@@ -1,7 +1,7 @@
 name: three_js_exporters
-description: "A new Flutter package project."
+description: "Flutter exporters package that exports objs and stls, converted from threejs and three_dart package."
 version: 0.0.1
-homepage:
+homepage: https://github.com/Knightro63/three_js/tree/main/packages/three_js_exporters
 
 environment:
   sdk: '>=3.3.2 <4.0.0'

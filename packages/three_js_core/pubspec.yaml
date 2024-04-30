@@ -1,7 +1,7 @@
 name: three_js_core
-description: "A new Flutter package project."
+description: "Flutter core package converted from threejs and three_dart package."
 version: 0.0.1
-homepage:
+homepage: https://github.com/Knightro63/three_js/tree/main/packages/three_js_core
 
 environment:
   sdk: '>=3.3.2 <4.0.0'
