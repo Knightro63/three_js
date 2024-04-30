@@ -369,9 +369,9 @@ class Material with EventDispatcher {
 
   void setValueFromString(String key, dynamic newValue) {
     if (key == "alphaTest") {
-      alphaTest = newValue;
+      alphaTest = newValue.toDouble();
     } else if (key == "bumpScale") {
-      bumpScale = newValue;
+      bumpScale = newValue.toDouble();
     } else if (key == "alphaMap") {
       alphaMap = newValue;
     } else if (key == "aoMap") {
@@ -391,9 +391,9 @@ class Material with EventDispatcher {
     } else if (key == "blendSrcAlpha") {
       blendSrcAlpha = newValue;
     } else if (key == "clearcoat") {
-      clearcoat = newValue;
+      clearcoat = newValue.toDouble();
     } else if (key == "clearcoatRoughness") {
-      clearcoatRoughness = newValue;
+      clearcoatRoughness = newValue.toDouble();
     } else if (key == "clipIntersection") {
       clipIntersection = newValue;
     } else if (key == "clipping") {
@@ -403,7 +403,7 @@ class Material with EventDispatcher {
     } else if (key == "clipShadows") {
       clipShadows = newValue;
     } else if (key == "color") {
-      if (newValue.runtimeType == Color) {
+      if (newValue is Color) {
         color = newValue;
       } else {
         color = Color.fromHex32(newValue);
@@ -443,7 +443,7 @@ class Material with EventDispatcher {
     } else if (key == "linejoin") {
       linejoin = newValue;
     } else if (key == "linewidth") {
-      linewidth = newValue;
+      linewidth = newValue.toDouble();
     } else if (key == "matcap") {
       matcap = newValue;
     } else if (key == "map") {
@@ -459,21 +459,21 @@ class Material with EventDispatcher {
     } else if (key == "normalScale") {
       normalScale = newValue;
     } else if (key == "opacity") {
-      opacity = newValue;
+      opacity = newValue.toDouble();
     } else if (key == "polygonOffset") {
       polygonOffset = newValue;
     } else if (key == "polygonOffsetFactor") {
-      polygonOffsetFactor = newValue;
+      polygonOffsetFactor = newValue.toDouble();
     } else if (key == "polygonOffsetUnits") {
-      polygonOffsetUnits = newValue;
+      polygonOffsetUnits = newValue.toDouble();
     } else if (key == "premultipliedAlpha") {
       premultipliedAlpha = newValue;
     } else if (key == "reflectivity") {
-      reflectivity = newValue;
+      reflectivity = newValue.toDouble();
     } else if (key == "roughness") {
-      roughness = newValue;
+      roughness = newValue.toDouble();
     }else if (key == "refractionRatio") {
-      refractionRatio = newValue;
+      refractionRatio = newValue.toDouble();
     }else if (key == "roughnessMap") {
       roughnessMap = newValue;
     } else if (key == "shading") {
@@ -482,17 +482,17 @@ class Material with EventDispatcher {
       //   this.flatShading = ( newValue == FlatShading ) ? true : false;
 
     } else if (key == "shininess") {
-      shininess = newValue;
+      shininess = newValue.toDouble();
     } else if (key == "side") {
       side = newValue;
     } else if (key == "size") {
-      size = newValue;
+      size = newValue.toDouble();
     } else if (key == "dashSize") {
-      dashSize = newValue;
+      dashSize = newValue.toDouble();
     } else if (key == "gapSize") {
-      gapSize = newValue;
+      gapSize = newValue.toDouble();
     } else if (key == "scale") {
-      scale = newValue;
+      scale = newValue.toDouble();
     } else if (key == "sizeAttenuation") {
       sizeAttenuation = newValue;
     } else if (key == "stencilZFail") {
@@ -522,11 +522,11 @@ class Material with EventDispatcher {
     } else if (key == "wireframe") {
       wireframe = newValue;
     } else if (key == "wireframeLinewidth") {
-      wireframeLinewidth = newValue;
+      wireframeLinewidth = newValue.toDouble();
     } else if (key == "shadowSide") {
       shadowSide = newValue;
     } else if (key == "specular") {
-      if (newValue.runtimeType == Color) {
+      if (newValue is Color) {
         specular = newValue;
       } else {
         specular = Color.fromHex32(newValue);

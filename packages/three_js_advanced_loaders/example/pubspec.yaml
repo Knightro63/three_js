@@ -38,5 +38,5 @@ flutter:
     - assets/stanford-bunny.fbx
     - assets/royal_esplanade_1k.hdr
     - assets/DamagedHelmet/
-    - assets/Horse.gltf
+    - assets/Horse.glb
     - assets/Soldier.gltf

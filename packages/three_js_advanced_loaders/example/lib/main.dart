@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_gl/flutter_gl.dart';
 import 'package:three_js_core/three_js_core.dart' as three;
-import 'package:three_js_core_loaders/three_js_core_loaders.dart';
+import 'package:three_js_animations/three_js_animations.dart';
+import 'package:three_js_helpers/three_js_helpers.dart';
 import 'package:three_js_advanced_loaders/three_js_advanced_loaders.dart';
 import 'package:three_js_controls/three_js_controls.dart';
 import 'package:three_js_math/three_js_math.dart' as tmath;
@@ -47,39 +49,41 @@ class _State extends State<WebglGeometries> {
 
   late three.Scene scene;
   late three.Camera camera;
-  late three.Mesh mesh;
+  late three.Object3D mesh;
+
+  AnimationMixer? mixer;
+  three.Clock clock = three.Clock();
+  OrbitControls? controls;
 
   double dpr = 1.0;
-
-  final int amount = 4;
 
   bool verbose = false;
   bool disposed = false;
 
+  var radius = 600;
+  double theta = 0;
+  var prevTime = DateTime.now().millisecondsSinceEpoch;
+
   late three.Object3D object;
 
   late three.Texture texture;
-  //late three.TextureLoader textureLoader;
-  final GlobalKey<three.PeripheralsState> _globalKey = GlobalKey<three.PeripheralsState>();
-  late OrbitControls controls;
-  three.WebGLRenderTarget? renderTarget;
+
+  late three.PointLight light;
+
+  VertexNormalsHelper? vnh;
+  VertexTangentsHelper? vth;
+
+  late three.WebGLMultisampleRenderTarget renderTarget;
 
   dynamic sourceTexture;
+
+  bool loaded = false;
+
+  late three.Object3D model;
 
   @override
   void initState() {
     super.initState();
-  }
-
-  @override
-  void dispose() {
-    print(" dispose ............. ");
-    disposed = true;
-    loading = {};
-    controls.clearListeners();
-    three3dRender.dispose();
-    print(" dispose finish ");
-    super.dispose();
   }
 
   // Platform messages are asynchronous, so we initialize in an async method.
@@ -94,14 +98,14 @@ class _State extends State<WebglGeometries> {
       "alpha": false,
       "width": width.toInt(),
       "height": height.toInt(),
-      "dpr": dpr,
-      'precision': 'highp'
+      "dpr": dpr
     };
 
     await three3dRender.initialize(options: _options);
 
     setState(() {});
 
+    // TODO web wait dom ok!!!
     Future.delayed(const Duration(milliseconds: 100), () async {
       await three3dRender.prepareContext();
 
@@ -109,7 +113,7 @@ class _State extends State<WebglGeometries> {
     });
   }
 
-  void initSize(BuildContext context) {
+  initSize(BuildContext context) {
     if (screenSize != null) {
       return;
     }
@@ -122,9 +126,57 @@ class _State extends State<WebglGeometries> {
     initPlatformState();
   }
 
-  void render() {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Builder(
+        builder: (BuildContext context) {
+          initSize(context);
+          return SingleChildScrollView(child: _build(context));
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        child: const Text("render"),
+        onPressed: () {
+          clickRender();
+        },
+      ),
+    );
+  }
+
+  Widget _build(BuildContext context) {
+    return Column(
+      children: [
+        Container(
+          child: Stack(
+            children: [
+              Container(
+                  child: Container(
+                      width: width,
+                      height: height,
+                      color: Colors.black,
+                      child: Builder(builder: (BuildContext context) {
+                        if (kIsWeb) {
+                          return three3dRender.isInitialized
+                              ? HtmlElementView(
+                                  viewType: three3dRender.textureId!.toString())
+                              : Container();
+                        } else {
+                          return three3dRender.isInitialized
+                              ? Texture(textureId: three3dRender.textureId!)
+                              : Container();
+                        }
+                      }))),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  render() {
     int _t = DateTime.now().millisecondsSinceEpoch;
-    renderer!.clear(true, true, true);
+
     final _gl = three3dRender.gl;
 
     renderer!.render(scene, camera);
@@ -137,8 +189,9 @@ class _State extends State<WebglGeometries> {
       print(renderer!.info.render);
     }
 
+    // 重要 更新纹理之前一定要调用 确保gl程序执行完毕
     _gl.flush();
-    controls.update();
+
     if (verbose) print(" render: sourceTexture: $sourceTexture ");
 
     if (!kIsWeb) {
@@ -146,87 +199,92 @@ class _State extends State<WebglGeometries> {
     }
   }
 
-  void initRenderer() {
+  initRenderer() {
     Map<String, dynamic> _options = {
       "width": width,
       "height": height,
       "gl": three3dRender.gl,
       "antialias": true,
-      "canvas": three3dRender.element,
-      "alpha": true,
-      "clearColor": 0xffffff,
-      "clearAlpha": 0,
+      "canvas": three3dRender.element
     };
-
-    if(!kIsWeb){
-      _options['logarithmicDepthBuffer'] = true;
-    }
-
     renderer = three.WebGLRenderer(_options);
     renderer!.setPixelRatio(dpr);
     renderer!.setSize(width, height, false);
-    renderer!.shadowMap.enabled = true;
-
     renderer!.shadowMap.enabled = false;
-    renderer!.alpha = true;
-    renderer!.setClearColor(tmath.Color.fromHex32(0xffffff), 0);
-    renderer!.autoClearDepth = true;
-    renderer!.autoClearStencil = true;
-    renderer!.autoClear = true;
 
     if (!kIsWeb) {
-      final pars = three.WebGLRenderTargetOptions({"format": tmath.RGBAFormat,"samples": 4});
-      renderTarget = three.WebGLRenderTarget((width * dpr).toInt(), (height * dpr).toInt(), pars);
-      renderTarget!.samples = 4;
+      var pars = three.WebGLRenderTargetOptions({"format": tmath.RGBAFormat});
+      renderTarget = three.WebGLMultisampleRenderTarget(
+          (width * dpr).toInt(), (height * dpr).toInt(), pars);
+      renderTarget.samples = 4;
       renderer!.setRenderTarget(renderTarget);
-      sourceTexture = renderer!.getRenderTargetGLTexture(renderTarget!);
-    }
-    else {
-      renderTarget = null;
+      sourceTexture = renderer!.getRenderTargetGLTexture(renderTarget);
     }
   }
 
-  void initScene() async{
-    await initPage();
+  initScene() {
     initRenderer();
-    animate();
+    initPage();
   }
 
   initPage() async {
+    camera = three.PerspectiveCamera(50, width / height, 1, 10000);
+    camera.position.y = 300;
+
     scene = three.Scene();
+    scene.background = tmath.Color.fromHex32(0xf0f0f0);
 
-    camera = three.PerspectiveCamera(45, width / height, 0.25, 20);
-    camera.position.setValues( - 0, 0, 2.7 );
-    camera.lookAt(scene.position);
+    var light1 = three.DirectionalLight(0xefefff, 1.5);
+    light1.position.setValues(1, 1, 1).normalize();
+    scene.add(light1);
 
-    OrbitControls _controls = OrbitControls(camera, _globalKey);
-    controls = _controls;
+    var light2 = three.DirectionalLight(0xffefef, 1.5);
+    light2.position.setValues(-1, -1, -1).normalize();
+    scene.add(light2);
 
-    RGBELoader _loader = RGBELoader();
-    final hdrTexture = await _loader.fromAsset('assets/royal_esplanade_1k.hdr');
-    _loader.dispose();
-    hdrTexture!.mapping = tmath.EquirectangularReflectionMapping;
-    scene.background = hdrTexture;
-    scene.environment = hdrTexture;
+    final loader = GLTFLoader();
+    final gltf = await loader.fromAsset('assets/Horse.glb');
 
-    scene.add( three.AmbientLight( 0xffffff ) );
+    mesh = gltf!.scene.children[0];
+    mesh.scale.setValues(1.5, 1.5, 1.5);
+    scene.add(mesh);
 
-    GLTFLoader loader = GLTFLoader().setPath('assets/DamagedHelmet/');
+    mixer = AnimationMixer(mesh);
+    mixer!.clipAction(gltf.animations![0])?.play();
 
-    final GLTFData result = (await loader.fromAsset('DamagedHelmet.gltf'))!;
-    loader.dispose();
+    loaded = true;
 
-    print(" gltf load sucess result: $result  ");
+    animate();
 
-    object = result.scene;
-
-    scene.add(object);
-    // textureLoader = three.TextureLoader();
+    // scene.overrideMaterial = new three.MeshBasicMaterial();
   }
 
-  void animate() {
+  clickRender() {
+    print("clickRender..... ");
+    animate();
+  }
+
+  animate() {
     if (!mounted || disposed) {
       return;
+    }
+
+    if (!loaded) {
+      return;
+    }
+
+    theta += 0.1;
+
+    camera.position.x =radius * math.sin(theta.toRad());
+    camera.position.z =radius * math.cos(theta.toRad());
+
+    camera.lookAt(tmath.Vector3(0, 150, 0));
+
+    if (mixer != null) {
+      var time = DateTime.now().millisecondsSinceEpoch;
+      mixer!.update((time - prevTime) * 0.001);
+
+      prevTime = time;
     }
 
     render();
@@ -237,49 +295,12 @@ class _State extends State<WebglGeometries> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Builder(
-        builder: (BuildContext context) {
-          initSize(context);
-          return _build(context);
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        child: const Text("render"),
-        onPressed: () {
-          render();
-        },
-      ),
-    );
-  }
+  void dispose() {
+    print(" dispose ............. ");
+    disposed = true;
+    three3dRender.dispose();
 
-  Widget _build(BuildContext context) {
-    return Container(
-      color: Colors.black,
-      child: three.Peripherals(
-        key: _globalKey,
-        builder: (BuildContext context) {
-          return Container(
-            width: width,
-            height: height,
-            color: Theme.of(context).canvasColor,
-            child: Builder(builder: (BuildContext context) {
-              if (kIsWeb) {
-                return three3dRender.isInitialized
-                    ? HtmlElementView(
-                        viewType:
-                            three3dRender.textureId!.toString())
-                    : Container();
-              } else {
-                return three3dRender.isInitialized
-                    ? Texture(textureId: three3dRender.textureId!)
-                    : Container();
-              }
-            })
-          );
-        }),
-    );
+    super.dispose();
   }
 }
 
