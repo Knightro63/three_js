@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 
 const Map<String, int> _colorKeywords = {
@@ -157,14 +158,14 @@ extension SVGColor on Color{
     void handleAlpha(String? string) {
       if (string == null) return;
       if (double.parse(string) < 1) {
-        print('THREE.Color: Alpha component of $style will be ignored.');
+        console.info('Color: Alpha component of $style will be ignored.');
       }
     }
 
-    final _reg1 = RegExp(r"^\#([A-Fa-f\d]+)$");
+    final reg1 = RegExp(r"^\#([A-Fa-f\d]+)$");
 
-    if (_reg1.hasMatch(style)) {
-      final match = _reg1.firstMatch(style);
+    if (reg1.hasMatch(style)) {
+      final match = reg1.firstMatch(style);
       final hex = match!.group(1)!;
       final size = hex.length;
 
@@ -184,10 +185,10 @@ extension SVGColor on Color{
         return this;
       }
     } else {
-      final _reg2 = RegExp(r"^((?:rgb|hsl)a?)\(\s*([^\)]*)\)");
+      final reg2 = RegExp(r"^((?:rgb|hsl)a?)\(\s*([^\)]*)\)");
 
-      if (_reg2.hasMatch(style)) {
-        final match = _reg2.firstMatch(style)!;
+      if (reg2.hasMatch(style)) {
+        final match = reg2.firstMatch(style)!;
 
         // print(" match.groupCount: ${match.groupCount} 1: ${match.group(1)} 2: ${match.group(2)} ");
 
@@ -197,10 +198,10 @@ extension SVGColor on Color{
         switch (name) {
           case 'rgb':
           case 'rgba':
-            final _colorReg1 = RegExp(
+            final colorReg1 = RegExp(
                 r"^(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*(?:,\s*(\d*\.?\d+)\s*)?$");
-            if (_colorReg1.hasMatch(components)) {
-              final match1 = _colorReg1.firstMatch(components)!;
+            if (colorReg1.hasMatch(components)) {
+              final match1 = colorReg1.firstMatch(components)!;
 
               final c1 = match1.group(1)!;
               final c2 = match1.group(2)!;
@@ -314,7 +315,7 @@ extension SVGColor on Color{
       setFromHex32(hex);
     } 
     else {
-      print('THREE.Color: Unknown color ' + style);
+      console.warning('Color: Unknown color $style');
     }
 
     return this;

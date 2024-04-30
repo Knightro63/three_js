@@ -1,3 +1,4 @@
+import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_curves/three_js_curves.dart';
 import 'dart:math' as math;
 import 'package:three_js_math/three_js_math.dart';
@@ -237,7 +238,7 @@ class SvgPath {
           nx = eatNum();
           ny = eatNum();
           if (rx != ry) {
-            print('Forcing elliptical arc to be a circular one: $rx $ry');
+            console.info('Forcing elliptical arc to be a circular one: $rx $ry');
           }
 
           // SVG implementation notes does all the math for us! woo!

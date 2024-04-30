@@ -3,10 +3,10 @@ import 'package:three_js_math/three_js_math.dart';
 import 'package:three_js_core/three_js_core.dart';
 
 class PlaneHelper extends Line {
-  num size = 1.0;
+  double size = 1.0;
   Plane? plane;
 
-  PlaneHelper.create(geometry, material) : super(geometry, material){
+  PlaneHelper.create(super.geometry, super.material){
     type = "PlaneHelper";
   }
 

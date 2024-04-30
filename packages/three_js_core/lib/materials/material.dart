@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'package:three_js_core/others/index.dart';
+
 import '../core/event_dispatcher.dart';
 import '../core/object_3d.dart';
 import 'package:three_js_math/three_js_math.dart';
@@ -293,11 +295,11 @@ class Material with EventDispatcher {
 
   double? size;
 
-  double? _reflectivity;
-  double? get reflectivity => _reflectivity;
-  set reflectivity(double? value) {
-    _reflectivity = value;
-  }
+  double? reflectivity;
+  // double? get reflectivity => _reflectivity;
+  // set reflectivity(double? value) {
+  //   _reflectivity = value;
+  // }
 
   bool? uniformsNeedUpdate;
 
@@ -338,7 +340,7 @@ class Material with EventDispatcher {
       final newValue = values[key];
 
       if (newValue == null) {
-        print('THREE.Material setValues: $key parameter is null.');
+        console.warning('Material setValues: $key parameter is null.');
         continue;
       }
 
@@ -353,7 +355,7 @@ class Material with EventDispatcher {
       final newValue = values[key];
 
       if (newValue == null) {
-        print('THREE.Material setValues: $key parameter is null.');
+        console.warning('Material setValues: $key parameter is null.');
         continue;
       }
 

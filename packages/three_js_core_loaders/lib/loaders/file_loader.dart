@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:three_js_core/three_js_core.dart';
+
 import '../utils/blob.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -45,7 +47,7 @@ class FileLoader extends Loader {
       return ThreeFile('network',bytes,url);
     }
     catch(e){
-      print('ThreeJS error: $e');
+      console.error('ThreeJS error: $e');
       return null;
     }
   }
@@ -61,7 +63,7 @@ class FileLoader extends Loader {
       final Uint8List data = await file.readAsBytes();
       return await fromBytes(data,'path',filePath);
     }catch(e){
-      print('FileLoader error from path');
+      console.error('FileLoader error from path: ${path.substring(0,30)}');
       return null;
     }
   }
@@ -93,7 +95,7 @@ class FileLoader extends Loader {
       return ThreeFile('asset',bytes,asset);
     }
     catch(e){
-      print('ThreeJS error: $e');
+      console.error('ThreeJS error: $e');
       return null;
     }
   }
@@ -147,10 +149,10 @@ class FileLoader extends Loader {
     return null;
   }
 
-  bool _isDuplicate(String name){
-    if (loading[name] != null) return true;
-    return false;
-  }
+  // bool _isDuplicate(String name){
+  //   if (loading[name] != null) return true;
+  //   return false;
+  // }
 
   FileLoader setResponseType(String value) {
     responseType = value;

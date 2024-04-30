@@ -419,7 +419,7 @@ class TransformControls extends Object3D {
       object?.updateMatrixWorld(force);
 
       if (object?.parent == null) {
-        print('TransformControls: The attached 3D object must be a part of the scene graph.');
+        console.warning('TransformControls: The attached 3D object must be a part of the scene graph.');
       } 
       else {
         object?.parent?.matrixWorld.decompose(_parentPosition, _parentQuaternion, _parentScale);
@@ -773,10 +773,8 @@ class TransformControls extends Object3D {
   void setSpace(space) {
     this.space = space;
   }
-
-  void update() {
-    print('THREE.TransformControls: update function has no more functionality and therefore has been deprecated.');
-  }
+  @Deprecated("TransformControls: update function has no more functionality.")
+  void update() {}
 
   // mouse / touch event handlers
   Pointer _getPointer(event) {

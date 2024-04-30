@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'package:three_js_curves/three_js_curves.dart';
 import 'package:universal_html/parsing.dart';
@@ -542,7 +543,7 @@ class SVGLoaderParser {
     void addStyle(svgName, jsName, [adjustFunction]) {
       adjustFunction ??= (v) {
         if (v.startsWith('url')) {
-          print('SVGLoader: url access in attributes is not implemented.');
+          console.info('SVGLoader: url access in attributes is not implemented.');
         }
 
         return v;
@@ -1038,8 +1039,7 @@ class SVGLoaderParser {
           break;
 
         default:
-          print("SvgLoader.parsePathNode command is not support ... ");
-          print(command);
+          console.warning("SvgLoader.parsePathNode command is not support ...\nConnamd: $command");
       }
 
       // Console.log( type, parseFloats( data ), parseFloats( data ).length  )
@@ -1093,7 +1093,7 @@ class SVGLoaderParser {
   }
 
   ShapePath parsePolygonNode(node) {
-    print("SVGLoader.parsePolygonNode todo test ");
+    console.info("SVGLoader: parsePolygonNode todo test.");
     // final regex = /(-?[\d\.?]+)[,|\s](-?[\d\.?]+)/g;
     final regex = RegExp(r"(-?[\d\.?]+)[,|\s](-?[\d\.?]+)");
     final path = ShapePath();
@@ -1142,7 +1142,7 @@ class SVGLoaderParser {
   }
 
   ShapePath parsePolylineNode(node) {
-    print("SVGLoader.parsePolylineNode todo  ");
+    console.info("SVGLoader: parsePolylineNode todo.");
 
     // final regex = /(-?[\d\.?]+)[,|\s](-?[\d\.?]+)/g;
     final regex = RegExp(r"(-?[\d\.?]+)[,|\s](-?[\d\.?]+)");
@@ -1249,18 +1249,21 @@ class SVGLoaderParser {
         if (curve is LineCurve) {
           transfVec2(curve.v1);
           transfVec2(curve.v2);
-        } else if (curve.isCubicBezierCurve) {
+        } 
+        else if (curve.isCubicBezierCurve) {
           transfVec2(curve.v0);
           transfVec2(curve.v1);
           transfVec2(curve.v2);
           transfVec2(curve.v3);
-        } else if (curve.isQuadraticBezierCurve) {
+        } 
+        else if (curve.isQuadraticBezierCurve) {
           transfVec2(curve.v0);
           transfVec2(curve.v1);
           transfVec2(curve.v2);
-        } else if (curve.isEllipseCurve) {
+        } 
+        else if (curve.isEllipseCurve) {
           if (isRotated) {
-            print('SVGLoader: Elliptic arc or ellipse rotation or skewing is not implemented.');
+            console.info('SVGLoader: Elliptic arc or ellipse rotation or skewing is not implemented.');
           }
 
           tempV2.setValues(curve.aX, curve.aY);
@@ -1345,7 +1348,7 @@ class SVGLoaderParser {
           parseNode(usedNode, style);
         } 
         else {
-          print("SVGLoader: 'use node' references non-existent node id: $usedNodeId");
+          console.info("SVGLoader: 'use node' references non-existent node id: $usedNodeId");
         }
 
         break;

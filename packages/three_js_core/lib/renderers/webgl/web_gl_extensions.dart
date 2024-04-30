@@ -116,7 +116,7 @@ class WebGLExtensions {
     dynamic extension = getExtension(name);
 
     if (extension == null) {
-      print('three.WebGLExtensions.get: $name extension not supported.');
+      console.error('WebGLExtensions.get: $name extension not supported.');
     }
 
     return extension;

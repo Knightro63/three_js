@@ -1,3 +1,5 @@
+import 'package:three_js_core/others/index.dart';
+
 import 'image_element.dart';
 import './texture.dart';
 
@@ -21,7 +23,7 @@ class CompressedTexture extends Texture {
   ):super(null, mapping, wrapS, wrapT, magFilter, minFilter, format, type, anisotropy, encoding) {
     // this.image = ImageDataInfo(null, width, height, null);
     isCompressedTexture = true;
-    print(" CompressedTexture todo ============ ");
+    console.info(" CompressedTexture todo ============ ");
 
     image = ImageElement(width: width, height: height);
 

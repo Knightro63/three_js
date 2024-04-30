@@ -1,3 +1,4 @@
+import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'animation_utils.dart';
 import 'dart:math' as math;
@@ -112,7 +113,7 @@ class KeyframeTrack {
         }
       }
 
-      print('THREE.KeyframeTrack: $message');
+      console.info('KeyframeTrack: $message');
       return this;
     }
 
@@ -122,7 +123,7 @@ class KeyframeTrack {
   }
 
   int? getInterpolation() {
-    print("KeyframeTrack.getInterpolation todo debug need confirm?? ");
+    console.info("KeyframeTrack.getInterpolation todo debug need confirm?? ");
     return _interpolation;
   }
 
@@ -195,14 +196,14 @@ class KeyframeTrack {
 
     final valueSize = getValueSize();
     if (valueSize - valueSize.floor() != 0) {
-      print('THREE.KeyframeTrack: Invalid value size in track. $this');
+      console.warning('KeyframeTrack: Invalid value size in track. $this');
       valid = false;
     }
 
     final times = this.times, values = this.values, nKeys = times.length;
 
     if (nKeys == 0) {
-      print('THREE.KeyframeTrack: Track is empty. $this');
+      console.warning('KeyframeTrack: Track is empty. $this');
       valid = false;
     }
 
@@ -212,13 +213,13 @@ class KeyframeTrack {
       final currTime = times[i];
 
       if (currTime.isNaN) {
-        print('THREE.KeyframeTrack: Time is not a valid number. $this i: $i $currTime');
+        console.warning('KeyframeTrack: Time is not a valid number. $this i: $i $currTime');
         valid = false;
         break;
       }
       
       if (prevTime != null && prevTime > currTime) {
-        print('THREE.KeyframeTrack: Out of order keys.$this i: $i currTime: $currTime prevTime: $prevTime');
+        console.warning('KeyframeTrack: Out of order keys.$this i: $i currTime: $currTime prevTime: $prevTime');
         valid = false;
         break;
       }
@@ -230,7 +231,7 @@ class KeyframeTrack {
         final value = values[i];
 
         if (value.isNaN) {
-          print('THREE.KeyframeTrack: Value is not a valid number. $this i: $i value: $value');
+          console.warning('KeyframeTrack: Value is not a valid number. $this i: $i value: $value');
           valid = false;
           break;
         }

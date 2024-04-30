@@ -1,4 +1,5 @@
 import 'package:flutter_gl/flutter_gl.dart';
+import 'package:three_js_core/others/index.dart';
 import 'package:three_js_math/three_js_math.dart';
 import './line.dart';
 
@@ -32,11 +33,11 @@ class LineSegments extends Line {
         geometry.setAttributeFromString('lineDistance', Float32BufferAttribute(lineDistances, 1, false));
       } 
       else {
-        print('THREE.LineSegments.computeLineDistances(): Computation only possible with non-indexed BufferGeometry.');
+        console.info('LineSegments.computeLineDistances(): Computation only possible with non-indexed BufferGeometry.');
       }
     }
     // else if (geometry.isGeometry) {
-    //   throw ('THREE.LineSegments.computeLineDistances() no longer supports THREE.Geometry. Use THREE.BufferGeometry instead.');
+    //   throw ('LineSegments.computeLineDistances() no longer supports Geometry. Use BufferGeometry instead.');
     // }
 
     return this;

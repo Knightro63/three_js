@@ -1,3 +1,4 @@
+import 'package:three_js_core/others/index.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'image_element.dart';
 
@@ -76,7 +77,7 @@ Map<String,dynamic> serializeImage( image ) {
 
 		} 
     else {
-			print( 'THREE.Texture: Unable to serialize Texture.' );
+			console.warning('Texture: Unable to serialize Texture.');
 			return {};
 		}
 	}

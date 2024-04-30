@@ -12,32 +12,28 @@ class DirectionalLightHelper extends Object3D {
   late Line targetLine;
   Color? color;
 
-  DirectionalLightHelper(this.light, [int? size = 1, this.color]) : super() {
+  DirectionalLightHelper(this.light, [double size = 1, this.color]) : super() {
     light.updateMatrixWorld(false);
 
     matrix = light.matrixWorld;
     matrixAutoUpdate = false;
-
-    size ??= 1;
     BufferGeometry geometry = BufferGeometry();
 
-    double _size = size.toDouble();
-
     List<double> posData = [
-      -_size,
-      _size,
+      -size,
+      size,
       0.0,
-      _size,
-      _size,
+      size,
+      size,
       0.0,
-      _size,
-      -_size,
+      size,
+      -size,
       0.0,
-      -_size,
-      -_size,
+      -size,
+      -size,
       0.0,
-      -_size,
-      _size,
+      -size,
+      size,
       0.0
     ];
 

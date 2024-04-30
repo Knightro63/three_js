@@ -21,8 +21,8 @@ abstract class Vector {
   Vector setValues(double x, double y);
   bool equals(Vector v);
   Vector setFrom(Vector v);
-  Vector sub(Vector a, [Vector? b]);
-  Vector add(Vector a, [Vector? b]);
+  Vector sub(Vector a);
+  Vector add(Vector a);
   Vector setScalar(double scalar);
 
   num getComponent(int index);

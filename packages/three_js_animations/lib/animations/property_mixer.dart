@@ -1,3 +1,4 @@
+import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'property_binding.dart';
 
@@ -56,7 +57,7 @@ class PropertyMixer {
 
         setIdentity = _setAdditiveIdentityOther;
 
-        print("PropertyMixer  todo  typeName: $typeName");
+        console.info("PropertyMixer  todo  typeName: $typeName");
         buffer = List<String?>.filled(valueSize * 5, null);
         // this.buffer = new Array( valueSize * 5 );
 

@@ -1,5 +1,5 @@
 import 'dart:convert';
-
+import '../others/console.dart';
 import 'package:three_js_math/three_js_math.dart';
 import '../materials/index.dart';
 import '../textures/index.dart';
@@ -175,7 +175,7 @@ class Object3D with EventDispatcher {
       if (object != null) {
         type = object["type"];
         json = object;
-        print(" object is not null use object as json type: $type ");
+        console.warning("object is not null use object as json type: $type ");
       }
     }
 
@@ -349,7 +349,7 @@ class Object3D with EventDispatcher {
 
   Object3D add(Object3D? object) {
     if (object == this) {
-      print('THREE.Object3D.add: object can\'t be added as a child of itself. $object');
+      console.warning('Object3D.add: object can\'t be added as a child of itself. $object');
       return this;
     }
 
@@ -364,7 +364,7 @@ class Object3D with EventDispatcher {
       object.dispatchEvent(_addedEvent);
     } 
     else {
-      print('THREE.Object3D.add: object not an instance of THREE.Object3D. $object');
+      console.warning('Object3D.add: object not an instance of THREE.Object3D. $object');
     }
 
     return this;
@@ -460,7 +460,7 @@ class Object3D with EventDispatcher {
 
   Vector3 getWorldPosition(Vector3? target) {
     if (target == null) {
-      print('THREE.Object3D: .getWorldPosition() target is now required');
+      console.error('Object3D: .getWorldPosition() target is now required');
       target = Vector3.zero();
     }
 
@@ -490,7 +490,7 @@ class Object3D with EventDispatcher {
   }
 
   void raycast(Raycaster raycaster, List<Intersection> intersects) {
-    print("Object3D raycast todo ");
+    throw("Object3D not implimented");
   }
 
   void traverse(Function(Object3D) callback) {
@@ -623,14 +623,14 @@ class Object3D with EventDispatcher {
     // object specific properties
 
     if (type == "InstancedMesh") {
-      InstancedMesh _instanceMesh = this as InstancedMesh;
+      InstancedMesh instanceMesh = this as InstancedMesh;
 
       object["type"] = 'InstancedMesh';
-      object["count"] = _instanceMesh.count;
-      object["instanceMatrix"] = _instanceMesh.instanceMatrix!.toJson();
+      object["count"] = instanceMesh.count;
+      object["instanceMatrix"] = instanceMesh.instanceMatrix!.toJson();
 
-      if (_instanceMesh.instanceColor != null) {
-        object["instanceColor"] = _instanceMesh.instanceColor!.toJson();
+      if (instanceMesh.instanceColor != null) {
+        object["instanceColor"] = instanceMesh.instanceColor!.toJson();
       }
     }
 
@@ -666,7 +666,6 @@ class Object3D with EventDispatcher {
       }
     }
 
-    // TODO
     // if ( this.type == "SkinnedMesh" ) {
 
     //   SkinnedMesh _skinnedMesh = this;
@@ -708,8 +707,7 @@ class Object3D with EventDispatcher {
       object["children"] = childrenJSON;
     }
 
-    // //
-    // TODO
+
     // if ( this.animations.length > 0 ) {
 
     // 	List<Map<String, dynamic>> _animationJSON = [];
@@ -735,7 +733,7 @@ class Object3D with EventDispatcher {
       final skeletons = extractFromCache(meta.skeletons);
       final animations = extractFromCache(meta.animations);
       
-      print(" isRootObject: $isRootObject ");
+      console.info("isRootObject: $isRootObject ");
 
       if (geometries.isNotEmpty) output["geometries"] = geometries;
       if (materials.isNotEmpty) output["materials"] = materials;

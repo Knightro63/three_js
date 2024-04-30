@@ -241,7 +241,7 @@ class GLTFLoader extends Loader {
           extensions[extensionName] = GLTFMeshQuantizationExtension();
         } else {
           if (extensionsRequired.indexOf(extensionName) >= 0 && plugins[extensionName] == null) {
-            print('THREE.GLTFLoader: Unknown extension $extensionName.');
+            console.warning('GLTFLoader: Unknown extension $extensionName.');
           }
         }
       }

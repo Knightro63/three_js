@@ -5,10 +5,9 @@ import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'package:three_js_core_loaders/three_js_core_loaders.dart';
 
-/**
- * Loads a Wavefront .mtl file specifying materials
- */
-
+///
+/// Loads a Wavefront .mtl file specifying materials
+///
 class MTLLoader extends Loader {
   late final FileLoader _loader;
   dynamic materialOptions;
@@ -63,17 +62,17 @@ class MTLLoader extends Loader {
     return this;
   }
 
-  /**
-	 * Parses a MTL file.
-	 *
-	 * @param {String} text - Content of MTL file
-	 * @return {MaterialCreator}
-	 *
-	 * @see setPath setResourcePath
-	 *
-	 * @note In order for relative texture references to resolve correctly
-	 * you must call setResourcePath() explicitly prior to parse.
-	 */
+  ///
+	/// Parses a MTL file.
+	///
+	/// String text - Content of MTL file
+	/// return MaterialCreator
+	///
+	/// see setPath setResourcePath
+	///
+	/// note In order for relative texture references to resolve correctly
+	/// you must call setResourcePath() explicitly prior to parse.
+	///
   MaterialCreator _parse(Uint8List bytes) {
     String text = String.fromCharCodes(bytes);
     List<String> lines = text.split('\n');
@@ -121,20 +120,20 @@ class MTLLoader extends Loader {
   }
 }
 
-/**
- * Create a MTLLoader.MaterialCreator
- * @param baseUrl - Url relative to which textures are loaded
- * @param options - Set of options on how to construct the materials
- *                  side: Which side to apply the material
- *                        FrontSide (default), THREE.BackSide, THREE.DoubleSide
- *                  wrap: What type of wrapping to apply for textures
- *                        RepeatWrapping (default), THREE.ClampToEdgeWrapping, THREE.MirroredRepeatWrapping
- *                  normalizeRGB: RGBs need to be normalized to 0-1 from 0-255
- *                                Default: false, assumed to be already normalized
- *                  ignoreZeroRGBs: Ignore values of RGBs (Ka,Kd,Ks) that are all 0's
- *                                  Default: false
- * @constructor
- */
+///
+/// Create a MTLLoader.MaterialCreator
+/// @param baseUrl - Url relative to which textures are loaded
+/// @param options - Set of options on how to construct the materials
+///                  side: Which side to apply the material
+///                        FrontSide (default), THREE.BackSide, THREE.DoubleSide
+///                  wrap: What type of wrapping to apply for textures
+///                        RepeatWrapping (default), THREE.ClampToEdgeWrapping, THREE.MirroredRepeatWrapping
+///                  normalizeRGB: RGBs need to be normalized to 0-1 from 0-255
+///                                Default: false, assumed to be already normalized
+///                  ignoreZeroRGBs: Ignore values of RGBs (Ka,Kd,Ks) that are all 0's
+///                                  Default: false
+/// @constructor
+///
 
 class MaterialCreator {
   late String baseUrl;
@@ -460,7 +459,7 @@ class MaterialCreator {
       loader.flipY = true;
     }
 
-    if (loader.setCrossOrigin != null) loader.setCrossOrigin(crossOrigin);
+    loader.setCrossOrigin(crossOrigin);
 
     // final texture = loader.load( url, onLoad, onProgress, onError );
     final texture = await loader.fromAsset(url);

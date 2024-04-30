@@ -417,7 +417,7 @@ class PropertyBinding extends AnimationBinding{
 
     // ensure there is a value node
     if (targetObject == null) {
-      print('THREE.PropertyBinding: Trying to update node for track: $path but it wasn\'t found.');
+      console.warning('PropertyBinding: Trying to update node for track: $path but it wasn\'t found.');
       return;
     }
 
@@ -428,19 +428,19 @@ class PropertyBinding extends AnimationBinding{
       switch (objectName) {
         case 'materials':
           if (!targetObject.material) {
-            print('THREE.PropertyBinding: Can not bind to material as node does not have a material. $this');
+            console.warning('PropertyBinding: Can not bind to material as node does not have a material. $this');
             return;
           }
 
           if (!targetObject.material.materials) {
-            print('THREE.PropertyBinding: Can not bind to material.materials as node.material does not have a materials array. $this');
+            console.warning('PropertyBinding: Can not bind to material.materials as node.material does not have a materials array. $this');
             return;
           }
           targetObject = targetObject.material.materials;
           break;
         case 'bones':
           if (targetObject.skeleton != null) {
-            print('THREE.PropertyBinding: Can not bind to bones as node does not have a skeleton. $this');
+            console.warning('PropertyBinding: Can not bind to bones as node does not have a skeleton. $this');
             return;
           }
           // potential future optimization: skip this if propertyIndex is already an integer
@@ -457,7 +457,7 @@ class PropertyBinding extends AnimationBinding{
           break;
         default:
           if (targetObject.getProperty(objectName) == null) {
-            print('THREE.PropertyBinding: Can not bind to objectName of node null. $this');
+            console.warning('PropertyBinding: Can not bind to objectName of node null. $this');
             return;
           }
 
@@ -467,7 +467,7 @@ class PropertyBinding extends AnimationBinding{
 
       if (objectIndex != null) {
         if (targetObject?.children[objectIndex] == null) {
-          print('THREE.PropertyBinding: Trying to bind to objectIndex of objectName, but is null.$this $targetObject');
+          console.warning('PropertyBinding: Trying to bind to objectIndex of objectName, but is null.$this $targetObject');
           return;
         }
 
@@ -481,7 +481,7 @@ class PropertyBinding extends AnimationBinding{
     if (nodeProperty == null) {
       final nodeName = parsedPath["nodeName"];
 
-      print('THREE.PropertyBinding: Trying to update property for track: $nodeName $propertyName  but it wasn\'t found. $targetObject');
+      console.warning('PropertyBinding: Trying to update property for track: $nodeName $propertyName  but it wasn\'t found. $targetObject');
       return;
     }
 
@@ -510,13 +510,13 @@ class PropertyBinding extends AnimationBinding{
 
         // support resolving morphTarget names into indices.
         if (targetObject?.geometry != null) {
-          print('THREE.PropertyBinding: Can not bind to morphTargetInfluences because node does not have a geometry. $this');
+          console.warning('PropertyBinding: Can not bind to morphTargetInfluences because node does not have a geometry. $this');
           return;
         }
 
         if (targetObject?.geometry is BufferGeometry) {
           if (targetObject?.geometry?.morphAttributes != null) {
-            print('THREE.PropertyBinding: Can not bind to morphTargetInfluences because node does not have a geometry.morphAttributes. $this');
+            console.warning('PropertyBinding: Can not bind to morphTargetInfluences because node does not have a geometry.morphAttributes. $this');
             return;
           }
 
@@ -525,7 +525,7 @@ class PropertyBinding extends AnimationBinding{
           }
         } 
         else {
-          print('THREE.PropertyBinding: Can not bind to morphTargetInfluences on THREE.Geometry. Use THREE.BufferGeometry instead. $this');
+          console.warning('PropertyBinding: Can not bind to morphTargetInfluences on Geometry. Use BufferGeometry instead. $this');
           return;
         }
       }

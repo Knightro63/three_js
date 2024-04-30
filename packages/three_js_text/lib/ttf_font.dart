@@ -1,5 +1,6 @@
 import 'font.dart';
 import 'package:three_js_curves/three_js_curves.dart';
+import 'package:three_js_core/three_js_core.dart';
 
 class TTFFont extends Font {
   TTFFont(data) {
@@ -57,8 +58,7 @@ class TTFFont extends Font {
     dynamic glyph = data["glyphs"][char] ?? data["glyphs"]['?'];
 
     if (glyph == null) {
-      print(
-          "THREE.Font: character $char does not exists in font family ${data.familyName}");
+      console.warning("Font: character $char does not exists in font family ${data.familyName}");
       // return null;
       glyph = data["glyphs"]["a"];
     }
@@ -77,8 +77,7 @@ class TTFFont extends Font {
         outline = glyph["_cachedOutline"];
       }
 
-      print(" outline scale: $scale ");
-      print(outline);
+      console.info("Outline scale: $scale.\nOutline: $outline");
 
       for (int i = 0, l = outline.length; i < l;) {
         final action = outline[i];

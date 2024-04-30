@@ -5,58 +5,57 @@ import 'package:flutter_gl/flutter_gl.dart';
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'package:three_js_core_loaders/three_js_core_loaders.dart';
-/**
- * Description: A THREE loader for STL ASCII files, as created by Solidworks and other CAD programs.
- *
- * Supports both binary and ASCII encoded files, with automatic detection of type.
- *
- * The loader returns a non-indexed buffer geometry.
- *
- * Limitations:
- *  Binary decoding supports "Magics" color format (http://en.wikipedia.org/wiki/STL_(file_format)#Color_in_binary_STL).
- *  There is perhaps some question as to how valid it is to always assume little-endian-ness.
- *  ASCII decoding assumes file is UTF-8.
- *
- * Usage:
- *  const loader = new STLLoader();
- *  loader.load( './models/stl/slotted_disk.stl', function ( geometry ) {
- *    scene.add( new THREE.Mesh( geometry ) );
- *  });
- *
- * For binary STLs geometry might contain colors for vertices. To use it:
- *  // use the same code to load STL as above
- *  if (geometry.hasColors) {
- *    material = new THREE.MeshPhongMaterial({ opacity: geometry.alpha, vertexColors: true });
- *  } else { .... }
- *  const mesh = new THREE.Mesh( geometry, material );
- *
- * For ASCII STLs containing multiple solids, each solid is assigned to a different group.
- * Groups can be used to assign a different color by defining an array of materials with the same length of
- * geometry.groups and passing it to the Mesh constructor:
- *
- * const mesh = new THREE.Mesh( geometry, material );
- *
- * For example:
- *
- *  const materials = [];
- *  const nGeometryGroups = geometry.groups.length;
- *
- *  const colorMap = ...; // Some logic to index colors.
- *
- *  for (let i = 0; i < nGeometryGroups; i++) {
- *
- *		const material = new THREE.MeshPhongMaterial({
- *			color: colorMap[i],
- *			wireframe: false
- *		});
- *
- *  }
- *
- *  materials.push(material);
- *  const mesh = new THREE.Mesh(geometry, materials);
- */
 
-
+///
+/// Description: A THREE loader for STL ASCII files, as created by Solidworks and other CAD programs.
+///
+/// Supports both binary and ASCII encoded files, with automatic detection of type.
+///
+/// The loader returns a non-indexed buffer geometry.
+///
+/// Limitations:
+///  Binary decoding supports "Magics" color format (http://en.wikipedia.org/wiki/STL_(file_format)#Color_in_binary_STL).
+///  There is perhaps some question as to how valid it is to always assume little-endian-ness.
+///  ASCII decoding assumes file is UTF-8.
+///
+/// Usage:
+///  const loader = new STLLoader();
+///  loader.load( './models/stl/slotted_disk.stl', function ( geometry ) {
+///    scene.add( new THREE.Mesh( geometry ) );
+///  });
+///
+/// For binary STLs geometry might contain colors for vertices. To use it:
+///  // use the same code to load STL as above
+///  if (geometry.hasColors) {
+///    material = new THREE.MeshPhongMaterial({ opacity: geometry.alpha, vertexColors: true });
+///  } else { .... }
+///  const mesh = new THREE.Mesh( geometry, material );
+///
+/// For ASCII STLs containing multiple solids, each solid is assigned to a different group.
+/// Groups can be used to assign a different color by defining an array of materials with the same length of
+/// geometry.groups and passing it to the Mesh constructor:
+///
+/// const mesh = new THREE.Mesh( geometry, material );
+///
+/// For example:
+///
+///  const materials = [];
+///  const nGeometryGroups = geometry.groups.length;
+///
+///  const colorMap = ...; // Some logic to index colors.
+///
+///  for (let i = 0; i < nGeometryGroups; i++) {
+///
+///		const material = new THREE.MeshPhongMaterial({
+///			color: colorMap[i],
+///			wireframe: false
+///		});
+///
+///  }
+///
+///  materials.push(material);
+///  const mesh = new THREE.Mesh(geometry, materials);
+///
 class STLLoader extends Loader {
   late final FileLoader _loader;
 
@@ -260,7 +259,6 @@ class STLLoader extends Loader {
 
           // each face have to own THREE valid vertices
           if(vertexCountPerFace != 3){
-            print(vertexCountPerFace);
             throw( 'THREE.STLLoader: Something isn\'t right with the vertices of face number $faceCounter');
           }
           vertexCountPerFace = 0;
@@ -286,7 +284,7 @@ class STLLoader extends Loader {
 
     return geometry;
   }
-	BufferGeometry _parse(data, [String? path, Function? onLoad, Function? onError]) {
+	BufferGeometry _parse(data) {
 		bool matchDataViewAt( query, reader, offset ) {
 			// Check if each byte in query matches the corresponding byte from the current offset
 			for (int i = 0, il = query.length; i < il; i ++ ) {
@@ -296,9 +294,9 @@ class STLLoader extends Loader {
 		}
 		bool isBinary(Uint8List data){
 			final reader = ByteData.view(data.buffer);
-			const face_size = ( 32 / 8 * 3 ) + ( ( 32 / 8 * 3 ) * 3 ) + ( 16 / 8 );
-			final n_faces = reader.getUint32( 80, Endian.little);
-			final expect = 80 + ( 32 / 8 ) + ( n_faces * face_size );
+			const faceSize = ( 32 / 8 * 3 ) + ( ( 32 / 8 * 3 ) * 3 ) + ( 16 / 8 );
+			final nFaces = reader.getUint32( 80, Endian.little);
+			final expect = 80 + ( 32 / 8 ) + ( nFaces * faceSize );
 
 			if (expect == reader.lengthInBytes) {
 				return true;

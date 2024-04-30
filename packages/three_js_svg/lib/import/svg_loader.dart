@@ -204,11 +204,12 @@ class SVGLoader extends Loader{
         return;
       }
 
-      final t;
+      dynamic t;
 
       if (ax != 0) {
         t = bx / ax;
-      } else {
+      } 
+      else {
         t = by / ay;
       }
 

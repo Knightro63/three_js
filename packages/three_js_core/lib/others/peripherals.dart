@@ -306,6 +306,7 @@ class WebPointerEvent {
   void preventDefault() {
     // TODO
   }
+  
   @override
   String toString() {
     return "pointerId: $pointerId button: $button pointerType: $pointerType clientX: $clientX clientY: $clientY pageX: $pageX pageY: $pageY ";

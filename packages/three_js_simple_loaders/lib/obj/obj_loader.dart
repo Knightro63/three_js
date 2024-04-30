@@ -8,13 +8,13 @@ import 'package:three_js_math/three_js_math.dart';
 import 'package:three_js_core_loaders/three_js_core_loaders.dart';
 
 // o object_name | g group_name
-final _object_pattern = RegExp("^[og]\s*(.+)?");
+final _objectPattern = RegExp("^[og]\s*(.+)?");
 // mtllib file_reference
-final _material_library_pattern = RegExp("^mtllib ");
+final _materialLibraryPattern = RegExp("^mtllib ");
 // usemtl material_name
-final _material_use_pattern = RegExp("^usemtl ");
+final _materialUsePattern = RegExp("^usemtl ");
 // usemap map_name
-final _map_use_pattern = RegExp("^usemap ");
+final _mapUsePattern = RegExp("^usemap ");
 
 final _vA = Vector3();
 final _vB = Vector3();
@@ -266,13 +266,13 @@ class ParserState {
     final src = colors;
     final dst = object!.geometry["colors"];
 
-    if (src.length > a && src[a] != null){
+    if (src.length > a){// && src[a] != null
       dst.addAll([src[a + 0], src[a + 1], src[a + 2]]);
     }
-    if (b != null && src.length > b && src[b] != null){
+    if (b != null && src.length > b){// && src[b] != null
       dst.addAll([src[b + 0], src[b + 1], src[b + 2]]);
     }
-    if (c != null && src.length > c && src[c] != null){
+    if (c != null && src.length > c){// && src[c] != null
       dst.addAll([src[c + 0], src[c + 1], src[c + 2]]);
     }
   }
@@ -564,8 +564,8 @@ class OBJLoader extends Loader {
 
         state.addPointGeometry(pointData);
       } 
-      else if (_object_pattern.hasMatch(line)) {
-        List<RegExpMatch> result = _object_pattern.allMatches(line).toList();
+      else if (_objectPattern.hasMatch(line)) {
+        List<RegExpMatch> result = _objectPattern.allMatches(line).toList();
 
         // o object_name
         // or
@@ -573,26 +573,26 @@ class OBJLoader extends Loader {
 
         // WORKAROUND: https://bugs.chromium.org/p/v8/issues/detail?id=2869
         // final name = result[ 0 ].substr( 1 ).trim();
-        final name = (' ' + (result[0].group(0)?.substring(1).trim() ?? '')).substring(1);
+        final name = (' ${(result[0].group(0)?.substring(1).trim() ?? '')}').substring(1);
 
         state.startObject(name, null);
       } 
-      else if (_material_use_pattern.hasMatch(line)) {
+      else if (_materialUsePattern.hasMatch(line)) {
         // material
 
         state.object!
             .startMaterial(line.substring(7).trim(), state.materialLibraries);
       } 
-      else if (_material_library_pattern.hasMatch(line)) {
+      else if (_materialLibraryPattern.hasMatch(line)) {
         // mtl file
 
         state.materialLibraries.add(line.substring(7).trim());
       } 
-      else if (_map_use_pattern.hasMatch(line)) {
+      else if (_mapUsePattern.hasMatch(line)) {
         // the line is parsed but ignored since the loader assumes textures are defined MTL files
         // (according to https://www.okino.com/conv/imp_wave.htm, 'usemap' is the old-style Wavefront texture reference method)
 
-        print('THREE.OBJLoader: Rendering identifier "usemap" not supported. Textures must be defined in MTL files.');
+        console.error('OBJLoader: Rendering identifier "usemap" not supported. Textures must be defined in MTL files.');
       } 
       else if (lineFirstChar == 's') {
         List<String> result = line.split(' ');
@@ -632,8 +632,7 @@ class OBJLoader extends Loader {
       else {
         // Handle null terminated files without exception
         if (line == '\0') continue;
-
-        print('THREE.OBJLoader: Unexpected line: "$line"');
+        console.warning('OBJLoader: Unexpected line: "$line"');
       }
     }
 
@@ -764,7 +763,7 @@ class OBJLoader extends Loader {
 
         buffergeometry.setAttributeFromString('position', Float32BufferAttribute(Float32Array.fromList(state.vertices), 3));
 
-        if (state.colors.isNotEmpty && state.colors[0] != null) {
+        if (state.colors.isNotEmpty) {// && state.colors[0] != null
           buffergeometry.setAttributeFromString('color', Float32BufferAttribute(Float32Array.fromList(state.colors), 3));
           material.vertexColors = true;
         }

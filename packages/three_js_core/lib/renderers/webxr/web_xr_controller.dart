@@ -87,9 +87,9 @@ class WebXRController {
 	}
 
 	WebXRController update(inputSource, frame, referenceSpace ) {
-		dynamic inputPose = null;
-		dynamic gripPose = null;
-		dynamic handPose = null;
+		dynamic inputPose;
+		dynamic gripPose;
+		dynamic handPose;
 
 		final targetRay = _targetRay;
 		final grip = _grip;

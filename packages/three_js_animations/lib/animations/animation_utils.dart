@@ -1,4 +1,5 @@
 import 'package:flutter_gl/native-array/index.dart';
+import 'package:three_js_core/others/index.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'animation_clip.dart';
 import 'keyframe_track.dart';
@@ -8,7 +9,7 @@ class AnimationUtils {
   static List<T> arraySlice<T>(List<T> array, [int from = 0, int? to]) {
     // if ( AnimationUtils.isTypedArray( array ) ) {
     if (array.runtimeType.toString() != "List<num>") {
-      print(" AnimationUtils.arraySlice array: ${array.runtimeType.toString()} ");
+      console.info(" AnimationUtils.arraySlice array: ${array.runtimeType} ");
       // 	// in ios9 array.subarray(from, null) will return empty array
       // 	// but array.subarray(from) or array.subarray(from, len) is correct
       // 	return new array.constructor( array.subarray( from, to != null ? to : array.length ) );
@@ -37,7 +38,7 @@ class AnimationUtils {
   }
 
   static bool isTypedArray(object) {
-    print("AnimationUtils isTypedArray object: ${object.runtimeType.toString()}");
+    console.info("AnimationUtils isTypedArray object: ${object.runtimeType}");
     return false;
 
     // return ArrayBuffer.isView( object ) &&
@@ -216,12 +217,12 @@ class AnimationUtils {
         return track.name == referenceTrack.name && track.valueTypeName == referenceTrackType;
       });
 
-      if (targetTrack == null) continue;
+      //if (targetTrack == null) continue;
 
       int referenceOffset = 0;
       final referenceValueSize = referenceTrack.getValueSize();
 
-      print("AnimationUtils isInterpolantFactoryMethodGLTFCubicSpline todo ");
+      console.info("AnimationUtils isInterpolantFactoryMethodGLTFCubicSpline todo");
       // if ( referenceTrack.createInterpolant.isInterpolantFactoryMethodGLTFCubicSpline ) {
       // 	referenceOffset = referenceValueSize / 3;
       // }
@@ -229,7 +230,7 @@ class AnimationUtils {
       int targetOffset = 0;
       final targetValueSize = targetTrack.getValueSize();
 
-      print("AnimationUtils isInterpolantFactoryMethodGLTFCubicSpline todo ");
+      console.info("AnimationUtils isInterpolantFactoryMethodGLTFCubicSpline todo");
       // if ( targetTrack.createInterpolant.isInterpolantFactoryMethodGLTFCubicSpline ) {
       // 	targetOffset = targetValueSize / 3;
       // }

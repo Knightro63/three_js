@@ -114,16 +114,16 @@ class RGBELoader extends DataTextureLoader {
     rgbeError(rgbeErrorCode, msg) {
       switch (rgbeErrorCode) {
         case rgbeReadError:
-          print('THREE.RGBELoader Read Error: ${msg ?? ""}');
+          console.error('RGBELoader Read Error: ${msg ?? ""}');
           break;
         case rgbeWriteError:
-          print('THREE.RGBELoader Write Error: ${msg ?? ""}');
+          console.error('RGBELoader Write Error: ${msg ?? ""}');
           break;
         case rgbeFormatError:
-          print('THREE.RGBELoader Bad File Format: ${msg ?? ""}');
+          console.error('RGBELoader Bad File Format: ${msg ?? ""}');
           break;
         case rgbeMemoryError:
-          print('THREE.RGBELoader: Error: ${msg ?? ""}');
+          console.error('RGBELoader: Error: ${msg ?? ""}');
           break;
         default:
       }
@@ -468,7 +468,7 @@ class RGBELoader extends DataTextureLoader {
             break;
 
           default:
-            print('THREE.RGBELoader: unsupported type: ${this.type}');
+            console.warning('RGBELoader: unsupported type: ${this.type}');
             break;
         }
 

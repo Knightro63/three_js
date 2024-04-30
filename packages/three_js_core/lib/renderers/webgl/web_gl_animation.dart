@@ -1,16 +1,15 @@
 part of three_webgl;
 
 class WebGLAnimation {
-  var context;
+  dynamic context;
   bool isAnimating = false;
-  var animationLoop;
-  var requestId;
+  dynamic animationLoop;
+  dynamic requestId;
 
   WebGLAnimation();
 
   void onAnimationFrame(double time, int frame) {
     animationLoop(time, frame);
-
     requestId = context.requestAnimationFrame(onAnimationFrame);
   }
 
@@ -19,13 +18,11 @@ class WebGLAnimation {
     if (animationLoop == null) return;
 
     requestId = context.requestAnimationFrame(onAnimationFrame);
-
     isAnimating = true;
   }
 
   void stop() {
     context.cancelAnimationFrame(requestId);
-
     isAnimating = false;
   }
 

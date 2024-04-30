@@ -5,12 +5,11 @@ import 'package:three_js_core_loaders/three_js_core_loaders.dart';
 import 'package:opentype_dart/index.dart' as opentype;
 import 'package:three_js_text/three_js_text.dart';
 
-/**
- * Requires opentype.js to be included in the project.
- * Loads TTF files and converts them into typeface JSON that can be used directly
- * to create THREE.Font objects.
- */
-
+///
+/// Requires opentype.js to be included in the project.
+/// Loads TTF files and converts them into typeface JSON that can be used directly
+/// to create THREE.Font objects.
+///
 class TTFLoader extends Loader {
   bool reversed = false;
   late final FileLoader _loader;
@@ -86,7 +85,9 @@ class TTFLoader extends Loader {
 
       final reversed = [];
 
-      paths.forEach((p) {
+      //paths.forEach((p) {
+      for(int k = 0; k < paths.length;k++){
+        final p = paths[k];
         final result = {
           "type": 'm',
           "x": p[p.length - 1].x,
@@ -113,7 +114,7 @@ class TTFLoader extends Loader {
           result["y"] = p[i - 1].y;
           reversed.add(result);
         }
-      });
+      }
 
       return reversed;
     }
@@ -151,24 +152,15 @@ class TTFLoader extends Loader {
               token["o"] += command["type"].toLowerCase() + ' ';
 
               if (command["x"] != null && command["y"] != null) {
-                token["o"] += (command["x"] * scale).round().toString() +
-                    ' ' +
-                    (command["y"] * scale).round().toString() +
-                    ' ';
+                token["o"] += '${(command["x"] * scale).round()} ${ (command["y"] * scale).round()} ';
               }
 
               if (command["x1"] != null && command["y1"] != null) {
-                token["o"] += (command["x1"] * scale).round().toString() +
-                    ' ' +
-                    (command["y1"] * scale).round().toString() +
-                    ' ';
+                token["o"] += '${(command["x1"] * scale).round()} ${(command["y1"] * scale).round()} ';
               }
 
               if (command["x2"] != null && command["y2"] != null) {
-                token["o"] += (command["x2"] * scale).round().toString() +
-                    ' ' +
-                    (command["y2"] * scale).round().toString() +
-                    ' ';
+                token["o"] += '${(command["x2"] * scale).round()} ${(command["y2"] * scale).round()} ';
               }
             });
           }

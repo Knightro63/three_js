@@ -21,7 +21,7 @@ class BaseWebGLBufferRenderer {
 class WebGLBufferRenderer extends BaseWebGLBufferRenderer {
   dynamic gl;
   bool isWebGL2 = true;
-  var mode;
+  dynamic mode;
   WebGLExtensions extensions;
   WebGLInfo info;
   WebGLCapabilities capabilities;

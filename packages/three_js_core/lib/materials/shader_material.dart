@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:three_js_core/others/index.dart';
 import '../renderers/shaders/index.dart';
 import '../renderers/shaders/shader_chunk/default_fragment.glsl.dart';
 import '../renderers/shaders/shader_chunk/default_vertex.glsl.dart';
@@ -9,7 +10,7 @@ class ShaderMaterial extends Material {
     _init();
     if (parameters != null) {
       if (parameters[MaterialProperty.attributes] != null) {
-        print('THREE.ShaderMaterial: attributes should now be defined in THREE.BufferGeometry instead.');
+        console.warning('ShaderMaterial: attributes should now be defined in BufferGeometry instead.');
       }
 
       setValues(parameters);
@@ -19,7 +20,7 @@ class ShaderMaterial extends Material {
     _init();
     if (parameters != null) {
       if (parameters['attributes'] != null) {
-        print('THREE.ShaderMaterial: attributes should now be defined in THREE.BufferGeometry instead.');
+        console.warning('ShaderMaterial: attributes should now be defined in BufferGeometry instead.');
       }
 
       setValuesFromString(parameters);

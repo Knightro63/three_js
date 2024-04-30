@@ -96,7 +96,7 @@ class WebGLBindingStates {
       if (vao != null) {
         return gl.bindVertexArray(vao);
       } else {
-        print(" WebGLBindingStates.dart  bindVertexArrayObject VAO is null");
+        console.warning(" WebGLBindingStates.dart  bindVertexArrayObject VAO is null");
         return;
       }
     }
@@ -333,7 +333,7 @@ class WebGLBindingStates {
           // TODO Attribute may not be available on context restore
 
           if (attribute == null) {
-            print("WebGLBindingState setupVertexAttributes name: $name attribute == null ");
+            console.warning("WebGLBindingState setupVertexAttributes name: $name attribute == null ");
             continue;
           }
 
@@ -469,7 +469,7 @@ class WebGLBindingStates {
   }
 
   void releaseStatesOfProgram(program) {
-    print(" WebGLBindingStates releaseStatesOfProgram ");
+    console.info(" WebGLBindingStates releaseStatesOfProgram ");
 
     // for ( final geometryId in bindingStates ) {
 

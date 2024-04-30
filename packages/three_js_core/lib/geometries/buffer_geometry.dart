@@ -263,7 +263,7 @@ class BufferGeometry with EventDispatcher {
     final morphAttributesPosition = morphAttributes["position"];
 
     if (position != null && position is GLBufferAttribute) {
-      print('THREE.BufferGeometry.computeBoundingBox(): GLBufferAttribute requires a manual bounding box. Alternatively set "mesh.frustumCulled" to "false". $this');
+      console.warning('BufferGeometry.computeBoundingBox(): GLBufferAttribute requires a manual bounding box. Alternatively set "mesh.frustumCulled" to "false". $this');
 
       double infinity = 9999999999.0;
 
@@ -384,7 +384,7 @@ class BufferGeometry with EventDispatcher {
       boundingSphere!.radius = math.sqrt(maxRadiusSq);
 
       if (boundingSphere?.radius == null) {
-        print('THREE.BufferGeometry.computeBoundingSphere(): Computed radius is NaN. The "position" attribute is likely to have NaN values. $this');
+        console.warning('BufferGeometry.computeBoundingSphere(): Computed radius is NaN. The "position" attribute is likely to have NaN values. $this');
       }
     }
   }
@@ -404,7 +404,7 @@ class BufferGeometry with EventDispatcher {
         attributes["position"] == null ||
         attributes["normal"] == null ||
         attributes["uv"] == null) {
-      Console.error('THREE.BufferGeometry: .computeTangents() failed. Missing required attributes (index, position, normal or uv)');
+      console.error('THREE.BufferGeometry: .computeTangents() failed. Missing required attributes (index, position, normal or uv)');
       return;
     }
 
@@ -626,9 +626,7 @@ class BufferGeometry with EventDispatcher {
     if (offset == null) {
       offset = 0;
 
-      print(
-          'THREE.BufferGeometry.merge(): Overwriting original geometry, starting at offset=0. '
-          'Use BufferGeometryUtils.mergeBufferGeometries() for lossless merge.');
+      console.warning('BufferGeometry.merge(): Overwriting original geometry, starting at offset=0.\nUse BufferGeometryUtils.mergeBufferGeometries() for lossless merge.');
     }
 
     final attributes = this.attributes;
@@ -665,7 +663,7 @@ class BufferGeometry with EventDispatcher {
 
   BufferGeometry toNonIndexed() {
     convertBufferAttribute(attribute, indices) {
-      print("BufferGeometry.convertBufferAttribute todo  ");
+      console.info("BufferGeometry.convertBufferAttribute todo");
 
       final array = attribute.array;
       final itemSize = attribute.itemSize;
@@ -693,7 +691,7 @@ class BufferGeometry with EventDispatcher {
     //
 
     if (index == null) {
-      print('THREE.BufferGeometry.toNonIndexed(): Geometry is already non-indexed.');
+      console.info('BufferGeometry.toNonIndexed(): Geometry is already non-indexed.');
       return this;
     }
 
@@ -777,7 +775,6 @@ class BufferGeometry with EventDispatcher {
     final index = this.index;
 
     if (index != null) {
-      // TODO
       data["data"]["index"] = {
         "type": index.array.runtimeType.toString(),
         "array": index.array.sublist(0)
@@ -789,7 +786,6 @@ class BufferGeometry with EventDispatcher {
     for (String key in attributes.keys) {
       final attribute = attributes[key];
 
-      // TODO
       // data["data"]["attributes"][ key ] = attribute.toJson( data["data"] );
       data["data"]["attributes"][key] = attribute.toJson();
     }
@@ -805,7 +801,6 @@ class BufferGeometry with EventDispatcher {
       for (int i = 0, il = attributeArray.length; i < il; i++) {
         final attribute = attributeArray[i];
 
-        // TODO
         // final attributeData = attribute.toJson( data["data"] );
         // final attributeData = attribute.toJson();
 
@@ -939,8 +934,7 @@ class BufferGeometry with EventDispatcher {
   }
 
   void dispose() {
-    print(" BufferGeometry dispose ........... ");
-
+    console.info(" BufferGeometry dispose ........... ");
     dispatchEvent(Event(type: "dispose"));
   }
 }

@@ -1,9 +1,8 @@
 import 'package:three_js_animations/three_js_animations.dart';
 
-/*********************************/
-/********** INTERPOLATION ********/
-
-/*********************************/
+///*********************************/
+///********** INTERPOLATION ********/
+///*********************************/
 
 // Spline Interpolation
 // Specification: https://github.com/KhronosGroup/glTF/blob/master/specification/2.0/README.md#appendix-c-spline-interpolation

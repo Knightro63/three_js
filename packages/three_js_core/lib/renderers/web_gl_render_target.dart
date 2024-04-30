@@ -39,7 +39,7 @@ abstract class RenderTarget with EventDispatcher {
   int get samples => _samples;
 
   set samples(int value) {
-    print("Important warn: make sure set samples before setRenderTarget  ");
+    console.warning("Important warn: make sure set samples before setRenderTarget  ");
     _samples = value;
   }
 

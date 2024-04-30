@@ -45,7 +45,7 @@ extension ListExtension on List{
   }
 }
 
-extension doubleUtil on double{
+extension DoubleUtil on double{
   double toRad(){
     return this*(math.pi / 180);
   }

@@ -10,7 +10,7 @@ class WebGLClipping {
   bool localClippingEnabled = false;
   bool renderingShadows = false;
 
-  var globalState;
+  dynamic globalState;
 
   Map<String, dynamic> uniform = {"value": null, "needsUpdate": false};
 

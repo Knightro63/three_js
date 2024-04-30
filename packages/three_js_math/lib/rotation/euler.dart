@@ -183,7 +183,7 @@ class Euler {
         break;
 
       default:
-        print('THREE.Euler: .setFromRotationMatrix() encountered an unknown order: $order');
+        throw('THREE.Euler: .setFromRotationMatrix() encountered an unknown order: $order');
     }
 
     _order = order;
@@ -242,8 +242,8 @@ class Euler {
     return array;
   }
 
+  @Deprecated('.toVector3 has been removed. Use Vector3.setFromEuler() instead')
   Vector3 toVector3([Vector3? optionalResult]) {
-    print("Euler: .toVector3.zero() has been removed. Use Vector3.setFromEuler() instead ");
     if (optionalResult != null) {
       optionalResult.setValues(_x, _y, _z);
       return optionalResult;

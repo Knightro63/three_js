@@ -173,7 +173,7 @@ class TrackballControls with EventDispatcher {
         scope.object.zoom /= factor;
         scope.object.updateProjectionMatrix();
       } else {
-        print('THREE.TrackballControls: Unsupported camera type');
+        console.error('TrackballControls: Unsupported camera type');
       }
     } else {
       factor = 1.0 + (_zoomEnd.y - _zoomStart.y) * scope.zoomSpeed;
@@ -185,7 +185,7 @@ class TrackballControls with EventDispatcher {
           scope.object.zoom /= factor;
           scope.object.updateProjectionMatrix();
         } else {
-          print('THREE.TrackballControls: Unsupported camera type');
+          console.error('TrackballControls: Unsupported camera type');
         }
       }
 
@@ -289,7 +289,7 @@ class TrackballControls with EventDispatcher {
         lastZoom = scope.object.zoom;
       }
     } else {
-      print('THREE.TrackballControls: Unsupported camera type');
+      console.error('THREE.TrackballControls: Unsupported camera type');
     }
   }
 

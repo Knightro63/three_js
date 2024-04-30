@@ -8,9 +8,9 @@ import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'gltf_extensions.dart';
 
-/*********************************/
-/********** INTERNALS ************/
-/*********************************/
+///*********************************/
+///********** INTERNALS ************/
+///*********************************/
 
 /* CONSTANTS */
 
@@ -187,9 +187,9 @@ final gltfInterpolation = {
 
 final gltfAlphaModes = {"OPAQUE": 'OPAQUE', "MASK": 'MASK', "BLEND": 'BLEND'};
 
-/**
- * Specification: https://github.com/KhronosGroup/glTF/blob/master/specification/2.0/README.md#default-material
- */
+///
+/// Specification: https://github.com/KhronosGroup/glTF/blob/master/specification/2.0/README.md#default-material
+///
 Function createDefaultMaterial = (GLTFRegistry cache) {
   if (cache.get('DefaultMaterial') == null) {
     cache.add(
@@ -222,29 +222,29 @@ Function addUnknownExtensionsToUserData =
   }
 };
 
-/**
- * @param {Object3D|Material|BufferGeometry} object
- * @param {GLTF.definition} gltfDef
- */
+///
+/// @param {Object3D|Material|BufferGeometry} object
+/// @param {GLTF.definition} gltfDef
+///
 Function assignExtrasToUserData = (object, gltfDef) {
   if (gltfDef["extras"] != null) {
     if (gltfDef["extras"] is Map) {
       object.userData.addAll(gltfDef["extras"]);
     } 
     else {
-      print('THREE.GLTFLoader: Ignoring primitive type .extras, ${gltfDef["extras"]}');
+      console.info('GLTFLoader: Ignoring primitive type .extras, ${gltfDef["extras"]}');
     }
   }
 };
 
-/**
- * Specification: https://github.com/KhronosGroup/glTF/blob/master/specification/2.0/README.md#morph-targets
- *
- * @param {BufferGeometry} geometry
- * @param {Array<GLTF.Target>} targets
- * @param {GLTFParser} parser
- * @return {Promise<BufferGeometry>}
- */
+///
+/// Specification: https://github.com/KhronosGroup/glTF/blob/master/specification/2.0/README.md#morph-targets
+///
+/// @param {BufferGeometry} geometry
+/// @param {Array<GLTF.Target>} targets
+/// @param {GLTFParser} parser
+/// @return {Promise<BufferGeometry>}
+///
 Future<BufferGeometry> addMorphTargets(BufferGeometry geometry, targets, GLTFParser parser) async {
   bool hasMorphPosition = false;
   bool hasMorphNormal = false;
@@ -303,10 +303,10 @@ Future<BufferGeometry> addMorphTargets(BufferGeometry geometry, targets, GLTFPar
   return geometry;
 }
 
-/**
- * @param {Mesh} mesh
- * @param {GLTF.Mesh} meshDef
- */
+///
+/// @param {Mesh} mesh
+/// @param {GLTF.Mesh} meshDef
+///
 Function updateMorphTargets = (Mesh mesh, Map<String, dynamic> meshDef) {
   mesh.updateMorphTargets();
 
@@ -328,7 +328,7 @@ Function updateMorphTargets = (Mesh mesh, Map<String, dynamic> meshDef) {
       }
     } 
     else {
-      print('THREE.GLTFLoader: Invalid extras.targetNames length. Ignoring names.');
+      console.warning('GLTFLoader: Invalid extras.targetNames length. Ignoring names.');
     }
   }
 };
@@ -384,11 +384,11 @@ num getNormalizedComponentScale(constructor) {
   }
 }
 
-/**
- * @param {BufferGeometry} geometry
- * @param {GLTF.Primitive} primitiveDef
- * @param {GLTFParser} parser
- */
+///
+/// @param {BufferGeometry} geometry
+/// @param {GLTF.Primitive} primitiveDef
+/// @param {GLTFParser} parser
+///
 Function computeBounds =
     (BufferGeometry geometry, Map<String, dynamic> primitiveDef, GLTFParser parser) {
   Map<String, dynamic> attributes = primitiveDef["attributes"];
@@ -417,7 +417,7 @@ Function computeBounds =
       }
     } 
     else {
-      print('THREE.GLTFLoader: Missing min/max properties for accessor POSITION.');
+      console.warning('GLTFLoader: Missing min/max properties for accessor POSITION.');
 
       return;
     }
@@ -459,7 +459,7 @@ Function computeBounds =
           maxDisplacement.max(vector);
         } 
         else {
-          print('THREE.GLTFLoader: Missing min/max properties for accessor POSITION.');
+          console.warning('GLTFLoader: Missing min/max properties for accessor POSITION.');
         }
       }
     }
@@ -478,12 +478,12 @@ Function computeBounds =
   geometry.boundingSphere = sphere;
 };
 
-/**
- * @param {BufferGeometry} geometry
- * @param {GLTF.Primitive} primitiveDef
- * @param {GLTFParser} parser
- * @return {Promise<BufferGeometry>}
- */
+///
+/// @param {BufferGeometry} geometry
+/// @param {GLTF.Primitive} primitiveDef
+/// @param {GLTFParser} parser
+/// @return {Promise<BufferGeometry>}
+///
 Function addPrimitiveAttributes =
     (BufferGeometry geometry, Map<String, dynamic> primitiveDef, GLTFParser parser) async {
   final attributes = primitiveDef["attributes"];
@@ -528,11 +528,11 @@ Function addPrimitiveAttributes =
       : geometry;
 };
 
-/**
- * @param {BufferGeometry} geometry
- * @param {Number} drawMode
- * @return {BufferGeometry}
- */
+///
+/// @param {BufferGeometry} geometry
+/// @param {Number} drawMode
+/// @return {BufferGeometry}
+///
 Function toTrianglesDrawMode = (BufferGeometry geometry, num drawMode) {
   BufferAttribute<NativeArray<num>>? index = geometry.getIndex();
 
@@ -552,7 +552,7 @@ Function toTrianglesDrawMode = (BufferGeometry geometry, num drawMode) {
       index = geometry.getIndex();
     } 
     else {
-      print('THREE.GLTFLoader.toTrianglesDrawMode(): Undefined position attribute. Processing not possible.');
+      console.warning('GLTFLoader.toTrianglesDrawMode(): Undefined position attribute. Processing not possible.');
       return geometry;
     }
   }
@@ -587,7 +587,7 @@ Function toTrianglesDrawMode = (BufferGeometry geometry, num drawMode) {
   }
 
   if ((newIndices.length / 3) != numberOfTriangles) {
-    print('THREE.GLTFLoader.toTrianglesDrawMode(): Unable to generate correct amount of triangles.');
+    console.warning('GLTFLoader.toTrianglesDrawMode(): Unable to generate correct amount of triangles.');
   }
 
   // build final geometry

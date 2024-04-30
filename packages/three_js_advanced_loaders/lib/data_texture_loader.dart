@@ -140,7 +140,6 @@ class DataTextureLoader extends Loader {
   }
 
   DataTexture? _parse(Uint8List bytes){
-    print(String.fromCharCodes(bytes));
     final Map<String,dynamic> texData = json.decode(String.fromCharCodes(bytes));
     return parse(texData);
   }

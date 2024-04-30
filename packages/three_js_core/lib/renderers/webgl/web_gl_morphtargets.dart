@@ -19,7 +19,7 @@ void denormalize(morph, BufferAttribute attribute) {
   } else if (array is Int32Array) {
     denominator = 2147483647;
   } else {
-    Console.error('three.WebGLMorphtargets: Unsupported morph attribute data type: ', array);
+    console.error('three.WebGLMorphtargets: Unsupported morph attribute data type: $array');
   }
 
   morph.divideScalar(denominator);

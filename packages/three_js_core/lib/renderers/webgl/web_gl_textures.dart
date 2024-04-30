@@ -134,7 +134,7 @@ class WebGLTextures {
     if (internalFormatName != null) {
       // if ( gl[ internalFormatName ] != null ) return gl[ internalFormatName ];
 
-      print('three.WebGLRenderer: Attempt to use non-existing WebGL internal format $internalFormatName');
+      console.warning('WebGLRenderer: Attempt to use non-existing WebGL internal format $internalFormatName');
     }
 
     dynamic internalFormat = glFormat;
@@ -347,7 +347,7 @@ class WebGLTextures {
     int textureUnit = textureUnits;
 
     if (textureUnit >= maxTextures) {
-      print('three.WebGLTextures: Trying to use $textureUnit texture units while this GPU supports only $maxTextures');
+      console.warning('WebGLTextures: Trying to use $textureUnit texture units while this GPU supports only $maxTextures');
     }
 
     textureUnits += 1;
@@ -388,9 +388,9 @@ class WebGLTextures {
       final image = texture.image;
 
       if (texture is! OpenGLTexture && image == null) {
-        print('three.WebGLRenderer: Texture marked for update but image is null');
+        console.warning('WebGLRenderer: Texture marked for update but image is null');
       } else if (texture is! OpenGLTexture && image.complete == false) {
-        print('three.WebGLRenderer: Texture marked for update but image is incomplete');
+        console.warning('WebGLRenderer: Texture marked for update but image is incomplete');
       } else {
         uploadTexture(textureProperties, texture, slot);
         return;
@@ -457,16 +457,14 @@ class WebGLTextures {
       }
 
       if (texture.wrapS != ClampToEdgeWrapping || texture.wrapT != ClampToEdgeWrapping) {
-        print(
-            'three.WebGLRenderer: Texture is not power of two. Texture.wrapS and Texture.wrapT should be set to three.ClampToEdgeWrapping.');
+        console.error('WebGLRenderer: Texture is not power of two. Texture.wrapS and Texture.wrapT should be set to ClampToEdgeWrapping.');
       }
 
       gl.texParameteri(textureType, gl.TEXTURE_MAG_FILTER, filterFallback(texture.magFilter));
       gl.texParameteri(textureType, gl.TEXTURE_MIN_FILTER, filterFallback(texture.minFilter));
 
       if (texture.minFilter != NearestFilter && texture.minFilter != LinearFilter) {
-        print(
-            'three.WebGLRenderer: Texture is not power of two. Texture.minFilter should be set to three.NearestFilter or three.LinearFilter.');
+        console.error('WebGLRenderer: Texture is not power of two. Texture.minFilter should be set to NearestFilter or LinearFilter.');
       }
     }
 
@@ -919,7 +917,7 @@ class WebGLTextures {
           }
         } else {
           if (texture.type == FloatType) {
-            Console.error('WebGLRenderer: Floating point depth texture requires WebGL2.');
+            console.error('WebGLRenderer: Floating point depth texture requires WebGL2.');
           }
         }
 
@@ -930,7 +928,7 @@ class WebGLTextures {
           // DEPTH_COMPONENT and type is not UNSIGNED_SHORT or UNSIGNED_INT
           // (https://www.khronos.org/registry/webgl/extensions/WEBGL_depth_texture/)
           if (texture.type != UnsignedShortType && texture.type != UnsignedIntType) {
-            Console.warn('three.WebGLRenderer: Use UnsignedShortType or UnsignedIntType for DepthFormat DepthTexture.');
+            console.warning('three.WebGLRenderer: Use UnsignedShortType or UnsignedIntType for DepthFormat DepthTexture.');
 
             texture.type = UnsignedIntType;
             glType = utils.convert(texture.type);
@@ -946,7 +944,7 @@ class WebGLTextures {
           // DEPTH_STENCIL and type is not UNSIGNED_INT_24_8_WEBGL.
           // (https://www.khronos.org/registry/webgl/extensions/WEBGL_depth_texture/)
           if (texture.type != UnsignedInt248Type) {
-            Console.warn('three.WebGLRenderer: Use UnsignedInt248Type for DepthStencilFormat DepthTexture.');
+            console.warning('WebGLRenderer: Use UnsignedInt248Type for DepthStencilFormat DepthTexture.');
 
             texture.type = UnsignedInt248Type;
             glType = utils.convert(texture.type);
@@ -1013,8 +1011,7 @@ class WebGLTextures {
                     _gl.TEXTURE_2D, i, glInternalFormat, mipmap.width, mipmap.height, 0, mipmap.data);
               }
             } else {
-              Console.warn(
-                  'three.WebGLRenderer: Attempt to load unsupported compressed texture format in .uploadTexture()');
+              console.warning('WebGLRenderer: Attempt to load unsupported compressed texture format in .uploadTexture()');
             }
           } else {
             if (useTexStorage) {
@@ -1461,8 +1458,7 @@ class WebGLTextures {
                       mipmap.height, 0, mipmap.data);
                 }
               } else {
-                Console.warn(
-                    'three.WebGLRenderer: Attempt to load unsupported compressed texture format in .setTextureCube()');
+                console.warning('WebGLRenderer: Attempt to load unsupported compressed texture format in .setTextureCube()');
               }
             } else {
               if (useTexStorage) {
@@ -1794,8 +1790,7 @@ class WebGLTextures {
             }
           }
         } else {
-          print(
-              'three.WebGLRenderer: WebGLMultipleRenderTargets can only be used with WebGL2 or WEBGL_draw_buffers extension.');
+          console.error('WebGLRenderer: WebGLMultipleRenderTargets can only be used with WebGL2 or WEBGL_draw_buffers extension.');
         }
       } else if ((isWebGL2 && renderTarget.samples > 0) && useMultisampledRenderToTexture(renderTarget) == false) {
         renderTargetProperties["__webglMultisampledFramebuffer"] = _gl.createFramebuffer();
@@ -2023,11 +2018,11 @@ class WebGLTextures {
           // in WebGL 2 uncompressed textures can only be sRGB encoded if they have the RGBA8 format
 
           if (format != RGBAFormat || type != UnsignedByteType) {
-            print('three.WebGLTextures: sRGB encoded textures have to use RGBAFormat and UnsignedByteType.');
+            console.warning('WebGLTextures: sRGB encoded textures have to use RGBAFormat and UnsignedByteType.');
           }
         }
       } else {
-        print('three.WebGLTextures: Unsupported texture encoding: $encoding');
+        console.warning('WebGLTextures: Unsupported texture encoding: $encoding');
       }
     }
 

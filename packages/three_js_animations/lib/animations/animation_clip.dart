@@ -205,7 +205,7 @@ class AnimationClip {
   // parse the animation.hierarchy format
   static AnimationClip? parseAnimation(Map<String,dynamic>? animation, bones) {
     if (animation == null) {
-      print('THREE.AnimationClip: No animation in JSONLoader data.');
+      console.warning('AnimationClip: No animation in JsonLoader data.');
       return null;
     }
 

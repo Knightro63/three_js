@@ -295,7 +295,7 @@ class WebGLRenderer {
 
     _pixelRatio = pixelRatio;
 
-    print(" WebGLRenderer setDrawingBufferSize ");
+    console.info("WebGLRenderer setDrawingBufferSize ");
 
     // _canvas.width = math.floor( width * pixelRatio );
     // _canvas.height = math.floor( height * pixelRatio );
@@ -422,7 +422,7 @@ class WebGLRenderer {
 
   // Events
   void onContextRestore(/* event */) {
-    print('three.WebGLRenderer: Context Restored.');
+    console.info('WebGLRenderer: Context Restored.');
 
     _isContextLost = false;
 
@@ -1287,8 +1287,7 @@ class WebGLRenderer {
           pUniforms.setValue(_gl, 'boneTexture', skeleton.boneTexture, textures);
           pUniforms.setValue(_gl, 'boneTextureSize', skeleton.boneTextureSize, textures);
         } else {
-          Console.warn(
-              'three.WebGLRenderer: SkinnedMesh can only be used with WebGL 2. With WebGL 1 OES_texture_float and vertex textures support is required.');
+          console.warning('WebGLRenderer: SkinnedMesh can only be used with WebGL 2. With WebGL 1 OES_texture_float and vertex textures support is required.');
         }
       }
     }
@@ -1407,7 +1406,7 @@ class WebGLRenderer {
         // The multisample_render_to_texture extension doesn't work properly if there
         // are midframe flushes and an external depth buffer. Disable use of the extension.
         if (extensions.has('WEBGL_multisampled_render_to_texture') == true) {
-          Console.warn('three.WebGLRenderer: extension was disabled because an external texture was provided');
+          console.warning('WebGLRenderer: extension was disabled because an external texture was provided');
           renderTarget.useRenderToTexture = false;
           renderTarget.useRenderbuffer = true;
         }
@@ -1516,8 +1515,7 @@ class WebGLRenderer {
 
         if (textureFormat != RGBAFormat &&
             utils.convert(textureFormat) != _gl.getParameter(_gl.IMPLEMENTATION_COLOR_READ_FORMAT)) {
-          print(
-              'three.WebGLRenderer.readRenderTargetPixels: renderTarget is not in RGBA or implementation defined format.');
+          console.warning('WebGLRenderer.readRenderTargetPixels: renderTarget is not in RGBA or implementation defined format.');
           return;
         }
 
@@ -1533,7 +1531,7 @@ class WebGLRenderer {
                     extensions.get('OES_texture_float') ||
                     extensions.get('WEBGL_color_buffer_float'))) && // Chrome Mac >= 52 and Firefox
             !halfFloatSupportedByExt) {
-          print('three.WebGLRenderer.readRenderTargetPixels: renderTarget is not in UnsignedByteType or implementation defined type.');
+          console.warning('WebGLRenderer.readRenderTargetPixels: renderTarget is not in UnsignedByteType or implementation defined type.');
           return;
         }
 
@@ -1554,7 +1552,7 @@ class WebGLRenderer {
 
   void copyFramebufferToTexture(position, Texture texture, {int level = 0}) {
     if (texture is! FramebufferTexture) {
-      print('three.WebGLRenderer: copyFramebufferToTexture() can only be used with FramebufferTexture.');
+      console.warning('WebGLRenderer: copyFramebufferToTexture() can only be used with FramebufferTexture.');
       return;
     }
 
@@ -1616,7 +1614,7 @@ class WebGLRenderer {
     final depth = sourceBox.max.z - sourceBox.min.z + 1;
     final glFormat = utils.convert(dstTexture.format);
     final glType = utils.convert(dstTexture.type);
-    final glTarget;
+    dynamic glTarget;
 
     if (dstTexture is Data3DTexture) {
       textures.setTexture3D(dstTexture, 0);
@@ -1625,7 +1623,7 @@ class WebGLRenderer {
       textures.setTexture2DArray(dstTexture, 0);
       glTarget = _gl.TEXTURE_2D_ARRAY;
     } else {
-      print('three.WebGLRenderer.copyTextureToTexture3D: only supports three.DataTexture3D and three.DataTexture2DArray.');
+      console.warning('WebGLRenderer.copyTextureToTexture3D: only supports DataTexture3D and DataTexture2DArray.');
       return;
     }
 
@@ -1652,7 +1650,7 @@ class WebGLRenderer {
     } 
     else {
       if (srcTexture.isCompressedTexture) {
-        print('three.WebGLRenderer.copyTextureToTexture3D: untested support for compressed srcTexture.');
+        console.warning('WebGLRenderer.copyTextureToTexture3D: untested support for compressed srcTexture.');
         _gl.compressedTexSubImage3D(glTarget, level, position.x, position.y, position.z, width, height, depth, glFormat, image.data);
       } 
       else {

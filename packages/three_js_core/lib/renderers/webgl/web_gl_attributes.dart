@@ -34,14 +34,14 @@ class WebGLAttributes {
       bytesPerElement = Float32List.bytesPerElement;
     } 
     else if (attribute is Float64BufferAttribute) {
-      print('three.WebGLAttributes: Unsupported data buffer format: Float64Array.');
+      console.error('WebGLAttributes: Unsupported data buffer format: Float64Array.');
     } 
     else if (attribute is Float16BufferAttribute) {
       if (isWebGL2) {
         bytesPerElement = 2;
         type = gl.HALF_FLOAT;
       } else {
-        print('three.WebGLAttributes: Usage of Float16BufferAttribute requires WebGL2.');
+        console.error('WebGLAttributes: Usage of Float16BufferAttribute requires WebGL2.');
       }
     } else if (attribute is Uint16BufferAttribute) {
       bytesPerElement = Uint16List.bytesPerElement;

@@ -7,12 +7,11 @@ import 'package:three_js_math/three_js_math.dart';
  * Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_pbrSpecularGlossiness
  */
 
-/**
- * A sub class of StandardMaterial with some of the functionality
- * changed via the `onBeforeCompile` callback
- * @pailhead
- */
-
+///
+/// A sub class of StandardMaterial with some of the functionality
+/// changed via the `onBeforeCompile` callback
+/// @pailhead
+///
 class GLTFMeshStandardSGMaterial extends MeshStandardMaterial {
   bool isGLTFSpecularGlossinessMaterial = true;
   late Map<String, dynamic> extraUniforms;

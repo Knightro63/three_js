@@ -32,9 +32,6 @@ class CameraView{
 }
 
 class Camera extends Object3D {
-  @override
-  String type = "Camera";
-
   Matrix4 matrixWorldInverse = Matrix4.identity();
 
   Matrix4 projectionMatrix = Matrix4.identity();
@@ -59,12 +56,16 @@ class Camera extends Object3D {
 
   late Vector4 viewport;
 
-  Camera():super();
+  Camera():super(){
+    type = "Camera";
+  }
 
-  Camera.fromJson(Map<String,dynamic> json, Map<String,dynamic> rootJson):super.fromJson(json, rootJson);
+  Camera.fromJson(Map<String,dynamic> json, Map<String,dynamic> rootJson):super.fromJson(json, rootJson){
+    type = "Camera";
+  }
 
   void updateProjectionMatrix() {
-    print(" Camera.updateProjectionMatrix ");
+    throw(" Camera.updateProjectionMatrix not implimented.");
   }
 
   @override

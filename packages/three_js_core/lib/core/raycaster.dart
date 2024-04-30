@@ -1,3 +1,5 @@
+import 'package:three_js_core/others/index.dart';
+
 import './index.dart';
 import '../cameras/index.dart';
 import 'package:three_js_math/three_js_math.dart';
@@ -67,7 +69,7 @@ class Raycaster {
       this.camera = camera;
     } 
     else {
-      print('THREE.Raycaster: Unsupported camera type: ${camera.type}');
+      console.error('Raycaster: Unsupported camera type: ${camera.type}');
     }
   }
 

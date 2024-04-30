@@ -36,7 +36,7 @@ mixin WebGLProgramExtra {
       case GammaEncoding:
         return ['Gamma', '( value, float( GAMMA_FACTOR ) )'];
       default:
-        print('three.WebGLProgram: Unsupported encoding: $encoding');
+        console.error('WebGLProgram: Unsupported encoding: $encoding');
         return ['Linear', '( value )'];
     }
   }
@@ -90,7 +90,7 @@ mixin WebGLProgramExtra {
         break;
 
       default:
-        print('three.WebGLProgram: Unsupported toneMapping: $toneMapping');
+        console.error('three.WebGLProgram: Unsupported toneMapping: $toneMapping');
         toneMappingName = 'Linear';
     }
 
@@ -299,8 +299,7 @@ mixin WebGLProgramExtra {
   }
 
   String deprecatedLoopReplacer(match, start, end, snippet) {
-    print(
-        'WebGLProgram: #pragma unroll_loop shader syntax is deprecated. Please use #pragma unroll_loop_start syntax instead.');
+    console.warning('WebGLProgram: #pragma unroll_loop shader syntax is deprecated. Please use #pragma unroll_loop_start syntax instead.');
     return loopReplacer(match, start, end, snippet);
   }
 

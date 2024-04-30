@@ -358,9 +358,9 @@ class WebGLProgram extends DefaultProgram with WebGLProgramExtra {
         final vertexErrors = getShaderErrors(gl, glVertexShader, 'vertex');
         final fragmentErrors = getShaderErrors(gl, glFragmentShader, 'fragment');
 
-        print('three.WebGLProgram: shader error: ${gl.getError()} gl.VALIDATE_STATUS ${gl.getProgramParameter(program, gl.VALIDATE_STATUS)} gl.getProgramInfoLog $programLog  $vertexErrors $fragmentErrors ');
+        console.error('WebGLProgram: shader error: ${gl.getError()} gl.VALIDATE_STATUS ${gl.getProgramParameter(program, gl.VALIDATE_STATUS)} gl.getProgramInfoLog $programLog  $vertexErrors $fragmentErrors ');
       } else if (programLog != '' && programLog != null) {
-        print('three.WebGLProgram: gl.getProgramInfoLog() programLog: $programLog vertexLog: $vertexLog fragmentLog: $fragmentLog ');
+        console.error('WebGLProgram: gl.getProgramInfoLog() programLog: $programLog vertexLog: $vertexLog fragmentLog: $fragmentLog ');
       } else if (vertexLog == '' || fragmentLog == '') {
         haveDiagnostics = false;
       }

@@ -10,6 +10,7 @@ class _DeviceOrientation{
     this.beta = 0,
     this.gamma = 0
   });
+
   double alpha;
   double gamma;
   double beta;
@@ -29,12 +30,12 @@ class DeviceOrientationControls{
 	double eps = 0.000001;
 	bool enabled = true;
 
-	_DeviceOrientation deviceOrientation = _DeviceOrientation();
+	_DeviceOrientation _deviceOrientation = _DeviceOrientation();
 	double screenOrientation = 0;
 	double alphaOffset = 0; // radians
 
 	void onDeviceOrientationChangeEvent( event ) {
-		deviceOrientation = event;
+		_deviceOrientation = event;
 	}
 
 	void onScreenOrientationChangeEvent() {
@@ -72,7 +73,7 @@ class DeviceOrientationControls{
 	void update(){
     if (enabled == false ) return;
 
-    final device = deviceOrientation;
+    final device = _deviceOrientation;
 
     final double alpha = device.alpha > 0? device.alpha.toRad() + alphaOffset : 0; // Z
     final double beta = device.beta > 0? device.beta.toRad() : 0; // X'

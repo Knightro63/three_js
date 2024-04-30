@@ -352,7 +352,7 @@ class AnimationMixer with EventDispatcher {
     Interpolant? interpolant = interpolants[lastActiveIndex];
 
     if (interpolant == null) {
-      print(" AnimationMixer LinearInterpolant init todo   ");
+      console.info(" AnimationMixer LinearInterpolant init todo");
       interpolant = LinearInterpolant(List<num>.filled(2, 0),
           List<num>.filled(2, 0), 1, _controlInterpolantsResultBuffer);
 

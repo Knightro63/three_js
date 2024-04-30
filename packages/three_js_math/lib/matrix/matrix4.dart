@@ -271,7 +271,7 @@ class Matrix4 {
       te[2] = -d;
       te[6] = b * c;
       te[10] = a * c;
-    } else if (euler.order == 'YZX') {
+    } else if (euler.order == RotationOrders.yzx) {
       final ac = a * c, ad = a * d, bc = b * c, bd = b * d;
 
       te[0] = c * e;
@@ -362,13 +362,7 @@ class Matrix4 {
     return this;
   }
 
-  Matrix4 multiply(Matrix4 m, {Matrix4? n}) {
-    if (n != null) {
-      print(
-          'THREE.Matrix4: .multiply() now only accepts one argument. Use .multiply2( a, b ) instead.');
-      return multiply2(m, n);
-    }
-
+  Matrix4 multiply(Matrix4 m) {
     return multiply2(this, m);
   }
 
@@ -991,10 +985,8 @@ class Matrix4 {
   List<double> toList() {
     return storage.sublist(0);
   }
-
+  @Deprecated('Use matrixInv.copy( matrix ).invert()')
   Matrix4 getInverse(Matrix4 matrix) {
-    print(
-        'THREE.Matrix4: .getInverse() has been removed. Use matrixInv.copy( matrix ).invert(); instead.');
     return setFrom(matrix).invert();
   }
 }

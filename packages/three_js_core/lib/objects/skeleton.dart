@@ -1,4 +1,5 @@
 import 'package:flutter_gl/flutter_gl.dart';
+import 'package:three_js_core/others/index.dart';
 import 'package:three_js_math/three_js_math.dart';
 import '../textures/index.dart';
 import './bone.dart';
@@ -34,11 +35,11 @@ class Skeleton {
     //       32x32 pixel texture max  256 bones * 4 pixels = (32 * 32)
     //       64x64 pixel texture max 1024 bones * 4 pixels = (64 * 64)
 
-    double _size = math.sqrt(bones.length * 4); // 4 pixels needed for 1 matrix
-    _size = MathUtils.ceilPowerOfTwo(_size).toDouble();
-    _size = math.max(_size, 4);
+    double getSize = math.sqrt(bones.length * 4); // 4 pixels needed for 1 matrix
+    getSize = MathUtils.ceilPowerOfTwo(getSize).toDouble();
+    getSize = math.max(getSize, 4);
 
-    int size = _size.toInt();
+    int size = getSize.toInt();
 
     boneTextureSize = size;
 
@@ -53,7 +54,7 @@ class Skeleton {
       // handle special case
 
       if (bones.length != boneInverses.length) {
-        print('THREE.Skeleton: Number of inverse bone matrices does not match amount of bones.');
+        console.warning('Skeleton: Number of inverse bone matrices does not match amount of bones.');
 
         this.boneInverses = [];
 
@@ -168,7 +169,7 @@ class Skeleton {
       Bone? bone = bones[uuid];
 
       if (bone == null) {
-        print('THREE.Skeleton: No bone found with UUID: $uuid');
+        console.warning('Skeleton: No bone found with UUID: $uuid');
         bone = Bone();
       }
 

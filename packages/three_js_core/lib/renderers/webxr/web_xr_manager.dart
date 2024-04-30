@@ -21,28 +21,28 @@ class WebXRManager with EventDispatcher {
   var session = null;
   double framebufferScaleFactor = 1.0;
 
-  var referenceSpace = null;
-  var onAnimationFrameCallback = null;
+  var referenceSpace;
+  var onAnimationFrameCallback;
   String referenceSpaceType = 'local-floor';
 
-  var pose = null;
-  var glBinding = null;
-  var glFramebuffer = null;
-  var glProjLayer = null;
-  var glBaseLayer = null;
+  var pose;
+  var glBinding;
+  var glFramebuffer;
+  var glProjLayer;
+  var glBaseLayer ;
   bool isMultisample = false;
-  var glMultisampledFramebuffer = null;
-  var glColorRenderbuffer = null;
-  var glDepthRenderbuffer = null;
-  var xrFrame = null;
-  var depthStyle = null;
-  var clearStyle = null;
+  var glMultisampledFramebuffer;
+  var glColorRenderbuffer;
+  var glDepthRenderbuffer;
+  var xrFrame;
+  var depthStyle;
+  var clearStyle;
 
   final controllers = [];
   final Map inputSourcesMap = {};
 
-  var _currentDepthNear = null;
-  var _currentDepthFar = null;
+  var _currentDepthNear;
+  var _currentDepthFar;
 
   final WebGLAnimation animation = WebGLAnimation();
   late final ArrayCamera cameraVR;

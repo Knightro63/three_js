@@ -23,7 +23,7 @@ class PointerLockControls with EventDispatcher {
   }
 
   void onMouseMove(event) {
-    print("onMouseMove event: $event isLocked ${scope.isLocked} ");
+    console.warning("onMouseMove event: $event isLocked ${scope.isLocked} ");
     if (scope.isLocked == false) return;
 
     final movementX = event.movementX ?? event.mozMovementX ?? event.webkitMovementX ?? 0;
@@ -55,7 +55,7 @@ class PointerLockControls with EventDispatcher {
   }
 
   void onPointerlockError() {
-    print('THREE.PointerLockControls: Unable to use Pointer Lock API');
+    console.warning('PointerLockControls: Unable to use Pointer Lock API');
   }
 
   void connect() {

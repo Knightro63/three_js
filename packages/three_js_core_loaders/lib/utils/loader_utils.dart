@@ -1,5 +1,7 @@
 import 'dart:convert' as convert;
 
+import 'package:three_js_core/three_js_core.dart';
+
 class LoaderUtils {
   static String decodeText(List<int> array) {
     final s = const convert.Utf8Decoder().convert(array);
@@ -28,7 +30,7 @@ class LoaderUtils {
         path = path.replaceFirst(match.group(0)!, match.group(1)!);
       }
 
-      print("GLTFHelper.resolveURL todo debug  ");
+      console.info("GLTFHelper.resolveURL todo debug.");
       // path = path.replace( RegExp("(^https?:\/\/[^\/]+).*", caseSensitive: false), '$1' );
 
     }

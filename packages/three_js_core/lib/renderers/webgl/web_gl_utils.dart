@@ -11,7 +11,7 @@ class WebGLUtils {
   }
 
   dynamic convert(p, [encoding]) {
-    var extension;
+    dynamic extension;
 
     if (p == UnsignedByteType) return gl.UNSIGNED_BYTE;
     if (p == UnsignedShort4444Type) return gl.UNSIGNED_SHORT_4_4_4_4;
@@ -45,7 +45,7 @@ class WebGLUtils {
     if (p == RedFormat) return gl.RED;
 
     if (p == RGBFormat) {
-      Console.warn('three.WebGLRenderer: three.RGBFormat has been removed. Use three.RGBAFormat instead. https://github.com/mrdoob/three.js/pull/23228');
+      console.warning('WebGLRenderer: RGBFormat has been removed. Use RGBAFormat instead. https://github.com/mrdoob/three.js/pull/23228');
       return gl.RGBA;
     }
 

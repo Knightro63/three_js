@@ -26,7 +26,7 @@ class WebGLInfo {
     } else if (mode == gl.POINTS) {
       render["points"] = render["points"]! + instanceCount * count;
     } else {
-      print('three.WebGLInfo: Unknown draw mode: $mode ');
+      console.warning('three.WebGLInfo: Unknown draw mode: $mode ');
     }
   }
 

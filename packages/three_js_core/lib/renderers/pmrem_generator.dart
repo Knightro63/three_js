@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_gl/flutter_gl.dart';
+import 'package:three_js_core/others/index.dart';
 
 import 'package:three_js_math/three_js_math.dart';
 import '../renderers/index.dart';
@@ -393,7 +394,7 @@ class PMREMGenerator {
     final blurMaterial = _blurMaterial;
 
     if (direction != 'latitudinal' && direction != 'longitudinal') {
-      print('blur direction must be either latitudinal or longitudinal!');
+      console.warning('blur direction must be either latitudinal or longitudinal!');
     }
 
     // Number of standard deviations at which to cut off the discrete approximation.
@@ -418,7 +419,7 @@ class PMREMGenerator {
         : maxSamples;
 
     if (samples > maxSamples) {
-      print("sigmaRadians, $sigmaRadians, is too large and will clip, as it requested $samples samples when the maximum is set to $maxSamples");
+      console.warning("sigmaRadians, $sigmaRadians, is too large and will clip, as it requested $samples samples when the maximum is set to $maxSamples");
     }
 
     List<double> weights = [];

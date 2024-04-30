@@ -9,20 +9,20 @@ import 'package:three_js_math/three_js_math.dart';
 import 'package:three_js_animations/three_js_animations.dart';
 import 'package:three_js_core_loaders/three_js_core_loaders.dart';
 import 'package:three_js_curves/three_js_curves.dart';
-/**
- * Loader loads FBX file and generates Group representing FBX scene.
- * Requires FBX file to be >= 7.0 and in ASCII or >= 6400 in Binary format
- * Versions lower than this may load but will probably have errors
- *
- * Needs Support:
- *  Morph normals / blend shape normals
- *
- * FBX format references:
- * 	https://help.autodesk.com/view/FBX/2017/ENU/?guid=__cpp_ref_index_html (C++ SDK reference)
- *
- * Binary format specification:
- *	https://code.blender.org/2013/08/fbx-binary-file-format-specification/
- */
+///
+/// Loader loads FBX file and generates Group representing FBX scene.
+/// Requires FBX file to be >= 7.0 and in ASCII or >= 6400 in Binary format
+/// Versions lower than this may load but will probably have errors
+///
+/// Needs Support:
+///  Morph normals / blend shape normals
+///
+/// FBX format references:
+/// 	https://help.autodesk.com/view/FBX/2017/ENU/?guid=__cpp_ref_index_html (C++ SDK reference)
+///
+/// Binary format specification:
+///	https://code.blender.org/2013/08/fbx-binary-file-format-specification/
+///
 
 late _FBXTree _fbxTree;
 late Map connections;
@@ -259,14 +259,14 @@ class __FBXTreeParser {
 
       case 'tga':
         if (manager.getHandler('.tga') == null) {
-          print('FBXLoader: TGA loader not found, skipping $fileName');
+          console.warning('FBXLoader: TGA loader not found, skipping $fileName');
         }
 
         type = 'image/tga';
         break;
 
       default:
-        print('FBXLoader: Image type "$extension" is not supported.');
+        console.warning('FBXLoader: Image type "$extension" is not supported.');
         return null;
     }
 
@@ -353,7 +353,7 @@ class __FBXTreeParser {
       final loader = manager.getHandler('.tga');
 
       if (loader == null) {
-        print('FBXLoader: TGA loader not found, creating placeholder texture for ${textureNode["RelativeFilename"]}');
+        console.warning('FBXLoader: TGA loader not found, creating placeholder texture for ${textureNode["RelativeFilename"]}');
         texture = Texture();
       } 
       else {
@@ -362,7 +362,7 @@ class __FBXTreeParser {
       }
     } 
     else if (extension == 'psd') {
-      print('FBXLoader: PSD textures are not supported, creating placeholder texture for ${textureNode["RelativeFilename"]}');
+      console.warning('FBXLoader: PSD textures are not supported, creating placeholder texture for ${textureNode["RelativeFilename"]}');
       texture = Texture();
     } 
     else {
@@ -418,7 +418,7 @@ class __FBXTreeParser {
         material = MeshLambertMaterial();
         break;
       default:
-        print('FBXLoader: unknown material type "%s". Defaulting to MeshPhongMaterial.$type');
+        console.warning('FBXLoader: unknown material type "%s". Defaulting to MeshPhongMaterial.$type');
         material = MeshPhongMaterial();
         break;
     }
@@ -431,7 +431,7 @@ class __FBXTreeParser {
 
   // Parse FBX material and return parameters suitable for a three.js material
   // Also parse the texture map and return any textures associated with the material
-  Map<String,dynamic> parseParameters(Map materialNode, Map textureMap, ID) {
+  Map<String,dynamic> parseParameters(Map materialNode, Map textureMap, id) {
     Map<String, dynamic> parameters = {};
 
     if (materialNode["BumpFactor"] != null) {
@@ -491,7 +491,7 @@ class __FBXTreeParser {
 
     final scope = this;
 
-    final connection = connections[ID];
+    final connection = connections[id];
 
     if (connection["children"] != null) {
       connection["children"].forEach((child) {
@@ -563,7 +563,7 @@ class __FBXTreeParser {
           case 'SpecularFactor': // AKA specularLevel
           case 'VectorDisplacementColor': // NOTE: Seems to be a copy of DisplacementColor
           default:
-            print('FBXLoader: %s map is not supported in three.js, skipping texture. $type');
+            console.warning('FBXLoader: %s map is not supported in three.js, skipping texture. $type');
             break;
         }
       });
@@ -577,7 +577,7 @@ class __FBXTreeParser {
     // if the texture is a layered texture, just use the first layer and issue a warning
     if (_fbxTree.objects?["LayeredTexture"] != null &&
         _fbxTree.objects?["LayeredTexture"].id != null) {
-      print('FBXLoader: layered textures are not supported in three.js. Discarding all but first layer.');
+      console.warning('FBXLoader: layered textures are not supported in three.js. Discarding all but first layer.');
       id = connections[id].children[0].ID;
     }
 
@@ -604,7 +604,7 @@ class __FBXTreeParser {
           skeleton["ID"] = nodeID;
 
           if (relationships["parents"].length > 1){
-            print('FBXLoader: skeleton attached to more than one geometry is not supported.');
+            console.warning('FBXLoader: skeleton attached to more than one geometry is not supported.');
           }
           skeleton["geometryID"] = relationships["parents"][0]["ID"];
 
@@ -618,7 +618,7 @@ class __FBXTreeParser {
           morphTarget["id"] = nodeID;
 
           if (relationships["parents"].length > 1){
-            print('FBXLoader: morph target attached to more than one geometry is not supported.');
+            console.warning('FBXLoader: morph target attached to more than one geometry is not supported.');
           }
 
           morphTargets[nodeID] = morphTarget;
@@ -899,7 +899,7 @@ class __FBXTreeParser {
           break;
 
         default:
-          print('FBXLoader: Unknown camera type $type.');
+          console.warning('FBXLoader: Unknown camera type $type.');
           model = Object3D();
           break;
       }
@@ -911,7 +911,7 @@ class __FBXTreeParser {
   // Create a DirectionalLight, PointLight or SpotLight
   createLight(relationships) {
     late Object3D model;
-    var lightAttribute;
+    dynamic lightAttribute;
 
     relationships.children.forEach((child) {
       final attr = _fbxTree.objects?["_NodeAttribute"][child["ID"]];
@@ -993,7 +993,7 @@ class __FBXTreeParser {
           break;
 
         default:
-          print('FBXLoader: Unknown light type ${lightAttribute.LightType.value}, defaulting to a PointLight.');
+          console.warning('FBXLoader: Unknown light type ${lightAttribute.LightType.value}, defaulting to a PointLight.');
           model = PointLight(color.getHex(), intensity);
           break;
       }
@@ -1034,9 +1034,10 @@ class __FBXTreeParser {
     }
 
     if (geometry?.attributes["color"] != null) {
-      materials.forEach((material) {
+      //materials.forEach((material) {
+      for(Material? material in materials){
         material?.vertexColors = true;
-      });
+      }
     }
 
     if (geometry?.userData["FBX_Deformer"] != null) {
@@ -1050,7 +1051,6 @@ class __FBXTreeParser {
   }
 
   Line createCurve(relationships, geometryMap) {
-    print(geometryMap);
     final geometry = relationships.children.reduce((geo, child) {
       if (geometryMap.has(child["ID"])) geo = geometryMap.get(child["ID"]);
 
@@ -1174,10 +1174,11 @@ class __FBXTreeParser {
           final poseNodes = bindPoseNode[nodeID]["PoseNode"];
 
           if (poseNodes is List) {
-            poseNodes.forEach((poseNode) {
+            //poseNodes.forEach((poseNode) {
+            for(dynamic poseNode in poseNodes){
               bindMatrices[poseNode["Node"]] =
                   Matrix4.identity().copyFromArray(poseNode["Matrix"]["a"]);
-            });
+            }
           } else {
             bindMatrices[poseNodes["Node"]] =
                 Matrix4.identity().copyFromArray(poseNodes["Matrix"]["a"]);
@@ -1511,7 +1512,7 @@ class _GeometryParser {
 
         if (weights.length > 4) {
           if (!displayedWeightsWarning) {
-            print('FBXLoader: Vertex has more than 4 skinning weights assigned to vertex. Deleting additional weights.');
+            console.warning('FBXLoader: Vertex has more than 4 skinning weights assigned to vertex. Deleting additional weights.');
             displayedWeightsWarning = true;
           }
 
@@ -1886,7 +1887,7 @@ class _GeometryParser {
     final order = int.tryParse(geoNode['Order']);
 
     if (order == null) {
-      print('FBXLoader: Invalid Order ${geoNode['Order']} given for geometry ID: ${geoNode['id']}');
+      console.warning('FBXLoader: Invalid Order ${geoNode['Order']} given for geometry ID: ${geoNode['id']}');
       return BufferGeometry();
     }
 
@@ -2057,7 +2058,7 @@ class _AnimationParser {
                 final rawModel = _fbxTree.objects?["Model"][modelID];
 
                 if (rawModel == null) {
-                  print('FBXLoader: Encountered a unused curve. $child');
+                  console.warning('FBXLoader: Encountered a unused curve. $child');
                   return;
                 }
 
@@ -2151,7 +2152,7 @@ class _AnimationParser {
       if (children.length > 1) {
         // it seems like stacks will always be associated with a single layer. But just in case there are files
         // where there are multiple layers per stack, we'll display a warning
-        print('FBXLoader: Encountered an animation stack with multiple layers, this is currently not supported. Ignoring subsequent layers.');
+        console.warning('FBXLoader: Encountered an animation stack with multiple layers, this is currently not supported. Ignoring subsequent layers.');
       }
 
       final layer = layersMap[children[0]["ID"]];
@@ -2199,18 +2200,20 @@ class _AnimationParser {
       if (positionTrack != null) tracks.add(positionTrack);
     }
 
-    if (rawTracks["R"] != null && rawTracks["R"]["curves"].keys.length > 0) {
+    if (rawTracks["R"] != null && rawTracks["R"]["curves"].keys.isNotEmpty()) {
       final rotationTrack = generateRotationTrack(
-          rawTracks["modelName"],
-          rawTracks["R"]["curves"],
-          initialRotation,
-          rawTracks["preRotation"],
-          rawTracks["postRotation"],
-          rawTracks["eulerOrder"]);
-      if (rotationTrack != null) tracks.add(rotationTrack);
+        rawTracks["modelName"],
+        rawTracks["R"]["curves"],
+        initialRotation,
+        rawTracks["preRotation"],
+        rawTracks["postRotation"],
+        rawTracks["eulerOrder"]
+      );
+      //if (rotationTrack != null) 
+        tracks.add(rotationTrack);
     }
 
-    if (rawTracks["S"] != null && rawTracks["S"]["curves"].keys.length > 0) {
+    if (rawTracks["S"] != null && rawTracks["S"]["curves"].keys.isNotEmpty()) {
       final scaleTrack = _generateVectorTrack(rawTracks["modelName"],
           rawTracks["S"]["curves"], initialScale, 'scale');
       if (scaleTrack != null) tracks.add(scaleTrack);
@@ -2362,7 +2365,8 @@ class _AnimationParser {
     int yIndex = -1;
     int zIndex = -1;
 
-    times.forEach((time) {
+    //times.forEach((time) {
+    for(num time in times){
       if (curves["x"] != null){
         xIndex = curves["x"]["times"].toList().indexOf(time);
       }
@@ -2398,7 +2402,7 @@ class _AnimationParser {
       } else {
         values.add(prevValue[2]);
       }
-    });
+    }
 
     return values;
   }
@@ -2666,7 +2670,6 @@ class _TextParser {
 
   void parseNodePropertyContinued(String line) {
     final currentNode = getCurrentNode();
-    print(line);
     if(currentNode['a'] == null){
       currentNode['a'] = line;
     }
@@ -2688,10 +2691,9 @@ class _TextParser {
     // into array like below
     // ["Lcl Scaling", "Lcl Scaling", "", "A", "1,1,1" ]
     final List<String> props = propValue.split('",').map((prop) {
-      return prop
-          .trim()
-          .replaceAll(RegExp(r'^\"'), '')
-          .replaceAll(RegExp(r'\s'), '_');
+      return prop.trim()
+        .replaceAll(RegExp(r'^\"'), '')
+        .replaceAll(RegExp(r'\s'), '_');
     }).toList();
 
     final innerPropName = props[0];
@@ -2851,9 +2853,10 @@ class _BinaryParser {
     } else if (subNode["name"] == 'Properties70') {
       final keys = subNode.keys;
 
-      keys.forEach((key) {
+      //keys.forEach((key) {
+      for(String key in keys){
         node[key] = subNode[key];
-      });
+      }
     } else if (name == 'Properties70' && subNode["name"] == 'P') {
       String innerPropName = subNode["propertyList"][0];
       String innerPropType1 = subNode["propertyList"][1];
@@ -3304,7 +3307,7 @@ _getData(int polygonVertexIndex, int polygonIndex,int vertexIndex, infoObject) {
       index = infoObject.indices[0];
       break;
     default:
-      print('FBXLoader: unknown attribute mapping type ${infoObject["mappingType"]}');
+      console.warning('FBXLoader: unknown attribute mapping type ${infoObject["mappingType"]}');
   }
 
   if (infoObject["referenceType"] == 'IndexToDirect'){
@@ -3481,7 +3484,7 @@ String _getEulerOrder(int? order) {
   ];
 
   if (order == 6) {
-    print('FBXLoader: unsupported Euler Order: Spherical XYZ. Animations and rotations may be incorrect.');
+    console.warning('FBXLoader: unsupported Euler Order: Spherical XYZ. Animations and rotations may be incorrect.');
     return enums[0];
   }
 

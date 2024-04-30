@@ -19,7 +19,6 @@ final _v3 = Vector3();
 
 class TransformControlsGizmo extends Object3D {
   bool isTransformControlsGizmo = true;
-  String type = 'TransformControlsGizmo';
 
   Camera? camera;
   Object3D? object;
@@ -108,6 +107,7 @@ class TransformControlsGizmo extends Object3D {
   late TransformControls controls;
 
   TransformControlsGizmo(this.controls) : super() {
+    type = 'TransformControlsGizmo';
     // shared materials
 
     final gizmoMaterial = MeshBasicMaterial.fromMap({
@@ -195,11 +195,10 @@ class TransformControlsGizmo extends Object3D {
     translateHelperGeometry() {
       final geometry = BufferGeometry();
 
-      geometry.setAttribute(
-          Semantic.position, Float32BufferAttribute.fromTypedData(Float32List.fromList([0.0, 0.0, 0.0, 1.0, 1.0, 1.0]), 3));
+      geometry.setAttribute(Semantic.position, Float32BufferAttribute.fromTypedData(Float32List.fromList([0.0, 0.0, 0.0, 1.0, 1.0, 1.0]), 3));
 
       return geometry;
-    };
+    }
 
     // Gizmo definitions - custom hierarchy definitions for setupGizmo() function
 
@@ -647,34 +646,34 @@ class TransformControlsGizmo extends Object3D {
       final gizmo = Object3D();
 
       for (final name in gizmoMap.keys) {
-        final _len = gizmoMap[name].length;
+        final len = gizmoMap[name].length;
 
-        for (int i = (_len - 1); i >= 0; i--) {
-          final _gi = gizmoMap[name][i];
+        for (int i = (len - 1); i >= 0; i--) {
+          final gi = gizmoMap[name][i];
 
           dynamic object;
-          if (_gi.length > 0) {
-            object = _gi[0].clone();
+          if (gi.length > 0) {
+            object = gi[0].clone();
           }
 
           List<num>? position;
-          if (_gi.length > 1) {
-            position = _gi[1];
+          if (gi.length > 1) {
+            position = gi[1];
           }
 
           List<num>? rotation;
-          if (_gi.length > 2) {
-            rotation = _gi[2];
+          if (gi.length > 2) {
+            rotation = gi[2];
           }
 
           List<num>? scale;
-          if (_gi.length > 3) {
-            scale = _gi[3];
+          if (gi.length > 3) {
+            scale = gi[3];
           }
 
           dynamic tag ;
-          if (_gi.length > 4) {
-            tag = _gi[4];
+          if (gi.length > 4) {
+            tag = gi[4];
           }
 
           // name and tag properties are essential for picking and updating logic.

@@ -101,12 +101,7 @@ class Vector2 extends Vector{
     return this;
   }
   @override
-  Vector2 add(Vector a, [Vector? b]) {
-    if (b != null) {
-      print('THREE.Vector2: .add() now only accepts one argument. Use .add2( a, b ) instead.');
-      return add2(a, b);
-    }
-
+  Vector2 add(Vector a) {
     x += a.x;
     y += a.y;
 
@@ -135,12 +130,7 @@ class Vector2 extends Vector{
     return this;
   }
   @override
-  Vector2 sub(Vector a, [Vector? b]) {
-    if (b != null) {
-      print('THREE.Vector2: .sub() now only accepts one argument. Use .sub2( a, b ) instead.');
-      return sub2(a, b);
-    }
-
+  Vector2 sub(Vector a) {
     x -= a.x;
     y -= a.y;
 

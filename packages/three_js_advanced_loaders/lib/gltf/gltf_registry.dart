@@ -1,5 +1,3 @@
-/* GLTFREGISTRY */
-
 class GLTFRegistry {
   Map<String,dynamic> objects = {};
 

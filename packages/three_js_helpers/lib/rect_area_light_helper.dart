@@ -3,9 +3,9 @@ import 'package:flutter_gl/flutter_gl.dart';
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 
-/**
- *  This helper must be added as a child of the light
- */
+///
+///  This helper must be added as a child of the light
+///
 
 class RectAreaLightHelper extends Line {
   late RectAreaLight light;
@@ -73,8 +73,7 @@ class RectAreaLightHelper extends Line {
 
   @override
   void raycast(Raycaster raycaster, List<Intersection> intersects) {
-
-    print("==== raycast $this  1 ");
+    console.info("==== raycast $this  1 ");
 
     final geometry = this.geometry!;
     final material = this.material;
@@ -110,7 +109,7 @@ class RectAreaLightHelper extends Line {
     final groups = geometry.groups;
     final drawRange = geometry.drawRange;
 
-    print("==== raycast $this  index: $index  ");
+    console.info("==== raycast $this  index: $index  ");
 
     if (index != null) {
       // indexed buffer geometry

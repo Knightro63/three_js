@@ -4,7 +4,7 @@ import 'package:three_js_core/three_js_core.dart';
 import 'dart:math' as math;
 
 class PolarGridHelper extends LineSegments {
-  PolarGridHelper.create(geomertey, material) : super(geomertey, material);
+  PolarGridHelper.create(super.geomertey, super.material);
 
   factory PolarGridHelper([
     radius = 10,

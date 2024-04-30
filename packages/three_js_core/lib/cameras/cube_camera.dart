@@ -1,7 +1,7 @@
+import '../others/console.dart';
 import '../core/index.dart';
 import 'package:three_js_math/three_js_math.dart';
 import '../renderers/index.dart';
-
 import 'perspective_camera.dart';
 
 class CubeCamera extends Object3D {
@@ -21,7 +21,7 @@ class CubeCamera extends Object3D {
     type = 'CubeCamera';
 
     if (renderTarget.isWebGLCubeRenderTarget != true) {
-      print('THREE.CubeCamera: The constructor now expects an instance of WebGLCubeRenderTarget as third parameter.');
+      console.warning('CubeCamera: The constructor now expects an instance of WebGLCubeRenderTarget as third parameter.');
       return;
     }
 

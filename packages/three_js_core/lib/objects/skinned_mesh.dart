@@ -1,3 +1,5 @@
+import 'package:three_js_core/others/index.dart';
+
 import '../core/index.dart';
 import 'package:three_js_math/three_js_math.dart';
 import './mesh.dart';
@@ -81,10 +83,12 @@ class SkinnedMesh extends Mesh {
 
     if (bindMode == 'attached') {
       bindMatrixInverse..setFrom(matrixWorld)..invert();
-    } else if (bindMode == 'detached') {
+    } 
+    else if (bindMode == 'detached') {
       bindMatrixInverse..setFrom(bindMatrix!)..invert();
-    } else {
-      print('THREE.SkinnedMesh: Unrecognized bindMode: $bindMode');
+    } 
+    else {
+      console.warning('SkinnedMesh: Unrecognized bindMode: $bindMode');
     }
   }
 

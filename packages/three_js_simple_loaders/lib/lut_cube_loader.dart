@@ -7,7 +7,6 @@ import 'package:three_js_math/three_js_math.dart';
 import 'package:three_js_core_loaders/three_js_core_loaders.dart';
 
 // https://wwwimages2.adobe.com/content/dam/acom/en/products/speedgrade/cc/pdfs/cube-lut-specification-1.0.pdf
-
 class LUTCubeLoaderData {
   LUTCubeLoaderData({
     this.title,
@@ -81,7 +80,7 @@ class LUTCubeLoader extends Loader {
     return _parse(tf.data);
   }
 
-  LUTCubeLoaderData _parse(Uint8List bytes, [String? path, Function? onLoad, Function? onError]) {
+  LUTCubeLoaderData _parse(Uint8List bytes) {
     String str = String.fromCharCodes(bytes);
     // Remove empty lines and comments
     // str = str

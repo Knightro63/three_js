@@ -41,9 +41,8 @@ class Quaternion {
     return [_x, _y, _z, _w];
   }
 
-  static Quaternion staticSlerp(
-      Quaternion qa, Quaternion qb, Quaternion qm, double t) {
-    print('THREE.Quaternion: Static .slerp() has been deprecated. Use is now qm.slerpQuaternions( qa, qb, t ) instead.');
+  @Deprecated(' Static .slerp() has been deprecated. Use is now qm.slerpQuaternions( qa, qb, t ) instead.')
+  static Quaternion staticSlerp(Quaternion qa, Quaternion qb, Quaternion qm, double t) {
     return qm.slerpQuaternions(qa, qb, t);
   }
 
@@ -243,9 +242,8 @@ class Quaternion {
         _z = c1 * c2 * s3 + s1 * s2 * c3;
         _w = c1 * c2 * c3 + s1 * s2 * s3;
         break;
-
       default:
-        print('THREE.Quaternion: .setFromEuler() encountered an unknown order: $order');
+        throw('THREE.Quaternion: .setFromEuler() encountered an unknown order: $order');
     }
 
     if (update) onChangeCallback();
@@ -420,12 +418,7 @@ class Quaternion {
     return this;
   }
 
-  Quaternion multiply(Quaternion q, {Quaternion? p}) {
-    if (p != null) {
-      print('THREE.Quaternion: .multiply() now only accepts one argument. Use .multiplyQuaternions( a, b ) instead.');
-      return multiplyQuaternions(q, p);
-    }
-
+  Quaternion multiply(Quaternion q) {
     return multiplyQuaternions(this, q);
   }
 

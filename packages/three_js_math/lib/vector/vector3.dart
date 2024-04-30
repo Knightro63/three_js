@@ -145,11 +145,7 @@ class Vector3 extends Vector{
     return this;
   }
   @override
-  Vector3 add(Vector a, [Vector? b]) {
-    if (b != null) {
-      print('THREE.Vector2: .add() now only accepts one argument. Use .add2( a, b ) instead.');
-      return add2(a, b);
-    }
+  Vector3 add(Vector a) {
     x += a.x;
     y += a.y;
     if(a is Vector4){
@@ -202,12 +198,7 @@ class Vector3 extends Vector{
   }
 
   @override
-  Vector3 sub(Vector a, [Vector? b]) {
-    if (b != null) {
-      print('THREE.Vector3: .sub() now only accepts one argument. Use .sub2( a, b ) instead.');
-      return sub2(a, b);
-    }
-
+  Vector3 sub(Vector a) {
     x -= a.x;
     y -= a.y;
 
@@ -495,12 +486,7 @@ class Vector3 extends Vector{
     return this;
   }
 
-  Vector3 cross(Vector3 v, {Vector3? w}) {
-    if (w != null) {
-      print('THREE.Vector3: .cross() now only accepts one argument. Use .cross2( a, b ) instead.');
-      return cross2(v, w);
-    }
-
+  Vector3 cross(Vector3 v) {
     return cross2(this, v);
   }
 

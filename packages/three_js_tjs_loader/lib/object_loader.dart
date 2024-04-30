@@ -72,10 +72,8 @@ class ObjectLoader extends Loader {
     Map<String,dynamic> json = jsonDecode(String.fromCharCodes(bytes));
     final metadata = json['metadata'];
 
-    if (metadata == null ||
-        metadata['type'] == null ||
-        metadata['type'].toLowerCase() == 'geometry') {
-      print ('THREE.ObjectLoader: Can\'t load Object');
+    if (metadata == null || metadata['type'] == null || metadata['type'].toLowerCase() == 'geometry') {
+      console.warning('ObjectLoader: Can\'t load Object');
       return null;
     }
 
@@ -148,7 +146,7 @@ class ObjectLoader extends Loader {
             geometry = bufferGeometryLoader.parseJson(data);
             break;
           case 'Geometry':
-            print('THREE.ObjectLoader: The legacy Geometry type is no longer supported.');
+            console.error('ObjectLoader: The legacy Geometry type is no longer supported.');
             break;
           default:
             if (data["type"] == "PlaneGeometry") {
@@ -324,10 +322,7 @@ class ObjectLoader extends Loader {
   Map parseTextures(json, images) {
     parseConstant(value, type) {
       if (value is num) return value;
-
-      print(
-          'THREE.ObjectLoader.parseTexture: Constant should be in numeric form. $value');
-
+      console.warning('ObjectLoader.parseTexture: Constant should be in numeric form. $value');
       return type[value];
     }
 
@@ -338,11 +333,11 @@ class ObjectLoader extends Loader {
         Map<String, dynamic> data = json[i];
 
         if (data['image'] == null) {
-          print('THREE.ObjectLoader: No "image" specified for ${data["uuid"]}');
+          console.warning('ObjectLoader: No "image" specified for ${data["uuid"]}');
         }
 
         if (images[data["image"]] == null) {
-          print('THREE.ObjectLoader: Undefined image ${data["image"]}');
+          console.warning('ObjectLoader: Undefined image ${data["image"]}');
         }
 
         Texture texture;
@@ -421,7 +416,7 @@ class ObjectLoader extends Loader {
 
     getGeometry(name) {
       if (geometries[name] == null) {
-        print('THREE.ObjectLoader: Undefined geometry $name');
+        console.warning('ObjectLoader: Undefined geometry $name');
       }
 
       return geometries[name];
@@ -437,7 +432,7 @@ class ObjectLoader extends Loader {
           final uuid = name[i];
 
           if (materials[uuid] == null) {
-            print('THREE.ObjectLoader: Undefined material $uuid');
+            console.warning('ObjectLoader: Undefined material $uuid');
           }
 
           array.add(materials[uuid]);
@@ -447,7 +442,7 @@ class ObjectLoader extends Loader {
       }
 
       if (materials[name] == null) {
-        print('THREE.ObjectLoader: Undefined material $name');
+        console.warning('ObjectLoader: Undefined material $name');
       }
 
       return materials[name];
@@ -455,7 +450,7 @@ class ObjectLoader extends Loader {
 
     getTexture(uuid) {
       if (textures[uuid] == null) {
-        print('THREE.ObjectLoader: Undefined texture $uuid');
+        console.warning('ObjectLoader: Undefined texture $uuid');
       }
 
       return textures[uuid];
@@ -742,8 +737,7 @@ class ObjectLoader extends Loader {
         final skeleton = skeletons[child.skeleton];
 
         if (skeleton == null) {
-          print(
-              'THREE.ObjectLoader: No skeleton found with UUID: ${child.skeleton}');
+          console.warning('ObjectLoader: No skeleton found with UUID: ${child.skeleton}');
         } else {
           child.bind(skeleton, child.bindMatrix);
         }
@@ -754,8 +748,7 @@ class ObjectLoader extends Loader {
   /* DEPRECATED */
 
   setTexturePath(value) {
-    print(
-        'THREE.ObjectLoader: .setTexturePath() has been renamed to .setResourcePath().');
+    console.error('ObjectLoader: .setTexturePath() has been renamed to .setResourcePath().');
     return setResourcePath(value);
   }
 }

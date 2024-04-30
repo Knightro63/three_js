@@ -315,7 +315,7 @@ class WebGLState {
               break;
 
             default:
-              print('three.WebGLState: Invalid blending: $blending');
+              console.error('WebGLState: Invalid blending: $blending');
               break;
           }
         } else {
@@ -337,7 +337,7 @@ class WebGLState {
               break;
 
             default:
-              print('three.WebGLState: Invalid blending: $blending');
+              console.error('WebGLState: Invalid blending: $blending');
               break;
           }
         }

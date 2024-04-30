@@ -428,8 +428,7 @@ class OrbitControls with EventDispatcher {
           scope.object.matrix);
     } else {
       // camera neither orthographic nor perspective
-      print(
-          'WARNING: OrbitControls.js encountered an unknown camera type - pan disabled.');
+      console.warning('OrbitControls.js encountered an unknown camera type - pan disabled.');
       scope.enablePan = false;
     }
   }
@@ -445,7 +444,7 @@ class OrbitControls with EventDispatcher {
       zoomChanged = true;
     } 
     else {
-      print('WARNING: OrbitControls.js encountered an unknown camera type - dolly/zoom disabled.');
+      console.warning('OrbitControls.js encountered an unknown camera type - dolly/zoom disabled.');
       scope.enableZoom = false;
     }
   }
@@ -461,7 +460,7 @@ class OrbitControls with EventDispatcher {
       zoomChanged = true;
     } 
     else {
-      print('WARNING: OrbitControls.js encountered an unknown camera type - dolly/zoom disabled.');
+      console.warning('OrbitControls.js encountered an unknown camera type - dolly/zoom disabled.');
       scope.enableZoom = false;
     }
   }
@@ -649,8 +648,7 @@ class OrbitControls with EventDispatcher {
   void handleTouchMoveDolly(event) {
     final position = getSecondPointerPosition(event)!;
 
-    print("handleTouchMoveDolly event.pageX: ${event.pageX} position.x: ${position.x} ");
-    print("handleTouchMoveDolly event.pageY: ${event.pageY} position.y: ${position.y} ");
+    console.info("handleTouchMoveDolly event.pageX: ${event.pageX} position.x: ${position.x} ");
 
     final dx = event.pageX - position.x;
     final dy = event.pageY - position.y;
@@ -884,23 +882,16 @@ class OrbitControls with EventDispatcher {
         switch (scope.touches['TWO']) {
           case Touch.dollyPan:
             if (scope.enableZoom == false && scope.enablePan == false) return;
-
             handleTouchStartDollyPan();
-
             state = OrbitState.touchDollyPan;
-
             break;
-
           case Touch.dollyRotate:
-            if (scope.enableZoom == false && scope.enableRotate == false)
+            if (scope.enableZoom == false && scope.enableRotate == false){
               return;
-
+            }
             handleTouchStartDollyRotate();
-
             state = OrbitState.touchDollyRotate;
-
             break;
-
           default:
             state = OrbitState.none;
         }

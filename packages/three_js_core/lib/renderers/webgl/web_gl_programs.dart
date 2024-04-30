@@ -69,7 +69,7 @@ class WebGLPrograms {
       precision = capabilities.getMaxPrecision(material.precision);
 
       if (precision != material.precision) {
-        print('three.WebGLProgram.getParameters: ${material.precision} not supported, using $precision instead.');
+        console.warning('WebGLProgram.getParameters: ${material.precision} not supported, using $precision instead.');
       }
     }
 

@@ -242,9 +242,8 @@ class ColorManagement {
 		return ColorSpace.linear;
 	}
 
-	static set workingColorSpace( colorSpace ) {
-		print( 'THREE.ColorManagement: .workingColorSpace is readonly.' );
-	}
+  @Deprecated('ColorManagement: .workingColorSpace is readonly.')
+	static set workingColorSpace( colorSpace ) {}
 
 	static Color convert(Color color, ColorSpace? sourceColorSpace, ColorSpace? targetColorSpace){
 		if(

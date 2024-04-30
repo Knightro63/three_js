@@ -97,7 +97,7 @@ class ExtrudeGeometry extends BufferGeometry {
 
       scalePt2(pt, vec, size) {
         if (vec == null) {
-          print('THREE.ExtrudeGeometry: vec does not exist');
+          console.info('ExtrudeGeometry: vec does not exist');
         }
 
         return vec.clone().scale(size).add(pt);
@@ -115,9 +115,9 @@ class ExtrudeGeometry extends BufferGeometry {
         // inPt' is the intersection of the two lines parallel to the two
         //  adjacent edges of inPt at a distance of 1 unit on the left side.
 
-        final vTransX,
-            vTransY,
-            shrinkBy; // resulting translation vector for inPt
+        late double vTransX;
+        late double vTransY;
+        late double shrinkBy; // resulting translation vector for inPt
 
         // good reading for geometry algorithms (here: line-line intersection)
         // http://geomalgorithms.com/a05-_intersect-1.html
@@ -369,13 +369,13 @@ class ExtrudeGeometry extends BufferGeometry {
         addVertex(b);
         addVertex(c);
 
-        final nextIndex = verticesArray.length / 3;
-        late final uvs;
+        final nextIndex = verticesArray.length ~/ 3;
+        dynamic uvs;
 
         if (uvgen == "WorldUVGenerator") {
-          uvs = WorldUVGenerator.generateTopUV(scope, verticesArray,
-              nextIndex - 3, nextIndex - 2, nextIndex - 1);
-        } else {
+          uvs = WorldUVGenerator.generateTopUV(verticesArray, nextIndex - 3, nextIndex - 2, nextIndex - 1);
+        } 
+        else {
           throw ("ExtrudeBufferGeometry uvgen: $uvgen is not support yet ");
         }
 
@@ -440,13 +440,11 @@ class ExtrudeGeometry extends BufferGeometry {
         addVertex(c);
         addVertex(d);
 
-        final nextIndex = verticesArray.length / 3;
+        final nextIndex = verticesArray.length ~/ 3;
 
-        final uvs;
-
+        dynamic uvs;
         if (uvgen == "WorldUVGenerator") {
-          uvs = WorldUVGenerator.generateSideWallUV(scope, verticesArray,
-              nextIndex - 6, nextIndex - 3, nextIndex - 2, nextIndex - 1);
+          uvs = WorldUVGenerator.generateSideWallUV(verticesArray, nextIndex - 6, nextIndex - 3, nextIndex - 2, nextIndex - 1);
         } else {
           throw ("ExtrudeBufferGeometry uvgen: $uvgen is not support yet ");
         }
@@ -486,7 +484,6 @@ class ExtrudeGeometry extends BufferGeometry {
       }
 
       // Create faces for the z-sides of the shape
-
       void buildSideFaces() {
         int start = verticesArray.length ~/ 3.0;
         int layeroffset = 0;
@@ -509,15 +506,10 @@ class ExtrudeGeometry extends BufferGeometry {
       /* Faces */
 
       // Top and bottom faces
-
       buildLidFaces();
 
       // Sides faces
       buildSideFaces();
-
-      /////  Internal functions
-
-      ///
     }
 
     for (int i = 0, l = shapes.length; i < l; i++) {
@@ -537,33 +529,32 @@ class ExtrudeGeometry extends BufferGeometry {
 }
 
 class WorldUVGenerator {
-  static generateTopUV(geometry, vertices, num indexA, num indexB, num indexC) {
-    final aX = vertices[indexA.toInt() * 3];
-    final aY = vertices[indexA.toInt() * 3 + 1];
-    final bX = vertices[indexB.toInt() * 3];
-    final bY = vertices[indexB.toInt() * 3 + 1];
-    final cX = vertices[indexC.toInt() * 3];
-    final cY = vertices[indexC.toInt() * 3 + 1];
+  static List<Vector2> generateTopUV(List<double> vertices, int indexA, int indexB, int indexC) {
+    final aX = vertices[indexA * 3];
+    final aY = vertices[indexA * 3 + 1];
+    final bX = vertices[indexB * 3];
+    final bY = vertices[indexB * 3 + 1];
+    final cX = vertices[indexC * 3];
+    final cY = vertices[indexC * 3 + 1];
 
     return [
       Vector2(aX, aY), Vector2(bX, bY), Vector2(cX, cY)
     ];
   }
 
-  static generateSideWallUV(
-      geometry, List<double> vertices, num indexA, num indexB, num indexC, num indexD) {
-    double aX = vertices[indexA.toInt() * 3];
-    double aY = vertices[indexA.toInt() * 3 + 1];
-    double aZ = vertices[indexA.toInt() * 3 + 2];
-    double bX = vertices[indexB.toInt() * 3];
-    double bY = vertices[indexB.toInt() * 3 + 1];
-    double bZ = vertices[indexB.toInt() * 3 + 2];
-    double cX = vertices[indexC.toInt() * 3];
-    double cY = vertices[indexC.toInt() * 3 + 1];
-    double cZ = vertices[indexC.toInt() * 3 + 2];
-    double dX = vertices[indexD.toInt() * 3];
-    double dY = vertices[indexD.toInt() * 3 + 1];
-    double dZ = vertices[indexD.toInt() * 3 + 2];
+  static List<Vector2> generateSideWallUV(List<double> vertices, int indexA, int indexB, int indexC, int indexD) {
+    double aX = vertices[indexA * 3];
+    double aY = vertices[indexA * 3 + 1];
+    double aZ = vertices[indexA * 3 + 2];
+    double bX = vertices[indexB * 3];
+    double bY = vertices[indexB * 3 + 1];
+    double bZ = vertices[indexB * 3 + 2];
+    double cX = vertices[indexC * 3];
+    double cY = vertices[indexC * 3 + 1];
+    double cZ = vertices[indexC * 3 + 2];
+    double dX = vertices[indexD * 3];
+    double dY = vertices[indexD * 3 + 1];
+    double dZ = vertices[indexD * 3 + 2];
 
     if ((aY - bY).abs() < (aX - bX).abs()) {
       return [

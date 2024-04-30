@@ -333,49 +333,49 @@ class Ray {
     //   |Dot(D,N)|*b1 = sign(Dot(D,N))*Dot(D,Cross(Q,E2))
     //   |Dot(D,N)|*b2 = sign(Dot(D,N))*Dot(D,Cross(E1,Q))
     //   |Dot(D,N)|*t = -sign(Dot(D,N))*Dot(Q,N)
-    double DdN = direction.dot(_normal);
+    double ddN = direction.dot(_normal);
     int sign;
 
-    if (DdN > 0) {
+    if (ddN > 0) {
       if (backfaceCulling) return null;
       sign = 1;
-    } else if (DdN < 0) {
+    } else if (ddN < 0) {
       sign = -1;
-      DdN = -DdN;
+      ddN = -ddN;
     } else {
       return null;
     }
 
     _diff.sub2(origin, a);
-    final DdQxE2 = sign * direction.dot(_edge2.cross2(_diff, _edge2));
+    final ddQxE2 = sign * direction.dot(_edge2.cross2(_diff, _edge2));
 
     // b1 < 0, no intersection
-    if (DdQxE2 < 0) {
+    if (ddQxE2 < 0) {
       return null;
     }
 
-    final DdE1xQ = sign * direction.dot(_edge1.cross(_diff));
+    final ddE1xQ = sign * direction.dot(_edge1.cross(_diff));
 
     // b2 < 0, no intersection
-    if (DdE1xQ < 0) {
+    if (ddE1xQ < 0) {
       return null;
     }
 
     // b1+b2 > 1, no intersection
-    if (DdQxE2 + DdE1xQ > DdN) {
+    if (ddQxE2 + ddE1xQ > ddN) {
       return null;
     }
 
     // Line intersects triangle, check if ray does.
-    final QdN = -sign * _diff.dot(_normal);
+    final qdN = -sign * _diff.dot(_normal);
 
     // t < 0, no intersection
-    if (QdN < 0) {
+    if (qdN < 0) {
       return null;
     }
 
     // Ray intersects triangle.
-    return at(QdN / DdN, target);
+    return at(qdN / ddN, target);
   }
 
   Ray applyMatrix4(Matrix4 matrix4) {

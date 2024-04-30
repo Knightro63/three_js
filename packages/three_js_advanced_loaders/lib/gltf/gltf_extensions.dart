@@ -8,10 +8,9 @@ import 'gltf_mesh_standard_sg_material.dart';
 import 'gltf_helper.dart';
 import 'dart:math' as math;
 
-/*********************************/
-/********** extensions ***********/
-
-/*********************************/
+///*********************************/
+///********** extensions ***********/
+///*********************************/
 
 Map<String, String> extensions = {
   "KHR_BINARY_GLTF": 'KHR_binary_glTF',
@@ -47,11 +46,11 @@ class GLTFExtension {
   Function? createNodeMesh;
 }
 
-/**
- * Materials specular Extension
- *
- * Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_specular
- */
+///
+/// Materials specular Extension
+///
+/// Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_specular
+///
 class GLTFMaterialsSpecularExtension extends GLTFExtension {
   late GLTFParser parser;
 
@@ -103,12 +102,12 @@ class GLTFMaterialsSpecularExtension extends GLTFExtension {
   }
 }
 
-/**
- * DDS Texture Extension
- *
- * Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Vendor/MSFT_texture_dds
- *
- */
+///
+/// DDS Texture Extension
+///
+/// Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Vendor/MSFT_texture_dds
+///
+///
 class GLTFTextureDDSExtension extends GLTFExtension {
   late dynamic ddsLoader;
 
@@ -120,11 +119,11 @@ class GLTFTextureDDSExtension extends GLTFExtension {
   }
 }
 
-/**
- * Punctual Lights Extension
- *
- * Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_lights_punctual
- */
+///
+/// Punctual Lights Extension
+///
+/// Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_lights_punctual
+///
 class GLTFLightsExtension extends GLTFExtension {
   late GLTFParser parser;
   late dynamic cache;
@@ -262,11 +261,11 @@ class GLTFLightsExtension extends GLTFExtension {
   }
 }
 
-/**
- * Unlit Materials Extension
- *
- * Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_unlit
- */
+///
+/// Unlit Materials Extension
+///
+/// Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_unlit
+///
 class GLTFMaterialsUnlitExtension extends GLTFExtension {
   GLTFMaterialsUnlitExtension() {
     name = extensions["KHR_MATERIALS_UNLIT"]!;
@@ -301,11 +300,11 @@ class GLTFMaterialsUnlitExtension extends GLTFExtension {
   }
 }
 
-/**
- * Clearcoat Materials Extension
- *
- * Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_clearcoat
- */
+///
+/// Clearcoat Materials Extension
+///
+/// Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_clearcoat
+///
 class GLTFMaterialsClearcoatExtension extends GLTFExtension {
   late GLTFParser parser;
 
@@ -369,11 +368,11 @@ class GLTFMaterialsClearcoatExtension extends GLTFExtension {
   }
 }
 
-/**
- * Sheen Materials Extension
- *
- * Specification: https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Khronos/KHR_materials_sheen
- */
+///
+/// Sheen Materials Extension
+///
+/// Specification: https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Khronos/KHR_materials_sheen
+///
 class GLTFMaterialsSheenExtension extends GLTFExtension {
   late GLTFParser parser;
 
@@ -430,12 +429,12 @@ class GLTFMaterialsSheenExtension extends GLTFExtension {
   }
 }
 
-/**
- * Transmission Materials Extension
- *
- * Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_transmission
- * Draft: https://github.com/KhronosGroup/glTF/pull/1698
- */
+///
+/// Transmission Materials Extension
+///
+/// Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_transmission
+/// Draft: https://github.com/KhronosGroup/glTF/pull/1698
+///
 class GLTFMaterialsTransmissionExtension extends GLTFExtension {
   late GLTFParser parser;
 
@@ -480,11 +479,11 @@ class GLTFMaterialsTransmissionExtension extends GLTFExtension {
   }
 }
 
-/**
- * Materials ior Extension
- *
- * Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_ior
- */
+///
+/// Materials ior Extension
+///
+/// Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_ior
+///
 class GLTFMaterialsIorExtension extends GLTFExtension {
   late GLTFParser parser;
 
@@ -519,11 +518,11 @@ class GLTFMaterialsIorExtension extends GLTFExtension {
   }
 }
 
-/**
- * Materials Volume Extension
- *
- * Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_volume
- */
+///
+/// Materials Volume Extension
+///
+/// Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_volume
+///
 class GLTFMaterialsVolumeExtension extends GLTFExtension {
   late GLTFParser parser;
 
@@ -569,11 +568,11 @@ class GLTFMaterialsVolumeExtension extends GLTFExtension {
   }
 }
 
-/**
- * BasisU Texture Extension
- *
- * Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_texture_basisu
- */
+///
+/// BasisU Texture Extension
+///
+/// Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_texture_basisu
+///
 class GLTFTextureBasisUExtension extends GLTFExtension {
   late GLTFParser parser;
 
@@ -610,11 +609,11 @@ class GLTFTextureBasisUExtension extends GLTFExtension {
   }
 }
 
-/**
- * WebP Texture Extension
- *
- * Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Vendor/EXT_texture_webp
- */
+///
+/// WebP Texture Extension
+///
+/// Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Vendor/EXT_texture_webp
+///
 class GLTFTextureWebPExtension extends GLTFExtension {
   late GLTFParser parser;
   bool? isSupported;
@@ -675,11 +674,11 @@ class GLTFTextureWebPExtension extends GLTFExtension {
   }
 }
 
-/**
-* meshopt BufferView Compression Extension
-*
-* Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Vendor/EXT_meshopt_compression
-*/
+///
+/// meshopt BufferView Compression Extension
+///
+/// Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Vendor/EXT_meshopt_compression
+///
 class GLTFMeshoptCompression extends GLTFExtension {
   late GLTFParser parser;
 
@@ -787,11 +786,11 @@ class GLTFBinaryExtension extends GLTFExtension {
   }
 }
 
-/**
- * DRACO Mesh Compression Extension
- *
- * Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_draco_mesh_compression
- */
+///
+/// DRACO Mesh Compression Extension
+///
+/// Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_draco_mesh_compression
+///
 class GLTFDracoMeshCompressionExtension extends GLTFExtension {
   late dynamic json;
   late dynamic dracoLoader;
@@ -852,11 +851,11 @@ class GLTFDracoMeshCompressionExtension extends GLTFExtension {
   }
 }
 
-/**
- * Texture Transform Extension
- *
- * Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_texture_transform
- */
+///
+/// Texture Transform Extension
+///
+/// Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_texture_transform
+///
 class GLTFTextureTransformExtension extends GLTFExtension {
   GLTFTextureTransformExtension(){
     name = extensions["KHR_TEXTURE_TRANSFORM"]!;
@@ -878,7 +877,7 @@ class GLTFTextureTransformExtension extends GLTFExtension {
     }
 
     if (transform.texCoord != null) {
-      print('THREE.GLTFLoader: Custom UV sets in $name extension not yet supported.');
+      console.warning('GLTFLoader: Custom UV sets in $name extension not yet supported.');
     }
 
     texture.needsUpdate = true;
@@ -1007,11 +1006,11 @@ class GLTFMaterialsPbrSpecularGlossinessExtension extends GLTFExtension {
   }
 }
 
-/**
- * Mesh Quantization Extension
- *
- * Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_mesh_quantization
- */
+///
+/// Mesh Quantization Extension
+///
+/// Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_mesh_quantization
+///
 class GLTFMeshQuantizationExtension extends GLTFExtension {
   GLTFMeshQuantizationExtension(){
     name = extensions["KHR_MESH_QUANTIZATION"]!;
