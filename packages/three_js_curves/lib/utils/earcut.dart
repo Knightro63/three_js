@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'package:three_js_math/three_js_math.dart';
 
 class Earcut {
   static List<num> triangulate(List<double> data, List<int>? holeIndices, [int? dim]) {
@@ -101,7 +102,9 @@ void earcutLinked(Node? ear, List<num> triangles, int dim, double minX, double m
   // interlink polygon nodes in z-order
   if (pass == null && invSize != null) indexCurve(ear, minX, minY, invSize);
 
-  var stop = ear, prev, next;
+  Node? stop = ear;
+  Node? prev;
+  Node? next;
 
   // iterate through ears, slicing them one by one
   while (ear!.prev != ear.next) {
@@ -110,9 +113,9 @@ void earcutLinked(Node? ear, List<num> triangles, int dim, double minX, double m
 
     if (invSize != null ? isEarHashed(ear, minX, minY, invSize) : isEar(ear)) {
       // cut off the triangle
-      triangles.add(prev.i / dim);
+      triangles.add(prev!.i / dim);
       triangles.add(ear.i / dim);
-      triangles.add(next.i / dim);
+      triangles.add(next!.i / dim);
 
       removeNode(ear);
 
@@ -277,20 +280,22 @@ splitEarcut(start, triangles, dim, minX, minY, invSize) {
 // link every hole into the outer loop, producing a single-ring polygon without holes
 eliminateHoles(data, holeIndices, outerNode, dim) {
   var queue = [];
-  var len, start, end, list;
+  late int start; 
+  late int end;
+  Node? list;
 
-  for (var i = 0, len = holeIndices.length; i < len; i++) {
+  for (int i = 0, len = holeIndices.length; i < len; i++) {
     start = holeIndices[i] * dim;
     end = i < len - 1 ? holeIndices[i + 1] * dim : data.length;
     list = linkedList(data, start, end, dim, false);
-    if (list == list.next) list.steiner = true;
-    queue.add(getLeftmost(list));
+    if (list == list?.next) list?.steiner = true;
+    queue.add(getLeftmost(list!));
   }
 
   queue.sort((a, b) => compareX(a, b));
 
   // process holes from left to right
-  for (var i = 0; i < queue.length; i++) {
+  for (int i = 0; i < queue.length; i++) {
     eliminateHole(queue[i], outerNode);
     outerNode = filterPoints(outerNode, outerNode.next);
   }
@@ -324,16 +329,16 @@ eliminateHole(hole, outerNode) {
 // David Eberly's algorithm for finding a bridge between hole and outer polygon
 findHoleBridge(hole, outerNode) {
   var p = outerNode;
-  var hx = hole.x;
-  var hy = hole.y;
-  var qx = -double.infinity;
-  var m;
+  double hx = hole.x;
+  double hy = hole.y;
+  double qx = -double.infinity;
+  dynamic m;
 
   // find a segment intersected by a ray from the hole's leftmost point to the left;
   // segment's endpoint with lesser x will be potential connection point
   do {
     if (hy <= p.y && hy >= p.next.y && p.next.y != p.y) {
-      var x = p.x + (hy - p.y) * (p.next.x - p.x) / (p.next.y - p.y);
+      double x = p.x + (hy - p.y) * (p.next.x - p.x) / (p.next.y - p.y);
       if (x <= hx && x > qx) {
         qx = x;
         if (x == hx) {
@@ -356,9 +361,10 @@ findHoleBridge(hole, outerNode) {
   // if there are no points found, we have a valid connection;
   // otherwise choose the point of the minimum angle with the ray as connection point
 
-  var stop = m, mx = m.x, my = m.y;
-  var tanMin = double.infinity;
-  var tan;
+  var stop = m;
+  double mx = m.x, my = m.y;
+  double tanMin = double.infinity;
+  late double tan;
 
   p = m;
 
@@ -407,7 +413,15 @@ void indexCurve(Node start, minX, minY, invSize) {
 // Simon Tatham's linked list merge sort algorithm
 // http://www.chiark.greenend.org.uk/~sgtatham/algorithms/listsort.html
 sortLinked(list) {
-  var i, p, q, e, tail, numMerges, pSize, qSize, inSize = 1;
+  late int i; 
+  Node? p; 
+  Node? q; 
+  Node? e; 
+  Node? tail; 
+  int numMerges = 0; 
+  late int pSize; 
+  late int qSize; 
+  int inSize = 1;
 
   do {
     p = list;
@@ -421,20 +435,20 @@ sortLinked(list) {
       pSize = 0;
       for (i = 0; i < inSize; i++) {
         pSize++;
-        q = q.nextZ;
+        q = q?.nextZ;
         if (q == null) break;
       }
 
       qSize = inSize;
 
       while (pSize > 0 || (qSize > 0 && q != null)) {
-        if (pSize != 0 && (qSize == 0 || q == null || p.z <= q.z)) {
+        if (pSize != 0 && (qSize == 0 || q == null || (p?.z ?? 0) <= (q.z ?? 0))) {
           e = p;
-          p = p.nextZ;
+          p = p?.nextZ;
           pSize--;
         } else {
           e = q;
-          q = q.nextZ;
+          q = q?.nextZ;
           qSize--;
         }
 
@@ -444,14 +458,14 @@ sortLinked(list) {
           list = e;
         }
 
-        e.prevZ = tail;
+        e?.prevZ = tail;
         tail = e;
       }
 
       p = q;
     }
 
-    tail.nextZ = null;
+    tail?.nextZ = null;
     inSize *= 2;
   } while (numMerges > 1);
 

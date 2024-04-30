@@ -10,6 +10,7 @@ class QuadraticBezierCurve3 extends Curve{
     this.v2 = v2 ?? Vector3.zero();
   }
 
+  @override
   Vector? getPoint(double t, [Vector? optionalTarget]) {
     final point = Vector3.zero();
 

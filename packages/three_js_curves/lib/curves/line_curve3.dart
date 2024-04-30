@@ -2,9 +2,9 @@ import 'package:three_js_math/three_js_math.dart';
 import '../core/curve.dart';
 
 class LineCurve3 extends Curve{
-  bool isLineCurve3 = true;
-
   LineCurve3([Vector3? v1,Vector3? v2]):super(){
+    isLineCurve3 = true;
+
     this.v1 = v1 ?? Vector3.zero();
     this.v2 = v2 ?? Vector3.zero();
   }
@@ -31,7 +31,8 @@ class LineCurve3 extends Curve{
   Vector? getPointAt(double u, [Vector? optionalTarget]) {
     return getPoint( u, optionalTarget );
   }
-
+  
+  @override
   LineCurve3 copy(Curve source ) {
     super.copy(source);
 

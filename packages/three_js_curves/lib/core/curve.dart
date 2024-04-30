@@ -84,9 +84,8 @@ class Curve {
 
   // Virtual base class method to overwrite and implement in subclasses
   //	- t [0 .. 1]
-
+  @Deprecated('Curve: .getPoint() not implemented.')
   Vector? getPoint(double t, [Vector? optionalTarget]) {
-    print('THREE.Curve: .getPoint() not implemented.');
     return null;
   }
 
