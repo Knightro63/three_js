@@ -1,0 +1,42 @@
+name: example
+description: "A new Flutter project."
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.3.2 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.6
+  flutter_gl: ^0.0.21
+  three_js_core_loaders:
+    path: ../../three_js_core_loaders
+  three_js_core:
+    path: ../../three_js_core
+  three_js_helpers:
+    path: ../../three_js_helpers
+  three_js_math:
+    path: ../../three_js_math
+  three_js_animations:
+    path: ../../three_js_animations
+  three_js_advanced_loaders:
+    path: ../
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    # - assets/helvetiker_bold.typeface.json
+    - assets/SambaDancing.fbx
+    - assets/nurbs.fbx
+    - assets/stanford-bunny.fbx
+    - assets/royal_esplanade_1k.hdr
+    - assets/DamagedHelmet/
+    - assets/Horse.gltf
+    - assets/Soldier.gltf

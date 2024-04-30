@@ -1,0 +1,23 @@
+name: three_js_core_loaders
+description: "A new Flutter package project."
+version: 0.0.1
+homepage:
+
+environment:
+  sdk: '>=3.3.2 <4.0.0'
+  flutter: ">=1.17.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  three_js_core:
+    path: ../three_js_core
+  image: ^4.0.02
+  flutter_gl: ^0.0.21
+  http: ^0.13.4
+  universal_html: ^2.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0

@@ -1,0 +1,25 @@
+name: three_js_animations
+description: "A new Flutter package project."
+version: 0.0.1
+homepage:
+
+environment:
+  sdk: '>=3.3.2 <4.0.0'
+  flutter: ">=1.17.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  three_js_core:
+    path: ../three_js_core
+  three_js_math:
+    path: ../three_js_math
+  flutter_gl: ^0.0.21
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+# The following section is specific to Flutter packages.
+flutter:
