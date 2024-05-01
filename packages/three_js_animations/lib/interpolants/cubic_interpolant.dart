@@ -6,13 +6,31 @@ import 'interpolant.dart';
 /// It was derived from a Hermitian construction setting the first derivative
 /// at each sample position to the linear slope between neighboring positions
 /// over their parameter interval.
-
+/// 
+/// ```dart
+/// final interpolant = CubicInterpolant(
+///   [0,0],
+///   [0,0],
+///   1,
+/// 	[0]
+/// );
+/// interpolant.evaluate( 0.5 );
+/// ```
+/// 
 class CubicInterpolant extends Interpolant {
   late num _weightPrev;
   late num _offsetPrev;
   late num _weightNext;
   late num _offsetNext;
 
+	/// [parameterPositions] -- array of positions
+  /// 
+	/// [sampleValues] -- array of samples
+  /// 
+	/// [sampleSize] -- number of samples
+  /// 
+	/// [resultBuffer] -- buffer to store the interpolation results.
+  /// 
   CubicInterpolant(
     super.parameterPositions, 
     super.sampleValues, 

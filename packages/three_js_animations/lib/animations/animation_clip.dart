@@ -13,6 +13,21 @@ class AnimationClip {
   late List<KeyframeTrack> tracks;
   late List results;
 
+  /// [name] - a name for this clip.<br />
+  /// [duration] - the duration of this clip (in seconds). If a
+  /// negative value is passed, the duration will be calculated from the passed
+  /// `tracks` array.<br />
+  /// [tracks] - an array of [KeyframeTracks].<br />
+  /// [blendMode] - defines how the animation is blended/combined
+  /// when two or more animations are simultaneously played.<br /><br />
+  /// 
+  /// Note: Instead of instantiating an AnimationClip directly with the
+  /// constructor, you can use one of its static methods to create
+  /// AnimationClips: from JSON ([parse]), from morph target
+  /// sequences ([CreateFromMorphTargetSequence], 
+  /// [CreateClipsFromMorphTargetSequences]) or from animation hierarchies
+  /// ([parseAnimation]) - if your model doesn't already
+  /// hold AnimationClips in its geometry's animations array.
   AnimationClip(this.name,
     [this.duration = -1, List<KeyframeTrack>? tracks, this.blendMode = NormalAnimationBlendMode]) {
     this.tracks = tracks ?? [];

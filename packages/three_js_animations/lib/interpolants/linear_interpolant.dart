@@ -1,6 +1,24 @@
 import 'interpolant.dart';
 
+/// ```dart
+/// final interpolant = LinearInterpolant(
+///   [0,0],
+///   [0,0],
+///   1,
+/// 	[0]
+/// );
+/// interpolant.evaluate( 0.5 );
+/// ```
+/// 
 class LinearInterpolant extends Interpolant {
+	/// [parameterPositions] -- array of positions
+  /// 
+	/// [sampleValues] -- array of samples
+  /// 
+	/// [sampleSize] -- number of samples
+  /// 
+	/// [resultBuffer] -- buffer to store the interpolation results.
+  /// 
   LinearInterpolant(
     super.parameterPositions, 
     super.sampleValues, 

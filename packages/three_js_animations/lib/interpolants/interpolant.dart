@@ -14,7 +14,7 @@
 ///
 /// References:
 ///
-/// 		http://www.oodesign.com/template-method-pattern.html
+/// http://www.oodesign.com/template-method-pattern.html
 ///
 class Interpolant {
   late List<num> parameterPositions;
@@ -28,8 +28,17 @@ class Interpolant {
 
   Map<String,dynamic> defaultSettings = {};
 
+	/// [parameterPositions] -- array of positions
+  /// 
+	/// [sampleValues] -- array of samples
+  /// 
+	/// [valueSize] -- number of values
+  /// 
+	/// [resultBuffer] -- buffer to store the interpolation results.
+  /// 
   Interpolant(this.parameterPositions, this.sampleValues, this.valueSize,this.resultBuffer);
 
+  /// Evaluate the interpolant at position [t].
   List? evaluate(num t) {
     final pp = parameterPositions;
     int i1 = cachedIndex;

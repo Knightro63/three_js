@@ -108,7 +108,6 @@ class _State extends State<WebglGeometries> {
     // TODO web wait dom ok!!!
     Future.delayed(const Duration(milliseconds: 100), () async {
       await three3dRender.prepareContext();
-
       initScene();
     });
   }

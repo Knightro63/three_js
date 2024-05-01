@@ -2,8 +2,25 @@ import 'package:three_js_math/three_js_math.dart';
 import 'interpolant.dart';
 
 /// Spherical linear unit quaternion interpolant.
-
+/// ```dart
+/// final interpolant = LinearInterpolant(
+///   [0,0],
+///   [0,0],
+///   1,
+/// 	[0]
+/// );
+/// interpolant.evaluate( 0.5 );
+/// ```
+/// 
 class QuaternionLinearInterpolant extends Interpolant {
+	/// [parameterPositions] -- array of positions
+  /// 
+	/// [sampleValues] -- array of samples
+  /// 
+	/// [sampleSize] -- number of samples
+  /// 
+	/// [resultBuffer] -- buffer to store the interpolation results.
+  /// 
   QuaternionLinearInterpolant(
     super.parameterPositions, 
     super.sampleValues, 

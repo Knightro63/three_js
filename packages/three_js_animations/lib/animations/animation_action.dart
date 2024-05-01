@@ -5,6 +5,14 @@ import 'animation_mixer.dart';
 import 'animation_clip.dart';
 import 'property_mixer.dart';
 
+/// AnimationActions schedule the performance of the animations which are
+/// stored in [page:AnimationClip AnimationClips].<br /><br />
+/// 
+/// Note: Most of AnimationAction's methods can be chained.<br /><br />
+/// 
+/// For an overview of the different elements of the three.js animation system
+/// see the "Animation System" article in the "Next Steps" section of the
+/// manual.
 class AnimationAction {
   late double time;
   late num timeScale;
@@ -32,7 +40,23 @@ class AnimationAction {
   late bool zeroSlopeAtStart;
   late bool zeroSlopeAtEnd;
 
-  AnimationAction(this.mixer, this.clip,{this.localRoot, int? blendMode}) {
+  /// [mixer] - the `AnimationMixer` that is controlled by
+  /// this action.
+  /// 
+  /// [clip] - the `AnimationClip` that holds the animation
+  /// data for this action.
+  /// 
+  /// [localRoot] - the root object on which this action is
+  /// performed.
+  /// 
+  /// [blendMode] - defines how the animation is blended/combined
+  /// when two or more animations are simultaneously played.
+  /// 
+  /// 
+  /// Note: Instead of calling this constructor directly you should instantiate
+  /// an AnimationAction with [page:AnimationMixer.clipAction] since this method
+  /// provides caching for better performance.
+  AnimationAction(this.mixer, this.clip, {this.localRoot, int? blendMode}) {
     this.blendMode = blendMode ?? clip.blendMode;
 
     final tracks = clip.tracks; 
@@ -92,19 +116,41 @@ class AnimationAction {
     zeroSlopeAtEnd = true; // clips for start, loop and end
   }
 
-  // State & Scheduling
-
+  /// Tells the mixer to activate the action. This method can be chained.
+  /// 
+  /// Note: Activating this action doesn’t necessarily mean that the animation
+  /// starts immediately: If the action had already finished before (by reaching
+  /// the end of its last loop), or if a time for a delayed start has been set
+  /// (via [startAt]), a [reset] must be executed
+  /// first. Some other settings ([paused]=true, [enabled]=false, [weight]=0, [timeScale]=0)
+  /// can prevent the animation from playing, too.
   AnimationAction play() {
     mixer.activateAction(this);
     return this;
   }
 
+  /// Tells the mixer to deactivate this action. This method can be chained.
+  /// 
+  /// The action will be immediately stopped and completely [reset].
+  /// 
+  /// Note: You can stop all active actions on the same mixer in one go via
+  /// [mixer.stopAllAction].
   AnimationAction stop() {
     mixer.deactivateAction(this);
 
     return reset();
   }
 
+  /// Resets the action. This method can be chained.
+  /// 
+  /// This method sets [paused] to false, [page:.enabled enabled]
+  /// to true, [time] to `0`, interrupts any scheduled fading and
+  /// warping, and removes the internal loop count and scheduling for delayed
+  /// starting.
+  /// 
+  /// Note: .`reset` is always called by [stop], but .`reset` doesn’t
+  /// call .`stop` itself. This means: If you want both, resetting and stopping,
+  /// don’t call .`reset`; call .`stop` instead.
   AnimationAction reset() {
     paused = false;
     enabled = true;
@@ -116,6 +162,15 @@ class AnimationAction {
     return stopFading().stopWarping();
   }
 
+  /// Returns true if the action’s [time] is currently running.
+  /// 
+  /// In addition to being activated in the mixer (see [isScheduled]) the following conditions must be fulfilled: [paused] is equal to false, [enabled] is equal to true,
+  /// [timeScale] is different from `0`, and there is no
+  /// scheduling for a delayed start ([startAt]).
+  ///
+  /// Note: `isRunning` being true doesn’t necessarily mean that the animation
+  /// can actually be seen. This is only the case, if [weight] is
+  /// additionally set to a non-zero value.
   bool isRunning() {
     return enabled &&
         !paused &&
@@ -124,17 +179,28 @@ class AnimationAction {
         mixer.isActiveAction(this);
   }
 
-  // return true when play has been called
+  /// Returns true, if this action is activated in the mixer.
+  /// Note: This doesn’t necessarily mean that the animation is actually running
+  /// (compare the additional conditions for [isRunning]).
   bool isScheduled() {
     return mixer.isActiveAction(this);
   }
 
+  /// Defines the time for a delayed start (usually passed as
+  /// [AnimationMixer.time] + deltaTimeInSeconds). This method can be
+  /// chained.
+  /// 
+  /// Note: The animation will only start at the given time, if .`startAt` is
+  /// chained with [play], or if the action has already been
+  /// activated in the mixer (by a previous call of .`play`, without stopping or
+  /// resetting it in the meantime).
   AnimationAction startAt(time) {
     _startTime = time;
 
     return this;
   }
 
+  /// Sets the loop [mode] and the number of [repetitions]. This method can be chained.
   AnimationAction setLoop(int mode, num repetitions) {
     loop = mode;
     this.repetitions = repetitions;
@@ -142,11 +208,15 @@ class AnimationAction {
     return this;
   }
 
-  // Weight
-
-  // set the weight stopping any scheduled fading
-  // although .enabled = false yields an effective weight of zero, this
-  // method does *not* change .enabled, because it would be confusing
+  /// Sets the [weight] and stops any scheduled fading. This method
+  /// can be chained.
+  /// 
+  /// If [enabled] is true, the effective weight (an internal
+  /// property) will also be set to this value; otherwise the effective weight
+  /// (directly affecting the animation at this moment) will be set to `0`.
+  /// 
+  /// Note: .`enabled` will not be switched to `false` automatically, if
+  /// .`weight` is set to `0` by this method.
   AnimationAction setEffectiveWeight(int weight) {
     this.weight = weight;
 
@@ -161,14 +231,27 @@ class AnimationAction {
     return _effectiveWeight;
   }
 
+  /// Increases the [page:.weight weight] of this action gradually from `0` to
+  /// `1`, within the passed time interval. This method can be chained.
   AnimationAction fadeIn(num duration) {
     return _scheduleFading(duration, 0, 1);
   }
 
+  /// Decreases the [weight] of this action gradually from `1` to
+  /// `0`, within the passed time interval. This method can be chained.
   AnimationAction fadeOut(num duration) {
     return _scheduleFading(duration, 1, 0);
   }
 
+  /// Causes this action to [fadeIn], fading out another action
+  /// simultaneously, within the passed time interval. This method can be
+  /// chained.
+  /// 
+  /// If warpBoolean is true, additional [warping] (gradually changes
+  /// of the time scales) will be applied.
+  /// 
+  /// Note: Like with `fadeIn`/`fadeOut`, the fading starts/ends with a weight
+  /// of `1`.
   AnimationAction crossFadeFrom(AnimationAction fadeOutAction, num duration, bool warp) {
     fadeOutAction.fadeOut(duration);
     fadeIn(duration);
@@ -186,10 +269,21 @@ class AnimationAction {
     return this;
   }
 
+  /// Causes this action to [fadeOut], fading in another action
+  /// simultaneously, within the passed time interval. This method can be
+  /// chained.
+  /// 
+  /// If warpBoolean is true, additional [warping] (gradually changes
+  /// of the time scales) will be applied.
+  /// 
+  /// Note: Like with `fadeIn`/`fadeOut`, the fading starts/ends with a weight
+  /// of `1`.
   AnimationAction crossFadeTo(AnimationAction fadeInAction, num duration, bool warp) {
     return fadeInAction.crossFadeFrom(this, duration, warp);
   }
 
+  /// Stops any scheduled [page:.fadeIn fading] which is applied to this action.
+  /// This method can be chained.
   AnimationAction stopFading() {
     final weightInterpolant = _weightInterpolant;
 
@@ -201,11 +295,16 @@ class AnimationAction {
     return this;
   }
 
-  // Time Scale Control
-
-  // set the time scale stopping any scheduled warping
-  // although .paused = true yields an effective time scale of zero, this
-  // method does *not* change .paused, because it would be confusing
+  /// Sets the [timeScale] and stops any scheduled warping. This
+  /// method can be chained.
+  /// 
+  /// If [ppaused] is false, the effective time scale (an internal
+  /// property) will also be set to this value; otherwise the effective time
+  /// scale (directly affecting the animation at this moment) will be set to
+  /// `0`.
+  /// 
+  /// Note: .`paused` will not be switched to `true` automatically, if
+  /// .`timeScale` is set to `0` by this method.
   AnimationAction setEffectiveTimeScale(num timeScale) {
     this.timeScale = timeScale;
     _effectiveTimeScale = paused ? 0 : timeScale;
@@ -213,17 +312,30 @@ class AnimationAction {
     return stopWarping();
   }
 
-  // return the time scale considering warping and .paused
+  /// Returns the effective time scale (considering the current states of
+  /// warping and [paused]).
   num getEffectiveTimeScale() {
     return _effectiveTimeScale;
   }
 
+  /// Sets the duration for a single loop of this action (by adjusting
+  /// [timeScale] and stopping any scheduled warping). This
+  /// method can be chained.
   AnimationAction setDuration(num duration) {
     timeScale = clip.duration / duration;
 
     return stopWarping();
   }
 
+  /// Synchronizes this action with the passed other action. This method can be
+  /// chained.
+  /// 
+  /// Synchronizing is done by setting this action’s [time] and
+  /// [timeScale] values to the corresponding values of the
+  /// other action (stopping any scheduled warping).
+  /// 
+  /// Note: Future changes of the other action's `time` and `timeScale` will not
+  /// be detected.
   AnimationAction syncWith(AnimationAction action) {
     time = action.time;
     timeScale = action.timeScale;
@@ -231,10 +343,15 @@ class AnimationAction {
     return stopWarping();
   }
 
+  /// Decelerates this animation's speed to `0` by decreasing [timeScale] gradually (starting from its current value), within the passed
+  /// time interval. This method can be chained.
   AnimationAction halt(num duration) {
     return warp(_effectiveTimeScale, 0, duration);
   }
 
+  /// Changes the playback speed, within the passed time interval, by modifying
+  /// [timeScale] gradually from `startTimeScale` to
+  /// `endTimeScale`. This method can be chained.
   AnimationAction warp(num startTimeScale, num endTimeScale, num duration) {
     final mixer = this.mixer, now = mixer.time, timeScale = this.timeScale;
 
@@ -257,6 +374,8 @@ class AnimationAction {
     return this;
   }
 
+  /// Stops any scheduled [page:.warp warping] which is applied to this action.
+  /// This method can be chained.
   AnimationAction stopWarping() {
     final timeScaleInterpolant = _timeScaleInterpolant;
 
@@ -270,14 +389,17 @@ class AnimationAction {
 
   // Object Accessors
 
+  /// Returns the mixer which is responsible for playing this action.
   AnimationMixer getMixer() {
     return mixer;
   }
 
+  /// Returns the clip which holds the animation data for this action.
   AnimationClip getClip() {
     return clip;
   }
 
+  /// Returns the root object on which this action is performed
   Object3D getRoot() {
     return localRoot ?? mixer.root;
   }
