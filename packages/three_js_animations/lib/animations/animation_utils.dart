@@ -4,6 +4,7 @@ import 'package:three_js_math/three_js_math.dart';
 import 'animation_clip.dart';
 import 'keyframe_track.dart';
 
+/// An object with various functions to assist with animations, used internally.
 class AnimationUtils {
   // same as Array.prototype.slice, but also works on typed arrays
   static List<T> arraySlice<T>(List<T> array, [int from = 0, int? to]) {
@@ -18,7 +19,7 @@ class AnimationUtils {
     return array.sublist(from, to);
   }
 
-  // converts an array to a specific type
+  /// Converts an array to a specific type.
   static List<num> convertArray(array, String type, [bool forceClone = false]) {
     // var 'null' and 'null' pass
     if (array == null || !forceClone && array.runtimeType.toString() == type) {
@@ -37,6 +38,7 @@ class AnimationUtils {
     return array.sublist(0);//slice(array, 0); // create Array
   }
 
+  /// Returns `true` if the object is a typed array.
   static bool isTypedArray(object) {
     console.info("AnimationUtils isTypedArray object: ${object.runtimeType}");
     return false;
@@ -45,7 +47,7 @@ class AnimationUtils {
     // 	! ( object instanceof DataView );
   }
 
-  // returns an array by which times and values can be sorted
+  /// Returns an array by which times and values can be sorted.
   static List<int> getKeyframeOrder(List<num> times) {
     int compareTime(int i, int j) {
       return (times[i] - times[j]).toInt();
@@ -64,7 +66,7 @@ class AnimationUtils {
     return result;
   }
 
-  // uses the array previously returned by 'getKeyframeOrder' to sort data
+  /// Sorts the array previously returned by [getKeyframeOrder].
   static List<num> sortedArray(List<num> values, int stride, List<int> order) {
     final nValues = values.length;
     final result = List<num>.filled(nValues, 0);
@@ -137,6 +139,7 @@ class AnimationUtils {
     // }
   // }
 
+  /// Creates a new clip, containing only the segment of the original clip between the given frames.
   AnimationClip subclip(AnimationClip sourceClip, String name, int startFrame, int endFrame, {int fps = 30}) {
     final clip = sourceClip.clone();
 
@@ -194,6 +197,7 @@ class AnimationUtils {
     return clip;
   }
 
+  /// Converts the keyframes of the given animation clip to an additive format.
   AnimationClip makeClipAdditive(AnimationClip targetClip,{int referenceFrame = 0, AnimationClip? referenceClip, int fps = 30}) {
     referenceClip ??= targetClip;
 

@@ -53,8 +53,7 @@ class Mesh extends Object3D {
         morphTargetInfluences = source.morphTargetInfluences!.sublist(0);
       }
       if (source.morphTargetDictionary != null) {
-        morphTargetDictionary =
-            json.decode(json.encode(source.morphTargetDictionary));
+        morphTargetDictionary = json.decode(json.encode(source.morphTargetDictionary));
       }
       material = source.material;
       geometry = source.geometry;
@@ -65,34 +64,25 @@ class Mesh extends Object3D {
   void updateMorphTargets() {
     final geometry = this.geometry;
 
-    if (geometry is BufferGeometry) {
-      final morphAttributes = geometry.morphAttributes;
-      final keys = morphAttributes.keys.toList();
+    final morphAttributes = geometry!.morphAttributes;
+    final keys = morphAttributes.keys.toList();
 
-      if (keys.isNotEmpty) {
-        List<BufferAttribute>? morphAttribute = morphAttributes[keys[0]];
+    if (keys.isNotEmpty) {
+      List<BufferAttribute>? morphAttribute = morphAttributes[keys[0]];
 
-        if (morphAttribute != null) {
-          morphTargetInfluences = [];
-          morphTargetDictionary = {};
+      if (morphAttribute != null) {
+        morphTargetInfluences = [];
+        morphTargetDictionary = {};
 
-          for (int m = 0, ml = morphAttribute.length; m < ml; m++) {
-            String name = morphAttribute[m].name ?? m.toString();
+        for (int m = 0, ml = morphAttribute.length; m < ml; m++) {
+          String name = morphAttribute[m].name ?? m.toString();
 
-            morphTargetInfluences!.add(0.0);
-            morphTargetDictionary![name] = m;
-          }
+          morphTargetInfluences!.add(0.0);
+          morphTargetDictionary![name] = m;
         }
       }
     }
-    // else {
-    //   final morphTargets = geometry?.morphTargets;
-
-    //   if (morphTargets != null && morphTargets.length > 0) {
-    //     print(
-    //         'THREE.Mesh.updateMorphTargets() no longer supports THREE.Geometry. Use THREE.BufferGeometry instead.');
-    //   }
-    // }
+  
   }
 
   @override

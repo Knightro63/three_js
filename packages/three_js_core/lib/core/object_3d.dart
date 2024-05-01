@@ -87,7 +87,7 @@ class Object3D with EventDispatcher {
   Material? material;
 
   List<double>? morphTargetInfluences;
-  Map<String, dynamic>? morphTargetDictionary;
+  Map<String,dynamic>? morphTargetDictionary;
 
   // InstancedMesh
   int? count;

@@ -1058,7 +1058,6 @@ class GLTFParser {
       // 1. create Mesh
 
       late Object3D mesh;
-
       final material = materials[i];
 
       if (primitive["mode"] == webglConstants["TRIANGLES"] ||
@@ -1066,33 +1065,34 @@ class GLTFParser {
           primitive["mode"] == webglConstants["TRIANGLE_FAN"] ||
           primitive["mode"] == null) {
         // .isSkinnedMesh isn't in glTF spec. See ._markDefs()
-        mesh = meshDef["isSkinnedMesh"] == true
-            ? SkinnedMesh(geometry, material)
-            : Mesh(geometry, material);
+        mesh = meshDef["isSkinnedMesh"] == true? SkinnedMesh(geometry, material): Mesh(geometry, material);
 
-        if (mesh is SkinnedMesh &&
-            !mesh.geometry!.attributes["skinWeight"].normalized) {
+        if (mesh is SkinnedMesh && !mesh.geometry!.attributes["skinWeight"].normalized) {
           // we normalize floating point skin weight array to fix malformed assets (see #15319)
           // it's important to skip this for non-float32 data since normalizeSkinWeights assumes non-normalized inputs
           mesh.normalizeSkinWeights();
         }
 
         if (primitive["mode"] == webglConstants["TRIANGLE_STRIP"]) {
-          mesh.geometry =
-              toTrianglesDrawMode(mesh.geometry, TriangleStripDrawMode);
-        } else if (primitive["mode"] == webglConstants["TRIANGLE_FAN"]) {
-          mesh.geometry =
-              toTrianglesDrawMode(mesh.geometry, TriangleFanDrawMode);
+          mesh.geometry = toTrianglesDrawMode(mesh.geometry, TriangleStripDrawMode);
+        } 
+        else if (primitive["mode"] == webglConstants["TRIANGLE_FAN"]) {
+          mesh.geometry = toTrianglesDrawMode(mesh.geometry, TriangleFanDrawMode);
         }
-      } else if (primitive["mode"] == webglConstants["LINES"]) {
+      } 
+      else if (primitive["mode"] == webglConstants["LINES"]) {
         mesh = LineSegments(geometry, material);
-      } else if (primitive["mode"] == webglConstants["LINE_STRIP"]) {
+      } 
+      else if (primitive["mode"] == webglConstants["LINE_STRIP"]) {
         mesh = Line(geometry, material);
-      } else if (primitive["mode"] == webglConstants["LINE_LOOP"]) {
+      } 
+      else if (primitive["mode"] == webglConstants["LINE_LOOP"]) {
         mesh = LineLoop(geometry, material);
-      } else if (primitive["mode"] == webglConstants["POINTS"]) {
+      } 
+      else if (primitive["mode"] == webglConstants["POINTS"]) {
         mesh = Points(geometry, material);
-      } else {
+      } 
+      else {
         throw ('THREE.GLTFLoader: Primitive mode unsupported: ${primitive["mode"]}');
       }
 
@@ -1100,9 +1100,7 @@ class GLTFParser {
         updateMorphTargets(mesh, meshDef);
       }
 
-      mesh.name =
-          parser.createUniqueName(meshDef["name"] ?? ('mesh_$meshIndex'));
-
+      mesh.name = parser.createUniqueName(meshDef["name"] ?? ('mesh_$meshIndex'));
       assignExtrasToUserData(mesh, meshDef);
 
       if (primitive["extensions"] != null){
@@ -1110,7 +1108,6 @@ class GLTFParser {
       }
 
       parser.assignFinalMaterial(mesh);
-
       meshes.add(mesh);
     }
 

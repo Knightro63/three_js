@@ -6,9 +6,9 @@ import 'animation_clip.dart';
 import 'property_mixer.dart';
 
 /// AnimationActions schedule the performance of the animations which are
-/// stored in [page:AnimationClip AnimationClips].<br /><br />
+/// stored in [AnimationClips].
 /// 
-/// Note: Most of AnimationAction's methods can be chained.<br /><br />
+/// Note: Most of AnimationAction's methods can be chained.
 /// 
 /// For an overview of the different elements of the three.js animation system
 /// see the "Animation System" article in the "Next Steps" section of the
@@ -52,9 +52,8 @@ class AnimationAction {
   /// [blendMode] - defines how the animation is blended/combined
   /// when two or more animations are simultaneously played.
   /// 
-  /// 
   /// Note: Instead of calling this constructor directly you should instantiate
-  /// an AnimationAction with [page:AnimationMixer.clipAction] since this method
+  /// an AnimationAction with [AnimationMixer.clipAction] since this method
   /// provides caching for better performance.
   AnimationAction(this.mixer, this.clip, {this.localRoot, int? blendMode}) {
     this.blendMode = blendMode ?? clip.blendMode;
@@ -121,8 +120,9 @@ class AnimationAction {
   /// Note: Activating this action doesn’t necessarily mean that the animation
   /// starts immediately: If the action had already finished before (by reaching
   /// the end of its last loop), or if a time for a delayed start has been set
-  /// (via [startAt]), a [reset] must be executed
-  /// first. Some other settings ([paused]=true, [enabled]=false, [weight]=0, [timeScale]=0)
+  /// (via [startAt]), a [reset] must be executed first.
+  /// 
+  /// Some other settings ([paused]=true, [enabled]=false, [weight]=0, [timeScale]=0)
   /// can prevent the animation from playing, too.
   AnimationAction play() {
     mixer.activateAction(this);
@@ -180,6 +180,7 @@ class AnimationAction {
   }
 
   /// Returns true, if this action is activated in the mixer.
+  /// 
   /// Note: This doesn’t necessarily mean that the animation is actually running
   /// (compare the additional conditions for [isRunning]).
   bool isScheduled() {
@@ -344,14 +345,18 @@ class AnimationAction {
   }
 
   /// Decelerates this animation's speed to `0` by decreasing [timeScale] gradually (starting from its current value), within the passed
-  /// time interval. This method can be chained.
+  /// time interval. 
+  /// 
+  /// This method can be chained.
   AnimationAction halt(num duration) {
     return warp(_effectiveTimeScale, 0, duration);
   }
 
   /// Changes the playback speed, within the passed time interval, by modifying
   /// [timeScale] gradually from `startTimeScale` to
-  /// `endTimeScale`. This method can be chained.
+  /// `endTimeScale`. 
+  /// 
+  /// This method can be chained.
   AnimationAction warp(num startTimeScale, num endTimeScale, num duration) {
     final mixer = this.mixer, now = mixer.time, timeScale = this.timeScale;
 
@@ -375,15 +380,14 @@ class AnimationAction {
   }
 
   /// Stops any scheduled [page:.warp warping] which is applied to this action.
+  /// 
   /// This method can be chained.
   AnimationAction stopWarping() {
     final timeScaleInterpolant = _timeScaleInterpolant;
-
     if (timeScaleInterpolant != null) {
       _timeScaleInterpolant = null;
       mixer.takeBackControlInterpolant(timeScaleInterpolant);
     }
-
     return this;
   }
 
@@ -423,11 +427,9 @@ class AnimationAction {
       final timeRunning = (time - startTime) * timeDirection;
       if (timeRunning < 0 || timeDirection == 0) {
         return; // yet to come / don't decide when delta = 0
-
       }
 
       // start
-
       _startTime = null; // unschedule
       deltaTime = timeDirection * timeRunning;
     }

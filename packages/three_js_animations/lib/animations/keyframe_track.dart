@@ -4,6 +4,49 @@ import 'animation_utils.dart';
 import 'dart:math' as math;
 import '../interpolants/index.dart';
 
+///	A KeyframeTrack is a timed sequence of
+/// [keyframes](https://en.wikipedia.org/wiki/Key_frame ), which are
+/// composed of lists of times and related values, and which are used to
+/// animate a specific property of an object.
+/// 
+/// For an overview of the different elements of the three.js animation system
+/// see the "Animation System" article in the "Next Steps" section of the
+/// manual.
+/// 
+/// In contrast to the animation hierarchy of the
+/// [JSON model format](https://github.com/mrdoob/three.js/wiki/JSON-Model-format-3) a `KeyframeTrack` doesn't store its single keyframes as
+/// objects in a "keys" array (holding the times and the values for each frame
+/// together in one place).
+/// 
+/// Instead of this there are always two arrays in a `KeyframeTrack`: the
+/// [times] array stores the time values for all keyframes of this
+/// track in sequential order, and the [values] array contains
+/// the corresponding changing values of the animated property.
+/// 
+/// A single value, belonging to a certain point of time, can not only be a
+/// simple number, but (for example) a vector (if a position is animated) or a
+/// quaternion (if a rotation is animated). For this reason the values array
+/// (which is a flat array, too) might be three or four times as long as the
+/// times array.
+/// 
+/// Corresponding to the different possible types of animated values there are
+/// several subclasses of `KeyframeTrack`, inheriting the most properties and
+/// methods:
+/// <li>[BooleanKeyframeTrack]</li>
+/// <li>[ColorKeyframeTrack]</li>
+/// <li>[NumberKeyframeTrack]</li>
+/// <li>[QuaternionKeyframeTrack]</li>
+/// <li>[StringKeyframeTrack]</li>
+/// <li>[VectorKeyframeTrack]</li>
+/// 
+/// Some examples of how to manually create [AnimationClips] with different sorts of KeyframeTracks can be found in the
+/// [AnimationClipCreator](https://threejs.org/examples/jsm/animation/AnimationClipCreator.js) file.
+/// 
+/// Since explicit values are only specified for the discrete points of time
+/// stored in the times array, all values in between have to be interpolated.
+/// 
+/// The track's name is important for the connection of this track with a
+/// specific property of the animated node (done by [PropertyBinding]).
 class KeyframeTrack {
   late String name;
   late List<num> times;
@@ -17,6 +60,16 @@ class KeyframeTrack {
   Function? createInterpolant;
   late int? _interpolation;
 
+  /// [name] - the identifier for the `KeyframeTrack`.
+  /// 
+  /// [times] - an array of keyframe times, converted internally to a
+  /// [Float32Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Float32Array).
+  /// 
+  /// [values] - an array with the values related to the times array,
+  /// converted internally to a
+  /// [Float32Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Float32Array ).
+  /// 
+  /// [interpolation] - the type of interpolation to use. See [Constants] for possible values. Default is [InterpolateLinear].
   KeyframeTrack(this.name,List<num> times,List<num> values, [int? interpolation]) {
     // if (name == null) throw ('THREE.KeyframeTrack: track name is null');
     // this.name = name;
@@ -62,7 +115,10 @@ class KeyframeTrack {
     return json;
   }
 
-
+  /// Creates a new [DiscreteInterpolant] from the
+  /// [times] and [values]. A
+  /// Float32Array can be passed which will receive the results. Otherwise a new
+  /// array with the appropriate size will be created automatically.
   Interpolant? interpolantFactoryMethodDiscrete(result) {
     return DiscreteInterpolant(
       times, 
@@ -72,6 +128,10 @@ class KeyframeTrack {
     );
   }
 
+  /// Creates a new [LinearInterpolant] from the
+  /// [times] and [values]. A
+  /// Float32Array can be passed which will receive the results. Otherwise a new
+  /// array with the appropriate size will be created automatically.
   Interpolant? interpolantFactoryMethodLinear(result) {
     return LinearInterpolant(
       times, 
@@ -81,6 +141,10 @@ class KeyframeTrack {
     );
   }
 
+  /// Create a new [CubicInterpolant] from the
+  /// [times] and [values]. A
+  /// Float32Array can be passed which will receive the results. Otherwise a new
+  /// array with the appropriate size will be created automatically.
   Interpolant? interpolantFactoryMethodSmooth(result) {
     return CubicInterpolant(times, values, getValueSize(), result);
   }
@@ -122,11 +186,13 @@ class KeyframeTrack {
     return this;
   }
 
+  /// Returns the interpolation type.
   int? getInterpolation() {
     console.info("KeyframeTrack.getInterpolation todo debug need confirm?? ");
     return _interpolation;
   }
 
+  /// Returns the size of each value (that is the length of the [values] array divided by the length of the [times] array).
   int getValueSize() {
     return values.length ~/ times.length;
   }
@@ -325,7 +391,8 @@ class KeyframeTrack {
 
     return this;
   }
-
+  
+  /// Returns a copy of this track.
   KeyframeTrack clone() {
     return KeyframeTrack(name, times, values)..createInterpolant = createInterpolant;
   }

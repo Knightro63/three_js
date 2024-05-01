@@ -7,6 +7,13 @@ import 'keyframe_track.dart';
 import 'property_mixer.dart';
 import 'property_binding.dart';
 
+/// The AnimationMixer is a player for animations on a particular object in
+/// the scene. When multiple objects in the scene are animated independently,
+/// one AnimationMixer may be used for each object.
+/// 
+/// For an overview of the different elements of the three.js animation system
+/// see the "Animation System" article in the "Next Steps" section of the
+/// manual.
 class AnimationMixer with EventDispatcher {
   num time = 0.0;
   num timeScale = 1.0;
@@ -25,6 +32,8 @@ class AnimationMixer with EventDispatcher {
 
   final _controlInterpolantsResultBuffer = List<num>.filled(1, 0);
 
+  /// [rootObject] - the object whose animations shall be played
+	/// by this mixer.
   AnimationMixer(this.root) {
     _initMemoryManager();
   }
@@ -379,6 +388,14 @@ class AnimationMixer with EventDispatcher {
   // return an action for a clip optionally using a custom root target
   // object (this method allocates a lot of dynamic memory in case a
   // previously unknown clip/root combination is specified)
+  /// Returns an [AnimationAction] for the passed clip, optionally using a
+  /// root object different from the mixer's default root. The first parameter
+  /// can be either an [AnimationClip] object or the name of an
+  /// AnimationClip.
+  /// 
+  /// If an action fitting the clip and root parameters doesn't yet exist, it
+  /// will be created by this method. Calling this method several times with the
+  /// same clip and root parameters always returns the same clip instance.
   AnimationAction? clipAction(AnimationClip? clip, [Object3D? optionalRoot, int? blendMode]) {
     final root = optionalRoot ?? this.root;
     final rootUuid = root.uuid;
@@ -433,6 +450,11 @@ class AnimationMixer with EventDispatcher {
   }
 
   // get an existing action
+  /// Returns an existing [AnimationAction] for the passed clip, optionally
+  /// using a root object different from the mixer's default root.
+  /// 
+  /// The first parameter can be either an [page:AnimationClip] object or the
+  /// name of an AnimationClip.
   AnimationAction? existingAction(AnimationClip clip, optionalRoot) {
     final root = optionalRoot ?? this.root;
     final rootUuid = root.uuid;
@@ -448,7 +470,7 @@ class AnimationMixer with EventDispatcher {
     return null;
   }
 
-  // deactivates all previously scheduled actions
+  /// Deactivates all previously scheduled actions on this mixer.
   AnimationMixer stopAllAction() {
     final actions = _actions, nActions = _nActiveActions;
 
@@ -459,7 +481,9 @@ class AnimationMixer with EventDispatcher {
     return this;
   }
 
-  // advance the time and update apply the animation
+  /// Advance the time and update apply the animation
+  /// 
+  /// This is usually done in the render loop, passing [clock.getDelta] scaled by the mixer's [timeScale].
   AnimationMixer update(num deltaTime) {
     deltaTime *= timeScale;
 
@@ -500,13 +524,14 @@ class AnimationMixer with EventDispatcher {
     return update(timeInSeconds); // Update used to set exact time. Returns "this" AnimationMixer object.
   }
 
-  // return this mixer's root target object
+  /// Returns this mixer's root object.
   Object3D getRoot() {
     return root;
   }
 
-  // free all resources specific to a particular clip
-  void nuncacheClip(AnimationClip clip) {
+  /// Deallocates all memory resources for a clip. Before using this method make
+	/// sure to call [AnimationAction.stop]() for all related actions.
+  void uncacheClip(AnimationClip clip) {
     final actions = _actions,
         clipUuid = clip.uuid,
         actionsByClip = this.actionsByClip,
@@ -542,7 +567,10 @@ class AnimationMixer with EventDispatcher {
     }
   }
 
-  // free all resources specific to a particular root target object
+  /// Deallocates all memory resources for a root object. Before using this
+  /// method make sure to call [AnimationAction.stop]() for all related
+  /// actions or alternatively [stopAllAction]() when the mixer operates 
+  /// on a single root.
   void uncacheRoot(root) {
     final rootUuid = root.uuid;
     final actionsByClip = this.actionsByClip;
@@ -572,7 +600,8 @@ class AnimationMixer with EventDispatcher {
     }
   }
 
-  // remove a targeted clip from the cache
+  ///	Deallocates all memory resources for an action. Before using this method
+	/// make sure to call [AnimationAction.stop]() to deactivate the action.
   void uncacheAction(AnimationClip clip, [optionalRoot]) {
     final action = existingAction(clip, optionalRoot);
 

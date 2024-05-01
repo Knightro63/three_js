@@ -45,6 +45,8 @@ class AnimationObjectGroup {
   late Map<String,int> _bindingsIndicesByPath;
   List<Mesh> _objects = [];
 
+  /// [items] - an arbitrary number of meshes that share the same
+	/// animation state.
   AnimationObjectGroup(List<Mesh>? items) {
     // cached objects followed by the active ones
     _objects = items != null ? items.sublist(0) : [];
@@ -63,6 +65,7 @@ class AnimationObjectGroup {
     _bindingsIndicesByPath = {}; // inside: indices in these arrays
   }
 
+  /// Adds an arbitrary number of objects to this `AnimationObjectGroup`.
   void add(List<Mesh> items) {
     final objects = _objects,
         indicesByUUID = _indicesByUUID,
@@ -130,6 +133,7 @@ class AnimationObjectGroup {
     nCachedObjects_ = nCachedObjects;
   }
 
+  /// Removes an arbitrary number of objects from this `AnimationObjectGroup`.
   void remove(List<Mesh> items) {
     final objects = _objects,
         indicesByUUID = _indicesByUUID,
@@ -169,7 +173,7 @@ class AnimationObjectGroup {
     nCachedObjects_ = nCachedObjects;
   }
 
-  // remove & forget
+  /// Deallocates all memory resources for the passed objects of this `AnimationObjectGroup`.
   void uncache(List<Mesh> items) {
     final objects = _objects,
         indicesByUUID = _indicesByUUID,
@@ -244,7 +248,6 @@ class AnimationObjectGroup {
   }
 
   // Internal interface used by befriended PropertyBinding.Composite:
-
   List<PropertyBinding?> subscribe_(String path, parsedPath) {
     // returns an array of bindings for the given path that is changed
     // according to the contained objects in the group

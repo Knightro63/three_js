@@ -45,14 +45,12 @@ class WebGLMorphtargets {
 
   void update(Object3D object, BufferGeometry geometry, Material material, WebGLProgram program) {
     List<num>? objectInfluences = object.morphTargetInfluences;
-
-    if (capabilities.isWebGL2 == true) {
+    
+    if (capabilities.isWebGL2) {
       // instead of using attributes, the WebGL 2 code path encodes morph targets
       // into an array of data textures. Each layer represents a single morph target.
 
-      final morphAttribute = geometry.morphAttributes["position"] ??
-          geometry.morphAttributes["normal"] ??
-          geometry.morphAttributes["color"];
+      final morphAttribute = geometry.morphAttributes["position"] ?? geometry.morphAttributes["normal"] ?? geometry.morphAttributes["color"];
       final morphTargetsCount = (morphAttribute != null) ? morphAttribute.length : 0;
 
       Map? entry = morphTextures.get(geometry);
@@ -157,8 +155,6 @@ class WebGLMorphtargets {
         geometry.addEventListener('dispose', disposeTexture);
       }
 
-      //
-
       double morphInfluencesSum = 0;
 
       for (int i = 0; i < objectInfluences!.length; i++) {
@@ -172,7 +168,8 @@ class WebGLMorphtargets {
 
       program.getUniforms().setValue(gl, 'morphTargetsTexture', entry["texture"], textures);
       program.getUniforms().setValue(gl, 'morphTargetsTextureSize', entry["size"]);
-    } else {
+    } 
+    else {
       // When object doesn't have morph target influences defined, we treat it as a 0-length array
       // This is important to make sure we set up morphTargetBaseInfluence / morphTargetInfluences
 
