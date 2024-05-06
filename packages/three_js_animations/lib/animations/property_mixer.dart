@@ -2,6 +2,18 @@ import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'property_binding.dart';
 
+/// Buffered scene graph property that allows weighted accumulation; used internally.
+/// 
+/// Buffer with size [valueSize] * 4.
+/// 
+/// 
+/// This has the layout: [ incoming | accu0 | accu1 | orig ]
+/// 
+/// 
+/// Interpolators can use .buffer as their .result and the data then goes to
+/// `incoming`. `accu0` and `accu1` are used frame-interleaved for the
+/// cumulative result and are compared to detect changes. `orig` stores the
+/// original state of the property.
 class PropertyMixer {
   late PropertyBinding binding;
   late int valueSize;
@@ -84,7 +96,10 @@ class PropertyMixer {
     referenceCount = 0;
   }
 
-  // accumulate data in the 'incoming' region into 'accu<i>'
+  /// Accumulate data in [buffer][accuIndex]
+  /// `incoming` region into `accu[i]`.
+
+  /// If weight is `0` this does nothing.
   void accumulate(int accuIndex, int weight) {
     // note: happily accumulating nothing when weight = 0, the caller knows
     // the weight and shouldn't have made the call in the first place
@@ -111,7 +126,9 @@ class PropertyMixer {
     cumulativeWeight = currentWeight;
   }
 
-  // accumulate data in the 'incoming' region into 'add'
+  /// Accumulate data in the `incoming` region into 'add'.
+  /// 
+	/// If weight is `0` this does nothing.
   void accumulateAdditive(int weight) {
     final buffer = this.buffer,
         stride = valueSize,
@@ -129,7 +146,8 @@ class PropertyMixer {
     cumulativeWeightAdditive += weight;
   }
 
-  // apply the state of 'accu<i>' to the binding when accus differ
+  /// Apply the state of [buffer] `accu[i]` to the
+	/// binding when accus differ.
   void apply(accuIndex) {
     final stride = valueSize,
         buffer = this.buffer,
@@ -171,7 +189,7 @@ class PropertyMixer {
     }
   }
 
-  // remember the state of the bound property and copy it to both accus
+  /// Remember the state of the bound property and copy it to both accus.
   void saveOriginalState() {
     final binding = this.binding;
 
@@ -193,7 +211,7 @@ class PropertyMixer {
     cumulativeWeightAdditive = 0;
   }
 
-  // apply the state previously taken via 'saveOriginalState' to the binding
+  /// Apply the state previously taken via 'saveOriginalState' to the binding.
   void restoreOriginalState() {
     final originalValueOffset = valueSize * 3;
     binding.setValue(buffer, originalValueOffset);
@@ -221,8 +239,6 @@ class PropertyMixer {
       buffer[targetIndex + i] = buffer[startIndex + i];
     }
   }
-
-  // mix functions
 
   void _select(buffer, int dstOffset, int srcOffset, double t, int stride) {
     if (t >= 0.5) {

@@ -1,7 +1,13 @@
 import './material.dart';
 import 'package:three_js_math/three_js_math.dart';
 
+/// A material that maps the normal vectors to RGB colors.
 class MeshNormalMaterial extends Material {
+
+  /// [parameters] - (optional) an object with one or more
+  /// properties defining the material's appearance. Any property of the
+  /// material (including any property inherited from [Material]) can be
+  /// passed in here.
   MeshNormalMaterial([Map<MaterialProperty, dynamic>? parameters]) : super() {
     _init();
     setValues(parameters);

@@ -5,6 +5,27 @@ import '../cameras/index.dart';
 final _v1 = Vector3.zero();
 final _v2 = Vector3.zero();
 
+/// Level of Detail - show meshes with more or less geometry based on distance
+/// from the camera.
+///
+/// Every level is associated with an object, and rendering can be switched
+/// between them at the distances specified. Typically you would create, say,
+/// three meshes, one for far away (low detail), one for mid range (medium
+/// detail) and one for close up (high detail).
+/// 
+/// ```
+/// final lod = LOD();
+///
+/// //Create spheres with 3 levels of detail and create new LOD levels for them
+/// for( int i = 0; i < 3; i++ ) {
+///   final geometry = IcosahedronGeometry( 10, 3 - i );
+///   final mesh = Mesh( geometry, material );
+///   lod.addLevel( mesh, i * 75 );
+/// }
+//// 
+/// ∂scene.add( lod );
+/// ```
+/// 
 class LOD extends Object3D{
   LOD({
     this.object,
@@ -36,6 +57,13 @@ class LOD extends Object3D{
 		return this;
 	}
 
+  /// [object] - The [page:Object3D] to display at this level.
+  /// 
+  /// [distance] - The distance at which to display this level of
+  /// detail. Default `0.0`.
+  /// 
+  /// Adds a mesh that will display at a certain distance and greater. Typically
+  /// the further away the distance, the lower the detail on the mesh.
 	LOD addLevel([Object3D? object, double distance = 0]){
 		this.distance = distance.abs();
 
@@ -55,10 +83,12 @@ class LOD extends Object3D{
 		return this;
 	}
 
+  /// Get the currently active LOD level. As index of the levels array.
 	int getCurrentLevel(){
 		return currentLevel;
 	}
 
+  /// Get a reference to the first [page:Object3D] (mesh) that is greater that [distance].
 	Object3D? getObjectForDistance(double distance){
 		final levels = this.levels;
 
@@ -76,6 +106,7 @@ class LOD extends Object3D{
 		return null;
 	}
 
+  /// Get intersections between a casted [Ray] and this LOD [Raycaster.intersectObject] will call this method.
   @override
 	void raycast(Raycaster raycaster, List<Intersection> intersects){
 		final levels = this.levels;
@@ -86,6 +117,8 @@ class LOD extends Object3D{
 		}
 	}
 
+  /// Set the visibility of each [level]'s [object]
+  /// based on distance from the [camera].
 	void update(Camera camera){
 		final levels = this.levels;
 
@@ -119,6 +152,7 @@ class LOD extends Object3D{
 		}
 	}
 
+  /// Create a JSON structure with details of this LOD object.
   @override
 	Map<String,dynamic> toJson({Object3dMeta? meta}){
 		final data = super.toJson(meta:meta);

@@ -1,7 +1,27 @@
 import './material.dart';
 import 'package:three_js_math/three_js_math.dart';
 
+/// A material for shiny surfaces with specular highlights.
+///
+/// The material uses a non-physically based
+/// [Blinn-Phong](https://en.wikipedia.org/wiki/Blinn-Phong_shading_model)
+/// model for calculating reflectance. Unlike the Lambertian model used in the
+/// [MeshLambertMaterial] this can simulate shiny surfaces with specular
+/// highlights (such as varnished wood). [MeshPhongMaterial] uses per-fragment shading.
+///
+/// Performance will generally be greater when using this material over the
+/// [MeshStandardMaterial] or [MeshPhysicalMaterial], at the cost of
+/// some graphical accuracy.
 class MeshPhongMaterial extends Material {
+
+  /// [parameters] - (optional) an object with one or more
+  /// properties defining the material's appearance. Any property of the
+  /// material (including any property inherited from [Material]) can be
+  /// passed in here.
+  /// 
+  /// The exception is the property [color], which can be
+  /// passed in as a hexadecimal int and is 0xffffff (white) by default.
+  /// [Color] is called internally.
   MeshPhongMaterial([Map<MaterialProperty, dynamic>? parameters]) : super() {
     _init();
     setValues(parameters);

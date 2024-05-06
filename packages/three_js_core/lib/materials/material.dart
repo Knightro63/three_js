@@ -95,6 +95,14 @@ enum MaterialProperty{
   }
 }
 
+/// Abstract base class for materials.
+///
+/// Materials describe the appearance of [page:Object objects]. They are
+/// defined in a (mostly) renderer-independent way, so you don't have to
+/// rewrite materials if you decide to use a different renderer.
+///
+/// The following properties and methods are inherited by all other material
+/// types (although they may have different defaults).
 class Material with EventDispatcher {
   dynamic metalnessNode;
   dynamic roughnessNode;
@@ -303,7 +311,31 @@ class Material with EventDispatcher {
 
   bool? uniformsNeedUpdate;
 
+  /// An optional callback that is executed immediately before the shader
+  /// program is compiled. This function is called with the shader source code
+  /// as a parameter. Useful for the modification of built-in materials.
+  /// 
+  /// Unlike properties, the callback is not supported by [clone], 
+  /// [copy] and [toJson].
   Function? onBeforeCompile;
+
+  /// In case onBeforeCompile is used, this callback can be used to identify
+  /// values of settings used in onBeforeCompile, so three.js can reuse a cached
+  /// shader or recompile the shader for this material as needed.
+  /// 
+  /// ```
+  /// if(black){
+  ///   shader.fragmentShader = shader.fragmentShader.replace('gl_FragColor = vec4(1)', 'gl_FragColor = vec4(0)');
+  /// }
+  /// ```
+  /// ```
+  /// material.customProgramCacheKey(){ 
+  ///   return black ? '1' : '0';
+  /// }
+  /// ```
+  /// 
+  /// Unlike properties, the callback is not supported by [clone], 
+  /// [copy] and [toJson].
   late Function customProgramCacheKey;
 
   Map<String, dynamic> extra = {};
@@ -348,6 +380,9 @@ class Material with EventDispatcher {
     }
   }
 
+  /// [values] - a container with parameters.
+  /// 
+  /// Sets the properties based on the `values`.
   void setValues(Map<MaterialProperty, dynamic>? values) {
     if (values == null) return;
 
@@ -363,10 +398,16 @@ class Material with EventDispatcher {
     }
   }
 
+  /// [type] - the parameter to change.
+  /// 
+  /// Sets the properties based on the `values`.
   void setValue(MaterialProperty type, dynamic newValue) {
     setValueFromString(type.name, newValue);
   }
 
+  /// [key] - String values of the parameter to change.
+  /// 
+  /// Sets the properties based on the `values`.
   void setValueFromString(String key, dynamic newValue) {
     if (key == "alphaTest") {
       alphaTest = newValue.toDouble();
@@ -536,6 +577,11 @@ class Material with EventDispatcher {
     }
   }
 
+  /// meta -- object containing metadata such as textures or images for the
+  /// material.
+  /// 
+  /// Convert the material to three.js
+  /// [JSON Object/Scene format](https://github.com/mrdoob/three.js/wiki/JSON-Object-Scene-format-4).
   Map<String, dynamic> toJson({Object3dMeta? meta}) {
     final isRoot = (meta == null || meta is String);
 
@@ -789,10 +835,12 @@ class Material with EventDispatcher {
     return data;
   }
 
+  /// Return a new material with the same parameters as this material.
   Material clone() {
     throw ("Material.clone $type need implement.... ");
   }
 
+  /// Copy the parameters from the passed material into this material.
   Material copy(Material source) {
     name = source.name;
 
@@ -864,6 +912,11 @@ class Material with EventDispatcher {
     return this;
   }
 
+  /// Frees the GPU-related resources allocated by this instance. Call this
+  /// method whenever this instance is no longer used in your app.
+  /// 
+  /// Material textures must be be disposed of by the dispose() method of
+  /// [Texture].
   void dispose() {
     dispatchEvent(Event(type: "dispose"));
   }

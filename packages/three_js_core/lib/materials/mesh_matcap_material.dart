@@ -1,7 +1,23 @@
 import './material.dart';
 import 'package:three_js_math/three_js_math.dart';
 
+/// [MeshMatcapMaterial] is defined by a MatCap (or Lit Sphere) texture, which encodes the
+/// material color and shading.
+/// 
+/// [MeshMatcapMaterial] does not respond to lights since the matcap image file encodes
+/// baked lighting. It will cast a shadow onto an object that receives shadows
+/// (and shadow clipping works), but it will not self-shadow or receive
+/// shadows.
 class MeshMatcapMaterial extends Material {
+
+  /// [parameters] - (optional) an object with one or more
+  /// properties defining the material's appearance. Any property of the
+  /// material (including any property inherited from [Material]) can be
+  /// passed in here.
+  /// 
+  /// The exception is the property [color], which can be
+  /// passed in as a hexadecimal int and is 0xffffff (white) by default.
+  /// [Color]is called internally.
   MeshMatcapMaterial([Map<MaterialProperty, dynamic>? parameters]) : super() {
     _init();
     setValues(parameters);

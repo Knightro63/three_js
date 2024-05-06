@@ -108,30 +108,35 @@ class DataTextureLoader extends Loader {
     ThreeFile? tf = await _loader.fromNetwork(uri);
     return tf == null?null:_parse(tf.data);
   }
+  
   @override
   Future<DataTexture?> fromFile(File file) async{
     _init();
     ThreeFile tf = await _loader.fromFile(file);
     return _parse(tf.data);
   }
+  
   @override
   Future<DataTexture?> fromPath(String filePath) async{
     _init();
     ThreeFile? tf = await _loader.fromPath(filePath);
     return tf == null?null:_parse(tf.data);
   }
+  
   @override
   Future<DataTexture?> fromBlob(Blob blob) async{
     _init();
     ThreeFile tf = await _loader.fromBlob(blob);
     return _parse(tf.data);
   }
+  
   @override
   Future<DataTexture?> fromAsset(String asset, {String? package}) async{
     _init();
     ThreeFile? tf = await _loader.fromAsset(asset,package: package);
     return tf == null?null:_parse(tf.data);
   }
+  
   @override
   Future<DataTexture?> fromBytes(Uint8List bytes) async{
     _init();

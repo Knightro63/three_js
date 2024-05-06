@@ -5,7 +5,82 @@ import '../renderers/shaders/shader_chunk/default_fragment.glsl.dart';
 import '../renderers/shaders/shader_chunk/default_vertex.glsl.dart';
 import './material.dart';
 
+/// A material rendered with custom shaders. A shader is a small program
+/// written in
+/// [GLSL](https://www.khronos.org/files/opengles_shading_language.pdf)
+/// that runs on the GPU. You may want to use a custom shader if you need to:
+/// 
+/// <ul>
+///   <li>
+///     implement an effect not included with any of the built-in [materials]
+///   </li>
+///   <li>
+///     combine many objects into a single [BufferGeometry] in order to
+///     improve performance
+///   </li>
+/// </ul>
+/// There are the following notes to bear in mind when using a `ShaderMaterial`:
+///
+/// <ul>
+///   <li>
+///     A `ShaderMaterial` will only be rendered properly by
+///     [WebGLRenderer], since the GLSL code in the
+///     [link:https://en.wikipedia.org/wiki/Shader#Vertex_shaders vertexShader]
+///     and [link:https://en.wikipedia.org/wiki/Shader#Pixel_shaders fragmentShader] 
+///     properties must be compiled and run on the GPU using WebGL.
+///   </li>
+///   <li>
+///     As of THREE r72, directly assigning attributes in a ShaderMaterial is no
+///     longer supported. A [BufferGeometry] instance must be used instead,
+///     using [BufferAttribute] instances to define custom attributes.
+///   </li>
+///   <li>
+///     As of THREE r77, [WebGLRenderTarget] or
+///     [WebGLCubeRenderTarget] instances are no longer supposed to be used
+///     as uniforms. Their [Texture texture] property must be used instead.
+///   </li>
+///   <li>
+///     Built in attributes and uniforms are passed to the shaders along with
+///     your code. If you don't want the [WebGLProgram] to add anything to
+///     your shader code, you can use [RawShaderMaterial] instead of this
+///     class.
+///   </li>
+///   <li>
+///     You can use the directive #pragma unroll_loop_start and #pragma
+///     unroll_loop_end in order to unroll a `for` loop in GLSL by the shader
+///     preprocessor. The directive has to be placed right above the loop. The
+///     loop formatting has to correspond to a defined standard.
+///     <ul>
+///       <li>
+///         The loop has to be
+///         [link:https://en.wikipedia.org/wiki/Normalized_loop normalized].
+///       </li>
+///       <li>The loop variable has to be *i*.</li>
+///       <li>
+///         The value `UNROLLED_LOOP_INDEX` will be replaced with the explicitly
+///         value of *i* for the given iteration and can be used in preprocessor
+///         statements.
+///       </li>
+///     </ul>
+///     <code>
+///       #pragma unroll_loop_start 
+///       for ( int i = 0; i < 10; i ++ ) {
+///           // ... 
+///         }
+///       #pragma unroll_loop_end
+///     </code>
+///   </li>
+/// </ul>
 class ShaderMaterial extends Material {
+
+  /// [parameters] - (optional) an object with one or more
+  /// properties defining the material's appearance. Any property of the
+  /// material (including any property inherited from [Material] and
+  /// [MeshStandardMaterial]) can be passed in here.
+  /// 
+  /// The exception is the property [color], which can be
+  /// passed in as a hexadecimal int and is 0xffffff (white) by default.
+  /// [Color] is called internally.
   ShaderMaterial([Map<MaterialProperty, dynamic>? parameters]) : super() {
     _init();
     if (parameters != null) {

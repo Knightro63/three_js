@@ -1,8 +1,10 @@
 import '../core/index.dart';
 import '../materials/index.dart';
-
 import './fog.dart';
 
+/// Scenes allow you to set up what and where is to be rendered by three.js.
+/// 
+/// This is where you place objects, lights and cameras.
 class Scene extends Object3D {
   FogBase? fog;
 
@@ -59,6 +61,10 @@ class Scene extends Object3D {
     return this;
   }
 
+  /// [meta] - object containing metadata such as textures or images for the scene.
+  /// 
+  /// Convert the scene to three.js
+  /// [JSON Object/Scene format](https://github.com/mrdoob/three.js/wiki/JSON-Object-Scene-format-4).
   @override
   Map<String, dynamic> toJson({Object3dMeta? meta}) {
     Map<String, dynamic> data = super.toJson(meta: meta);

@@ -6,7 +6,20 @@ import './line.dart';
 final _lsstart = Vector3.zero();
 final _lsend = Vector3.zero();
 
+/// A series of lines drawn between pairs of vertices.
+/// 
+/// This is nearly the same as [Line]; the only difference is that it is
+/// rendered using
+/// [gl.LINE_LOOP](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/drawElements) instead of
+/// [gl.LINE_STRIP](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/drawElements).
+/// 
 class LineSegments extends Line {
+
+  /// [geometry] — Pair(s) of vertices representing each line segment(s).
+  /// 
+  /// [material] — Material for the line. Default is
+  /// [LineBasicMaterial].
+  /// 
   LineSegments(super.geometry, super.material){
     type = 'LineSegments';
   }

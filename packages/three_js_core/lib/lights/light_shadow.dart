@@ -4,6 +4,7 @@ import '../math/frustum.dart';
 import '../renderers/index.dart';
 import 'light.dart';
 
+/// Serves as a base class for the other shadow classes.
 class LightShadow {
   Camera? camera;
 
@@ -32,18 +33,30 @@ class LightShadow {
 
   late double focus;
 
+  /// [camera] - the light's view of the world.
+  /// 
+  /// Create a new [name]. This is not intended to be called directly - it is
+  /// used as a base class by other light shadows.
   LightShadow([this.camera]);
 
   LightShadow.fromJson(Map<String, dynamic> json, Map<String,dynamic> rootJson);
 
+  /// Used internally by the renderer to get the number of viewports that need
+  /// to be rendered for this shadow.
   int getViewportCount() {
     return viewportCount;
   }
 
+  /// Gets the shadow cameras frustum. Used internally by the renderer to cull
+  /// objects.
   Frustum getFrustum() {
     return frustum;
   }
-
+  
+  /// Update the matrices for the camera and shadow, used internally by the
+  /// renderer.
+  /// 
+  /// [light] - the light for which the shadow is being rendered.
   void updateMatrices(Light light, {int viewportIndex = 0}) {
     final shadowCamera = camera;
     final shadowMatrix = matrix;
@@ -70,10 +83,14 @@ class LightShadow {
     return viewports[viewportIndex];
   }
 
+  /// Used internally by the renderer to extend the shadow map to contain all
+  /// viewports
   Vector2 getFrameExtents() {
     return frameExtents;
   }
 
+  /// Copies value of all the properties from the [source] to
+  /// this Light.
   LightShadow copy(LightShadow source) {
     camera = source.camera?.clone();
     bias = source.bias;
@@ -83,10 +100,12 @@ class LightShadow {
     return this;
   }
 
+  /// Creates a new LightShadow with the same properties as this one.
   LightShadow clone() {
     return LightShadow().copy(this);
   }
 
+  /// Serialize this LightShadow.
   Map<String, dynamic> toJson() {
     Map<String, dynamic> object = {};
 
@@ -102,6 +121,8 @@ class LightShadow {
     return object;
   }
 
+  /// Frees the GPU-related resources allocated by this instance. Call this
+  /// method whenever this instance is no longer used in your app.
   void dispose() {
     if (map != null) {
       map!.dispose();

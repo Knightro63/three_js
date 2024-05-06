@@ -2,7 +2,35 @@ import 'dart:convert';
 import '../core/index.dart';
 import 'camera.dart';
 
+/// Camera that uses
+/// [orthographic projection](https://en.wikipedia.org/wiki/Orthographic_projectio).
+///
+/// In this projection mode, an object's size in the rendered image stays
+/// constant regardless of its distance from the camera.
+///
+/// This can be useful for rendering 2D scenes and UI elements, amongst other
+/// things.
+/// 
+/// ```
+/// final camera = OrthographicCamera( width / - 2, width / 2, height / 2, height / - 2, 1, 1000 );
+/// scene.add( camera );
+/// ```
 class OrthographicCamera extends Camera {
+  
+  /// [left] — Camera frustum left plane.
+  /// 
+  /// [right] — Camera frustum right plane.
+  /// 
+  /// [top] — Camera frustum top plane.
+  /// 
+  /// [bottom] — Camera frustum bottom plane.
+  /// 
+  /// [near] — Camera frustum near plane.
+  /// 
+  /// [far] — Camera frustum far plane.
+  /// 
+  /// Together these define the camera's
+  /// [viewing frustum](https://en.wikipedia.org/wiki/Viewing_frustum).
   OrthographicCamera([
     double left = -1,
     double right = 1,
@@ -44,6 +72,22 @@ class OrthographicCamera extends Camera {
     return this;
   }
 
+  /// [fullWidth] — full width of multiview setup
+  /// 
+  /// [fullHeight] — full height of multiview setup
+  /// 
+  /// [x] — horizontal offset of subcamera
+  /// 
+  /// [y] — vertical offset of subcamera
+  /// 
+  /// [width] — width of subcamera
+  /// 
+  /// [height] — height of subcamera
+  ///
+  /// Sets an offset in a larger
+  /// [viewing frustum](https://en.wikipedia.org/wiki/Viewing_frustum). This
+  /// is useful for multi-window or multi-monitor/multi-machine setups. For an
+  /// example on how to use it see [setViewOffset].
   void setViewOffset(double fullWidth, double fullHeight, double x, double y, double width, double height) {
     view ??= CameraView();
 
@@ -58,6 +102,7 @@ class OrthographicCamera extends Camera {
     updateProjectionMatrix();
   }
 
+  /// Removes any offset set by the .setViewOffset method.
   void clearViewOffset() {
     if (view != null) {
       view!.enabled = false;
@@ -66,6 +111,8 @@ class OrthographicCamera extends Camera {
     updateProjectionMatrix();
   }
 
+  /// Updates the camera projection matrix. Must be called after any change of
+  /// parameters.
   @override
   void updateProjectionMatrix() {
     final dx = (this.right - this.left) / (2 * zoom);
@@ -94,6 +141,10 @@ class OrthographicCamera extends Camera {
     projectionMatrixInverse.invert();
   }
 
+  /// [meta] -- object containing metadata such as textures or images in objects'
+  /// descendants.
+  /// Convert the camera to three.js
+  /// [JSON Object/Scene format](https://github.com/mrdoob/three.js/wiki/JSON-Object-Scene-format-4).
   @override
   Map<String, dynamic> toJson({Object3dMeta? meta}) {
     final data = super.toJson(meta: meta);

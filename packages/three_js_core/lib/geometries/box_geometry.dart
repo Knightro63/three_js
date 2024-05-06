@@ -2,10 +2,38 @@ import 'package:flutter_gl/flutter_gl.dart';
 import '../core/index.dart';
 import 'package:three_js_math/three_js_math.dart';
 
+/// [name] is a geometry class for a rectangular cuboid with a given `width`,
+/// `height`, and `depth`. On creation, the cuboid is centred on the origin,
+/// with each edge parallel to one of the axes.
+/// 
+/// ```
+/// final geometry = BoxGeometry( 1, 1, 1 ); 
+/// final material = MeshBasicMaterial({ MaterialProperty.color: 0x00ff00} ); 
+/// final cube = Mesh( geometry, material ); 
+/// scene.add(cube);
+/// ```
 class BoxGeometry extends BufferGeometry {
   late int groupStart;
   late int numberOfVertices;
 
+  /// [width] — Width; that is, the length of the edges parallel to the X axis.
+  /// Optional; defaults to `1`.
+  ///
+  /// [height] — Height; that is, the length of the edges parallel to the Y axis.
+  /// Optional; defaults to `1`.
+  ///
+  /// [depth] — Depth; that is, the length of the edges parallel to the Z axis.
+  /// Optional; defaults to `1`.
+  ///
+  /// [widthSegments] — Number of segmented rectangular faces along the width of
+  /// the sides. Optional; defaults to `1`.
+  ///
+  /// [heightSegments] — Number of segmented rectangular faces along the height of
+  /// the sides. Optional; defaults to `1`.
+  ///
+  /// [depthSegments] — Number of segmented rectangular faces along the depth of
+  /// the sides. Optional; defaults to `1`.
+  ///
   BoxGeometry([
     double width = 1,
     double height = 1,

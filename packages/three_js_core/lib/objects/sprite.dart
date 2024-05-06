@@ -23,11 +23,32 @@ final Vector2 _spriteuvA = Vector2.zero();
 final Vector2 _spriteuvB = Vector2.zero();
 final Vector2 _spriteuvC = Vector2.zero();
 
+/// A sprite is a plane that always faces towards the camera, generally with a
+/// partially transparent texture applied.
+///
+/// Sprites do not cast shadows, setting 
+/// ```
+/// castShadow = true
+/// ``` 
+/// will have no effect.
+/// 
+/// ```
+/// final map = TextureLoader().fromAsset( 'sprite.png' );
+/// final material = SpriteMaterial({MaterialProperty.map: map});
+///
+/// final sprite = Sprite(material);
+/// scene.add(sprite);
+/// ```
+/// 
 class Sprite extends Object3D {
   Vector2 center = Vector2(0.5, 0.5);
 
   bool isSprite = true;
 
+  /// [Material material] - (optional) an instance of
+  /// [SpriteMaterial]. Default is a white [SpriteMaterial].
+  ///
+  /// Creates a new [name].
   Sprite([Material? material]) : super() {
     type = 'Sprite';
 
@@ -72,6 +93,10 @@ class Sprite extends Object3D {
     type = 'Sprite';
   }
 
+  /// Get intersections between a casted ray and this sprite.
+  /// [Raycaster.intersectObject] will call this method. The raycaster
+  /// must be initialized by calling [Raycaster.setFromCamera] before
+  /// raycasting against sprites.
   @override
   void raycast(Raycaster raycaster, List<Intersection> intersects) {
     _worldScale.setFromMatrixScale(matrixWorld);

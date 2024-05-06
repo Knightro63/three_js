@@ -1,11 +1,22 @@
 import './material.dart';
 import 'package:three_js_math/three_js_math.dart';
 
+/// [MeshDistanceMaterial] is internally used for implementing shadow mapping with
+/// [PointLight]s.
+///
+/// Can also be used to customize the shadow casting of an object by assigning
+/// an instance of [MeshDistanceMaterial] to [customDistanceMaterial]. The
+/// following examples demonstrates this approach in order to ensure
+/// transparent parts of objects do no cast shadows.
 class MeshDistanceMaterial extends Material {
   late Vector3 referencePosition;
   late num nearDistance;
   late num farDistance;
 
+  /// [parameters] - (optional) an object with one or more
+  /// properties defining the material's appearance. Any property of the
+  /// material (including any property inherited from [Material]) can be
+  /// passed in here.
   MeshDistanceMaterial([Map<MaterialProperty, dynamic>? parameters]) : super() {
     _init();
     setValues(parameters);
@@ -30,11 +41,13 @@ class MeshDistanceMaterial extends Material {
     displacementBias = 0;
   }
 
+  /// Return a new material with the same parameters as this material.
   @override
   MeshDistanceMaterial clone() {
     return MeshDistanceMaterial(<MaterialProperty, dynamic>{}).copy(this);
   }
 
+  /// Copy the parameters from the passed material into this material.
   @override
   MeshDistanceMaterial copy(Material source) {
     super.copy(source);

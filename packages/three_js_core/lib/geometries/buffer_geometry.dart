@@ -16,6 +16,33 @@ final _bufferGeometrybox = BoundingBox();
 final _bufferGeometryboxMorphTargets = BoundingBox();
 final _bufferGeometryvector = Vector3.zero();
 
+/// A representation of mesh, line, or point geometry. Includes vertex
+/// positions, face indices, normals, colors, UVs, and custom attributes
+/// within buffers, reducing the cost of passing all this data to the GPU.
+/// 
+/// To read and edit data in BufferGeometry attributes, see
+/// [BufferAttribute] documentation.
+/// 
+/// ```
+/// final geometry = BufferGeometry();
+///
+/// // create a simple square shape. We duplicate the top left and bottom right
+/// // vertices because each vertex needs to appear once per triangle.
+/// final vertices = Float32Array.fromList([
+///   -1.0, -1.0,  1.0, // v0
+///     1.0, -1.0,  1.0, // v1
+///     1.0,  1.0,  1.0, // v2
+///
+///     1.0,  1.0,  1.0, // v3
+///   -1.0,  1.0,  1.0, // v4
+///   -1.0, -1.0,  1.0  // v5
+/// ]);
+///
+/// // itemSize = 3 because there are 3 values (components) per vertex
+/// geometry.setAttribute(Semantic.position, new THREE.BufferAttribute( vertices, 3 ) );
+/// final material = MeshBasicMaterial({MaterialProperty.color: 0xff0000});
+/// final mesh = Mesh( geometry, material );
+/// ```
 class BufferGeometry with EventDispatcher {
   int id = _bufferGeometryId += 2;
   String uuid = MathUtils.generateUUID();
@@ -78,6 +105,7 @@ class BufferGeometry with EventDispatcher {
     }
   }
 
+  /// Return the [index] buffer.
   BufferAttribute? getIndex() => index;
 
   void setIndex(index) {
@@ -96,36 +124,56 @@ class BufferGeometry with EventDispatcher {
     }
   }
 
+  /// Returns the [type] with the specified Semantic.
   dynamic getAttribute(Semantic type) {
     return attributes[type.name];
   }
+  
+  /// Sets an attribute to this geometry. Use this rather than the attributes
+  /// property, because an internal hashmap of [attributes] is maintained
+  /// to speed up iterating over attributes.
   BufferGeometry setAttribute(Semantic type, attribute) {
     attributes[type.name] = attribute;
     return this;
   }
+  
+  /// Deletes the [type] with the specified Semantic.
   BufferGeometry deleteAttribute(Semantic type) {
     attributes.remove(type.name);
     return this;
   }
+  
+  /// Returns `true` if the attribute with the specified name exists.
   bool hasAttribute(Semantic type) {
     return attributes[type.name] != null;
   }
 
+  /// Returns the [type] with the specified string name.
   dynamic getAttributeFromString(String type) {
     return attributes[type];
   }
+  
+  /// Sets an attribute to this geometry. Use this rather than the attributes
+  /// property, because an internal hashmap of [attributes] is maintained
+  /// to speed up iterating over attributes.
   BufferGeometry setAttributeFromString(String type, BufferAttribute source) {
     attributes[type] = source;
     return this;
   }
+  
+  /// Deletes the [type] with the specified string name.
   BufferGeometry deleteAttributeFromString(String type) {
     attributes.remove(type);
     return this;
   }
+  
+  /// Returns `true` if the attribute with the specified name exists.
   bool hasAttributeFromString(String type) {
     return attributes[type] != null;
   }
 
+  /// Adds a group to this geometry; see the [groups]
+  /// property for details.
   void addGroup(int start, int count, [int materialIndex = 0]) {
     groups.add({
       "start": start,
@@ -134,15 +182,20 @@ class BufferGeometry with EventDispatcher {
     });
   }
 
+  /// Clears all groups.
   void clearGroups() {
     groups = [];
   }
 
+  /// Set the [drawRange] property. For non-indexed BufferGeometry, count
+  /// is the number of vertices to render. For indexed BufferGeometry, count is
+  /// the number of indices to render.
   void setDrawRange(int start, int count) {
     drawRange["start"] = start;
     drawRange["count"] = count;
   }
 
+  /// Applies the matrix transform to the geometry.
   void applyMatrix4(Matrix4 matrix) {
     final position = attributes["position"];
     if (position != null) {
@@ -177,12 +230,16 @@ class BufferGeometry with EventDispatcher {
     }
   }
 
+  /// Applies the rotation represented by the quaternion to the geometry.
   BufferGeometry applyQuaternion(Quaternion q) {
     m1.makeRotationFromQuaternion(q);
     applyMatrix4(m1);
     return this;
   }
 
+  /// Rotate the geometry about the X axis. This is typically done as a one time
+  /// operation, and not during a loop. Use [rotation] for typical
+  /// real-time mesh rotation.
   BufferGeometry rotateX(double angle) {
     // rotate geometry around world x-axis
     _bufferGeometrym1.makeRotationX(angle);
@@ -190,6 +247,9 @@ class BufferGeometry with EventDispatcher {
     return this;
   }
 
+  /// Rotate the geometry about the Y axis. This is typically done as a one time
+  /// operation, and not during a loop. Use [rotation] for typical
+  /// real-time mesh rotation.
   BufferGeometry rotateY(double angle) {
     // rotate geometry around world y-axis
     _bufferGeometrym1.makeRotationY(angle);
@@ -197,6 +257,9 @@ class BufferGeometry with EventDispatcher {
     return this;
   }
 
+  /// Rotate the geometry about the Z axis. This is typically done as a one time
+  /// operation, and not during a loop. Use [rotation] for typical
+  /// real-time mesh rotation.
   BufferGeometry rotateZ(double angle) {
     // rotate geometry around world z-axis
     _bufferGeometrym1.makeRotationZ(angle);
@@ -204,6 +267,9 @@ class BufferGeometry with EventDispatcher {
     return this;
   }
 
+  /// Translate the geometry by [x,y,z]. This is typically done as a one time operation,
+  /// and not during a loop. Use [position] for typical real-time
+  /// mesh translation.
   BufferGeometry translate(double x, double y, double z) {
     // translate geometry
     _bufferGeometrym1.makeTranslation(x, y, z);
@@ -211,10 +277,16 @@ class BufferGeometry with EventDispatcher {
     return this;
   }
 
+  /// Translate the geometry by Vecotr3. This is typically done as a one time operation,
+  /// and not during a loop. Use [position] for typical real-time
+  /// mesh translation.
   BufferGeometry translateWithVector3(Vector3 v3) {
     return translate(v3.x, v3.y, v3.z);
   }
 
+  /// Scale the geometry data. This is typically done as a one time operation,
+  /// and not during a loop. Use [scale] for typical real-time
+  /// mesh scaling.
   BufferGeometry scale(double x, double y, double z) {
     // scale geometry
     _bufferGeometrym1.makeScale(x, y, z);
@@ -222,6 +294,11 @@ class BufferGeometry with EventDispatcher {
     return this;
   }
 
+  /// vector - A world vector to look at.
+  ///
+  /// Rotates the geometry to face a point in space. This is typically done as a
+  /// one time operation, and not during a loop. Use [lookAt] for
+  /// typical real-time mesh usage.
   BufferGeometry lookAt(Vector3 vector) {
     _bufferGeometryobj.lookAt(vector);
     _bufferGeometryobj.updateMatrix();
@@ -229,6 +306,7 @@ class BufferGeometry with EventDispatcher {
     return this;
   }
 
+  /// Center the geometry based on the bounding box.
   void center() {
     computeBoundingBox();
     boundingBox!.getCenter(_bufferGeometryoffset);
@@ -236,6 +314,7 @@ class BufferGeometry with EventDispatcher {
     translate(_bufferGeometryoffset.x, _bufferGeometryoffset.y,_bufferGeometryoffset.z);
   }
 
+  /// Sets the attributes for this BufferGeometry from an array of points.
   BufferGeometry setFromPoints(points) {
     List<double> position = [];
 
@@ -306,6 +385,10 @@ class BufferGeometry with EventDispatcher {
     // }
   }
 
+  /// Computes the bounding sphere of the geometry, and updates the [boundingSphere] attribute.
+  /// 
+  /// The engine automatically computes the bounding sphere when it is needed, e.g., for ray casting or view frustum culling.
+  /// You may need to recompute the bounding sphere if the geometry vertices are modified.
   void computeBoundingSphere() {
     boundingSphere ??= BoundingSphere();
 
@@ -393,6 +476,12 @@ class BufferGeometry with EventDispatcher {
     // backwards compatibility
   }
 
+  /// Calculates and adds a tangent attribute to this geometry.
+  /// 
+  /// The computation is only supported for indexed geometries and if position,
+  /// normal, and uv attributes are defined. When using a tangent space normal
+  /// map, prefer the MikkTSpace algorithm provided by
+  /// [BufferGeometryUtils.computeMikkTSpaceTangents] instead.
   void computeTangents() {
     final index = this.index;
     final attributes = this.attributes;
@@ -542,6 +631,10 @@ class BufferGeometry with EventDispatcher {
     }
   }
 
+  /// Computes vertex normals for the given vertex data. For indexed geometries, 
+  /// the method sets each vertex normal to be the average of the face normals of the faces that share that vertex.
+  /// 
+	/// For non-indexed geometries, vertices are not shared, and the method sets each vertex normal to be the same as the face normal.
   void computeVertexNormals() {
     final index = this.index;
     final positionAttribute = getAttributeFromString('position');
@@ -651,6 +744,8 @@ class BufferGeometry with EventDispatcher {
     return this;
   }
 
+  /// Every normal vector in a geometry will have a magnitude of `1`. This will
+  /// correct lighting on the geometry surfaces.
   void normalizeNormals() {
     final normals = attributes["normal"];
 
@@ -661,6 +756,7 @@ class BufferGeometry with EventDispatcher {
     }
   }
 
+  /// Return a non-index version of an indexed BufferGeometry.
   BufferGeometry toNonIndexed() {
     convertBufferAttribute(attribute, indices) {
       console.info("BufferGeometry.convertBufferAttribute todo");
@@ -743,6 +839,8 @@ class BufferGeometry with EventDispatcher {
     return geometry2;
   }
 
+  /// Convert the buffer geometry to three.js
+  /// [JSON Object/Scene format](https://github.com/mrdoob/three.js/wiki/JSON-Object-Scene-format-4).
   Map<String, dynamic> toJson({Object3dMeta? meta}) {
     Map<String, dynamic> data = {
       "metadata": {
@@ -839,6 +937,7 @@ class BufferGeometry with EventDispatcher {
     return data;
   }
 
+  /// Creates a clone of this BufferGeometry.
   BufferGeometry clone() {
     return BufferGeometry().copy(this);
   }
@@ -933,6 +1032,8 @@ class BufferGeometry with EventDispatcher {
     return this;
   }
 
+  /// Frees the GPU-related resources allocated by this instance. Call this
+  /// method whenever this instance is no longer used in your app.
   void dispose() {
     console.info(" BufferGeometry dispose ........... ");
     dispatchEvent(Event(type: "dispose"));

@@ -1,12 +1,14 @@
 import 'buffer_geometry.dart';
 import '../core/object_3d.dart';
 
+/// An instanced version of [BufferGeometry].
 class InstancedBufferGeometry extends BufferGeometry {
   InstancedBufferGeometry() : super() {
     type = 'InstancedBufferGeometry';
     instanceCount = double.infinity.toInt();
   }
 
+  /// Copies the given [name] to this instance.
   @override
   InstancedBufferGeometry copy(BufferGeometry source) {
     super.copy(source);

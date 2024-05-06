@@ -8,10 +8,22 @@ final _instanceLocalMatrix = Matrix4.identity();
 final _instanceWorldMatrix = Matrix4.identity();
 
 List<Intersection> _instanceIntersects = [];
-
 final _mesh = Mesh(BufferGeometry(), Material());
 
+/// A special version of [Mesh] with instanced rendering support. Use
+/// [name] if you have to render a large number of objects with the same
+/// geometry and material but with different world transformations. The usage
+/// of [name] will help you to reduce the number of draw calls and thus
+/// improve the overall rendering performance in your application.
 class InstancedMesh extends Mesh {
+
+  /// [geometry] - an instance of [BufferGeometry].
+  ///
+  /// [material] - an instance of [Material]. Default is a
+  /// new [MeshBasicMaterial].
+  /// 
+  /// [count] - the number of instances.
+  /// 
   InstancedMesh(super.geometry, super.material, int count){
     type = "InstancedMesh";
 
@@ -41,6 +53,13 @@ class InstancedMesh extends Mesh {
     return color.fromNativeArray(instanceColor!.array.data, index * 3);
   }
 
+  /// [index] - The index of an instance. Values have to be in the
+  /// range [0, count].
+  /// 
+  /// [matrix] - This 4x4 matrix will be set to the local
+  /// transformation matrix of the defined instance.
+  /// Get the local transformation matrix of the defined instance.
+  /// 
   Matrix4 getMatrixAt(int index, Matrix4 matrix) {
     return matrix.fromNativeArray(instanceMatrix!.array, index * 16);
   }
@@ -81,11 +100,29 @@ class InstancedMesh extends Mesh {
     }
   }
 
+  /// [index] - The index of an instance. Values have to be in the
+  /// range [0, count].
+  /// 
+  /// [color] - The color of a single instance.
+  /// 
+  /// Sets the given color to the defined instance. Make sure you set
+  /// [instanceColor][needsUpdate] to
+  /// true after updating all the colors.
   void setColorAt(int index, Color color) {
     instanceColor ??= InstancedBufferAttribute(Float32Array((instanceMatrix!.count * 3).toInt()), 3, false);
     color.copyIntoArray(instanceColor!.array, index * 3);
   }
 
+
+  /// [index] - The index of an instance. Values have to be in the
+  /// range [0, count].
+  /// 
+  /// [matrix] - A 4x4 matrix representing the local transformation
+  /// of a single instance.
+  /// 
+  /// Sets the given local transformation matrix to the defined instance. Make
+  /// sure you set [instanceMatrix][needsUpdate] 
+  /// to true after updating all the matrices.
   void setMatrixAt(int index, Matrix4 matrix) {
     matrix.copyIntoArray(instanceMatrix!.array.toDartList(), index * 16);
   }
@@ -93,6 +130,8 @@ class InstancedMesh extends Mesh {
   @override
   void updateMorphTargets() {}
 
+  /// Frees the GPU-related resources allocated by this instance. Call this
+  /// method whenever this instance is no longer used in your app.
   @override
   void dispose() {
     dispatchEvent(Event(type: "dispose"));

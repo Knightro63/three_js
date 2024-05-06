@@ -1,7 +1,17 @@
 import './material.dart';
 import 'package:three_js_math/three_js_math.dart';
 
+/// A material implementing toon shading.
 class MeshToonMaterial extends Material {
+
+  /// [parameters] - (optional) an object with one or more
+  /// properties defining the material's appearance. Any property of the
+  /// material (including any property inherited from [Material] and
+  /// [MeshStandardMaterial]) can be passed in here.
+  /// 
+  /// The exception is the property [color], which can be
+  /// passed in as a hexadecimal int and is 0xffffff (white) by default.
+  /// [Color] is called internally.
   MeshToonMaterial([Map<MaterialProperty, dynamic>? parameters]) : super() {
     _init();
     setValues(parameters);

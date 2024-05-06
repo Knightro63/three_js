@@ -28,6 +28,7 @@ late _FBXTree _fbxTree;
 late Map connections;
 late AnimationObject sceneGraph;
 
+
 class FBXLoader extends Loader {
   late int innerWidth;
   late int innerHeight;

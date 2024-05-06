@@ -1,7 +1,14 @@
 import './material.dart';
 import 'package:three_js_math/three_js_math.dart';
 
+/// A material for drawing geometry by depth. Depth is based off of the camera
+/// near and far plane. White is nearest, black is farthest.
 class MeshDepthMaterial extends Material {
+
+  /// [parameters] - (optional) an object with one or more
+  /// properties defining the material's appearance. Any property of the
+  /// material (including any property inherited from [Material]) can be
+  /// passed in here.
   MeshDepthMaterial([Map<MaterialProperty, dynamic>?parameters]) : super() {
     _init();
     setValues(parameters);
@@ -22,6 +29,7 @@ class MeshDepthMaterial extends Material {
     displacementMap = null;
   }
   
+  /// Copy the parameters from the passed material into this material.
   @override
   MeshDepthMaterial copy(Material source) {
     super.copy(source);
@@ -42,6 +50,7 @@ class MeshDepthMaterial extends Material {
     return this;
   }
 
+  /// Return a new material with the same parameters as this material.
   @override
   MeshDepthMaterial clone() {
     return MeshDepthMaterial().copy(this);

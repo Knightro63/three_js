@@ -1,6 +1,19 @@
 import 'package:three_js_math/three_js_math.dart';
 import './texture.dart';
 
+/// Creates a cube texture made up of six images.
+/// ```
+/// final loader = CubeTextureLoader();
+/// loader.setPath('textures/cube/pisa/');
+///
+/// final textureCube = loader.load([
+///   'px.png', 'nx.png',
+///   'py.png', 'ny.png',
+///   'pz.png', 'nz.png'
+/// ]);
+///
+/// final material = MeshBasicMaterial({MaterialProperty.color: 0xffffff, MaterialProperty.envMap: textureCube});
+/// ```
 class CubeTexture extends Texture {
   bool isCubeTexture = true;
 

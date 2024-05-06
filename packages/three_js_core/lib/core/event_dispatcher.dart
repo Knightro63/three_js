@@ -1,6 +1,4 @@
-import 'object_3d.dart';
-
-/// https://github.com/mrdoob/eventdispatcher.js/
+import 'object_3d.dart'; 
 class Event {
   Event({
     this.type,
@@ -39,9 +37,38 @@ class Event {
   }
 }
 
+/// JavaScript events for custom objects.
+/// 
+/// [EventDispatcher on GitHub](https://github.com/mrdoob/eventdispatcher.js)
+/// 
+/// ```
+/// // Adding events to a custom object
+/// class Car with EventDispatcher {
+/// 	start() {
+/// 		this.dispatchEvent( { type: 'start', message: 'vroom vroom!' } );
+/// 	}
+/// }
+///
+/// // Using events with the custom object
+/// final car = Car();
+/// car.addEventListener(
+///   'start', 
+///   (event){
+/// 	  alert( event.message );
+///   }
+/// );
+///
+/// car.start();
+/// ```
+///
 mixin EventDispatcher {
   Map<String, List<Function>>? _listeners = {};
 
+  /// [type] - The type of event to listen to.
+  /// 
+  /// [listener] - The function that gets called when the event is fired.
+  /// 
+  /// Adds a listener to an event type.
   void addEventListener(String type, Function listener) {
     _listeners ??= {};
 
@@ -56,12 +83,22 @@ mixin EventDispatcher {
     }
   }
 
+  /// [type] - The type of event to listen to.
+  /// 
+  /// [listener] - The function that gets called when the event is fired.
+  /// 
+  /// Checks if listener is added to an event type.
   bool hasEventListener(String type, Function listener) {
     if (_listeners == null) return false;
     final listeners = _listeners!;
     return listeners[type] != null && listeners[type]!.contains(listener);
   }
 
+  /// type - The type of the listener that gets removed.
+  /// 
+  /// listener - The listener function that gets removed.
+  /// 
+  /// Removes a listener from an event type.
   void removeEventListener(String type, Function listener) {
     if (_listeners == null) return;
 
@@ -77,6 +114,9 @@ mixin EventDispatcher {
     }
   }
 
+  /// [event] - The event that gets fired.
+  /// 
+  /// Fire an event type.
   void dispatchEvent(Event event) {
     if (_listeners == null || _listeners!.isEmpty) return;
 
@@ -100,6 +140,7 @@ mixin EventDispatcher {
     }
   }
 
+  /// Remove all Listeners.
   void clearListeners() {
     _listeners?.clear();
   }

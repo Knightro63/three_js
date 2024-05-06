@@ -7,6 +7,9 @@ final _eyeRight = Matrix4.identity();
 final _eyeLeft = Matrix4.identity();
 final _projectionMatrix = Matrix4.identity();
 
+/// Dual [page:PerspectiveCamera PerspectiveCamera]s used for effects such as
+/// [3D Anaglyph](https://en.wikipedia.org/wiki/Anaglyph_3D) or
+/// [Parallax Barrier](https://en.wikipedia.org/wiki/parallax_barrier).
 class StereoCamera {
   String type = 'StereoCamera';
 
@@ -14,7 +17,12 @@ class StereoCamera {
 
   double eyeSep = 0.064;
 
+  /// Left camera. This is added to [page:Layers layer 1] - objects to be
+  /// rendered by the left camera must also be added to this layer.
   late PerspectiveCamera cameraL;
+  
+  /// Right camera.This is added to [page:Layers layer 2] - objects to be
+  /// rendered by the right camera must also be added to this layer.
   late PerspectiveCamera cameraR;
 
   final Map<String, dynamic> _cache = {};
@@ -29,6 +37,7 @@ class StereoCamera {
     cameraR.matrixAutoUpdate = false;
   }
 
+  /// Update the stereo cameras based on the camera passed in.
   void update(Camera camera) {
     final cache = _cache;
 

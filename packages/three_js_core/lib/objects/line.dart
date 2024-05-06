@@ -10,7 +10,35 @@ final _inverseMatrix = Matrix4.identity();
 final _ray = Ray();
 final _sphere = BoundingSphere();
 
+/// A continuous line.
+/// 
+/// This is nearly the same as [Line]; the only difference is that it is
+/// rendered using
+/// [gl.LINE_LOOP](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/drawElements) instead of
+/// [gl.LINE_STRIP](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/drawElements).
+/// ```
+/// final material = LineBasicMaterial({
+///   MaterialProperty.color: 0x0000ff
+/// });
+///
+/// final points = [];
+/// points.add(Vector3( - 10, 0, 0 ) );
+/// points.add(Vector3( 0, 10, 0 ) );
+/// points.add(Vector3( 10, 0, 0 ) );
+///
+/// final geometry = BufferGeometry().setFromPoints( points );
+///
+/// final line = Line( geometry, material );
+/// scene.add( line );
+/// ```
+/// 
 class Line extends Object3D {
+  /// [geometry] — vertices representing the line
+  /// segment(s). Default is a new [BufferGeometry].
+  /// 
+  /// [material] — material for the line. Default is a new
+  /// [LineBasicMaterial].
+  /// 
   Line(BufferGeometry? geometry, Material? material) : super() {
     this.geometry = geometry ?? BufferGeometry();
     this.material = material ?? LineBasicMaterial(<MaterialProperty, dynamic>{});
@@ -32,11 +60,16 @@ class Line extends Object3D {
     return this;
   }
 
+  /// Returns a clone of this Line object and its descendants.
   @override
   Line clone([bool? recursive = true]) {
     return Line(geometry!, material!).copy(this, recursive);
   }
 
+  /// Computes an array of distance values which are necessary for
+  /// [LineDashedMaterial]. For each vertex in the geometry, the method
+  /// calculates the cumulative length from the current point to the very
+  /// beginning of the line.
   Line computeLineDistances() {
     final geometry = this.geometry;
 
@@ -73,6 +106,8 @@ class Line extends Object3D {
     return this;
   }
 
+  /// Get intersections between a casted [Ray] and this Line.
+  /// [Raycaster.intersectObject] will call this method.
   @override
   void raycast(Raycaster raycaster, List<Intersection> intersects) {
     final geometry = this.geometry!;
@@ -177,6 +212,9 @@ class Line extends Object3D {
     }
   }
 
+  /// Updates the morphTargets to have no influence on the object. Resets the
+  /// [morphTargetInfluences] and [morphTargetDictionary]
+  /// properties.
   void updateMorphTargets() {
     final geometry = this.geometry!;
 

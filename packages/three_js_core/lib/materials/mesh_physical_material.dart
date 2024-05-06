@@ -2,7 +2,55 @@ import './material.dart';
 import 'mesh_standard_material.dart';
 import 'package:three_js_math/three_js_math.dart';
 
+/// An extension of the [MeshStandardMaterial], providing more advanced
+/// physically-based rendering properties:
+/// 
+/// <ul>
+///   <li>
+///     <b>Anisotropy:</b> Ability to represent the anisotropic property of materials 
+///     as observable with brushed metals.
+///   </li>
+///   <li>
+///     <b>Clearcoat:</b> Some materials — like car paints, carbon fiber, and
+///     wet surfaces — require a clear, reflective layer on top of another layer
+///     that may be irregular or rough. Clearcoat approximates this effect,
+///     without the need for a separate transparent surface.
+///   </li>
+///   <li>
+///     <b>Iridescence:</b> Allows to render the effect where hue varies 
+///     depending on the viewing angle and illumination angle. This can be seen on
+///     soap bubbles, oil films, or on the wings of many insects.
+///   </li>
+///   <li>
+///     <b>Physically-based transparency:</b> One limitation of
+///     [opacity] is that highly transparent materials
+///     are less reflective. Physically-based [transmission] provides a
+///     more realistic option for thin, transparent surfaces like glass.
+///   </li>
+///   <li>
+///     <b>Advanced reflectivity:</b> More flexible reflectivity for
+///     non-metallic materials.
+///   </li>
+///   <li>
+///     <b>Sheen:</b> Can be used for representing cloth and fabric materials.
+///   </li>
+/// </ul>
+/// 
+/// As a result of these complex shading features, MeshPhysicalMaterial has a
+/// higher performance cost, per pixel, than other three.js materials. Most
+/// effects are disabled by default, and add cost as they are enabled. For
+/// best results, always specify an [environment map] when using
+/// this material.
 class MeshPhysicalMaterial extends MeshStandardMaterial {
+
+  /// [parameters] - (optional) an object with one or more
+  /// properties defining the material's appearance. Any property of the
+  /// material (including any property inherited from [Material] and
+  /// [MeshStandardMaterial]) can be passed in here.
+  /// 
+  /// The exception is the property [color], which can be
+  /// passed in as a hexadecimal int and is 0xffffff (white) by default.
+  /// [Color] is called internally.
   MeshPhysicalMaterial([Map<MaterialProperty, dynamic>? parameters]) : super(parameters) {
     _init();
     setValues(parameters);

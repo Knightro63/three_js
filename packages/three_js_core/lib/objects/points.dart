@@ -8,7 +8,16 @@ final _pointsray = Ray();
 final _pointssphere = BoundingSphere();
 final _position = Vector3.zero();
 
+/// A class for displaying points. The points are rendered by the
+/// [WebGLRenderer] using
+/// [ gl.POINTS](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/drawElements).
 class Points extends Object3D {
+
+  /// [geometry] — (optional) an instance of
+  /// [BufferGeometry]. Default is a new [BufferGeometry].
+  /// 
+  /// [Material material] — (optional) a [Material]. Default is a new
+  /// [PointsMaterial].
   Points(BufferGeometry geometry, Material? material) {
     type = 'Points';
 
@@ -32,6 +41,8 @@ class Points extends Object3D {
     return this;
   }
 
+  /// Get intersections between a casted ray and this Points.
+  /// [Raycaster.intersectObject] will call this method.
   @override
   void raycast(Raycaster raycaster, List<Intersection> intersects) {
     final geometry = this.geometry!;
@@ -88,6 +99,9 @@ class Points extends Object3D {
     }
   }
 
+  /// Updates the morphTargets to have no influence on the object. Resets the
+  /// [morphTargetInfluences] and
+  /// [morphTargetDictionary] properties.
   void updateMorphTargets() {
     final geometry = this.geometry;
 

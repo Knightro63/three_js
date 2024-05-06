@@ -32,12 +32,12 @@ import '../interpolants/index.dart';
 /// Corresponding to the different possible types of animated values there are
 /// several subclasses of `KeyframeTrack`, inheriting the most properties and
 /// methods:
-/// <li>[BooleanKeyframeTrack]</li>
-/// <li>[ColorKeyframeTrack]</li>
-/// <li>[NumberKeyframeTrack]</li>
-/// <li>[QuaternionKeyframeTrack]</li>
-/// <li>[StringKeyframeTrack]</li>
-/// <li>[VectorKeyframeTrack]</li>
+/// <li>BooleanKeyframeTrack</li>
+/// <li>ColorKeyframeTrack</li>
+/// <li>NumberKeyframeTrack</li>
+/// <li>QuaternionKeyframeTrack</li>
+/// <li>StringKeyframeTrack</li>
+/// <li>VectorKeyframeTrack</li>
 /// 
 /// Some examples of how to manually create [AnimationClips] with different sorts of KeyframeTracks can be found in the
 /// [AnimationClipCreator](https://threejs.org/examples/jsm/animation/AnimationClipCreator.js) file.
@@ -83,9 +83,7 @@ class KeyframeTrack {
     setInterpolation(_interpolation ?? defaultInterpolation);
   }
 
-  // Serialization (in static context, because of constructor invocation
-  // and automatic invocation of .toJSON):
-
+  /// Converts the track to JSON.
   static Map<String,dynamic> toJson(KeyframeTrack track) {
     //final trackType = track;
 
@@ -197,7 +195,7 @@ class KeyframeTrack {
     return values.length ~/ times.length;
   }
 
-  // move all keyframes either forwards or backwards in time
+  /// Moves all keyframes either forward or backward in time.
   KeyframeTrack shift(timeOffset) {
     if (timeOffset != 0.0) {
       final times = this.times;
@@ -210,7 +208,11 @@ class KeyframeTrack {
     return this;
   }
 
-  // scale all keyframe times by a factor (useful for frame <-> seconds conversions)
+  /// Scales all keyframe times by a factor
+  /// 
+  /// Note: This is useful, for example, for conversions to a certain rate of
+  /// frames per seconds (as it is done internally by
+  /// [animationClip.CreateFromMorphTargetSequence]).
   KeyframeTrack scale(timeScale) {
     if (timeScale != 1.0) {
       final times = this.times;
@@ -223,8 +225,8 @@ class KeyframeTrack {
     return this;
   }
 
-  // removes keyframes before and after animation without changing any values within the range [startTime, endTime].
-  // IMPORTANT: We do not shift around keys to the start of the track time, because for interpolated keys this will change their values
+  /// Removes keyframes before `startTime` and after `endTime`, without changing
+	/// any values within the range [`startTime`, `endTime`].
   KeyframeTrack trim(startTime, endTime) {
     final times = this.times, nKeys = times.length;
 
@@ -256,7 +258,11 @@ class KeyframeTrack {
     return this;
   }
 
-  // ensure we do not get a GarbageInGarbageOut situation, make sure tracks are at least minimally viable
+  /// Performs minimal validation on the tracks. Returns true if valid.
+  ///
+  /// This method logs errors to the console, if a track is empty, if the
+  /// [size] is not valid, if an item in the [times] or [values] array is not a valid number or if the
+  /// items in the `times` array are out of order.
   bool validate() {
     bool valid = true;
 
@@ -307,8 +313,9 @@ class KeyframeTrack {
     return valid;
   }
 
-  // removes equivalent sequential keys as common in morph target sequences
-  // (0,0,0,0,1,1,1,0,0,0,0,0,0,0) --> (0,0,1,1,0,0)
+  /// Removes equivalent sequential keys, which are common in morph target sequences.
+  /// 
+  /// [0,0,0,0,1,1,1,0,0,0,0,0,0,0] --> [0,0,1,1,0,0]s
   KeyframeTrack optimize() {
     // times or values may be shared with other tracks, so overwriting is unsafe
     final times = AnimationUtils.arraySlice(this.times),

@@ -28,7 +28,23 @@ final _uvC = Vector2.zero();
 final _intersectionPoint = Vector3.zero();
 final _intersectionPointWorld = Vector3.zero();
 
+/// Class representing triangular
+/// [polygon mesh](https://en.wikipedia.org/wiki/Polygon_mesh) based
+/// objects. Also serves as a base for other classes such as
+/// [SkinnedMesh].
+/// ```
+/// final geometry = BoxGeometry( 1, 1, 1 );
+/// final material = MeshBasicMaterial( { MaterialProperty.color: 0xffff00 } );
+/// final mesh = Mesh( geometry, material );
+/// scene.add( mesh );
+/// ```
 class Mesh extends Object3D {
+  /// [geometry] — (optional) an instance of
+  /// [BufferGeometry]. Default is a new [BufferGeometry].
+  /// 
+  /// [ material] — (optional) a single or an array of
+  /// [Material]. Default is a new [MeshBasicMaterial]
+  /// 
   Mesh([BufferGeometry? geometry, Material? material]) : super() {
     this.geometry = geometry ?? BufferGeometry();
     this.material = material;
@@ -40,6 +56,7 @@ class Mesh extends Object3D {
     type = "Mesh";
   }
 
+  /// Returns a clone of this [name] object and its descendants.
   @override
   Mesh clone([bool? recursive = true]) {
     return Mesh(geometry!.clone(), material?.clone()).copy(this, recursive);
@@ -61,6 +78,9 @@ class Mesh extends Object3D {
     return this;
   }
 
+  /// Updates the morphTargets to have no influence on the object. Resets the
+  /// [morphTargetInfluences] and
+  /// [morphTargetDictionary] properties.
   void updateMorphTargets() {
     final geometry = this.geometry;
 
@@ -85,6 +105,9 @@ class Mesh extends Object3D {
   
   }
 
+  /// Get intersections between a casted ray and this mesh.
+  /// [Raycaster.intersectObject] will call this method, but the results
+  /// are not ordered.
   @override
   void raycast(Raycaster raycaster, List<Intersection> intersects) {
     // print(" raycast: ${this.name} ${this} ");
@@ -350,9 +373,9 @@ Intersection? checkBufferGeometryIntersection(
   }
 
   if (object is SkinnedMesh) {
-    object.boneTransform(a, _vA);
-    object.boneTransform(b, _vB);
-    object.boneTransform(c, _vC);
+    object.applyBoneTransform(a, _vA);
+    object.applyBoneTransform(b, _vB);
+    object.applyBoneTransform(c, _vC);
   }
 
   final intersection = checkIntersection(

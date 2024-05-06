@@ -8,6 +8,34 @@ import 'dart:math' as math;
 final _offsetMatrix = Matrix4.identity();
 final _identityMatrix = Matrix4.identity();
 
+/// Use an array of [bones] to create a skeleton that can be used by
+/// a [SkinnedMesh].
+/// 
+/// ```
+/// // Create a simple "arm"
+/// 
+/// final bones = [];
+/// 
+/// final shoulder = Bone();
+/// final elbow = Bone();
+/// final hand = Bone();
+/// 
+/// shoulder.add( elbow );
+/// elbow.add( hand );
+/// 
+/// bones.add( shoulder );
+/// bones.add( elbow );
+/// bones.add( hand );
+/// 
+/// shoulder.position.y = -5;
+/// elbow.position.y = 0;
+/// hand.position.y = 5;
+/// 
+/// final armSkeleton = Skeleton( bones );
+/// ```
+/// 
+/// See the [SkinnedMesh] page for an example of usage with standard
+/// [BufferGeometry].
 class Skeleton {
   String uuid = MathUtils.generateUUID();
   late List<Bone> bones;
@@ -17,6 +45,12 @@ class Skeleton {
   late int boneTextureSize;
   double frame = -1;
 
+  /// [bones] - The array of [bones]. Default is an empty
+  /// array.
+  /// 
+  /// [boneInverses] - (optional) An array of [Matrix4s].
+  ///  
+  /// Creates a new [name].
   Skeleton([List<Bone>? bones, List<Matrix4>? boneInverses]) {
     this.bones = bones!.sublist(0);
     this.boneInverses = boneInverses ?? [];
@@ -65,6 +99,8 @@ class Skeleton {
     }
   }
 
+  /// Generates the [page:.boneInverses boneInverses] array if not provided in
+	/// the constructor.
   void calculateInverses() {
     boneInverses.length = 0;
     boneInverses.clear();
@@ -77,6 +113,7 @@ class Skeleton {
     }
   }
 
+  /// Returns the skeleton to the base pose.
   void pose() {
     // recover the bind-time world matrices
 
@@ -100,6 +137,9 @@ class Skeleton {
     }
   }
 
+  /// Updates the [boneMatrices] and [boneTexture] 
+  /// after changing the bones. This is called automatically by the
+  /// [WebGLRenderer] if the skeleton is used with a [SkinnedMesh].
   void update() {
     final bones = this.bones;
     final boneInverses = this.boneInverses;
@@ -122,10 +162,14 @@ class Skeleton {
     }
   }
 
+  /// Returns a clone of this Skeleton object.
   Skeleton clone() {
     return Skeleton(bones, boneInverses);
   }
 
+  /// Computes an instance of [DataTexture] in order to pass the bone data
+  /// more efficiently to the shader. The texture is assigned to
+  /// [boneTexture].
   Skeleton computeBoneTexture() {
 
     boneTexture = DataTexture(boneMatrices, boneTextureSize, boneTextureSize,
@@ -141,6 +185,10 @@ class Skeleton {
     return this;
   }
 
+  /// [name] - String to match to the Bone's .name property.
+  /// 
+  /// Searches through the skeleton's bone array and returns the first with a
+  /// matching name.
   Bone? getBoneByName(String name) {
     for (int i = 0, il = bones.length; i < il; i++) {
       final bone = bones[i];
@@ -153,6 +201,8 @@ class Skeleton {
     return null;
   }
 
+  /// Frees the GPU-related resources allocated by this instance. Call this
+  /// method whenever this instance is no longer used in your app.
   void dispose() {
     if (boneTexture != null) {
       boneTexture!.dispose();

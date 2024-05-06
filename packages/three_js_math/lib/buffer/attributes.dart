@@ -6,7 +6,7 @@ enum Semantic{
   uv2,
   tangent,
   lineDistances,
-  skinWeights,
+  skinWeight,
   skinIndex,
   faceIndex,
   morphs;

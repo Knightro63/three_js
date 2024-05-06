@@ -6,6 +6,18 @@ import './source.dart';
 
 int textureId = 0;
 
+/// Create a texture to apply to a surface or as a reflection or refraction map.
+/// 
+/// Note: After the initial use of a texture, its dimensions, format, and type
+/// cannot be changed. Instead, call [dispose] on the texture and
+/// instantiate a new one.
+/// ```
+/// // load a texture, set wrap mode to repeat
+/// final texture = TextureLoader().fromAsset( "textures/water.jpg" );
+/// texture.wrapS = RepeatWrapping;
+/// texture.wrapT = RepeatWrapping;
+/// texture.repeat.setValues( 4, 4 );
+/// ```
 class Texture with EventDispatcher {
   static String? defaultImage;
   static int defaultMapping = UVMapping;

@@ -4,7 +4,32 @@ import 'package:three_js_math/three_js_math.dart';
 import '../renderers/index.dart';
 import 'perspective_camera.dart';
 
+/// Creates 6 cameras that render to a [page:WebGLCubeRenderTarget].
+/// 
+/// ```
+/// // Create cube render target
+/// final cubeRenderTarget = WebGLCubeRenderTarget( 128, WebGLRenderTargetOptions({'generateMipmaps': true, 'minFilter': LinearMipmapLinearFilter }));
+///
+/// // Create cube camera
+/// final cubeCamera = CubeCamera( 1, 100000, cubeRenderTarget );
+/// scene.add( cubeCamera );
+///
+/// // Create car
+/// final chromeMaterial = MeshLambertMaterial({MaterialProperty.color: 0xffffff, MaterialProperty.envMap: cubeRenderTarget.texture } );
+/// final car = Mesh( carGeometry, chromeMaterial );
+/// scene.add( car );
+///
+/// // Update the render target cube
+/// car.visible = false;
+/// cubeCamera.position.copy( car.position );
+/// cubeCamera.update( renderer, scene );
+///
+/// // Render the scene
+/// car.visible = true;
+/// renderer.render( scene, camera );
+/// ```
 class CubeCamera extends Object3D {
+  /// The destination cube render target.
   late WebGLCubeRenderTarget renderTarget;
 
   late PerspectiveCamera cameraPX;
@@ -62,6 +87,11 @@ class CubeCamera extends Object3D {
     add(cameraNZ);
   }
 
+  /// [renderer]: The current WebGL renderer
+  /// 
+	/// [scene]: The current scene
+  /// 
+  /// Call this to update the [renderTarget].
   void update(WebGLRenderer renderer, Object3D scene) {
     if (parent == null) updateMatrixWorld(false);
 

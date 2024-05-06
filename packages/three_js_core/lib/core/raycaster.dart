@@ -4,6 +4,10 @@ import './index.dart';
 import '../cameras/index.dart';
 import 'package:three_js_math/three_js_math.dart';
 
+/// This class is designed to assist with
+/// [raycasting](https://en.wikipedia.org/wiki/Ray_casting). Raycasting is
+/// used for mouse picking (working out what objects in the 3d space the mouse
+/// is over) amongst other things.
 class Raycaster {
   late Ray ray;
   late double near;
@@ -12,6 +16,18 @@ class Raycaster {
   late Layers layers;
   late Map<String, dynamic> params;
 
+  /// [origin] — The origin vector where the ray casts from.
+  /// 
+  /// [direction] — The direction vector that gives direction to
+  /// the ray. Should be normalized.
+  /// 
+  /// [near] — All results returned are further away than near. Near
+  /// can't be negative. Default value is `0`.
+  /// 
+  /// [far] — All results returned are closer than far. Far can't be
+  /// lower than near. Default value is Infinity.
+  /// 
+  /// This creates a new raycaster object.
   Raycaster([Vector3? origin, Vector3? direction, double? near, double? far]) {
     ray = origin == null || direction == null?Ray():Ray.originDirection(origin, direction);
     // direction is assumed to be normalized (for accurate distance calculations)
@@ -47,11 +63,24 @@ class Raycaster {
     }
   }
 
+  /// [origin] — The origin vector where the ray casts from.
+  /// 
+  /// [direction] — The normalized direction vector that gives
+  /// direction to the ray.
+  /// 
+  /// Updates the ray with a new origin and direction. Please note that this
+  /// method only copies the values from the arguments.
   void set(Vector3 origin, Vector3 direction) {
     // direction is assumed to be normalized (for accurate distance calculations)
     ray.set(origin, direction);
   }
 
+  /// [coords] — 2D coordinates of the mouse, in normalized device
+  /// coordinates (NDC)---X and Y components should be between `-1` and `1`.
+  /// 
+  /// [camera] — camera from which the ray should originate
+  /// 
+  /// Updates the ray with a new origin and direction.
   void setFromCamera(Vector2 coords, Camera camera) {
     if (camera is PerspectiveCamera) {
       ray.origin.setFromMatrixPosition(camera.matrixWorld);
@@ -73,13 +102,52 @@ class Raycaster {
     }
   }
 
-  List<Intersection> intersectObject(Object3D object, bool recursive,[List<Intersection>? intersects]) {
+  /// [object] — The object to check for intersection with the
+  /// ray.
+  /// 
+  /// [recursive] — If true, it also checks all descendants.
+  /// Otherwise it only checks intersection with the object. Default is true.
+  /// 
+  /// [intersects] — (optional) target to set the result.
+  /// Otherwise a new [List] is instantiated. If set, you must clear this
+  /// list prior to each call (i.e., list.length = 0;).
+  /// 
+  /// Checks all intersection between the ray and the object with or without the
+  /// descendants. Intersections are returned sorted by distance, closest first.
+  /// A list of intersections is returned...
+  /// 
+  /// `Raycaster` delegates to the [raycast] method of the
+  /// passed object, when evaluating whether the ray intersects the object or
+  /// not. This allows [meshes] to respond differently to ray casting
+  /// than [lines] and [pointclouds].
+  /// 
+  /// *Note* that for meshes, faces must be pointed towards the origin of the
+  /// [ray] in order to be detected; intersections of the ray passing
+  /// through the back of a face will not be detected. To raycast against both
+  /// faces of an object, you'll want to set the [material]'s
+  /// [side] property to `DoubleSide`.
+  List<Intersection> intersectObject(Object3D object, bool recursive, [List<Intersection>? intersects]) {
     final ints = intersects ?? [];
     intersectObject4(object, this, ints, recursive);
     ints.sort(ascSort);
     return ints;
   }
 
+  /// [objects] — The objects to check for intersection with the
+  /// ray.
+  /// 
+  /// [recursive] — If true, it also checks all descendants of the
+  /// objects. Otherwise it only checks intersection with the objects. Default
+  /// is true.
+  /// 
+  /// [intersects] — (optional) target to set the result.
+  /// Otherwise a new [List] is instantiated. If set, you must clear this
+  /// list prior to each call (i.e., list.length = 0;).
+  /// 
+  /// Checks all intersection between the ray and the objects with or without
+  /// the descendants. Intersections are returned sorted by distance, closest
+  /// first. Intersections are of the same form as those returned by
+  /// [intersectObject].
   List<Intersection> intersectObjects(List<Object3D> objects, bool recursive, [List<Intersection>? intersects]) {
     intersects = intersects ?? List<Intersection>.from([]);
 
@@ -105,6 +173,27 @@ class Intersection {
   Vector2? uv;
   Vector2? uv2;
 
+  /// [distance] – distance between the origin of the ray and the
+  /// intersection
+  /// 
+  /// [point] – point of intersection, in world coordinates
+  /// 
+  /// [face] – intersected face
+  /// 
+  /// [faceIndex] – index of the intersected face
+  /// 
+  /// [object] – the intersected object
+  /// 
+  /// [uv] - U,V coordinates at point of intersection
+  /// 
+  /// [uv2] - Second set of U,V coordinates at point of
+  /// intersection
+  /// 
+  /// [normal] - interpolated normal vector at point of
+  /// intersection
+  /// 
+  /// [instanceId] – The index number of the instance where the ray
+  /// intersects the InstancedMesh
   Intersection({
     this.instanceId,
     required this.distance,

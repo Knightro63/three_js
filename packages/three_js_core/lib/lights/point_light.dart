@@ -3,7 +3,30 @@ import 'dart:math' as math;
 import 'light.dart';
 import 'point_light_shadow.dart';
 
+/// A light that gets emitted from a single point in all directions. A common
+/// use case for this is to replicate the light emitted from a bare
+/// lightbulb.
+/// 
+/// This light can cast shadows - see [PointLightShadow] page for
+/// details.
+/// 
+/// ```
+/// final light = PointLight( 0xff0000, 1, 100 );
+/// light.position.setValues( 50, 50, 50 );
+/// scene.add( light );
+/// ```
 class PointLight extends Light {
+  /// [color] - (optional) hexadecimal color of the light. Default
+  /// is 0xffffff (white).
+  /// 
+  /// [intensity] - (optional) numeric value of the light's
+  /// strength/intensity. Default is `1`.
+  /// 
+  /// [distance] - Maximum range of the light. Default is `0` (no
+  /// limit).
+  /// 
+  /// [decay] - The amount the light dims along the distance of the
+  /// light. Default is `2`.
   PointLight(super.color, [super.intensity, double? distance, double? decay]){
     // remove default 0  for js 0 is false  but for dart 0 is not.
     // PointLightShadow.updateMatrices  far value
@@ -29,6 +52,8 @@ class PointLight extends Light {
     intensity = value / (4 * math.pi);
   }
 
+  /// Copies value of all the properties from the [source] to
+  /// this PointLight.
   @override
   PointLight copy(Object3D source, [bool? recursive]) {
     super.copy.call(source);
@@ -41,6 +66,8 @@ class PointLight extends Light {
     return this;
   }
 
+  /// Frees the GPU-related resources allocated by this instance. Call this
+  /// method whenever this instance is no longer used in your app.
   @override
   void dispose() {
     shadow?.dispose();

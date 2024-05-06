@@ -2,7 +2,24 @@ import 'package:flutter_gl/flutter_gl.dart';
 import '../core/index.dart';
 import 'package:three_js_math/three_js_math.dart';
 
+/// A class for generating plane geometries.
+/// 
+/// ```
+/// final geometry = PlaneGeometry( 1, 1 );
+/// final material = MeshBasicMaterial({MaterilalProperty.color: 0xffff00, side: DoubleSide});
+/// final plane = Mesh( geometry, material );
+/// scene.add( plane );
+/// ```
+/// 
 class PlaneGeometry extends BufferGeometry {
+  
+  /// [width] — Width along the X axis. Default is `1`.
+  /// 
+  /// [height] — Height along the Y axis. Default is `1`.
+  /// 
+  /// [widthSegments] — Optional. Default is `1`.
+  /// 
+  /// [heightSegments] — Optional. Default is `1`.
   PlaneGeometry([
     double width = 1,
     double height = 1,

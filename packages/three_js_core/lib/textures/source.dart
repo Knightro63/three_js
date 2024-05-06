@@ -2,22 +2,27 @@ import 'package:three_js_core/others/index.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'image_element.dart';
 
+/// Represents the data source of a texture.
 class Source {
   late String uuid;
   dynamic data;
   late int version;
-
   int currentVersion = 0;
 
+  /// [data] -- The data definition of a texture. Default is `null`.
 	Source([this.data]){
     uuid = MathUtils.generateUUID();
     version = 0;
 	}
 
-	set needsUpdate( value ) {
-    if (value == true) version++;
+	set needsUpdate(bool value ) {
+    if(value) version++;
 	}
 
+  /// [meta] - optional object containing metadata.
+  /// 
+  /// Convert the data source to three.js
+  /// [JSON Object/Scene format](https://github.com/mrdoob/three.js/wiki/JSON-Object-Scene-format-4).
 	Map<String,dynamic> toJson(meta) {
 		final isRootObject = ( meta == null || meta is String );
 

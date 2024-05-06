@@ -31,6 +31,8 @@ class CameraView{
   };
 }
 
+/// Abstract base class for cameras. This class should always be inherited
+/// when you build a new camera.
 class Camera extends Object3D {
   Matrix4 matrixWorldInverse = Matrix4.identity();
 
@@ -53,9 +55,11 @@ class Camera extends Object3D {
   late double bottom;
 
   CameraView? view;//Map<String, dynamic>? view;
-
   late Vector4 viewport;
 
+  /// Creates a new [name]. Note that this class is not intended to be called
+  /// directly; you probably want a [PerspectiveCamera] or
+  /// [OrthographicCamera] instead.
   Camera():super(){
     type = "Camera";
   }
@@ -68,6 +72,7 @@ class Camera extends Object3D {
     throw(" Camera.updateProjectionMatrix not implimented.");
   }
 
+  /// Copy the properties from the source camera into this one.
   @override
   Camera copy(Object3D source, [bool? recursive]) {
     super.copy(source, recursive);
@@ -80,6 +85,12 @@ class Camera extends Object3D {
     return this;
   }
 
+  /// [target] — the result will be copied into this Vector3.
+  ///
+  /// 
+  /// Returns a [Vector3] representing the world space direction in which
+  /// the camera is looking. (Note: A camera looks down its local, negative
+  /// z-axis).
   @override
   Vector3 getWorldDirection(Vector3 target) {
     updateWorldMatrix(true, false);
@@ -103,6 +114,7 @@ class Camera extends Object3D {
     matrixWorldInverse.invert();
   }
 
+  /// Return a new camera with the same properties as this one.
   @override
   Camera clone([bool? recursive = true]) {
     return Camera()..copy(this);
