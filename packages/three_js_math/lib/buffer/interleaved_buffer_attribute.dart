@@ -44,6 +44,8 @@ class InterleavedBufferAttribute extends BufferAttribute {
     return this;
   }
 
+  /// Applies normal matrix [m] to every Vector3 element of this
+  /// InterleavedBufferAttribute.
   @override
   InterleavedBufferAttribute applyNormalMatrix(Matrix3 m) {
     for (int i = 0, l = count; i < l; i++) {
@@ -55,6 +57,9 @@ class InterleavedBufferAttribute extends BufferAttribute {
     return this;
   }
 
+  /// Applies matrix [m] to every Vector3 element of this
+  /// InterleavedBufferAttribute, interpreting the elements as a direction
+  /// vectors.
   @override
   InterleavedBufferAttribute transformDirection(Matrix4 m) {
     for (int i = 0, l = count; i < l; i++) {
@@ -68,50 +73,59 @@ class InterleavedBufferAttribute extends BufferAttribute {
     return this;
   }
 
+  /// Sets the x component of the item at the given index.
   @override
   InterleavedBufferAttribute setX(int index, x) {
     data!.array[index * data!.stride + offset] = x;
     return this;
   }
 
+  /// Sets the y component of the item at the given index.
   @override
   InterleavedBufferAttribute setY(int index, y) {
     data!.array[index * data!.stride + offset + 1] = y;
     return this;
   }
 
+  /// Sets the z component of the item at the given index.
   @override
   InterleavedBufferAttribute setZ(int index, z) {
     data!.array[index * data!.stride + offset + 2] = z;
     return this;
   }
 
+  // Sets the w component of the item at the given index.
   @override
   InterleavedBufferAttribute setW(int index, w) {
     data!.array[index * data!.stride + offset + 3] = w;
     return this;
   }
 
+  /// Returns the x component of the item at the given index.
   @override
   double getX(int index) {
     return data!.array[index * data!.stride + offset].toDouble();
   }
 
+  /// Returns the y component of the item at the given index.
   @override
   double getY(int index) {
     return data!.array[index * data!.stride + offset + 1].toDouble();
   }
 
+  /// Returns the z component of the item at the given index.
   @override
   double getZ(int index) {
     return data!.array[index * data!.stride + offset + 2].toDouble();
   }
 
+  /// Returns the w component of the item at the given index.
   @override
   double getW(int index) {
     return data!.array[index * data!.stride + offset + 3].toDouble();
   }
 
+  /// Sets the x and y components of the item at the given index.
   @override
   InterleavedBufferAttribute setXY(int index, x, y) {
     index = index * data!.stride + offset;
@@ -121,6 +135,7 @@ class InterleavedBufferAttribute extends BufferAttribute {
     return this;
   }
 
+  /// Sets the x, y and z components of the item at the given index.
   @override
   InterleavedBufferAttribute setXYZ(int index, x, y, z) {
     index = index * data!.stride + offset;
@@ -132,6 +147,7 @@ class InterleavedBufferAttribute extends BufferAttribute {
     return this;
   }
 
+  /// Sets the x, y, z and w components of the item at the given index.
   @override
   InterleavedBufferAttribute setXYZW(int index, x, y, z, w) {
     index = index * data!.stride + offset;

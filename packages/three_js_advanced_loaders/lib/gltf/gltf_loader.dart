@@ -27,6 +27,15 @@ class GLTFData{
   GLTFParser parser;
 }
 
+/// [glTF](https://www.khronos.org/gltf) (GL Transmission Format) is an
+/// [open format specification](https://github.com/KhronosGroup/glTF/tree/master/specification/2.0)
+/// for efficient delivery and loading of 3D content. Assets may be provided either in JSON (.gltf)
+/// or binary (.glb) format. External files store textures (.jpg, .png) and additional binary
+/// data (.bin). A glTF asset may deliver one or more scenes, including meshes, materials,
+/// textures, skins, skeletons, morph targets, animations, lights, and/or cameras.
+/// 
+/// [GLTFLoader] uses [ImageBitmapLoader] whenever possible. Be advised that image bitmaps are not automatically GC-collected when they are no longer referenced,
+/// and they require special handling during the disposal process. More information in the [How to dispose of objects](https://threejs.org/docs/#manual/en/introduction/How-to-dispose-of-objects) guide.
 class GLTFLoader extends Loader {
   late final FileLoader _loader;
   late List<Function> pluginCallbacks;
@@ -35,6 +44,9 @@ class GLTFLoader extends Loader {
   late dynamic _ddsLoader;
   late dynamic _meshoptDecoder;
 
+  /// [manager] — The [loadingManager] for the loader to use. Default is [DefaultLoadingManager].
+  /// 
+  /// Creates a new [FontLoader].
   GLTFLoader([super.manager]){
     _loader = FileLoader(manager);
     _dracoLoader = null;

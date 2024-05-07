@@ -1,5 +1,6 @@
 import 'interleaved_buffer.dart';
 
+/// An instanced version of [InterleavedBuffer].
 class InstancedInterleavedBuffer extends InterleavedBuffer {
   bool isInstancedInterleavedBuffer = true;
   

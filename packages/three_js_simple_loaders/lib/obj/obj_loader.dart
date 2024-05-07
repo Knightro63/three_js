@@ -374,12 +374,17 @@ class ParserState {
   }
 }
 
-//
-
+/// The [OBJ file format](https://en.wikipedia.org/wiki/Wavefront_.obj_file)  is a simple data-format
+/// that represents 3D geometry in a human readable format as the position of each vertex, the UV position of
+/// each texture coordinate vertex, vertex normals, and the faces that make each polygon defined as a list of
+/// vertices, and texture vertices.
 class OBJLoader extends Loader {
   late final FileLoader _loader;
   MaterialCreator? materials;
 
+  /// [manager] — The [loadingManager] for the loader to use. Default is [DefaultLoadingManager].
+  /// 
+  /// Creates a new [OBJLoader].
   OBJLoader([super.manager]){
     _loader = FileLoader(manager);
   }

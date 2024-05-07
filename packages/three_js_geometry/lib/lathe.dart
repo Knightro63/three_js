@@ -3,7 +3,32 @@ import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'dart:math' as math;
 
+/// Creates meshes with axial symmetry like vases. The lathe rotates around
+/// the Y axis.
+/// 
+/// ```
+/// final List<Vector2> points = [];
+/// for ( int i = 0; i < 10; i ++ ) {
+///   points.add(Vector2( math.sin( i * 0.2 ) * 10 + 5, ( i - 5 ) * 2 ) );
+/// }
+/// final geometry = LatheGeometry(points);
+/// final material = MeshBasicMaterial({MaterialProperty.color: 0xffff00});
+/// final lathe = Mesh( geometry, material );
+/// scene.add( lathe );
+/// ```
 class LatheGeometry extends BufferGeometry {
+
+  /// [points] — Array of Vector2s. The x-coordinate of each point must be greater
+  /// than zero. Default is an array with (0,-0.5), (0.5,0) and (0,0.5) which
+  /// creates a simple diamond shape.
+  /// 
+  /// [segments] — the number of circumference segments to generate. Default is
+  /// 12.
+  /// 
+  /// [phiStart] — the starting angle in radians. Default is `0`.
+  /// 
+  /// [phiLength] — the radian (0 to 2PI) range of the lathed section 2PI is a
+  /// closed lathe, less than 2PI is a portion. Default is 2PI.
   LatheGeometry(List<Vector2> points,{int segments = 12, double phiStart = 0, double phiLength = math.pi * 2}): super() {
     type = 'LatheGeometry';
     parameters = {

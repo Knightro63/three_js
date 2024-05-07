@@ -5,10 +5,16 @@ import 'package:three_js_core/three_js_core.dart';
 final _vector = Vector3();
 final _camera = Camera();
 
-///	- shows frustum, line of sight and up of the camera
-///	- suitable for fast updates
-/// 	- based on frustum visualization in lightgl.js shadowmap example
-///		http://evanw.github.com/lightgl.js/tests/shadowmap.html
+/// This helps with visualizing what a camera contains in its frustum. It
+/// visualizes the frustum of a camera using a [LineSegments].
+/// 
+/// [CameraHelper] must be a child of the scene.
+/// 
+/// ```
+/// final camera = PerspectiveCamera( 75, pixelRatio, 0.1, 1000 );
+/// final helper = CameraHelper( camera );
+/// scene.add( helper );
+/// ```
 class CameraHelper extends LineSegments {
   late Camera camera;
   late Map<String, dynamic> pointMap;
@@ -17,6 +23,9 @@ class CameraHelper extends LineSegments {
     type = "CameraHelper";
   }
 
+  /// [camera] -- The camera to visualize.
+  /// 
+  /// This create a new [CameraHelper] for the specified camera.
   factory CameraHelper(Camera camera) {
     final geometry = BufferGeometry();
     final material = LineBasicMaterial.fromMap({"color": 0xffffff, "vertexColors": true, "toneMapped": false});
@@ -115,6 +124,7 @@ class CameraHelper extends LineSegments {
     return cameraHelper;
   }
 
+  /// Updates the helper based on the projectionMatrix of the camera.
   void update() {
     final geometry = this.geometry;
     final pointMap = this.pointMap;
@@ -166,6 +176,8 @@ class CameraHelper extends LineSegments {
     geometry!.getAttributeFromString('position').needsUpdate = true;
   }
 
+  /// Frees the GPU-related resources allocated by this instance. Call this
+  /// method whenever this instance is no longer used in your app.
   @override
   void dispose() {
     geometry!.dispose();

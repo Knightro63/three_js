@@ -106,6 +106,23 @@ class SVGObject extends Object3D{
   bool isSVGObject = true;
 }
 
+
+/// [SVGRenderer] can be used to render geometric data using SVG. The produced vector graphics are particular useful in the following use cases:
+/// 
+/// * Animated logos or icons
+/// * Interactive 2D/3D diagrams or graphs
+/// * Interactive maps
+/// * Complex or animated user interfaces
+/// 
+/// [SVGRenderer] has various advantages. It produces crystal-clear and sharp output which is independent of the actual viewport resolution.
+/// 
+/// SVG elements can be styled via CSS. And they have good accessibility since it's possible to add metadata like title or description (useful for search engines or screen readers).
+/// 
+/// There are, however, some important limitations:
+/// 
+/// * No advanced shading
+/// * No texture support
+/// * No shadow support
 class SVGRenderer {
   SVGRenderer({
     quality = SVGQuality.high,
@@ -161,15 +178,20 @@ class SVGRenderer {
 
   Vector2 get size => Vector2(width,height);
 
+  /// Sets the render quality. Possible values are `low` and `high` (default).
   void setQuality(SVGQuality quality) {
     this.quality = quality;
   }
+  
+  /// Sets the clearColor and the clearAlpha.
   void setClearColor(Color color){
     _clearColor.setFrom( color );
   }
   void setPixelRatio(){
 
   }
+  
+  /// Resizes the renderer to (width, height).
   void setSize(double width,double height) {
     this.width = width;
     this.height = height;
@@ -183,6 +205,8 @@ class SVGRenderer {
     _clipBox.min.setValues(-widthHalf, -heightHalf );
     _clipBox.max.setValues(widthHalf, heightHalf );
   }
+  
+  /// Sets the precision of the data used to create a path.
   void setPrecision(int precision){
     this.precision = precision;
   }
@@ -196,6 +220,8 @@ class SVGRenderer {
   String convert(num c){
     return (precision != null ? c.toStringAsFixed(precision!) : c.toString());
   }
+  
+  /// Tells the renderer to clear its drawing surface.
   void clear() {
     svg = SVGDocument(addHeader:true,edgeOnly: true);
     svg.setAttribute('viewBox','${-widthHalf} ${-heightHalf} $width $height');
@@ -207,6 +233,7 @@ class SVGRenderer {
     svg.style['background-color'] = _clearColor.getStyle();
   }
 
+  /// Renders a [scene] using a [camera].
   void render(Scene scene, Camera camera){
     Projector projector = Projector();
     RenderData renderData = RenderData();

@@ -15,6 +15,9 @@ class RGBELoader extends DataTextureLoader {
   late final FileLoader _loader;
   int type = HalfFloatType;
 
+  /// [manager] — The [loadingManager] for the loader to use. Default is [DefaultLoadingManager].
+  /// 
+  /// Creates a new [FontLoader].
   RGBELoader([super.manager]){
     _loader = FileLoader(manager);
   }

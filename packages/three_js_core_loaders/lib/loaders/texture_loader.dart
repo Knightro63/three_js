@@ -8,6 +8,15 @@ import 'loader.dart';
 import 'package:three_js_core/three_js_core.dart';
 import '../ImageLoader/image_loader.dart';
 
+/// Class for loading a [texture]. This uses the
+/// [ImageLoader] internally for loading files.
+/// 
+/// ```
+/// final texture = await TextureLoader().fromAsset('textures/land_ocean_ice_cloud_2048.jpg' ); 
+/// // immediately use the texture for material creation 
+///
+/// final material = MeshBasicMaterial({ MaterialProperty.map:texture});
+/// ```
 class TextureLoader extends Loader {
   TextureLoader([super.manager,this.flipY = false]);
   bool flipY;
@@ -31,6 +40,7 @@ class TextureLoader extends Loader {
 
     return null;
   }
+  
   @override
   Future<Texture?> fromNetwork(Uri uri) async{
     final url = uri.path;
@@ -67,6 +77,7 @@ class TextureLoader extends Loader {
     return _textureProcess(image,url);
   }
 
+  /// If the type of format is unknown load it here.
   Future<Texture?> unknown(dynamic url) async{
     if(url is File){
       return fromFile(url);

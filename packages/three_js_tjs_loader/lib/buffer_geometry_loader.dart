@@ -1,17 +1,20 @@
 import 'dart:async';
-import 'dart:typed_data';
 import 'dart:convert' as convert;
 import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:three_js_core/three_js_core.dart';
 import 'package:flutter_gl/flutter_gl.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'package:three_js_core_loaders/three_js_core_loaders.dart';
 
+/// A loader for loading a [BufferGeometry]. This uses the
+/// [FileLoader] internally for loading files.
 class BufferGeometryLoader extends Loader {
   late final FileLoader _loader;
 
+  /// [manager] — The [loadingManager] for the loader to use. Default is [DefaultLoadingManager].
+  /// 
+  /// Creates a new [FontLoader].
   BufferGeometryLoader([super.manager]){
     _loader = FileLoader(manager);
   }

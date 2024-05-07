@@ -7,9 +7,6 @@ import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'package:three_js_core_loaders/three_js_core_loaders.dart';
 
-/// Abstract Base class to load generic binary textures formats (rgbe, hdr, ...)
-///
-/// Sub classes have to implement the parse() method which will be used in load().
 class TextureLoaderData{
   TextureLoaderData({
     this.width,
@@ -82,9 +79,15 @@ class TextureLoaderData{
   };
 }
 
+/// Abstract Base class to load generic binary textures formats (rgbe, hdr, ...)
+///
+/// Sub classes have to implement the parse() method which will be used in load().
 class DataTextureLoader extends Loader {
   late final FileLoader _loader;
 
+  /// [manager] — The [loadingManager] for the loader to use. Default is [DefaultLoadingManager].
+  /// 
+  /// Creates a new [FontLoader].
   DataTextureLoader([super.manager]){
     _loader = FileLoader(manager);
   }

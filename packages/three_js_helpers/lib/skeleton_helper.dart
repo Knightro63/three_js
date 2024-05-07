@@ -6,6 +6,13 @@ final _shvector = Vector3();
 final _boneMatrix = Matrix4();
 final _matrixWorldInv = Matrix4();
 
+/// A helper object to assist with visualizing a [Skeleton]. The
+/// helper is rendered using a [LineBasicMaterial].
+/// 
+/// ```
+/// final helper = SkeletonHelper( skinnedMesh );
+/// scene.add( helper );
+/// ```
 class SkeletonHelper extends LineSegments {
   bool isSkeletonHelper = true;
   late dynamic root;
@@ -16,7 +23,9 @@ class SkeletonHelper extends LineSegments {
     matrixAutoUpdate = false;
   }
 
-  factory SkeletonHelper(object) {
+  /// [object] -- Usually an instance of [SkinnedMesh]. However, any instance
+  /// of [Object3D] can be used if it represents a hierarchy of [Bone]s (via [Object3D.children]).
+  factory SkeletonHelper(Object3D object) {
     final bones = getBoneList(object);
 
     final geometry = BufferGeometry();

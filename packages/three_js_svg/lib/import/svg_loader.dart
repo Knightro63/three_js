@@ -8,12 +8,16 @@ import 'package:three_js_math/three_js_math.dart';
 import 'svg_loader_parser.dart';
 import 'svg_loader_points_to_stroke.dart';
 
+/// [Scalable Vector Graphics](https://en.wikipedia.org/wiki/Scalable_Vector_Graphics) is an XML-based vector image format for two-dimensional graphics with support for interactivity and animation.
 class SVGLoader extends Loader{
   late final FileLoader _loader;
   // Default dots per inch
   num defaultDPI = 90;
   SVGUnits defaultUnit = SVGUnits.px;
 
+  /// [manager] — The [loadingManager] for the loader to use. Default is [DefaultLoadingManager].
+  /// 
+  /// Creates a new [SVGLoader].
   SVGLoader([super.manager]){
     _loader = FileLoader(manager);
   }

@@ -1,6 +1,21 @@
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 
+/// An exporter for `PLY`.
+///
+/// [PLY](https://en.wikipedia.org/wiki/PLY_(file_format)) (Polygon or Stanford Triangle Format) is a
+/// file format for efficient delivery and loading of simple, static 3D content in a dense format.
+/// Both binary and ascii formats are supported. PLY can store vertex positions, colors, normals and
+/// uv coordinates. No textures or texture references are saved.
+/// 
+/// ```
+/// // Instantiate an exporter
+/// final exporter = PLYExporter();
+///
+/// // Parse the input and generate the ply output
+/// final data = exporter.parseMesh( scene, options );
+/// downloadFile( data );
+/// ```
 class PLYExporter{
   String _file = '';
   String _ploygon = '';
@@ -35,7 +50,7 @@ class PLYExporter{
   void _end(){
     _file = _file.replaceAll('xxx', _numVerticies.toString());
     _file = _file.replaceAll('yyy', _faces.toString());
-    _file += _ploygon+'\n';
+    _file += '$_ploygon\n';
   }
 
   String parseMesh(Mesh mesh, [bool hasColor = false]){

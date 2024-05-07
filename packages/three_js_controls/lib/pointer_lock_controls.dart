@@ -1,5 +1,17 @@
-part of three_js_controls;
+import 'dart:math' as math;
+import 'package:flutter/widgets.dart' hide Matrix4;
+import 'package:three_js_core/three_js_core.dart';
+import 'package:three_js_math/three_js_math.dart';
+import 'package:flutter/material.dart' hide Matrix4;
 
+final _changeEvent = Event(type: 'change');
+final _euler = Euler(0, 0, 0, RotationOrders.yxz);
+final _vector = Vector3.zero();
+final _lockEvent = Event(type: 'lock');
+final _unlockEvent = Event(type: 'unlock');
+
+/// The implementation of this class is based on the [Pointer Lock API](https://developer.mozilla.org/en-US/docs/Web/API/Pointer_Lock_API).
+/// [PointerLockControls] is a perfect choice for first person 3D games.
 class PointerLockControls with EventDispatcher {
   final _pi2 = math.pi / 2;
   bool isLocked = false;
@@ -17,6 +29,9 @@ class PointerLockControls with EventDispatcher {
   late GlobalKey<PeripheralsState> listenableKey;
   PeripheralsState get domElement => listenableKey.currentState!;
 
+  /// [camera] - The camera to be controlled.
+  /// 
+  /// [listenableKey] - The element used for event listeners.
   PointerLockControls(this.camera, this.listenableKey) : super() {
     scope = this;
     connect();

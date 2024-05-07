@@ -10,7 +10,11 @@ import 'package:universal_html/html.dart' as uhtml;
 import 'package:three_js_core/three_js_core.dart';
 import 'image_loader_app.dart' if (dart.library.js) 'image_loader_web.dart';
 
+/// A loader for loading an [Image]. This is used internally by the
+/// [CubeTextureLoader], [ObjectLoader] and [TextureLoader].
 class ImageLoader extends Loader {
+  /// [manager] — The [loadingManager]
+  /// for the loader to use. Default is [DefaultLoadingManager].
   ImageLoader([super.manager, this.flipY = false]);
   bool flipY;
 

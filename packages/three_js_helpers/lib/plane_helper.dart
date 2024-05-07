@@ -2,6 +2,13 @@ import 'package:flutter_gl/flutter_gl.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'package:three_js_core/three_js_core.dart';
 
+/// Helper object to visualize a [Plane].
+/// 
+/// ```
+/// final plane = Plane( Vector3( 1, 1, 0.2 ), 3 );
+/// final helper = PlaneHelper( plane, 1, 0xffff00 );
+/// scene.add( helper );
+/// ```
 class PlaneHelper extends Line {
   double size = 1.0;
   Plane? plane;
@@ -10,9 +17,14 @@ class PlaneHelper extends Line {
     type = "PlaneHelper";
   }
 
-  factory PlaneHelper(plane, [size = 1, hex = 0xffff00]) {
-    final color = hex;
-
+  /// [plane] - the plane to visualize.
+  /// 
+  /// [size] - (optional) side length of plane helper. Default is
+  /// 1.
+  /// 
+  /// [color] - (optional) the color of the helper. Default is
+  /// 0xffff00.
+  factory PlaneHelper(Plane plane, [double size = 1, int color = 0xffff00]) {
     List<double> positions = [
       1,
       -1,
@@ -93,6 +105,8 @@ class PlaneHelper extends Line {
     return planeHelper;
   }
 
+  /// This overrides the method in the base [Object3D] class so that it
+  /// also updates the helper object according to the [plane] and [size] properties.
   @override
   void updateMatrixWorld([bool force = false]) {
     double scale = -plane!.constant;

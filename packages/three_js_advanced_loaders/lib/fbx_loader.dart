@@ -9,6 +9,11 @@ import 'package:three_js_math/three_js_math.dart';
 import 'package:three_js_animations/three_js_animations.dart';
 import 'package:three_js_core_loaders/three_js_core_loaders.dart';
 import 'package:three_js_curves/three_js_curves.dart';
+
+late _FBXTree _fbxTree;
+late Map connections;
+late AnimationObject sceneGraph;
+
 ///
 /// Loader loads FBX file and generates Group representing FBX scene.
 /// Requires FBX file to be >= 7.0 and in ASCII or >= 6400 in Binary format
@@ -23,17 +28,14 @@ import 'package:three_js_curves/three_js_curves.dart';
 /// Binary format specification:
 ///	https://code.blender.org/2013/08/fbx-binary-file-format-specification/
 ///
-
-late _FBXTree _fbxTree;
-late Map connections;
-late AnimationObject sceneGraph;
-
-
 class FBXLoader extends Loader {
   late int innerWidth;
   late int innerHeight;
   late final FileLoader _loader;
 
+  /// [manager] — The [loadingManager] for the loader to use. Default is [DefaultLoadingManager].
+  /// 
+  /// Creates a new [FontLoader].
   FBXLoader({LoadingManager? manager, required int width, required int height}):super(manager){
     innerHeight = height;
     innerWidth = width;

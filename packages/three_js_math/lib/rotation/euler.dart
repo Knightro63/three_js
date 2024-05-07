@@ -22,6 +22,17 @@ enum RotationOrders{
   }
 }
 
+/// A class representing [Euler Angles](http://en.wikipedia.org/wiki/Euler_angles).
+/// 
+/// Euler angles describe a rotational transformation by rotating an object on
+/// its various axes in specified amounts per axis, and a specified axis
+/// order.
+/// 
+/// ```
+/// final a = Euler( 0, 1, 1.57, RotationOrders.xyz);
+/// final b = Vector3( 1, 0, 1 );
+/// b.applyEuler(a);
+/// ```
 class Euler {
   String type = "Euler";
   
@@ -34,6 +45,17 @@ class Euler {
 
   Function onChangeCallback = () {};
 
+  /// [x] - (optional) the angle of the x axis in radians. Default is
+  /// `0`.
+  /// 
+  /// [y] - (optional) the angle of the y axis in radians. Default is
+  /// `0`.
+  /// 
+  /// [z] - (optional) the angle of the z axis in radians. Default is
+  /// `0`.
+  /// 
+  /// [order] - (optional) a enum representing the order that the
+  /// rotations are applied, defaults to [RotationOrders.xyz].
   Euler([double? x, double? y, double? z, RotationOrders? order]) {
     _x = x ?? 0;
     _y = y ?? 0;
@@ -65,6 +87,16 @@ class Euler {
     onChangeCallback();
   }
 
+  /// [x] - the angle of the x axis in radians.
+  /// 
+  /// [y] - the angle of the y axis in radians.
+  /// 
+  /// [z] - the angle of the z axis in radians.
+  /// 
+  /// [order] - (optional) a string representing the order that the
+  /// rotations are applied.
+  /// 
+  /// Sets the angles of this euler transform and optionally the [order].
   Euler set(double x, double y, double z, [RotationOrders? order]) {
     _x = x;
     _y = y;
@@ -76,10 +108,12 @@ class Euler {
     return this;
   }
 
+  /// Returns a new Euler with the same parameters as this one.
   Euler clone() {
     return Euler(_x, _y, _z, _order);
   }
 
+  /// Copies value of [euler] to this euler.
   Euler copy(Euler euler) {
     _x = euler._x;
     _y = euler._y;
@@ -91,6 +125,15 @@ class Euler {
     return this;
   }
 
+  /// [m] - a [Matrix4] of which the upper 3x3 of matrix is a
+  /// pure [rotation matrix](https://en.wikipedia.org/wiki/Rotation_matrix)
+  /// (i.e. unscaled).
+  /// 
+  /// [order] - (optional) a string representing the order that the
+  /// rotations are applied.
+  /// 
+  /// Sets the angles of this euler transform from a pure rotation matrix based
+  /// on the orientation specified by order.
   Euler setFromRotationMatrix(Matrix4 m, [RotationOrders? order, bool? update]) {
     //final clamp = MathUtils.clamp;
 
@@ -193,16 +236,35 @@ class Euler {
     return this;
   }
 
+  /// [q] - a normalized quaternion.
+  /// 
+  /// [order] - (optional) a string representing the order that the
+  /// rotations are applied.
+  /// 
+  /// Sets the angles of this euler transform from a normalized quaternion based
+  /// on the orientation specified by [order].
   Euler setFromQuaternion(Quaternion q, [RotationOrders? order, bool update = false]) {
     _matrix.makeRotationFromQuaternion(q);
 
     return setFromRotationMatrix(_matrix, order, update);
   }
 
+  /// [v] - [Vector3].
+  /// 
+  /// [order] - (optional) a string representing the order that the
+  /// rotations are applied.
+  /// 
+  /// Set the [x], [y] and [z], and optionally update
+  /// the [order].
   Euler setFromVector3(Vector3 v, [RotationOrders? order]) {
     return set(v.x, v.y, v.z, order ?? _order);
   }
 
+  /// Resets the euler angle with a new order by creating a quaternion from this
+  /// euler angle and then setting this euler angle with the quaternion and the
+  /// new order.
+  /// 
+  /// <em>*Warning*: this discards revolution information.</em>
   Euler reorder(RotationOrders newOrder) {
     // WARNING: this discards revolution information -bhouston
     _quaternion.setFromEuler(this, false);
@@ -216,6 +278,17 @@ class Euler {
         (euler._order == _order);
   }
 
+
+  /// [array] of length 3 or 4. The optional 4th argument corresponds
+  /// to the [order].
+  /// 
+  /// Assigns this euler's [x] angle to `array[0]`.
+  /// 
+  /// Assigns this euler's [y] angle to `array[1]`.
+  /// 
+  /// Assigns this euler's [z] angle to `array[2]`.
+  /// 
+  /// Optionally assigns this euler's [order] to `array[3]`.
   Euler fromArray(List<double> array) {
     _x = array[0];
     _y = array[1];
@@ -232,6 +305,12 @@ class Euler {
     return [_x, _y, _z, orderNo];
   }
 
+  /// [array] - (optional) array to store the euler in.
+  /// 
+  /// [offset] (optional) offset in the array.
+  /// 
+  /// Returns an array of the form [[x], [y], [z],
+  /// [order]].
   List<num> toArray([List<num>? array, int offset = 0]) {
     array ??= List<num>.filled(offset + 4, 0);
     array[offset] = _x;

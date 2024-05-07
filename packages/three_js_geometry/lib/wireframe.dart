@@ -2,8 +2,24 @@ import 'dart:typed_data';
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 
-class Wireframe extends BufferGeometry {
-  Wireframe(BufferGeometry geometry) : super() {
+/// This can be used as a helper object to view a [BufferGeometry] as a wireframe.
+/// 
+/// ```
+/// final geometry = SphereGeometry( 100, 100, 100 );
+///
+/// final wireframe = WireframeGeometry( geometry );
+///
+/// final line = LineSegments(wireframe);
+/// line.material.depthTest = false;
+/// line.material.opacity = 0.25;
+/// line.material.transparent = true;
+///
+/// scene.add( line );
+/// ```
+class WireframeGeometry extends BufferGeometry {
+
+  /// [geometry] — any geometry object.
+  WireframeGeometry(BufferGeometry geometry) : super() {
     type = "WireframeGeometry";
     // buffer
 

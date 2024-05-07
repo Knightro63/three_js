@@ -8,6 +8,8 @@ import '../vector/index.dart';
 
 // 3-band SH defined by 9 coefficients
 
+/// Represents a third-order spherical harmonics (SH). Light probes use this
+/// class to encode lighting information.
 class SphericalHarmonics3 {
   String type = "SphericalHarmonics3";
 
@@ -19,6 +21,9 @@ class SphericalHarmonics3 {
     }
   }
 
+  /// [coefficients] - An array of SH coefficients.
+  /// 
+  /// Sets the given SH coefficients to this instance.
   SphericalHarmonics3 set(List<Vector3> coefficients) {
     for (int i = 0; i < 9; i++) {
       this.coefficients[i].setFrom(coefficients[i]);
@@ -27,6 +32,7 @@ class SphericalHarmonics3 {
     return this;
   }
 
+  /// Sets all SH coefficients to `0`.
   SphericalHarmonics3 zero() {
     for (int i = 0; i < 9; i++) {
       coefficients[i].setValues(0, 0, 0);
@@ -94,6 +100,9 @@ class SphericalHarmonics3 {
     return target;
   }
 
+  /// [sh] - The SH to add.
+  /// 
+  /// Adds the given SH to this instance.
   SphericalHarmonics3 add(SphericalHarmonics3 sh) {
     for (int i = 0; i < 9; i++) {
       coefficients[i].add(sh.coefficients[i]);
@@ -102,6 +111,12 @@ class SphericalHarmonics3 {
     return this;
   }
 
+  /// [sh] - The SH to add.
+  /// 
+  /// [s] - The scale factor.
+  /// 
+  /// A convenience method for performing [add] and [scale] at
+  /// once.
   SphericalHarmonics3 addScaledSH(SphericalHarmonics3 sh, double s) {
     for (int i = 0; i < 9; i++) {
       coefficients[i].addScaled(sh.coefficients[i], s);
@@ -110,6 +125,9 @@ class SphericalHarmonics3 {
     return this;
   }
 
+  /// [s] - The scale factor.
+  /// 
+  /// Scales this SH by the given scale factor.
   SphericalHarmonics3 scale(double s) {
     for (int i = 0; i < 9; i++) {
       coefficients[i].scale(s);
@@ -118,6 +136,12 @@ class SphericalHarmonics3 {
     return this;
   }
 
+  /// [sh] - The SH to interpolate with.
+  /// 
+  /// [alpha] - The alpha factor.
+  /// 
+  /// Linear interpolates between the given SH and this instance by the given
+  /// alpha factor.
   SphericalHarmonics3 lerp(SphericalHarmonics3 sh, double alpha) {
     for (int i = 0; i < 9; i++) {
       coefficients[i].lerp(sh.coefficients[i], alpha);
@@ -136,14 +160,24 @@ class SphericalHarmonics3 {
     return true;
   }
 
+  /// [sh] - The SH to copy.
+  /// 
+  /// Copies the given SH to this instance.
   SphericalHarmonics3 copy(SphericalHarmonics3 sh) {
     return set(sh.coefficients);
   }
 
+  /// Returns a new instance of [SphericalHarmonics3] with equal coefficients.
   SphericalHarmonics3 clone() {
     return SphericalHarmonics3().copy(this);
   }
 
+  /// [array] - The array holding the numbers of the SH
+  /// coefficients.
+  /// 
+  /// [offset] - (optional) The array offset.
+  /// 
+  /// Sets the coefficients of this instance from the given array.
   SphericalHarmonics3 fromArray(List<double> array, [int offset = 0]) {
     final coefficients = this.coefficients;
 
@@ -154,6 +188,12 @@ class SphericalHarmonics3 {
     return this;
   }
 
+  /// [array] - (optional) The target array.
+  /// 
+  /// [offset] - (optional) The array offset.
+  /// 
+  /// Returns an array with the coefficients, or copies them into the provided
+  /// array. The coefficients are represented as numbers.
   List<double> toArray(List<double> array, [int offset = 0]) {
     final coefficients = this.coefficients;
 
@@ -164,8 +204,11 @@ class SphericalHarmonics3 {
     return array;
   }
 
-  // evaluate the basis functions
-  // shBasis is an Array[ 9 ]
+  /// [normal] - The normal vector (assumed to be unit length).
+  /// 
+  /// [shBasis] - The resulting SH basis.
+  /// 
+  /// Computes the SH basis for the given normal vector.
   static void getBasisAt(Vector3 normal, List<double> shBasis) {
     // normal is assumed to be unit length
 

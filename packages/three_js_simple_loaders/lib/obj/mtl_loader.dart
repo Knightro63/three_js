@@ -5,13 +5,15 @@ import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'package:three_js_core_loaders/three_js_core_loaders.dart';
 
-///
-/// Loads a Wavefront .mtl file specifying materials
-///
+/// The Material Template Library format (MTL) or .MTL File Format is a companion file format to .OBJ that describes surface shading
+/// (material) properties of objects within one or more .OBJ files.
 class MTLLoader extends Loader {
   late final FileLoader _loader;
   dynamic materialOptions;
 
+  /// [manager] — The [loadingManager] for the loader to use. Default is [DefaultLoadingManager].
+  /// 
+  /// Creates a new [MTLLoader].
   MTLLoader([super.manager]){
     _loader = FileLoader(manager);
   }

@@ -5,12 +5,9 @@ import 'package:three_js_core_loaders/three_js_core_loaders.dart';
 import 'package:typr_dart/typr_dart.dart' as typr_dart;
 import 'package:three_js_text/three_js_text.dart';
 
-/**
- * Requires opentype.js to be included in the project.
- * Loads TTF files and converts them into typeface JSON that can be used directly
- * to create THREE.Font objects.
- */
-
+/// Requires opentype.js to be included in the project.
+/// Loads TTF files and converts them into typeface JSON that can be used directly
+/// to create [Font] objects.
 class TYPRLoader extends Loader {
   bool reversed = false;
   late final FileLoader _loader;

@@ -33,12 +33,28 @@ Matrix4 _gizmoMatrixStateTemp = Matrix4();
 Matrix4 _cameraMatrixStateTemp = Matrix4();
 Vector3 _scalePointTemp = Vector3();
 
-/// *
-/// *
-/// * @param {Camera} camera Virtual camera used in the scene
-/// * @param {HTMLElement} domElement Renderer's dom element
-/// * @param {Scene} scene The scene to be rendered
-/// *
+/// Arcball controls allow the camera to be controlled by a virtual trackball with full touch support and advanced navigation functionality.
+/// 
+/// Cursor/finger positions and movements are mapped over a virtual trackball surface
+/// represented by a gizmo and mapped in intuitive and consistent camera movements.
+/// Dragging cursor/fingers will cause camera to orbit around the center of the trackball in a conservative way (returning to the starting point
+/// will make the camera to return to its starting orientation).
+///
+///
+/// In addition to supporting pan, zoom and pinch gestures, Arcball controls provide <i>focus</i> functionality with a double click/tap for
+/// intuitively moving the object's point of interest in the center of the virtual trackball.
+/// Focus allows a much better inspection and navigation in complex environment.
+/// Moreover Arcball controls allow FOV manipulation (in a vertigo-style method) and z-rotation.
+/// Saving and restoring of Camera State is supported also through clipboard
+/// (use ctrl+c and ctrl+v shortcuts for copy and paste the state).
+///
+///
+/// Unlike [OrbitControls] and [TrackballControls], [ArcballControls] doesn't require [update] to be called externally in an animation loop when animations
+/// are on.
+///
+///
+/// To use this, as with all files in the /examples directory, you will have to
+/// include the file separately in your HTML.
 class ArcballControls with EventDispatcher {
   Vector3 target = Vector3();
   final Vector3 _currentTarget = Vector3();
@@ -175,6 +191,11 @@ class ArcballControls with EventDispatcher {
   Scene? scene;
   dynamic _state;
 
+  /// [camera] - (required) The camera to be controlled. The camera must not be a child of another object, unless that object is the scene itself.
+  /// 
+  /// [listenableKey] - The element used for event listeners.
+  /// 
+  /// [scene] - The scene rendered by the camera. If not given, gizmos cannot be shown.
   ArcballControls(this.camera, this.listenableKey, [this.scene, double devicePixelRatio = 1.0]): super() {
     //FSA
     _state = State2.idle;
@@ -1293,19 +1314,13 @@ class ArcballControls with EventDispatcher {
     //dispatchEvent( _changeEvent );
   }
 
-  /// *
-	/// * Set _center's x/y coordinates
-	/// * @param {Number} clientX
-	/// * @param {Number} clientY
-	/// *
+	/// Set _center's x/y coordinates
   void setCenter(double clientX, double clientY) {
     _center.x = clientX;
     _center.y = clientY;
   }
 
-  /// *
-	/// * Set default mouse actions
-	/// *
+	/// Set default mouse actions
   void initializeMouseActions() {
     setMouseAction('pan', 0, 'CTRL');
     setMouseAction('pan', 2);
@@ -1319,12 +1334,8 @@ class ArcballControls with EventDispatcher {
     setMouseAction('fov', 1, 'SHIFT');
   }
 
-  /// *
-	/// * Compare two mouse actions
-	/// * @param {Object} action1
-	/// * @param {Object} action2
-	/// * @returns {Boolean} True if action1 and action 2 are the same mouse action, false otherwise
-	/// *
+	/// Compare two mouse actions
+	/// returns bool True if action1 and action 2 are the same mouse action, false otherwise
   bool compareMouseAction(action1, action2) {
     if (action1['operation'] == action2['operation']) {
       if (action1['mouse'] == action2['mouse'] &&
@@ -1338,13 +1349,11 @@ class ArcballControls with EventDispatcher {
     }
   }
 
-  /// *
 	/// * Set a mouse action by specifying the operation to be performed and a mouse/key combination. In case of conflict, replaces the existing one
-	/// * @param {String} operation The operation to be performed ('pan', 'rotate', 'ZOOM', 'fov)
-	/// * @param {*} mouse A mouse button (0, 1, 2, 3) or for wheel notches
-	/// * @param {*} key The keyboard modifier ('CTRL', 'SHIFT') or null if key is not needed
-	/// * @returns {Boolean} True if the mouse action has been successfully added, false otherwise
-	/// *
+	/// * [operation] The operation to be performed ('pan', 'rotate', 'ZOOM', 'fov)
+	/// * [mouse] A mouse button (0, 1, 2, 3) or for wheel notches
+	/// * [key] The keyboard modifier ('CTRL', 'SHIFT') or null if key is not needed
+	/// * returns Boolean True if the mouse action has been successfully added, false otherwise
   bool setMouseAction(String operation, int mouse, [String? key]) {
     final operationInput = ['pan', 'rotate', 'ZOOM', 'fov'];
     final mouseInput = ['0', '1', '2', '3'];
@@ -1406,12 +1415,10 @@ class ArcballControls with EventDispatcher {
     return true;
   }
 
-  /// *
 	/// * Remove a mouse action by specifying its mouse/key combination
-	/// * @param {*} mouse A mouse button (0, 1, 2, 3) 3 for wheel notches
-	/// * @param {*} key The keyboard modifier ('CTRL', 'SHIFT') or null if key is not needed
-	/// * @returns {Boolean} True if the operation has been succesfully removed, false otherwise
-	/// *
+	/// * [mouse] A mouse button (0, 1, 2, 3) 3 for wheel notches
+	/// * [key] The keyboard modifier ('CTRL', 'SHIFT') or null if key is not needed
+	/// * returns Boolean True if the operation has been succesfully removed, false otherwise
   bool unsetMouseAction(mouse, [String? key]) {
     for (int i = 0; i < mouseActions.length; i++) {
       if (
@@ -1426,12 +1433,10 @@ class ArcballControls with EventDispatcher {
     return false;
   }
 
-  /// *
 	/// * Return the operation associated to a mouse/keyboard combination
-	/// * @param {*} mouse A mouse button (0, 1, 2, 3) 3 for wheel notches
-	/// * @param {*} key The keyboard modifier ('CTRL', 'SHIFT') or null if key is not needed
-	/// * @returns The operation if it has been found, null otherwise
-	/// *
+	/// * [mouse] A mouse button (0, 1, 2, 3) 3 for wheel notches
+	/// * [key] The keyboard modifier ('CTRL', 'SHIFT') or null if key is not needed
+	/// * returns The operation if it has been found, null otherwise
   String? getOpFromAction(int mouse, String? key) {
     Map<String,dynamic> action;
 
@@ -1454,12 +1459,10 @@ class ArcballControls with EventDispatcher {
     return null;
   }
 
-  /// *
 	/// * Get the operation associated to mouse and key combination and returns the corresponding FSA state
-	/// * @param {Number} mouse Mouse button
-	/// * @param {String} key Keyboard modifier
-	/// * @returns The FSA state obtained from the operation associated to mouse/keyboard combination
-	/// *
+	/// * [mouse] Mouse button
+	/// * [key] Keyboard modifier
+	/// * returns The FSA state obtained from the operation associated to mouse/keyboard combination
   int? getOpStateFromAction(int mouse, String? key) {
     Map<String,dynamic> action;
 
@@ -1482,20 +1485,13 @@ class ArcballControls with EventDispatcher {
     return null;
   }
 
-  /// *
-	/// * Calculate the angle between two pointers
-	/// * @param {PointerEvent} p1
-	/// * @param {PointerEvent} p2
-	/// * @returns {Number} The angle between two pointers in degrees
-	/// *
+	/// Calculate the angle between two pointers
+	/// returns double The angle between two pointers in degrees
   double getAngle(p1, p2) {
     return math.atan2(p2.clientY - p1.clientY, p2.clientX - p1.clientX) *180 /math.pi;
   }
 
-  /// *
-	/// * Update a PointerEvent inside current pointerevents array
-	/// * @param {PointerEvent} event
-	/// *
+	/// Update a PointerEvent inside current pointerevents array
   void updateTouchEvent(event) {
     for (int i = 0; i < _touchCurrent.length; i++) {
       if (_touchCurrent[i].pointerId == event.pointerId) {
@@ -1505,10 +1501,8 @@ class ArcballControls with EventDispatcher {
     }
   }
 
-  /// *
 	/// * Apply a transformation matrix, to the camera and gizmos
-	/// * @param {Object} transformation Object containing matrices to apply to camera and gizmos
-	/// */
+	/// * [transformation] Object containing matrices to apply to camera and gizmos
   void applyTransformMatrix(Map<String, Matrix4>? transformation) {
     if (transformation?['camera'] != null) {
       _m4_1.setFrom(_cameraMatrixState).premultiply(transformation!['camera']!);
@@ -1581,13 +1575,11 @@ class ArcballControls with EventDispatcher {
     }
   }
 
-  /// *
 	/// * Calculate the angular speed
-	/// * @param {Number} p0 Position at t0
-	/// * @param {Number} p1 Position at t1
-	/// * @param {Number} t0 Initial time in milliseconds
-	/// * @param {Number} t1 Ending time in milliseconds
-	/// *
+	/// * [p0] Position at t0
+	/// * [p1] Position at t1
+	/// * [t0] Initial time in milliseconds
+	/// * [t1] Ending time in milliseconds
   double calculateAngularSpeed(p0, p1, t0, t1) {
     final s = p1 - p0;
     final t = (t1 - t0) / 1000;
@@ -1598,23 +1590,19 @@ class ArcballControls with EventDispatcher {
     return s / t;
   }
 
-  /// *
 	/// * Calculate the distance between two pointers
-	/// * @param {PointerEvent} p0 The first pointer
-	/// * @param {PointerEvent} p1 The second pointer
-	/// * @returns {number} The distance between the two pointers
-	/// *
+	/// * [p0] The first pointer
+	/// * [p1] The second pointer
+	/// * returns double The distance between the two pointers
   double calculatePointersDistance(p0, p1) {
     return math.sqrt(math.pow(p1.clientX - p0.clientX, 2) +
         math.pow(p1.clientY - p0.clientY, 2));
   }
 
-  /// *
 	/// * Calculate the rotation axis as the vector perpendicular between two vectors
-	/// * @param {Vector3} vec1 The first vector
-	/// * @param {Vector3} vec2 The second vector
-	/// * @returns {Vector3} The normalized rotation axis
-	/// *
+	/// * [vec1] The first vector
+	/// * [vec2] The second vector
+	/// * returns Vector3 The normalized rotation axis
   Vector3 calculateRotationAxis(Vector3 vec1, Vector3 vec2) {
     _rotationMatrix.extractRotation(_cameraMatrixState);
     _quat.setFromRotationMatrix(_rotationMatrix);
@@ -1623,11 +1611,8 @@ class ArcballControls with EventDispatcher {
     return _rotationAxis.normalize().clone();
   }
 
-  /// *
 	/// * Calculate the trackball radius so that gizmo's diamater will be 2/3 of the minimum side of the camera frustum
-	/// * @param {Camera} camera
-	/// * @returns {Number} The trackball radius
-	/// *
+	/// * returns double The trackball radius
   double calculateTbRadius(Camera camera) {
     final distance = camera.position.distanceTo(_gizmos.position);
 
@@ -1643,12 +1628,10 @@ class ArcballControls with EventDispatcher {
     return 0;
   }
 
-  /// *
 	/// * Focus operation consist of positioning the point of interest in front of the camera and a slightly zoom in
-	/// * @param {Vector3} point The point of interest
-	/// * @param {Number} size Scale factor
-	/// * @param {Number} amount Amount of operation to be completed (used for focus animations, default is complete full operation)
-	/// *
+	/// * [point] The point of interest
+	/// * [size] Scale factor
+	/// * [amount] Amount of operation to be completed (used for focus animations, default is complete full operation)
   void focus(point, size, [num amount = 1]) {
     //move center of camera (along with gizmos) towards point of interest
     _offset.setFrom(point).sub(_gizmos.position).scale(amount);
@@ -1747,19 +1730,15 @@ class ArcballControls with EventDispatcher {
     }
   }
 
-  /// *
 	/// * Compute the easing out cubic function for ease out effect in animation
 	/// * @param {Number} t The absolute progress of the animation in the bound of 0 (beginning of the) and 1 (ending of animation)
 	/// * @returns {Number} Result of easing out cubic at time t
-	/// *
   num easeOutCubic(t) {
     return 1 - math.pow(1 - t, 3);
   }
 
-  /// *
 	/// * Make rotation gizmos more or less visible
-	/// * @param {Boolean} isActive If true, make gizmos more visible
-	/// *
+	/// * [isActive] If true, make gizmos more visible
   void activateGizmos(isActive) {
     final gizmoX = _gizmos.children[0];
     final gizmoY = _gizmos.children[1];
@@ -1776,13 +1755,10 @@ class ArcballControls with EventDispatcher {
     }
   }
 
-  /// *
 	/// * Calculate the cursor position in NDC
-	/// * @param {number} x Cursor horizontal coordinate within the canvas
-	/// * @param {number} y Cursor vertical coordinate within the canvas
-	/// * @param {HTMLElement} canvas The canvas where the renderer draws its output
-	/// * @returns {Vector2} Cursor normalized position inside the canvas
-	/// *
+	/// * [cursorX] Cursor horizontal coordinate within the canvas
+	/// * [cursorY] Cursor vertical coordinate within the canvas
+	/// * @ Vector2 Cursor normalized position inside the canvas
   Vector2 getCursorNDC(double cursorX, double cursorY) {
     // final canvasRect = canvas.getBoundingClientRect();
 
@@ -1795,13 +1771,10 @@ class ArcballControls with EventDispatcher {
     return _v2_1.clone();
   }
 
-  /// *
 	/// * Calculate the cursor position inside the canvas x/y coordinates with the origin being in the center of the canvas
-	/// * @param {Number} x Cursor horizontal coordinate within the canvas
-	/// * @param {Number} y Cursor vertical coordinate within the canvas
-	/// * @param {HTMLElement} canvas The canvas where the renderer draws its output
-	/// * @returns {Vector2} Cursor position inside the canvas
-	/// *
+	/// * [cursorX] Cursor horizontal coordinate within the canvas
+	/// * [cursorY] Cursor vertical coordinate within the canvas
+	/// * returns Vector2 Cursor position inside the canvas
   Vector2 getCursorPosition(double cursorX, double cursorY) {
     _v2_1.setFrom(getCursorNDC(cursorX, cursorY));
     _v2_1.x *= (camera.right - camera.left) * 0.5;
@@ -1809,10 +1782,8 @@ class ArcballControls with EventDispatcher {
     return _v2_1.clone();
   }
 
-  /// *
 	/// * Set the camera to be controlled
-	/// * @param {Camera} camera The virtual camera to be controlled
-	/// *
+	/// * [camera] The virtual camera to be controlled
   void setCamera(camera) {
     camera.lookAt(target);
     camera.updateMatrix();
@@ -1848,19 +1819,15 @@ class ArcballControls with EventDispatcher {
     makeGizmos(target, _tbRadius);
   }
 
-  /// *
 	/// * Set gizmos visibility
-	/// * @param {Boolean} value Value of gizmos visibility
-	/// *
+	/// * [value] Value of gizmos visibility
   void setGizmosVisible(value) {
     _gizmos.visible = value;
     dispatchEvent(_changeEvent);
   }
 
-  /// *
 	/// * Set gizmos radius factor and redraws gizmos
-	/// * @param {Float} value Value of radius factor
-	/// *
+	/// * [value] Value of radius factor
   void setTbRadius(value) {
     radiusFactor = value;
     _tbRadius = calculateTbRadius(camera);
@@ -1877,11 +1844,9 @@ class ArcballControls with EventDispatcher {
     dispatchEvent(_changeEvent);
   }
 
-  /// *
 	/// * Creates the rotation gizmos matching trackball center and radius
-	/// * @param {Vector3} tbCenter The trackball center
-	/// * @param {number} tbRadius The trackball radius
-	/// *
+	/// * [tbCenter] The trackball center
+	/// * [tbRadius] The trackball radius
   void makeGizmos(tbCenter, tbRadius) {
     final curve = EllipseCurve(0, 0, tbRadius, tbRadius);
     final points = curve.getPoints(_curvePts);
@@ -2103,12 +2068,10 @@ class ArcballControls with EventDispatcher {
     dispatchEvent(_changeEvent);
   }
 
-  /// *
 	/// * Rotate the camera around an axis passing by trackball's center
-	/// * @param {Vector3} axis Rotation axis
-	/// * @param {number} angle Angle in radians
-	/// * @returns {Object} Object with 'camera' field containing transformation matrix resulting from the operation to be applied to the camera
-	/// *
+	/// * [axis] Rotation axis
+	/// * [angle] Angle in radians
+	/// * returns Object Object with 'camera' field containing transformation matrix resulting from the operation to be applied to the camera
   Map<String, Matrix4> rotate(Vector3 axis, double angle) {
     final point = _gizmos.position; //rotation center
     _translationMatrix.makeTranslation(-point.x, -point.y, -point.z);
@@ -2181,13 +2144,11 @@ class ArcballControls with EventDispatcher {
     }
   }
 
-  /// *
 	/// * Perform uniform scale operation around a given point
-	/// * @param {Number} size Scale factor
-	/// * @param {Vector3} point Point around which scale
-	/// * @param {Boolean} scaleGizmos If gizmos should be scaled (Perspective only)
-	/// * @returns {Object} Object with 'camera' and 'gizmo' fields containing transformation matrices resulting from the operation to be applied to the camera and gizmos
-	/// *
+	/// * [size] Scale factor
+	/// * [point] Point around which scale
+	/// * [scaleGizmos] If gizmos should be scaled (Perspective only)
+	/// * returns Object Object with 'camera' and 'gizmo' fields containing transformation matrices resulting from the operation to be applied to the camera and gizmos
   Map<String, Matrix4>? scale(double size, Vector? point, [bool scaleGizmos = true]) {
     _scalePointTemp.setFrom(point ?? Vector3());
     double sizeInverse = 1 / size;
@@ -2295,10 +2256,8 @@ class ArcballControls with EventDispatcher {
     return null;
   }
 
-  /// *
 	/// * Set camera fov
-	/// * @param {Number} value fov to be setted
-	/// *
+	/// * [value] fov to be setted
   void setFov(double value) {
     if (camera is PerspectiveCamera) {
       camera.fov = MathUtils.clamp(value, minFov, maxFov);
@@ -2306,11 +2265,9 @@ class ArcballControls with EventDispatcher {
     }
   }
 
-  /// *
 	/// * Set values in transformation object
-	/// * @param {Matrix4} camera Transformation to be applied to the camera
-	/// * @param {Matrix4} gizmos Transformation to be applied to gizmos
-	/// *
+	/// * [camera] Transformation to be applied to the camera
+	/// * [gizmos] Transformation to be applied to gizmos
   void setTransformationMatrices([Matrix4? camera, Matrix4? gizmos]) {
     if (camera != null) {
       if (_transformation['camera'] != null) {
@@ -2337,12 +2294,10 @@ class ArcballControls with EventDispatcher {
     }
   }
 
-  /// *
 	/// * Rotate camera around its direction axis passing by a given point by a given angle
-	/// * @param {Vector3} point The point where the rotation axis is passing trough
-	/// * @param {Number} angle Angle in radians
-	/// * @returns The computed transormation matix
-	/// *
+	/// * [point] The point where the rotation axis is passing trough
+	/// * [angle] Angle in radians
+	/// * returns The computed transormation matix
   Map<String, Matrix4> zRotate(Vector3 point, double angle) {
     _rotationMatrix.makeRotationAxis(_rotationAxis, angle);
     _translationMatrix.makeTranslation(-point.x, -point.y, -point.z);
@@ -2369,12 +2324,10 @@ class ArcballControls with EventDispatcher {
     return _raycaster;
   }
 
-  /// *
 	/// * Unproject the cursor on the 3D object surface
-	/// * @param {Vector2} cursor Cursor coordinates in NDC
-	/// * @param {Camera} camera Virtual camera
-	/// * @returns {Vector3} The point of intersection with the model, if exist, null otherwise
-	/// *
+	/// * [cursor] Cursor coordinates in NDC
+	/// * [camera] Virtual camera
+	/// * returns Vector3 The point of intersection with the model, if exist, null otherwise
   Vector3? unprojectOnObj(Vector2 cursor, Camera camera) {
     final raycaster = getRaycaster();
     raycaster.near = camera.near;
@@ -2393,15 +2346,12 @@ class ArcballControls with EventDispatcher {
     return null;
   }
 
-  /// *
 	/// * Unproject the cursor on the trackball surface
-	/// * @param {Camera} camera The virtual camera
-	/// * @param {Number} cursorX Cursor horizontal coordinate on screen
-	/// * @param {Number} cursorY Cursor vertical coordinate on screen
-	/// * @param {HTMLElement} canvas The canvas where the renderer draws its output
-	/// * @param {number} tbRadius The trackball radius
-	/// * @returns {Vector3} The unprojected point on the trackball surface
-	/// */
+	/// * [camera] The virtual camera
+	/// * [cursorX] Cursor horizontal coordinate on screen
+	/// * [cursorY] Cursor vertical coordinate on screen
+	/// * [tbRadius] The trackball radius
+	/// * returns Vector3 The unprojected point on the trackball surface
   Vector3 unprojectOnTbSurface(Camera camera, double cursorX, double cursorY, double tbRadius) {
     if (camera is OrthographicCamera) {
       _v2_1.setFrom(getCursorPosition(cursorX, cursorY));
@@ -2512,15 +2462,12 @@ class ArcballControls with EventDispatcher {
     return Vector3();
   }
 
-  /// *
 	/// * Unproject the cursor on the plane passing through the center of the trackball orthogonal to the camera
-	/// * @param {Camera} camera The virtual camera
-	/// * @param {Number} cursorX Cursor horizontal coordinate on screen
-	/// * @param {Number} cursorY Cursor vertical coordinate on screen
-	/// * @param {HTMLElement} canvas The canvas where the renderer draws its output
-	/// * @param {Boolean} initialDistance If initial distance between camera and gizmos should be used for calculations instead of current (Perspective only)
-	/// * @returns {Vector3} The unprojected point on the trackball plane
-	/// *
+	/// * [camera] The virtual camera
+	/// * [cursorX] Cursor horizontal coordinate on screen
+	/// * [cursorY] Cursor vertical coordinate on screen
+	/// * [initialDistance] If initial distance between camera and gizmos should be used for calculations instead of current (Perspective only)
+	/// * returns Vector3 The unprojected point on the trackball plane
   Vector3 unprojectOnTbPlane(Camera camera, double cursorX, double cursorY,[bool initialDistance = false]) {
     if (camera is OrthographicCamera) {
       _v2_1.setFrom(getCursorPosition(cursorX, cursorY));
@@ -2602,11 +2549,9 @@ class ArcballControls with EventDispatcher {
     }
   }
 
-  /// *
 	/// * Update the trackball FSA
-	/// * @param {State2} newState New state of the FSA
-	/// * @param {Boolean} updateMatrices If matriices state should be updated
-	/// *
+	/// * [newState] New state of the FSA
+	/// * [updateMatrices] If matriices state should be updated
   void updateTbState(newState, bool updateMatrices) {
     _state = newState;
     if (updateMatrices) {

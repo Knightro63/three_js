@@ -3,7 +3,27 @@ import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'dart:math' as math;
 
+/// A class for generating a two-dimensional ring geometry.
+/// 
+/// ```
+/// final geometry = RingGeometry( 1,5,32); 
+/// final material = MeshBasicMaterial( { MaterialProperty.color: 0xffff00}); 
+/// final circle = Mesh(geometry, material); 
+/// scene.add(circle);
+/// ```
 class RingGeometry extends BufferGeometry {
+  /// [innerRadius] — Default is `0.5`.
+  /// 
+  /// [outerRadius] — Default is `1`.
+  /// 
+  /// [thetaSegments] — Number of segments. A higher number means the ring will be
+  /// more round. Minimum is `3`. Default is `32`.
+  /// 
+  /// [phiSegments] — Number of segments per ring segment. Minimum is `1`. Default is `1`.
+  /// 
+  /// [thetaStart] — Starting angle. Default is `0`.
+  /// 
+  /// [thetaLength] — Central angle. Default is `pi` * 2.
   RingGeometry([
     double innerRadius = 0.5,
     double outerRadius = 1,

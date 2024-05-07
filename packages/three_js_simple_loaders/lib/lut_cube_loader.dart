@@ -25,9 +25,15 @@ class LUTCubeLoaderData {
   Data3DTexture? texture3D;
 }
 
+/// A 3D LUT loader that supports the .cube file format.
+/// 
+/// Based on the following reference: (https://wwwimages2.adobe.com/content/dam/acom/en/products/speedgrade/cc/pdfs/cube-lut-specification-1.0.pdf)
 class LUTCubeLoader extends Loader {
   late final FileLoader _loader;
 
+  /// [manager] — The [loadingManager] for the loader to use. Default is [DefaultLoadingManager].
+  /// 
+  /// Creates a new [LUTCubeLoader].
   LUTCubeLoader([super.manager]){
     _loader = FileLoader(manager);
   }

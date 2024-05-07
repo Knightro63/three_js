@@ -1,13 +1,25 @@
-/**
- * @author kovacsv / http://kovacsv.hu/
- * @author mrdoob / http://mrdoob.com/
- * @author mudcube / http://mudcu.be/
- */
+//@author kovacsv / http://kovacsv.hu/
+//@author mrdoob / http://mrdoob.com/
+//@author mudcube / http://mudcu.be/
 
 import 'dart:typed_data';
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 
+/// An exporter for the STL file format.
+/// 
+/// [STL](https://en.wikipedia.org/wiki/STL_(file_format)) files describe only the surface geometry
+/// of a three-dimensional object without any representation of color, texture or other common model attributes.
+/// The STL format specifies both ASCII and binary representations, with binary being more compact. 
+/// STL files contain no scale information or indexes, and the units are arbitrary.
+/// 
+/// ```
+/// // Instantiate an exporter
+/// final exporter = STLBinaryExporter();
+///
+/// // Parse the input and generate the STL encoded output
+/// final result = exporter.parseMesh(mesh);
+/// ```
 class STLBinaryExporter{
   late ByteData _output;
   bool _usingParse = false;
@@ -95,9 +107,10 @@ class STLBinaryExporter{
     _output.setUint32( offset, triangles, Endian.little ); offset += 4;
 
     // Traversing our collected objects
-    objects.forEach(( mesh ){
+    ///objects.forEach(( mesh ){
+    for(Mesh mesh in objects){
       parseMesh(mesh);
-    });
+    }
     _usingParse = false;
     return _output.buffer.asUint8List();
   }

@@ -1,3 +1,4 @@
+/// List of all the attributes used in threejs
 enum Semantic{
   position,
   normal,

@@ -5,13 +5,32 @@ import 'package:three_js_math/three_js_math.dart';
 final _v1 = Vector3.zero();
 final _v2 = Vector3.zero();
 
+/// Visualizes an object's vertex tangents.
+/// Requires that tangents have been specified in a [custom attribute] or
+/// have been calculated using [computeTangents].
+/// 
+/// ```
+/// final geometry = BoxGeometry( 10, 10, 10, 2, 2, 2 );
+/// final material = MeshStandardMaterial();
+/// final mesh = Mesh( geometry, material );
+///
+/// final helper = VertexTangentsHelper( mesh, 1, 0x00ffff );
+///
+/// scene.add( mesh );
+/// scene.add( helper );
+/// ```
 class VertexTangentsHelper extends LineSegments {
   late Object3D object;
   late int size;
 
   VertexTangentsHelper.create(super.geometry, super.material);
 
-  factory VertexTangentsHelper(Object3D object, [int size = 1, color = 0x00ffff]) {
+  /// [object] -- object for which to render vertex tangents.
+  /// 
+  /// [size] -- (optional) length of the arrows. Default is *1*.
+  /// 
+  /// [color] -- (optional) hex color of the arrows. Default is *0x00ffff*.
+  factory VertexTangentsHelper(Object3D object, [int size = 1, int color = 0x00ffff]) {
     final nTangents = object.geometry?.attributes["tangent"].count;
     final geometry = BufferGeometry();
 

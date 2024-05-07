@@ -6,11 +6,16 @@ import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'package:three_js_core_loaders/three_js_core_loaders.dart';
 
+/// A loader for loading a [Material] in JSON format. This uses the
+/// [FileLoader] internally for loading files.
 class MaterialLoader extends Loader {
   late final FileLoader _loader;
   late Map textures;
 
-  MaterialLoader([LoadingManager? manager]) : super(manager) {
+  /// [manager] — The [loadingManager] for the loader to use. Default is [DefaultLoadingManager].
+  /// 
+  /// Creates a new [FontLoader].
+  MaterialLoader([super.manager]){
     textures = {};
     _loader = FileLoader(manager);
   }

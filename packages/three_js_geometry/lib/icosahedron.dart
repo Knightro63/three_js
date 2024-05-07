@@ -1,6 +1,7 @@
 import 'polyhedron.dart';
 import 'dart:math' as math;
 
+/// A class for generating an icosahedron geometry.
 class IcosahedronGeometry extends PolyhedronGeometry {
   IcosahedronGeometry.create(
     super.vertices, 
@@ -11,7 +12,11 @@ class IcosahedronGeometry extends PolyhedronGeometry {
   ]){
     type = "IcosahedronGeometry";
   }
-
+  /// [radius] — Default is `1`.
+  /// 
+  /// [detail] — Default is `0`. Setting this to a value greater than `0` adds more
+  /// vertices making it no longer an icosahedron. When detail is greater than
+  /// 1, it's effectively a sphere.
   factory IcosahedronGeometry([double radius = 1, int detail = 0]) {
     final t = (1 + math.sqrt(5)) / 2;
 

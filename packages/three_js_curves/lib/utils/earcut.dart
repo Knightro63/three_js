@@ -1,5 +1,4 @@
 import 'dart:math' as math;
-import 'package:three_js_math/three_js_math.dart';
 
 class Earcut {
   static List<num> triangulate(List<double> data, List<int>? holeIndices, [int? dim]) {

@@ -3,7 +3,30 @@ import 'dart:typed_data';
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 
+/// [CircleGeometry] is a simple shape of Euclidean geometry. It is constructed from a
+/// number of triangular segments that are oriented around a central point and
+/// extend as far out as a given radius. It is built counter-clockwise from a
+/// start angle and a given central angle. It can also be used to create
+/// regular polygons, where the number of segments determines the number of
+/// sides.
+/// 
+/// ```
+/// final geometry = CircleGeometry(radius:5, segments:32); 
+/// final material = MeshBasicMaterial( { MaterialProperty.color: 0xffff00}); 
+/// final circle = Mesh(geometry, material); 
+/// scene.add(circle);
+/// ```
 class CircleGeometry extends BufferGeometry {
+
+  /// [radius] — Radius of the circle, default = 1.
+  /// 
+  /// [segments] — Number of segments (triangles), minimum = `3`, default = `32`.
+  /// 
+  /// [thetaStart] — Start angle for first segment, default = `0` (three o'clock
+  /// position).
+  /// 
+  /// [thetaLength] — The central angle, often called theta, of the circular
+  /// sector. The default is `2`*pi, which makes for a complete circle.
   CircleGeometry({
     double radius = 1, 
     int segments = 8, 

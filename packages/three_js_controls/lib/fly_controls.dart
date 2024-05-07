@@ -1,4 +1,7 @@
-part of three_js_controls;
+import 'package:flutter/widgets.dart' hide Matrix4;
+import 'package:three_js_core/three_js_core.dart';
+import 'package:three_js_math/three_js_math.dart';
+import 'package:flutter/material.dart' hide Matrix4;
 
 class FlyMoveState{
   double up = 0; 
@@ -24,11 +27,16 @@ class _ContainerDimensions{
   Offset offset;
 }
 
+/// [FlyControls] enables a navigation similar to fly modes in DCC tools like Blender. You can arbitrarily transform the camera in
+/// 3D space without any limitations (e.g. focus on a specific target).
 class FlyControls{
   late GlobalKey<PeripheralsState> listenableKey;
   PeripheralsState get domElement => listenableKey.currentState!;
 	Camera object;
 
+  /// [object] - The camera to be controlled.
+  /// 
+  /// [listenableKey] - The element used for event listeners.
   FlyControls(this.object, this.listenableKey ) {
     //if(domElement) this.domElement.setAttribute( 'tabindex', - 1 );
 
@@ -175,6 +183,7 @@ class FlyControls{
   final _lastPosition = Vector3();
   double delta = 1;
 
+  /// Updates the controls. Usually called in the animation loop.
 	void update() {
     final moveMult = delta * movementSpeed;
     final rotMult = delta * rollSpeed;
@@ -231,6 +240,7 @@ class FlyControls{
 		event.preventDefault();
 	}
 
+  /// Should be called if the controls is no longer required.
 	void dispose(){
 		domElement.removeEventListener( PeripheralType.contextmenu, contextmenu, false );
 		domElement.removeEventListener( PeripheralType.mousedown, mousedown, false );

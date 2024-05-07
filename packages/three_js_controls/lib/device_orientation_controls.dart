@@ -1,11 +1,11 @@
-part of three_js_controls;
+import 'dart:math' as math;
+import 'package:flutter/widgets.dart' hide Matrix4;
+import 'package:three_js_core/three_js_core.dart';
+import 'package:three_js_math/three_js_math.dart';
+import 'package:flutter/material.dart' hide Matrix4;
 
-/**
- * W3C Device Orientation control (http://w3c.github.io/deviceorientation/spec-source-orientation.html)
- */
-
-class _DeviceOrientation{
-  _DeviceOrientation({
+class DeviceOrientation{
+  DeviceOrientation({
     this.alpha = 0,
     this.beta = 0,
     this.gamma = 0
@@ -30,7 +30,7 @@ class DeviceOrientationControls{
 	double eps = 0.000001;
 	bool enabled = true;
 
-	_DeviceOrientation _deviceOrientation = _DeviceOrientation();
+	DeviceOrientation _deviceOrientation = DeviceOrientation();
 	double screenOrientation = 0;
 	double alphaOffset = 0; // radians
 

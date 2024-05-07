@@ -1,9 +1,20 @@
-/**
- * @author mrdoob / http://mrdoob.com/
- */
+//@author mrdoob / http://mrdoob.com/
+
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 
+/// An exporter for the [OBJ](https://en.wikipedia.org/wiki/Wavefront_.obj_file) file format.
+///
+/// [OBJExporter] is not able to export material data into MTL files so only geometry data are supported.
+/// 
+/// ```
+/// // Instantiate an exporter
+/// final exporter = OBJExporter();
+///
+/// // Parse the input and generate the OBJ output
+/// final data = exporter.parseMesh( scene );
+/// downloadFile( data );
+/// ```
 class OBJExporter{
   String _output = '';
   int _indexVertex = 0;
@@ -40,7 +51,7 @@ class OBJExporter{
     }
 
     // name of the mesh object
-    _output += 'o ' + mesh.name + '\n';
+    _output += 'o ${mesh.name}\n';
 
     // vertices
     if(vertices != null) {
@@ -123,7 +134,7 @@ class OBJExporter{
     //final indices = geometry?.getIndex();
 
     // name of the line object
-    _output += 'o ' + line.name + '\n';
+    _output += 'o ${line.name}\n';
 
     if( vertices != null) {
       for (int i = 0, l = vertices.length; i < l; i ++, nbVertex++ ) {

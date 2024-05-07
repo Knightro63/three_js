@@ -14,51 +14,57 @@ import 'package:three_js_core_loaders/three_js_core_loaders.dart';
 /// The loader returns a non-indexed buffer geometry.
 ///
 /// Limitations:
-///  Binary decoding supports "Magics" color format (http://en.wikipedia.org/wiki/STL_(file_format)#Color_in_binary_STL).
+///  Binary decoding supports "Magics" color [format](http://en.wikipedia.org/wiki/STL_(file_format)#Color_in_binary_STL).
 ///  There is perhaps some question as to how valid it is to always assume little-endian-ness.
 ///  ASCII decoding assumes file is UTF-8.
 ///
 /// Usage:
-///  const loader = new STLLoader();
-///  loader.load( './models/stl/slotted_disk.stl', function ( geometry ) {
-///    scene.add( new THREE.Mesh( geometry ) );
-///  });
+/// ```
+///  final loader = STLLoader();
+///  final geometry = await loader.fromAsset( 'assets/models/stl/slotted_disk.stl');
+///  scene.add(Mesh(geometry));
+///  ```
 ///
 /// For binary STLs geometry might contain colors for vertices. To use it:
 ///  // use the same code to load STL as above
+/// ```
 ///  if (geometry.hasColors) {
-///    material = new THREE.MeshPhongMaterial({ opacity: geometry.alpha, vertexColors: true });
+///    material = MeshPhongMaterial({ MaterialProperty.opacity: geometry.alpha, MaterialProperty.vertexColors: true });
 ///  } else { .... }
-///  const mesh = new THREE.Mesh( geometry, material );
+///  final mesh = Mesh( geometry, material );
+///```
 ///
 /// For ASCII STLs containing multiple solids, each solid is assigned to a different group.
 /// Groups can be used to assign a different color by defining an array of materials with the same length of
 /// geometry.groups and passing it to the Mesh constructor:
-///
-/// const mesh = new THREE.Mesh( geometry, material );
-///
+///```
+/// final mesh = Mesh( geometry, material );
+///```
 /// For example:
+///```
+///  final materials = [];
+///  final nGeometryGroups = geometry.groups.length;
 ///
-///  const materials = [];
-///  const nGeometryGroups = geometry.groups.length;
+///  final colorMap = ...; // Some logic to index colors.
 ///
-///  const colorMap = ...; // Some logic to index colors.
+///  for (int i = 0; i < nGeometryGroups; i++) {
 ///
-///  for (let i = 0; i < nGeometryGroups; i++) {
-///
-///		const material = new THREE.MeshPhongMaterial({
-///			color: colorMap[i],
-///			wireframe: false
+///		final material = MeshPhongMaterial({
+///			MaterialProperty.color: colorMap[i],
+///			MaterialProperty.wireframe: false
 ///		});
 ///
 ///  }
 ///
-///  materials.push(material);
-///  const mesh = new THREE.Mesh(geometry, materials);
-///
+///  materials.add(material);
+///  final mesh = Mesh(geometry, materials);
+///```
 class STLLoader extends Loader {
   late final FileLoader _loader;
 
+  /// [manager] — The [loadingManager] for the loader to use. Default is [DefaultLoadingManager].
+  /// 
+  /// Creates a new [MTLLoader].
 	STLLoader([super.manager]){
 		_loader = FileLoader(manager);
   }

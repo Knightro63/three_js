@@ -6,12 +6,31 @@ final _v1 = Vector3.zero();
 final _v2 = Vector3.zero();
 final _normalMatrix = Matrix3.identity();
 
+/// Visualizes an object's vertex normals.
+/// Requires that normals have been specified in a [custom attribute] or
+/// have been calculated using [computeVertexNormals].
+/// 
+/// ```
+/// final geometry = BoxGeometry( 10, 10, 10, 2, 2, 2 );
+/// final material = MeshStandardMaterial();
+/// final mesh = Mesh( geometry, material );
+///
+/// final helper = VertexNormalsHelper( mesh, 1, 0xff0000 );
+///
+/// scene.add( mesh );
+/// scene.add( helper );
+/// ```
 class VertexNormalsHelper extends LineSegments {
   late Object3D object;
   late int size;
 
   VertexNormalsHelper.create(super.geometry, super.material);
 
+  /// [object] -- object for which to render vertex normals.
+  /// 
+  /// [size] -- (optional) length of the arrows. Default is *1*.
+  /// 
+  /// [color] -- (optional) hex color of the arrows. Default is *0xff0000*.
   factory VertexNormalsHelper(Object3D object, [int size = 1, int color = 0xff0000]) {
     final geometry = BufferGeometry();
 

@@ -3,7 +3,35 @@ import 'dart:typed_data';
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 
+/// A class for generating cylinder geometries.
+/// 
+/// ```
+/// final geometry = CylinderGeometry( 5, 5, 20, 32 ); 
+/// final material = MeshBasicMaterial( { MaterialProperty.color: 0xffff00}); 
+/// final circle = Mesh(geometry, material); 
+/// scene.add(circle);
+/// ```
 class CylinderGeometry extends BufferGeometry {
+  /// [radiusTop] — Radius of the cylinder at the top. Default is `1`.
+  /// 
+  /// [radiusBottom] — Radius of the cylinder at the bottom. Default is `1`.
+  /// 
+  /// [height] — Height of the cylinder. Default is `1`.
+  /// 
+  /// [radialSegments] — Number of segmented faces around the circumference of the
+  /// cylinder. Default is `32`
+  /// 
+  /// [heightSegments] — Number of rows of faces along the height of the cylinder.
+  /// Default is `1`.
+  /// 
+  /// [openEnded] — A Boolean indicating whether the ends of the cylinder are open
+  /// or capped. Default is false, meaning capped.
+  /// 
+  /// [thetaStart] — Start angle for first segment, default = 0 (three o'clock
+  /// position).
+  /// 
+  /// [thetaLength] — The central angle, often called theta, of the circular
+  /// sector. The default is `2`*Pi, which makes for a complete cylinder.
   CylinderGeometry([
     double radiusTop = 1,
     double radiusBottom = 1,

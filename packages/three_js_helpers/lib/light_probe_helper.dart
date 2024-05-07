@@ -1,9 +1,18 @@
 import 'package:three_js_core/three_js_core.dart';
 
+/// Renders a sphere to visualize a light probe in the scene.
+/// 
+/// ```
+/// final helper = LightProbeHelper( lightProbe, 1 );
+/// scene.add( helper );
+/// ```
 class LightProbeHelper extends Mesh {
   late LightProbe lightProbe;
   late double size;
 
+  /// [lightProbe] -- the light probe.
+  /// 
+  /// [size] -- size of the helper sphere
   LightProbeHelper.create(super.geometry, super.material){
     type = 'LightProbeHelper';
 		onBeforeRender.call();
@@ -75,6 +84,7 @@ class LightProbeHelper extends Mesh {
     return lph;
 	}
 
+  /// Frees the GPU-related resources allocated by this instance. Call this method whenever this instance is no longer used in your app.
   @override
 	void dispose() {
 		geometry?.dispose();

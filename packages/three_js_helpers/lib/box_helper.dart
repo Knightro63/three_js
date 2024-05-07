@@ -4,12 +4,34 @@ import 'package:three_js_core/three_js_core.dart';
 
 final _box = BoundingBox();
 
+/// Helper object to graphically show the world-axis-aligned bounding box
+/// around an object. The actual bounding box is handled with [BoundingBox],
+/// this is just a visual helper for debugging. It can be automatically
+/// resized with the [BoxHelper.update] method when the object it's
+/// created from is transformed. Note that the object must have a
+/// [BufferGeometry] for this to work, so it won't work with [Sprites].
+/// 
+/// ```
+/// final sphere = SphereGeometry();
+/// final object = Mesh( sphere, MeshBasicMaterial({MaterialProperty.color: 0xff0000}));
+/// final box = BoxHelper( object, color: 0xffff00 );
+/// scene.add( box );
+/// ```
 class BoxHelper extends LineSegments {
   Object3D? object;
 
   BoxHelper.create(super.geometry, super.material);
 
-  factory BoxHelper(object, {color = 0xffff00}) {
+  /// [object] -- (optional) the object3D to show the
+  /// world-axis-aligned boundingbox.
+  /// 
+  /// [color] -- (optional) hexadecimal value that defines the box's
+  /// color. Default is 0xffff00.
+  /// 
+  /// Creates a new wireframe box that bounds the passed object. Internally this
+  /// uses [setFromObject] to calculate the dimensions. Note that this
+  /// includes any children.
+  factory BoxHelper(object, {int color = 0xffff00}) {
     final indices = Uint16Array.from([
       0,
       1,
@@ -55,6 +77,8 @@ class BoxHelper extends LineSegments {
     return boxHelper;
   }
 
+  /// Updates the helper's geometry to match the dimensions of the object,
+  /// including any children. See [setFromObject].
   void update() {
     if (object != null) {
       _box.setFromObject(object!);
@@ -114,6 +138,9 @@ class BoxHelper extends LineSegments {
     geometry!.computeBoundingSphere();
   }
 
+  /// [object] - [Object3D] to create the helper of.
+  /// 
+  /// Updates the wireframe box for the passed object.
   BoxHelper setFromObject(object) {
     this.object = object;
     update();

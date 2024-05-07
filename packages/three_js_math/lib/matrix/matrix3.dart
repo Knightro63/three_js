@@ -3,11 +3,15 @@ import 'package:flutter_gl/flutter_gl.dart';
 import 'dart:math' as math;
 import 'index.dart';
 
+/// A class representing a 3x3
+/// [matrix](https://en.wikipedia.org/wiki/Matrix_(mathematics)).
 class Matrix3 {
   String type = "Matrix3";
 
   late Float32List storage;
 
+  /// Creates a 3x3 matrix with the given arguments in row-major order. If no arguments are provided, the constructor initializes
+  /// the [Matrix3] to the 3x3 [identity matrix](https://en.wikipedia.org/wiki/Identity_matrix).
   Matrix3.identity() {
     storage = Float32List.fromList([1, 0, 0, 0, 1, 0, 0, 0, 1]);
   }
@@ -28,6 +32,7 @@ class Matrix3 {
     return this;
   }
 
+  /// Set the current 3x3 matrix as an identity matrix.
   Matrix3 identity() {
     setValues(1, 0, 0, 0, 1, 0, 0, 0, 1);
 
@@ -47,10 +52,12 @@ class Matrix3 {
         argStorage[2] * v0 + argStorage[5] * v1 + argStorage[8] * v2;
   }
 
+  /// Creates a new Matrix3 and with identical elements to this one.
   Matrix3 clone() {
     return Matrix3.identity().copyFromArray(storage);
   }
 
+  /// Copies the elements of matrix [page:Matrix3 m] into this matrix.
   Matrix3 setFrom(Matrix3 m) {
     final te = storage;
     final me = m.storage;
@@ -76,6 +83,7 @@ class Matrix3 {
   //   return this;
   // }
 
+  /// Set this matrix to the upper 3x3 matrix of the Matrix4 [m].
   Matrix3 setFromMatrix4(Matrix4 m) {
     final me = m.storage;
 
@@ -84,6 +92,7 @@ class Matrix3 {
     return this;
   }
 
+  /// Post-multiplies this matrix by [m].
   Matrix3 multiply(Matrix3 m) {
     return multiply2(this, m);
   }
@@ -92,6 +101,7 @@ class Matrix3 {
     return multiply2(m, this);
   }
 
+  /// Sets this matrix to [a] x [b].
   Matrix3 multiply2(Matrix3 a, Matrix3 b) {
     final ae = a.storage;
     final be = b.storage;
@@ -120,6 +130,7 @@ class Matrix3 {
     return this;
   }
 
+  /// Multiplies every component of the matrix by the scalar value [s].
   Matrix3 scale(double s) {
     final te = storage;
 
@@ -147,6 +158,8 @@ class Matrix3 {
 
     return this;
   }
+  
+  /// Computes and returns the [determinant](https://en.wikipedia.org/wiki/Determinant) of this matrix.
   double determinant() {
     final te = storage;
 
@@ -168,6 +181,10 @@ class Matrix3 {
         c * e * g;
   }
 
+  /// Inverts this matrix, using the
+  /// [analytic method](https://en.wikipedia.org/wiki/Invertible_matrix#Analytic_solution). 
+  /// You can not invert with a determinant of zero. If you
+  /// attempt this, the method produces a zero matrix instead.
   Matrix3 invert() {
     final te = storage,
         n11 = te[0],
@@ -203,6 +220,8 @@ class Matrix3 {
     return this;
   }
 
+  /// [Transposes](https://en.wikipedia.org/wiki/Transpose) this matrix in
+  /// place.
   Matrix3 transpose() {
     double tmp;
     final m = storage;
@@ -220,10 +239,23 @@ class Matrix3 {
     return this;
   }
 
+  /// [m] - [Matrix4]
+  /// 
+  /// Sets this matrix as the upper left 3x3 of the
+  /// [normal matrix](https://en.wikipedia.org/wiki/Normal_matrix) of the
+  /// passed [matrix4]. 
+  /// The normal matrix is the
+  /// [inverse](https://en.wikipedia.org/wiki/Invertible_matrix)
+  /// [transpose](https://en.wikipedia.org/wiki/Transpose) of the matrix
+  /// [m].
   Matrix3 getNormalMatrix(Matrix4 matrix4) {
     return setFromMatrix4(matrix4).invert().transpose();
   }
 
+  /// [array] - array to store the resulting vector in.
+  /// 
+  /// [Transposes](https://en.wikipedia.org/wiki/Transpose) this matrix into
+  /// the supplied array, and returns itself unchanged.
   Matrix3 transposeIntoArray(List<double> r) {
     final m = storage;
 
@@ -240,6 +272,22 @@ class Matrix3 {
     return this;
   }
 
+  /// [tx] - offset x
+  /// 
+  /// [ty] - offset y
+  /// 
+  /// [sx] - repeat x
+  /// 
+  /// [sy] - repeat y
+  /// 
+  /// [rotation] - rotation, in radians. Positive values rotate
+  /// counterclockwise
+  /// 
+  /// [cx] - center x of rotation
+  /// 
+  /// [cy] - center y of rotation
+  /// 
+  /// Sets the UV transform matrix from offset, repeat, rotation, and center.
   Matrix3 setUvTransform(double tx, double ty, double sx, double sy, double rotation, double cx, double cy) {
     final c = math.cos(rotation);
     final s = math.sin(rotation);
@@ -250,6 +298,7 @@ class Matrix3 {
     return this;
   }
 
+  /// Rotates this matrix by the given [theta] (in radians).
   Matrix3 rotate(double theta) {
     final c = math.cos(theta);
     final s = math.sin(theta);
@@ -270,6 +319,7 @@ class Matrix3 {
     return this;
   }
 
+  /// Translates this matrix by the given scalar values.
   Matrix3 translate(double tx, double ty) {
     final te = storage;
 
@@ -283,6 +333,7 @@ class Matrix3 {
     return this;
   }
 
+  /// Return true if this matrix and [page:Matrix3 m] are equal.
   bool equals(Matrix3 matrix) {
     final te = storage;
     final me = matrix.storage;
@@ -300,6 +351,14 @@ class Matrix3 {
 
     return this;
   }
+  
+  /// [array] - the array to read the elements from.
+  /// 
+  /// [offset] - (optional) index of first element in the array.
+  /// Default is `0`.
+  /// 
+  /// Sets the elements of this matrix based on an array in
+  /// [column-major](https://en.wikipedia.org/wiki/Row-_and_column-major_order#Column-major_order) format.
   Matrix3 copyFromArray(List<double> array, {int offset = 0}) {
     for (int i = 0; i < 9; i++) {
       storage[i] = array[i + offset];
@@ -308,6 +367,14 @@ class Matrix3 {
     return this;
   }
 
+  /// [array] - (optional) array to store the resulting vector in. If
+  /// not given a new array will be created.
+  /// 
+  /// [offset] - (optional) offset in the array at which to put the
+  /// result.
+  /// 
+  /// Writes the elements of this matrix to an array in
+  /// [column-major](https://en.wikipedia.org/wiki/Row-_and_column-major_order#Column-major_order) format.
   List<double> toArray(List<double> array, {int offset = 0}) {
     final te = storage;
 

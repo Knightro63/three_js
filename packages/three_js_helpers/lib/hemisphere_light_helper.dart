@@ -8,11 +8,25 @@ final _vectorHemisphereLightHelper = Vector3();
 final _color1 = Color(0, 0, 0);
 final _color2 = Color(0, 0, 0);
 
+/// Creates a visual aid consisting of a spherical [Mesh] for a
+/// [HemisphereLight].
+/// 
+/// ```
+/// final light = HemisphereLight( 0xffffbb, 0x080820, 1 );
+/// final helper = HemisphereLightHelper( light, 5 );
+/// scene.add( helper );
+/// ```
 class HemisphereLightHelper extends Object3D {
   Color? color;
   late Light light;
 
-  HemisphereLightHelper(this.light, size, this.color) : super() {
+  /// [light] - The light being visualized.
+  /// 
+  /// [size] - The size of the mesh used to visualize the light.
+  /// 
+  /// [color] - (optional) if this is not the set the helper will take
+  /// the color of the light.
+  HemisphereLightHelper(this.light, double size, [this.color]) : super() {
     light.updateMatrixWorld(false);
 
     matrix = light.matrixWorld;

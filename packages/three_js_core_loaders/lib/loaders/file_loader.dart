@@ -18,6 +18,16 @@ class ThreeFile{
   String? location;
 }
 
+/// A low level class for loading resources with Fetch, used internally by
+/// most loaders. It can also be used directly to load any file type that does
+/// not have a loader.
+///
+/// *Note:* The cache must be enabled using
+/// `Cache.enabled = true;`
+/// This is a global property and only needs to be set once to be used by all
+/// loaders that use FileLoader internally. [Cache] is a cache
+/// module that holds the response from each request made through this loader,
+/// so each file is requested once.
 class FileLoader extends Loader {
   FileLoader([super.manager]);
 
@@ -154,11 +164,32 @@ class FileLoader extends Loader {
   //   return false;
   // }
 
+  /// Change the response type. Valid values are:
+  /// 
+  /// [text] or empty string (default) - returns the data as
+  /// [String].
+  /// 
+  /// [arraybuffer] - loads the data into a
+  /// [ArrayBuffer](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer) and returns that.
+  /// 
+  /// [blob] - returns the data as a
+  /// [Blob](https://developer.mozilla.org/en/docs/Web/API/Blob).
+  /// 
+  /// [document] - parses the file using the
+  /// [DOMParser](https://developer.mozilla.org/en-US/docs/Web/API/DOMParser).
+  /// 
+  /// [json] - parses the file using
+  /// [JSON.parse](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/parse).
+  /// 
   FileLoader setResponseType(String value) {
     responseType = value;
     return this;
   }
 
+  /// Set the expected
+  /// [mimeType](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types)
+  /// of the file being loaded. Note that in many cases this will be
+  /// determined automatically, so by default it is `null`.
   FileLoader setMimeType(String value) {
     mimeType = value;
     return this;

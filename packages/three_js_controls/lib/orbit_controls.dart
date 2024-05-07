@@ -1,4 +1,13 @@
-part of three_js_controls;
+import 'dart:math' as math;
+import 'package:flutter/widgets.dart' hide Matrix4;
+import 'package:three_js_core/three_js_core.dart';
+import 'package:three_js_math/three_js_math.dart';
+import 'spherical.dart';
+import 'package:flutter/material.dart' hide Matrix4;
+
+final _changeEvent = Event(type: 'change');
+final _startEvent = Event(type: 'start');
+final _endEvent = Event(type: 'end');
 
 // This set of controls performs orbiting, dollying (zooming), and panning.
 // Unlike TrackballControls, it maintains the "up" direction object.up (+Y by default).
@@ -28,6 +37,10 @@ class Keys {
   static const String bottom = 'ArrowDown';
 }
 
+/// Orbit controls allow the camera to orbit around a target.
+///
+/// To use this, as with all files in the /examples directory, you will have to
+/// include the file separately in your project.
 class OrbitControls with EventDispatcher {
   late OrbitControls scope;
   late Camera object;
@@ -116,6 +129,9 @@ class OrbitControls with EventDispatcher {
   late Quaternion quat;
   late Quaternion quatInverse;
 
+  /// [object] - The camera to be controlled.
+  /// 
+  /// [listenableKey] - The element used for event listeners.
   OrbitControls(this.object, this.listenableKey):super() {
     scope = this;
 

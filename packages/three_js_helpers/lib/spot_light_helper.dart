@@ -5,11 +5,25 @@ import 'dart:math' as math;
 
 final spotLightHelperVector = Vector3();
 
+/// This displays a cone shaped helper object for a [SpotLight].
+/// 
+/// ```
+/// final spotLight = SpotLight( 0xffffff );
+/// spotLight.position.setValues( 10, 10, 10 );
+/// scene.add( spotLight );
+/// 
+/// final spotLightHelper = SpotLightHelper( spotLight );
+/// scene.add( spotLightHelper );
+/// ```
 class SpotLightHelper extends Object3D {
   late Light light;
   late Color? color;
   late LineSegments cone;
 
+  /// [light] -- The [SpotLight] to be visualized.
+  ///
+  /// [color] -- (optional) if this is not the set the helper will take
+  /// the color of the light.
   SpotLightHelper(this.light, this.color) : super() {
     matrixAutoUpdate = false;
     light.updateMatrixWorld(false);

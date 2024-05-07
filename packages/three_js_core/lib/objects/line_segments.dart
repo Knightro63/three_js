@@ -20,7 +20,7 @@ class LineSegments extends Line {
   /// [material] — Material for the line. Default is
   /// [LineBasicMaterial].
   /// 
-  LineSegments(super.geometry, super.material){
+  LineSegments(super.geometry, [super.material]){
     type = 'LineSegments';
   }
 

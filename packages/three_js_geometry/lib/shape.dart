@@ -3,9 +3,34 @@ import 'package:three_js_core/core/index.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'package:three_js_curves/three_js_curves.dart';
 
+/// Creates an one-sided polygonal geometry from one or more path shapes.
+/// 
+/// ```
+/// const x = 0, y = 0;
+///
+/// final heartShape = Shape();
+///
+/// heartShape.moveTo( x + 5, y + 5 );
+/// heartShape.bezierCurveTo( x + 5, y + 5, x + 4, y, x, y );
+/// heartShape.bezierCurveTo( x - 6, y, x - 6, y + 7,x - 6, y + 7 );
+/// heartShape.bezierCurveTo( x - 6, y + 11, x - 3, y + 15.4, x + 5, y + 19 );
+/// heartShape.bezierCurveTo( x + 12, y + 15.4, x + 16, y + 11, x + 16, y + 7 );
+/// heartShape.bezierCurveTo( x + 16, y + 7, x + 16, y, x + 10, y );
+/// heartShape.bezierCurveTo( x + 7, y, x + 5, y + 5, x + 5, y + 5 );
+///
+/// final geometry = ShapeGeometry( heartShape );
+/// final material = MeshBasicMaterial( { MaterialProperty.color: 0x00ff00 } );
+/// final mesh = Mesh( geometry, material ) ;
+/// scene.add( mesh );
+/// ```
 class ShapeGeometry extends BufferGeometry {
   late List<Shape> shapes;
 
+  /// [shapes] — [List] of shapes or a single [shape]. Default is
+  /// a single triangle shape.
+  /// 
+  /// [curveSegments] - [int] - Number of segments per shape. Default is
+  /// 12.
   ShapeGeometry(this.shapes, {int curveSegments = 12}) : super() {
     type = 'ShapeGeometry';
     parameters = {};

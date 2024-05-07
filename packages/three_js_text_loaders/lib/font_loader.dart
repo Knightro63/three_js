@@ -6,10 +6,17 @@ import 'package:three_js_core_loaders/three_js_core_loaders.dart';
 import 'package:three_js_text/three_js_text.dart';
 
 // loader font from typeface json
-
+/// Class for loading a font in JSON format. Returns a font, which is an
+/// array of [Shapes] representing the font.
+/// This uses the [FileLoader] internally for loading files.
+///
+/// You can convert fonts online using [facetype.js](https://gero3.github.io/facetype.js/)
 class FontLoader extends Loader {
   late final FileLoader _loader;
 
+  /// [manager] — The [loadingManager] for the loader to use. Default is [DefaultLoadingManager].
+  /// 
+  /// Creates a new [FontLoader].
   FontLoader([super.manager]){
     _loader = FileLoader(manager);
   }

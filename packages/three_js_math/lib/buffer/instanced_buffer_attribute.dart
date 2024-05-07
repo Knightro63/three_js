@@ -1,8 +1,10 @@
 import 'buffer_attribute.dart';
 
+/// An instanced version of [BufferAttribute].
 class InstancedBufferAttribute extends BufferAttribute {
   late int meshPerAttribute;
 
+  /// [InstancedBufferAttribute] ([array], [itemSize], [normalized], [meshPerAttribute] )
   InstancedBufferAttribute(super.array, super.itemSize, [super.normalized = false, this.meshPerAttribute = 1]){
     type = "InstancedBufferAttribute";
   }

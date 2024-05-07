@@ -12,9 +12,16 @@ import 'package:three_js_core_loaders/three_js_core_loaders.dart';
 import 'material_loader.dart';
 import 'buffer_geometry_loader.dart';
 
+/// A loader for loading a JSON resource in the
+/// [JSON Object/Scene format](https://github.com/mrdoob/three.js/wiki/JSON-Object-Scene-format-4).
+/// 
+/// This uses the [FileLoader] internally for loading files.
 class ObjectLoader extends Loader {
   late final FileLoader _loader;
 
+  /// [manager] — The [loadingManager] for the loader to use. Default is [DefaultLoadingManager].
+  /// 
+  /// Creates a new [FontLoader].
   ObjectLoader([super.manager]){
     _loader = FileLoader(manager);
   }

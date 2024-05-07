@@ -2,6 +2,11 @@ import 'package:flutter_gl/flutter_gl.dart';
 import '../others/constants.dart';
 import '../math/index.dart';
 
+/// [Interleaved] means that multiple attributes, possibly of different types,
+/// (e.g., position, normal, uv, color) are packed into a single array buffer.
+///
+/// An introduction into interleaved arrays can be found here:
+/// [Interleaved array basics](https://blog.tojicode.com/2011/05/interleaved-array-basics.html)
 class InterleavedBuffer {
   NativeArray array;
   int stride;
@@ -16,6 +21,10 @@ class InterleavedBuffer {
 
   String type = "InterleavedBuffer";
 
+  /// [array] -- A typed array with a shared buffer. Stores the
+  /// geometry data.
+  /// 
+  /// [stride] -- The number of typed-array elements per vertex.
   InterleavedBuffer(this.array, this.stride) {
     count = array.length ~/ stride;
 
@@ -38,6 +47,7 @@ class InterleavedBuffer {
     return this;
   }
 
+  /// Copies another [source] to this [source].
   InterleavedBuffer copy(InterleavedBuffer source) {
     array = source.array.clone();
     count = source.count;
@@ -47,6 +57,7 @@ class InterleavedBuffer {
     return this;
   }
 
+  /// Copies data from `attribute[index2]` to array[index1].
   InterleavedBuffer copyAt(int index1, InterleavedBuffer attribute, int index2) {
     index1 *= stride;
     index2 *= attribute.stride;
@@ -66,6 +77,8 @@ class InterleavedBuffer {
 
   // }
 
+  /// [data] - This object holds shared array buffers required for properly
+  /// cloning geometries with interleaved attributes.
   InterleavedBuffer clone(InterleavedBuffer data) {
     // data.arrayBuffers ??= {};
 
@@ -96,6 +109,8 @@ class InterleavedBuffer {
     return this;
   }
 
+  /// [data] - This object holds shared array buffers required for properly
+  /// serializing geometries with interleaved attributes.
   Map<String, dynamic> toJson(InterleavedBuffer data) {
     // data.arrayBuffers ??= {};
 

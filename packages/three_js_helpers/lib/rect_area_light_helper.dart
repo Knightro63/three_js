@@ -3,17 +3,23 @@ import 'package:flutter_gl/flutter_gl.dart';
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 
-///
-///  This helper must be added as a child of the light
-///
-
+/// Creates a visual aid for a [RectAreaLight].
+/// 
+/// ```
+/// final light = RectAreaLight( 0xffffbb, 1.0, 5, 5 );
+/// final helper = RectAreaLightHelper( light );
+/// light.add( helper ); // helper must be added as a child of the light
+/// ```
 class RectAreaLightHelper extends Line {
   late RectAreaLight light;
   Color? color;
 
   RectAreaLightHelper.create(super.light, super.color);
 
-	factory RectAreaLightHelper( light, color ) {
+  /// [light] -- The light being visualized.
+  /// 
+  /// [color] -- (optional) if this is not the set the helper will take the color of the light.
+	factory RectAreaLightHelper(RectAreaLight light, [Color? color]) {
 
 		List<double> positions = [ 1, 1, 0, - 1, 1, 0, - 1, - 1, 0, 1, - 1, 0, 1, 1, 0 ];
 
@@ -253,6 +259,7 @@ class RectAreaLightHelper extends Line {
     }
   }
 
+  /// Frees the GPU-related resources allocated by this instance. Call this method whenever this instance is no longer used in your app.
   @override
 	void dispose() {
 		geometry?.dispose();

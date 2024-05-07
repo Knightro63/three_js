@@ -3,6 +3,14 @@ import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'dart:math' as math;
 
+/// This can be used as a helper object to view the edges of a
+/// [geometry].
+/// ```
+/// final geometry = BoxGeometry( 100, 100, 100 ); 
+/// final edges = EdgesGeometry( geometry ); 
+/// final line = LineSegments(edges, LineBasicMaterial({ MaterialProperty.color: 0xffff00})); 
+/// scene.add(line);
+/// ```
 class EdgesGeometry extends BufferGeometry {
   final _v0 = Vector3.zero();
   final _v1 = Vector3.zero();

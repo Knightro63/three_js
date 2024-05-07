@@ -3,7 +3,29 @@ import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'dart:math' as math;
 
+/// Creates a torus knot, the particular shape of which is defined by a pair
+/// of coprime integers, p and q. If p and q are not coprime, the result will
+/// be a torus link.
+/// 
+/// ```
+/// final geometry = TorusKnotGeometry( 10, 3, 100, 16 ); 
+/// final material = MeshBasicMaterial( { MaterialProperty.color: 0xffff00}); 
+/// final circle = Mesh(geometry, material); 
+/// scene.add(circle);
+/// ```
 class TorusKnotGeometry extends BufferGeometry {
+
+  /// [radius] - Radius of the torus. Default is `1`.
+  /// 
+  /// [tube] — Radius of the tube. Default is `0.4`.
+  /// 
+  /// [radialSegments] — Default is `8`.
+  /// 
+  /// [p] — This value determines, how many times the geometry winds around its
+	/// axis of rotational symmetry. Default is `2`.
+  /// 
+  /// [q] — This value determines, how many times the geometry winds around a
+	/// circle in the interior of the torus. Default is `3`.
   TorusKnotGeometry([
     double radius = 1,
     double tube = 0.4,

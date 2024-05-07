@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'polyhedron.dart';
 
+/// A class for generating a dodecahedron geometries.
 class DodecahedronGeometry extends PolyhedronGeometry{
   DodecahedronGeometry.create(List<double> vertices, List<int> indices, [double radius = 1, int detail = 0])
       : super(vertices, indices, radius, detail) {
@@ -8,6 +9,10 @@ class DodecahedronGeometry extends PolyhedronGeometry{
     parameters = {"radius": radius, "detail": detail};
   }
 
+  /// [radius] — Radius of the dodecahedron. Default is `1`.
+  /// 
+  /// [detail] — Default is `0`. Setting this to a value greater than `0` adds
+  /// vertices making it no longer a dodecahedron.
   factory DodecahedronGeometry([double radius = 1, int detail = 0]) {
     final t = (1 + math.sqrt(5)) / 2;
     final r = 1 / t;

@@ -3,7 +3,25 @@ import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'dart:math' as math;
 
+/// A class for generating torus geometries.
+/// 
+/// ```
+/// final geometry = TorusGeometry( 10, 3, 16, 100); 
+/// final material = MeshBasicMaterial( { MaterialProperty.color: 0xffff00}); 
+/// final circle = Mesh(geometry, material); 
+/// scene.add(circle);
+/// ```
 class TorusGeometry extends BufferGeometry {
+  /// [radius] - Radius of the torus, from the center of the torus to the center
+  /// of the tube. Default is `1`. 
+  /// 
+  /// [tube] — Radius of the tube. Default is `0.4`.
+  /// 
+  /// [radialSegments] — Default is `12`
+  /// 
+  /// [tubularSegments] — Default is `48`.
+  /// 
+  /// [arc] — Central angle. Default is `pi` * 2.
   TorusGeometry([
     double radius = 1,
     double tube = 0.4,

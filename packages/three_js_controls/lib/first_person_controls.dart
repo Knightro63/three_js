@@ -1,8 +1,19 @@
-part of three_js_controls;
+import 'dart:math' as math;
+import 'package:flutter/widgets.dart' hide Matrix4;
+import 'package:three_js_core/three_js_core.dart';
+import 'package:three_js_math/three_js_math.dart';
+import 'spherical.dart';
+
+import 'package:flutter/material.dart' hide Matrix4;
 
 enum LookType{active,position}
 
+/// This class is an alternative implementation of [FlyControls].
 class FirstPersonControls with EventDispatcher {
+
+  /// [object] - The camera to be controlled.
+  /// 
+  /// [listenableKey] - The element used for event listeners.
   FirstPersonControls(this.object,this.listenableKey):super(){
     domElement.addEventListener( PeripheralType.contextmenu, contextmenu, false );
     domElement.addEventListener( PeripheralType.mousemove, onMouseMove, false );
@@ -72,6 +83,7 @@ class FirstPersonControls with EventDispatcher {
 	Vector3 target = Vector3();
   Vector3 targetPosition = Vector3();
 
+  /// Should be called if the application window is resized.
 	void handleResize(){
 		viewHalfX = domElement.clientWidth / 2;
 		viewHalfY = domElement.clientHeight / 2;
@@ -174,6 +186,7 @@ class FirstPersonControls with EventDispatcher {
     return targetPosition;
   }
 
+  /// Updates the controls. Usually called in the animation loop.
   void update(double delta){
     if(enabled == false) return;
 
@@ -296,6 +309,7 @@ class FirstPersonControls with EventDispatcher {
 		event.preventDefault();
 	}
 
+  /// Should be called if the controls is no longer required.
 	void dispose() {
 		domElement.removeEventListener( PeripheralType.contextmenu, contextmenu, false );
 		domElement.removeEventListener( PeripheralType.mousedown, onMouseDown, false );

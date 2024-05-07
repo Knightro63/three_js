@@ -3,7 +3,22 @@ import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'dart:math' as math;
 
+/// A polyhedron is a solid in three dimensions with flat faces. This class
+/// will take an array of vertices, project them onto a sphere, and then
+/// divide them up to the desired level of detail. This class is used by
+/// [DodecahedronGeometry], [IcosahedronGeometry],
+/// [OctahedronGeometry], and [TetrahedronGeometry] to generate
+/// their respective geometries.
 class PolyhedronGeometry extends BufferGeometry {
+  /// [vertices] — [List<double>] of points of the form [1,1,1, -1,-1,-1, ... ]
+  /// 
+  /// [indices] — [List<int>] of indices that make up the faces of the form
+  /// [0,1,2, 2,3,0, ... ] 
+  /// 
+  /// [radius] — [double] - The radius of the final shape 
+  /// 
+  /// [detail] — [int] - How many levels to subdivide the geometry. The
+  /// more detail, the smoother the shape.
   PolyhedronGeometry(List<double> vertices, List<int> indices, [double radius = 1, int detail = 0]) : super() {
     type = "PolyhedronGeometry";
     // default buffer data

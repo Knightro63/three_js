@@ -1,5 +1,16 @@
-part of three_js_controls;
+import 'dart:math' as math;
+import 'package:flutter/widgets.dart' hide Matrix4;
+import 'package:three_js_core/three_js_core.dart';
+import 'package:three_js_math/three_js_math.dart';
+import 'orbit_controls.dart';
+import 'package:flutter/material.dart' hide Matrix4;
 
+final _changeEvent = Event(type: 'change');
+final _startEvent = Event(type: 'start');
+final _endEvent = Event(type: 'end');
+
+/// [TrackballControls] is similar to [OrbitControls]. However, it does not maintain a constant camera [up] vector.
+/// That means if the camera orbits over the “north” and “south” poles, it does not flip to stay "right side up".
 class TrackballControls with EventDispatcher {
   late TrackballControls scope;
   late Camera object;
@@ -64,6 +75,9 @@ class TrackballControls with EventDispatcher {
   late Vector3 up0;
   late double zoom0;
 
+  /// [object] - The camera to be controlled.
+  /// 
+  /// [listenableKey] - The element used for event listeners.
   TrackballControls(this.object, this.listenableKey): super() {
     scope = this;
 

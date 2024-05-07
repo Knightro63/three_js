@@ -6,12 +6,30 @@ final _v1 = Vector3();
 final _v2 = Vector3();
 final _v3 = Vector3();
 
+/// Helper object to assist with visualizing a [page:DirectionalLight]'s
+/// effect on the scene. This consists of plane and a line representing the
+/// light's position and direction.
+/// 
+/// ```
+/// final light = DirectionalLight( 0xFFFFFF );
+/// scene.add( light );
+///
+/// final helper = DirectionalLightHelper( light, 5 );
+/// scene.add( helper );
+/// ```
 class DirectionalLightHelper extends Object3D {
   late DirectionalLight light;
   late Line lightPlane;
   late Line targetLine;
   Color? color;
 
+  /// [light]-- The light to be visualized.
+  /// 
+  /// [size] -- (optional) dimensions of the plane. Default is
+  /// `1`.
+  /// 
+  /// [color] -- (optional) if this is not the set the helper will take
+  /// the color of the light.
   DirectionalLightHelper(this.light, [double size = 1, this.color]) : super() {
     light.updateMatrixWorld(false);
 
