@@ -53,8 +53,8 @@ import 'package:example/controls/misc_controls_trackball.dart';
 
 @immutable
 class ExamplePage extends StatefulWidget {
-  String? id;
-  ExamplePage({Key? key, this.id}) : super(key: key);
+  final String? id;
+  const ExamplePage({super.key, this.id});
 
   @override
   _MyAppState createState() => _MyAppState();
@@ -73,13 +73,13 @@ class _MyAppState extends State<ExamplePage> {
     String fileName = widget.id!;
 
     if (fileName == "webgl_camera_array") {
-      page = webgl_camera_array(fileName: fileName);
+      page = WebglCameraArray(fileName: fileName);
     } else if (fileName == "webgl_loader_obj") {
-      page = webgl_loader_obj(fileName: fileName);
+      page = WebglLoaderObj(fileName: fileName);
     } else if (fileName == "webgl_materials_browser") {
       page = webgl_materials_browser(fileName: fileName);
     } else if (fileName == "webgl_shadow_contact") {
-      page = webgl_shadow_contact(fileName: fileName);
+      page = WebglShadowContact(fileName: fileName);
     } else if (fileName == "webgl_geometry_text") {
       page = webgl_geometry_text(fileName: fileName);
     } else if (fileName == "webgl_geometry_shapes") {
@@ -123,9 +123,9 @@ class _MyAppState extends State<ExamplePage> {
     } else if (fileName == "webgl_animation_skinning_additive_blending") {
       page = webgl_animation_skinning_additive_blending(fileName: fileName);
     } else if (fileName == "webgl_animation_skinning_morph") {
-      page = webgl_animation_skinning_morph(fileName: fileName);
+      page = WebglAnimationSkinningMorph(fileName: fileName);
     } else if (fileName == "webgl_camera") {
-      page = webgl_camera(fileName: fileName);
+      page = WebglCamera(fileName: fileName);
     } else if (fileName == "webgl_geometry_colors") {
       page = webgl_geometry_colors(fileName: fileName);
     } else if (fileName == "webgl_loader_svg") {

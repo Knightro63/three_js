@@ -1631,7 +1631,7 @@ class ArcballControls with EventDispatcher {
 	/// * Focus operation consist of positioning the point of interest in front of the camera and a slightly zoom in
 	/// * [point] The point of interest
 	/// * [size] Scale factor
-	/// * [amount] Amount of operation to be completed (used for focus animations, default is complete full operation)
+	/// * [amount] amount of operation to be completed (used for focus animations, default is complete full operation)
   void focus(point, size, [num amount = 1]) {
     //move center of camera (along with gizmos) towards point of interest
     _offset.setFrom(point).sub(_gizmos.position).scale(amount);

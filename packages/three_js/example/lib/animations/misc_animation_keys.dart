@@ -34,9 +34,9 @@ class _State extends State<misc_animation_keys> {
 
   double dpr = 1.0;
 
-  final AMOUNT = 4;
+  final amount = 4;
 
-  bool verbose = true;
+  bool verbose = false;
 
   late three.Object3D object;
 
@@ -162,7 +162,7 @@ class _State extends State<misc_animation_keys> {
       print(renderer!.info.render);
     }
 
-    // 重要 更新纹理之前一定要调用 确保gl程序执行完毕
+    
     _gl.finish();
 
     if (verbose) print(" render: sourceTexture: $sourceTexture ");

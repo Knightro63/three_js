@@ -1,9 +1,9 @@
-import 'package:example/app/ExamplePage.dart';
+import 'package:example/app/example_page.dart';
 import 'package:example/HomePage.dart';
 import 'package:flutter/material.dart';
 
 class ExampleApp extends StatefulWidget {
-  const ExampleApp({Key? key}) : super(key: key);
+  const ExampleApp({super.key});
 
   @override
   _MyAppState createState() => _MyAppState();

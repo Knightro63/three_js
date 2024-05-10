@@ -31,7 +31,7 @@
 //   num dpr = 1.0;
 
 
-//   bool verbose = true;
+//   bool verbose = false;
 //   bool disposed = false;
 
 //   bool loaded = false;

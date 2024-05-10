@@ -191,7 +191,15 @@ class GLTFLoader extends Loader {
     return this;
   }
 
-  Future<GLTFData> _parse(Uint8List data) {
+  Future<GLTFData> _parse(Uint8List data) async{
+    String cacheName = String.fromCharCodes(data).toString().substring(0,50);
+    manager.itemStart(cacheName);
+    final didParse = await _parseAll(data);
+    manager.itemEnd(cacheName);
+    return didParse;
+  }
+
+  Future<GLTFData> _parseAll(Uint8List data) {
     final String content;
     final extensions = {};
     final plugins = {};

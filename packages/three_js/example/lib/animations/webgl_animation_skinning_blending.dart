@@ -35,9 +35,9 @@ class _State extends State<webgl_animation_skinning_blending> {
 
   double dpr = 1.0;
 
-  var AMOUNT = 4;
+  var amount = 4;
 
-  bool verbose = true;
+  bool verbose = false;
   bool disposed = false;
 
   late three.Object3D object;

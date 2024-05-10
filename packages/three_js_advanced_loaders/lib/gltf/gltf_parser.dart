@@ -232,8 +232,6 @@ class GLTFParser {
     final cacheKey = '$type:$index';
     dynamic dependency = cache.get(cacheKey);
 
-    // print(" GLTFParse.getDependency type: ${type} index: ${index} ");
-
     if (dependency == null) {
       switch (type) {
         case 'scene':
@@ -245,8 +243,8 @@ class GLTFParser {
           break;
 
         case 'mesh':
-          dependency = await _invokeOne((ext) async {
-            return ext.loadMesh != null ? await ext.loadMesh(index) : null;
+          dependency = await _invokeOne((GLTFParser? ext) async {
+            return ext?.loadMesh != null ? await ext!.loadMesh(index) : null;
           });
           break;
 
@@ -316,17 +314,15 @@ class GLTFParser {
     if (dependencies != null) {
       return dependencies;
     }
-
-    final parser = this;
+    
     final defs = json[type + (type == 'mesh' ? 'es' : 's')] ?? [];
-
     List otherDependencies = [];
 
     int l = defs.length;
 
     for (int i = 0; i < l; i++) {
-      final dep = await parser.getDependency(type, i);
-      otherDependencies.add(dep);
+      final dep1 = await getDependency(type, i);
+      otherDependencies.add(dep1);
     }
 
     cache.add(type, otherDependencies);
@@ -997,20 +993,17 @@ class GLTFParser {
       else {
         dynamic geometryPromise;
 
-        if (primitive["extensions"] != null &&
-            primitive["extensions"][extensions["KHR_DRACO_MESH_COMPRESSION"]] !=
-                null) {
+        if (primitive["extensions"] != null && primitive["extensions"][extensions["KHR_DRACO_MESH_COMPRESSION"]] != null) {
           // Use DRACO geometry if available
           geometryPromise = await createDracoPrimitive(primitive);
-        } else {
+        } 
+        else {
           // Otherwise create a geometry
-          geometryPromise = await addPrimitiveAttributes(
-              BufferGeometry(), primitive, parser);
+          geometryPromise = await addPrimitiveAttributes(BufferGeometry(), primitive, parser);
         }
 
         // Cache this geometry
         cache[cacheKey] = {"primitive": primitive, "promise": geometryPromise};
-
         pending.add(geometryPromise);
       }
     }
@@ -1059,10 +1052,12 @@ class GLTFParser {
       late Object3D mesh;
       final material = materials[i];
 
-      if (primitive["mode"] == webglConstants["TRIANGLES"] ||
-          primitive["mode"] == webglConstants["TRIANGLE_STRIP"] ||
-          primitive["mode"] == webglConstants["TRIANGLE_FAN"] ||
-          primitive["mode"] == null) {
+      if (
+        primitive["mode"] == webglConstants["TRIANGLES"] ||
+        primitive["mode"] == webglConstants["TRIANGLE_STRIP"] ||
+        primitive["mode"] == webglConstants["TRIANGLE_FAN"] ||
+        primitive["mode"] == null
+      ) {
         // .isSkinnedMesh isn't in glTF spec. See ._markDefs()
         mesh = meshDef["isSkinnedMesh"] == true? SkinnedMesh(geometry, material): Mesh(geometry, material);
 
@@ -1109,14 +1104,13 @@ class GLTFParser {
       parser.assignFinalMaterial(mesh);
       meshes.add(mesh);
     }
-
+    
     if (meshes.length == 1) {
       return meshes[0];
     }
 
     final group = Group();
-
-    for (int i = 0, il = meshes.length; i < il; i++) {
+    for (int i = 0; i < meshes.length; i++) {
       group.add(meshes[i]);
     }
 
@@ -1342,52 +1336,43 @@ class GLTFParser {
   Future<Object3D> loadNode(int nodeIndex) async {
     final json = this.json;
     final extensions = this.extensions;
-    final parser = this;
 
     Map<String, dynamic> nodeDef = json["nodes"][nodeIndex];
 
     // reserve node's name before its dependencies, so the root has the intended name.
-    final nodeName =
-        nodeDef["name"] != null ? parser.createUniqueName(nodeDef["name"]) : '';
+    final nodeName = nodeDef["name"] != null ? createUniqueName(nodeDef["name"]) : '';
 
     final pending = [];
 
-    final meshPromise = await parser._invokeOne((ext) {
-      return ext.createNodeMesh != null ? ext.createNodeMesh(nodeIndex) : null;
+    final meshPromise = await _invokeOne((GLTFParser? ext) {
+      return ext?.createNodeMesh != null ? ext!.createNodeMesh(nodeIndex) : null;
     });
 
     if (meshPromise != null) {
       pending.add(meshPromise);
     }
-    if ( nodeDef["mesh"] != null ) {
-      final mesh = await parser.getDependency( 'mesh', nodeDef["mesh"] );
-      final node = await parser.getNodeRef( parser.meshCache, nodeDef["mesh"], mesh );
-      // if weights are provided on the node, override weights on the mesh.
-      if ( nodeDef["weights"] != null ) {
-        node.traverse( ( o ) {
-          if ( ! o.isMesh ) return;
-          for ( int i = 0, il = nodeDef["weights"].length; i < il; i ++ ) {
-            o.morphTargetInfluences[ i ] = nodeDef["weights"][ i ];
-          }
-        } );
-      }
-      pending.add(node);
-    }
+    // if ( nodeDef["mesh"] != null ) {
+    //   final mesh = await getDependency( 'mesh', nodeDef["mesh"] );
+    //   final Object3D? node = await getNodeRef( meshCache, nodeDef["mesh"], mesh );
+    //   // if weights are provided on the node, override weights on the mesh.
+    //   if ( nodeDef["weights"] != null ) {
+    //     node?.traverse( ( o ) {
+    //       if (o is! Mesh ) return;
+    //       for ( int i = 0, il = nodeDef["weights"].length; i < il; i ++ ) {
+    //         o.morphTargetInfluences![ i ] = nodeDef["weights"][ i ];
+    //       }
+    //     } );
+    //   }
+    //   pending.add(node);
+    // }
 
     if (nodeDef["camera"] != null) {
-      final camera = await parser.getDependency('camera', nodeDef["camera"]);
+      final camera = await getDependency('camera', nodeDef["camera"]);
 
-      pending.add(await parser.getNodeRef(
-          parser.cameraCache, nodeDef["camera"], camera));
+      pending.add(await getNodeRef(cameraCache, nodeDef["camera"], camera));
     }
 
-    // parser._invokeAll( ( ext ) async {
-    //   return ext.createNodeAttachment != null ? await ext.createNodeAttachment( nodeIndex ) : null;
-    // } ).forEach( ( promise ) {
-    //   pending.add( promise );
-    // } );
-
-    List results = await parser._invokeAll((ext) async {
+    List results = await _invokeAll((ext) async {
       return ext.createNodeAttachment != null
           ? await ext.createNodeAttachment(nodeIndex)
           : null;
@@ -1406,20 +1391,22 @@ class GLTFParser {
     }
 
     late final Object3D node;
-
     // .isBone isn't in glTF spec. See ._markDefs
     if (nodeDef["isBone"] == true) {
       node = Bone();
-    } else if (objects.length > 1) {
+    } 
+    else if (objects.length > 1) {
       node = Group();
-    } else if (objects.length == 1) {
+    } 
+    else if (objects.length == 1) {
       node = objects[0];
-    } else {
+    } 
+    else {
       node = Object3D();
     }
 
     if (objects.isEmpty || node != objects[0]) {
-      for (int i = 0, il = objects.length; i < il; i++) {
+      for (int i = 0; i < objects.length; i++) {
         node.add(objects[i]);
       }
     }
@@ -1453,8 +1440,7 @@ class GLTFParser {
       }
     }
 
-    parser.associations[node] = {"type": 'nodes', "index": nodeIndex};
-
+    associations[node] = {"type": 'nodes', "index": nodeIndex};
     return node;
   }
 
@@ -1463,27 +1449,25 @@ class GLTFParser {
   /// @param {number} sceneIndex
   /// @return {Promise<Group>}
   ///
-  Future<void> buildNodeHierarchy(int nodeId, parentObject, json, parser) async {
+  Future<void> buildNodeHierarchy(int nodeId, Object3D? parentObject, Map<String,dynamic> json) async {
     Map<String, dynamic> nodeDef = json["nodes"][nodeId];
 
-    final node = await parser.getDependency('node', nodeId);
+    final Object3D? node = await getDependency('node', nodeId);
 
     if (nodeDef["skin"] != null) {
-      // build skeleton here as well
-
       dynamic skinEntry;
 
-      final skin = await parser.getDependency('skin', nodeDef["skin"]);
+      final skin = await getDependency('skin', nodeDef["skin"]);
       skinEntry = skin;
 
       final jointNodes = [];
 
-      for (int i = 0, il = skinEntry["joints"].length; i < il; i++) {
-        final node = await parser.getDependency('node', skinEntry["joints"][i]);
-        jointNodes.add(node);
+      for (int i = 0; i < skinEntry["joints"].length; i++) {
+        final node1 = await getDependency('node', skinEntry["joints"][i]);
+        jointNodes.add(node1);
       }
 
-      node.traverse((mesh) {
+      node?.traverse((mesh) {
         if(mesh is SkinnedMesh) {
           List<Bone> bones = [];
           List<Matrix4> boneInverses = [];
@@ -1512,15 +1496,13 @@ class GLTFParser {
     }
 
     // build node hierachy
-
-    parentObject.add(node);
+    parentObject?.add(node);
 
     if (nodeDef["children"] != null) {
-      final children = nodeDef["children"];
-
-      for (int i = 0, il = children.length; i < il; i++) {
+      final List children = nodeDef["children"];
+      for (int i = 0; i < children.length; i++) {
         final child = children[i];
-        await buildNodeHierarchy(child, node, json, parser);
+        await buildNodeHierarchy(child, node, json);
       }
     }
   }
@@ -1529,13 +1511,12 @@ class GLTFParser {
     final json = this.json;
     final extensions = this.extensions;
     Map<String, dynamic> sceneDef = this.json["scenes"][sceneIndex];
-    final parser = this;
 
     // Loader returns Group, not Scene.
     // See: https://github.com/mrdoob/three.js/issues/18342#issuecomment-578981172
     final scene = Group();
     if (sceneDef["name"] != null){
-      scene.name = parser.createUniqueName(sceneDef["name"]);
+      scene.name = createUniqueName(sceneDef["name"]);
     }
 
     assignExtrasToUserData(scene, sceneDef);
@@ -1544,10 +1525,10 @@ class GLTFParser {
       addUnknownExtensionsToUserData(extensions, scene, sceneDef);
     }
 
-    final nodeIds = sceneDef["nodes"] ?? [];
+    final List nodeIds = sceneDef["nodes"] ?? [];
 
-    for (int i = 0, il = nodeIds.length; i < il; i++) {
-      await buildNodeHierarchy(nodeIds[i], scene, json, parser);
+    for (int i = 0; i < nodeIds.length; i++) {
+      await buildNodeHierarchy(nodeIds[i], scene, json);
     }
 
     return scene;

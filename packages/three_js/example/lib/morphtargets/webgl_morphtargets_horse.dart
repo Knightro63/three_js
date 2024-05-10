@@ -36,7 +36,7 @@ class _State extends State<webgl_morphtargets_horse> {
 
   double dpr = 1.0;
 
-  bool verbose = true;
+  bool verbose = false;
   bool disposed = false;
 
   var radius = 600;
@@ -171,7 +171,7 @@ class _State extends State<webgl_morphtargets_horse> {
       print(renderer!.info.render);
     }
 
-    // 重要 更新纹理之前一定要调用 确保gl程序执行完毕
+    
     _gl.flush();
 
     if (verbose) print(" render: sourceTexture: $sourceTexture ");

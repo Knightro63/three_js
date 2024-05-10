@@ -37,12 +37,12 @@ class _State extends State<webgl_morphtargets_sphere> {
 
   double dpr = 1.0;
 
-  var AMOUNT = 4;
+  var amount = 4;
 
   var sign = 1;
   var speed = 0.5;
 
-  bool verbose = true;
+  bool verbose = false;
   bool disposed = false;
 
   late three.Object3D object;
@@ -173,7 +173,7 @@ class _State extends State<webgl_morphtargets_sphere> {
       print(renderer!.info.render);
     }
 
-    // 重要 更新纹理之前一定要调用 确保gl程序执行完毕
+    
     _gl.flush();
 
     if (verbose) print(" render: sourceTexture: $sourceTexture ");

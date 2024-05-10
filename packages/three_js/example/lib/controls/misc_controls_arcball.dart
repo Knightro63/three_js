@@ -30,9 +30,9 @@ class _MyAppState extends State<misc_controls_arcball> {
 
   double dpr = 1.0;
 
-  var AMOUNT = 4;
+  var amount = 4;
 
-  bool verbose = true;
+  bool verbose = false;
   bool disposed = false;
 
   late three.WebGLRenderTarget renderTarget;
@@ -160,7 +160,7 @@ class _MyAppState extends State<misc_controls_arcball> {
       print(renderer!.info.render);
     }
 
-    // 重要 更新纹理之前一定要调用 确保gl程序执行完毕
+    
     _gl.flush();
 
     // var pixels = _gl.readCurrentPixels(0, 0, 10, 10);
@@ -209,8 +209,8 @@ class _MyAppState extends State<misc_controls_arcball> {
   initPage() {
     var ASPECTRATIO = width / height;
 
-    var WIDTH = (width / AMOUNT) * dpr;
-    var HEIGHT = (height / AMOUNT) * dpr;
+    var WIDTH = (width / amount) * dpr;
+    var HEIGHT = (height / amount) * dpr;
 
     scene = three.Scene();
     scene.background = three.Color.fromHex32(0xcccccc);

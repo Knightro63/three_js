@@ -99,9 +99,9 @@ class _multi_views1_State extends State<multi_views1> {
   late three.Mesh mesh;
 
   double dpr = 1.0;
-  int AMOUNT = 4;
+  int amount = 4;
 
-  bool verbose = true;
+  bool verbose = false;
   bool disposed = false;
 
   bool loaded = false;
@@ -223,7 +223,7 @@ class _multi_views1_State extends State<multi_views1> {
       // print(renderer!.info.render);
     }
 
-    // 重要 更新纹理之前一定要调用 确保gl程序执行完毕
+    
     _gl.flush();
 
     // print("three3dRender 1: ${three3dRender.textureId} render: sourceTexture: $sourceTexture ");
@@ -350,9 +350,9 @@ class _multi_views2_State extends State<multi_views2> {
 
   double dpr = 1.0;
 
-  int AMOUNT = 4;
+  int amount = 4;
 
-  bool verbose = true;
+  bool verbose = false;
   bool disposed = false;
 
   bool loaded = false;
