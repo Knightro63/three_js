@@ -96,7 +96,8 @@ class WebGLGeometries {
 
         indices.addAll([a, b, b, c, c, a]);
       }
-    } else {
+    } 
+    else {
       final array = geometryPosition.array;
       version = geometryPosition.version;
 
@@ -113,7 +114,8 @@ class WebGLGeometries {
     final max = indices.getMaxValue();
     if (max != null && max > 65535) {
       attribute = Uint32BufferAttribute(Uint32Array.from(indices), 1, false);
-    } else {
+    } 
+    else {
       attribute = Uint16BufferAttribute(Uint16Array.from(indices), 1, false);
     }
 
@@ -121,14 +123,8 @@ class WebGLGeometries {
 
     // Updating index buffer in VAO now. See WebGLBindingStates
 
-    //
-
     final previousAttribute = wireframeAttributes.get(geometry);
-
     if (previousAttribute != null) attributes.remove(previousAttribute);
-
-    //
-
     wireframeAttributes.add(key: geometry, value: attribute);
   }
 
@@ -137,15 +133,14 @@ class WebGLGeometries {
 
     if (currentAttribute != null) {
       final geometryIndex = geometry.index;
-
       if (geometryIndex != null) {
         // if the attribute is obsolete, create a new one
-
         if (currentAttribute.version < geometryIndex.version) {
           updateWireframeAttribute(geometry);
         }
       }
-    } else {
+    } 
+    else {
       updateWireframeAttribute(geometry);
     }
     return wireframeAttributes.get(geometry);

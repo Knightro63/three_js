@@ -2202,8 +2202,7 @@ class _AnimationParser {
           rawTracks["T"]["curves"], initialPosition, 'position');
       if (positionTrack != null) tracks.add(positionTrack);
     }
-
-    if (rawTracks["R"] != null && rawTracks["R"]["curves"].keys.isNotEmpty()) {
+    if (rawTracks["R"]?["curves"]?.keys != null && rawTracks["R"]["curves"].keys.isNotEmpty) {
       final rotationTrack = generateRotationTrack(
         rawTracks["modelName"],
         rawTracks["R"]["curves"],

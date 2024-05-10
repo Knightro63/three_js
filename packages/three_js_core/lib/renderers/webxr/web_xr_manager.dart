@@ -147,14 +147,14 @@ class WebXRManager with EventDispatcher {
   setFramebufferScaleFactor( value ) {
     framebufferScaleFactor = value;
     if (isPresenting == true ) {
-      print( 'three.WebXRManager: Cannot change framebuffer scale while presenting.' );
+      console.warning( 'WebXRManager: Cannot change framebuffer scale while presenting.' );
     }
   }
 
   setReferenceSpaceType ( value ) {
     referenceSpaceType = value;
     if (isPresenting == true ) {
-      print( 'three.WebXRManager: Cannot change reference space type while presenting.' );
+      console.warning( 'three.WebXRManager: Cannot change reference space type while presenting.' );
     }
   }
 
@@ -163,7 +163,7 @@ class WebXRManager with EventDispatcher {
   }
 
   getBaseLayer () {
-    return glProjLayer != null ? glProjLayer : glBaseLayer;
+    return glProjLayer ?? glBaseLayer;
   }
 
   getBinding () {
@@ -229,7 +229,7 @@ class WebXRManager with EventDispatcher {
 
       } else {
         isMultisample = attributes.antialias;
-        var depthFormat = null;
+        dynamic depthFormat;
 
         if ( attributes.depth ) {
 
@@ -334,12 +334,10 @@ class WebXRManager with EventDispatcher {
   final cameraLPos = Vector3.zero();
   final cameraRPos = Vector3.zero();
 
-  /**
-   * Assumes 2 cameras that are parallel and share an X-axis, and that
-   * the cameras' projection and world matrices have already been set.
-   * And that near and far planes are identical for both cameras.
-   * Visualization of this technique: https://computergraphics.stackexchange.com/a/4765
-   */
+  /// Assumes 2 cameras that are parallel and share an X-axis, and that
+  /// the cameras' projection and world matrices have already been set.
+  /// And that near and far planes are identical for both cameras.
+  /// Visualization of this technique: https://computergraphics.stackexchange.com/a/4765
   void setProjectionFromUnion(Camera camera, PerspectiveCamera cameraL, PerspectiveCamera cameraR ) {
 
     cameraLPos.setFromMatrixPosition( cameraL.matrixWorld );
@@ -504,9 +502,9 @@ class WebXRManager with EventDispatcher {
         cameraVRNeedsUpdate = true;
       }
 
-      for ( var i = 0; i < views.length; i ++ ) {
+      for (int i = 0; i < views.length; i ++ ) {
         final view = views[ i ];
-        var viewport = null;
+        dynamic viewport;
 
         if ( glBaseLayer != null ) {
           viewport = glBaseLayer.getViewport( view );

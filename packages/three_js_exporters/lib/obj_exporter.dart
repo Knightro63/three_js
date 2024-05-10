@@ -41,9 +41,9 @@ class OBJExporter{
     Matrix3 normalMatrixWorld = Matrix3.identity();
 
     // shortcuts
-    final Float32BufferAttribute? vertices = geometry?.getAttribute(Semantic.position);
-    final Float32BufferAttribute? normals = geometry?.getAttribute( Semantic.normal);
-    final Float32BufferAttribute? uvs = geometry?.getAttribute(Semantic.uv);
+    final Float32BufferAttribute? vertices = geometry?.getAttribute(Attribute.position);
+    final Float32BufferAttribute? normals = geometry?.getAttribute( Attribute.normal);
+    final Float32BufferAttribute? uvs = geometry?.getAttribute(Attribute.uv);
     final indices = geometry?.getIndex();
 
     if(!_usingParse){
@@ -130,7 +130,7 @@ class OBJExporter{
     final Vector3 vertex = Vector3();
 
     // shortcuts
-    Float32BufferAttribute? vertices = geometry?.getAttribute( Semantic.position);
+    Float32BufferAttribute? vertices = geometry?.getAttribute( Attribute.position);
     //final indices = geometry?.getIndex();
 
     // name of the line object

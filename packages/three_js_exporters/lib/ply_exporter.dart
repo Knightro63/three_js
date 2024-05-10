@@ -59,8 +59,8 @@ class PLYExporter{
     }
     int vertexOffset = _numVerticies;
     BufferGeometry? geometry = mesh.geometry;
-    final Float32BufferAttribute? vertices = geometry?.getAttribute(Semantic.position);
-    final Float32BufferAttribute? normals = geometry?.getAttribute(Semantic.normal);
+    final Float32BufferAttribute? vertices = geometry?.getAttribute(Attribute.position);
+    final Float32BufferAttribute? normals = geometry?.getAttribute(Attribute.normal);
 
     if(vertices != null){
       for(int j = 0; j < vertices.length;j++){

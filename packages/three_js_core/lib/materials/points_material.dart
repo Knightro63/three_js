@@ -15,7 +15,7 @@ import 'package:three_js_math/three_js_math.dart';
 /// }
 ///
 /// final geometry = BufferGeometry();
-/// geometry.setAttribute(Semantic.position, Float32BufferAttribute( vertices, 3 ) );
+/// geometry.setAttribute(Attribute.position, Float32BufferAttribute( vertices, 3 ) );
 /// final material = PointsMaterial( { MaterialProperty.color: 0x888888 } );
 /// final points = Points( geometry, material );
 /// scene.add( points );

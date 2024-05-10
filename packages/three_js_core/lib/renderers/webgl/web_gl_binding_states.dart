@@ -55,12 +55,15 @@ class WebGLBindingStates {
       // print("WebGLBindingStates.dart setup object: ${object}  updateBuffers: ${updateBuffers}  ");
 
       if (updateBuffers) saveCache(object, geometry, program, index);
-    } else {
+    } 
+    else {
       final wireframe = (material.wireframe == true);
 
-      if (currentState["geometry"] != geometry.id ||
-          currentState["program"] != program.id ||
-          currentState["wireframe"] != wireframe) {
+      if (
+        currentState["geometry"] != geometry.id ||
+        currentState["program"] != program.id ||
+        currentState["wireframe"] != wireframe
+      ) {
         currentState["geometry"] = geometry.id;
         currentState["program"] = program.id;
         currentState["wireframe"] = wireframe;

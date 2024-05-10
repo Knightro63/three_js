@@ -18,3 +18,6 @@ export 'light_probe_helper.dart';
 export 'rect_area_light_helper.dart';
 export 'vertex_normals_helper.dart';
 export 'vertex_tangents_helper.dart';
+
+export 'enviroments/index.dart';
+export 'utils/skeleton_utils.dart';

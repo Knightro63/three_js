@@ -43,7 +43,7 @@ class STLExporter{
       _output = 'solid exported\n';
     }
     BufferGeometry? geometry = object.geometry;
-    final Float32BufferAttribute? vertices = geometry?.getAttribute(Semantic.position);
+    final Float32BufferAttribute? vertices = geometry?.getAttribute(Attribute.position);
     final indices = geometry?.getIndex();
     if(indices != null){
       for(int i = 0, l = indices.length; i < l; i+=3) {

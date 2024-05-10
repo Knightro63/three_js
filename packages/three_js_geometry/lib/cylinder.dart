@@ -270,9 +270,9 @@ class CylinderGeometry extends BufferGeometry {
     // build geometry
 
     setIndex(indices);
-    setAttribute(Semantic.position,Float32BufferAttribute.fromTypedData(Float32List.fromList(vertices), 3, false));
-    setAttribute(Semantic.normal, Float32BufferAttribute.fromTypedData(Float32List.fromList(normals), 3, false));
-    setAttribute(Semantic.uv, Float32BufferAttribute.fromTypedData(Float32List.fromList(uvs), 2, false));
+    setAttribute(Attribute.position,Float32BufferAttribute.fromTypedData(Float32List.fromList(vertices), 3, false));
+    setAttribute(Attribute.normal, Float32BufferAttribute.fromTypedData(Float32List.fromList(normals), 3, false));
+    setAttribute(Attribute.uv, Float32BufferAttribute.fromTypedData(Float32List.fromList(uvs), 2, false));
   }
 
   static CylinderGeometry fromJson(Map<String,dynamic> data) {

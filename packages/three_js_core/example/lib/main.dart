@@ -153,8 +153,7 @@ class _State extends State<WebglGeometries> {
 
     if (!kIsWeb) {
       final pars = three.WebGLRenderTargetOptions({"format": tmath.RGBAFormat});
-      renderTarget = three.WebGLMultisampleRenderTarget(
-          (width * dpr).toInt(), (height * dpr).toInt(), pars);
+      renderTarget = three.WebGLMultisampleRenderTarget((width * dpr).toInt(), (height * dpr).toInt(), pars);
       renderTarget.samples = 4;
       renderer!.setRenderTarget(renderTarget);
       sourceTexture = renderer!.getRenderTargetGLTexture(renderTarget);
@@ -183,7 +182,7 @@ class _State extends State<WebglGeometries> {
 
     final material = three.MeshPhongMaterial({
       three.MaterialProperty.side: tmath.DoubleSide, 
-      three.MaterialProperty.wireframe: false
+      three.MaterialProperty.wireframe: true
     });
 
     object = three.Mesh(three.SphereGeometry(75, 20, 10), material);

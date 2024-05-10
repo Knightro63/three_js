@@ -491,7 +491,8 @@ class WebGLRenderer {
     // print(" WebGLRenderer.renderBufferDirect geometry.index ${index?.count} - ${index} position: - ${position}  ");
     if (index == null) {
       if (position == null || position.count == 0) return;
-    } else if (index.count == 0) {
+    } 
+    else if (index.count == 0) {
       return;
     }
     //
@@ -538,7 +539,8 @@ class WebGLRenderer {
       if (material.wireframe == true) {
         state.setLineWidth(material.wireframeLinewidth! * getTargetPixelRatio());
         renderer.setMode(_gl.LINES);
-      } else {
+      } 
+      else {
         renderer.setMode(_gl.TRIANGLES);
       }
     } 
@@ -551,9 +553,11 @@ class WebGLRenderer {
 
       if (object is LineSegments) {
         renderer.setMode(_gl.LINES);
-      } else if (object is LineLoop) {
+      } 
+      else if (object is LineLoop) {
         renderer.setMode(_gl.LINE_LOOP);
-      } else {
+      } 
+      else {
         renderer.setMode(_gl.LINE_STRIP);
       }
     } 
@@ -569,7 +573,6 @@ class WebGLRenderer {
     } 
     else if (geometry is InstancedBufferGeometry) {
       final instanceCount = math.min(geometry.instanceCount!, geometry.maxInstanceCount!);
-
       renderer.renderInstances(drawStart, drawCount, instanceCount);
     } 
     else {
@@ -715,7 +718,7 @@ class WebGLRenderer {
       scene.onAfterRender(renderer: this, scene: scene, camera: camera);
     }
 
-    // _gl.finish();
+    _gl.finish();
 
     bindingStates.resetDefaultState();
     _currentMaterialId = -1;
@@ -812,8 +815,8 @@ class WebGLRenderer {
               //for (final element in material) {
                 if (material.visible) {
                   currentRenderList!.push(object, geometry, material, groupOrder, _vector3.z, null);
-                //}
-              }
+                }
+              //}
             }
           } else if (material != null && material.visible) {
             currentRenderList!.push(object, geometry, material, groupOrder, _vector3.z, null);

@@ -40,8 +40,8 @@ final _matrix = Matrix4.identity();
 ///   skinWeights.push( 1 - skinWeight, skinWeight, 0, 0 );
 /// }
 ///
-/// geometry.setAttribute(Semantic.skinIndex, Uint16BufferAttribute( skinIndices, 4));
-/// geometry.setAttribute(Semantic.skinWeight, Float32BufferAttribute( skinWeights, 4));
+/// geometry.setAttribute(Attribute.skinIndex, Uint16BufferAttribute( skinIndices, 4));
+/// geometry.setAttribute(Attribute.skinWeight, Float32BufferAttribute( skinWeights, 4));
 ///
 /// // create skinned mesh and skeleton
 ///

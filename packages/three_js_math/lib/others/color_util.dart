@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 import 'package:flutter_gl/flutter_gl.dart';
 import 'dart:math' as math;
+import '../math/math_util.dart';
 
 enum ColorSpace{linear,srgb}
 
@@ -152,7 +153,36 @@ class Color{
 
     return this;
   }
+  Color setRGB([double? r, double? g, double? b, ColorSpace colorSpace = ColorSpace.linear]) {
+    red = r ?? 1.0;
+    green = g ?? 1.0;
+    blue = b ?? 1.0;
 
+    ColorManagement.toWorkingColorSpace( this, colorSpace );
+
+    return this;
+  }
+  Color setHSL(double h, double s, double l, [ColorSpace colorSpace = ColorSpace.linear]) {
+    // h,s,l ranges are in 0.0 - 1.0
+    h = ((h % 1) + 1) % 1;
+    s = MathUtils.clamp(s, 0, 1);
+    l = MathUtils.clamp(l, 0, 1);
+
+    if (s == 0) {
+      red = green = blue = l;
+    } else {
+      final p = l <= 0.5 ? l * (1 + s) : l + s - (l * s);
+      final q = (2 * l) - p;
+
+      red = Color.hue2rgb(q, p, h + 1 / 3);
+      green = Color.hue2rgb(q, p, h);
+      blue = Color.hue2rgb(q, p, h - 1 / 3);
+    }
+
+    ColorManagement.toWorkingColorSpace( this, colorSpace );
+
+    return this;
+  }
   Color toLinear() {
     storage[0] = srgbToLinear(red);
     storage[1] = srgbToLinear(green);
@@ -174,6 +204,13 @@ class Color{
     storage[0] += color.red;
     storage[1] += color.green;
     storage[2] += color.blue;
+    return this;
+  }
+  Color setScalar(double scalar) {
+    red = scalar;
+    green = scalar;
+    blue = scalar;
+
     return this;
   }
   Color addScalar(num s) {
@@ -198,6 +235,23 @@ class Color{
 		return "rgb(${( temp.red * 255 )},${( temp.green * 255 )},${( temp.blue * 255 )})";
   }
 
+  List<num> toNumArray(List<num> array, [int offset = 0]) {
+    array[offset] = storage[0];
+    array[offset + 1] = storage[1];
+    array[offset + 2] = storage[2];
+
+    return array;
+  }
+
+  Color copyFromUnknown(list,[int offset = 0]) {
+    storage[0] = list[offset].toDouble();
+    storage[1] = list[offset+1].toDouble();
+    storage[2] = list[offset+2].toDouble();
+    if(list.length > 3){
+      storage[3] = list[offset+3].toDouble();
+    }
+    return this;
+  }
   Color copySRGBToLinear(Color color) {
     storage[0] = srgbToLinear(color.storage[0]);
     storage[1] = srgbToLinear(color.storage[1]);

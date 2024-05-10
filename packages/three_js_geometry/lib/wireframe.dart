@@ -34,7 +34,7 @@ class WireframeGeometry extends BufferGeometry {
     if (geometry.index != null) {
       // indexed BufferGeometry
 
-      final position = geometry.attributes[Semantic.position.name];
+      final position = geometry.attributes[Attribute.position.name];
       final indices = geometry.index;
       List<Map<String,dynamic>> groups = geometry.groups;
 
@@ -71,7 +71,7 @@ class WireframeGeometry extends BufferGeometry {
     else {
       // non-indexed BufferGeometry
 
-      final position = geometry.attributes[Semantic.position.name];
+      final position = geometry.attributes[Attribute.position.name];
 
       for (int i = 0, l = (position!.count ~/ 3); i < l; i++) {
         for (int j = 0; j < 3; j++) {
@@ -96,7 +96,7 @@ class WireframeGeometry extends BufferGeometry {
 
     // build geometry
 
-    setAttribute(Semantic.position,Float32BufferAttribute.fromTypedData(Float32List.fromList(vertices), 3, false));
+    setAttribute(Attribute.position,Float32BufferAttribute.fromTypedData(Float32List.fromList(vertices), 3, false));
   }
 }
 

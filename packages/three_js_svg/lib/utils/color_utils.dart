@@ -285,28 +285,6 @@ extension SVGColor on Color{
     return this;
   }
 
-  Color setHSL(double h, double s, double l, [ColorSpace colorSpace = ColorSpace.linear]) {
-    // h,s,l ranges are in 0.0 - 1.0
-    h = ((h % 1) + 1) % 1;
-    s = MathUtils.clamp(s, 0, 1);
-    l = MathUtils.clamp(l, 0, 1);
-
-    if (s == 0) {
-      red = green = blue = l;
-    } else {
-      final p = l <= 0.5 ? l * (1 + s) : l + s - (l * s);
-      final q = (2 * l) - p;
-
-      red = Color.hue2rgb(q, p, h + 1 / 3);
-      green = Color.hue2rgb(q, p, h);
-      blue = Color.hue2rgb(q, p, h - 1 / 3);
-    }
-
-    ColorManagement.toWorkingColorSpace( this, colorSpace );
-
-    return this;
-  }
-
   Color setColorName(String style) {
     // color keywords
     final hex = _colorKeywords[style.toLowerCase()];

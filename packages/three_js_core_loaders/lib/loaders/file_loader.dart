@@ -96,7 +96,7 @@ class FileLoader extends Loader {
     if (cached != null) {
       manager.itemStart(cacheName);
       manager.itemEnd(cacheName);
-      return cached;
+      return ThreeFile('bytes',cached,'cache');
     }
     try{
       ByteData fileData = await rootBundle.load(asset);

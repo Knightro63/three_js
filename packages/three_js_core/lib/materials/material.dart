@@ -956,7 +956,7 @@ class Material with EventDispatcher {
       throw ("Material.getProperty type: $type propertyName: $propertyName is not support ");
     }
   }
-
+  void operator []=(String key, dynamic value) => setProperty(key, value);
   void setProperty(String propertyName, dynamic value) {
     if (propertyName == "color") {
       color = value;

@@ -42,7 +42,7 @@ class STLBinaryExporter{
 
   Uint8List parseMesh(Mesh object){
     BufferGeometry? geometry = object.geometry;
-    final Float32BufferAttribute? vertices = geometry?.getAttribute(Semantic.position);
+    final Float32BufferAttribute? vertices = geometry?.getAttribute(Attribute.position);
     final indices = geometry?.getIndex();
     if(vertices != null && indices != null){
       if(!_usingParse){

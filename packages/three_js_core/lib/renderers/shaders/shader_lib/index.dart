@@ -30,3 +30,5 @@ export './shadow_frag.glsl.dart';
 export './shadow_vert.glsl.dart';
 export './sprite_frag.glsl.dart';
 export './sprite_vert.glsl.dart';
+export 'horizontal_blur_shader.dart';
+export 'vertical_blur_shader.dart';

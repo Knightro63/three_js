@@ -127,8 +127,11 @@ class WebGLShadowMap {
       }
 
       if (shadow.map == null) {
-        final pars =
-            WebGLRenderTargetOptions({"minFilter": NearestFilter, "magFilter": NearestFilter, "format": RGBAFormat});
+        final pars = WebGLRenderTargetOptions({
+          "minFilter": NearestFilter, 
+          "magFilter": NearestFilter, 
+          "format": RGBAFormat
+        });
 
         shadow.map = WebGLRenderTarget(_shadowMapSize.x.toInt(), _shadowMapSize.y.toInt(), pars);
         shadow.map!.texture.name = '${light.name}.shadowMap';
@@ -243,7 +246,8 @@ class WebGLShadowMap {
 
     if (type == VSMShadowMap) {
       result.side = (material.shadowSide != null) ? material.shadowSide! : material.side;
-    } else {
+    } 
+    else {
       result.side = (material.shadowSide != null) ? material.shadowSide! : shadowSide[material.side]!;
     }
 

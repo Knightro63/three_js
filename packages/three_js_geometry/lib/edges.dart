@@ -28,7 +28,7 @@ class EdgesGeometry extends BufferGeometry {
     final thresholdDot = math.cos((math.pi/180) * thresholdAngle);
 
     final indexAttr = geometry.getIndex();
-    final positionAttr = geometry.getAttribute(Semantic.position);
+    final positionAttr = geometry.getAttribute(Attribute.position);
     final indexCount = indexAttr != null ? indexAttr.count : positionAttr.count;
 
     final indexArr = [0, 0, 0];
@@ -118,6 +118,6 @@ class EdgesGeometry extends BufferGeometry {
       }
     }
 
-    setAttribute(Semantic.position,Float32BufferAttribute.fromTypedData(Float32List.fromList(vertices), 3, false));
+    setAttribute(Attribute.position,Float32BufferAttribute.fromTypedData(Float32List.fromList(vertices), 3, false));
   }
 }

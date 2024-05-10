@@ -137,7 +137,7 @@ class GLTFLoader extends Loader {
   Future<GLTFData?> fromAsset(String asset, {String? package}) async{
     _init();
     if(path == ''){
-      setPath('assets');
+      setPath(asset.replaceAll(asset.split('/').last, ''));
     }
     ThreeFile? tf = await _loader.fromAsset(asset,package: package);
     return tf == null?null:_parse(tf.data);

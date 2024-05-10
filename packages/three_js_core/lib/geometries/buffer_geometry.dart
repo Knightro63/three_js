@@ -39,7 +39,7 @@ final _bufferGeometryvector = Vector3.zero();
 /// ]);
 ///
 /// // itemSize = 3 because there are 3 values (components) per vertex
-/// geometry.setAttribute(Semantic.position, new THREE.BufferAttribute( vertices, 3 ) );
+/// geometry.setAttribute(Attribute.position, new THREE.BufferAttribute( vertices, 3 ) );
 /// final material = MeshBasicMaterial({MaterialProperty.color: 0xff0000});
 /// final mesh = Mesh( geometry, material );
 /// ```
@@ -124,27 +124,27 @@ class BufferGeometry with EventDispatcher {
     }
   }
 
-  /// Returns the [type] with the specified Semantic.
-  dynamic getAttribute(Semantic type) {
+  /// Returns the [type] with the specified Attribute.
+  dynamic getAttribute(Attribute type) {
     return attributes[type.name];
   }
   
   /// Sets an attribute to this geometry. Use this rather than the attributes
   /// property, because an internal hashmap of [attributes] is maintained
   /// to speed up iterating over attributes.
-  BufferGeometry setAttribute(Semantic type, attribute) {
+  BufferGeometry setAttribute(Attribute type, attribute) {
     attributes[type.name] = attribute;
     return this;
   }
   
-  /// Deletes the [type] with the specified Semantic.
-  BufferGeometry deleteAttribute(Semantic type) {
+  /// Deletes the [type] with the specified Attribute.
+  BufferGeometry deleteAttribute(Attribute type) {
     attributes.remove(type.name);
     return this;
   }
   
   /// Returns `true` if the attribute with the specified name exists.
-  bool hasAttribute(Semantic type) {
+  bool hasAttribute(Attribute type) {
     return attributes[type.name] != null;
   }
 

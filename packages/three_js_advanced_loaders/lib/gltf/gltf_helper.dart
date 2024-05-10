@@ -321,10 +321,10 @@ Function updateMorphTargets = (Mesh mesh, Map<String, dynamic> meshDef) {
     final targetNames = meshDef["extras"]["targetNames"];
 
     if (mesh.morphTargetInfluences?.length == targetNames.length) {
-      //mesh.morphTargetDictionary = {};
+      mesh.morphTargetDictionary = {};
 
       for (int i = 0, il = targetNames.length; i < il; i++) {
-        //mesh.morphTargetDictionary?[targetNames[i]] = i;
+        mesh.morphTargetDictionary?[targetNames[i]] = i;
       }
     } 
     else {

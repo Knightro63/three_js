@@ -61,6 +61,13 @@ class MathUtils{
   static double deg2rad = math.pi / 180.0;
   static double rad2deg = 180.0 / math.pi;
 
+  static double degToRad(double val){
+    return val*(math.pi / 180);
+  }
+  static double radToDeg(double val){
+    return val*(180.0 / math.pi);
+  }
+
   static bool isPowerOfTwo(int value) {
     return (value & (value - 1)) == 0 && value != 0;
   }

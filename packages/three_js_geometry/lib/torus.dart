@@ -114,9 +114,9 @@ class TorusGeometry extends BufferGeometry {
     // build geometry
 
     setIndex(indices);
-    setAttribute(Semantic.position, Float32BufferAttribute.fromTypedData(Float32List.fromList(vertices), 3));
-    setAttribute(Semantic.normal, Float32BufferAttribute.fromTypedData(Float32List.fromList(normals), 3));
-    setAttribute(Semantic.uv, Float32BufferAttribute.fromTypedData(Float32List.fromList(uvs), 2));
+    setAttribute(Attribute.position, Float32BufferAttribute.fromTypedData(Float32List.fromList(vertices), 3));
+    setAttribute(Attribute.normal, Float32BufferAttribute.fromTypedData(Float32List.fromList(normals), 3));
+    setAttribute(Attribute.uv, Float32BufferAttribute.fromTypedData(Float32List.fromList(uvs), 2));
   }
 
   static fromJson(data) {

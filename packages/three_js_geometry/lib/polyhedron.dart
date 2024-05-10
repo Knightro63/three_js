@@ -237,9 +237,9 @@ class PolyhedronGeometry extends BufferGeometry {
 
     // build non-indexed geometry
 
-    setAttribute(Semantic.position,Float32BufferAttribute.fromTypedData(Float32List.fromList(vertexBuffer), 3, false));
-    setAttribute(Semantic.normal,Float32BufferAttribute.fromTypedData(Float32List.fromList(vertexBuffer.sublist(0)), 3, false));
-    setAttribute(Semantic.uv, Float32BufferAttribute.fromTypedData(Float32List.fromList(uvBuffer), 2, false));
+    setAttribute(Attribute.position,Float32BufferAttribute.fromTypedData(Float32List.fromList(vertexBuffer), 3, false));
+    setAttribute(Attribute.normal,Float32BufferAttribute.fromTypedData(Float32List.fromList(vertexBuffer.sublist(0)), 3, false));
+    setAttribute(Attribute.uv, Float32BufferAttribute.fromTypedData(Float32List.fromList(uvBuffer), 2, false));
 
     if (detail == 0) {
       computeVertexNormals(); // flat normals

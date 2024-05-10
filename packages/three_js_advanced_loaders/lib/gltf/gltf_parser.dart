@@ -367,7 +367,6 @@ class GLTFParser {
   Future<ByteBuffer?> loadBufferView2(int bufferViewIndex) async {
     final bufferViewDef = json["bufferViews"][bufferViewIndex];
     final buffer = await getDependency('buffer', bufferViewDef["buffer"]);
-
     final byteLength = bufferViewDef["byteLength"] ?? 0;
     final byteOffset = bufferViewDef["byteOffset"] ?? 0;
 
@@ -376,7 +375,7 @@ class GLTFParser {
     if (buffer is Uint8List) {
       otherBuffer = Uint8List.view(buffer.buffer, byteOffset, byteLength).sublist(0).buffer;
     } 
-    else{
+    else if(buffer != null){
       otherBuffer = Uint8List.view(buffer, byteOffset, byteLength).sublist(0).buffer;
     }
 
@@ -1360,20 +1359,20 @@ class GLTFParser {
     if (meshPromise != null) {
       pending.add(meshPromise);
     }
-    // if ( nodeDef["mesh"] != null ) {
-    //   final mesh = await parser.getDependency( 'mesh', nodeDef["mesh"] );
-    //   final node = await parser._getNodeRef( parser.meshCache, nodeDef["mesh"], mesh );
-    //   // if weights are provided on the node, override weights on the mesh.
-    //   if ( nodeDef["weights"] != null ) {
-    //     node.traverse( ( o ) {
-    //       if ( ! o.isMesh ) return;
-    //       for ( final i = 0, il = nodeDef["weights"].length; i < il; i ++ ) {
-    //         o.morphTargetInfluences[ i ] = nodeDef["weights"][ i ];
-    //       }
-    //     } );
-    //   }
-    //   pending.add(node);
-    // }
+    if ( nodeDef["mesh"] != null ) {
+      final mesh = await parser.getDependency( 'mesh', nodeDef["mesh"] );
+      final node = await parser.getNodeRef( parser.meshCache, nodeDef["mesh"], mesh );
+      // if weights are provided on the node, override weights on the mesh.
+      if ( nodeDef["weights"] != null ) {
+        node.traverse( ( o ) {
+          if ( ! o.isMesh ) return;
+          for ( int i = 0, il = nodeDef["weights"].length; i < il; i ++ ) {
+            o.morphTargetInfluences[ i ] = nodeDef["weights"][ i ];
+          }
+        } );
+      }
+      pending.add(node);
+    }
 
     if (nodeDef["camera"] != null) {
       final camera = await parser.getDependency('camera', nodeDef["camera"]);
@@ -1438,7 +1437,7 @@ class GLTFParser {
 
     if (nodeDef["matrix"] != null) {
       final matrix = Matrix4();
-      matrix.copyFromArray(List<double>.from(nodeDef["matrix"]));
+      matrix.copyFromUnknown(List<num>.from(nodeDef["matrix"]));
       node.applyMatrix4(matrix);
     } else {
       if (nodeDef["translation"] != null) {

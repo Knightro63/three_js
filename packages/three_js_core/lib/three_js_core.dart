@@ -12,4 +12,5 @@ export 'scenes/index.dart';
 export 'textures/index.dart';
 export 'others/index.dart';
 export 'math/index.dart';
-
+export 'renderers/shaders/shader_lib/index.dart';
+export 'renderers/pmrem_generator.dart';

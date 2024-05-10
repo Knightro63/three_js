@@ -17,6 +17,8 @@ dependencies:
     path: ../three_js_math
   three_js_geometry:
     path: ../three_js_geometry
+  three_js_animations:
+    path: ../three_js_animations
 
 dev_dependencies:
   flutter_test:

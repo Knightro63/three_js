@@ -421,7 +421,8 @@ class WebGLState {
     if (currentFlipSided != flipSided) {
       if (flipSided) {
         gl.frontFace(gl.CW);
-      } else {
+      } 
+      else {
         gl.frontFace(gl.CCW);
       }
 
@@ -560,63 +561,23 @@ class WebGLState {
   }
 
   void texSubImage2DNoSize(target, level, x, y, glFormat, glType, data) {
-    // try {
-
     gl.texSubImage2D_NOSIZE(target, level, x, y, glFormat, glType, data);
-
-    // } catch ( error ) {
-
-    // 	print( 'three.WebGLState: ${error}' );
-
-    // }
   }
 
   void texSubImage3D(target, level, xoffset, yoffset, zoffset, width, height, depth, format, type, pixels) {
-    // try {
-
     gl.texSubImage3D(target, level, xoffset, yoffset, zoffset, width, height, depth, format, type, pixels);
-
-    // } catch ( error ) {
-
-    // 	console.error( 'three.WebGLState:', error );
-
-    // }
   }
 
   void compressedTexSubImage2D(target, level, xoffset, yoffset, width, height, format, pixels) {
-    // try {
-
     gl.compressedTexSubImage2D(target, level, xoffset, yoffset, width, height, format, pixels);
-
-    // } catch ( error ) {
-
-    // 	console.error( 'three.WebGLState:', error );
-
-    // }
   }
 
   void texStorage2D(int type, int levels, int glInternalFormat, int width, int height) {
-    // try {
-
     gl.texStorage2D(type, levels, glInternalFormat, width, height);
-
-    // } catch ( error ) {
-
-    // 	print( 'three.WebGLState: ${error}' );
-
-    // }
   }
 
   void texStorage3D(target, levels, internalformat, width, height, depth) {
-    // try {
-
     gl.texStorage3D(target, levels, internalformat, width.toInt(), height.toInt(), depth);
-
-    // } catch ( error ) {
-
-    // 	console.error( 'three.WebGLState:', error );
-
-    // }
   }
 
   void texImage2DIf(int target, int level, int internalformat, int format, int type, image) {
@@ -641,8 +602,6 @@ class WebGLState {
     gl.texImage3D(target, level, internalformat, width, height, depth, border, format, type, offset);
   }
 
-  //
-
   void scissor(Vector4 scissor) {
     if (currentScissor.equals(scissor) == false) {
       gl.scissor(scissor.x.toInt(), scissor.y.toInt(), scissor.z.toInt(), scissor.w.toInt());
@@ -656,8 +615,6 @@ class WebGLState {
       currentViewport.setFrom(viewport);
     }
   }
-
-  //
 
   void reset() {
     // reset state

@@ -553,7 +553,6 @@ class Object3D with EventDispatcher {
     for (int i = 0, l = children.length; i < l; i++) {
       final child = children[i];
       final object = child.getObjectByProperty(name, value);
-
       if (object != null) {
         return object;
       }
