@@ -1,243 +1,58 @@
 import 'dart:async';
 import 'dart:math' as math;
-import 'package:flutter/foundation.dart';
+import 'package:example/src/demo.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gl/flutter_gl.dart';
 import 'package:three_js/three_js.dart' as three;
 import 'package:three_js_helpers/three_js_helpers.dart';
 
-class webgl_animation_multiple extends StatefulWidget {
-  String fileName;
-
-  webgl_animation_multiple({Key? key, required this.fileName})
-      : super(key: key);
+class WebglAnimationMultiple extends StatefulWidget {
+  final String fileName;
+  const WebglAnimationMultiple({super.key, required this.fileName});
 
   @override
   createState() => _State();
 }
 
-class _State extends State<webgl_animation_multiple> {
-  late FlutterGlPlugin three3dRender;
-  three.WebGLRenderer? renderer;
-
-  int? fboId;
-  late double width;
-  late double height;
-
-  Size? screenSize;
-
-  late three.Scene scene;
-  late three.Camera camera;
-  late three.Mesh mesh;
-
-  //////////////////////////////
-  // Global objects
-  //////////////////////////////
-  late three.Scene worldScene; // three.Scene where it all will be rendered
-
-  three.Clock clock = three.Clock();
-  three.OrbitControls? controls;
-
-  double dpr = 1.0;
-
-  var amount = 4;
-
-  bool verbose = false;
-  bool disposed = false;
-
-  late three.Object3D object;
-
-  late three.Texture texture;
-
-  late List<Map<String, dynamic>> MODELS;
-  late List<Map<String, dynamic>> UNITS;
-  var mixers =
-      []; // All the three.AnimationMixer objects for all the animations in the scene
-
-  var numLoadedModels = 0;
-
-  late three.WebGLMultisampleRenderTarget renderTarget;
-
-  dynamic? sourceTexture;
-
-  bool loaded = false;
-
-  late three.Object3D model;
-
-  final GlobalKey<three.PeripheralsState> _globalKey =
-      GlobalKey<three.PeripheralsState>();
+class _State extends State<WebglAnimationMultiple> {
+  late Demo demo;
 
   @override
   void initState() {
+    demo = Demo(
+      fileName: widget.fileName,
+      onSetupComplete: (){setState(() {});},
+      setup: setup
+    );
     super.initState();
   }
-
-  // Platform messages are asynchronous, so we initialize in an async method.
-  Future<void> initPlatformState() async {
-    width = screenSize!.width;
-    height = screenSize!.height;
-
-    three3dRender = FlutterGlPlugin();
-
-    Map<String, dynamic> _options = {
-      "antialias": true,
-      "alpha": false,
-      "width": width.toInt(),
-      "height": height.toInt(),
-      "dpr": dpr
-    };
-
-    await three3dRender.initialize(options: _options);
-
-    setState(() {});
-
-    // TODO web wait dom ok!!!
-    Future.delayed(const Duration(milliseconds: 100), () async {
-      await three3dRender.prepareContext();
-
-      initScene();
-    });
-  }
-
-  initSize(BuildContext context) {
-    if (screenSize != null) {
-      return;
-    }
-
-    final mqd = MediaQuery.of(context);
-
-    screenSize = mqd.size;
-    dpr = mqd.devicePixelRatio;
-
-    initPlatformState();
+  @override
+  void dispose() {
+    demo.dispose();
+    controls.clearListeners();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.fileName),
-      ),
-      body: Builder(
-        builder: (BuildContext context) {
-          initSize(context);
-          return SingleChildScrollView(child: _build(context));
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        child: const Text("render"),
-        onPressed: () {
-          clickRender();
-        },
-      ),
-    );
+    return demo.threeDart();
   }
 
-  Widget _build(BuildContext context) {
-    return Column(
-      children: [
-        Container(
-          child: Stack(
-            children: [
-              three.Peripherals(
-                key: _globalKey,
-                builder: (BuildContext context) {
-                  return Container(
-                      width: width,
-                      height: height,
-                      color: Colors.black,
-                      child: Builder(builder: (BuildContext context) {
-                        if (kIsWeb) {
-                          return three3dRender.isInitialized
-                              ? HtmlElementView(
-                                  viewType: three3dRender.textureId!.toString())
-                              : Container();
-                        } else {
-                          return three3dRender.isInitialized
-                              ? Texture(textureId: three3dRender.textureId!)
-                              : Container();
-                        }
-                      }));
-                },
-              )
-            ],
-          ),
-        ),
-      ],
-    );
-  }
+  late three.OrbitControls controls;
 
-  render() {
-    int _t = DateTime.now().millisecondsSinceEpoch;
+  late List<Map<String, dynamic>> models;
+  late List<Map<String, dynamic>> units;
+  final List<three.AnimationMixer> mixers = []; // All the three.AnimationMixer objects for all the animations in the scene
+  int numLoadedModels = 0;
 
-    final _gl = three3dRender.gl;
-
-    renderer!.render(worldScene, camera);
-
-    int _t1 = DateTime.now().millisecondsSinceEpoch;
-
-    if (verbose) {
-      print("render cost: ${_t1 - _t} ");
-      print(renderer!.info.memory);
-      print(renderer!.info.render);
-    }
-
-    _gl.flush();
-
-    if (verbose) print(" render: sourceTexture: $sourceTexture ");
-
-    if (!kIsWeb) {
-      three3dRender.updateTexture(sourceTexture);
-    }
-  }
-
-  initRenderer() {
-    Map<String, dynamic> _options = {
-      "width": width,
-      "height": height,
-      "gl": three3dRender.gl,
-      "antialias": true,
-      "canvas": three3dRender.element
-    };
-    renderer = three.WebGLRenderer(_options);
-    renderer!.setPixelRatio(dpr);
-    renderer!.setSize(width, height, false);
-    renderer!.shadowMap.enabled = true;
-
-    if (!kIsWeb) {
-      var pars = three.WebGLRenderTargetOptions({"format": three.RGBAFormat});
-      renderTarget = three.WebGLMultisampleRenderTarget(
-          (width * dpr).toInt(), (height * dpr).toInt(), pars);
-      renderTarget.samples = 4;
-      renderer!.setRenderTarget(renderTarget);
-      sourceTexture = renderer!.getRenderTargetGLTexture(renderTarget);
-    }
-  }
-
-  initScene() {
-    initRenderer();
-    initPage();
-  }
-
-  initPage() async {
-    //////////////////////////////
-
-    //////////////////////////////
-    // Information about our 3D models and units
-    //////////////////////////////
-
-    // The names of the 3D models to load. One-per file.
-    // A model may have multiple SkinnedMesh objects as well as several rigs (armatures). Units will define which
-    // meshes, armatures and animations to use. We will load the whole scene for each object and clone it for each unit.
-    // Models are from https://www.mixamo.com/
-    MODELS = [
+  Future<void> setup() async {
+    models = [
       {"name": "Soldier"},
       {"name": "Parrot"},
     ];
 
     // Here we define instances of the models that we want to place in the scene, their position, scale and the animations
     // that must be played.
-    UNITS = [
+    units = [
       {
         "modelName":
             "Soldier", // Will use the 3D model from file models/gltf/Soldier.glb
@@ -283,35 +98,24 @@ class _State extends State<webgl_animation_multiple> {
       },
     ];
 
-    //////////////////////////////
-    // The main setup happens here
-    //////////////////////////////
-
-    initScene2();
+    setup2();
     loadModels();
-    //////////////////////////////
-
-    loaded = true;
-
-    // scene.overrideMaterial = new three.MeshBasicMaterial();
   }
 
-  initScene2() {
-    camera = three.PerspectiveCamera(45, width / height, 1, 10000);
-    camera.position.setValues(3, 6, -10);
-    camera.lookAt(three.Vector3(0, 1, 0));
+  void setup2() {
+    demo.camera = three.PerspectiveCamera(45, demo.width / demo.height, 1, 10000);
+    demo.camera.position.setValues(3, 6, -10);
+    demo.camera.lookAt(three.Vector3(0, 1, 0));
 
-    clock = three.Clock();
+    demo.scene = three.Scene();
+    demo.scene.background = three.Color.fromHex32(0xa0a0a0);
+    demo.scene.fog = three.Fog(three.Color.fromHex32(0xa0a0a0), 10, 22);
 
-    worldScene = three.Scene();
-    worldScene.background = three.Color.fromHex32(0xa0a0a0);
-    worldScene.fog = three.Fog(three.Color.fromHex32(0xa0a0a0), 10, 22);
-
-    var hemiLight = three.HemisphereLight(0xffffff, 0x444444);
+    final hemiLight = three.HemisphereLight(0xffffff, 0x444444);
     hemiLight.position.setValues(0, 20, 0);
-    worldScene.add(hemiLight);
+    demo.scene.add(hemiLight);
 
-    var dirLight = three.DirectionalLight(0xffffff);
+    final dirLight = three.DirectionalLight(0xffffff);
     dirLight.position.setValues(-3, 10, -10);
     dirLight.castShadow = true;
     dirLight.shadow!.camera!.top = 10;
@@ -320,62 +124,49 @@ class _State extends State<webgl_animation_multiple> {
     dirLight.shadow!.camera!.right = 10;
     dirLight.shadow!.camera!.near = 0.1;
     dirLight.shadow!.camera!.far = 40;
-    worldScene.add(dirLight);
+    demo.scene.add(dirLight);
 
-    var controls = three.OrbitControls(camera, _globalKey);
+    controls = three.OrbitControls(demo.camera, demo.globalKey);
 
     // ground
-    var groundMesh = three.Mesh(three.PlaneGeometry(40, 40),
-        three.MeshPhongMaterial.fromMap({"color": 0x999999, "depthWrite": false}));
+    final groundMesh = three.Mesh(three.PlaneGeometry(40, 40), three.MeshPhongMaterial.fromMap({"color": 0x999999, "depthWrite": false}));
 
     groundMesh.rotation.x = -math.pi / 2;
     groundMesh.receiveShadow = true;
-    worldScene.add(groundMesh);
+    demo.scene.add(groundMesh);
   }
 
-  //////////////////////////////
-  // Function implementations
-  //////////////////////////////
-  /**
-     * Function that starts loading process for the next model in the queue. The loading process is
-     * asynchronous: it happens "in the background". Therefore we don't load all the models at once. We load one,
-     * wait until it is done, then load the next one. When all models are loaded, we call loadUnits().
-     */
-  loadModels() {
-    for (var i = 0; i < MODELS.length; ++i) {
-      var m = MODELS[i];
+  void loadModels() {
+    for (int i = 0; i < models.length; ++i) {
+      final m = models[i];
 
       loadGltfModel(m, () {
         ++numLoadedModels;
 
-        if (numLoadedModels == MODELS.length) {
-          print("All models loaded, time to instantiate units...");
+        if (numLoadedModels == models.length) {
+          three.console.info("All models loaded, time to instantiate units...");
           instantiateUnits();
         }
       });
     }
   }
 
-  /**
-     * Look at UNITS configuration, clone necessary 3D model scenes, place the armatures and meshes in the scene and
-     * launch necessary animations
-     */
-  instantiateUnits() {
-    var numSuccess = 0;
+  void instantiateUnits() {
+    int numSuccess = 0;
 
-    for (var i = 0; i < UNITS.length; ++i) {
-      var u = UNITS[i];
-      var model = getModelByName(u["modelName"]);
+    for (int i = 0; i < units.length; ++i) {
+      final u = units[i];
+      final model = getModelByName(u["modelName"]);
 
       if (model != null) {
-        var clonedScene = SkeletonUtils.clone(model["scene"]);
+        final clonedScene = SkeletonUtils.clone(model["scene"]);
 
         if (clonedScene != null) {
           // three.Scene is cloned properly, let's find one mesh and launch animation for it
-          var clonedMesh = clonedScene.getObjectByName(u["meshName"]);
+          final clonedMesh = clonedScene.getObjectByName(u["meshName"]);
 
           if (clonedMesh != null) {
-            var mixer = startAnimation(
+            final mixer = startAnimation(
                 clonedMesh,
                 List<three.AnimationClip>.from(model["animations"]),
                 u["animationName"]);
@@ -389,7 +180,7 @@ class _State extends State<webgl_animation_multiple> {
           // We can't set position, scale or rotation to individual mesh objects. Instead we set
           // it to the whole cloned scene and then add the whole scene to the game world
           // Note: this may have weird effects if you have lights or other items in the GLTF file's scene!
-          worldScene.add(clonedScene);
+          demo.scene.add(clonedScene);
 
           if (u["position"] != null) {
             clonedScene.position.setValues(
@@ -407,65 +198,56 @@ class _State extends State<webgl_animation_multiple> {
           }
         }
       } else {
-        print("Can not find model ${u["modelName"]}");
+        three.console.info("Can not find model ${u["modelName"]}");
       }
     }
 
-    print(" Successfully instantiated $numSuccess units ");
+    three.console.info(" Successfully instantiated $numSuccess units ");
 
-    animate();
+    demo.addAnimationEvent((dt){
+      for (int i = 0; i < mixers.length; ++i) {
+        mixers[i].update(dt);
+      }
+
+      controls.update();
+    });
   }
 
-  /**
-     * Start animation for a specific mesh object. Find the animation by name in the 3D model's animation array
-     * @param skinnedMesh {three.SkinnedMesh} The mesh to animate
-     * @param animations {Array} Array containing all the animations for this model
-     * @param animationName {string} Name of the animation to launch
-     * @return {three.AnimationMixer} Mixer to be used in the render loop
-     */
-  startAnimation(skinnedMesh, animations, animationName) {
-    var mixer = three.AnimationMixer(skinnedMesh);
-    var clip = three.AnimationClip.findByName(animations, animationName);
+  three.AnimationMixer startAnimation(
+    three.Object3D skinnedMesh, 
+    List<three.AnimationClip> animations, 
+    String animationName
+  ) {
+    final mixer = three.AnimationMixer(skinnedMesh);
+    final clip = three.AnimationClip.findByName(animations, animationName);
 
     if (clip != null) {
-      var action = mixer.clipAction(clip);
+      final action = mixer.clipAction(clip);
       action!.play();
     }
 
     return mixer;
   }
 
-  /**
-     * Find a model object by name
-     * @param name
-     * @returns {object|null}
-     */
-  getModelByName(name) {
-    for (var i = 0; i < MODELS.length; ++i) {
-      if (MODELS[i]["name"] == name) {
-        return MODELS[i];
+  Map<String, dynamic>? getModelByName(String name) {
+    for (int i = 0; i < models.length; ++i) {
+      if (models[i]["name"] == name) {
+        return models[i];
       }
     }
 
     return null;
   }
 
-  /**
-     * Load a 3D model from a GLTF file. Use the GLTFLoader.
-     * @param model {object} Model config, one item from the MODELS array. It will be updated inside the function!
-     * @param onLoaded {function} A callback function that will be called when the model is loaded
-     */
-  loadGltfModel(model, onLoaded) {
-    var loader = three.GLTFLoader();
-    var modelName = "assets/models/gltf/" + model["name"] + ".gltf";
+  void loadGltfModel(model, onLoaded) {
+    final loader = three.GLTFLoader();
+    final modelName = "assets/models/gltf/${model["name"]}.gltf";
 
     loader.fromAsset(modelName).then((gltf) {
-      var scene = gltf!.scene;
+      final scene = gltf!.scene;
 
       model["animations"] = gltf.animations;
       model["scene"] = scene;
-
-      // Enable Shadows
 
       gltf.scene.traverse((object) {
         if (object is three.Mesh) {
@@ -473,47 +255,8 @@ class _State extends State<webgl_animation_multiple> {
         }
       });
 
-      print("Done loading model ${model["name"]} ");
-
+      three.console.info("Done loading model ${model["name"]} ");
       onLoaded();
     });
-  }
-
-  clickRender() {
-    print("clickRender..... ");
-    animate();
-  }
-
-  animate() {
-    if (!mounted || disposed) {
-      return;
-    }
-
-    if (!loaded) {
-      return;
-    }
-
-    var mixerUpdateDelta = clock.getDelta();
-
-    // Update all the animation frames
-
-    for (var i = 0; i < mixers.length; ++i) {
-      mixers[i].update(mixerUpdateDelta);
-    }
-
-    render();
-
-    Future.delayed(const Duration(milliseconds: 40), () {
-      animate();
-    });
-  }
-
-  @override
-  void dispose() {
-    print(" dispose ............. ");
-    disposed = true;
-    three3dRender.dispose();
-
-    super.dispose();
   }
 }

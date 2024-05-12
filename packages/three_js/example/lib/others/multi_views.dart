@@ -5,15 +5,15 @@ import 'package:flutter/material.dart' hide Matrix4;
 import 'package:flutter_gl/flutter_gl.dart';
 import 'package:three_js/three_js.dart' as three;
 
-class multi_views extends StatefulWidget {
-  String fileName;
-  multi_views({Key? key, required this.fileName}) : super(key: key);
+class MultiViews extends StatefulWidget {
+  final String fileName;
+  const MultiViews({super.key, required this.fileName});
 
   @override
   createState() => _MyAppState();
 }
 
-class _MyAppState extends State<multi_views> {
+class _MyAppState extends State<MultiViews> {
   three.WebGLRenderer? renderer;
   FlutterGlPlugin three3dRender = FlutterGlPlugin();
 
@@ -68,24 +68,24 @@ class _MyAppState extends State<multi_views> {
   Widget _build(BuildContext context) {
     return Column(
       children: [
-        multi_views1(renderer: renderer),
+        MultiViews1(renderer: renderer),
         Container(height: 2, color: Colors.red,),
-        multi_views2(renderer: renderer)
+        MultiViews2(renderer: renderer)
       ],
     );
   }
 
 }
 
-class multi_views1 extends StatefulWidget {
-  three.WebGLRenderer? renderer;
+class MultiViews1 extends StatefulWidget {
+  final three.WebGLRenderer? renderer;
 
-  multi_views1({Key? key, this.renderer}) : super(key: key);
+  const MultiViews1({super.key, this.renderer});
 
   @override
   createState() => _multi_views1_State();
 }
-class _multi_views1_State extends State<multi_views1> {
+class _multi_views1_State extends State<MultiViews1> {
  
   three.WebGLRenderer? renderer;
 
@@ -327,15 +327,14 @@ class _multi_views1_State extends State<multi_views1> {
   }
 }
 
-class multi_views2 extends StatefulWidget {
-  three.WebGLRenderer? renderer;
-
-  multi_views2({Key? key, this.renderer}) : super(key: key);
+class MultiViews2 extends StatefulWidget {
+  final three.WebGLRenderer? renderer;
+  const MultiViews2({super.key, this.renderer});
 
   @override
   createState() => _multi_views2_State();
 }
-class _multi_views2_State extends State<multi_views2> {
+class _multi_views2_State extends State<MultiViews2> {
   three.WebGLRenderer? renderer;
   late FlutterGlPlugin three3dRender;
   int? fboId;

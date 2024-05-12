@@ -20,13 +20,14 @@ class _State extends State<WebglAnimationSkinningMorph> {
     demo = Demo(
       fileName: widget.fileName,
       onSetupComplete: (){setState(() {});},
-      setup: setup
+      setup: setup,
     );
     super.initState();
   }
   @override
   void dispose() {
     demo.dispose();
+    controls.clearListeners();
     super.dispose();
   }
 
@@ -35,13 +36,17 @@ class _State extends State<WebglAnimationSkinningMorph> {
     return demo.threeDart();
   }
 
+  late three.OrbitControls controls;
+
   Future<void> setup() async{
     late three.AnimationMixer mixer;
     late three.Object3D model;
 
     demo.camera = three.PerspectiveCamera(45, demo.width / demo.height, 0.1, 1000);
-    demo.camera.position.setValues(-5, 3, 10);
-    demo.camera.lookAt(three.Vector3(0, 2, 0));
+    demo.camera.position.setValues(-5, 5, 15);
+    demo.camera.lookAt(three.Vector3(0, 5, 0));
+
+    controls = three.OrbitControls(demo.camera, demo.globalKey);
 
     demo.scene = three.Scene();
     demo.scene.background = three.Color.fromHex32(0xffffff);
@@ -77,8 +82,6 @@ class _State extends State<WebglAnimationSkinningMorph> {
       if (object is three.Mesh) object.castShadow = true;
     });
 
-    //
-
     final skeleton = SkeletonHelper(model);
     skeleton.visible = true;
     demo.scene.add(skeleton);
@@ -88,16 +91,15 @@ class _State extends State<WebglAnimationSkinningMorph> {
     mixer = three.AnimationMixer(model);
 
     final idleAction = mixer.clipAction(animations[0]);
-    final walkAction = mixer.clipAction(animations[2]);
-    final runAction = mixer.clipAction(animations[1]);
+    // final walkAction = mixer.clipAction(animations[2]);
+    // final runAction = mixer.clipAction(animations[1]);
 
     // var actions = [ idleAction, walkAction, runAction ];
     idleAction!.play();
 
-    demo.addAnimationEvent(
-      (delta){
-        mixer.update(delta);
-      }
-    );
+    demo.addAnimationEvent((delta){
+      controls.update();
+      mixer.update(delta);
+    });
   }
 }

@@ -12,7 +12,14 @@ class DemoSettings{
     this.autoClear = true,
     Map<String,dynamic>? renderOptions,
     this.animate = true,
-    this.alpha = false
+    this.alpha = false,
+    this.autoClearDepth = true,
+    this.autoClearStencil = true,
+    this.clearAlpha = 1.0,
+    this.clearColor = 0x000000,
+    this.localClippingEnabled = false,
+    this.clippingPlanes = const [],
+    this.outputEncoding = three.LinearEncoding
   }){
     this.renderOptions = renderOptions ?? {
       "format": three.RGBAFormat,
@@ -24,12 +31,17 @@ class DemoSettings{
   bool enableShadowMap;
   bool autoClear;
   bool alpha;
+  bool autoClearDepth;
+  bool autoClearStencil;
+  bool localClippingEnabled;
+  int clearColor;
+  double clearAlpha;
   late Map<String,dynamic> renderOptions;
+  List<three.Plane> clippingPlanes;
+  int outputEncoding;
 }
 
-/**
- * Demo utility class. If you want to learn how to connect cannon.js with three.js, please look at the examples/threejs_* instead.
- */
+/// Demo utility class. If you want to learn how to connect cannon.js with three.js, please look at the examples/threejs_* instead.
 class Demo{
   void Function() onSetupComplete;
   Demo({
@@ -37,11 +49,14 @@ class Demo{
     required this.onSetupComplete, 
     this.rendererUpdate,
     required this.fileName,
-    required this.setup
+    required this.setup,
+    Size? size
   }){
     this.settings = settings ?? DemoSettings();
+    _size = size;
   }
 
+  Size? _size;
   late DemoSettings settings;
   String fileName;
   final GlobalKey<three.PeripheralsState> globalKey = GlobalKey<three.PeripheralsState>();
@@ -65,8 +80,8 @@ class Demo{
   bool pause = false;
   bool mounted = false;
 
-  late void Function()? rendererUpdate;
-  late FutureOr<void> Function()? setup;
+  void Function()? rendererUpdate;
+  FutureOr<void> Function()? setup;
   List<Function(double dt)> events = [];
 
   void addAnimationEvent(Function(double dt) event){
@@ -78,6 +93,7 @@ class Demo{
     //renderer?.dispose();
     scene.dispose();
     three3dRender.dispose();
+    three.loading.clear();
   }
 
   void initSize(BuildContext context){
@@ -87,7 +103,7 @@ class Demo{
 
     final mqd = MediaQuery.of(context);
 
-    screenSize = mqd.size;
+    screenSize = _size ?? mqd.size;
     dpr = mqd.devicePixelRatio;
 
    initPlatformState();
@@ -111,34 +127,46 @@ class Demo{
   }
 
   void render() {
-    final _gl = three3dRender.gl;
+    final gl = three3dRender.gl;
     rendererUpdate?.call();
     renderer!.render(scene, camera);
-    _gl.flush();
+    gl.flush();
     if(!kIsWeb) {
       three3dRender.updateTexture(sourceTexture);
     }
   }
   void initRenderer() {
-    Map<String, dynamic> _options = {
+    Map<String, dynamic> options = {
       "width": width,
       "height": height,
       "gl": three3dRender.gl,
       "antialias": true,
       "canvas": three3dRender.element,
-      "alpha": settings.alpha
+      "alpha": settings.alpha,
+      "clearColor": settings.clearColor,
+      "clearAlpha": settings.clearAlpha,
     };
 
     if(!kIsWeb){
-      _options['logarithmicDepthBuffer'] = true;
+      options['logarithmicDepthBuffer'] = true;
     }
 
-    renderer = WebGLRenderer(_options);
+    renderer = WebGLRenderer(options);
     renderer!.setPixelRatio(dpr);
     renderer!.setSize(width, height, false);
+    renderer!.alpha = settings.alpha;
     renderer!.shadowMap.enabled = settings.enableShadowMap;
     renderer!.shadowMap.type = three.PCFShadowMap;
     renderer!.autoClear = settings.autoClear;
+    renderer!.setClearColor(
+      three.Color.fromHex32(settings.clearColor), 
+      settings.clearAlpha
+    );
+    renderer!.autoClearDepth = settings.autoClearDepth;
+    renderer!.autoClearStencil = settings.autoClearStencil;
+    renderer!.outputEncoding = three.sRGBEncoding;
+    renderer!.localClippingEnabled = settings.localClippingEnabled;
+    renderer!.clippingPlanes = settings.clippingPlanes;
 
     if(!kIsWeb){
       final WebGLRenderTargetOptions pars = WebGLRenderTargetOptions(settings.renderOptions);
@@ -152,9 +180,8 @@ class Demo{
   }
 
   void initScene() async{
-    await setup?.call();
     initRenderer();
-    // setupWorld();
+    await setup?.call();
     mounted = true;
     animate();
     onSetupComplete();

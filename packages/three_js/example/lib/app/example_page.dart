@@ -77,79 +77,79 @@ class _MyAppState extends State<ExamplePage> {
     } else if (fileName == "webgl_loader_obj") {
       page = WebglLoaderObj(fileName: fileName);
     } else if (fileName == "webgl_materials_browser") {
-      page = webgl_materials_browser(fileName: fileName);
+      page = WebglMaterialsBrowser(fileName: fileName);
     } else if (fileName == "webgl_shadow_contact") {
       page = WebglShadowContact(fileName: fileName);
     } else if (fileName == "webgl_geometry_text") {
-      page = webgl_geometry_text(fileName: fileName);
+      page = WebglGeometryText(fileName: fileName);
     } else if (fileName == "webgl_geometry_shapes") {
-      page = webgl_geometry_shapes(fileName: fileName);
+      page = WebglGeometryShapes(fileName: fileName);
     } else if (fileName == "webgl_instancing_performance") {
-      page = webgl_instancing_performance(fileName: fileName);
+      page = WebglInstancingPerformance(fileName: fileName);
     } else if (fileName == "webgl_shadowmap_viewer") {
-      page = webgl_shadowmap_viewer(fileName: fileName);
+      page = WebglShadowmapViewer(fileName: fileName);
     } else if (fileName == "webgl_loader_gltf") {
-      page = webgl_loader_gltf(fileName: fileName);
+      page = WebglLoaderGltf(fileName: fileName);
     } else if (fileName == "webgl_loader_gltf_test") {
       page = webgl_loader_gltf_test(fileName: fileName);
     } else if (fileName == "webgl_loader_obj_mtl") {
-      page = webgl_loader_obj_mtl(fileName: fileName);
+      page = WebglLoaderObjMtl(fileName: fileName);
     } else if (fileName == "webgl_animation_keyframes") {
-      page = webgl_animation_keyframes(fileName: fileName);
+      page = WebglAnimationKeyframes(fileName: fileName);
     } else if (fileName == "webgl_loader_texture_basis") {
-      page = webgl_loader_texture_basis(fileName: fileName);
+      page = WebglLoaderTextureBasis(fileName: fileName);
     } else if (fileName == "webgl_animation_multiple") {
-      page = webgl_animation_multiple(fileName: fileName);
+      page = WebglAnimationMultiple(fileName: fileName);
     } else if (fileName == "webgl_skinning_simple") {
-      page = webgl_skinning_simple(fileName: fileName);
+      page = WebglSkinningSimple(fileName: fileName);
     } else if (fileName == "misc_animation_keys") {
-      page = misc_animation_keys(fileName: fileName);
+      page = MiscAnimationKeys(fileName: fileName);
     } else if (fileName == "webgl_clipping_intersection") {
-      page = webgl_clipping_intersection(fileName: fileName);
+      page = WebglClippingIntersection(fileName: fileName);
     } else if (fileName == "webgl_clipping_advanced") {
-      page = webgl_clipping_advanced(fileName: fileName);
+      page = WebglClippingAdvanced(fileName: fileName);
     } else if (fileName == "webgl_clipping_stencil") {
-      page = webgl_clipping_stencil(fileName: fileName);
+      page = WebglClippingStencil(fileName: fileName);
     } else if (fileName == "webgl_clipping") {
-      page = webgl_clipping(fileName: fileName);
+      page = WebglClipping(fileName: fileName);
     } else if (fileName == "webgl_geometries") {
-      page = webgl_geometries(fileName: fileName);
+      page = WebglGeometries(fileName: fileName);
     } else if (fileName == "webgl_animation_cloth") {
       page = webgl_animation_cloth(fileName: fileName);
     } else if (fileName == "webgl_materials") {
-      page = webgl_materials(fileName: fileName);
+      page = WebglMaterials(fileName: fileName);
     } else if (fileName == "webgl_animation_skinning_blending") {
-      page = webgl_animation_skinning_blending(fileName: fileName);
+      page = WebglAnimationSkinningBlending(fileName: fileName);
     } else if (fileName == "webgl_animation_skinning_additive_blending") {
-      page = webgl_animation_skinning_additive_blending(fileName: fileName);
+      page = WebglAnimationSkinningAdditiveBlending(fileName: fileName);
     } else if (fileName == "webgl_animation_skinning_morph") {
       page = WebglAnimationSkinningMorph(fileName: fileName);
     } else if (fileName == "webgl_camera") {
       page = WebglCamera(fileName: fileName);
     } else if (fileName == "webgl_geometry_colors") {
-      page = webgl_geometry_colors(fileName: fileName);
+      page = WebglGeometryColors(fileName: fileName);
     } else if (fileName == "webgl_loader_svg") {
-      page = webgl_loader_svg(fileName: fileName);
+      page = WebglLoaderSvg(fileName: fileName);
     } else if (fileName == "webgl_helpers") {
-      page = webgl_helpers(fileName: fileName);
+      page = WebglHelpers(fileName: fileName);
     } else if (fileName == "webgl_morphtargets") {
-      page = webgl_morphtargets(fileName: fileName);
+      page = WebglMorphtargets(fileName: fileName);
     } else if (fileName == "webgl_morphtargets_sphere") {
-      page = webgl_morphtargets_sphere(fileName: fileName);
+      page = WebglMorphtargetsSphere(fileName: fileName);
     } else if (fileName == "webgl_morphtargets_horse") {
-      page = webgl_morphtargets_horse(fileName: fileName);
+      page = WebglMorphtargetsHorse(fileName: fileName);
     } else if (fileName == "misc_controls_orbit") {
-      page = misc_controls_orbit(fileName: fileName);
+      page = MiscControlsOrbit(fileName: fileName);
     } else if (fileName == "misc_controls_trackball") {
-      page = misc_controls_trackball(fileName: fileName);
+      page = MiscControlsTrackball(fileName: fileName);
     } else if (fileName == "misc_controls_arcball") {
-      page = misc_controls_arcball(fileName: fileName);
+      page = MiscControlsArcball(fileName: fileName);
     } else if (fileName == "misc_controls_map") {
-      page = misc_controls_map(fileName: fileName);
+      page = MiscControlsMap(fileName: fileName);
     } else if (fileName == "webgl_loader_fbx") {
-      page = webgl_loader_fbx(fileName: fileName);
+      page = WebglLoaderFbx(fileName: fileName);
     } else if (fileName == "multi_views") {
-      page = multi_views(fileName: fileName);
+      page = MultiViews(fileName: fileName);
     }
     // else if (fileName == "games_fps") {
     //   page = TestGame(fileName: fileName);

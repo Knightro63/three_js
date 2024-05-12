@@ -12,6 +12,7 @@ class WebglLoaderObj extends StatefulWidget {
 }
 
 class _MyAppState extends State<WebglLoaderObj> {
+  late three.OrbitControls controls;
   late Demo demo;
 
   @override
@@ -19,7 +20,6 @@ class _MyAppState extends State<WebglLoaderObj> {
     demo = Demo(
       settings: DemoSettings(
         enableShadowMap: false,
-        animate: false
       ),
       fileName: widget.fileName,
       onSetupComplete: (){setState(() {});},
@@ -30,6 +30,7 @@ class _MyAppState extends State<WebglLoaderObj> {
   @override
   void dispose() {
     demo.dispose();
+    controls.clearListeners();
     super.dispose();
   }
 
@@ -53,6 +54,7 @@ class _MyAppState extends State<WebglLoaderObj> {
     demo.camera.add(pointLight);
     demo.scene.add(demo.camera);
 
+    controls = three.OrbitControls(demo.camera, demo.globalKey);
 
     final textureLoader = three.TextureLoader();
     textureLoader.flipY = false;
@@ -75,5 +77,9 @@ class _MyAppState extends State<WebglLoaderObj> {
 
     object.scale.setValues(0.5, 0.5, 0.5);
     demo.scene.add(object);
+
+    demo.addAnimationEvent((dt){
+      controls.update();
+    });
   }
 }

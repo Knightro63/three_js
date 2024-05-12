@@ -1,225 +1,61 @@
 import 'dart:async';
 import 'dart:math' as math;
-import 'package:flutter/foundation.dart';
+import 'package:example/src/demo.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gl/flutter_gl.dart';
 import 'package:three_js/three_js.dart' as three;
 import 'package:three_js_helpers/three_js_helpers.dart';
 
-class misc_animation_keys extends StatefulWidget {
-  String fileName;
-
-  misc_animation_keys({Key? key, required this.fileName}) : super(key: key);
+class MiscAnimationKeys extends StatefulWidget {
+  final String fileName;
+  const MiscAnimationKeys({super.key, required this.fileName});
 
   @override
   createState() => _State();
 }
 
-class _State extends State<misc_animation_keys> {
-  late FlutterGlPlugin three3dRender;
-  three.WebGLRenderer? renderer;
-
-  int? fboId;
-  late double width;
-  late double height;
-
-  Size? screenSize;
-
-  late three.Scene scene;
-  late three.Camera camera;
-  late three.Mesh mesh;
-
-  late three.AnimationMixer mixer;
-  three.Clock clock = three.Clock();
-
-  double dpr = 1.0;
-
-  final amount = 4;
-
-  bool verbose = false;
-
-  late three.Object3D object;
-
-  late three.Texture texture;
-
-  late three.WebGLMultisampleRenderTarget renderTarget;
-
-  dynamic sourceTexture;
-
-  bool loaded = false;
-
-  late three.Object3D model;
+class _State extends State<MiscAnimationKeys> {
+  late Demo demo;
 
   @override
   void initState() {
+    demo = Demo(
+      fileName: widget.fileName,
+      onSetupComplete: (){setState(() {});},
+      setup: setup
+    );
     super.initState();
   }
-
-  // Platform messages are asynchronous, so we initialize in an async method.
-  Future<void> initPlatformState() async {
-    width = screenSize!.width;
-    height = screenSize!.height;
-
-    three3dRender = FlutterGlPlugin();
-
-    Map<String, dynamic> _options = {
-      "antialias": true,
-      "alpha": false,
-      "width": width.toInt(),
-      "height": height.toInt(),
-      "dpr": dpr
-    };
-
-    await three3dRender.initialize(options: _options);
-
-    setState(() {});
-
-    // TODO web wait dom ok!!!
-    Future.delayed(const Duration(milliseconds: 100), () async {
-      await three3dRender.prepareContext();
-
-      initScene();
-      animate();
-    });
-  }
-
-  initSize(BuildContext context) {
-    if (screenSize != null) {
-      return;
-    }
-
-    final mqd = MediaQuery.of(context);
-
-    screenSize = mqd.size;
-    dpr = mqd.devicePixelRatio;
-
-    initPlatformState();
+  @override
+  void dispose() {
+    demo.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.fileName),
-      ),
-      body: Builder(
-        builder: (BuildContext context) {
-          initSize(context);
-          return SingleChildScrollView(child: _build(context));
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        child: const Text("render"),
-        onPressed: () {
-          clickRender();
-        },
-      ),
-    );
+    return demo.threeDart();
   }
 
-  Widget _build(BuildContext context) {
-    return Column(
-      children: [
-        Container(
-          child: Stack(
-            children: [
-              Container(
-                  child: Container(
-                      width: width,
-                      height: height,
-                      color: Colors.black,
-                      child: Builder(builder: (BuildContext context) {
-                        if (kIsWeb) {
-                          return three3dRender.isInitialized
-                              ? HtmlElementView(
-                                  viewType: three3dRender.textureId!.toString())
-                              : Container();
-                        } else {
-                          return three3dRender.isInitialized
-                              ? Texture(textureId: three3dRender.textureId!)
-                              : Container();
-                        }
-                      }))),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
+  late three.Mesh mesh;
+  late three.AnimationMixer mixer;
+  late three.Object3D object;
+  late three.Texture texture;
 
-  render() {
-    int _t = DateTime.now().millisecondsSinceEpoch;
-
-    final _gl = three3dRender.gl;
-
-    renderer!.render(scene, camera);
-
-    int _t1 = DateTime.now().millisecondsSinceEpoch;
-
-    if (verbose) {
-      print("render cost: ${_t1 - _t} ");
-      print(renderer!.info.memory);
-      print(renderer!.info.render);
-    }
-
-    
-    _gl.finish();
-
-    if (verbose) print(" render: sourceTexture: $sourceTexture ");
-
-    if (!kIsWeb) {
-      three3dRender.updateTexture(sourceTexture);
-    }
-  }
-
-  initRenderer() {
-    Map<String, dynamic> _options = {
-      "width": width,
-      "height": height,
-      "gl": three3dRender.gl,
-      "antialias": true,
-      "canvas": three3dRender.element
-    };
-    renderer = three.WebGLRenderer(_options);
-    renderer!.setPixelRatio(dpr);
-    renderer!.setSize(width, height, false);
-    renderer!.shadowMap.enabled = false;
-
-    if (!kIsWeb) {
-      final pars = three.WebGLRenderTargetOptions({"format": three.RGBAFormat});
-      renderTarget = three.WebGLMultisampleRenderTarget(
-          (width * dpr).toInt(), (height * dpr).toInt(), pars);
-      renderTarget.samples = 4;
-      renderer!.setRenderTarget(renderTarget);
-      sourceTexture = renderer!.getRenderTargetGLTexture(renderTarget);
-    }
-  }
-
-  initScene() {
-    initRenderer();
-    initPage();
-  }
-
-  initPage() async {
-    scene = three.Scene();
-
-    //
-
-    camera = three.PerspectiveCamera(40, width / height, 1, 1000);
-    camera.position.setValues(25, 25, 50);
-    camera.lookAt(scene.position);
-
-    //
+  Future<void> setup() async {
+    demo.scene = three.Scene();
+    demo.camera = three.PerspectiveCamera(40, demo.width / demo.height, 1, 1000);
+    demo.camera.position.setValues(25, 25, 50);
+    demo.camera.lookAt(demo.scene.position);
 
     final axesHelper = AxesHelper(10);
-    scene.add(axesHelper);
+    demo.scene.add(axesHelper);
 
     //
 
     final geometry = three.BoxGeometry(5, 5, 5);
     final material = three.MeshBasicMaterial.fromMap({"color": 0xffffff, "transparent": true});
     final mesh = three.Mesh(geometry, material);
-    scene.add(mesh);
+    demo.scene.add(mesh);
 
     // create a keyframe track (i.e. a timed sequence of keyframes) for each animated property
     // Note: the keyframe track type should correspond to the type of the property being animated
@@ -277,49 +113,8 @@ class _State extends State<misc_animation_keys> {
     // create a ClipAction and set it to play
     final clipAction = mixer.clipAction(clip);
     clipAction!.play();
-
-    //
-
-    loaded = true;
-
-    animate();
-
-    // scene.overrideMaterial = new three.MeshBasicMaterial();
-  }
-
-  clickRender() {
-    print("clickRender..... ");
-    animate();
-  }
-
-  animate() {
-    if (!mounted) {
-      return;
-    }
-
-    if (!loaded) {
-      return;
-    }
-
-    final delta = clock.getDelta();
-
-    print(" delat: $delta ");
-
-    mixer.update(delta);
-
-    render();
-
-    Future.delayed(const Duration(milliseconds: 40), () {
-      animate();
+    demo.addAnimationEvent((dt){
+      mixer.update(dt);
     });
-  }
-
-  @override
-  void dispose() {
-    print(" dispose ............. ");
-
-    three3dRender.dispose();
-
-    super.dispose();
   }
 }
