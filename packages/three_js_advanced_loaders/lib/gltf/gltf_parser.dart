@@ -860,7 +860,8 @@ class GLTFParser {
 
       // See: https://github.com/mrdoob/three.js/issues/17706
       materialParams["depthWrite"] = false;
-    } else {
+    } 
+    else {
       materialParams["transparent"] = false;
 
       if (alphaMode == gltfAlphaModes["MASK"]) {

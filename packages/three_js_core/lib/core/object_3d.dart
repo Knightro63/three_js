@@ -995,12 +995,12 @@ class Object3D with EventDispatcher {
   /// for such objects.
   void onAfterRender({
     WebGLRenderer? renderer,
-      Object3D? scene,
-      Camera? camera,
-      BufferGeometry? geometry,
-      Material? material,
-      Map<String, dynamic>? group
-    }) {
+    Object3D? scene,
+    Camera? camera,
+    BufferGeometry? geometry,
+    Material? material,
+    Map<String, dynamic>? group
+  }) {
     // print(" Object3D.onAfterRender ${type} ${id} ");
   }
 

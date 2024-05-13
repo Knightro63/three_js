@@ -44,6 +44,7 @@ class _State extends State<WebglClippingStencil> {
   }
 
   late three.OrbitControls controls;
+  bool cleared = false;
 
   late three.Object3D object;
   late List<three.Plane> planes;
@@ -99,7 +100,6 @@ class _State extends State<WebglClippingStencil> {
 
     controls = three.OrbitControls(demo.camera, demo.globalKey);
 
-
     final dirLight = three.DirectionalLight(0xffffff, 1);
     dirLight.position.setValues(5, 10, 7.5);
     dirLight.castShadow = true;
@@ -130,35 +130,35 @@ class _State extends State<WebglClippingStencil> {
 
     // Set up clip plane rendering
     planeObjects = [];
-    //final planeGeom = three.PlaneGeometry(4, 4);
+    final planeGeom = three.PlaneGeometry(4, 4);
 
     for (int i = 0; i < 1; i++) {
       final poGroup = three.Group();
       final plane = planes[i];
       final stencilGroup = createPlaneStencilGroup(geometry, plane, i + 1);
 
-      // List<three.Plane> _planes = planes.where((p) => p != plane).toList();
+      List<three.Plane> _planes = planes.where((p) => p != plane).toList();
 
-      // // plane is clipped by the other clipping planes
-      // final planeMat = three.MeshStandardMaterial.fromMap({
-      //   "color": 0xff00ff,
-      //   "metalness": 0.1,
-      //   "roughness": 0.75,
-      //   "clippingPlanes": planes,
-      //   "stencilWrite": true,
-      //   "stencilRef": 0,
-      //   "stencilFunc": three.NotEqualStencilFunc,
-      //   "stencilFail": three.ReplaceStencilOp,
-      //   "stencilZFail": three.ReplaceStencilOp,
-      //   "stencilZPass": three.ReplaceStencilOp,
-      // });
+      // plane is clipped by the other clipping planes
+      final planeMat = three.MeshStandardMaterial.fromMap({
+        "color": 0xE91E63,
+        "metalness": 0.1,
+        "roughness": 0.75,
+        "clippingPlanes": planes,
+        "stencilWrite": true,
+        "stencilRef": 0,
+        "stencilFunc": three.NotEqualStencilFunc,
+        "stencilFail": three.ReplaceStencilOp,
+        "stencilZFail": three.ReplaceStencilOp,
+        "stencilZPass": three.ReplaceStencilOp,
+      });
 
-      //final po = three.Mesh(planeGeom, planeMat);
-      //po.renderOrder = i + 1;
+      final po = three.Mesh(planeGeom, planeMat);
+      po.renderOrder = i + 1;
 
       object.add(stencilGroup);
-      // poGroup.add(po);
-      // planeObjects.add(po);
+      poGroup.add(po);
+      planeObjects.add(po);
       demo.scene.add(poGroup);
     }
 

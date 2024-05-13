@@ -50,10 +50,14 @@ class Demo{
     this.rendererUpdate,
     required this.fileName,
     required this.setup,
-    Size? size
+    Size? size,
+    WebGLRenderer? renderer,
+    bool useScaffold = true
   }){
     this.settings = settings ?? DemoSettings();
     _size = size;
+    lateRenderer = renderer;
+    _useScaffold = useScaffold;
   }
 
   Size? _size;
@@ -65,6 +69,7 @@ class Demo{
   late FlutterGlPlugin three3dRender;
   WebGLRenderTarget? renderTarget;
   WebGLRenderer? renderer;
+  WebGLRenderer? lateRenderer;
   Clock clock = Clock();
 
   late three.Scene scene;
@@ -78,6 +83,7 @@ class Demo{
   bool disposed = false;
   dynamic sourceTexture;
   bool pause = false;
+  late bool _useScaffold;
   bool mounted = false;
 
   void Function()? rendererUpdate;
@@ -136,37 +142,40 @@ class Demo{
     }
   }
   void initRenderer() {
-    Map<String, dynamic> options = {
-      "width": width,
-      "height": height,
-      "gl": three3dRender.gl,
-      "antialias": true,
-      "canvas": three3dRender.element,
-      "alpha": settings.alpha,
-      "clearColor": settings.clearColor,
-      "clearAlpha": settings.clearAlpha,
-    };
+    renderer = lateRenderer;
+    if(renderer == null){
+      Map<String, dynamic> options = {
+        "width": width,
+        "height": height,
+        "gl": three3dRender.gl,
+        "antialias": true,
+        "canvas": three3dRender.element,
+        "alpha": settings.alpha,
+        "clearColor": settings.clearColor,
+        "clearAlpha": settings.clearAlpha,
+      };
 
-    if(!kIsWeb){
-      options['logarithmicDepthBuffer'] = true;
+      if(!kIsWeb){
+        options['logarithmicDepthBuffer'] = true;
+      }
+
+      renderer = lateRenderer ?? WebGLRenderer(options);
+      renderer!.setPixelRatio(dpr);
+      renderer!.setSize(width, height, false);
+      renderer!.alpha = settings.alpha;
+      renderer!.shadowMap.enabled = settings.enableShadowMap;
+      renderer!.shadowMap.type = three.PCFShadowMap;
+      renderer!.autoClear = settings.autoClear;
+      renderer!.setClearColor(
+        three.Color.fromHex32(settings.clearColor), 
+        settings.clearAlpha
+      );
+      renderer!.autoClearDepth = settings.autoClearDepth;
+      renderer!.autoClearStencil = settings.autoClearStencil;
+      renderer!.outputEncoding = three.sRGBEncoding;
+      renderer!.localClippingEnabled = settings.localClippingEnabled;
+      renderer!.clippingPlanes = settings.clippingPlanes;
     }
-
-    renderer = WebGLRenderer(options);
-    renderer!.setPixelRatio(dpr);
-    renderer!.setSize(width, height, false);
-    renderer!.alpha = settings.alpha;
-    renderer!.shadowMap.enabled = settings.enableShadowMap;
-    renderer!.shadowMap.type = three.PCFShadowMap;
-    renderer!.autoClear = settings.autoClear;
-    renderer!.setClearColor(
-      three.Color.fromHex32(settings.clearColor), 
-      settings.clearAlpha
-    );
-    renderer!.autoClearDepth = settings.autoClearDepth;
-    renderer!.autoClearStencil = settings.autoClearStencil;
-    renderer!.outputEncoding = three.sRGBEncoding;
-    renderer!.localClippingEnabled = settings.localClippingEnabled;
-    renderer!.clippingPlanes = settings.clippingPlanes;
 
     if(!kIsWeb){
       final WebGLRenderTargetOptions pars = WebGLRenderTargetOptions(settings.renderOptions);
@@ -210,41 +219,45 @@ class Demo{
     });
   }
 
-  Widget threeDart() {
-    return Scaffold(
+  Widget threeDart(){
+    return _useScaffold?Scaffold(
       appBar: AppBar(
         title: Text(fileName),
       ),
-      body: Builder(builder: (BuildContext context) {
-        initSize(context);
-        return Stack(
-          children:[
-            Container(
-              width: screenSize!.width,
-              height: screenSize!.height,
-              color: Theme.of(context).canvasColor,
-              child: three.Peripherals(
-                key: globalKey,
-                builder: (BuildContext context) {
-                  return Container(
-                    width: width,
-                    height: height,
-                    color: Theme.of(context).canvasColor,
-                    child: Builder(builder: (BuildContext context) {
-                      if (kIsWeb) {
-                        return three3dRender.isInitialized? HtmlElementView(viewType:three3dRender.textureId!.toString()):Container();
-                      } 
-                      else {
-                        return three3dRender.isInitialized?Texture(textureId: three3dRender.textureId!):Container();
-                      }
-                    })
-                  );
-                }
-              ),
+      body: build()
+    ):build();
+  }
+
+  Widget build() {
+    return  Builder(builder: (BuildContext context) {
+      initSize(context);
+      return Stack(
+        children:[
+          Container(
+            width: screenSize!.width,
+            height: screenSize!.height,
+            color: Theme.of(context).canvasColor,
+            child: three.Peripherals(
+              key: globalKey,
+              builder: (BuildContext context) {
+                return Container(
+                  width: width,
+                  height: height,
+                  color: Theme.of(context).canvasColor,
+                  child: Builder(builder: (BuildContext context) {
+                    if (kIsWeb) {
+                      return three3dRender.isInitialized? HtmlElementView(viewType:three3dRender.textureId!.toString()):Container();
+                    } 
+                    else {
+                      return three3dRender.isInitialized?Texture(textureId: three3dRender.textureId!):Container();
+                    }
+                  })
+                );
+              }
             ),
-          ]
-        );
-      })
-    );
+          ),
+        ]
+      );
+    });
   }
 }

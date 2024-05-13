@@ -2,9 +2,9 @@ import 'src/filesJson.dart';
 import 'package:flutter/material.dart';
 
 class HomePage extends StatefulWidget {
-  Function chooseExample;
+  final Function chooseExample;
 
-  HomePage({Key? key, required this.chooseExample}) : super(key: key);
+  const HomePage({super.key, required this.chooseExample});
 
   @override
   _MyAppState createState() => _MyAppState();
@@ -65,6 +65,8 @@ class _MyAppState extends State<HomePage> {
               child: Text(name),
             )
           ],
-        )));
+        )
+      )
+    );
   }
 }

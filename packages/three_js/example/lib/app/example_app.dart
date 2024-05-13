@@ -1,5 +1,5 @@
 import 'package:example/app/example_page.dart';
-import 'package:example/HomePage.dart';
+import 'package:example/home_page.dart';
 import 'package:flutter/material.dart';
 
 class ExampleApp extends StatefulWidget {

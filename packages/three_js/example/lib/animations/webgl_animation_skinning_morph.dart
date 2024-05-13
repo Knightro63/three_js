@@ -63,7 +63,7 @@ class _State extends State<WebglAnimationSkinningMorph> {
 
     // scene.add( new three.CameraHelper( dirLight.shadow.camera ) );
 
-    final mesh = three.Mesh(three.PlaneGeometry(2000, 2000), three.MeshPhongMaterial.fromMap({"color": 0x999999, "depthWrite": true}));
+    final mesh = three.Mesh(three.PlaneGeometry(2000, 2000), three.MeshPhongMaterial.fromMap({"color": 0x999999}));
     mesh.rotation.x = -math.pi / 2;
     demo.scene.add(mesh);
 
@@ -79,7 +79,10 @@ class _State extends State<WebglAnimationSkinningMorph> {
     demo.scene.add(model);
 
     model.traverse((object) {
-      if (object is three.Mesh) object.castShadow = true;
+      if (object is three.Mesh){
+        object.castShadow = true;
+        object.frustumCulled = false;
+      }
     });
 
     final skeleton = SkeletonHelper(model);
