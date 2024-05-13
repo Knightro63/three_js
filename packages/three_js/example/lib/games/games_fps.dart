@@ -1,13 +1,11 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_gl/flutter_gl.dart';
 import 'package:three_js/three_js.dart' as three;
 import 'package:three_js_geometry/three_js_geometry.dart';
 import 'package:three_js_helpers/three_js_helpers.dart';
+import 'package:three_js_objects/three_js_objects.dart';
 
 class SphereData{
   SphereData({
@@ -23,9 +21,9 @@ class SphereData{
 
 class FPSGame extends StatefulWidget {
   const FPSGame({
-    Key? key,
+    super.key,
     required this.fileName
-  }) : super(key: key);
+  });
 
   final String fileName;
 
@@ -34,28 +32,96 @@ class FPSGame extends StatefulWidget {
 }
 
 class _FPSGamePageState extends State<FPSGame> {
-  FocusNode node = FocusNode();
-  // gl values
-  //late Object3D object;
-  bool animationReady = false;
-  late FlutterGlPlugin three3dRender;
-  three.WebGLRenderTarget? renderTarget;
-  three.WebGLRenderer? renderer;
-  int? fboId;
-  late double width;
-  late double height;
-  Size? screenSize;
-  late three.Scene scene;
-  late three.Camera camera;
-  double dpr = 1.0;
-  bool verbose = false;
-  bool disposed = false;
-  final GlobalKey<three.PeripheralsState> _globalKey = GlobalKey<three.PeripheralsState>();
-  dynamic sourceTexture;
+  late three.ThreeJS threeJs;
+
+  @override
+  void initState() {
+    threeJs = three.ThreeJS(
+      onSetupComplete: (){
+        setState(() {});
+        // Keybindings
+        // Add force on keydown
+        threeJs.domElement.addEventListener(three.PeripheralType.pointerdown, (event){
+          mouseTime = DateTime.now().millisecondsSinceEpoch;
+        });
+        threeJs.domElement.addEventListener(three.PeripheralType.pointerup, (event){
+          throwBall();
+        });
+        threeJs.domElement.addEventListener(three.PeripheralType.pointermove, (event){
+          threeJs.camera.rotation.y -= (event as three.WebPointerEvent).deltaX/100;
+          threeJs.camera.rotation.x -= event.deltaY/100;
+        });
+        threeJs.domElement.addEventListener(three.PeripheralType.keydown, (event){
+          switch (event.keyId) {
+            case 4294968068:
+            case 119:
+              keyStates[LogicalKeyboardKey.arrowUp] = true;
+              break;
+            case 115:
+            case 4294968065:
+              keyStates[LogicalKeyboardKey.arrowDown] = true;
+              break;
+            case 97:
+            case 4294968066:
+              keyStates[LogicalKeyboardKey.arrowLeft] = true;
+              break;
+            case 4294968067:
+            case 100:
+              keyStates[LogicalKeyboardKey.arrowRight] = true;
+              break;
+            case 32:
+              keyStates[LogicalKeyboardKey.space] = true;
+              break;
+          }
+        });
+
+        // Reset force on keyup
+        threeJs.domElement.addEventListener(three.PeripheralType.keyup, (event){
+          switch (event.keyId) {
+            case 4294968068:
+            case 119:
+              keyStates[LogicalKeyboardKey.arrowUp] = false;
+              break;
+            case 115:
+            case 4294968065:
+              keyStates[LogicalKeyboardKey.arrowDown] = false;
+              break;
+            case 97:
+            case 4294968066:
+              keyStates[LogicalKeyboardKey.arrowLeft] = false;
+              break;
+            case 4294968067:
+            case 100:
+              keyStates[LogicalKeyboardKey.arrowRight] = false;
+              break;
+            case 32:
+              keyStates[LogicalKeyboardKey.space] = false;
+              break;
+          }
+        });
+      },
+      setup: setup
+    );
+    super.initState();
+  }
+  @override
+  void dispose() {
+    threeJs.dispose();
+    three.loading.clear();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.fileName),
+      ),
+      body: threeJs.build()
+    );
+  }
 
   int stepsPerFrame = 5;
-  three.Clock clock = three.Clock();
-
   double gravity = 30;
 
   List<SphereData> spheres = [];
@@ -74,12 +140,6 @@ class _FPSGamePageState extends State<FPSGame> {
   bool playerOnFloor = false;
   int mouseTime = 0;
   Map<LogicalKeyboardKey,bool> keyStates = {
-    LogicalKeyboardKey.keyW: false,
-    LogicalKeyboardKey.keyA: false,
-    LogicalKeyboardKey.keyS: false,
-    LogicalKeyboardKey.keyD: false,
-    LogicalKeyboardKey.space: false,
-
     LogicalKeyboardKey.arrowUp: false,
     LogicalKeyboardKey.arrowLeft: false,
     LogicalKeyboardKey.arrowDown: false,
@@ -90,59 +150,17 @@ class _FPSGamePageState extends State<FPSGame> {
   three.Vector3 vector2 = three.Vector3();
   three.Vector3 vector3 = three.Vector3();
 
-  @override
-  void initState() {
-    super.initState();
-  }
-  @override
-  void dispose() {
-    disposed = true;
-    three3dRender.dispose();
-    super.dispose();
-  }
-  
-  void initSize(BuildContext context) {
-    if (screenSize != null) {
-      return;
-    }
+  Future<void> setup() async {
+    threeJs.scene = three.Scene();
+    threeJs.scene.background = three.Color.fromHex32(0x88ccee);
 
-    final mqd = MediaQuery.of(context);
-
-    screenSize = mqd.size;
-    dpr = mqd.devicePixelRatio;
-
-    initPlatformState();
-  }
-  void animate() {
-    if (!mounted || disposed) {
-      return;
-    }
-    double deltaTime = math.min(0.05, clock.getDelta())/stepsPerFrame;
-    if(deltaTime != 0){
-      for (int i = 0; i < stepsPerFrame; i ++) {
-        controls(deltaTime);
-        updatePlayer(deltaTime);
-        updateSpheres(deltaTime);
-        teleportPlayerIfOob();
-      }
-    }
-    render();
-
-    Future.delayed(const Duration(milliseconds: 40), () {
-      animate();
-    });
-  }
-  Future<void> initPage() async {
-    scene = three.Scene();
-    scene.background = three.Color(0x88ccee);
-
-    camera = three.PerspectiveCamera(70, width / height, 0.1, 1000);
-    camera.rotation.order = three.RotationOrders.yxz;
+    threeJs.camera = three.PerspectiveCamera(70, threeJs.width / threeJs.height, 0.1, 1000);
+    threeJs.camera.rotation.order = three.RotationOrders.yxz;
 
     // lights
     three.HemisphereLight fillLight1 = three.HemisphereLight( 0x4488bb, 0x002244, 0.5 );
     fillLight1.position.setValues( 2, 1, 1 );
-    scene.add(fillLight1);
+    threeJs.scene.add(fillLight1);
 
     three.DirectionalLight directionalLight = three.DirectionalLight( 0xffffff, 0.8 );
     directionalLight.position.setValues( - 5, 25, - 1 );
@@ -159,16 +177,16 @@ class _FPSGamePageState extends State<FPSGame> {
     directionalLight.shadow!.radius = 4;
     directionalLight.shadow!.bias = - 0.00006;
 
-    scene.add(directionalLight);
+    threeJs.scene.add(directionalLight);
 
     three.GLTFLoader().setPath('assets/models/gltf/').fromAsset('collision-world.glb').then((gltf){
       three.Object3D object = gltf!.scene;
-      scene.add(object);
-      worldOctree.fromGraphNode(object);
+      threeJs.scene.add(object);
+      //worldOctree.fromGraphNode(object);
 
-      OctreeHelper helper = OctreeHelper(worldOctree);
-      helper.visible = true;
-      scene.add(helper);
+      //OctreeHelper helper = OctreeHelper(worldOctree);
+      //helper.visible = true;
+      //scene.add(helper);
 
       object.traverse((child){
         if(child.type == 'Mesh'){
@@ -180,72 +198,16 @@ class _FPSGamePageState extends State<FPSGame> {
       });
     });
 
-    animationReady = true;
-  }
-  void render() {
-    final _gl = three3dRender.gl;
-    renderer!.render(scene, camera);
-    _gl.flush();
-    if(!kIsWeb) {
-      three3dRender.updateTexture(sourceTexture);
-    }
-  }
-  void initRenderer() {
-    Map<String, dynamic> _options = {
-      "width": width,
-      "height": height,
-      "gl": three3dRender.gl,
-      "antialias": true,
-      "canvas": three3dRender.element,
-    };
-
-    if(!kIsWeb && Platform.isAndroid){
-      _options['logarithmicDepthBuffer'] = true;
-    }
-
-    renderer = three.WebGLRenderer(_options);
-    renderer!.setPixelRatio(dpr);
-    renderer!.setSize(width, height, false);
-    renderer!.shadowMap.enabled = true;
-
-    if(!kIsWeb){
-      three.WebGLRenderTargetOptions pars = three.WebGLRenderTargetOptions({"format": three.RGBAFormat,"samples": 8});
-      renderTarget = three.WebGLRenderTarget((width * dpr).toInt(), (height * dpr).toInt(), pars);
-      renderTarget!.samples = 8;
-      renderer!.setRenderTarget(renderTarget);
-      sourceTexture = renderer!.getRenderTargetGLTexture(renderTarget!);
-    }
-    else{
-      renderTarget = null;
-    }
-  }
-  void initScene() async{
-    await initPage();
-    initRenderer();
-    animate();
-  }
-  Future<void> initPlatformState() async {
-    width = screenSize!.width;
-    height = screenSize!.height;
-
-    three3dRender = FlutterGlPlugin();
-
-    Map<String, dynamic> _options = {
-      "antialias": true,
-      "alpha": true,
-      "width": width.toInt(),
-      "height": height.toInt(),
-      "dpr": dpr,
-      'precision': 'highp'
-    };
-    await three3dRender.initialize(options: _options);
-
-    setState(() {});
-
-    // TODO web wait dom ok!!!
-    Future.delayed(const Duration(milliseconds: 100), () async {
-      await three3dRender.prepareContext();
-      initScene();
+    threeJs.addAnimationEvent((dt){
+      double deltaTime = math.min(0.05, dt)/stepsPerFrame;
+      if(deltaTime != 0){
+        for (int i = 0; i < stepsPerFrame; i ++) {
+          controls(deltaTime);
+          updatePlayer(deltaTime);
+          updateSpheres(deltaTime);
+          teleportPlayerIfOob();
+        }
+      }
     });
   }
 
@@ -258,14 +220,14 @@ class _FPSGamePageState extends State<FPSGame> {
     newsphere.castShadow = true;
     newsphere.receiveShadow = true;
 
-    scene.add( newsphere );
+    threeJs.scene.add( newsphere );
     spheres.add(SphereData(
       mesh: newsphere,
       collider: three.BoundingSphere(three.Vector3( 0, - 100, 0 ), sphereRadius),
       velocity: three.Vector3()
     ));
     SphereData sphere = spheres.last;
-    camera.getWorldDirection( playerDirection );
+    threeJs.camera.getWorldDirection( playerDirection );
     sphere.collider.center.setFrom(playerCollider.end).addScaled( playerDirection, playerCollider.radius * 1.5 );
     // throw the ball with more force if we hold the button longer, and if we move forward
     double impulse = 15 + 30 * ( 1 - math.exp((mouseTime-DateTime.now().millisecondsSinceEpoch) * 0.001));
@@ -299,7 +261,7 @@ class _FPSGamePageState extends State<FPSGame> {
     three.Vector3 deltaPosition = playerVelocity.clone().scale( deltaTime );
     playerCollider.translate( deltaPosition );
     playerCollisions();
-    camera.position.setFrom(playerCollider.end);
+    threeJs.camera.position.setFrom(playerCollider.end);
   }
   void playerSphereCollision(SphereData sphere) {
     three.Vector3 center = vector1.add2(playerCollider.start, playerCollider.end ).scale( 0.5 );
@@ -376,32 +338,32 @@ class _FPSGamePageState extends State<FPSGame> {
   }
 
   three.Vector3 getForwardVector() {
-    camera.getWorldDirection(playerDirection);
+    threeJs.camera.getWorldDirection(playerDirection);
     playerDirection.y = 0;
     playerDirection.normalize();
     return playerDirection;
   }
   three.Vector3 getSideVector() {
-    camera.getWorldDirection( playerDirection );
+    threeJs.camera.getWorldDirection( playerDirection );
     playerDirection.y = 0;
     playerDirection.normalize();
-    playerDirection.cross( camera.up );
+    playerDirection.cross( threeJs.camera.up );
     return playerDirection;
   }
   void controls(double deltaTime){
     // gives a bit of air control
     double speedDelta = deltaTime*(playerOnFloor?25:8);
 
-    if(keyStates[LogicalKeyboardKey.keyW]! || keyStates[LogicalKeyboardKey.arrowUp]!){
+    if(keyStates[LogicalKeyboardKey.arrowUp]!){
       playerVelocity.add( getForwardVector().scale(speedDelta));
     }
-    if(keyStates[LogicalKeyboardKey.keyS]! || keyStates[LogicalKeyboardKey.arrowDown]!){
+    if(keyStates[LogicalKeyboardKey.arrowDown]!){
       playerVelocity.add( getForwardVector().scale(-speedDelta));
     }
-    if(keyStates[LogicalKeyboardKey.keyA]! || keyStates[LogicalKeyboardKey.arrowLeft]!){
+    if(keyStates[LogicalKeyboardKey.arrowLeft]!){
       playerVelocity.add( getSideVector().scale(-speedDelta));
     }
-    if (keyStates[LogicalKeyboardKey.keyD]! || keyStates[LogicalKeyboardKey.arrowRight]!){
+    if (keyStates[LogicalKeyboardKey.arrowRight]!){
       playerVelocity.add( getSideVector().scale(speedDelta));
     }
     if(playerOnFloor){
@@ -411,105 +373,12 @@ class _FPSGamePageState extends State<FPSGame> {
     }
   }
   void teleportPlayerIfOob(){
-    if(camera.position.y <= - 25){
-      playerCollider.start.set(0,0.35,0);
-      playerCollider.end.set(0,1,0);
+    if(threeJs.camera.position.y <= - 25){
+      playerCollider.start.setValues(0,0.35,0);
+      playerCollider.end.setValues(0,1,0);
       playerCollider.radius = 0.35;
-      camera.position.setFrom(playerCollider.end);
-      camera.rotation.set(0,0,0);
+      threeJs.camera.position.setFrom(playerCollider.end);
+      threeJs.camera.rotation.set(0,0,0);
     }
-  }
-
-  Widget threeDart() {
-    return Builder(builder: (BuildContext context) {
-      initSize(context);
-      return Container(
-        width: screenSize!.width,
-        height: screenSize!.height,
-        color: Theme.of(context).canvasColor,
-        child: RawKeyboardListener(
-          focusNode: node,
-          onKey: (event){
-            if(event is RawKeyDownEvent){
-              if(
-                event.data.logicalKey == LogicalKeyboardKey.keyW || 
-                event.data.logicalKey == LogicalKeyboardKey.keyA || 
-                event.data.logicalKey == LogicalKeyboardKey.keyS || 
-                event.data.logicalKey == LogicalKeyboardKey.keyD || 
-                event.data.logicalKey == LogicalKeyboardKey.arrowUp || 
-                event.data.logicalKey == LogicalKeyboardKey.arrowLeft || 
-                event.data.logicalKey == LogicalKeyboardKey.arrowDown || 
-                event.data.logicalKey == LogicalKeyboardKey.arrowRight ||
-                event.data.logicalKey == LogicalKeyboardKey.space
-              ){
-                keyStates[event.data.logicalKey] = true;
-              }
-            }
-            else if(event is RawKeyUpEvent){
-              if(
-                event.data.logicalKey == LogicalKeyboardKey.keyW || 
-                event.data.logicalKey == LogicalKeyboardKey.keyA || 
-                event.data.logicalKey == LogicalKeyboardKey.keyS || 
-                event.data.logicalKey == LogicalKeyboardKey.keyD ||
-                event.data.logicalKey == LogicalKeyboardKey.arrowUp || 
-                event.data.logicalKey == LogicalKeyboardKey.arrowLeft || 
-                event.data.logicalKey == LogicalKeyboardKey.arrowDown || 
-                event.data.logicalKey == LogicalKeyboardKey.arrowRight ||
-                event.data.logicalKey == LogicalKeyboardKey.space
-              ){
-                keyStates[event.data.logicalKey] = false;
-              }
-            }
-          },
-          child: Listener(
-            onPointerDown: (details){
-              mouseTime = DateTime.now().millisecondsSinceEpoch;
-            },
-            onPointerUp: (details){
-              throwBall();
-            },
-            onPointerHover: (PointerHoverEvent details){
-              if(animationReady){
-                camera.rotation.y -= details.delta.dx/100;
-                camera.rotation.x -= details.delta.dy/100;
-              }
-            },
-            child: three.Peripherals(
-              key: _globalKey,
-              builder: (BuildContext context) {
-                FocusScope.of(context).requestFocus(node);
-                return Container(
-                  width: width,
-                  height: height,
-                  color: Theme.of(context).canvasColor,
-                  child: Builder(builder: (BuildContext context) {
-                    if (kIsWeb) {
-                      return three3dRender.isInitialized
-                          ? HtmlElementView(
-                              viewType:
-                                  three3dRender.textureId!.toString())
-                          : Container();
-                    } else {
-                      return three3dRender.isInitialized
-                          ? Texture(textureId: three3dRender.textureId!)
-                          : Container();
-                    }
-                  })
-                );
-              }),
-          )
-        )
-      );
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.fileName),
-      ),
-      body: threeDart(),
-    );
   }
 }

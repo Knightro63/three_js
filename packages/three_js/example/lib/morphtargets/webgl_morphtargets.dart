@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
-import 'package:example/src/demo.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_gl/flutter_gl.dart';
 import 'package:three_js/three_js.dart' as three;
@@ -14,12 +14,12 @@ class WebglMorphtargets extends StatefulWidget {
 }
 
 class _State extends State<WebglMorphtargets> {
-  late Demo demo;
+  late three.ThreeJS threeJs;
 
   @override
   void initState() {
-    demo = Demo(
-      fileName: widget.fileName,
+    threeJs = three.ThreeJS(
+      
       onSetupComplete: (){setState(() {});},
       setup: setup
     );
@@ -27,32 +27,38 @@ class _State extends State<WebglMorphtargets> {
   }
   @override
   void dispose() {
-    demo.dispose();
+    threeJs.dispose();
     controls.clearListeners();
+    three.loading.clear();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return demo.threeDart();
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.fileName),
+      ),
+      body: threeJs.build()
+    );
   }
 
   late three.OrbitControls controls;
 
   Future<void> setup() async {
-    demo.scene = three.Scene();
-    demo.scene.background = three.Color.fromHex32(0x8FBCD4);
+    threeJs.scene = three.Scene();
+    threeJs.scene.background = three.Color.fromHex32(0x8FBCD4);
 
-    demo.camera = three.PerspectiveCamera(45, demo.width / demo.height, 1, 20);
-    demo.camera.position.z = 10;
-    demo.scene.add(demo.camera);
+    threeJs.camera = three.PerspectiveCamera(45, threeJs.width / threeJs.height, 1, 20);
+    threeJs.camera.position.z = 10;
+    threeJs.scene.add(threeJs.camera);
 
-    demo.camera.lookAt(demo.scene.position);
-    controls = three.OrbitControls(demo.camera, demo.globalKey);
-    demo.scene.add(three.AmbientLight(0x8FBCD4, 0.4));
+    threeJs.camera.lookAt(threeJs.scene.position);
+    controls = three.OrbitControls(threeJs.camera, threeJs.globalKey);
+    threeJs.scene.add(three.AmbientLight(0x8FBCD4, 0.4));
 
     final pointLight = three.PointLight(0xffffff, 1);
-    demo.camera.add(pointLight);
+    threeJs.camera.add(pointLight);
 
     final geometry = createGeometry();
 
@@ -60,9 +66,9 @@ class _State extends State<WebglMorphtargets> {
         three.MeshPhongMaterial.fromMap({"color": 0xff0000, "flatShading": true});
 
     final mesh = three.Mesh(geometry, material);
-    demo.scene.add(mesh);
+    threeJs.scene.add(mesh);
 
-    demo.addAnimationEvent((dt){
+    threeJs.addAnimationEvent((dt){
       controls.update();
       num t = (DateTime.now().millisecondsSinceEpoch * 0.0005);
 

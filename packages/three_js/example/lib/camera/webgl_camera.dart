@@ -1,5 +1,5 @@
 import 'dart:math' as math;
-import 'package:example/src/demo.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_gl/flutter_gl.dart';
 import 'package:three_js/three_js.dart' as three;
@@ -14,16 +14,16 @@ class WebglCamera extends StatefulWidget {
 }
 
 class _MyAppState extends State<WebglCamera> {
-  late Demo demo;
+  late three.ThreeJS threeJs;
 
   @override
   void initState() {
-    demo = Demo(
-      fileName: widget.fileName,
+    threeJs = three.ThreeJS(
+      
       onSetupComplete: (){setState(() {});},
       setup: setup,
       rendererUpdate: renderUpdate,
-      settings: DemoSettings(renderOptions: {
+      settings: three.Settings(renderOptions: {
         "minFilter": three.LinearFilter,
         "magFilter": three.LinearFilter,
         "format": three.RGBAFormat,
@@ -34,7 +34,7 @@ class _MyAppState extends State<WebglCamera> {
   }
   @override
   void dispose() {
-    demo.dispose();
+    threeJs.dispose();
     super.dispose();
   }
   late three.Mesh mesh;
@@ -57,7 +57,12 @@ class _MyAppState extends State<WebglCamera> {
 
   @override
   Widget build(BuildContext context) {
-    return demo.threeDart();
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.fileName),
+      ),
+      body: threeJs.build()
+    );
   }
 
   void renderUpdate() {
@@ -92,35 +97,35 @@ class _MyAppState extends State<WebglCamera> {
 
     cameraRig.lookAt(mesh.position);
 
-    demo.renderer!.clear();
+    threeJs.renderer!.clear();
 
     activeHelper.visible = false;
 
-    demo.renderer!.setViewport(0, 0, demo.width / 2, demo.height);
-    demo.renderer!.render(demo.scene, activeCamera);
+    threeJs.renderer!.setViewport(0, 0, threeJs.width / 2, threeJs.height);
+    threeJs.renderer!.render(threeJs.scene, activeCamera);
 
     activeHelper.visible = true;
 
-    demo.renderer!.setViewport(demo.width / 2, 0, demo.width / 2, demo.height);
+    threeJs.renderer!.setViewport(threeJs.width / 2, 0, threeJs.width / 2, threeJs.height);
   }
 
   void setup(){
     int frustumSize = 600;
     double aspect = 1.0;
 
-    aspect = demo.width / demo.height;
-    demo.scene = three.Scene();
+    aspect = threeJs.width / threeJs.height;
+    threeJs.scene = three.Scene();
 
     //
 
-    demo.camera = three.PerspectiveCamera(50, 0.5 * aspect, 1, 10000);
-    demo.camera.position.z = 2500;
+    threeJs.camera = three.PerspectiveCamera(50, 0.5 * aspect, 1, 10000);
+    threeJs.camera.position.z = 2500;
 
     cameraPerspective =
         three.PerspectiveCamera(50, 0.5 * aspect, 150, 1000);
 
     cameraPerspectiveHelper = CameraHelper(cameraPerspective);
-    demo.scene.add(cameraPerspectiveHelper);
+    threeJs.scene.add(cameraPerspectiveHelper);
 
     //
     cameraOrtho = three.OrthographicCamera(
@@ -132,7 +137,7 @@ class _MyAppState extends State<WebglCamera> {
         1000);
 
     cameraOrthoHelper = CameraHelper(cameraOrtho);
-    demo.scene.add(cameraOrthoHelper);
+    threeJs.scene.add(cameraOrthoHelper);
 
     //
 
@@ -149,12 +154,12 @@ class _MyAppState extends State<WebglCamera> {
     cameraRig.add(cameraPerspective);
     cameraRig.add(cameraOrtho);
 
-    demo.scene.add(cameraRig);
+    threeJs.scene.add(cameraRig);
 
     //
 
     mesh = three.Mesh(three.SphereGeometry(100, 16, 8), three.MeshBasicMaterial.fromMap({"color": 0xffffff, "wireframe": true}));
-    demo.scene.add(mesh);
+    threeJs.scene.add(mesh);
 
     final mesh2 = three.Mesh(three.SphereGeometry(50, 16, 8),
         three.MeshBasicMaterial.fromMap({"color": 0x00ff00, "wireframe": true}));
@@ -182,7 +187,7 @@ class _MyAppState extends State<WebglCamera> {
 
     final particles = three.Points(
         geometry, three.PointsMaterial.fromMap({"color": 0x888888}));
-    demo.scene.add(particles);
+    threeJs.scene.add(particles);
   }
 }
 

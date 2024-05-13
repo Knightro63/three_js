@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
-import 'package:example/src/demo.dart';
+
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
 import 'package:three_js_geometry/three_js_geometry.dart';
@@ -14,15 +14,15 @@ class WebglGeometryShapes extends StatefulWidget {
 }
 
 class _MyAppState extends State<WebglGeometryShapes> {
-  late Demo demo;
+  late three.ThreeJS threeJs;
 
   @override
   void initState() {
-    demo = Demo(
-      fileName: widget.fileName,
+    threeJs = three.ThreeJS(
+      
       onSetupComplete: (){setState(() {});},
       setup: setup,
-      settings: DemoSettings(
+      settings: three.Settings(
           renderOptions: {
           "minFilter": three.LinearFilter,
           "magFilter": three.LinearFilter,
@@ -35,32 +35,37 @@ class _MyAppState extends State<WebglGeometryShapes> {
   }
   @override
   void dispose() {
-    demo.dispose();
+    threeJs.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return demo.threeDart();
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.fileName),
+      ),
+      body: threeJs.build()
+    );
   }
   
   late three.Group group;
   late three.Texture texture;
 
   Future<void> setup() async {
-    demo.scene = three.Scene();
+    threeJs.scene = three.Scene();
 
-    demo.camera = three.PerspectiveCamera(50, demo.width / demo.height, 1, 2000);
+    threeJs.camera = three.PerspectiveCamera(50, threeJs.width / threeJs.height, 1, 2000);
     // let camra far
-    demo.camera.position.setValues(0, 150, 1500);
-    demo.scene.add(demo.camera);
+    threeJs.camera.position.setValues(0, 150, 1500);
+    threeJs.scene.add(threeJs.camera);
 
     final light = three.PointLight(0xffffff, 0.8);
-    demo.camera.add(light);
+    threeJs.camera.add(light);
 
     group = three.Group();
     group.position.y = 50;
-    demo.scene.add(group);
+    threeJs.scene.add(group);
 
     final loader = three.TextureLoader();
     texture = (await loader.fromAsset("assets/textures/uv_grid_opengl.jpg"))!;

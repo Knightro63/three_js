@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
-import 'package:example/src/demo.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_gl/flutter_gl.dart';
 import 'package:three_js/three_js.dart' as three;
@@ -15,12 +15,12 @@ class WebglGeometryColors extends StatefulWidget {
 }
 
 class _MyAppState extends State<WebglGeometryColors> {
-  late Demo demo;
+  late three.ThreeJS threeJs;
 
   @override
   void initState() {
-    demo = Demo(
-      fileName: widget.fileName,
+    threeJs = three.ThreeJS(
+      
       onSetupComplete: (){setState(() {});},
       setup: setup
     );
@@ -28,30 +28,35 @@ class _MyAppState extends State<WebglGeometryColors> {
   }
   @override
   void dispose() {
-    demo.dispose();
+    threeJs.dispose();
     controls.clearListeners();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return demo.threeDart();
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.fileName),
+      ),
+      body: threeJs.build()
+    );
   }
 
   late three.OrbitControls controls;
   final objects = [], materials = [];
 
   Future<void> setup() async {
-    demo.camera = three.PerspectiveCamera(20, demo.width / demo.height, 1, 10000);
-    demo.camera.position.z = 1800;
-    controls = three.OrbitControls(demo.camera, demo.globalKey);
+    threeJs.camera = three.PerspectiveCamera(20, threeJs.width / threeJs.height, 1, 10000);
+    threeJs.camera.position.z = 1800;
+    controls = three.OrbitControls(threeJs.camera, threeJs.globalKey);
 
-    demo.scene = three.Scene();
-    demo.scene.background = three.Color.fromHex32(0xffffff);
+    threeJs.scene = three.Scene();
+    threeJs.scene.background = three.Color.fromHex32(0xffffff);
 
     final light = three.DirectionalLight(0xffffff);
     light.position.setValues(0, 0, 1);
-    demo.scene.add(light);
+    threeJs.scene.add(light);
 
     // shadow
 
@@ -77,19 +82,19 @@ class _MyAppState extends State<WebglGeometryColors> {
     shadowMesh = three.Mesh(shadowGeo, shadowMaterial);
     shadowMesh.position.y = -250;
     shadowMesh.rotation.x = -math.pi / 2;
-    demo.scene.add(shadowMesh);
+    threeJs.scene.add(shadowMesh);
 
     shadowMesh = three.Mesh(shadowGeo, shadowMaterial);
     shadowMesh.position.y = -250;
     shadowMesh.position.x = -400;
     shadowMesh.rotation.x = -math.pi / 2;
-    demo.scene.add(shadowMesh);
+    threeJs.scene.add(shadowMesh);
 
     shadowMesh = three.Mesh(shadowGeo, shadowMaterial);
     shadowMesh.position.y = -250;
     shadowMesh.position.x = 400;
     shadowMesh.rotation.x = -math.pi / 2;
-    demo.scene.add(shadowMesh);
+    threeJs.scene.add(shadowMesh);
 
     const radius = 200.0;
 
@@ -134,20 +139,20 @@ class _MyAppState extends State<WebglGeometryColors> {
     mesh.add(wireframe);
     mesh.position.x = -400;
     mesh.rotation.x = -1.87;
-    demo.scene.add(mesh);
+    threeJs.scene.add(mesh);
 
     mesh = three.Mesh(geometry2, material);
     wireframe = three.Mesh(geometry2, wireframeMaterial);
     mesh.add(wireframe);
     mesh.position.x = 400;
-    demo.scene.add(mesh);
+    threeJs.scene.add(mesh);
 
     mesh = three.Mesh(geometry3, material);
     wireframe = three.Mesh(geometry3, wireframeMaterial);
     mesh.add(wireframe);
-    demo.scene.add(mesh);
+    threeJs.scene.add(mesh);
 
-    demo.addAnimationEvent((dt){
+    threeJs.addAnimationEvent((dt){
       controls.update();
     });
   }
@@ -182,6 +187,6 @@ class _MyAppState extends State<WebglGeometryColors> {
 
     objects.add(mesh);
 
-    demo.scene.add(mesh);
+    threeJs.scene.add(mesh);
   }
 }

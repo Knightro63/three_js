@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
-import 'package:example/src/demo.dart';
+
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
 
@@ -13,15 +13,15 @@ class WebglInstancingPerformance extends StatefulWidget {
 }
 
 class _MyAppState extends State<WebglInstancingPerformance> {
-  late Demo demo;
+  late three.ThreeJS threeJs;
 
   @override
   void initState() {
-    demo = Demo(
-      fileName: widget.fileName,
+    threeJs = three.ThreeJS(
+      
       onSetupComplete: (){setState(() {});},
       setup: setup,
-      settings: DemoSettings(
+      settings: three.Settings(
         renderOptions: {
           "minFilter": three.LinearFilter,
           "magFilter": three.LinearFilter,
@@ -34,33 +34,38 @@ class _MyAppState extends State<WebglInstancingPerformance> {
   }
   @override
   void dispose() {
-    demo.dispose();
+    threeJs.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return demo.threeDart();
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.fileName),
+      ),
+      body: threeJs.build()
+    );
   }
 
   late three.Material material;
   int count = 1000;
 
   Future<void> setup() async {
-    demo.camera = three.PerspectiveCamera(70, demo.width / demo.height, 1, 100);
-    demo.camera.position.z = 30;
+    threeJs.camera = three.PerspectiveCamera(70, threeJs.width / threeJs.height, 1, 100);
+    threeJs.camera.position.z = 30;
 
-    demo.scene = three.Scene();
-    demo.scene.background = three.Color.fromHex32(0xffffff);
+    threeJs.scene = three.Scene();
+    threeJs.scene.background = three.Color.fromHex32(0xffffff);
 
     material = three.MeshNormalMaterial();
 
     final geometry = three.BoxGeometry(5, 5, 5);
     makeNaive(geometry);
 
-    demo.addAnimationEvent((dt){
-      demo.scene.rotation.x += 0.002;
-      demo.scene.rotation.y += 0.001;
+    threeJs.addAnimationEvent((dt){
+      threeJs.scene.rotation.x += 0.002;
+      threeJs.scene.rotation.y += 0.001;
     });
   }
 
@@ -73,7 +78,7 @@ class _MyAppState extends State<WebglInstancingPerformance> {
       mesh.setMatrixAt(i, matrix);
     }
 
-    demo.scene.add(mesh);  
+    threeJs.scene.add(mesh);  
   }
 
   void makeNaive(three.BufferGeometry geometry) {
@@ -83,7 +88,7 @@ class _MyAppState extends State<WebglInstancingPerformance> {
       final mesh = three.Mesh(geometry, material);
       randomizeMatrix(matrix);
       mesh.applyMatrix4(matrix);
-      demo.scene.add(mesh);
+      threeJs.scene.add(mesh);
     }
   }
 

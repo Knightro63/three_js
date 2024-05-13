@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
-import 'package:example/src/demo.dart';
+
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
 import 'package:three_js_helpers/three_js_helpers.dart';
@@ -14,15 +14,15 @@ class WebglLoaderFbx extends StatefulWidget {
 }
 
 class _MyAppState extends State<WebglLoaderFbx> {
- late Demo demo;
+ late three.ThreeJS threeJs;
 
   @override
   void initState() {
-    demo = Demo(
-      fileName: widget.fileName,
+    threeJs = three.ThreeJS(
+      
       onSetupComplete: (){setState(() {});},
       setup: setup,
-      settings: DemoSettings(
+      settings: three.Settings(
         renderOptions: {
           "minFilter": three.LinearFilter,
           "magFilter": three.LinearFilter,
@@ -35,14 +35,20 @@ class _MyAppState extends State<WebglLoaderFbx> {
   }
   @override
   void dispose() {
-    demo.dispose();
+    threeJs.dispose();
+    three.loading.clear();
     controls.clearListeners();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return demo.threeDart();
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.fileName),
+      ),
+      body: threeJs.build()
+    );
   }
 
   late three.Mesh mesh;
@@ -50,16 +56,16 @@ class _MyAppState extends State<WebglLoaderFbx> {
   late three.OrbitControls controls;
 
   Future<void> setup() async {
-    demo.scene = three.Scene();
-    demo.scene.background = three.Color.fromHex32(0xcccccc);
-    //demo.scene.fog = three.FogExp2(three.Color.fromHex32(0xcccccc), 0.002);
+    threeJs.scene = three.Scene();
+    threeJs.scene.background = three.Color.fromHex32(0xcccccc);
+    //threeJs.scene.fog = three.FogExp2(three.Color.fromHex32(0xcccccc), 0.002);
 
-    demo.camera = three.PerspectiveCamera(60, demo.width / demo.height, 1, 2000);
-    demo.camera.position.setValues( 100, 200, 300 );
+    threeJs.camera = three.PerspectiveCamera(60, threeJs.width / threeJs.height, 1, 2000);
+    threeJs.camera.position.setValues( 100, 200, 300 );
 
     // controls
 
-    controls = three.OrbitControls(demo.camera, demo.globalKey);
+    controls = three.OrbitControls(threeJs.camera, threeJs.globalKey);
 
     controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
     controls.dampingFactor = 0.05;
@@ -73,7 +79,7 @@ class _MyAppState extends State<WebglLoaderFbx> {
 
     final hemiLight = three.HemisphereLight( 0xffffff, 0x444444 );
     hemiLight.position.setValues( 0, 200, 0 );
-    demo.scene.add( hemiLight );
+    threeJs.scene.add( hemiLight );
 
     final dirLight = three.DirectionalLight( 0xffffff );
     dirLight.position.setValues( 0, 200, 100 );
@@ -84,7 +90,7 @@ class _MyAppState extends State<WebglLoaderFbx> {
     dirLight.shadow!.camera!.right = 120;
     dirLight.shadow!.camera!.near = 6;
     dirLight.shadow!.camera!.far = 400;
-    demo.scene.add( dirLight );
+    threeJs.scene.add( dirLight );
 
     // scene.add( new three.CameraHelper( dirLight.shadow!.camera ) );
 
@@ -97,7 +103,7 @@ class _MyAppState extends State<WebglLoaderFbx> {
     final grid = GridHelper( 2000, 20, three.Color(), three.Color());
     grid.material?.opacity = 0.2;
     grid.material?.transparent = true;
-    demo.scene.add( grid );
+    threeJs.scene.add( grid );
 
     final textureLoader = three.TextureLoader();
     textureLoader.flipY = true;
@@ -105,7 +111,7 @@ class _MyAppState extends State<WebglLoaderFbx> {
     //final normalTexture = await textureLoader.loadAsync("assets/models/fbx/model_tex_u1_v1_normal.jpg", null);
 
     // model
-    final loader = three.FBXLoader(width: demo.width.toInt(), height: demo.height.toInt());
+    final loader = three.FBXLoader(width: threeJs.width.toInt(), height: threeJs.height.toInt());
     final object = await loader.fromAsset( 'assets/models/fbx/SambaDancing.fbx');
     mixer = three.AnimationMixer(object!);
 
@@ -119,9 +125,9 @@ class _MyAppState extends State<WebglLoaderFbx> {
       }
     } );
 
-    demo.scene.add( object );
+    threeJs.scene.add( object );
 
-    demo.addAnimationEvent((dt){
+    threeJs.addAnimationEvent((dt){
       controls.update();
       mixer?.update(dt);
     });

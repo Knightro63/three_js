@@ -1,5 +1,5 @@
 import 'dart:math' as math;
-import 'package:example/src/demo.dart';
+
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
 import 'package:three_js_helpers/three_js_helpers.dart';
@@ -14,15 +14,15 @@ class WebglShadowmapViewer extends StatefulWidget {
 }
 
 class _MyAppState extends State<WebglShadowmapViewer> {
-  late Demo demo;
+  late three.ThreeJS threeJs;
 
   @override
   void initState() {
-    demo = Demo(
-      fileName: widget.fileName,
+    threeJs = three.ThreeJS(
+      
       onSetupComplete: (){setState(() {});},
       setup: setup,
-      settings: DemoSettings(
+      settings: three.Settings(
         renderOptions: {
           "minFilter": three.LinearFilter,
           "magFilter": three.LinearFilter,
@@ -35,25 +35,30 @@ class _MyAppState extends State<WebglShadowmapViewer> {
   }
   @override
   void dispose() {
-    demo.dispose();
+    threeJs.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return demo.threeDart();
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.fileName),
+      ),
+      body: threeJs.build()
+    );
   }
 
   void setup() {
-    demo.camera = three.PerspectiveCamera(45, demo.width / demo.height, 1, 1000);
-    demo.camera.position.setValues(0, 15, 70);
+    threeJs.camera = three.PerspectiveCamera(45, threeJs.width / threeJs.height, 1, 1000);
+    threeJs.camera.position.setValues(0, 15, 70);
 
-    demo.scene = three.Scene();
-    demo.camera.lookAt(demo.scene.position);
+    threeJs.scene = three.Scene();
+    threeJs.camera.lookAt(threeJs.scene.position);
 
     // Lights
 
-    demo.scene.add(three.AmbientLight(0x404040));
+    threeJs.scene.add(three.AmbientLight(0x404040));
 
     final spotLight = three.SpotLight(0xffffff);
     spotLight.name = 'Spot Light';
@@ -65,9 +70,9 @@ class _MyAppState extends State<WebglShadowmapViewer> {
     spotLight.shadow!.camera!.far = 30;
     spotLight.shadow!.mapSize.width = 1024;
     spotLight.shadow!.mapSize.height = 1024;
-    demo.scene.add(spotLight);
+    threeJs.scene.add(spotLight);
 
-    demo.scene.add(CameraHelper(spotLight.shadow!.camera!));
+    threeJs.scene.add(CameraHelper(spotLight.shadow!.camera!));
 
     final dirLight = three.DirectionalLight(0xffffff, 1);
     dirLight.name = 'Dir. Light';
@@ -81,9 +86,9 @@ class _MyAppState extends State<WebglShadowmapViewer> {
     dirLight.shadow!.camera!.bottom = -15;
     dirLight.shadow!.mapSize.width = 1024;
     dirLight.shadow!.mapSize.height = 1024;
-    demo.scene.add(dirLight);
+    threeJs.scene.add(dirLight);
 
-    demo.scene.add(CameraHelper(dirLight.shadow!.camera!));
+    threeJs.scene.add(CameraHelper(dirLight.shadow!.camera!));
 
     // Geometry
     final geometry = TorusKnotGeometry(25, 8, 75, 20);
@@ -98,14 +103,14 @@ class _MyAppState extends State<WebglShadowmapViewer> {
     torusKnot.position.y = 3;
     torusKnot.castShadow = true;
     torusKnot.receiveShadow = true;
-    demo.scene.add(torusKnot);
+    threeJs.scene.add(torusKnot);
 
     final geometry2 = three.BoxGeometry(3, 3, 3);
     final cube = three.Mesh(geometry2, material);
     cube.position.setValues(8, 3, 8);
     cube.castShadow = true;
     cube.receiveShadow = true;
-    demo.scene.add(cube);
+    threeJs.scene.add(cube);
 
     final geometry3 = three.BoxGeometry(10, 0.15, 10);
     material = three.MeshPhongMaterial.fromMap({"color": 0xa0adaf, "shininess": 150, "specular": 0x111111});
@@ -114,9 +119,9 @@ class _MyAppState extends State<WebglShadowmapViewer> {
     ground.scale.scale(3);
     ground.castShadow = false;
     ground.receiveShadow = true;
-    demo.scene.add(ground);
+    threeJs.scene.add(ground);
 
-    demo.addAnimationEvent((dt){
+    threeJs.addAnimationEvent((dt){
       torusKnot.rotation.x += 0.025;
       torusKnot.rotation.y += 0.2;
       torusKnot.rotation.z += 0.1;

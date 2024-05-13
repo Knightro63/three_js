@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
-import 'package:example/src/demo.dart';
+
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
 import 'package:three_js_helpers/three_js_helpers.dart';
@@ -14,15 +14,15 @@ class WebglClippingIntersection extends StatefulWidget {
 }
 
 class _State extends State<WebglClippingIntersection> {
-  late Demo demo;
+  late three.ThreeJS threeJs;
 
   @override
   void initState() {
-    demo = Demo(
-      fileName: widget.fileName,
+    threeJs = three.ThreeJS(
+      
       onSetupComplete: (){setState(() {});},
       setup: setup,
-      settings: DemoSettings(
+      settings: three.Settings(
         localClippingEnabled: true
       )
     );
@@ -30,14 +30,19 @@ class _State extends State<WebglClippingIntersection> {
   }
   @override
   void dispose() {
-    demo.dispose();
+    threeJs.dispose();
     controls.clearListeners();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return demo.threeDart();
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.fileName),
+      ),
+      body: threeJs.build()
+    );
   }
 
   late three.OrbitControls controls;
@@ -55,16 +60,16 @@ class _State extends State<WebglClippingIntersection> {
       three.Plane(three.Vector3(0, 0, -1), 0)
     ];
 
-    demo.scene = three.Scene();
-    demo.camera = three.PerspectiveCamera(40, demo.width / demo.height, 1, 200);
-    demo.camera.position.setValues(-1.5, 2.5, 3.0);
-    demo.camera.lookAt(demo.scene.position);
+    threeJs.scene = three.Scene();
+    threeJs.camera = three.PerspectiveCamera(40, threeJs.width / threeJs.height, 1, 200);
+    threeJs.camera.position.setValues(-1.5, 2.5, 3.0);
+    threeJs.camera.lookAt(threeJs.scene.position);
 
-    controls = three.OrbitControls(demo.camera, demo.globalKey);
+    controls = three.OrbitControls(threeJs.camera, threeJs.globalKey);
 
     final light = three.HemisphereLight(0xffffff, 0x080808, 1.5);
     light.position.setValues(-1.25, 1, 1.25);
-    demo.scene.add(light);
+    threeJs.scene.add(light);
 
     final group = three.Group();
 
@@ -81,16 +86,16 @@ class _State extends State<WebglClippingIntersection> {
       group.add(three.Mesh(geometry, material));
     }
 
-    demo.scene.add(group);
+    threeJs.scene.add(group);
 
     final helpers = three.Group();
     helpers.add(PlaneHelper(clipPlanes[0], 2, 0xff0000));
     helpers.add(PlaneHelper(clipPlanes[1], 2, 0x00ff00));
     helpers.add(PlaneHelper(clipPlanes[2], 2, 0x0000ff));
     helpers.visible = params["showHelpers"]!;
-    demo.scene.add(helpers);
+    threeJs.scene.add(helpers);
 
-    demo.addAnimationEvent((dt){
+    threeJs.addAnimationEvent((dt){
       controls.update();
     });
   }

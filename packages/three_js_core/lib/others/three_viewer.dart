@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 
 import 'package:flutter_gl/flutter_gl.dart';
-import 'package:three_js/three_js.dart' as three;
-import 'package:three_js/three_js.dart' hide Texture, Color;
+import 'package:three_js_core/three_js_core.dart' as core;
+import 'package:three_js_math/three_js_math.dart';
 
-class DemoSettings{
-  DemoSettings({
+class Settings{
+  Settings({
     this.enableShadowMap = true,
     this.autoClear = true,
     Map<String,dynamic>? renderOptions,
@@ -19,10 +19,10 @@ class DemoSettings{
     this.clearColor = 0x000000,
     this.localClippingEnabled = false,
     this.clippingPlanes = const [],
-    this.outputEncoding = three.LinearEncoding
+    this.outputEncoding = LinearEncoding
   }){
     this.renderOptions = renderOptions ?? {
-      "format": three.RGBAFormat,
+      "format": RGBAFormat,
       "samples": 4
     };
   }
@@ -37,43 +37,39 @@ class DemoSettings{
   int clearColor;
   double clearAlpha;
   late Map<String,dynamic> renderOptions;
-  List<three.Plane> clippingPlanes;
+  List<Plane> clippingPlanes;
   int outputEncoding;
 }
 
-/// Demo utility class. If you want to learn how to connect cannon.js with three.js, please look at the examples/threejs_* instead.
-class Demo{
+/// threeJs utility class. If you want to learn how to connect cannon.js with js, please look at the examples/threejs_* instead.
+class ThreeJS{
   void Function() onSetupComplete;
-  Demo({
-    DemoSettings? settings,
+  ThreeJS({
+    Settings? settings,
     required this.onSetupComplete, 
     this.rendererUpdate,
-    required this.fileName,
     required this.setup,
     Size? size,
-    WebGLRenderer? renderer,
-    bool useScaffold = true
+    core.WebGLRenderer? renderer,
   }){
-    this.settings = settings ?? DemoSettings();
+    this.settings = settings ?? Settings();
     _size = size;
     lateRenderer = renderer;
-    _useScaffold = useScaffold;
   }
 
   Size? _size;
-  late DemoSettings settings;
-  String fileName;
-  final GlobalKey<three.PeripheralsState> globalKey = GlobalKey<three.PeripheralsState>();
-  three.PeripheralsState get domElement => globalKey.currentState!;
+  late Settings settings;
+  final GlobalKey<core.PeripheralsState> globalKey = GlobalKey<core.PeripheralsState>();
+  core.PeripheralsState get domElement => globalKey.currentState!;
 
   late FlutterGlPlugin three3dRender;
-  WebGLRenderTarget? renderTarget;
-  WebGLRenderer? renderer;
-  WebGLRenderer? lateRenderer;
-  Clock clock = Clock();
+  core.WebGLRenderTarget? renderTarget;
+  core.WebGLRenderer? renderer;
+  core.WebGLRenderer? lateRenderer;
+  core.Clock clock = core.Clock();
 
-  late three.Scene scene;
-  late three.Camera camera;
+  late core.Scene scene;
+  late core.Camera camera;
   
   late double width;
   late double height;
@@ -83,7 +79,6 @@ class Demo{
   bool disposed = false;
   dynamic sourceTexture;
   bool pause = false;
-  late bool _useScaffold;
   bool mounted = false;
 
   void Function()? rendererUpdate;
@@ -99,7 +94,7 @@ class Demo{
     //renderer?.dispose();
     scene.dispose();
     three3dRender.dispose();
-    three.loading.clear();
+    //loading.clear();
   }
 
   void initSize(BuildContext context){
@@ -159,27 +154,27 @@ class Demo{
         options['logarithmicDepthBuffer'] = true;
       }
 
-      renderer = lateRenderer ?? WebGLRenderer(options);
+      renderer = lateRenderer ?? core.WebGLRenderer(options);
       renderer!.setPixelRatio(dpr);
       renderer!.setSize(width, height, false);
       renderer!.alpha = settings.alpha;
       renderer!.shadowMap.enabled = settings.enableShadowMap;
-      renderer!.shadowMap.type = three.PCFShadowMap;
+      renderer!.shadowMap.type = PCFShadowMap;
       renderer!.autoClear = settings.autoClear;
       renderer!.setClearColor(
-        three.Color.fromHex32(settings.clearColor), 
+        Color.fromHex32(settings.clearColor), 
         settings.clearAlpha
       );
       renderer!.autoClearDepth = settings.autoClearDepth;
       renderer!.autoClearStencil = settings.autoClearStencil;
-      renderer!.outputEncoding = three.sRGBEncoding;
+      renderer!.outputEncoding = sRGBEncoding;
       renderer!.localClippingEnabled = settings.localClippingEnabled;
       renderer!.clippingPlanes = settings.clippingPlanes;
     }
 
     if(!kIsWeb){
-      final WebGLRenderTargetOptions pars = WebGLRenderTargetOptions(settings.renderOptions);
-      renderTarget = WebGLRenderTarget((width * dpr).toInt(), (height * dpr).toInt(), pars);
+      final core.WebGLRenderTargetOptions pars = core.WebGLRenderTargetOptions(settings.renderOptions);
+      renderTarget = core.WebGLRenderTarget((width * dpr).toInt(), (height * dpr).toInt(), pars);
       renderer!.setRenderTarget(renderTarget);
       sourceTexture = renderer!.getRenderTargetGLTexture(renderTarget!);
     }
@@ -212,20 +207,10 @@ class Demo{
     };
     await three3dRender.initialize(options: options);
 
-    // TODO web wait dom ok!!!
     Future.delayed(const Duration(milliseconds: 100), () async {
       await three3dRender.prepareContext();
       initScene();
     });
-  }
-
-  Widget threeDart(){
-    return _useScaffold?Scaffold(
-      appBar: AppBar(
-        title: Text(fileName),
-      ),
-      body: build()
-    ):build();
   }
 
   Widget build() {
@@ -237,7 +222,7 @@ class Demo{
             width: screenSize!.width,
             height: screenSize!.height,
             color: Theme.of(context).canvasColor,
-            child: three.Peripherals(
+            child: core.Peripherals(
               key: globalKey,
               builder: (BuildContext context) {
                 return Container(

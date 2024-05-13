@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
-import 'package:example/src/demo.dart';
+
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
 import 'package:three_js_helpers/three_js_helpers.dart';
@@ -15,15 +15,15 @@ class WebglShadowContact extends StatefulWidget {
 }
 
 class _MyAppState extends State<WebglShadowContact> {
-  late Demo demo;
+  late three.ThreeJS threeJs;
 
   @override
   void initState() {
-    demo = Demo(
-      settings: DemoSettings(
+    threeJs = three.ThreeJS(
+      settings: three.Settings(
         alpha: true
       ),
-      fileName: widget.fileName,
+      
       onSetupComplete: (){setState(() {});},
       setup: setup,
       rendererUpdate: renderUpdate
@@ -32,7 +32,7 @@ class _MyAppState extends State<WebglShadowContact> {
   }
   @override
   void dispose() {
-    demo.dispose();
+    threeJs.dispose();
     super.dispose();
   }
 
@@ -64,11 +64,16 @@ class _MyAppState extends State<WebglShadowContact> {
 
   @override
   Widget build(BuildContext context) {
-    return demo.threeDart();
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.fileName),
+      ),
+      body: threeJs.build()
+    );
   }
 
   void renderUpdate() {
-    if (!demo.mounted) {
+    if (!threeJs.mounted) {
       return;
     }
 
@@ -78,19 +83,19 @@ class _MyAppState extends State<WebglShadowContact> {
     }
 
     // remove the background
-    final initialBackground = demo.scene.background;
-    demo.scene.background = null;
+    final initialBackground = threeJs.scene.background;
+    threeJs.scene.background = null;
 
     // force the depthMaterial to everything
     cameraHelper.visible = false;
-    demo.scene.overrideMaterial = depthMaterial;
+    threeJs.scene.overrideMaterial = depthMaterial;
 
     // render to the render target to get the depths
-    demo.renderer!.setRenderTarget(renderTarget2);
-    demo.renderer!.render(demo.scene, shadowCamera);
+    threeJs.renderer!.setRenderTarget(renderTarget2);
+    threeJs.renderer!.render(threeJs.scene, shadowCamera);
 
     // and reset the override material
-    demo.scene.overrideMaterial = null;
+    threeJs.scene.overrideMaterial = null;
     cameraHelper.visible = true;
 
     blurShadow(state["shadow"]["blur"]);
@@ -100,8 +105,8 @@ class _MyAppState extends State<WebglShadowContact> {
     blurShadow(state["shadow"]["blur"] * 0.4);
 
     // reset and render the normal scene
-    demo.renderer!.setRenderTarget(demo.renderTarget);
-    demo.scene.background = initialBackground;
+    threeJs.renderer!.setRenderTarget(threeJs.renderTarget);
+    threeJs.scene.background = initialBackground;
   }
 
   // renderTarget --> blurPlane (horizontalBlur) --> renderTargetBlur --> blurPlane (verticalBlur) --> renderTarget
@@ -113,16 +118,16 @@ class _MyAppState extends State<WebglShadowContact> {
     blurPlane.material!.uniforms["tDiffuse"]["value"] = renderTarget2.texture;
     horizontalBlurMaterial.uniforms["h"]["value"] = amount * 1 / 256;
 
-    demo.renderer!.setRenderTarget(renderTargetBlur);
-    demo.renderer!.render(blurPlane, shadowCamera);
+    threeJs.renderer!.setRenderTarget(renderTargetBlur);
+    threeJs.renderer!.render(blurPlane, shadowCamera);
 
     // blur vertically and draw in the main renderTarget
     blurPlane.material = verticalBlurMaterial;
     blurPlane.material!.uniforms["tDiffuse"]["value"] = renderTargetBlur.texture;
     verticalBlurMaterial.uniforms["v"]["value"] = amount * 1 / 256;
 
-    demo.renderer!.setRenderTarget(renderTarget2);
-    demo.renderer!.render(blurPlane, shadowCamera);
+    threeJs.renderer!.setRenderTarget(renderTarget2);
+    threeJs.renderer!.render(blurPlane, shadowCamera);
 
     blurPlane.visible = false;
   }
@@ -136,13 +141,13 @@ class _MyAppState extends State<WebglShadowContact> {
     const planeHeight = 2.5;
     const cameraHeight = 0.3;
 
-    demo.camera = three.PerspectiveCamera(50, demo.width / demo.height, 0.1, 100);
-    demo.camera.position.setValues(0.5, 1, 2);
+    threeJs.camera = three.PerspectiveCamera(50, threeJs.width / threeJs.height, 0.1, 100);
+    threeJs.camera.position.setValues(0.5, 1, 2);
 
-    demo.scene = three.Scene();
-    demo.scene.background = three.Color.fromHex32(0xffffff);
+    threeJs.scene = three.Scene();
+    threeJs.scene.background = three.Color.fromHex32(0xffffff);
 
-    demo.camera.lookAt(demo.scene.position);
+    threeJs.camera.lookAt(threeJs.scene.position);
 
     // add the example meshes
 
@@ -162,14 +167,14 @@ class _MyAppState extends State<WebglShadowContact> {
       mesh.position.y = 0.1;
       mesh.position.x = math.cos(angle) / 2.0;
       mesh.position.z = math.sin(angle) / 2.0;
-      demo.scene.add(mesh);
+      threeJs.scene.add(mesh);
       meshes.add(mesh);
     }
 
     // the container, if you need to move the plane just move this
     shadowGroup = three.Group();
     shadowGroup.position.y = -0.3;
-    demo.scene.add(shadowGroup);
+    threeJs.scene.add(shadowGroup);
 
     final pars = three.WebGLRenderTargetOptions({"format": three.RGBAFormat});
     // the render target that will show the shadows in the plane texture

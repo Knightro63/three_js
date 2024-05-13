@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
-import 'package:example/src/demo.dart';
+
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
 import 'package:three_js_helpers/three_js_helpers.dart';
@@ -13,12 +13,12 @@ class WebglAnimationSkinningMorph extends StatefulWidget {
 }
 
 class _State extends State<WebglAnimationSkinningMorph> {
-  late Demo demo;
+  late three.ThreeJS threeJs;
 
   @override
   void initState() {
-    demo = Demo(
-      fileName: widget.fileName,
+    threeJs = three.ThreeJS(
+      
       onSetupComplete: (){setState(() {});},
       setup: setup,
     );
@@ -26,14 +26,20 @@ class _State extends State<WebglAnimationSkinningMorph> {
   }
   @override
   void dispose() {
-    demo.dispose();
+    threeJs.dispose();
     controls.clearListeners();
+    three.loading.clear();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return demo.threeDart();
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.fileName),
+      ),
+      body: threeJs.build()
+    );
   }
 
   late three.OrbitControls controls;
@@ -42,41 +48,41 @@ class _State extends State<WebglAnimationSkinningMorph> {
     late three.AnimationMixer mixer;
     late three.Object3D model;
 
-    demo.camera = three.PerspectiveCamera(45, demo.width / demo.height, 0.1, 1000);
-    demo.camera.position.setValues(-5, 5, 15);
-    demo.camera.lookAt(three.Vector3(0, 5, 0));
+    threeJs.camera = three.PerspectiveCamera(45, threeJs.width / threeJs.height, 0.1, 1000);
+    threeJs.camera.position.setValues(-5, 5, 15);
+    threeJs.camera.lookAt(three.Vector3(0, 5, 0));
 
-    controls = three.OrbitControls(demo.camera, demo.globalKey);
+    controls = three.OrbitControls(threeJs.camera, threeJs.globalKey);
 
-    demo.scene = three.Scene();
-    demo.scene.background = three.Color.fromHex32(0xffffff);
-    demo.scene.fog = three.Fog(three.Color.fromHex32(0xa0a0a0), 10, 50);
+    threeJs.scene = three.Scene();
+    threeJs.scene.background = three.Color.fromHex32(0xffffff);
+    threeJs.scene.fog = three.Fog(three.Color.fromHex32(0xa0a0a0), 10, 50);
 
     final hemiLight = three.HemisphereLight(0xffffff, 0x444444);
     hemiLight.position.setValues(0, 20, 0);
-    demo.scene.add(hemiLight);
+    threeJs.scene.add(hemiLight);
 
     final dirLight = three.DirectionalLight(0xffffff);
     dirLight.position.setValues(0, 20, 10);
 
-    demo.scene.add(dirLight);
+    threeJs.scene.add(dirLight);
 
     // scene.add( new three.CameraHelper( dirLight.shadow.camera ) );
 
     final mesh = three.Mesh(three.PlaneGeometry(2000, 2000), three.MeshPhongMaterial.fromMap({"color": 0x999999}));
     mesh.rotation.x = -math.pi / 2;
-    demo.scene.add(mesh);
+    threeJs.scene.add(mesh);
 
     final grid = GridHelper(200, 40, three.Color.fromHex32(0x000000), three.Color.fromHex32(0x000000));
     grid.material?.opacity = 0.2;
     grid.material?.transparent = true;
-    demo.scene.add(grid);
+    threeJs.scene.add(grid);
 
     final loader = three.GLTFLoader().setPath('assets/models/gltf/RobotExpressive/');
     final result = await loader.fromAsset('RobotExpressive.gltf');
 
     model = result!.scene;
-    demo.scene.add(model);
+    threeJs.scene.add(model);
 
     model.traverse((object) {
       if (object is three.Mesh){
@@ -87,7 +93,7 @@ class _State extends State<WebglAnimationSkinningMorph> {
 
     final skeleton = SkeletonHelper(model);
     skeleton.visible = true;
-    demo.scene.add(skeleton);
+    threeJs.scene.add(skeleton);
 
     final animations = result.animations!;
 
@@ -100,7 +106,7 @@ class _State extends State<WebglAnimationSkinningMorph> {
     // var actions = [ idleAction, walkAction, runAction ];
     idleAction!.play();
 
-    demo.addAnimationEvent((delta){
+    threeJs.addAnimationEvent((delta){
       controls.update();
       mixer.update(delta);
     });

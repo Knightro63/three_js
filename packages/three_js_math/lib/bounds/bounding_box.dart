@@ -1,6 +1,5 @@
-import '../vector/index.dart';
-import '../objects/plane.dart';
-import '../buffer/buffer_attribute.dart';
+import 'package:three_js_math/three_js_math.dart';
+import 'dart:math' as math;
 
 /// Represents an axis-aligned bounding box (AABB) in 3D space.
 /// 
@@ -22,6 +21,19 @@ import '../buffer/buffer_attribute.dart';
 /// box.copy( mesh.geometry.boundingBox ).applyMatrix4( mesh.matrixWorld );
 /// ```
 class BoundingBox{
+  final _vectorBox3 = Vector3();
+  final _center = Vector3();
+  final _extents = Vector3();
+  final _triangleNormal = Vector3();
+  final _testAxis = Vector3();
+  // triangle centered vertices
+  final _v0 = Vector3();
+  final _box3v1 = Vector3();
+  final _v2 = Vector3();
+  // triangle edge vectors
+  final _f0 = Vector3();
+  final _f1 = Vector3();
+  final _f2 = Vector3();
 
   /// [min] - (optional) [Vector3] representing the lower (x,
   /// y, z) boundary of the box. Default is ( + Infinity, + Infinity, + Infinity
@@ -269,5 +281,123 @@ class BoundingBox{
     }
 
     return (min <= -plane.constant && max >= -plane.constant);
+  }
+
+  /// [sphere] - [BoundingSphere] to check for intersection against.
+  ///
+  /// Determines whether or not this box intersects [sphere].
+  bool intersectsSphere(BoundingSphere sphere) {
+    // Find the point on the AABB closest to the sphere center.
+    clampPoint(sphere.center, _vectorBox3);
+
+    // If that point is inside the sphere, the AABB and sphere intersect.
+    return _vectorBox3.distanceToSquared(sphere.center) <= (sphere.radius * sphere.radius);
+  }
+
+  /// [point] - [Vector3] to clamp.
+  /// 
+  /// [target] — the result will be copied into this Vector3.
+  /// 
+  /// [Clamps](https://en.wikipedia.org/wiki/Clamping_(graphics))  the
+  /// [point] within the bounds of this box.
+  /// 
+  Vector3 clampPoint(Vector3 point, Vector3 target) {
+    return target.setFrom(point).clamp(min, max);
+  }
+
+  /// [triangle] - [page:Triangle] to check for intersection
+  /// against.
+  /// 
+  /// Determines whether or not this box intersects [triangle].
+  bool intersectsTriangle(Triangle triangle) {
+    if (isEmpty()) {
+      return false;
+    }
+
+    // compute box center and extents
+    getCenter(_center);
+    _extents.sub2(max, _center);
+
+    // translate triangle to aabb origin
+    _v0.sub2(triangle.a, _center);
+    _box3v1.sub2(triangle.b, _center);
+    _v2.sub2(triangle.c, _center);
+
+    // compute edge vectors for triangle
+    _f0.sub2(_box3v1, _v0);
+    _f1.sub2(_v2, _box3v1);
+    _f2.sub2(_v0, _v2);
+
+    // test against axes that are given by cross product combinations of the edges of the triangle and the edges of the aabb
+    // make an axis testing of each of the 3 sides of the aabb against each of the 3 sides of the triangle = 9 axis of separation
+    // axis_ij = u_i x f_j (u0, u1, u2 = face normals of aabb = x,y,z axes vectors since aabb is axis aligned)
+    List<double> axes = [
+      0,
+      -_f0.z,
+      _f0.y,
+      0,
+      -_f1.z,
+      _f1.y,
+      0,
+      -_f2.z,
+      _f2.y,
+      _f0.z,
+      0,
+      -_f0.x,
+      _f1.z,
+      0,
+      -_f1.x,
+      _f2.z,
+      0,
+      -_f2.x,
+      -_f0.y,
+      _f0.x,
+      0,
+      -_f1.y,
+      _f1.x,
+      0,
+      -_f2.y,
+      _f2.x,
+      0
+    ];
+    if (!satForAxes(axes, _v0, _box3v1, _v2, _extents)) {
+      return false;
+    }
+
+    // test 3 face normals from the aabb
+    axes = [1, 0, 0, 0, 1, 0, 0, 0, 1];
+    if (!satForAxes(axes, _v0, _box3v1, _v2, _extents)) {
+      return false;
+    }
+
+    // finally testing the face normal of the triangle
+    // use already existing triangle edge vectors here
+    _triangleNormal.cross2(_f0, _f1);
+    axes = [_triangleNormal.x, _triangleNormal.y, _triangleNormal.z];
+
+    return satForAxes(axes, _v0, _box3v1, _v2, _extents);
+  }
+
+  bool satForAxes<T extends num>(
+      List<T> axes, Vector3 v0, Vector3 v1, Vector3 v2, Vector3 extents) {
+    for (int i = 0, j = axes.length - 3; i <= j; i += 3) {
+      _testAxis.copyFromUnknown(axes, i);
+      // project the aabb onto the seperating axis
+      final r = extents.x * (_testAxis.x).abs() +
+          extents.y * (_testAxis.y).abs() +
+          extents.z * (_testAxis.z).abs();
+      // project all 3 vertices of the triangle onto the seperating axis
+      final p0 = v0.dot(_testAxis);
+      final p1 = v1.dot(_testAxis);
+      final p2 = v2.dot(_testAxis);
+      // actual test, basically see if either of the most extreme of the triangle points intersects r
+      if (math.max(-math.max(math.max(p0, p1), p2), math.min(math.min(p0, p1), p2)) > r) {
+        // points of the projected triangle are outside the projected half-length of the aabb
+        // the axis is seperating and we can exit
+        return false;
+      }
+    }
+
+    return true;
   }
 }

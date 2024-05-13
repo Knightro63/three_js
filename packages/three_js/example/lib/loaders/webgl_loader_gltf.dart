@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:example/src/demo.dart';
+
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
 
@@ -12,18 +12,18 @@ class WebglLoaderGltf extends StatefulWidget {
 }
 
 class _MyAppState extends State<WebglLoaderGltf> {
-  late Demo demo;
+  late three.ThreeJS threeJs;
 
   @override
   void initState() {
-    demo = Demo(
-      fileName: widget.fileName,
+    threeJs = three.ThreeJS(
+      
       onSetupComplete: (){setState(() {});},
       setup: setup,
       rendererUpdate: (){
-        demo.renderer!.clear(true, true, true);
+        threeJs.renderer!.clear(true, true, true);
       },
-      settings: DemoSettings(
+      settings: three.Settings(
         clearAlpha: 0,
         clearColor: 0xffffff
       ),
@@ -32,36 +32,42 @@ class _MyAppState extends State<WebglLoaderGltf> {
   }
   @override
   void dispose() {
-    demo.dispose();
+    threeJs.dispose();
     controls.clearListeners();
+    three.loading.clear();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return demo.threeDart();
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.fileName),
+      ),
+      body: threeJs.build()
+    );
   }
 
   late three.OrbitControls controls;
 
   Future<void> setup() async {
-    demo.scene = three.Scene();
+    threeJs.scene = three.Scene();
 
-    demo.camera = three.PerspectiveCamera(45, demo.width / demo.height, 0.25, 20);
-    demo.camera.position.setValues( - 0, 0, 2.7 );
-    demo.camera.lookAt(demo.scene.position);
+    threeJs.camera = three.PerspectiveCamera(45, threeJs.width / threeJs.height, 0.25, 20);
+    threeJs.camera.position.setValues( - 0, 0, 2.7 );
+    threeJs.camera.lookAt(threeJs.scene.position);
 
-    controls = three.OrbitControls(demo.camera, demo.globalKey);
+    controls = three.OrbitControls(threeJs.camera, threeJs.globalKey);
 
     three.RGBELoader rgbeLoader = three.RGBELoader();
     rgbeLoader.setPath('assets/textures/equirectangular/');
     final hdrTexture = await rgbeLoader.fromAsset('royal_esplanade_1k.hdr');
     hdrTexture?.mapping = three.EquirectangularReflectionMapping;
 
-    demo.scene.background = hdrTexture;
-    demo.scene.environment = hdrTexture;
+    threeJs.scene.background = hdrTexture;
+    threeJs.scene.environment = hdrTexture;
 
-    demo.scene.add( three.AmbientLight( 0xffffff ) );
+    threeJs.scene.add( three.AmbientLight( 0xffffff ) );
 
     three.GLTFLoader loader = three.GLTFLoader()
         .setPath('assets/models/gltf/DamagedHelmet/glTF/');
@@ -90,9 +96,9 @@ class _MyAppState extends State<WebglLoaderGltf> {
     //   }
     // } );
 
-    demo.scene.add(object);
+    threeJs.scene.add(object);
   
-    demo.addAnimationEvent((dt){
+    threeJs.addAnimationEvent((dt){
       controls.update();
     });
   }

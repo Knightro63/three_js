@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
-import 'package:example/src/demo.dart';
+
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
 import 'package:three_js_helpers/three_js_helpers.dart';
@@ -15,12 +15,12 @@ class WebglHelpers extends StatefulWidget {
 }
 
 class _State extends State<WebglHelpers> {
-  late Demo demo;
+  late three.ThreeJS threeJs;
 
   @override
   void initState() {
-    demo = Demo(
-      fileName: widget.fileName,
+    threeJs = three.ThreeJS(
+      
       onSetupComplete: (){setState(() {});},
       setup: setup
     );
@@ -28,14 +28,20 @@ class _State extends State<WebglHelpers> {
   }
   @override
   void dispose() {
-    demo.dispose();
+    threeJs.dispose();
+    three.loading.clear();
     controls.clearListeners();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return demo.threeDart();
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.fileName),
+      ),
+      body: threeJs.build()
+    );
   }
 
   late three.OrbitControls controls;
@@ -48,31 +54,31 @@ class _State extends State<WebglHelpers> {
   VertexTangentsHelper? vth;
 
   Future<void> setup() async {
-    demo.camera = three.PerspectiveCamera(70, demo.width / demo.height, 1, 1000);
-    demo.camera.position.z = 400;
-    controls = three.OrbitControls(demo.camera, demo.globalKey);
+    threeJs.camera = three.PerspectiveCamera(70, threeJs.width / threeJs.height, 1, 1000);
+    threeJs.camera.position.z = 400;
+    controls = three.OrbitControls(threeJs.camera, threeJs.globalKey);
 
     // scene
 
-    demo.scene = three.Scene();
+    threeJs.scene = three.Scene();
 
     light = three.PointLight(0xffffff);
     light.position.setValues(200, 100, 150);
-    demo.scene.add(light);
+    threeJs.scene.add(light);
 
-    demo.scene.add(PointLightHelper(light, 15, three.Color.fromHex32(0xffffff)));
+    threeJs.scene.add(PointLightHelper(light, 15, three.Color.fromHex32(0xffffff)));
 
     final gridHelper = GridHelper(400, 40, three.Color.fromHex32(0x0000ff), three.Color.fromHex32(0x808080));
     gridHelper.position.y = -150;
     gridHelper.position.x = -150;
-    demo.scene.add(gridHelper);
+    threeJs.scene.add(gridHelper);
 
     final polarGridHelper = PolarGridHelper(200, 16, 8, 64, three.Color.fromHex32(0x0000ff), three.Color.fromHex32(0x808080));
     polarGridHelper.position.y = -150;
     polarGridHelper.position.x = 200;
-    demo.scene.add(polarGridHelper);
+    threeJs.scene.add(polarGridHelper);
 
-    demo.camera.lookAt(demo.scene.position);
+    threeJs.camera.lookAt(threeJs.scene.position);
 
     final loader = three.GLTFLoader().setPath('assets/models/gltf/');
 
@@ -89,7 +95,7 @@ class _State extends State<WebglHelpers> {
 
     final group = three.Group();
     group.scale.scale(50);
-    demo.scene.add(group);
+    threeJs.scene.add(group);
 
     // To make sure that the matrixWorld is up to date for the boxhelpers
     group.updateMatrixWorld(true);
@@ -97,12 +103,12 @@ class _State extends State<WebglHelpers> {
     group.add(mesh);
 
     vnh = VertexNormalsHelper(mesh, 5);
-    demo.scene.add(vnh!);
+    threeJs.scene.add(vnh!);
 
     vth = VertexTangentsHelper(mesh, 5);
-    demo.scene.add(vth!);
+    threeJs.scene.add(vth!);
 
-    demo.scene.add(BoxHelper(mesh));
+    threeJs.scene.add(BoxHelper(mesh));
 
     final wireframe = WireframeGeometry(mesh.geometry!);
 
@@ -113,7 +119,7 @@ class _State extends State<WebglHelpers> {
     line.material?.transparent = true;
     line.position.x = 4;
     group.add(line);
-    demo.scene.add(BoxHelper(line));
+    threeJs.scene.add(BoxHelper(line));
 
     final edges = EdgesGeometry(mesh.geometry!, null);
     line = three.LineSegments(edges, null);
@@ -122,12 +128,12 @@ class _State extends State<WebglHelpers> {
     line.material?.transparent = true;
     line.position.x = -4;
     group.add(line);
-    demo.scene.add(BoxHelper(line));
+    threeJs.scene.add(BoxHelper(line));
 
-    demo.scene.add(BoxHelper(group));
-    demo.scene.add(BoxHelper(demo.scene));
+    threeJs.scene.add(BoxHelper(group));
+    threeJs.scene.add(BoxHelper(threeJs.scene));
 
-    demo.addAnimationEvent((dt){
+    threeJs.addAnimationEvent((dt){
       animate();
       controls.update();
     });
@@ -136,9 +142,9 @@ class _State extends State<WebglHelpers> {
   void animate() {
     final time = -DateTime.now().millisecondsSinceEpoch * 0.00003;
 
-    demo.camera.position.x = 400 * math.cos(time);
-    demo.camera.position.z = 400 * math.sin(time);
-    demo.camera.lookAt(demo.scene.position);
+    threeJs.camera.position.x = 400 * math.cos(time);
+    threeJs.camera.position.z = 400 * math.sin(time);
+    threeJs.camera.lookAt(threeJs.scene.position);
 
     light.position.x = math.sin(time * 1.7) * 300;
     light.position.y = math.cos(time * 1.5) * 400;

@@ -21,6 +21,8 @@ dependencies:
     path: ../../three_js_transform_controls
   three_js_svg:
     path: ../../three_js_svg
+  three_js_objects:
+    path: ../../three_js_objects
   three_js_tjs_loader:
     path: ../../three_js_tjs_loader
 

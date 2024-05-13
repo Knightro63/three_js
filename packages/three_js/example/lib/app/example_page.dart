@@ -49,7 +49,7 @@ import 'package:example/controls/misc_controls_map.dart';
 import 'package:example/controls/misc_controls_orbit.dart';
 import 'package:example/controls/misc_controls_trackball.dart';
 
-//import 'package:example/games/games_fps2.dart';
+import 'package:example/games/games_fps.dart';
 
 @immutable
 class ExamplePage extends StatefulWidget {
@@ -150,10 +150,9 @@ class _MyAppState extends State<ExamplePage> {
       page = WebglLoaderFbx(fileName: fileName);
     } else if (fileName == "multi_views") {
       page = MultiViews(fileName: fileName);
-    }
-    // else if (fileName == "games_fps") {
-    //   page = TestGame(fileName: fileName);
-    // } 
+    }else if (fileName == "games_fps") {
+      page = FPSGame(fileName: fileName);
+    } 
     else {
       throw ("ExamplePage fileName $fileName is not support yet ");
     }

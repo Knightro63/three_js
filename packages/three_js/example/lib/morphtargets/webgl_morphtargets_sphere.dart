@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
-import 'package:example/src/demo.dart';
+
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
 
@@ -13,12 +13,12 @@ class WebglMorphtargetsSphere extends StatefulWidget {
 }
 
 class _State extends State<WebglMorphtargetsSphere> {
-  late Demo demo;
+  late three.ThreeJS threeJs;
 
   @override
   void initState() {
-    demo = Demo(
-      fileName: widget.fileName,
+    threeJs = three.ThreeJS(
+      
       onSetupComplete: (){setState(() {});},
       setup: setup
     );
@@ -26,34 +26,40 @@ class _State extends State<WebglMorphtargetsSphere> {
   }
   @override
   void dispose() {
-    demo.dispose();
+    threeJs.dispose();
+    three.loading.clear();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return demo.threeDart();
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.fileName),
+      ),
+      body: threeJs.build()
+    );
   }
 
   late three.Object3D mesh;
 
   Future<void> setup() async {
-    demo.camera = three.PerspectiveCamera(45, demo.width / demo.height, 0.2, 100);
-    demo.camera.position.setValues(0, 5, 5);
+    threeJs.camera = three.PerspectiveCamera(45, threeJs.width / threeJs.height, 0.2, 100);
+    threeJs.camera.position.setValues(0, 5, 5);
 
-    demo.scene = three.Scene();
+    threeJs.scene = three.Scene();
 
-    demo.camera.lookAt(demo.scene.position);
+    threeJs.camera.lookAt(threeJs.scene.position);
 
     final light1 = three.PointLight(0xff2200, 0.7);
     light1.position.setValues(100, 100, 100);
-    demo.scene.add(light1);
+    threeJs.scene.add(light1);
 
     final light2 = three.PointLight(0x22ff00, 0.7);
     light2.position.setValues(-100, -100, -100);
-    demo.scene.add(light2);
+    threeJs.scene.add(light2);
 
-    demo.scene.add(three.AmbientLight(0x111111, 1));
+    threeJs.scene.add(three.AmbientLight(0x111111, 1));
 
     final loader = three.GLTFLoader();
 
@@ -61,7 +67,7 @@ class _State extends State<WebglMorphtargetsSphere> {
     mesh = gltf.scene.getObjectByName('AnimatedMorphSphere')!;
 
     mesh.rotation.z = math.pi / 2;
-    demo.scene.add(mesh);
+    threeJs.scene.add(mesh);
 
     three.console.verbose(" load sucess mesh: $mesh  ");
     three.console.verbose(mesh.geometry!.morphAttributes);
@@ -83,7 +89,7 @@ class _State extends State<WebglMorphtargetsSphere> {
     int sign = 1;
     const speed = 0.5;
 
-    demo.addAnimationEvent((dt){
+    threeJs.addAnimationEvent((dt){
       final step = dt * speed;
       mesh.rotation.y += step;
 

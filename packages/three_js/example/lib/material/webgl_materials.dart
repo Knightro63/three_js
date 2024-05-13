@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
-import 'package:example/src/demo.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_gl/flutter_gl.dart';
 import 'package:three_js/three_js.dart' as three;
@@ -15,12 +15,12 @@ class WebglMaterials extends StatefulWidget {
 }
 
 class _MyAppState extends State<WebglMaterials> {
-  late Demo demo;
+  late three.ThreeJS threeJs;
 
   @override
   void initState() {
-    demo = Demo(
-      fileName: widget.fileName,
+    threeJs = three.ThreeJS(
+      
       onSetupComplete: (){setState(() {});},
       setup: setup
     );
@@ -28,14 +28,19 @@ class _MyAppState extends State<WebglMaterials> {
   }
   @override
   void dispose() {
-    demo.dispose();
+    threeJs.dispose();
     controls.clearListeners();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return demo.threeDart();
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.fileName),
+      ),
+      body: threeJs.build()
+    );
   }
 
   late three.OrbitControls controls;
@@ -43,16 +48,16 @@ class _MyAppState extends State<WebglMaterials> {
   final objects = [], materials = [];
 
   Future<void> setup() async {
-    demo.camera = three.PerspectiveCamera(45, demo.width / demo.height, 1, 2000);
-    demo.camera.position.setValues(0, 200, 800);
-    controls = three.OrbitControls(demo.camera, demo.globalKey);
-    demo.scene = three.Scene();
+    threeJs.camera = three.PerspectiveCamera(45, threeJs.width / threeJs.height, 1, 2000);
+    threeJs.camera.position.setValues(0, 200, 800);
+    controls = three.OrbitControls(threeJs.camera, threeJs.globalKey);
+    threeJs.scene = three.Scene();
 
     // Grid
 
     final helper = GridHelper(1000, 40, three.Color.fromHex32(0x303030), three.Color.fromHex32(0x303030));
     helper.position.y = -75;
-    demo.scene.add(helper);
+    threeJs.scene.add(helper);
 
     // Materials
 
@@ -109,7 +114,7 @@ class _MyAppState extends State<WebglMaterials> {
 
     // Lights
 
-    demo.scene.add(three.AmbientLight(0x111111, 1));
+    threeJs.scene.add(three.AmbientLight(0x111111, 1));
 
     final directionalLight = three.DirectionalLight(0xffffff, 0.125);
 
@@ -118,15 +123,15 @@ class _MyAppState extends State<WebglMaterials> {
     directionalLight.position.z = math.Random().nextDouble() - 0.5;
     directionalLight.position.normalize();
 
-    demo.scene.add(directionalLight);
+    threeJs.scene.add(directionalLight);
 
     pointLight = three.PointLight(0xffffff, 1);
-    demo.scene.add(pointLight);
+    threeJs.scene.add(pointLight);
 
     pointLight.add(three.Mesh(three.SphereGeometry(4, 8, 8),
         three.MeshBasicMaterial.fromMap({"color": 0xffffff})));
 
-    demo.addAnimationEvent((dt){
+    threeJs.addAnimationEvent((dt){
       controls.update();
       animate(dt);
     });
@@ -162,16 +167,16 @@ class _MyAppState extends State<WebglMaterials> {
 
     objects.add(mesh);
 
-    demo.scene.add(mesh);
+    threeJs.scene.add(mesh);
   }
 
   void animate(double dt) {
     final timer = 0.0001 * DateTime.now().millisecondsSinceEpoch;
 
-    demo.camera.position.x = math.cos(timer) * 1000;
-    demo.camera.position.z = math.sin(timer) * 1000;
+    threeJs.camera.position.x = math.cos(timer) * 1000;
+    threeJs.camera.position.z = math.sin(timer) * 1000;
 
-    demo.camera.lookAt(demo.scene.position);
+    threeJs.camera.lookAt(threeJs.scene.position);
 
     for (int i = 0, l = objects.length; i < l; i++) {
       final object = objects[i];

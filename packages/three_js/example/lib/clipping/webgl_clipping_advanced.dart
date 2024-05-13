@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
-import 'package:example/src/demo.dart';
+
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
 
@@ -13,15 +13,15 @@ class WebglClippingAdvanced extends StatefulWidget {
 }
 
 class _State extends State<WebglClippingAdvanced> {
-  late Demo demo;
+  late three.ThreeJS threeJs;
 
   @override
   void initState() {
-    demo = Demo(
-      fileName: widget.fileName,
+    threeJs = three.ThreeJS(
+      
       onSetupComplete: (){setState(() {});},
       setup: setup,
-      settings: DemoSettings(
+      settings: three.Settings(
         clippingPlanes: [],
         localClippingEnabled: true
       )
@@ -31,13 +31,18 @@ class _State extends State<WebglClippingAdvanced> {
   @override
   void dispose() {
     controls.clearListeners();
-    demo.dispose();
+    threeJs.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return demo.threeDart();
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.fileName),
+      ),
+      body: threeJs.build()
+    );
   }
 
   late three.OrbitControls controls;
@@ -138,14 +143,14 @@ class _State extends State<WebglClippingAdvanced> {
     scenePlaneMatrices = scenePlanes.map(planeToMatrix).toList();
     sceneGlobalClippingPlanes = cylindricalPlanes(5, 2.5);
 
-    demo.camera = three.PerspectiveCamera(45, demo.width / demo.height, 0.25, 16);
-    demo.camera.position.setValues(0, 1.5, 5);
-    demo.scene = three.Scene();
+    threeJs.camera = three.PerspectiveCamera(45, threeJs.width / threeJs.height, 0.25, 16);
+    threeJs.camera.position.setValues(0, 1.5, 5);
+    threeJs.scene = three.Scene();
 
-    demo.camera.lookAt(demo.scene.position);
-    demo.scene.add(three.AmbientLight(0xffffff, 0.3));
+    threeJs.camera.lookAt(threeJs.scene.position);
+    threeJs.scene.add(three.AmbientLight(0xffffff, 0.3));
 
-    controls = three.OrbitControls(demo.camera, demo.globalKey);
+    controls = three.OrbitControls(threeJs.camera, threeJs.globalKey);
 
     final spotLight = three.SpotLight(0xffffff, 0.5);
     spotLight.angle = math.pi / 5;
@@ -156,7 +161,7 @@ class _State extends State<WebglClippingAdvanced> {
     spotLight.shadow!.camera!.far = 10;
     spotLight.shadow!.mapSize.width = 1024;
     spotLight.shadow!.mapSize.height = 1024;
-    demo.scene.add(spotLight);
+    threeJs.scene.add(spotLight);
 
     final dirLight = three.DirectionalLight(0xffffff, 0.5);
     dirLight.position.setValues(0, 2, 0);
@@ -171,7 +176,7 @@ class _State extends State<WebglClippingAdvanced> {
 
     dirLight.shadow!.mapSize.width = 1024;
     dirLight.shadow!.mapSize.height = 1024;
-    demo.scene.add(dirLight);
+    threeJs.scene.add(dirLight);
 
     // Geometry
 
@@ -199,7 +204,7 @@ class _State extends State<WebglClippingAdvanced> {
       }
     }
 
-    demo.scene.add(object);
+    threeJs.scene.add(object);
 
     final planeGeometry = three.PlaneGeometry(3, 3, 1, 1),
         color = three.Color(0, 0, 0);
@@ -230,18 +235,18 @@ class _State extends State<WebglClippingAdvanced> {
       volumeVisualization.add(mesh);
     }
 
-    demo.scene.add(volumeVisualization);
+    threeJs.scene.add(volumeVisualization);
 
     final ground = three.Mesh(planeGeometry, three.MeshPhongMaterial.fromMap({"color": 0xa0adaf, "shininess": 10}));
     ground.rotation.x = -math.pi / 2;
     ground.scale.scale(3);
     ground.receiveShadow = true;
-    demo.scene.add(ground);
+    threeJs.scene.add(ground);
 
     globalClippingPlanes = createPlanes(sceneGlobalClippingPlanes.length);
 
     startTime = DateTime.now().millisecondsSinceEpoch;
-    demo.addAnimationEvent((dt){
+    threeJs.addAnimationEvent((dt){
       controls.update();
       animate();
     });
@@ -249,7 +254,7 @@ class _State extends State<WebglClippingAdvanced> {
 
   void setObjectWorldMatrix(three.Object3D object, three.Matrix4 matrix) {
     final parent = object.parent;
-    demo.scene.updateMatrixWorld(false);
+    threeJs.scene.updateMatrixWorld(false);
     object.matrix.setFrom(parent!.matrixWorld).invert();
     object.applyMatrix4(matrix);
   }

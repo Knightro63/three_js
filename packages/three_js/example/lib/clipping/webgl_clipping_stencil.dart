@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
-import 'package:example/src/demo.dart';
+
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
 import 'package:three_js_geometry/three_js_geometry.dart';
@@ -15,15 +15,15 @@ class WebglClippingStencil extends StatefulWidget {
 }
 
 class _State extends State<WebglClippingStencil> {
-  late Demo demo;
+  late three.ThreeJS threeJs;
 
   @override
   void initState() {
-    demo = Demo(
-      fileName: widget.fileName,
+    threeJs = three.ThreeJS(
+      
       onSetupComplete: (){setState(() {});},
       setup: setup,
-      settings: DemoSettings(
+      settings: three.Settings(
         localClippingEnabled: true,
         clearColor: 0x263238,
         clearAlpha: 1.0
@@ -33,14 +33,19 @@ class _State extends State<WebglClippingStencil> {
   }
   @override
   void dispose() {
-    demo.dispose();
+    threeJs.dispose();
     controls.clearListeners();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return demo.threeDart();
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.fileName),
+      ),
+      body: threeJs.build()
+    );
   }
 
   late three.OrbitControls controls;
@@ -92,13 +97,13 @@ class _State extends State<WebglClippingStencil> {
   }
 
   Future<void> setup() async {
-    demo.scene = three.Scene();
-    demo.camera = three.PerspectiveCamera(36, demo.width / demo.height, 1, 100);
-    demo.camera.position.setValues(2, 2, 2);
-    demo.scene.add(three.AmbientLight(0xffffff, 0.5));
-    demo.camera.lookAt(demo.scene.position);
+    threeJs.scene = three.Scene();
+    threeJs.camera = three.PerspectiveCamera(36, threeJs.width / threeJs.height, 1, 100);
+    threeJs.camera.position.setValues(2, 2, 2);
+    threeJs.scene.add(three.AmbientLight(0xffffff, 0.5));
+    threeJs.camera.lookAt(threeJs.scene.position);
 
-    controls = three.OrbitControls(demo.camera, demo.globalKey);
+    controls = three.OrbitControls(threeJs.camera, threeJs.globalKey);
 
     final dirLight = three.DirectionalLight(0xffffff, 1);
     dirLight.position.setValues(5, 10, 7.5);
@@ -110,7 +115,7 @@ class _State extends State<WebglClippingStencil> {
 
     dirLight.shadow!.mapSize.width = 1024;
     dirLight.shadow!.mapSize.height = 1024;
-    demo.scene.add(dirLight);
+    threeJs.scene.add(dirLight);
 
     planes = [
       three.Plane(three.Vector3(-1, 0, 0), 0),
@@ -121,12 +126,12 @@ class _State extends State<WebglClippingStencil> {
     // planeHelpers = planes.map((p) => PlaneHelper(p, 2, 0xffffff)).toList();
     // for (final ph in planeHelpers) {
     //   ph.visible = true;
-    //   demo.scene.add(ph);
+    //   threeJs.scene.add(ph);
     // }
 
     final geometry = TorusKnotGeometry(0.4, 0.15, 220, 60);
     object = three.Group();
-    demo.scene.add(object);
+    threeJs.scene.add(object);
 
     // Set up clip plane rendering
     planeObjects = [];
@@ -159,7 +164,7 @@ class _State extends State<WebglClippingStencil> {
       object.add(stencilGroup);
       poGroup.add(po);
       planeObjects.add(po);
-      demo.scene.add(poGroup);
+      threeJs.scene.add(poGroup);
     }
 
     final material = three.MeshStandardMaterial.fromMap({
@@ -184,9 +189,9 @@ class _State extends State<WebglClippingStencil> {
     ground.rotation.x = -math.pi / 2; // rotates X/Y to X/Z
     ground.position.y = -1;
     ground.receiveShadow = true;
-    demo.scene.add(ground);
+    threeJs.scene.add(ground);
 
-    demo.addAnimationEvent((dt){
+    threeJs.addAnimationEvent((dt){
       animate(dt);
       controls.update();
     });

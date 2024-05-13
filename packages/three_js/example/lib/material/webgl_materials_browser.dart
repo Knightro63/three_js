@@ -1,4 +1,4 @@
-import 'package:example/src/demo.dart';
+
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
 import 'package:three_js_geometry/three_js_geometry.dart';
@@ -12,12 +12,12 @@ class WebglMaterialsBrowser extends StatefulWidget {
 }
 
 class _MyAppState extends State<WebglMaterialsBrowser> {
-  late Demo demo;
+  late three.ThreeJS threeJs;
 
   @override
   void initState() {
-    demo = Demo(
-      fileName: widget.fileName,
+    threeJs = three.ThreeJS(
+      
       onSetupComplete: (){setState(() {});},
       setup: setup
     );
@@ -25,29 +25,34 @@ class _MyAppState extends State<WebglMaterialsBrowser> {
   }
   @override
   void dispose() {
-    demo.dispose();
+    threeJs.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return demo.threeDart();
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.fileName),
+      ),
+      body: threeJs.build()
+    );
   }
 
   Future<void> setup() async {
-    demo.camera = three.PerspectiveCamera(45, demo.width / demo.height, 1, 2000);
-    demo.camera.position.z = 250;
+    threeJs.camera = three.PerspectiveCamera(45, threeJs.width / threeJs.height, 1, 2000);
+    threeJs.camera.position.z = 250;
 
     // scene
 
-    demo.scene = three.Scene();
+    threeJs.scene = three.Scene();
 
     var ambientLight = three.AmbientLight(0xcccccc, 0.4);
-    demo.scene.add(ambientLight);
+    threeJs.scene.add(ambientLight);
 
     var pointLight = three.PointLight(0xffffff, 0.8);
-    demo.camera.add(pointLight);
-    demo.scene.add(demo.camera);
+    threeJs.camera.add(pointLight);
+    threeJs.scene.add(threeJs.camera);
 
     // texture
     var geometry = TorusKnotGeometry(10, 3, 200, 32).toNonIndexed();
@@ -55,6 +60,6 @@ class _MyAppState extends State<WebglMaterialsBrowser> {
 
     var object = three.Mesh(geometry, material);
 
-    demo.scene.add(object);
+    threeJs.scene.add(object);
   }
 }

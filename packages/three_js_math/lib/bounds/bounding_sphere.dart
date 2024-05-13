@@ -1,3 +1,5 @@
+import 'package:three_js_math/three_js_math.dart';
+
 import '../vector/index.dart';
 import '../objects/plane.dart';
 import '../matrix/index.dart';
@@ -80,5 +82,12 @@ class BoundingSphere{
   /// Determines whether or not this sphere intersects a given [plane].
   bool intersectsPlane(Plane plane) {
     return plane.distanceToPoint(center).abs() <= radius;
+  }
+
+  /// [box] - [page:Box3] to check for intersection against.
+  /// 
+  /// Determines whether or not this sphere intersects a given [box].
+  bool intersectsBox(BoundingBox box) {
+    return box.intersectsSphere(this);
   }
 }

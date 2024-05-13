@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:example/src/demo.dart';
+
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
 
@@ -12,12 +12,12 @@ class WebglLoaderTextureBasis extends StatefulWidget {
 }
 
 class _MyAppState extends State<WebglLoaderTextureBasis> {
-  late Demo demo;
+  late three.ThreeJS threeJs;
 
   @override
   void initState() {
-    demo = Demo(
-      fileName: widget.fileName,
+    threeJs = three.ThreeJS(
+      
       onSetupComplete: (){setState(() {});},
       setup: setup
     );
@@ -25,34 +25,40 @@ class _MyAppState extends State<WebglLoaderTextureBasis> {
   }
   @override
   void dispose() {
-    demo.dispose();
+    threeJs.dispose();
+    three.loading.clear();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return demo.threeDart();
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.fileName),
+      ),
+      body: threeJs.build()
+    );
   }
 
   Future<void> setup() async {
     
-    demo.camera = three.PerspectiveCamera(60, demo.width / demo.height, 0.25, 20);
-    demo.camera.position.setValues(-0.0, 0.0, 20.0);
+    threeJs.camera = three.PerspectiveCamera(60, threeJs.width / threeJs.height, 0.25, 20);
+    threeJs.camera.position.setValues(-0.0, 0.0, 20.0);
 
     // scene
 
-    demo.scene = three.Scene();
+    threeJs.scene = three.Scene();
 
     final ambientLight = three.AmbientLight(0xcccccc, 0.4);
-    demo.scene.add(ambientLight);
-    demo.camera.lookAt(demo.scene.position);
+    threeJs.scene.add(ambientLight);
+    threeJs.camera.lookAt(threeJs.scene.position);
 
     final geometry = three.PlaneGeometry(10, 10);
     final material = three.MeshBasicMaterial.fromMap({"side": three.DoubleSide});
 
     final mesh = three.Mesh(geometry, material);
 
-    demo.scene.add(mesh);
+    threeJs.scene.add(mesh);
 
     final loader = three.TextureLoader(null);
     loader.flipY = true;

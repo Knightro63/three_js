@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
-import 'package:example/src/demo.dart';
+
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
 import 'package:three_js_helpers/three_js_helpers.dart';
@@ -16,12 +16,12 @@ class WebglLoaderSvg extends StatefulWidget {
 }
 
 class _MyAppState extends State<WebglLoaderSvg> {
-  late Demo demo;
+  late three.ThreeJS threeJs;
 
   @override
   void initState() {
-    demo = Demo(
-      fileName: widget.fileName,
+    threeJs = three.ThreeJS(
+      
       onSetupComplete: (){setState(() {});},
       setup: setup
     );
@@ -29,13 +29,19 @@ class _MyAppState extends State<WebglLoaderSvg> {
   }
   @override
   void dispose() {
-    demo.dispose();
+    threeJs.dispose();
+    three.loading.clear();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return demo.threeDart();
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.fileName),
+      ),
+      body: threeJs.build()
+    );
   }
 
   late three.Mesh mesh;
@@ -58,19 +64,19 @@ class _MyAppState extends State<WebglLoaderSvg> {
 
 
   Future<void> setup() async {
-    demo.camera = three.PerspectiveCamera(50, demo.width / demo.height, 1, 1000);
-    demo.camera.position.setValues(0, 0, 200);
+    threeJs.camera = three.PerspectiveCamera(50, threeJs.width / threeJs.height, 1, 1000);
+    threeJs.camera.position.setValues(0, 0, 200);
 
     loadSVG(guiData["currentURL"]);
   }
 
   void loadSVG(url) {
-    demo.scene = three.Scene();
-    demo.scene.background = three.Color.fromHex32(0xb0b0b0);
+    threeJs.scene = three.Scene();
+    threeJs.scene.background = three.Color.fromHex32(0xb0b0b0);
 
     final helper = GridHelper(160, 10);
     helper.rotation.x = math.pi / 2;
-    demo.scene.add(helper);
+    threeJs.scene.add(helper);
 
     SVGLoader loader = SVGLoader();
 
@@ -142,7 +148,7 @@ class _MyAppState extends State<WebglLoaderSvg> {
         }
       }
 
-      demo.scene.add(group);
+      threeJs.scene.add(group);
     });
   }
 }

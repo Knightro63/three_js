@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:example/src/demo.dart';
+
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
 
@@ -13,15 +13,15 @@ class WebglLoaderObj extends StatefulWidget {
 
 class _MyAppState extends State<WebglLoaderObj> {
   late three.OrbitControls controls;
-  late Demo demo;
+  late three.ThreeJS threeJs;
 
   @override
   void initState() {
-    demo = Demo(
-      settings: DemoSettings(
+    threeJs = three.ThreeJS(
+      settings: three.Settings(
         enableShadowMap: false,
       ),
-      fileName: widget.fileName,
+      
       onSetupComplete: (){setState(() {});},
       setup: setup
     );
@@ -29,32 +29,38 @@ class _MyAppState extends State<WebglLoaderObj> {
   }
   @override
   void dispose() {
-    demo.dispose();
+    threeJs.dispose();
     controls.clearListeners();
+    three.loading.clear();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return demo.threeDart();
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.fileName),
+      ),
+      body: threeJs.build()
+    );
   }
 
   Future<void> setup() async {
     late three.Object3D object;
     late three.Texture texture;
-    demo.camera = three.PerspectiveCamera(45, demo.width / demo.height, 1, 2000);
-    demo.camera.position.z = 250;
+    threeJs.camera = three.PerspectiveCamera(45, threeJs.width / threeJs.height, 1, 2000);
+    threeJs.camera.position.z = 250;
 
-    demo.scene = three.Scene();
+    threeJs.scene = three.Scene();
 
     final ambientLight = three.AmbientLight(0xcccccc, 0.4);
-    demo.scene.add(ambientLight);
+    threeJs.scene.add(ambientLight);
 
     final pointLight = three.PointLight(0xffffff, 0.8);
-    demo.camera.add(pointLight);
-    demo.scene.add(demo.camera);
+    threeJs.camera.add(pointLight);
+    threeJs.scene.add(threeJs.camera);
 
-    controls = three.OrbitControls(demo.camera, demo.globalKey);
+    controls = three.OrbitControls(threeJs.camera, threeJs.globalKey);
 
     final textureLoader = three.TextureLoader();
     textureLoader.flipY = false;
@@ -76,9 +82,9 @@ class _MyAppState extends State<WebglLoaderObj> {
     });
 
     object.scale.setValues(0.5, 0.5, 0.5);
-    demo.scene.add(object);
+    threeJs.scene.add(object);
 
-    demo.addAnimationEvent((dt){
+    threeJs.addAnimationEvent((dt){
       controls.update();
     });
   }

@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
-import 'package:example/src/demo.dart';
+
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
 
@@ -13,15 +13,15 @@ class WebglGeometryText extends StatefulWidget {
 }
 
 class _MyAppState extends State<WebglGeometryText> {
-  late Demo demo;
+  late three.ThreeJS threeJs;
 
   @override
   void initState() {
-    demo = Demo(
-      fileName: widget.fileName,
+    threeJs = three.ThreeJS(
+      
       onSetupComplete: (){setState(() {});},
       setup: setup,
-      settings: DemoSettings(
+      settings: three.Settings(
         renderOptions: {
           "minFilter": three.LinearFilter,
           "magFilter": three.LinearFilter,
@@ -34,13 +34,19 @@ class _MyAppState extends State<WebglGeometryText> {
   }
   @override
   void dispose() {
-    demo.dispose();
+    three.loading.clear();
+    threeJs.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return demo.threeDart();
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.fileName),
+      ),
+      body: threeJs.build()
+    );
   }
 
   late three.Group group;
@@ -49,26 +55,26 @@ class _MyAppState extends State<WebglGeometryText> {
   Future<void> setup() async {
     // CAMERA
 
-    demo.camera = three.PerspectiveCamera(30, demo.width / demo.height, 1, 1500);
-    demo.camera.position.setValues(0, 400, 700);
+    threeJs.camera = three.PerspectiveCamera(30, threeJs.width / threeJs.height, 1, 1500);
+    threeJs.camera.position.setValues(0, 400, 700);
 
     final cameraTarget = three.Vector3(0, 50, 0);
-    demo.camera.lookAt(cameraTarget);
+    threeJs.camera.lookAt(cameraTarget);
 
     // SCENE
 
-    demo.scene = three.Scene();
-    demo.scene.background = three.Color.fromHex32(0x000000);
-    demo.scene.fog = three.Fog(three.Color.fromHex32(0x000000), 250, 1400);
+    threeJs.scene = three.Scene();
+    threeJs.scene.background = three.Color.fromHex32(0x000000);
+    threeJs.scene.fog = three.Fog(three.Color.fromHex32(0x000000), 250, 1400);
     // LIGHTS
 
     final dirLight = three.DirectionalLight(0xffffff, 0.125);
     dirLight.position.setValues(0, 0, 1).normalize();
-    demo.scene.add(dirLight);
+    threeJs.scene.add(dirLight);
 
     final pointLight = three.PointLight(0xffffff, 1.5);
     pointLight.position.setValues(0, 100, 90);
-    demo.scene.add(pointLight);
+    threeJs.scene.add(pointLight);
 
     // Get text from hash
 
@@ -86,7 +92,7 @@ class _MyAppState extends State<WebglGeometryText> {
     group.position.y = 50;
     group.scale.setValues(1, 1, 1);
 
-    demo.scene.add(group);
+    threeJs.scene.add(group);
 
     final font = await loadFont();
 
@@ -97,7 +103,7 @@ class _MyAppState extends State<WebglGeometryText> {
         three.MeshBasicMaterial.fromMap({"color": 0xffffff, "opacity": 0.5, "transparent": true}));
     plane.position.y = -100;
     plane.rotation.x = -math.pi / 2;
-    demo.scene.add(plane);
+    threeJs.scene.add(plane);
   }
 
   Future<three.TYPRFont> loadFont() async {
@@ -152,7 +158,7 @@ class _MyAppState extends State<WebglGeometryText> {
 
       textMesh2.position.x = centerOffset;
       textMesh2.position.y = -hover;
-      textMesh2.position.z = demo.height;
+      textMesh2.position.z = threeJs.height;
 
       textMesh2.rotation.x = math.pi;
       textMesh2.rotation.y = math.pi * 2;

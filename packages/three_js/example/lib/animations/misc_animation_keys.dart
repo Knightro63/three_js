@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
-import 'package:example/src/demo.dart';
+
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
 import 'package:three_js_helpers/three_js_helpers.dart';
@@ -14,12 +14,11 @@ class MiscAnimationKeys extends StatefulWidget {
 }
 
 class _State extends State<MiscAnimationKeys> {
-  late Demo demo;
+  late three.ThreeJS threeJs;
 
   @override
   void initState() {
-    demo = Demo(
-      fileName: widget.fileName,
+    threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
       setup: setup
     );
@@ -27,13 +26,18 @@ class _State extends State<MiscAnimationKeys> {
   }
   @override
   void dispose() {
-    demo.dispose();
+    threeJs.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return demo.threeDart();
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.fileName),
+      ),
+      body: threeJs.build()
+    );
   }
 
   late three.Mesh mesh;
@@ -42,20 +46,20 @@ class _State extends State<MiscAnimationKeys> {
   late three.Texture texture;
 
   Future<void> setup() async {
-    demo.scene = three.Scene();
-    demo.camera = three.PerspectiveCamera(40, demo.width / demo.height, 1, 1000);
-    demo.camera.position.setValues(25, 25, 50);
-    demo.camera.lookAt(demo.scene.position);
+    threeJs.scene = three.Scene();
+    threeJs.camera = three.PerspectiveCamera(40, threeJs.width / threeJs.height, 1, 1000);
+    threeJs.camera.position.setValues(25, 25, 50);
+    threeJs.camera.lookAt(threeJs.scene.position);
 
     final axesHelper = AxesHelper(10);
-    demo.scene.add(axesHelper);
+    threeJs.scene.add(axesHelper);
 
     //
 
     final geometry = three.BoxGeometry(5, 5, 5);
     final material = three.MeshBasicMaterial.fromMap({"color": 0xffffff, "transparent": true});
     final mesh = three.Mesh(geometry, material);
-    demo.scene.add(mesh);
+    threeJs.scene.add(mesh);
 
     // create a keyframe track (i.e. a timed sequence of keyframes) for each animated property
     // Note: the keyframe track type should correspond to the type of the property being animated
@@ -113,7 +117,7 @@ class _State extends State<MiscAnimationKeys> {
     // create a ClipAction and set it to play
     final clipAction = mixer.clipAction(clip);
     clipAction!.play();
-    demo.addAnimationEvent((dt){
+    threeJs.addAnimationEvent((dt){
       mixer.update(dt);
     });
   }

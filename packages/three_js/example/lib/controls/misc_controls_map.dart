@@ -1,5 +1,5 @@
 import 'dart:math' as math;
-import 'package:example/src/demo.dart';
+
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
 
@@ -12,15 +12,15 @@ class MiscControlsMap extends StatefulWidget {
 }
 
 class _MyAppState extends State<MiscControlsMap> {
-  late Demo demo;
+  late three.ThreeJS threeJs;
 
   @override
   void initState() {
-    demo = Demo(
-      fileName: widget.fileName,
+    threeJs = three.ThreeJS(
+      
       onSetupComplete: (){setState(() {});},
       setup: setup,
-      settings: DemoSettings(
+      settings: three.Settings(
         renderOptions: {
           "minFilter": three.LinearFilter,
           "magFilter": three.LinearFilter,
@@ -33,30 +33,35 @@ class _MyAppState extends State<MiscControlsMap> {
   }
   @override
   void dispose() {
-    demo.dispose();
+    threeJs.dispose();
     controls.clearListeners();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return demo.threeDart();
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.fileName),
+      ),
+      body: threeJs.build()
+    );
   }
 
   late three.MapControls controls;
 
   void setup() {
-    demo.scene = three.Scene();
-    demo.scene.background = three.Color.fromHex32(0xcccccc);
-    demo.scene.fog = three.FogExp2(three.Color.fromHex32(0xcccccc), 0.002);
+    threeJs.scene = three.Scene();
+    threeJs.scene.background = three.Color.fromHex32(0xcccccc);
+    threeJs.scene.fog = three.FogExp2(three.Color.fromHex32(0xcccccc), 0.002);
 
-    demo.camera = three.PerspectiveCamera(60, demo.width / demo.height, 1, 1000);
-    demo.camera.position.setValues(400, 200, 0);
-    demo.camera.lookAt(demo.scene.position);
+    threeJs.camera = three.PerspectiveCamera(60, threeJs.width / threeJs.height, 1, 1000);
+    threeJs.camera.position.setValues(400, 200, 0);
+    threeJs.camera.lookAt(threeJs.scene.position);
 
     // controls
 
-    controls = three.MapControls(demo.camera, demo.globalKey);
+    controls = three.MapControls(threeJs.camera, threeJs.globalKey);
 
     controls.enableDamping =
         true; // an animation loop is required when either damping or auto-rotation are enabled
@@ -85,23 +90,23 @@ class _MyAppState extends State<MiscControlsMap> {
       mesh.scale.z = 20;
       mesh.updateMatrix();
       mesh.matrixAutoUpdate = false;
-      demo.scene.add(mesh);
+      threeJs.scene.add(mesh);
     }
     // lights
 
     final dirLight1 = three.DirectionalLight(0xffffff);
     dirLight1.position.setValues(1, 1, 1);
-    demo.scene.add(dirLight1);
+    threeJs.scene.add(dirLight1);
 
     final dirLight2 = three.DirectionalLight(0x002288);
     dirLight2.position.setValues(-1, -1, -1);
-    demo.scene.add(dirLight2);
+    threeJs.scene.add(dirLight2);
 
     final ambientLight = three.AmbientLight(0x222222);
-    demo.scene.add(ambientLight);
+    threeJs.scene.add(ambientLight);
 
 
-    demo.addAnimationEvent((dt){
+    threeJs.addAnimationEvent((dt){
       controls.update();
     });
   }

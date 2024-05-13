@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
-import 'package:example/src/demo.dart';
+
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
 import 'package:three_js_helpers/three_js_helpers.dart';
@@ -14,12 +14,12 @@ class WebglAnimationMultiple extends StatefulWidget {
 }
 
 class _State extends State<WebglAnimationMultiple> {
-  late Demo demo;
+  late three.ThreeJS threeJs;
 
   @override
   void initState() {
-    demo = Demo(
-      fileName: widget.fileName,
+    threeJs = three.ThreeJS(
+      
       onSetupComplete: (){setState(() {});},
       setup: setup
     );
@@ -27,14 +27,19 @@ class _State extends State<WebglAnimationMultiple> {
   }
   @override
   void dispose() {
-    demo.dispose();
+    threeJs.dispose();
     controls.clearListeners();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return demo.threeDart();
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.fileName),
+      ),
+      body: threeJs.build()
+    );
   }
 
   late three.OrbitControls controls;
@@ -103,17 +108,17 @@ class _State extends State<WebglAnimationMultiple> {
   }
 
   void setup2() {
-    demo.camera = three.PerspectiveCamera(45, demo.width / demo.height, 1, 10000);
-    demo.camera.position.setValues(3, 6, -10);
-    demo.camera.lookAt(three.Vector3(0, 1, 0));
+    threeJs.camera = three.PerspectiveCamera(45, threeJs.width / threeJs.height, 1, 10000);
+    threeJs.camera.position.setValues(3, 6, -10);
+    threeJs.camera.lookAt(three.Vector3(0, 1, 0));
 
-    demo.scene = three.Scene();
-    demo.scene.background = three.Color.fromHex32(0xa0a0a0);
-    demo.scene.fog = three.Fog(three.Color.fromHex32(0xa0a0a0), 10, 22);
+    threeJs.scene = three.Scene();
+    threeJs.scene.background = three.Color.fromHex32(0xa0a0a0);
+    threeJs.scene.fog = three.Fog(three.Color.fromHex32(0xa0a0a0), 10, 22);
 
     final hemiLight = three.HemisphereLight(0xffffff, 0x444444);
     hemiLight.position.setValues(0, 20, 0);
-    demo.scene.add(hemiLight);
+    threeJs.scene.add(hemiLight);
 
     final dirLight = three.DirectionalLight(0xffffff);
     dirLight.position.setValues(-3, 10, -10);
@@ -124,16 +129,16 @@ class _State extends State<WebglAnimationMultiple> {
     dirLight.shadow!.camera!.right = 10;
     dirLight.shadow!.camera!.near = 0.1;
     dirLight.shadow!.camera!.far = 40;
-    demo.scene.add(dirLight);
+    threeJs.scene.add(dirLight);
 
-    controls = three.OrbitControls(demo.camera, demo.globalKey);
+    controls = three.OrbitControls(threeJs.camera, threeJs.globalKey);
 
     // ground
     final groundMesh = three.Mesh(three.PlaneGeometry(40, 40), three.MeshPhongMaterial.fromMap({"color": 0x999999, "depthWrite": false}));
 
     groundMesh.rotation.x = -math.pi / 2;
     groundMesh.receiveShadow = true;
-    demo.scene.add(groundMesh);
+    threeJs.scene.add(groundMesh);
   }
 
   void loadModels() {
@@ -180,7 +185,7 @@ class _State extends State<WebglAnimationMultiple> {
           // We can't set position, scale or rotation to individual mesh objects. Instead we set
           // it to the whole cloned scene and then add the whole scene to the game world
           // Note: this may have weird effects if you have lights or other items in the GLTF file's scene!
-          demo.scene.add(clonedScene);
+          threeJs.scene.add(clonedScene);
 
           if (u["position"] != null) {
             clonedScene.position.setValues(
@@ -204,7 +209,7 @@ class _State extends State<WebglAnimationMultiple> {
 
     three.console.info(" Successfully instantiated $numSuccess units ");
 
-    demo.addAnimationEvent((dt){
+    threeJs.addAnimationEvent((dt){
       for (int i = 0; i < mixers.length; ++i) {
         mixers[i].update(dt);
       }
