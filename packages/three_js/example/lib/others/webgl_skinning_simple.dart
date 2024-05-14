@@ -53,7 +53,7 @@ class _MyAppState extends State<WebglSkinningSimple> {
 
     threeJs.scene = three.Scene();
     threeJs.scene.background = three.Color.fromHex32(0xa0a0a0);
-    threeJs.scene.fog = three.Fog(three.Color.fromHex32(0xa0a0a0), 70, 100);
+    threeJs.scene.fog = three.Fog(0xa0a0a0, 70, 100);
 
     // ground
 
@@ -67,7 +67,7 @@ class _MyAppState extends State<WebglSkinningSimple> {
     ground.receiveShadow = true;
     threeJs.scene.add(ground);
 
-    final grid = GridHelper(500, 100, three.Color.fromHex32(0x000000), three.Color.fromHex32(0x000000));
+    final grid = GridHelper(500, 100, 0x000000, 0x000000);
     grid.position.y = -5;
     grid.material?.opacity = 0.2;
     grid.material?.transparent = true;

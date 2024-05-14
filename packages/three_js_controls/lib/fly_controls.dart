@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart' hide Matrix4;
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
@@ -69,13 +70,15 @@ class FlyControls{
 	Vector3 rotationVector = Vector3( 0, 0, 0 );
 
 	void keydown ( event ) {
-		if ( event.altKey ) {
+    print(event.keyLabel);
+    event as LogicalKeyboardKey;
+		if ( event.keyLabel.contains('alt') ) {
 			return;
 		}
 
 		//event.preventDefault();
 
-		switch ( event.keyCode ) {
+		switch ( event.keyId ) {
 			case 16: /* shift */ movementSpeedMultiplier = .1; break;
 
 			case 87: /*W*/ moveState.forward = 1; break;
@@ -103,7 +106,8 @@ class FlyControls{
 	}
 
 	void keyup( event ) {
-		switch ( event.keyCode ) {
+    event as LogicalKeyboardKey;
+		switch ( event.keyId ) {
 			case 16: /* shift */ movementSpeedMultiplier = 1; break;
 
 			case 87: /*W*/ moveState.forward = 0; break;

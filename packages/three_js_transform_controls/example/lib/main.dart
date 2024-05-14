@@ -177,7 +177,7 @@ class _State extends State<WebglGeometries> {
 
     scene = three.Scene();
     scene.background = tmath.Color.fromHex32(0xcccccc);
-    scene.fog = three.FogExp2(tmath.Color.fromHex32(0xcccccc), 0.002);
+    scene.fog = three.FogExp2(0xcccccc, 0.002);
 
     camera = three.PerspectiveCamera(45, width / height, 1, 2000);
     camera.position.setValues(0, 0, 200);

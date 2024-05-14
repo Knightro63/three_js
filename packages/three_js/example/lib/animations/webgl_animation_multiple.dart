@@ -114,7 +114,7 @@ class _State extends State<WebglAnimationMultiple> {
 
     threeJs.scene = three.Scene();
     threeJs.scene.background = three.Color.fromHex32(0xa0a0a0);
-    threeJs.scene.fog = three.Fog(three.Color.fromHex32(0xa0a0a0), 10, 22);
+    threeJs.scene.fog = three.Fog(0xa0a0a0, 10, 22);
 
     final hemiLight = three.HemisphereLight(0xffffff, 0x444444);
     hemiLight.position.setValues(0, 20, 0);

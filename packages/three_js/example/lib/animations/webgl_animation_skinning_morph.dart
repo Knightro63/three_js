@@ -56,7 +56,7 @@ class _State extends State<WebglAnimationSkinningMorph> {
 
     threeJs.scene = three.Scene();
     threeJs.scene.background = three.Color.fromHex32(0xffffff);
-    threeJs.scene.fog = three.Fog(three.Color.fromHex32(0xa0a0a0), 10, 50);
+    threeJs.scene.fog = three.Fog(0xa0a0a0, 10, 50);
 
     final hemiLight = three.HemisphereLight(0xffffff, 0x444444);
     hemiLight.position.setValues(0, 20, 0);
@@ -73,7 +73,7 @@ class _State extends State<WebglAnimationSkinningMorph> {
     mesh.rotation.x = -math.pi / 2;
     threeJs.scene.add(mesh);
 
-    final grid = GridHelper(200, 40, three.Color.fromHex32(0x000000), three.Color.fromHex32(0x000000));
+    final grid = GridHelper(200, 40, 0x000000, 0x000000);
     grid.material?.opacity = 0.2;
     grid.material?.transparent = true;
     threeJs.scene.add(grid);

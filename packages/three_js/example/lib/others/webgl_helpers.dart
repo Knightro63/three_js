@@ -66,9 +66,9 @@ class _State extends State<WebglHelpers> {
     light.position.setValues(200, 100, 150);
     threeJs.scene.add(light);
 
-    threeJs.scene.add(PointLightHelper(light, 15, three.Color.fromHex32(0xffffff)));
+    threeJs.scene.add(PointLightHelper(light, 15, 0xffffff));
 
-    final gridHelper = GridHelper(400, 40, three.Color.fromHex32(0x0000ff), three.Color.fromHex32(0x808080));
+    final gridHelper = GridHelper(400, 40, 0x0000ff, 0x808080);
     gridHelper.position.y = -150;
     gridHelper.position.x = -150;
     threeJs.scene.add(gridHelper);

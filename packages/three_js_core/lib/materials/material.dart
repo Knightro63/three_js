@@ -256,8 +256,7 @@ class Material with EventDispatcher {
 
   Texture? normalMap;
   Texture? bumpMap;
-  Texture? get envMap =>
-      (uniforms["envMap"] == null ? null : uniforms["envMap"]["value"]);
+  Texture? get envMap =>(uniforms["envMap"] == null ? null : uniforms["envMap"]["value"]);
   set envMap(value) {
     uniforms["envMap"] = {"value": value};
   }
@@ -475,6 +474,8 @@ class Material with EventDispatcher {
       fog = newValue;
     } else if (key == "fragmentShader") {
       fragmentShader = newValue;
+    }else if (key == "specularMap") {
+      specularMap = newValue;
     } else if (key == "instanced") {
       instanced = newValue;
     } else if (key == "lights") {
@@ -572,7 +573,10 @@ class Material with EventDispatcher {
       } else {
         specular = Color.fromHex32(newValue);
       }
-    } else {
+    } else if(key == 'glslVersion'){
+      glslVersion = newValue;
+    }
+    else {
       throw ("Material.setValues key: $key newValue: $newValue is not support");
     }
   }

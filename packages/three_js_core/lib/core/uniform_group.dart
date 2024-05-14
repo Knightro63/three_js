@@ -17,7 +17,10 @@ class UniformsGroup with EventDispatcher {
 		uniforms.add(uniform);
 		return this;
 	}
-
+	UniformsGroup addAll(List<Uniform> uniform ) {
+		uniforms.addAll(uniform);
+		return this;
+	}
 	UniformsGroup remove(Uniform uniform) {
 		final index = uniforms.indexOf(uniform);
 		if (index != - 1) uniforms.removeAt(index);

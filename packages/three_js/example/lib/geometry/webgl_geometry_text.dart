@@ -65,7 +65,7 @@ class _MyAppState extends State<WebglGeometryText> {
 
     threeJs.scene = three.Scene();
     threeJs.scene.background = three.Color.fromHex32(0x000000);
-    threeJs.scene.fog = three.Fog(three.Color.fromHex32(0x000000), 250, 1400);
+    threeJs.scene.fog = three.Fog(0x000000, 250, 1400);
     // LIGHTS
 
     final dirLight = three.DirectionalLight(0xffffff, 0.125);

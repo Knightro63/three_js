@@ -195,7 +195,7 @@ class _State extends State<WebglGeometries> {
 
     scene = three.Scene();
     scene.background = tmath.Color.fromHex32(0x000000);
-    scene.fog = three.Fog(tmath.Color.fromHex32(0x000000), 250, 1400);
+    scene.fog = three.Fog(0x000000, 250, 1400);
     // LIGHTS
 
     final dirLight = three.DirectionalLight(0xffffff, 0.125);

@@ -17,7 +17,6 @@ class _MyAppState extends State<MiscControlsArcball> {
   @override
   void initState() {
     threeJs = three.ThreeJS(
-      
       onSetupComplete: (){setState(() {});},
       setup: setup
     );
@@ -46,7 +45,7 @@ class _MyAppState extends State<MiscControlsArcball> {
 
     threeJs.scene = three.Scene();
     threeJs.scene.background = three.Color.fromHex32(0xcccccc);
-    threeJs.scene.fog = three.FogExp2(three.Color.fromHex32(0xcccccc), 0.002);
+    threeJs.scene.fog = three.FogExp2(0xcccccc, 0.002);
 
     threeJs.camera = three.PerspectiveCamera(45, threeJs.width / threeJs.height, 1, 2000);
     threeJs.camera.position.setValues(0, 0, 200);

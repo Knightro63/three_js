@@ -10,16 +10,16 @@ import './fog.dart';
 /// ```
 class FogExp2 extends FogBase {
   /// The color parameter is passed to the [Color] constructor to set the color property.
-  FogExp2(Color color,[ double? density]) {
+  FogExp2(int color,[ double? density]) {
     name = 'FogExp2';
-    this.color = color;
+    this.color = Color.fromHex32(color);
     this.density = (density != null) ? density : 0.00025;
     isFogExp2 = true;
   }
 
   /// Returns a new FogExp2 instance with the same parameters as this one.
   FogExp2 clone() {
-    return FogExp2(color, density);
+    return FogExp2(color.getHex(), density);
   }
 
   /// Return FogExp2 data in JSON format.

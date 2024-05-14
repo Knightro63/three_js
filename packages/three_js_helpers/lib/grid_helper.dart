@@ -29,9 +29,9 @@ class GridHelper extends LineSegments {
   /// [colorGrid] - The color of the lines of the grid. This can be a
   /// [Color], a hexadecimal value and an CSS-Color name. Default is
   /// 0x888888
-  factory GridHelper([double size = 10, int divisions = 10, Color? colorCenterLine, Color? colorGrid]) {
-    Color color_1 = colorCenterLine == null?Color.fromHex32(0x444444):Color.copy(colorCenterLine);
-    Color color_2 = colorGrid == null?Color.fromHex32(0x888888):Color.copy(colorGrid);
+  factory GridHelper([double size = 10, int divisions = 10, int? colorCenterLine, int? colorGrid]) {
+    Color color_1 = Color.fromHex32(colorCenterLine??0x444444);
+    Color color_2 = Color.fromHex32(colorGrid??0x888888);
 
     final center = divisions / 2;
     final step = size / divisions;

@@ -53,7 +53,7 @@ class _MyAppState extends State<MiscControlsMap> {
   void setup() {
     threeJs.scene = three.Scene();
     threeJs.scene.background = three.Color.fromHex32(0xcccccc);
-    threeJs.scene.fog = three.FogExp2(three.Color.fromHex32(0xcccccc), 0.002);
+    threeJs.scene.fog = three.FogExp2(0xcccccc, 0.002);
 
     threeJs.camera = three.PerspectiveCamera(60, threeJs.width / threeJs.height, 1, 1000);
     threeJs.camera.position.setValues(400, 200, 0);

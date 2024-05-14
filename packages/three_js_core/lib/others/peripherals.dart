@@ -89,40 +89,50 @@ class PeripheralsState extends State<Peripherals> {
       FocusScope.of(context).requestFocus(focusNode);
     });
 
-    return KeyboardListener(
-      focusNode: focusNode,
-      onKeyEvent: (event){
-        if(event is KeyDownEvent){
-          _onKeyDownEvent(context, event.logicalKey);
-        }
-        else if(event is KeyUpEvent){
-          _onKeyUpEvent(context, event.logicalKey);
-        }
+    return NotificationListener<SizeChangedLayoutNotification>(
+      onNotification: (event){
+        _onWindowResized(context, event);
+        return true;
       },
-      child:Listener(
-        onPointerSignal: (pointerSignal) {
-          if (pointerSignal is PointerScrollEvent) {
-            _onWheel(context, pointerSignal);
+      child: KeyboardListener(
+        focusNode: focusNode,
+        onKeyEvent: (event){
+          if(event is KeyDownEvent){
+            _onKeyDownEvent(context, event.logicalKey);
+          }
+          else if(event is KeyUpEvent){
+            _onKeyUpEvent(context, event.logicalKey);
           }
         },
-        onPointerDown: (PointerDownEvent event) {
-          _onPointerDown(context, event);
-        },
-        onPointerMove: (PointerMoveEvent event) {
-          _onPointerMove(context, event);
-        },
-        onPointerUp: (PointerUpEvent event) {
-          _onPointerUp(context, event);
-        },
-        onPointerCancel: (PointerCancelEvent event) {
-          _onPointerCancel(context, event);
-        },
-        onPointerHover: (PointerHoverEvent event){
-          _onMouseMove(context, event);
-        },
-        child: widget.builder(context),
+        child:Listener(
+          onPointerSignal: (pointerSignal) {
+            if (pointerSignal is PointerScrollEvent) {
+              _onWheel(context, pointerSignal);
+            }
+          },
+          onPointerDown: (PointerDownEvent event) {
+            _onPointerDown(context, event);
+          },
+          onPointerMove: (PointerMoveEvent event) {
+            _onPointerMove(context, event);
+          },
+          onPointerUp: (PointerUpEvent event) {
+            _onPointerUp(context, event);
+          },
+          onPointerCancel: (PointerCancelEvent event) {
+            _onPointerCancel(context, event);
+          },
+          onPointerHover: (PointerHoverEvent event){
+            _onMouseMove(context, event);
+          },
+          child: widget.builder(context),
+        )
       )
     );
+  }
+  void _onWindowResized(BuildContext context, SizeChangedLayoutNotification event){
+    //final wpe = WebPointerEvent.fromPointerScrollEvent(context, event);
+    _emit(PeripheralType.resize, context);
   }
   void _onKeyDownEvent(BuildContext context, LogicalKeyboardKey event){
     //final wpe = WebPointerEvent.fromPointerScrollEvent(context, event);

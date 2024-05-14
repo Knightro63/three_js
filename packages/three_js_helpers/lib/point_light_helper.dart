@@ -28,7 +28,7 @@ class PointLightHelper extends Mesh{
   /// 
   /// [color] -- (optional) if this is not the set the helper will take
   /// the color of the light.
-  factory PointLightHelper(PointLight light, double sphereSize, [Color? color]) {
+  factory PointLightHelper(PointLight light, double sphereSize, [int? color]) {
     final geometry = SphereGeometry(sphereSize, 4, 2);
     final material = MeshBasicMaterial.fromMap({"wireframe": true, "fog": false, "toneMapped": false});
 
@@ -37,7 +37,7 @@ class PointLightHelper extends Mesh{
     plh.light = light;
     plh.light.updateMatrixWorld(false);
 
-    plh.color = color;
+    plh.color = color!=null?Color.fromHex32(color):null;
     plh.matrix = plh.light.matrixWorld;
     plh.matrixAutoUpdate = false;
 

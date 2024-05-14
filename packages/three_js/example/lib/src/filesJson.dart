@@ -36,6 +36,7 @@ final filesJson = [
   "misc_controls_trackball",
   "misc_controls_arcball",
   "misc_controls_map",
+  'misc_controls_fly',
   "webgl_loader_fbx",
   "multi_views",
   // 'basic_physics',
@@ -44,5 +45,9 @@ final filesJson = [
   // 'compound2_physics',
   // 'moving_physics',
   'games_fps',
-  'marching_cubes'
+  'marching_cubes',
+  'misc_controls_transform',
+  'webgl_volume_perlin',
+  'webgl_volume_cloud',
+  'webgl_ubo_arrays'
 ];

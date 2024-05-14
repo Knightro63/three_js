@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'package:flutter_gl/flutter_gl.dart';
+import 'package:three_js_math/matrix/matrix3.dart';
 import 'dart:math' as math;
 import '../math/math_util.dart';
 
@@ -276,6 +277,17 @@ class Color{
     copyLinearToSRGB(this);
     return this;
   }
+
+	Color applyMatrix3(Matrix3 m){
+		final r = red, g = green, b = blue;
+		final e = m.storage;
+
+		storage[0] = e[ 0 ] * r + e[ 3 ] * g + e[ 6 ] * b;
+		storage[1] = e[ 1 ] * r + e[ 4 ] * g + e[ 7 ] * b;
+		storage[2] = e[ 2 ] * r + e[ 5 ] * g + e[ 8 ] * b;
+
+		return this;
+	}
 }
 
 // JavaScript RGB-to-RGB transforms, defined as

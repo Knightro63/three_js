@@ -393,9 +393,7 @@ class TransformControls extends Object3D {
 
   TransformControls(Camera? camera, this.listenableKey) : super() {
     scope = this;
-
     visible = false;
-    _camera = camera;
     // this.domElement.style.touchAction = 'none'; // disable touch scroll
 
     _gizmo = TransformControlsGizmo(this);
@@ -404,11 +402,13 @@ class TransformControls extends Object3D {
     _plane = TransformControlsPlane(this);
     _plane.name = "TransformControlsPlane";
 
+    this.camera = camera;
+
     add(_gizmo);
     add(_plane);
-
+    
     domElement.addEventListener(PeripheralType.pointerdown, _onPointerDown, false);
-    domElement.addEventListener(PeripheralType.pointermove, _onPointerHover, false);
+    domElement.addEventListener(PeripheralType.pointerHover, _onPointerHover, false);
     domElement.addEventListener(PeripheralType.pointerup, _onPointerUp, false);
   }
 
@@ -446,8 +446,7 @@ class TransformControls extends Object3D {
 
     _raycaster.setFromCamera(Vector2(pointer.x, pointer.y), camera!);
 
-    final intersect = intersectObjectWithRay(
-      _gizmo.picker[mode], _raycaster, false);
+    final intersect = intersectObjectWithRay(_gizmo.picker[mode], _raycaster, false);
 
     if (intersect != null) {
       axis = intersect.object?.name;
@@ -460,11 +459,10 @@ class TransformControls extends Object3D {
   void pointerDown(Pointer pointer) {
     _pointer0 = pointer;
 
-
     if (object == null || dragging == true || pointer.button != 1){
       return;
     }
-
+    
     if (axis != null) {
       _raycaster.setFromCamera(Vector2(pointer.x, pointer.y), camera!);
 
@@ -714,7 +712,7 @@ class TransformControls extends Object3D {
   @override
   void dispose() {
     domElement.removeEventListener(PeripheralType.pointerdown, _onPointerDown);
-    domElement.removeEventListener(PeripheralType.pointermove, _onPointerHover);
+    domElement.removeEventListener(PeripheralType.pointerHover, _onPointerHover);
     domElement.removeEventListener(PeripheralType.pointermove, _onPointerMove);
     domElement.removeEventListener(PeripheralType.pointerup, _onPointerUp);
 
@@ -797,7 +795,7 @@ class TransformControls extends Object3D {
     return onPointerUp(event);
   }
 
-  Pointer getPointer(event) {
+  Pointer getPointer(WebPointerEvent event) {
     final RenderBox renderBox = listenableKey.currentContext!.findRenderObject() as RenderBox;
     final size = renderBox.size;
     final rect = size;
@@ -824,7 +822,6 @@ class TransformControls extends Object3D {
 
   void onPointerDown(event) {
     if (!enabled) return;
-
     // this.domElement.setPointerCapture( event.pointerId );
 
     domElement.addEventListener(PeripheralType.pointermove, _onPointerMove);
@@ -849,7 +846,7 @@ class TransformControls extends Object3D {
     pointerUp(_getPointer(event));
   }
 
-  Intersection? intersectObjectWithRay(Object3D object, Raycaster raycaster, bool includeInvisible) {
+  Intersection? intersectObjectWithRay(Mesh object, Raycaster raycaster, bool includeInvisible) {
     final allIntersections = raycaster.intersectObject(object, true, null);
 
     for (int i = 0; i < allIntersections.length; i++) {
@@ -866,11 +863,7 @@ class Pointer {
   late double x;
   late double y;
   late int button;
-  Pointer(double x, double y, int button) {
-    x = x;
-    y = y;
-    button = button;
-  }
+  Pointer(this.x, this.y, this.button);
 
   Map<String,dynamic> toJSON() {
     return {"x": x, "y": y, "button": button};

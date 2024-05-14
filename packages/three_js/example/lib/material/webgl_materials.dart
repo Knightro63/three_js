@@ -55,7 +55,7 @@ class _MyAppState extends State<WebglMaterials> {
 
     // Grid
 
-    final helper = GridHelper(1000, 40, three.Color.fromHex32(0x303030), three.Color.fromHex32(0x303030));
+    final helper = GridHelper(1000, 40, 0x303030, 0x303030);
     helper.position.y = -75;
     threeJs.scene.add(helper);
 

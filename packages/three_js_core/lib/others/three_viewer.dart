@@ -48,6 +48,7 @@ class ThreeJS{
     Settings? settings,
     required this.onSetupComplete, 
     this.rendererUpdate,
+    this.windowResizeUpdate,
     required this.setup,
     Size? size,
     core.WebGLRenderer? renderer,
@@ -82,6 +83,7 @@ class ThreeJS{
   bool mounted = false;
 
   void Function()? rendererUpdate;
+  void Function(Size newSize)? windowResizeUpdate;
   FutureOr<void> Function()? setup;
   List<Function(double dt)> events = [];
 
@@ -180,6 +182,17 @@ class ThreeJS{
     }
     else{
       renderTarget = null;
+    }
+  }
+  void onWindowResize(BuildContext context){
+    final mqd = MediaQuery.of(context);
+    if(_size == null && screenSize != mqd.size){
+      screenSize = mqd.size;
+      dpr = mqd.devicePixelRatio;
+      windowResizeUpdate?.call(screenSize!);
+      renderer!.setPixelRatio(dpr);
+      renderer!.setSize(screenSize!.width, screenSize!.height);
+      render();
     }
   }
 

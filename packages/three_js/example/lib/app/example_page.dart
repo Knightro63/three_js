@@ -1,5 +1,10 @@
+import 'package:example/controls/misc_controls_fly.dart';
+import 'package:example/controls/misc_controls_transform.dart';
 import 'package:example/games/games_fps2.dart';
 import 'package:example/geometry/marching_cubes.dart';
+import 'package:example/others/webgl_ubo_arrays.dart';
+import 'package:example/volume/webgl_volume_cloud.dart';
+import 'package:example/volume/webgl_volume_perlin.dart';
 import 'package:flutter/material.dart';
 
 import 'package:example/animations/misc_animation_keys.dart';
@@ -148,6 +153,10 @@ class _MyAppState extends State<ExamplePage> {
       page = MiscControlsArcball(fileName: fileName);
     } else if (fileName == "misc_controls_map") {
       page = MiscControlsMap(fileName: fileName);
+    } else if (fileName == "misc_controls_fly") {
+      page = MiscControlsFly(fileName: fileName);
+    }else if (fileName == "misc_controls_transform") {
+      page = MiscControlsTransform(fileName: fileName);
     } else if (fileName == "webgl_loader_fbx") {
       page = WebglLoaderFbx(fileName: fileName);
     } else if (fileName == "multi_views") {
@@ -156,6 +165,12 @@ class _MyAppState extends State<ExamplePage> {
       page = FPSGame2(fileName: fileName);
     }else if (fileName == "marching_cubes") {
       page = Marching(fileName: fileName);
+    }else if (fileName == "webgl_volume_perlin") {
+      page = WebglVolumePerlin(fileName: fileName);
+    }else if (fileName == "webgl_volume_cloud") {
+      page = WebglVolumeCloud(fileName: fileName);
+    }else if (fileName == "webgl_ubo_arrays") {
+      page = WebglUboArrays(fileName: fileName);
     }
     else {
       throw ("ExamplePage fileName $fileName is not support yet ");

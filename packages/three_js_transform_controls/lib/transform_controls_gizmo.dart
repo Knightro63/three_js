@@ -642,8 +642,8 @@ class TransformControlsGizmo extends Object3D {
 
     // Creates an Object3D with gizmos described in custom hierarchy definition.
 
-    setupGizmo(gizmoMap) {
-      final gizmo = Object3D();
+    Mesh setupGizmo(gizmoMap) {
+      final gizmo = Mesh();
 
       for (final name in gizmoMap.keys) {
         final len = gizmoMap[name].length;
@@ -651,7 +651,7 @@ class TransformControlsGizmo extends Object3D {
         for (int i = (len - 1); i >= 0; i--) {
           final gi = gizmoMap[name][i];
 
-          dynamic object;
+          late Object3D object;
           if (gi.length > 0) {
             object = gi[0].clone();
           }
@@ -681,7 +681,7 @@ class TransformControlsGizmo extends Object3D {
           object.tag = tag;
 
           if (position != null) {
-            object.position.set(position[0].toDouble(), position[1].toDouble(), position[2].toDouble());
+            object.position.setValues(position[0].toDouble(), position[1].toDouble(), position[2].toDouble());
           }
 
           if (rotation != null) {
@@ -689,19 +689,19 @@ class TransformControlsGizmo extends Object3D {
           }
 
           if (scale != null) {
-            object.scale.set(scale[0].toDouble(), scale[1].toDouble(), scale[2].toDouble());
+            object.scale.setValues(scale[0].toDouble(), scale[1].toDouble(), scale[2].toDouble());
           }
 
           object.updateMatrix();
 
-          final tempGeometry = object.geometry.clone();
-          tempGeometry.applyMatrix4(object.matrix);
+          final tempGeometry = object.geometry?.clone();
+          tempGeometry?.applyMatrix4(object.matrix);
           object.geometry = tempGeometry;
-          object.renderOrder = double.infinity;
+          object.renderOrder = double.maxFinite.toInt();
 
-          object.position.set(0.0, 0.0, 0.0);
+          object.position.setValues(0.0, 0.0, 0.0);
           object.rotation.set(0.0, 0.0, 0.0);
-          object.scale.set(1.0, 1.0, 1.0);
+          object.scale.setValues(1.0, 1.0, 1.0);
 
           gizmo.add(object);
         }
@@ -778,8 +778,7 @@ class TransformControlsGizmo extends Object3D {
       handle.position.setFrom(worldPosition);
 
       double factor;
-
-      if (camera! is OrthographicCamera) {
+      if (camera is OrthographicCamera) {
         factor = (camera!.top - camera!.bottom) / camera!.zoom;
       } else {
         factor = worldPosition.distanceTo(cameraPosition) *

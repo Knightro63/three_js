@@ -383,7 +383,7 @@ class _State extends State<webgl_animation_cloth> {
 
     scene = three.Scene();
     scene.background = three.Color.fromHex32(0xcce0ff);
-    scene.fog = three.Fog(three.Color.fromHex32(0xcce0ff), 500, 10000);
+    scene.fog = three.Fog(0xcce0ff, 500, 10000);
 
     // camera
 

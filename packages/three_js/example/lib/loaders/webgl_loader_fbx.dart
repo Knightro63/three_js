@@ -100,7 +100,7 @@ class _MyAppState extends State<WebglLoaderFbx> {
     // mesh.receiveShadow = true;
     // scene.add( mesh );
 
-    final grid = GridHelper( 2000, 20, three.Color(), three.Color());
+    final grid = GridHelper( 2000, 20);
     grid.material?.opacity = 0.2;
     grid.material?.transparent = true;
     threeJs.scene.add( grid );

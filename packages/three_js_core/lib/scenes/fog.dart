@@ -14,7 +14,6 @@ class FogBase {
   Map<String,dynamic> toJson() {
     throw(" need implement .... ");
   }
-
 }
 
 /// This class contains the parameters that define linear fog, i.e., that
@@ -25,9 +24,9 @@ class FogBase {
 /// ```
 class Fog extends FogBase {
   /// The color parameter is passed to the [Color] constructor to set the color property.
-  Fog(Color color, [double? near, double? far]) {
+  Fog(int color, [double? near, double? far]) {
     name = 'Fog';
-    this.color = color;
+    this.color = Color.fromHex32(color);
     this.near = near ?? 1;
     this.far = far ?? 1000;
     isFog = true;
@@ -35,7 +34,7 @@ class Fog extends FogBase {
 
   /// Returns a new fog instance with the same parameters as this one.
   Fog clone() {
-    return Fog(color, near, far);
+    return Fog(color.getHex(), near, far);
   }
   
   /// Return fog data in JSON format.

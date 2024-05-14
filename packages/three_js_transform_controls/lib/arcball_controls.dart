@@ -1660,7 +1660,7 @@ class ArcballControls with EventDispatcher {
 	/// 
   void drawGrid() {
     if (scene != null) {
-      final color = Color.fromHex32(0x888888);
+      const color = 0x888888;
       const multiplier = 3;
       double? size;
       double? divisions;

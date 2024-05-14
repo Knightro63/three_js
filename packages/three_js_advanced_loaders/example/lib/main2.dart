@@ -192,7 +192,7 @@ class _State extends State<WebglGeometries> {
   Future<void> initPage() async {
     scene = three.Scene();
     scene.background = tmath.Color.fromHex32( 0xa0a0a0 );
-    scene.fog = three.Fog( tmath.Color.fromHex32( 0xa0a0a0 ), 200, 1000 );
+    scene.fog = three.Fog(0xa0a0a0, 200, 1000 );
 
     camera = three.PerspectiveCamera(60, width / height, 1, 2000);
     camera.position.setValues( 100, 200, 300 );

@@ -204,8 +204,14 @@ const StaticCopyUsage = 35046;
 const DynamicCopyUsage = 35050;
 const StreamCopyUsage = 35042;
 
+const LinearTransfer = 'linear';
+const SRGBTransfer = 'srgb';
+const Rec709Primaries = 'rec709';
+const P3Primaries = 'p3';
+
 const GLSL1 = '100';
 const GLSL3 = '300 es';
+const SRGBColorSpace = 'srgb';
 
 const MAX_SAFE_INTEGER = 9999999999;
 
