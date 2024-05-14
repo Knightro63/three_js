@@ -16,7 +16,7 @@ class FirstPersonControls with EventDispatcher {
   /// [listenableKey] - The element used for event listeners.
   FirstPersonControls(this.object,this.listenableKey):super(){
     domElement.addEventListener( PeripheralType.contextmenu, contextmenu, false );
-    domElement.addEventListener( PeripheralType.mousemove, onMouseMove, false );
+    domElement.addEventListener( PeripheralType.pointerHover, onMouseMove, false );
     domElement.addEventListener( PeripheralType.pointerdown, onMouseDown, false );
     domElement.addEventListener( PeripheralType.pointerup, onMouseUp, false );
     //this.domElement.setAttribute( 'tabindex', - 1 );
@@ -121,40 +121,65 @@ class FirstPersonControls with EventDispatcher {
 	}
 
 	void onKeyDown(event) {
+    print(event);
 		switch ( event.keyId ) {
 			case 4294968068: /*up*/
-			case 119: /*W*/ moveForward = true; break;
-
+			case 119: /*W*/ 
+        moveForward = true; 
+        break;
 			case 4294968066: /*left*/
-			case 97: /*A*/ moveLeft = true; break;
+			case 97: /*A*/ 
+        moveLeft = true; 
+        break;
 
 			case 4294968065: /*down*/
-			case 115: /*S*/ moveBackward = true; break;
+			case 115: /*S*/ 
+        moveBackward = true; 
+        break;
 
 			case 4294968067: /*right*/
-			case 100: /*D*/ moveRight = true; break;
+			case 100: /*D*/ 
+        moveRight = true; 
+        break;
 
-			case 114: /*R*/ moveUp = true; break;
-			case 102: /*F*/ moveDown = true; break;
+			case 114: /*R*/ 
+        moveUp = true; 
+        break;
+			case 102: /*F*/ 
+        moveDown = true; 
+        break;
 		}
 	}
 
 	void onKeyUp( event ) {
 		switch ( event.keyId ) {
 			case 4294968068: /*up*/
-			case 119: /*W*/ moveForward = false; break;
+			case 119: /*W*/ 
+        moveForward = false; 
+        break;
 
 			case 4294968066: /*left*/
-			case 97: /*A*/ moveLeft = false; break;
+			case 97: /*A*/ 
+        moveLeft = false; 
+        break;
 
 			case 4294968065: /*down*/
-			case 115: /*S*/ moveBackward = false; break;
+			case 115: /*S*/ 
+        moveBackward = false; 
+        break;
 
 			case 4294968067: /*right*/
-			case 100: /*D*/ moveRight = false; break;
+			case 100: /*D*/ 
+        moveRight = false; 
+        break;
 
-			case 114: /*R*/ moveUp = false; break;
-			case 102: /*F*/ moveDown = false; break;
+			case 114: /*R*/ 
+        moveUp = false; 
+        break;
+
+			case 102: /*F*/ 
+        moveDown = false; 
+        break;
 		}
 	}
 
@@ -312,9 +337,9 @@ class FirstPersonControls with EventDispatcher {
   /// Should be called if the controls is no longer required.
 	void dispose() {
 		domElement.removeEventListener( PeripheralType.contextmenu, contextmenu, false );
-		domElement.removeEventListener( PeripheralType.mousedown, onMouseDown, false );
-	  domElement.removeEventListener( PeripheralType.mousemove, onMouseMove, false );
-		domElement.removeEventListener( PeripheralType.mouseup, onMouseUp, false );
+		domElement.removeEventListener( PeripheralType.pointerdown, onMouseDown, false );
+	  domElement.removeEventListener( PeripheralType.pointerHover, onMouseMove, false );
+		domElement.removeEventListener( PeripheralType.pointerup, onMouseUp, false );
 
 		domElement.removeEventListener( PeripheralType.keydown, onKeyDown, false );
 		domElement.removeEventListener( PeripheralType.keyup, onKeyUp, false );
@@ -329,5 +354,4 @@ class FirstPersonControls with EventDispatcher {
 		lat = 90 - spherical.phi.toDeg();
 		lon = spherical.theta.toDeg();
 	}
-
 }

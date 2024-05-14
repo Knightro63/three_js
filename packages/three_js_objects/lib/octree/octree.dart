@@ -131,7 +131,7 @@ class Octree{
         for (int z = 0; z < 2; z ++ ) {
           BoundingBox box = BoundingBox();
           final Vector3 v = _v1.setValues(x.toDouble(), y.toDouble(), z.toDouble());
-          box.min.setFrom(box.min).add(v.multiply(halfsize));
+          box.min.setFrom(this.box.min).add(v.multiply(halfsize));
           box.max.setFrom(box.min).add(halfsize);
           subTrees.add(Octree(box));
         }
@@ -153,7 +153,7 @@ class Octree{
         subTrees[ i ].split( level + 1 );
       }
       if ( len != 0 ) {
-        subTrees.add(subTrees[i]);
+        this.subTrees.add(subTrees[i]);
       }
     }
   }
@@ -167,21 +167,21 @@ class Octree{
 
     triangle.getPlane( _plane );
 
-    num d1 = _plane.distanceToPoint( capsule.start ) - capsule.radius;
-    num d2 = _plane.distanceToPoint( capsule.end ) - capsule.radius;
+    double d1 = _plane.distanceToPoint( capsule.start ) - capsule.radius;
+    double d2 = _plane.distanceToPoint( capsule.end ) - capsule.radius;
 
     if(( d1 > 0 && d2 > 0 ) || ( d1 < - capsule.radius && d2 < - capsule.radius)){
       return null;
     }
 
-    num delta = (d1/(d1.abs() + d2.abs())).abs();
+    double delta = (d1/(d1.abs() + d2.abs())).abs();
     Vector3 intersectPoint = _v1.setFrom( capsule.start ).lerp( capsule.end, delta );
 
     if(triangle.containsPoint( intersectPoint)){
       return OctreeData(normal: _plane.normal.clone(), point: intersectPoint.clone(), depth: math.min( d1, d2).abs());
     }
 
-    num r2 = capsule.radius * capsule.radius;
+    double r2 = capsule.radius * capsule.radius;
 
     line1 = _line1.setStartEnd( capsule.start, capsule.end );
 
@@ -208,8 +208,8 @@ class Octree{
     triangle.getPlane( _plane );
 
     if(!sphere.intersectsPlane( _plane )) return null;
-    num depth = _plane.distanceToSphere( sphere ).abs();
-    num r2 = sphere.radius * sphere.radius - depth * depth;
+    double depth = _plane.distanceToSphere( sphere ).abs();
+    double r2 = sphere.radius * sphere.radius - depth * depth;
 
     Vector3 plainPoint = _plane.projectPoint( sphere.center, _v1 );
 
@@ -227,7 +227,7 @@ class Octree{
       _line1.setStartEnd( lines[ i ][ 0 ], lines[ i ][ 1 ] );
       _line1.closestPointToPoint( plainPoint, true, _v2 );
 
-      num d = _v2.distanceToSquared( sphere.center );
+      double d = _v2.distanceToSquared( sphere.center );
 
       if ( d < r2 ) {
         return OctreeData(normal: sphere.center.clone().sub( _v2 ).normalize(), point: _v2.clone(), depth: sphere.radius - math.sqrt(d));
@@ -273,7 +273,7 @@ class Octree{
 
     if(hit){
       Vector3 collisionVector = _capsule.getCenter(Vector3()).sub( capsule.getCenter(_v1));
-      num depth = collisionVector.length;
+      double depth = collisionVector.length;
       return OctreeData(normal: collisionVector.normalize(), depth: depth);
     }
 
@@ -326,15 +326,15 @@ class Octree{
     double distance = 1e100;
     Vector3? result;
 
-    for (int i = 0; i < triangles.length; i ++ ) {
-      result = ray.intersectTriangle( triangles[ i ].a, triangles[ i ].b, triangles[ i ].c, true, _v1 );
+    for (int i = 0; i < triangles.length; i ++) {
+      result = ray.intersectTriangle( triangles[i].a, triangles[i].b, triangles[i].c, true, _v1 );
       if(result != null){
         double newdistance = result.sub(ray.origin).length;
 
         if ( distance > newdistance ) {
-          position = result.clone().add( ray.origin );
+          position = result.clone().add(ray.origin);
           distance = newdistance;
-          triangle = triangles[ i ];
+          triangle = triangles[i];
         }
       }
     }

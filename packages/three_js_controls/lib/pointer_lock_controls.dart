@@ -74,14 +74,14 @@ class PointerLockControls with EventDispatcher {
   }
 
   void connect() {
-    scope.domElement.addEventListener(PeripheralType.mousemove, onMouseMove);
+    scope.domElement.addEventListener(PeripheralType.pointerHover, onMouseMove);
     scope.domElement.addEventListener(PeripheralType.pointerup, onMouseMove);
     scope.domElement.addEventListener(PeripheralType.pointerlockchange, onPointerlockChange);
     scope.domElement.addEventListener(PeripheralType.pointerlockerror, onPointerlockError);
   }
 
   void disconnect() {
-    scope.domElement.removeEventListener(PeripheralType.mousemove, onMouseMove);
+    scope.domElement.removeEventListener(PeripheralType.pointerHover, onMouseMove);
     scope.domElement.removeEventListener(PeripheralType.pointerlockchange, onPointerlockChange);
     scope.domElement.removeEventListener(PeripheralType.pointerlockerror, onPointerlockError);
   }

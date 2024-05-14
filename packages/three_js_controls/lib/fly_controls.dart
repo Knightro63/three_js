@@ -41,9 +41,9 @@ class FlyControls{
     //if(domElement) this.domElement.setAttribute( 'tabindex', - 1 );
 
     domElement.addEventListener( PeripheralType.contextmenu, contextmenu, false );
-    domElement.addEventListener( PeripheralType.mousemove, mousemove, false );
-    domElement.addEventListener( PeripheralType.mousedown, mousedown, false );
-    domElement.addEventListener( PeripheralType.mouseup, mouseup, false );
+    domElement.addEventListener( PeripheralType.pointerHover, mousemove, false );
+    domElement.addEventListener( PeripheralType.pointerdown, mousedown, false );
+    domElement.addEventListener( PeripheralType.pointerup, mouseup, false );
     domElement.addEventListener( PeripheralType.keydown, keydown, false );
     domElement.addEventListener(PeripheralType.keyup, keyup, false );
 
@@ -243,9 +243,9 @@ class FlyControls{
   /// Should be called if the controls is no longer required.
 	void dispose(){
 		domElement.removeEventListener( PeripheralType.contextmenu, contextmenu, false );
-		domElement.removeEventListener( PeripheralType.mousedown, mousedown, false );
-		domElement.removeEventListener( PeripheralType.mousemove, mousemove, false );
-		domElement.removeEventListener( PeripheralType.mouseup, mouseup, false );
+		domElement.removeEventListener( PeripheralType.pointerdown, mousedown, false );
+		domElement.removeEventListener( PeripheralType.pointerHover, mousemove, false );
+		domElement.removeEventListener( PeripheralType.pointerup, mouseup, false );
 		domElement.removeEventListener( PeripheralType.keydown, keydown, false );
 		domElement.removeEventListener( PeripheralType.keyup, keyup, false );
 	}

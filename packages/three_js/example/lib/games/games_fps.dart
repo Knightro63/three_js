@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:three_js/three_js.dart' as three;
 import 'package:three_js_geometry/three_js_geometry.dart';
-import 'package:three_js_helpers/three_js_helpers.dart';
 import 'package:three_js_objects/three_js_objects.dart';
 
 class SphereData{
@@ -47,9 +46,9 @@ class _FPSGamePageState extends State<FPSGame> {
         threeJs.domElement.addEventListener(three.PeripheralType.pointerup, (event){
           throwBall();
         });
-        threeJs.domElement.addEventListener(three.PeripheralType.pointermove, (event){
-          threeJs.camera.rotation.y -= (event as three.WebPointerEvent).deltaX/100;
-          threeJs.camera.rotation.x -= event.deltaY/100;
+        threeJs.domElement.addEventListener(three.PeripheralType.pointerHover, (event){
+          threeJs.camera.rotation.y -= (event as three.WebPointerEvent).movementX/100;
+          threeJs.camera.rotation.x -= event.movementY/100;
         });
         threeJs.domElement.addEventListener(three.PeripheralType.keydown, (event){
           switch (event.keyId) {
@@ -144,6 +143,7 @@ class _FPSGamePageState extends State<FPSGame> {
     LogicalKeyboardKey.arrowLeft: false,
     LogicalKeyboardKey.arrowDown: false,
     LogicalKeyboardKey.arrowRight: false,
+    LogicalKeyboardKey.space: false,
   };
 
   three.Vector3 vector1 = three.Vector3();
@@ -182,11 +182,11 @@ class _FPSGamePageState extends State<FPSGame> {
     three.GLTFLoader().setPath('assets/models/gltf/').fromAsset('collision-world.glb').then((gltf){
       three.Object3D object = gltf!.scene;
       threeJs.scene.add(object);
-      //worldOctree.fromGraphNode(object);
+      worldOctree.fromGraphNode(object);
 
-      //OctreeHelper helper = OctreeHelper(worldOctree);
-      //helper.visible = true;
-      //scene.add(helper);
+      OctreeHelper helper = OctreeHelper(worldOctree);
+      helper.visible = true;
+      threeJs.scene.add(helper);
 
       object.traverse((child){
         if(child.type == 'Mesh'){
@@ -313,7 +313,7 @@ class _FPSGamePageState extends State<FPSGame> {
     }
   }
   void updateSpheres(double deltaTime) {
-    spheres.forEach((sphere) {
+    for(final sphere in spheres){
       sphere.collider.center.addScaled(sphere.velocity, deltaTime);
       OctreeData? result = worldOctree.sphereIntersect(sphere.collider);
       if(result != null) {
@@ -328,7 +328,7 @@ class _FPSGamePageState extends State<FPSGame> {
       sphere.velocity.addScaled(sphere.velocity, damping);
 
       playerSphereCollision(sphere);
-    });
+    }
 
     spheresCollisions();
 

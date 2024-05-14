@@ -183,8 +183,9 @@ class _State extends State<WebglClippingStencil> {
     object.add(clippedColorFront);
 
     final ground = three.Mesh(
-        three.PlaneGeometry(9, 9, 1, 1),
-        three.ShadowMaterial.fromMap({"color": 0, "opacity": 0.25, "side": three.DoubleSide}));
+      three.PlaneGeometry(9, 9, 1, 1),
+      three.ShadowMaterial.fromMap({"color": 0, "opacity": 0.25, "side": three.DoubleSide})
+    );
 
     ground.rotation.x = -math.pi / 2; // rotates X/Y to X/Z
     ground.position.y = -1;

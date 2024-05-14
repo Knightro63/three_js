@@ -1,4 +1,4 @@
-var filesJson = [
+final filesJson = [
   "webgl_camera",
   "webgl_camera_array",
   "webgl_loader_obj",
@@ -38,10 +38,11 @@ var filesJson = [
   "misc_controls_map",
   "webgl_loader_fbx",
   "multi_views",
-  'basic_physics',
-  'collision_physics',
-  'compound_physics',
-  'compound2_physics',
-  'moving_physics',
-  'games_fps'
+  // 'basic_physics',
+  // 'collision_physics',
+  // 'compound_physics',
+  // 'compound2_physics',
+  // 'moving_physics',
+  'games_fps',
+  'marching_cubes'
 ];

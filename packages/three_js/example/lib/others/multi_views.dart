@@ -55,10 +55,12 @@ class _MyAppState extends State<MultiViews> {
         future: init(),
         builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
           if (!snapshot.hasData) {
-            return CircularProgressIndicator();
+            return const CircularProgressIndicator();
           }
           else{
-            return _build(context);
+            return SingleChildScrollView(
+              child: _build(context)
+            );
           }
         }
       ),
@@ -179,11 +181,8 @@ class _multi_views2_State extends State<MultiViews2> {
   }
 
   late three.Mesh mesh;
-
   late three.Object3D object;
-
   late three.Texture texture;
-
   three.AnimationMixer? mixer;
 
   Future<void> setup() async {

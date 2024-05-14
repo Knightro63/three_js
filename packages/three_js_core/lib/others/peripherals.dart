@@ -9,10 +9,8 @@ enum PeripheralType{
   wheel,
   pointerdown,//touchstart,
   pointermove,//touchmove,
-  mousedown,
-  mouseup,
-  mousemove,
   pointerup,//touchend,
+  pointerHover,
   pointerleave,
   pointercancel,
   pointerlockchange,
@@ -65,13 +63,13 @@ class PeripheralsState extends State<Peripherals> {
   }
 
   void addEventListener(PeripheralType name, Function callback, [bool flag = false]) {
-    var cls = _listeners[name] ?? [];
+    final cls = _listeners[name] ?? [];
     cls.add(callback);
     _listeners[name] = cls;
   }
 
   void removeEventListener(PeripheralType name, Function callback, [bool flag = false]) {
-    var cls = _listeners[name] ?? [];
+    final cls = _listeners[name] ?? [];
     cls.remove(callback);
     _listeners[name] = cls;
   }
@@ -127,45 +125,40 @@ class PeripheralsState extends State<Peripherals> {
     );
   }
   void _onKeyDownEvent(BuildContext context, LogicalKeyboardKey event){
-    //var wpe = WebPointerEvent.fromPointerScrollEvent(context, event);
-    emit(PeripheralType.keydown, event);
+    //final wpe = WebPointerEvent.fromPointerScrollEvent(context, event);
+    _emit(PeripheralType.keydown, event);
   }
   void _onKeyUpEvent(BuildContext context, LogicalKeyboardKey event){
-    //var wpe = WebPointerEvent.fromPointerScrollEvent(context, event);
-    emit(PeripheralType.keyup, event);
+    //final wpe = WebPointerEvent.fromPointerScrollEvent(context, event);
+    _emit(PeripheralType.keyup, event);
   }
   void _onWheel(BuildContext context, PointerScrollEvent event) {
-    var wpe = WebPointerEvent.fromPointerScrollEvent(context, event);
-    emit(PeripheralType.wheel, wpe);
+    final wpe = WebPointerEvent.fromPointerScrollEvent(context, event);
+    _emit(PeripheralType.wheel, wpe);
   }
 
   void _onPointerDown(BuildContext context, PointerDownEvent event) {
-    var wpe = WebPointerEvent.fromPointerDownEvent(context, event);
-    //emit("touchstart", wpe);
-    emit(PeripheralType.pointerdown, wpe);
+    final wpe = WebPointerEvent.fromPointerDownEvent(context, event);
+    _emit(PeripheralType.pointerdown, wpe);
   }
 
   void _onPointerMove(BuildContext context, PointerMoveEvent event) {
-    var wpe = WebPointerEvent.fromPointerMoveEvent(context, event);
-
-    //emit("touchmove", wpe);
-    emit(PeripheralType.pointermove, wpe);
+    final wpe = WebPointerEvent.fromPointerMoveEvent(context, event);
+    _emit(PeripheralType.pointermove, wpe);
   }
   void _onMouseMove(BuildContext context, PointerHoverEvent event) {
-    var wpe = WebPointerEvent.fromMouseMoveEvent(context, event);
-    emit(PeripheralType.mousemove, wpe);
+    final wpe = WebPointerEvent.fromMouseMoveEvent(context, event);
+    _emit(PeripheralType.pointerHover, wpe);
   }
   void _onPointerUp(BuildContext context, PointerUpEvent event) {
-    var wpe = WebPointerEvent.fromPointerUpEvent(context, event);
-    //emit("touchend", wpe);
-    emit(PeripheralType.pointerup, wpe);
+    final wpe = WebPointerEvent.fromPointerUpEvent(context, event);
+    _emit(PeripheralType.pointerup, wpe);
   }
-
   void _onPointerCancel(BuildContext context, PointerCancelEvent event) {
     // emit("pointercancel", event);
   }
 
-  void emit(PeripheralType name, event) {
+  void _emit(PeripheralType name, event) {
     final callbacks = _listeners[name];
     if (callbacks != null && callbacks.isNotEmpty) {
       for (int i = 0; i < callbacks.length; i++) {
@@ -243,14 +236,14 @@ class WebPointerEvent {
   }
 
   static WebPointerEvent convertEvent(context, event) {
-    var wpe = WebPointerEvent();
+    final wpe = WebPointerEvent();
 
     wpe.pointerId = event.pointer;
     wpe.pointerType = getPointerType(event);
     wpe.button = getButton(event);
 
     RenderBox getBox = context.findRenderObject() as RenderBox;
-    var local = getBox.globalToLocal(event.position);
+    final local = getBox.globalToLocal(event.position);
     wpe.clientX = local.dx;
     wpe.clientY = local.dy;
     wpe.pageX = event.position.dx;
@@ -294,8 +287,7 @@ class WebPointerEvent {
       BuildContext context, PointerMoveEvent event) {
     return convertEvent(context, event);
   }
-  factory WebPointerEvent.fromMouseMoveEvent(
-      BuildContext context, PointerHoverEvent event) {
+  factory WebPointerEvent.fromMouseMoveEvent(BuildContext context, PointerHoverEvent event) {
     return convertEvent(context, event);
   }
   factory WebPointerEvent.fromPointerUpEvent(

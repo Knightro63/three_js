@@ -1,14 +1,10 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:math' as math;
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_gl/flutter_gl.dart';
 import 'package:three_js/three_js.dart' as three;
 import 'package:three_js_geometry/three_js_geometry.dart';
-import 'package:three_js_helpers/three_js_helpers.dart';
+import 'package:three_js_objects/three_js_objects.dart';
 
 class SphereData{
   SphereData({
@@ -22,59 +18,61 @@ class SphereData{
   three.Vector3 velocity;
 }
 
-class TestGame extends StatefulWidget {
-  const TestGame({
-    Key? key,
+class FPSGame2 extends StatefulWidget {
+  const FPSGame2({
+    super.key,
     required this.fileName
-  }) : super(key: key);
+  });
 
   final String fileName;
 
   @override
-  _TestGamePageState createState() => _TestGamePageState();
+  _FPSGame2PageState createState() => _FPSGame2PageState();
 }
 
-class _TestGamePageState extends State<TestGame> {
-  FocusNode node = FocusNode();
+class _FPSGame2PageState extends State<FPSGame2> {
   late three.FirstPersonControls fpsControl;
-  // gl values
-  //late Object3D object;
-  bool animationReady = false;
-  late FlutterGlPlugin three3dRender;
-  three.WebGLRenderTarget? renderTarget;
-  three.WebGLRenderer? renderer;
-  int? fboId;
-  late double width;
-  late double height;
-  Size? screenSize;
-  late three.Scene scene;
-  late three.Camera camera;
-  double dpr = 1.0;
-  bool verbose = false;
-  bool disposed = false;
-  final GlobalKey<three.PeripheralsState> _globalKey = GlobalKey<three.PeripheralsState>();
-  dynamic sourceTexture;
+  late three.ThreeJS threeJs;
+
+  @override
+  void initState() {
+    threeJs = three.ThreeJS(
+      onSetupComplete: (){
+        setState(() {});
+      },
+      setup: setup
+    );
+    super.initState();
+  }
+  @override
+  void dispose() {
+    threeJs.dispose();
+    three.loading.clear();
+    fpsControl.clearListeners();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.fileName),
+      ),
+      body: threeJs.build()
+    );
+  }
 
   int stepsPerFrame = 5;
-  three.Clock clock = three.Clock();
-
   double gravity = 30;
-
   List<SphereData> spheres = [];
   int sphereIdx = 0;
-
   Octree worldOctree = Octree();
   Capsule playerCollider = Capsule(three.Vector3( 0, 0.35, 0 ), three.Vector3( 0, 1, 0 ), 0.35);
 
   bool playerOnFloor = false;
   int mouseTime = 0;
   Map<LogicalKeyboardKey,bool> keyStates = {
-    LogicalKeyboardKey.keyW: false,
-    LogicalKeyboardKey.keyA: false,
-    LogicalKeyboardKey.keyS: false,
-    LogicalKeyboardKey.keyD: false,
     LogicalKeyboardKey.space: false,
-
     LogicalKeyboardKey.arrowUp: false,
     LogicalKeyboardKey.arrowLeft: false,
     LogicalKeyboardKey.arrowDown: false,
@@ -87,59 +85,17 @@ class _TestGamePageState extends State<TestGame> {
 
   late final three.Vector3 playerVelocity;
 
-  @override
-  void initState() {
-    super.initState();
-  }
-  @override
-  void dispose() {
-    disposed = true;
-    three3dRender.dispose();
-    super.dispose();
-  }
-  
-  void initSize(BuildContext context) {
-    if (screenSize != null) {
-      return;
-    }
+  Future<void> setup() async {
+    threeJs.scene = three.Scene();
+    threeJs.scene.background = three.Color.fromHex32(0x88ccee);
 
-    final mqd = MediaQuery.of(context);
-
-    screenSize = mqd.size;
-    dpr = mqd.devicePixelRatio;
-
-    initPlatformState();
-  }
-  void animate() {
-    if (!mounted || disposed) {
-      return;
-    }
-    double deltaTime = math.min(0.05, clock.getDelta())/stepsPerFrame;
-    if(deltaTime != 0){
-      for (int i = 0; i < stepsPerFrame; i ++) {
-        fpsControl.update(deltaTime);
-        updatePlayer(deltaTime);
-        updateSpheres(deltaTime);
-        teleportPlayerIfOob();
-      }
-    }
-    render();
-
-    Future.delayed(const Duration(milliseconds: 40), () {
-      animate();
-    });
-  }
-  Future<void> initPage() async {
-    scene = three.Scene();
-    scene.background = three.Color(0x88ccee);
-
-    camera = three.PerspectiveCamera(70, width / height, 0.1, 1000);
-    camera.rotation.order = three.RotationOrders.yxz;
+    threeJs.camera = three.PerspectiveCamera(70, threeJs.width / threeJs.height, 0.1, 1000);
+    threeJs.camera.rotation.order = three.RotationOrders.yxz;
 
     // lights
     three.HemisphereLight fillLight1 = three.HemisphereLight( 0x4488bb, 0x002244, 0.5 );
     fillLight1.position.setValues( 2, 1, 1 );
-    scene.add(fillLight1);
+    threeJs.scene.add(fillLight1);
 
     three.DirectionalLight directionalLight = three.DirectionalLight( 0xffffff, 0.8 );
     directionalLight.position.setValues( - 5, 25, - 1 );
@@ -156,16 +112,16 @@ class _TestGamePageState extends State<TestGame> {
     directionalLight.shadow!.radius = 4;
     directionalLight.shadow!.bias = - 0.00006;
 
-    scene.add(directionalLight);
+    threeJs.scene.add(directionalLight);
 
     three.GLTFLoader().setPath('assets/models/gltf/').fromAsset('collision-world.glb').then((gltf){
       three.Object3D object = gltf!.scene;
-      scene.add(object);
+      threeJs.scene.add(object);
       worldOctree.fromGraphNode(object);
 
       OctreeHelper helper = OctreeHelper(worldOctree);
       helper.visible = true;
-      scene.add(helper);
+      threeJs.scene.add(helper);
 
       object.traverse((child){
         if(child.type == 'Mesh'){
@@ -177,7 +133,7 @@ class _TestGamePageState extends State<TestGame> {
       });
     });
 
-    fpsControl = three.FirstPersonControls(camera, _globalKey);
+    fpsControl = three.FirstPersonControls(threeJs.camera, threeJs.globalKey);
     fpsControl.lookSpeed = 1/100;
     fpsControl.movementSpeed = 15.0;
     fpsControl.lookType = three.LookType.position;
@@ -186,76 +142,21 @@ class _TestGamePageState extends State<TestGame> {
       if(event.keyId == 32){
         playerVelocity.y = 15;
       }
-    }, false );
+    });
     fpsControl.domElement.addEventListener(three.PeripheralType.pointerup, (event){
       throwBall();
-    }, false );
-    animationReady = true;
-  }
-  void render() {
-    final _gl = three3dRender.gl;
-    renderer!.render(scene, camera);
-    _gl.flush();
-    if(!kIsWeb) {
-      three3dRender.updateTexture(sourceTexture);
-    }
-  }
-  void initRenderer() {
-    Map<String, dynamic> _options = {
-      "width": width,
-      "height": height,
-      "gl": three3dRender.gl,
-      "antialias": true,
-      "canvas": three3dRender.element,
-    };
+    });
 
-    if(!kIsWeb && Platform.isAndroid){
-      _options['logarithmicDepthBuffer'] = true;
-    }
-
-    renderer = three.WebGLRenderer(_options);
-    renderer!.setPixelRatio(dpr);
-    renderer!.setSize(width, height, false);
-    renderer!.shadowMap.enabled = true;
-
-    if(!kIsWeb){
-      three.WebGLRenderTargetOptions pars = three.WebGLRenderTargetOptions({"format": three.RGBAFormat,"samples": 8});
-      renderTarget = three.WebGLRenderTarget((width * dpr).toInt(), (height * dpr).toInt(), pars);
-      renderTarget!.samples = 8;
-      renderer!.setRenderTarget(renderTarget);
-      sourceTexture = renderer!.getRenderTargetGLTexture(renderTarget!);
-    }
-    else{
-      renderTarget = null;
-    }
-  }
-  void initScene() async{
-    await initPage();
-    initRenderer();
-    animate();
-  }
-  Future<void> initPlatformState() async {
-    width = screenSize!.width;
-    height = screenSize!.height;
-
-    three3dRender = FlutterGlPlugin();
-
-    Map<String, dynamic> _options = {
-      "antialias": true,
-      "alpha": true,
-      "width": width.toInt(),
-      "height": height.toInt(),
-      "dpr": dpr,
-      'precision': 'highp'
-    };
-    await three3dRender.initialize(options: _options);
-
-    setState(() {});
-
-    // TODO web wait dom ok!!!
-    Future.delayed(const Duration(milliseconds: 100), () async {
-      await three3dRender.prepareContext();
-      initScene();
+    threeJs.addAnimationEvent((dt){
+      double deltaTime = math.min(0.05, dt)/stepsPerFrame;
+      if(deltaTime != 0){
+        for (int i = 0; i < stepsPerFrame; i ++) {
+          fpsControl.update(dt);
+          updatePlayer(deltaTime);
+          updateSpheres(deltaTime);
+          teleportPlayerIfOob();
+        }
+      }
     });
   }
 
@@ -268,14 +169,14 @@ class _TestGamePageState extends State<TestGame> {
     newsphere.castShadow = true;
     newsphere.receiveShadow = true;
 
-    scene.add( newsphere );
+    threeJs.scene.add( newsphere );
     spheres.add(SphereData(
       mesh: newsphere,
       collider: three.BoundingSphere(three.Vector3( 0, - 100, 0 ), sphereRadius),
       velocity: three.Vector3()
     ));
     SphereData sphere = spheres.last;
-    camera.getWorldDirection( fpsControl.targetPosition );
+    threeJs.camera.getWorldDirection( fpsControl.targetPosition );
     sphere.collider.center.setFrom(playerCollider.end).addScaled( fpsControl.targetPosition, playerCollider.radius * 1.5 );
     // throw the ball with more force if we hold the button longer, and if we move forward
     double impulse = 15 + 15 * ( 1 - math.exp((mouseTime-DateTime.now().millisecondsSinceEpoch) * 0.001));
@@ -312,7 +213,7 @@ class _TestGamePageState extends State<TestGame> {
     three.Vector3 deltaPosition = playerVelocity.clone().scale( deltaTime );
     playerCollider.translate(deltaPosition);
     playerCollisions();
-    camera.position.setFrom(playerCollider.end);
+    threeJs.camera.position.setFrom(playerCollider.end);
   }
   void playerSphereCollision(SphereData sphere) {
     three.Vector3 center = vector1.add2(playerCollider.start, playerCollider.end ).scale( 0.5 );
@@ -364,7 +265,7 @@ class _TestGamePageState extends State<TestGame> {
     }
   }
   void updateSpheres(double deltaTime) {
-    spheres.forEach((sphere) {
+    for(final sphere in spheres){
       sphere.collider.center.addScaled(sphere.velocity, deltaTime);
       OctreeData? result = worldOctree.sphereIntersect(sphere.collider);
       if(result != null) {
@@ -379,7 +280,7 @@ class _TestGamePageState extends State<TestGame> {
       sphere.velocity.addScaled(sphere.velocity, damping);
 
       playerSphereCollision(sphere);
-    });
+    }
 
     spheresCollisions();
 
@@ -389,60 +290,12 @@ class _TestGamePageState extends State<TestGame> {
   }
 
   void teleportPlayerIfOob(){
-    if(camera.position.y <= - 25){
-      playerCollider.start.set(0,0.35,0);
-      playerCollider.end.set(0,1,0);
+    if(threeJs.camera.position.y <= - 25){
+      playerCollider.start.setValues(0,0.35,0);
+      playerCollider.end.setValues(0,1,0);
       playerCollider.radius = 0.35;
-      camera.position.setFrom(playerCollider.end);
-      camera.rotation.set(0,0,0);
+      threeJs.camera.position.setFrom(playerCollider.end);
+      threeJs.camera.rotation.set(0,0,0);
     }
-  }
-
-  Widget threeDart() {
-    return Builder(builder: (BuildContext context) {
-      initSize(context);
-      return Container(
-        width: screenSize!.width,
-        height: screenSize!.height,
-        color: Theme.of(context).canvasColor,
-        child: three.Peripherals(
-          key: _globalKey,
-          builder: (BuildContext context) {
-            FocusScope.of(context).requestFocus(node);
-            return Container(
-              width: width,
-              height: height,
-              color: Theme.of(context).canvasColor,
-              child: Builder(builder: (BuildContext context) {
-                if (kIsWeb) {
-                  return three3dRender.isInitialized
-                      ? HtmlElementView(
-                          viewType:
-                              three3dRender.textureId!.toString())
-                      : Container();
-                } else {
-                  return three3dRender.isInitialized
-                      ? Texture(textureId: three3dRender.textureId!)
-                      : Container();
-                }
-              })
-            );
-          }),
-      );
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.fileName),
-      ),
-      body: Stack(
-        children: [
-          threeDart(),
-        ],
-      )
-    );
   }
 }

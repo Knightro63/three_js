@@ -1,4 +1,4 @@
-var tagsJson = {
+final tagsJson = {
   "webgl_animation_cloth": ["physics", "integration", "shadow"],
   "webgl_clipping": ["solid"],
   "webgl_clipping_advanced": ["solid"],
