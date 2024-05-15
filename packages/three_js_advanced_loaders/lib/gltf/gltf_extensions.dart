@@ -76,15 +76,16 @@ class GLTFMaterialsSpecularExtension extends GLTFExtension {
         return null;
       }
 
-      List<Future<Texture>> pending = [];
+      List<Future<Texture?>> pending = [];
 
       final extension = materialDef["extensions"][name];
 
       materialParams.specularIntensity = extension.specularFactor ?? 1.0;
 
       if (extension.specularTexture != null) {
-        pending.add(parser.assignTexture(
-            materialParams, 'specularIntensityMap', extension.specularTexture));
+        pending.add(
+          parser.assignTexture(materialParams, 'specularIntensityMap', extension.specularTexture)
+        );
       }
 
       final colorArray = extension.specularColorFactor ?? [1, 1, 1];
@@ -92,8 +93,7 @@ class GLTFMaterialsSpecularExtension extends GLTFExtension {
           Color(colorArray[0], colorArray[1], colorArray[2]);
 
       if (extension.specularColorTexture != null) {
-        final texture = parser.assignTexture(
-            materialParams, 'specularColorMap', extension.specularColorTexture, sRGBEncoding);
+        final texture = parser.assignTexture(materialParams, 'specularColorMap', extension.specularColorTexture, sRGBEncoding);
         pending.add(texture);
       }
 
@@ -204,7 +204,7 @@ class GLTFLightsExtension extends GLTFExtension {
           }
         }
       ).toList();
-      color.fromNativeArray(listDouble);
+      color.fromUnknown(listDouble);
     }
 
     final num range = lightDef["range"] ?? 0;
@@ -581,7 +581,7 @@ class GLTFTextureBasisUExtension extends GLTFExtension {
     loadTexture = loadTexture2;
   }
 
-  Future<Texture>? loadTexture2(textureIndex) {
+  Future<Texture?>? loadTexture2(textureIndex) {
     final parser = this.parser;
     Map<String, dynamic> json = parser.json;
 
@@ -623,7 +623,7 @@ class GLTFTextureWebPExtension extends GLTFExtension {
     loadTexture = loadTexture2;
   }
 
-  Future<Texture>? loadTexture2(textureIndex) {
+  Future<Texture?>? loadTexture2(textureIndex) {
     final name = this.name;
     final parser = this.parser;
     Map<String, dynamic> json = parser.json;

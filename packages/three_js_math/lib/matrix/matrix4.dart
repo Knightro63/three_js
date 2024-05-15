@@ -37,7 +37,6 @@ class Matrix4 {
       1.0
     ]);
   }
-
   Matrix4.identity() {
     storage = Float32List.fromList([
       1.0,
@@ -56,6 +55,26 @@ class Matrix4 {
       0.0,
       0.0,
       1.0
+    ]);
+  }
+  Matrix4.zero() {
+    storage = Float32List.fromList([
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
     ]);
   }
   

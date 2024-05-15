@@ -58,7 +58,7 @@ class WebGLPrograms {
       envMap = cubemaps.get(material.envMap ?? environment);
     }
 
-    final cubeUVHeight = (envMap != null) && (envMap.mapping == CubeUVReflectionMapping) ? envMap.image.height : null;
+    final cubeUVHeight = (envMap != null) && (envMap.mapping == CubeUVReflectionMapping) ? envMap.image?.height : null;
 
     final shaderID = shaderIDs[material.shaderID];
 

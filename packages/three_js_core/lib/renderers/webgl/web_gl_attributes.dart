@@ -138,10 +138,10 @@ class WebGLAttributes {
 
     final data = buffers.get(attribute);
 
-    if (data == null) {
+    if (data == null && attribute != null) {
       buffers.add(key: attribute, value: createBuffer(attribute, bufferType, name: name));
     } 
-    else if (data["version"] < attribute.version) {
+    else if(data?["version"] != null && data["version"] < attribute.version) {
       updateBuffer(data["buffer"], attribute, bufferType);
       data["version"] = attribute.version;
     }

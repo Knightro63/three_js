@@ -1,7 +1,11 @@
 import 'package:example/controls/misc_controls_fly.dart';
+import 'package:example/controls/misc_controls_pointerlock.dart';
 import 'package:example/controls/misc_controls_transform.dart';
 import 'package:example/games/games_fps2.dart';
 import 'package:example/geometry/marching_cubes.dart';
+import 'package:example/instancing/webgl_instancing_dynamic.dart';
+import 'package:example/instancing/webgl_instancing_raycasting.dart';
+import 'package:example/morphtargets/webgl_morphtargets_face.dart';
 import 'package:example/others/webgl_ubo_arrays.dart';
 import 'package:example/volume/webgl_volume_cloud.dart';
 import 'package:example/volume/webgl_volume_perlin.dart';
@@ -30,7 +34,7 @@ import 'package:example/geometry/webgl_geometry_text.dart';
 
 import 'package:example/others/multi_views.dart';
 import 'package:example/others/webgl_helpers.dart';
-import 'package:example/others/webgl_instancing_performance.dart';
+import 'package:example/instancing/webgl_instancing_performance.dart';
 import 'package:example/others/webgl_skinning_simple.dart';
 
 import 'package:example/loaders/webgl_loader_fbx.dart';
@@ -93,7 +97,11 @@ class _MyAppState extends State<ExamplePage> {
       page = WebglGeometryShapes(fileName: fileName);
     } else if (fileName == "webgl_instancing_performance") {
       page = WebglInstancingPerformance(fileName: fileName);
-    } else if (fileName == "webgl_shadowmap_viewer") {
+    } else if(fileName == "webgl_instancing_raycast"){
+      page = WebglInstancingRaycast(fileName: fileName);
+    } else if(fileName == "webgl_instancing_dynamic"){
+      page = WebglInstancingDynamic(fileName: fileName);
+    }else if (fileName == "webgl_shadowmap_viewer") {
       page = WebglShadowmapViewer(fileName: fileName);
     } else if (fileName == "webgl_loader_gltf") {
       page = WebglLoaderGltf(fileName: fileName);
@@ -135,7 +143,11 @@ class _MyAppState extends State<ExamplePage> {
       page = WebglCamera(fileName: fileName);
     } else if (fileName == "webgl_geometry_colors") {
       page = WebglGeometryColors(fileName: fileName);
-    } else if (fileName == "webgl_loader_svg") {
+    } 
+    // else if(fileName == "webgl_geometry_csg"){
+
+    // } 
+    else if (fileName == "webgl_loader_svg") {
       page = WebglLoaderSvg(fileName: fileName);
     } else if (fileName == "webgl_helpers") {
       page = WebglHelpers(fileName: fileName);
@@ -145,6 +157,8 @@ class _MyAppState extends State<ExamplePage> {
       page = WebglMorphtargetsSphere(fileName: fileName);
     } else if (fileName == "webgl_morphtargets_horse") {
       page = WebglMorphtargetsHorse(fileName: fileName);
+    } else if(fileName == 'webgl_morphtargets_face'){
+      page = WebglMorphtargetsFace(fileName: fileName);
     } else if (fileName == "misc_controls_orbit") {
       page = MiscControlsOrbit(fileName: fileName);
     } else if (fileName == "misc_controls_trackball") {
@@ -153,6 +167,8 @@ class _MyAppState extends State<ExamplePage> {
       page = MiscControlsArcball(fileName: fileName);
     } else if (fileName == "misc_controls_map") {
       page = MiscControlsMap(fileName: fileName);
+    }else if (fileName == "misc_controls_pointerlock") {
+      page = MiscControlsPointerlock(fileName: fileName);
     } else if (fileName == "misc_controls_fly") {
       page = MiscControlsFly(fileName: fileName);
     }else if (fileName == "misc_controls_transform") {

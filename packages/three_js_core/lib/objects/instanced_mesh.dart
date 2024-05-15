@@ -7,6 +7,8 @@ import './mesh.dart';
 final _instanceLocalMatrix = Matrix4.identity();
 final _instanceWorldMatrix = Matrix4.identity();
 
+final _sphere = BoundingSphere();
+
 List<Intersection> _instanceIntersects = [];
 final _mesh = Mesh(BufferGeometry(), Material());
 
@@ -16,6 +18,7 @@ final _mesh = Mesh(BufferGeometry(), Material());
 /// of [name] will help you to reduce the number of draw calls and thus
 /// improve the overall rendering performance in your application.
 class InstancedMesh extends Mesh {
+  BoundingSphere? boundingSphere;
 
   /// [geometry] - an instance of [BufferGeometry].
   ///
@@ -50,7 +53,7 @@ class InstancedMesh extends Mesh {
   }
 
   Color getColorAt(int index, Color color) {
-    return color.fromNativeArray(instanceColor!.array.data, index * 3);
+    return color.fromUnknown(instanceColor!.array, index * 3);
   }
 
   /// [index] - The index of an instance. Values have to be in the
@@ -136,4 +139,23 @@ class InstancedMesh extends Mesh {
   void dispose() {
     dispatchEvent(Event(type: "dispose"));
   }
+
+	void computeBoundingSphere() {
+		final geometry = this.geometry;
+		final count = this.count;
+
+		boundingSphere ??= BoundingSphere();
+		
+		if (geometry?.boundingSphere == null ) {
+			geometry?.computeBoundingSphere();
+		}
+
+		boundingSphere?.empty();
+
+		for (int i = 0; i < count!; i ++ ) {
+			getMatrixAt( i, _instanceLocalMatrix );
+			_sphere.setFrom(geometry!.boundingSphere!).applyMatrix4( _instanceLocalMatrix );
+			boundingSphere?.union( _sphere );
+		}
+	}
 }

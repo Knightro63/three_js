@@ -56,22 +56,20 @@ class CompressedTexture extends Texture {
   /// choices.
   /// 
   /// 
-  CompressedTexture(
+  CompressedTexture([
     mipmaps, 
-    int width, 
-    int height,
-    [
-      int? format, 
-      int? type, 
-      int? mapping, 
-      int? wrapS, 
-      int? wrapT,
-      int? magFilter, 
-      int? minFilter, 
-      int? anisotropy, 
-      int? encoding
-    ]
-  ):super(null, mapping, wrapS, wrapT, magFilter, minFilter, format, type, anisotropy, encoding) {
+    int width = 1, 
+    int height = 1,
+    int? format, 
+    int? type, 
+    int? mapping, 
+    int? wrapS, 
+    int? wrapT,
+    int? magFilter, 
+    int? minFilter, 
+    int? anisotropy, 
+    int? encoding
+  ]):super(null, mapping, wrapS, wrapT, magFilter, minFilter, format, type, anisotropy, encoding) {
     // this.image = ImageDataInfo(null, width, height, null);
     isCompressedTexture = true;
     console.info(" CompressedTexture todo ============ ");

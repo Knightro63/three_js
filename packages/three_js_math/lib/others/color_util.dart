@@ -73,7 +73,25 @@ class Color{
         (blue * 255).toInt() << 0;
   }
 
-  Color fromNativeArray(List<num> list,[int offset = 0]) {
+  Color fromNativeArray(NativeArray<num> list,[int offset = 0]) {
+    storage[0] = list[offset].toDouble();
+    storage[1] = list[offset+1].toDouble();
+    storage[2] = list[offset+2].toDouble();
+    if(list.length > 3){
+      storage[3] = list[offset+3].toDouble();
+    }
+    return this;
+  }
+  Color fromUnknown(list,[int offset = 0]) {
+    storage[0] = list[offset].toDouble();
+    storage[1] = list[offset+1].toDouble();
+    storage[2] = list[offset+2].toDouble();
+    if(list.length > 3){
+      storage[3] = list[offset+3].toDouble();
+    }
+    return this;
+  }
+  Color fromList(List<double> list,[int offset = 0]) {
     storage[0] = list[offset].toDouble();
     storage[1] = list[offset+1].toDouble();
     storage[2] = list[offset+2].toDouble();
@@ -190,6 +208,9 @@ class Color{
     storage[2] = srgbToLinear(blue);
     return this;
   }
+	bool equals(Color c ) {
+		return ( c.red == red ) && ( c.green == green ) && ( c.blue == blue );
+	}
   void scale(double s) {
     storage[0] *= s;
     storage[1] *= s;

@@ -263,14 +263,12 @@ class WebPointerEvent {
       wpe.deltaX = event.scrollDelta.dx;
       wpe.deltaY = event.scrollDelta.dy;
     }
-
-    if(event is PointerMoveEvent || event is PointerHoverEvent) {
+    final EventTouch touch = EventTouch();
+    //if(event is PointerMoveEvent || event is PointerHoverEvent) {
       wpe.movementX = event.delta.dx;
       wpe.movementY = event.delta.dy;
-    }
+    //}
 
-
-    final EventTouch touch = EventTouch();
     touch.pointer = event.pointer;
     touch.pageX = event.position.dx;
     touch.pageY = event.position.dy;
@@ -317,9 +315,9 @@ class WebPointerEvent {
 
 class EventTouch {
   late int pointer;
-  num? pageX;
-  num? pageY;
+  double? pageX;
+  double? pageY;
 
-  num? clientX;
-  num? clientY;
+  double? clientX;
+  double? clientY;
 }

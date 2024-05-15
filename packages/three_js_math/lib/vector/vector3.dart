@@ -356,6 +356,7 @@ class Vector3 extends Vector{
   }
   @override
   Vector3 divideScalar(num scalar) {
+    if(scalar == 0) return this;
     return scale(1 / scalar);
   }
 

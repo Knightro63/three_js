@@ -50,7 +50,7 @@ class webgl_animation_keyframesState extends State<WebglAnimationKeyframes> {
     // scene
     threeJs.scene = three.Scene();
 
-    final pmremGenerator = three.PMREMGenerator(threeJs.renderer);
+    final pmremGenerator = three.PMREMGenerator(threeJs.renderer!);
     threeJs.scene.background = three.Color.fromHex32(0xbfe3dd);
     threeJs.scene.environment = pmremGenerator.fromScene(RoomEnvironment(), 0.04).texture;
 

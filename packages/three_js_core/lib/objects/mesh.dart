@@ -361,9 +361,9 @@ Intersection? checkBufferGeometryIntersection(
         _morphB.addScaled(_tempB, influence);
         _morphC.addScaled(_tempC, influence);
       } else {
-        _morphA.addScaled(_tempA..sub(_vA), influence);
-        _morphB.addScaled(_tempB..sub(_vB), influence);
-        _morphC.addScaled(_tempC..sub(_vC), influence);
+        _morphA.addScaled(_tempA.sub(_vA), influence);
+        _morphB.addScaled(_tempB.sub(_vB), influence);
+        _morphC.addScaled(_tempC.sub(_vC), influence);
       }
     }
 

@@ -814,7 +814,7 @@ class BufferGeometry with EventDispatcher {
       List<BufferAttribute> morphArray = [];
       List<BufferAttribute> morphAttribute = morphAttributes[name]!; // morphAttribute: array of Float32BufferAttributes
 
-      for (int i = 0, il = morphAttribute.length; i < il; i++) {
+      for (int i = 0; i < morphAttribute.length; i++) {
         final attribute = morphAttribute[i];
 
         final newAttribute = convertBufferAttribute(attribute, indices);

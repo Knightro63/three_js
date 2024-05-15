@@ -59,7 +59,7 @@ class PMREMGenerator {
   late int _lodMax;
   late int _cubeSize;
 
-  PMREMGenerator(renderer) {
+  PMREMGenerator(WebGLRenderer renderer) {
     // Golden Ratio
     phi = (1 + math.sqrt(5)) / 2;
     invPhi = 1 / phi;

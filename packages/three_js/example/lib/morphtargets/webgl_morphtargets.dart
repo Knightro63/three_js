@@ -62,11 +62,12 @@ class _State extends State<WebglMorphtargets> {
 
     final geometry = createGeometry();
 
-    final material =
-        three.MeshPhongMaterial.fromMap({"color": 0xff0000, "flatShading": true});
+    final material = three.MeshPhongMaterial.fromMap({"color": 0xff0000, "flatShading": true});
 
     final mesh = three.Mesh(geometry, material);
     threeJs.scene.add(mesh);
+
+    controls.enableZoom = false;
 
     threeJs.addAnimationEvent((dt){
       controls.update();
@@ -77,7 +78,6 @@ class _State extends State<WebglMorphtargets> {
 
       mesh.morphTargetInfluences![0] = v0;
       mesh.morphTargetInfluences![1] = v1;
-
       // mesh.morphTargetInfluences![0] = 0.2;
     });
   }
@@ -106,31 +106,23 @@ class _State extends State<WebglMorphtargets> {
       final z = positionAttribute.getZ(i);
 
       spherePositions.addAll([
-        x *
-            math.sqrt(
-                1 - (y * y / 2) - (z * z / 2) + (y * y * z * z / 3)),
-        y *
-            math.sqrt(
-                1 - (z * z / 2) - (x * x / 2) + (z * z * x * x / 3)),
+        x * math.sqrt( 1 - (y * y / 2) - (z * z / 2) + (y * y * z * z / 3)),
+        y * math.sqrt( 1 - (z * z / 2) - (x * x / 2) + (z * z * x * x / 3)),
         z * math.sqrt(1 - (x * x / 2) - (y * y / 2) + (x * x * y * y / 3))
       ]);
 
       // stretch along the x-axis so we can see the twist better
       vertex.setValues(x * 2, y, z);
 
-      vertex
-          .applyAxisAngle(direction, math.pi * x / 2)
-          .copyIntoArray(twistPositions, twistPositions.length);
+      vertex.applyAxisAngle(direction, math.pi * x / 2).copyIntoArray(twistPositions, twistPositions.length);
     }
 
     // add the spherical positions as the first morph target
     // geometry.morphAttributes["position"][ 0 ] = new three.Float32BufferAttribute( spherePositions, 3 );
-    geometry.morphAttributes["position"]!
-        .add(three.Float32BufferAttribute(Float32Array.fromList(spherePositions), 3));
+    geometry.morphAttributes["position"]!.add(three.Float32BufferAttribute(Float32Array.fromList(spherePositions), 3));
 
     // add the twisted positions as the second morph target
-    geometry.morphAttributes["position"]!
-        .add(three.Float32BufferAttribute(Float32Array.fromList(twistPositions), 3));
+    geometry.morphAttributes["position"]!.add(three.Float32BufferAttribute(Float32Array.fromList(twistPositions), 3));
 
     return geometry;
   }

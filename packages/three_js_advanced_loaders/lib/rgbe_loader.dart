@@ -5,7 +5,7 @@ import 'package:flutter_gl/flutter_gl.dart';
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'package:three_js_core_loaders/three_js_core_loaders.dart';
-import 'data_texture_loader.dart';
+import 'textures/data_texture_loader.dart';
 import 'dart:math' as math;
 
 // https://github.com/mrdoob/three.js/issues/5552

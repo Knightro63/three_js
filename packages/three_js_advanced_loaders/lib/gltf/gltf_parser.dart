@@ -340,7 +340,7 @@ class GLTFParser {
     final loader = fileLoader;
 
     if (bufferDef["type"] != null && bufferDef["type"] != 'arraybuffer') {
-      throw ('THREE.GLTFLoader: ${bufferDef["type"]} buffer type is not supported.');
+      throw ('GLTFLoader: ${bufferDef["type"]} buffer type is not supported.');
     }
 
     // If present, GLB container is required to be the first buffer.
@@ -349,10 +349,14 @@ class GLTFParser {
     }
 
     final options = this.options;
-    final url = LoaderUtils.resolveURL(bufferDef["uri"], options["path"]);
-    final res = await loader.unknown(url);
+    if(bufferDef["uri"] != null && options["path"] != null){
+      final url = LoaderUtils.resolveURL(bufferDef["uri"], options["path"]);
+      final res = await loader.unknown(url);
 
-    return res?.data;
+      return res?.data;
+    }
+
+    return null;
   }
 
   ///
@@ -435,10 +439,13 @@ class GLTFParser {
           'InterleavedBuffer:${accessorDef["bufferView"]}:${accessorDef["componentType"]}:$ibSlice:${accessorDef["count"]}';
       dynamic ib = parser.cache.get(ibCacheKey);
 
-      if (ib == null) {
+      if (ib == null && bufferView != null) {
         // array = TypedArray.view( bufferView, ibSlice * byteStride, accessorDef.count * byteStride / elementBytes );
-        array = typedArray.view(bufferView, ibSlice * byteStride,
-            accessorDef["count"] * byteStride / elementBytes);
+        array = typedArray.view(
+          bufferView, 
+          ibSlice * byteStride,
+          accessorDef["count"] * byteStride / elementBytes
+        );
 
         // Integer parameters to IB/IBA are in array elements, not bytes.
         ib = InterleavedBuffer(Float32Array.fromList(array), byteStride ~/ elementBytes);
@@ -447,7 +454,7 @@ class GLTFParser {
       }
 
       bufferAttribute = InterleavedBufferAttribute(
-          ib, itemSize, (byteOffset % byteStride) / elementBytes, normalized);
+          ib, itemSize, (byteOffset % byteStride) ~/ elementBytes, normalized);
     } else {
       if (bufferView == null) {
         array = typedArray.createList(accessorDef["count"] * itemSize);
@@ -507,13 +514,13 @@ class GLTFParser {
   /// @param {number} textureIndex
   /// @return {Promise<THREE.Texture>}
   ///
-  Future<Texture> loadTexture(textureIndex) async {
+  Future<Texture?> loadTexture(textureIndex) async {
     final parser = this;
     Map<String, dynamic> json = this.json;
     final options = this.options;
 
     Map<String, dynamic> textureDef = json["textures"][textureIndex];
-    final sourceIndex = textureDef["source"];
+    final sourceIndex = textureDef["source"] ?? 0;
     final sourceDef = json["images"][sourceIndex];
 
     final textureExtensions = textureDef["extensions"] ?? {};
@@ -542,7 +549,7 @@ class GLTFParser {
     return loadTextureImage(textureIndex, sourceIndex, loader);
   }
 
-  Future<Texture> loadTextureImage(textureIndex, sourceIndex, loader) async {
+  Future<Texture?> loadTextureImage(textureIndex, sourceIndex, loader) async {
     // print(" GLTFParser.loadTextureImage source: ${source} textureIndex: ${textureIndex} loader: ${loader} ");
 
     final parser = this;
@@ -563,19 +570,19 @@ class GLTFParser {
 
 
     loader.flipY = false;
-    Texture texture = await loadImageSource(sourceIndex, loader);
+    Texture? texture = await loadImageSource(sourceIndex, loader);
 
-    texture.flipY = false;
+    texture?.flipY = false;
 
-    if (textureDef["name"] != null) texture.name = textureDef["name"];
+    if (textureDef["name"] != null) texture?.name = textureDef["name"];
 
     final samplers = json["samplers"] ?? {};
     Map sampler = samplers[textureDef["sampler"]] ?? {};
 
-    texture.magFilter = webglFilters[sampler["magFilter"]] ?? LinearFilter;
-    texture.minFilter = webglFilters[sampler["minFilter"]] ?? LinearMipmapLinearFilter;
-    texture.wrapS = webglWrappings[sampler["wrapS"]] ?? RepeatWrapping;
-    texture.wrapT = webglWrappings[sampler["wrapT"]] ?? RepeatWrapping;
+    texture?.magFilter = webglFilters[sampler["magFilter"]] ?? LinearFilter;
+    texture?.minFilter = webglFilters[sampler["minFilter"]] ?? LinearMipmapLinearFilter;
+    texture?.wrapS = webglWrappings[sampler["wrapS"]] ?? RepeatWrapping;
+    texture?.wrapT = webglWrappings[sampler["wrapT"]] ?? RepeatWrapping;
 
     parser.associations[texture] = {"textures": textureIndex};
 
@@ -584,7 +591,7 @@ class GLTFParser {
     return texture;
   }
 
-  Future<Texture> loadImageSource(sourceIndex, TextureLoader loader) async {
+  Future<Texture?> loadImageSource(sourceIndex, TextureLoader loader) async {
     final parser = this;
     final json = this.json;
     final options = this.options;
@@ -623,11 +630,11 @@ class GLTFParser {
       }
     } 
     else if (sourceURI == null) {
-      throw ('THREE.GLTFLoader: Image $sourceIndex is missing URI and bufferView');
+      throw ('GLTFLoader: Image $sourceIndex is missing URI and bufferView');
     }
 
     sourceCache[sourceIndex] = texture;
-    return texture!;
+    return texture;
   }
 
   ///
@@ -637,10 +644,10 @@ class GLTFParser {
   /// @param {Object} mapDef
   /// @return {Promise}
   ///
-  Future<Texture> assignTexture(materialParams, mapName, Map<String, dynamic> mapDef, [encoding]) async {
+  Future<Texture?> assignTexture(materialParams, mapName, Map<String, dynamic> mapDef, [encoding]) async {
     final parser = this;
 
-    Texture texture = await getDependency('texture', mapDef["index"]);
+    Texture? texture = await getDependency('texture', mapDef["index"]);
 
     // Materials sample aoMap from UV set 1 and other maps from UV set 0 - this can't be configured
     // However, we will copy UV set 0 to UV set 1 on demand for aoMap
@@ -665,9 +672,7 @@ class GLTFParser {
 
 
     if ( encoding != null ) {
-
-      texture.encoding = encoding;
-
+      texture?.encoding = encoding;
     }
 
     materialParams[mapName] = texture;
@@ -1259,7 +1264,7 @@ class GLTFParser {
         targetNames.add(targetName);
       }
 
-      Float32List outputArray = outputAccessor.array.toDartList();
+      dynamic outputArray = outputAccessor.array.toDartList();
 
       if (outputAccessor.normalized) {
         final scale = getNormalizedComponentScale(outputArray.runtimeType);

@@ -92,8 +92,8 @@ class _MyAppState extends State<WebglSkinningSimple> {
 
     final loader = three.GLTFLoader().setPath('assets/models/gltf/');
 
-    // final result = await loader.loadAsync( 'Parrot.gltf');
-    final result = await loader.fromAsset('SimpleSkinning.gltf');
+    final result = await loader.fromAsset( 'Parrot.gltf');
+    //final result = await loader.fromAsset('SimpleSkinning.gltf');
 
     three.console.info(" gltf load sucess result: $result  ");
 

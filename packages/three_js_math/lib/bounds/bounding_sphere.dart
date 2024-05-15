@@ -1,8 +1,8 @@
 import 'package:three_js_math/three_js_math.dart';
+import 'dart:math' as math;
 
-import '../vector/index.dart';
-import '../objects/plane.dart';
-import '../matrix/index.dart';
+final _v1 = Vector3.zero();
+final _v2 = Vector3.zero();
 
 /// A sphere defined by a center and radius.
 class BoundingSphere{
@@ -54,6 +54,10 @@ class BoundingSphere{
     return this;
   }
 
+	bool isEmpty() {
+		return (radius < 0 );
+	}
+
   /// Makes the sphere empty by setting [center] to (0, 0, 0) and
   /// [radius] to -1.
   BoundingSphere empty() {
@@ -90,4 +94,47 @@ class BoundingSphere{
   bool intersectsBox(BoundingBox box) {
     return box.intersectsSphere(this);
   }
+
+	BoundingSphere expandByPoint( point ) {
+		if(isEmpty()){
+			center.setFrom( point );
+			radius = 0;
+			return this;
+		}
+
+		_v1.sub2(point, center);
+
+		final lengthSq = _v1.length2;
+
+		if ( lengthSq > ( radius * radius ) ) {
+			// calculate the minimal sphere
+			final length = math.sqrt( lengthSq );
+			final delta = ( length - radius ) * 0.5;
+			center.addScaled( _v1, delta / length );
+			radius += delta;
+		}
+
+		return this;
+	}
+
+	BoundingSphere union(BoundingSphere sphere ) {
+		if (sphere.isEmpty()) {
+			return this;
+		}
+
+		if (isEmpty()){
+			setFrom(sphere);
+			return this;
+		}
+
+		if(center.equals(sphere.center) == true ) {
+			radius = math.max(radius, sphere.radius );
+		} else {
+			_v2.sub2(sphere.center, center).setLength(sphere.radius);
+			expandByPoint(_v1.setFrom( sphere.center ).add(_v2));
+			expandByPoint(_v1.setFrom( sphere.center ).sub( _v2));
+		}
+
+		return this;
+	}
 }

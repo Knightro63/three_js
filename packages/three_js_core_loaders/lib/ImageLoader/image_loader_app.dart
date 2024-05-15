@@ -81,10 +81,10 @@ ImageElement? imageProcess2(Uint8List? bytes, String? url, bool flipY) {
     image = flipVertical(image);
   }
   image = image?.convert(format:Format.uint8,numChannels: 4);
-  return ImageElement(
+  return image != null?ImageElement(
     url: url,
-    data: Uint8Array.from(image!.getBytes()),
+    data: Uint8Array.from(image.getBytes()),
     width: image.width,
     height: image.height
-  );
+  ):null;
 }

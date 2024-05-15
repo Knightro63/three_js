@@ -38,11 +38,11 @@ class PointerLockControls with EventDispatcher {
   }
 
   void onMouseMove(event) {
-    console.warning("onMouseMove event: $event isLocked ${scope.isLocked} ");
+    event as WebPointerEvent;
     if (scope.isLocked == false) return;
 
-    final movementX = event.movementX ?? event.mozMovementX ?? event.webkitMovementX ?? 0;
-    final movementY = event.movementY ?? event.mozMovementY ?? event.webkitMovementY ?? 0;
+    final movementX = event.movementX;
+    final movementY = event.movementY;
 
     _euler.setFromQuaternion(camera.quaternion);
 
