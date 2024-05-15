@@ -73,7 +73,7 @@ class _MyAppState extends State<MiscControlsTransform> {
     final ambientLight = three.AmbientLight( 0xffffff );
     threeJs.scene.add( ambientLight );
 
-    final light = three.DirectionalLight( 0xffffff, 4 );
+    final light = three.DirectionalLight( 0xffffff, 0.9 );
     light.position.setValues( 1, 1, 1 );
     threeJs.scene.add( light );
 

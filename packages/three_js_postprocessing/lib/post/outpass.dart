@@ -62,7 +62,8 @@ class OutputPass extends Pass {
 		fsQuad = FullScreenQuad(material );
 	}
 
-	getTransfer(colorSpace) {
+	String? getTransfer(colorSpace) {
+    print(colorSpace);
 		if ( colorSpace == NoColorSpace ) return LinearTransfer;
 		return COLOR_SPACES[ colorSpace ]['transfer'];
 	}
@@ -82,7 +83,8 @@ class OutputPass extends Pass {
 
 			material.defines = {};
 
-			if (getTransfer(_outputColorSpace) == SRGBTransfer ) material.defines!['SRGB_TRANSFER'] = '';
+			//if (getTransfer(_outputColorSpace) == SRGBTransfer ) 
+      material.defines!['SRGB_TRANSFER'] = '';
 
 			if (_toneMapping == LinearToneMapping ){ material.defines!['LINEAR_TONE_MAPPING'] = '';}
 			else if (_toneMapping == ReinhardToneMapping ){ material.defines!['REINHARD_TONE_MAPPING'] = '';}

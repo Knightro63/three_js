@@ -81,7 +81,7 @@ class _MyAppState extends State<WebglLoaderFbx> {
     hemiLight.position.setValues( 0, 200, 0 );
     threeJs.scene.add( hemiLight );
 
-    final dirLight = three.DirectionalLight( 0xffffff );
+    final dirLight = three.DirectionalLight( 0xffffff);
     dirLight.position.setValues( 0, 200, 100 );
     dirLight.castShadow = true;
     dirLight.shadow!.camera!.top = 180;

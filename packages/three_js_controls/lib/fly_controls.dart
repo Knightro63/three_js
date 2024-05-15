@@ -42,7 +42,7 @@ class FlyControls{
     //if(domElement) this.domElement.setAttribute( 'tabindex', - 1 );
 
     domElement.addEventListener( PeripheralType.contextmenu, contextmenu, false );
-    domElement.addEventListener( PeripheralType.pointerHover, mousemove, false );
+    domElement.addEventListener( PeripheralType.pointermove, mousemove, false );
     domElement.addEventListener( PeripheralType.pointerdown, mousedown, false );
     domElement.addEventListener( PeripheralType.pointerup, mouseup, false );
     domElement.addEventListener( PeripheralType.keydown, keydown, false );
@@ -61,7 +61,7 @@ class FlyControls{
 	//var changeEvent = {type: 'change' };
 	double eps = 0.000001;
 
-	Quaternion tmpQuaternion = Quaternion();
+	Quaternion tmpQuaternion = Quaternion.identity();
 
 	int mouseStatus = 0;
 
@@ -70,7 +70,6 @@ class FlyControls{
 	Vector3 rotationVector = Vector3( 0, 0, 0 );
 
 	void keydown ( event ) {
-    print(event.keyLabel);
     event as LogicalKeyboardKey;
 		if ( event.keyLabel.contains('alt') ) {
 			return;
@@ -78,26 +77,27 @@ class FlyControls{
 
 		//event.preventDefault();
 
-		switch ( event.keyId ) {
-			case 16: /* shift */ movementSpeedMultiplier = .1; break;
+		switch ( event.keyLabel.toLowerCase() ) {
+      case 'shift right':
+			case 'shift left': /* shift */ movementSpeedMultiplier = .1; break;
 
-			case 87: /*W*/ moveState.forward = 1; break;
-			case 83: /*S*/ moveState.back = 1; break;
+			case 'w': /*W*/ moveState.forward = 1; break;
+			case 's': /*S*/ moveState.back = 1; break;
 
-			case 65: /*A*/ moveState.left = 1; break;
-			case 68: /*D*/ moveState.right = 1; break;
+			case 'a': /*A*/ moveState.left = 1; break;
+			case 'd': /*D*/ moveState.right = 1; break;
 
-			case 82: /*R*/ moveState.up = 1; break;
-			case 70: /*F*/ moveState.down = 1; break;
+			case 'r': /*R*/ moveState.up = 1; break;
+			case 'f': /*F*/ moveState.down = 1; break;
 
-			case 38: /*up*/ moveState.pitchUp = 1; break;
-			case 40: /*down*/ moveState.pitchDown = 1; break;
+			case 'arrow up': /*up*/ moveState.pitchUp = 1; break;
+			case 'arrow down': /*down*/ moveState.pitchDown = 1; break;
 
-			case 37: /*left*/ moveState.yawLeft = 1; break;
-			case 39: /*right*/ moveState.yawRight = 1; break;
+			case 'arrow left': /*left*/ moveState.yawLeft = 1; break;
+			case 'arrow right': /*right*/ moveState.yawRight = 1; break;
 
-			case 81: /*Q*/ moveState.rollLeft = 1; break;
-			case 69: /*E*/ moveState.rollRight = 1; break;
+			case 'q': /*Q*/ moveState.rollLeft = 1; break;
+			case 'e': /*E*/ moveState.rollRight = 1; break;
 
 		}
 
@@ -107,26 +107,27 @@ class FlyControls{
 
 	void keyup( event ) {
     event as LogicalKeyboardKey;
-		switch ( event.keyId ) {
-			case 16: /* shift */ movementSpeedMultiplier = 1; break;
+		switch ( event.keyLabel.toLowerCase()) {
+      case 'shift right':
+			case 'shift left': /* shift */ movementSpeedMultiplier = 1; break;
 
-			case 87: /*W*/ moveState.forward = 0; break;
-			case 83: /*S*/ moveState.back = 0; break;
+			case 'w': /*W*/ moveState.forward = 0; break;
+			case 's': /*S*/ moveState.back = 0; break;
 
-			case 65: /*A*/ moveState.left = 0; break;
-			case 68: /*D*/ moveState.right = 0; break;
+			case 'a': /*A*/ moveState.left = 0; break;
+			case 'd': /*D*/ moveState.right = 0; break;
 
-			case 82: /*R*/ moveState.up = 0; break;
-			case 70: /*F*/ moveState.down = 0; break;
+			case 'r': /*R*/ moveState.up = 0; break;
+			case 'f': /*F*/ moveState.down = 0; break;
 
-			case 38: /*up*/ moveState.pitchUp = 0; break;
-			case 40: /*down*/moveState.pitchDown = 0; break;
+			case 'arrow up': /*up*/ moveState.pitchUp = 0; break;
+			case 'arrow down': /*down*/moveState.pitchDown = 0; break;
 
-			case 37: /*left*/ moveState.yawLeft = 0; break;
-			case 39: /*right*/ moveState.yawRight = 0; break;
+			case 'arrow left': /*left*/ moveState.yawLeft = 0; break;
+			case 'arrow right': /*right*/ moveState.yawRight = 0; break;
 
-			case 81: /*Q*/ moveState.rollLeft = 0; break;
-			case 69: /*E*/ moveState.rollRight = 0; break;
+			case 'q': /*Q*/ moveState.rollLeft = 0; break;
+			case 'e': /*E*/ moveState.rollRight = 0; break;
 		}
 
 		updateMovementVector();
@@ -185,10 +186,10 @@ class FlyControls{
 
   final _lastQuaternion = Quaternion();
   final _lastPosition = Vector3();
-  double delta = 1;
+  //double delta = 1;
 
   /// Updates the controls. Usually called in the animation loop.
-	void update() {
+	void update(double delta) {
     final moveMult = delta * movementSpeed;
     final rotMult = delta * rollSpeed;
 

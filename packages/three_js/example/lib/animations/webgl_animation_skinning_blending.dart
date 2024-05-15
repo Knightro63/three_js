@@ -55,7 +55,7 @@ class _State extends State<WebglAnimationSkinningBlending> {
     threeJs.scene.background = three.Color.fromHex32(0xffffff);
     threeJs.scene.fog = three.Fog(0xa0a0a0, 10, 50);
 
-    final hemiLight = three.HemisphereLight(0xffffff, 0x444444);
+    final hemiLight = three.HemisphereLight(0xffffff, 0x444444,2);
     hemiLight.position.setValues(0, -4, -2);
     threeJs.scene.add(hemiLight);
 

@@ -458,8 +458,7 @@ class TransformControls extends Object3D {
 
   void pointerDown(Pointer pointer) {
     _pointer0 = pointer;
-
-    if (object == null || dragging == true || pointer.button != 1){
+    if (object == null || dragging == true || pointer.button != 0){
       return;
     }
     

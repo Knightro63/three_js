@@ -60,7 +60,7 @@ class _State extends State<MiscControlsFly> {
     threeJs.scene = three.Scene();
     threeJs.scene.fog = three.FogExp2(0x000000, 0.00000025 );
 
-    final dirLight = three.DirectionalLight( 0xffffff, 3 );
+    final dirLight = three.DirectionalLight( 0xffffff, 0.9 );
     dirLight.position.setValues( - 1, 0, 1 ).normalize();
     threeJs.scene.add( dirLight );
 
@@ -178,13 +178,13 @@ class _State extends State<MiscControlsFly> {
 
     final renderModel = RenderPass(threeJs.scene, threeJs.camera);
     final effectFilm = FilmPass(noiseIntensity: 0.35 );
-    final outputPass = OutputPass();
+    //final outputPass = OutputPass();
 
     final composer = EffectComposer(threeJs.renderer!);
 
     composer.addPass( renderModel );
     composer.addPass( effectFilm );
-    composer.addPass( outputPass );
+    //composer.addPass( outputPass );
 
     threeJs.addAnimationEvent((delta){
       const rotationSpeed = 0.02;
@@ -207,8 +207,8 @@ class _State extends State<MiscControlsFly> {
         d = ( dPlanet - radius * 1.01 );
       }
 
-      controls.movementSpeed = 0.33 * d;
-      controls.update(  );//delta
+      controls.movementSpeed = 0.033 * d;
+      controls.update(delta);//
 
       composer.render( delta );
     });
