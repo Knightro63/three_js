@@ -1,8 +1,8 @@
 part of three_js_transform_controls;
 
-final _tempVector = Vector3();
-final _tempVector2 = Vector3();
-final _tempQuaternion = Quaternion();
+final _tempVector = Vector3.zero();
+final _tempVector2 = Vector3.zero();
+final _tempQuaternion = Quaternion.identity();
 final _unit = {
   "X": Vector3(1, 0, 0),
   "Y": Vector3(0, 1, 0),
@@ -166,6 +166,7 @@ class TransformControls extends Object3D {
   bool get dragging => _dragging;
 
   set dragging(bool value) {
+    
     if (value != _dragging) {
       _dragging = value;
       _plane.dragging = value;
@@ -220,19 +221,19 @@ class TransformControls extends Object3D {
 
   // Reusable utility variables
 
-  // final worldPosition = Vector3();
-  // final worldPositionStart = Vector3();
-  // final worldQuaternion = Quaternion();
-  // final worldQuaternionStart = Quaternion();
-  // final cameraPosition = Vector3();
-  // final cameraQuaternion = Quaternion();
-  // final pointStart = Vector3();
-  // final pointEnd = Vector3();
-  // final rotationAxis = Vector3();
+  // final worldPosition = Vector3.zero();
+  // final worldPositionStart = Vector3.zero();
+  // final worldQuaternion = Quaternion.identity();
+  // final worldQuaternionStart = Quaternion.identity();
+  // final cameraPosition = Vector3.zero();
+  // final cameraQuaternion = Quaternion.identity();
+  // final pointStart = Vector3.zero();
+  // final pointEnd = Vector3.zero();
+  // final rotationAxis = Vector3.zero();
   // final rotationAngle = 0;
-  // final eye = Vector3();
+  // final eye = Vector3.zero();
 
-  Vector3 _worldPosition = Vector3();
+  Vector3 _worldPosition = Vector3.zero();
   Vector3 get worldPosition => _worldPosition;
 
   set worldPosition(Vector3 value) {
@@ -245,7 +246,7 @@ class TransformControls extends Object3D {
     }
   }
 
-  Vector3 _worldPositionStart = Vector3();
+  Vector3 _worldPositionStart = Vector3.zero();
   Vector3 get worldPositionStart => _worldPositionStart;
 
   set worldPositionStart(Vector3 value) {
@@ -258,7 +259,7 @@ class TransformControls extends Object3D {
     }
   }
 
-  Quaternion _worldQuaternion = Quaternion();
+  Quaternion _worldQuaternion = Quaternion.identity();
   Quaternion get worldQuaternion => _worldQuaternion;
 
   set worldQuaternion(Quaternion value) {
@@ -271,7 +272,7 @@ class TransformControls extends Object3D {
     }
   }
 
-  Quaternion _worldQuaternionStart = Quaternion();
+  Quaternion _worldQuaternionStart = Quaternion.identity();
   Quaternion get worldQuaternionStart => _worldQuaternionStart;
 
   set worldQuaternionStart(Quaternion value) {
@@ -284,7 +285,7 @@ class TransformControls extends Object3D {
     }
   }
 
-  Vector3 _cameraPosition = Vector3();
+  Vector3 _cameraPosition = Vector3.zero();
   Vector3 get cameraPosition => _cameraPosition;
 
   set cameraPosition(Vector3 value) {
@@ -297,7 +298,7 @@ class TransformControls extends Object3D {
     }
   }
 
-  Quaternion _cameraQuaternion = Quaternion();
+  Quaternion _cameraQuaternion = Quaternion.identity();
   Quaternion get cameraQuaternion => _cameraQuaternion;
 
   set cameraQuaternion(Quaternion value) {
@@ -310,7 +311,7 @@ class TransformControls extends Object3D {
     }
   }
 
-  Vector3 _pointStart = Vector3();
+  Vector3 _pointStart = Vector3.zero();
   Vector3 get pointStart => _pointStart;
 
   set pointStart(Vector3 value) {
@@ -323,7 +324,7 @@ class TransformControls extends Object3D {
     }
   }
 
-  Vector3 _pointEnd = Vector3();
+  Vector3 _pointEnd = Vector3.zero();
   Vector3 get pointEnd => _pointEnd;
 
   set pointEnd(Vector3 value) {
@@ -335,7 +336,7 @@ class TransformControls extends Object3D {
     }
   }
 
-  Vector3 _rotationAxis = Vector3();
+  Vector3 _rotationAxis = Vector3.zero();
   Vector3 get rotationAxis => _rotationAxis;
 
   set rotationAxis(Vector3 value) {
@@ -361,7 +362,7 @@ class TransformControls extends Object3D {
     }
   }
 
-  Vector3 _eye = Vector3();
+  Vector3 _eye = Vector3.zero();
   Vector3 get eye => _eye;
 
   set eye(Vector3 value) {
@@ -373,23 +374,23 @@ class TransformControls extends Object3D {
     }
   }
 
-  final _offset = Vector3();
-  final _startNorm = Vector3();
-  final _endNorm = Vector3();
-  final _cameraScale = Vector3();
+  final _offset = Vector3.zero();
+  final _startNorm = Vector3.zero();
+  final _endNorm = Vector3.zero();
+  final _cameraScale = Vector3.zero();
 
-  final _parentPosition = Vector3();
-  final _parentQuaternion = Quaternion();
-  final _parentQuaternionInv = Quaternion();
-  final _parentScale = Vector3();
+  final _parentPosition = Vector3.zero();
+  final _parentQuaternion = Quaternion.identity();
+  final _parentQuaternionInv = Quaternion.identity();
+  final _parentScale = Vector3.zero();
 
-  final _worldScaleStart = Vector3();
-  final _worldQuaternionInv = Quaternion();
-  final _worldScale = Vector3();
+  final _worldScaleStart = Vector3.zero();
+  final _worldQuaternionInv = Quaternion.identity();
+  final _worldScale = Vector3.zero();
 
-  final _positionStart = Vector3();
-  final _quaternionStart = Quaternion();
-  final _scaleStart = Vector3();
+  final _positionStart = Vector3.zero();
+  final _quaternionStart = Quaternion.identity();
+  final _scaleStart = Vector3.zero();
 
   TransformControls(Camera? camera, this.listenableKey) : super() {
     scope = this;
@@ -509,7 +510,7 @@ class TransformControls extends Object3D {
     if (object == null ||
         axis == null ||
         dragging == false ||
-        pointer.button != 1) return;
+        pointer.button != 0) return;
 
     _raycaster.setFromCamera(Vector2(pointer.x, pointer.y), camera!);
 
@@ -528,13 +529,14 @@ class TransformControls extends Object3D {
         _offset.applyQuaternion(_worldQuaternionInv);
       }
 
-      if (axis.contains('X')) _offset.x = 0;
-      if (axis.contains('Y')) _offset.y = 0;
-      if (axis.contains('Z')) _offset.z = 0;
+      if (!axis.contains('X')) _offset.x = 0;
+      if (!axis.contains('Y')) _offset.y = 0;
+      if (!axis.contains('Z')) _offset.z = 0;
 
       if (space == 'local' && axis != 'XYZ') {
         _offset.applyQuaternion(_quaternionStart).divide(_parentScale);
-      } else {
+      } 
+      else {
         _offset.applyQuaternion(_parentQuaternionInv).divide(_parentScale);
       }
 

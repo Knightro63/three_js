@@ -157,7 +157,7 @@ class BufferGeometryLoader extends Loader {
         }
       }
 
-      geometry.setAttribute(key, bufferAttribute);
+      geometry.setAttributeFromString(key, bufferAttribute);
     }
 
     final morphAttributes = json["data"]["morphAttributes"];
@@ -232,7 +232,11 @@ NativeArray getTypedArray(String type, List buffer) {
   } else if (type == "Uint16Array" || type == "Uint16List") {
     return Uint16Array.from(List<int>.from(buffer));
   } else if (type == "Float32Array" || type == "Float32List") {
-    return Float32Array.from(List<double>.from(buffer));
+    List<double> b = [];
+    for(int i = 0; i < buffer.length;i++){
+      b.add(buffer[i].toDouble());
+    }
+    return Float32Array.from(List<double>.from(b));
   } else {
     throw (" Util.dart getTypedArray type: $type is not support ");
   }

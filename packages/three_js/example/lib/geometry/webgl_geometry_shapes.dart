@@ -54,13 +54,13 @@ class _MyAppState extends State<WebglGeometryShapes> {
 
   Future<void> setup() async {
     threeJs.scene = three.Scene();
-
-    threeJs.camera = three.PerspectiveCamera(50, threeJs.width / threeJs.height, 1, 2000);
+    threeJs.scene.background = three.Color.fromHex32(0xffffff);
+    threeJs.camera = three.PerspectiveCamera(50, threeJs.width / threeJs.height, 1, 1000);
     // let camra far
-    threeJs.camera.position.setValues(0, 150, 1500);
+    threeJs.camera.position.setValues(0, 150, 500);
     threeJs.scene.add(threeJs.camera);
 
-    final light = three.PointLight(0xffffff, 0.8);
+    final light = three.PointLight(0xffffff,0.8,0,0);
     threeJs.camera.add(light);
 
     group = three.Group();

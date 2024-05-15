@@ -136,7 +136,7 @@ class FlyControls{
 
   void mousedown( event ) {
 		event.preventDefault();
-		event.stopPropagation();
+		//event.stopPropagation();
 
 		if (dragToLook ) {
 			mouseStatus ++;
@@ -166,7 +166,7 @@ class FlyControls{
 
 	void mouseup( event ) {
 		event.preventDefault();
-		event.stopPropagation();
+		//event.stopPropagation();
 
 		if (dragToLook ) {
 			mouseStatus --;

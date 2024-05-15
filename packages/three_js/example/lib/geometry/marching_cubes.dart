@@ -77,7 +77,7 @@ class _MarchingState extends State<Marching> {
   
   late three.OrbitControls controls;
   late EffectController effectController;
-  String currentMaterial = 'plastic';
+  String currentMaterial = 'shiny';
   late MarchingCubes effect;
   double time = 0;
 
@@ -161,7 +161,7 @@ class _MarchingState extends State<Marching> {
     controls.maxDistance = 5000;
 
     effectController = EffectController(
-      material: 'plastic',
+      material: 'shiny',
       speed: 1.0,
       numBlobs: 10,
       resolution: 28,

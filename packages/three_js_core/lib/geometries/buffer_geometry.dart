@@ -156,7 +156,7 @@ class BufferGeometry with EventDispatcher {
   /// Sets an attribute to this geometry. Use this rather than the attributes
   /// property, because an internal hashmap of [attributes] is maintained
   /// to speed up iterating over attributes.
-  BufferGeometry setAttributeFromString(String type, BufferAttribute source) {
+  BufferGeometry setAttributeFromString(String type, source) {
     attributes[type] = source;
     return this;
   }

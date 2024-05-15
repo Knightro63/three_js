@@ -3,6 +3,13 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
+import 'package:three_js_tjs_loader/buffer_geometry_loader.dart';
+
+enum Method {
+  instance,
+  merged,
+  native
+}
 
 class WebglInstancingPerformance extends StatefulWidget {
   final String fileName;
@@ -49,7 +56,11 @@ class _MyAppState extends State<WebglInstancingPerformance> {
   }
 
   late three.Material material;
-  int count = 1000;
+
+  final Map<String,dynamic> api = {
+    'method': Method.instance,
+    'count': 1000
+  };
 
   Future<void> setup() async {
     threeJs.camera = three.PerspectiveCamera(70, threeJs.width / threeJs.height, 1, 100);
@@ -60,8 +71,27 @@ class _MyAppState extends State<WebglInstancingPerformance> {
 
     material = three.MeshNormalMaterial();
 
-    final geometry = three.BoxGeometry(5, 5, 5);
-    makeNaive(geometry);
+    //final geometry = three.BoxGeometry(5, 5, 5);
+		BufferGeometryLoader()
+      .setPath( 'assets/models/json/' )
+      .fromAsset( 'suzanne_buffergeometry.json')
+      .then((geometry ) {
+        geometry as three.BufferGeometry;
+        material = three.MeshNormalMaterial();
+        geometry.computeVertexNormals();
+
+        switch ( api['method'] ) {
+          case Method.instance:
+            makeInstanced( geometry );
+            break;
+          // case Method.merged:
+          //   makeMerged( geometry );
+          //   break;
+          case Method.native:
+            makeNaive( geometry );
+            break;
+        }
+      });
 
     threeJs.addAnimationEvent((dt){
       threeJs.scene.rotation.x += 0.002;
@@ -71,9 +101,9 @@ class _MyAppState extends State<WebglInstancingPerformance> {
 
   void makeInstanced(three.BufferGeometry geometry) {
     final matrix = three.Matrix4();
-    final mesh = three.InstancedMesh(geometry, material, count);
+    final mesh = three.InstancedMesh(geometry, material, api['count']);
 
-    for (int i = 0; i < count; i++) {
+    for (int i = 0; i < api['count']; i++) {
       randomizeMatrix(matrix);
       mesh.setMatrixAt(i, matrix);
     }
@@ -84,7 +114,7 @@ class _MyAppState extends State<WebglInstancingPerformance> {
   void makeNaive(three.BufferGeometry geometry) {
     final matrix = three.Matrix4();
 
-    for (int i = 0; i < count; i++) {
+    for (int i = 0; i < api['count']; i++) {
       final mesh = three.Mesh(geometry, material);
       randomizeMatrix(matrix);
       mesh.applyMatrix4(matrix);
