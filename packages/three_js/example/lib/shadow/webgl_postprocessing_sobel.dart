@@ -63,13 +63,13 @@ class _State extends State<WebglPostprocessingSobel> {
     final ambientLight = three.AmbientLight( 0xe7e7e7 );
     threeJs.scene.add( ambientLight );
 
-    final pointLight = three.PointLight( 0xffffff, 20/3 );
+    final pointLight = three.PointLight( 0xffffff, 20 );
     threeJs.camera.add( pointLight );
     threeJs.scene.add( threeJs.camera );
 
     // postprocessing
 
-    final composer = EffectComposer( threeJs.renderer! );
+    final composer = EffectComposer( threeJs.renderer!, threeJs.renderTarget );
     final renderPass = RenderPass( threeJs.scene, threeJs.camera );
     composer.addPass( renderPass );
 
@@ -94,7 +94,7 @@ class _State extends State<WebglPostprocessingSobel> {
     threeJs.addAnimationEvent((dt){
       controls.update();
       // if (params.enable == true ) {
-      //   composer.render(dt);
+         composer.render(dt);
       // } 
     });
   }

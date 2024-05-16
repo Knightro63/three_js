@@ -53,10 +53,9 @@ class ShaderPasses extends Pass {
     }
 
     if (passes != null) {
-      int i = 0;
       int lastPass = passes!.length - 1;
       WebGLRenderTarget? lastRenderTarget;
-      for (Map<String, dynamic> _pass in passes!) {
+      for (int i = 0; i <  passes!.length; i++) {
         material.uniforms["acPass"] = {"value": i};
         if (lastRenderTarget != null) {
           material.uniforms["acPassTexture"] = {

@@ -45,7 +45,7 @@ final Map<String,dynamic> COLOR_SPACES = {
 
 class OutputPass extends Pass {
   dynamic _toneMapping;
-  dynamic _outputColorSpace;
+  //dynamic _outputColorSpace;
 	OutputPass():super(){
 		//
 		const Map<String, dynamic> shader = outputShader;
@@ -63,7 +63,6 @@ class OutputPass extends Pass {
 	}
 
 	String? getTransfer(colorSpace) {
-    print(colorSpace);
 		if ( colorSpace == NoColorSpace ) return LinearTransfer;
 		return COLOR_SPACES[ colorSpace ]['transfer'];
 	}

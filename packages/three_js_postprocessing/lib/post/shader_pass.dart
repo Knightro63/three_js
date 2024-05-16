@@ -5,9 +5,6 @@ import 'pass.dart';
 
 class ShaderPass extends Pass {
   late dynamic textureID;
-  late Map<String, dynamic> uniforms;
-  late Material material;
-  late FullScreenQuad fsQuad;
 
   ShaderPass([ShaderMaterial? shader, String? textureID]) : super() {
     this.textureID = (textureID != null) ? textureID : 'tDiffuse';
@@ -20,7 +17,9 @@ class ShaderPass extends Pass {
     fsQuad = FullScreenQuad(material);
   }
 
-  ShaderPass.fromJson(Map? shader):super(){
+  ShaderPass.fromJson([Map? shader, String? textureID]):super(){
+    this.textureID = (textureID != null) ? textureID : 'tDiffuse';
+
     uniforms = UniformsUtils.clone(shader?["uniforms"]);
     Map<String, dynamic> _defines = {};
     _defines.addAll(shader?["defines"] ?? {});
@@ -30,6 +29,8 @@ class ShaderPass extends Pass {
       "vertexShader": shader?["vertexShader"],
       "fragmentShader": shader?["fragmentShader"]
     });
+
+    fsQuad = FullScreenQuad(material);
   }
 
   @override

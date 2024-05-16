@@ -3,6 +3,8 @@ import 'package:example/controls/misc_controls_pointerlock.dart';
 import 'package:example/controls/misc_controls_transform.dart';
 import 'package:example/games/games_fps2.dart';
 import 'package:example/geometry/marching_cubes.dart';
+import 'package:example/geometry/webgl_geometry_dynamic.dart';
+import 'package:example/geometry/webgl_geometry_extrude_shapes.dart';
 import 'package:example/instancing/webgl_instancing_dynamic.dart';
 import 'package:example/instancing/webgl_instancing_raycasting.dart';
 import 'package:example/morphtargets/webgl_morphtargets_face.dart';
@@ -99,7 +101,17 @@ class _MyAppState extends State<ExamplePage> {
       page = WebglGeometryText(fileName: fileName);
     } else if (fileName == "webgl_geometry_shapes") {
       page = WebglGeometryShapes(fileName: fileName);
-    } else if (fileName == "webgl_instancing_performance") {
+    } 
+    else if(fileName == "webgl_geometry_extrude_shapes"){
+      page = WebglGeometryExtrudeShapes(fileName: fileName);
+    }
+    else if(fileName == "webgl_geometry_dynamic"){
+      page = WebglGeometryDynamic(fileName: fileName);
+    }
+    else if(fileName == "webgl_geometry_extrude_splines"){
+      page = ;
+    }
+    else if (fileName == "webgl_instancing_performance") {
       page = WebglInstancingPerformance(fileName: fileName);
     } else if(fileName == "webgl_instancing_raycast"){
       page = WebglInstancingRaycast(fileName: fileName);

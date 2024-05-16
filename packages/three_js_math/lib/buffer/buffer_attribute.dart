@@ -246,7 +246,7 @@ abstract class BufferAttribute<TData extends NativeArray> extends BaseBufferAttr
   }
 
   /// Sets the x component of the vector at the given index.
-  BufferAttribute setX(int index, int x) {
+  BufferAttribute setX(int index, num x) {
     array[index * itemSize] = x;
 
     return this;
@@ -258,7 +258,7 @@ abstract class BufferAttribute<TData extends NativeArray> extends BaseBufferAttr
   }
 
   /// Sets the y component of the vector at the given index.
-  BufferAttribute setY(int index, int y) {
+  BufferAttribute setY(int index, num y) {
     array[index * itemSize + 1] = y;
 
     return this;
@@ -270,7 +270,7 @@ abstract class BufferAttribute<TData extends NativeArray> extends BaseBufferAttr
   }
 
   /// Sets the z component of the vector at the given index.
-  BufferAttribute setZ(int index, int z) {
+  BufferAttribute setZ(int index, num z) {
     array[index * itemSize + 2] = z;
 
     return this;

@@ -64,7 +64,7 @@ class CatmullRomCurve3 extends Curve {
   late String curveType;
   late num tension;
 
-  CatmullRomCurve3({points, this.closed = false, this.curveType = 'centripetal', this.tension = 0.5}): super() {
+  CatmullRomCurve3({List<Vector>? points, this.closed = false, this.curveType = 'centripetal', this.tension = 0.5}): super() {
     this.points = points ?? [];
   }
 

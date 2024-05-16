@@ -96,12 +96,12 @@ class _State extends State<WebglUboArrays> {
 				mat4 viewMatrix;
 			};
 
-			uniform mat4 modelMatrix;
-			uniform mat3 normalMatrix;
+			//uniform mat4 modelMatrix;
+			//uniform mat3 normalMatrix;
 
-			in vec3 position;
-			in vec3 normal;
-			in vec2 uv;
+			//in vec3 position;
+			//in vec3 normal;
+			//in vec2 uv;
 			out vec2 vUv;
 
 			out vec3 vPositionEye;
@@ -172,7 +172,7 @@ class _State extends State<WebglUboArrays> {
         'modelMatrix': { 'value': null },
         'normalMatrix': { 'value': null }
       },
-      // uniformsGroups: [ cameraUniformsGroup, lightingUniformsGroup ],
+      // 'uniformsGroups': [ cameraUniformsGroup, lightingUniformsGroup ],
       'name': 'Box',
       'defines': {
         'POINTLIGHTS_MAX': pointLightsMax
@@ -238,7 +238,7 @@ class _State extends State<WebglUboArrays> {
     const speed = 0.5; // Speed of rotation
 
     // Update each light's position
-    for(int i = 0; i < lights.length; i ++ ) {
+    for(int i = 0; i < lights.length/2-1; i ++ ) {
       final light = lights[i];
       final center = lightCenters[i];
 
@@ -248,7 +248,7 @@ class _State extends State<WebglUboArrays> {
       final z = center.y + math.cos( angle ) * radius;
 
       // Update the light's position
-      light.value.set( x, 1, z, 0 );
+      light.value.setValues( x, 1.0, z, 0.0 );
     }
   }
 }

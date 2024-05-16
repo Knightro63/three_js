@@ -26,7 +26,8 @@ const luminosityShader = {
 
 			vec4 texel = texture2D( tDiffuse, vUv );
 
-			float l = luminance( texel.rgb );
+      const vec3 lumaCoeffs = vec3( 0.2125, 0.7154, 0.0721 );
+			float l = dot( texel.rgb, lumaCoeffs );//luminance( texel.rgb );
 
 			gl_FragColor = vec4( l, l, l, texel.w );
 
