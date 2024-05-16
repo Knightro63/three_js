@@ -441,8 +441,8 @@ class WebGLLights {
         matrix4.multiply(viewMatrix);
         matrix42.extractRotation(matrix4);
 
-        uniforms["halfWidth"].set(light.width! * 0.5, 0.0, 0.0);
-        uniforms["halfHeight"].set(0.0, light.height! * 0.5, 0.0);
+        uniforms["halfWidth"].setValues(light.width! * 0.5, 0.0, 0.0);
+        uniforms["halfHeight"].setValues(0.0, light.height! * 0.5, 0.0);
 
         uniforms["halfWidth"].applyMatrix4(matrix42);
         uniforms["halfHeight"].applyMatrix4(matrix42);

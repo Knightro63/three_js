@@ -55,7 +55,7 @@ class Camera extends Object3D {
   late double bottom;
 
   CameraView? view;//Map<String, dynamic>? view;
-  late Vector4 viewport;
+  Vector4? viewport;
 
   /// Creates a new [name]. Note that this class is not intended to be called
   /// directly; you probably want a [PerspectiveCamera] or

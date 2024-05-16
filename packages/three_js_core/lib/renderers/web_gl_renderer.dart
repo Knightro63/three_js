@@ -927,20 +927,20 @@ class WebGLRenderer {
     }
   }
 
-  void renderObject(
-      Object3D object, scene, Camera camera, BufferGeometry geometry, Material material, Map<String, dynamic>? group) {
+  void renderObject(Object3D object, scene, Camera camera, BufferGeometry geometry, Material material, Map<String, dynamic>? group) {
     // print(" render renderObject  type: ${object.type} material: ${material} name: ${object.name}  geometry: ${geometry}");
     // print("1 render renderObject type: ${object.type} name: ${object.name}  ${DateTime.now().millisecondsSinceEpoch}");
 
     if (object.onBeforeRender != null) {
       object.onBeforeRender!(
-          renderer: this,
-          mesh: object,
-          scene: scene,
-          camera: camera,
-          geometry: geometry,
-          material: material,
-          group: group);
+        renderer: this,
+        mesh: object,
+        scene: scene,
+        camera: camera,
+        geometry: geometry,
+        material: material,
+        group: group
+      );
     }
 
     object.modelViewMatrix.multiply2(camera.matrixWorldInverse, object.matrixWorld);
@@ -1674,7 +1674,12 @@ class WebGLRenderer {
   }
 
   void initTexture(Texture texture) {
-    textures.setTexture2D(texture, 0);
+    if ( texture is CubeTexture ) {
+			textures.setTextureCube( texture, 0 );
+		}
+    else{
+      textures.setTexture2D(texture, 0);
+    }
 
     state.unbindTexture();
   }

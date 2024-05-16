@@ -6,7 +6,11 @@ import 'package:example/geometry/marching_cubes.dart';
 import 'package:example/instancing/webgl_instancing_dynamic.dart';
 import 'package:example/instancing/webgl_instancing_raycasting.dart';
 import 'package:example/morphtargets/webgl_morphtargets_face.dart';
+import 'package:example/others/webgl_interactive_voxelpainter.dart';
 import 'package:example/others/webgl_ubo_arrays.dart';
+import 'package:example/shadow/webgl_lights_rectarealight.dart';
+import 'package:example/shadow/webgl_postprocessing_sobel.dart';
+import 'package:example/shadow/webgl_water.dart';
 import 'package:example/volume/webgl_volume_cloud.dart';
 import 'package:example/volume/webgl_volume_perlin.dart';
 import 'package:flutter/material.dart';
@@ -101,7 +105,9 @@ class _MyAppState extends State<ExamplePage> {
       page = WebglInstancingRaycast(fileName: fileName);
     } else if(fileName == "webgl_instancing_dynamic"){
       page = WebglInstancingDynamic(fileName: fileName);
-    }else if (fileName == "webgl_shadowmap_viewer") {
+    } else if(fileName == "webgl_interactive_voxelpainter"){
+      page = WebglInteractiveVoxelpainter(fileName: fileName);
+    } else if (fileName == "webgl_shadowmap_viewer") {
       page = WebglShadowmapViewer(fileName: fileName);
     } else if (fileName == "webgl_loader_gltf") {
       page = WebglLoaderGltf(fileName: fileName);
@@ -143,7 +149,16 @@ class _MyAppState extends State<ExamplePage> {
       page = WebglCamera(fileName: fileName);
     } else if (fileName == "webgl_geometry_colors") {
       page = WebglGeometryColors(fileName: fileName);
-    } 
+    }
+    else if(fileName == "webgl_lights_rectarealight"){
+      page = WebglLightsRectarealight(fileName: fileName);
+    }
+    else if(fileName == "webgl_postprocessing_sobel"){
+      page = WebglPostprocessingSobel(fileName: fileName);
+    }
+    else if(fileName == "webgl_water"){
+      page = WebglWater(fileName: fileName);
+    }
     // else if(fileName == "webgl_geometry_csg"){
 
     // } 

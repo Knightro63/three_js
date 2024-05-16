@@ -18,6 +18,7 @@ Map<String, String> shaderChunk = {
   "color_fragment": colorFragment,
   "color_pars_fragment": colorParsFragment,
   "color_pars_vertex": colorParsVertex,
+  "colorspace_fragment": colorspaceFragment,
   'colorspace_pars_fragment': colorspaceParsFragment,
   "color_vertex": colorVertex,
   "common": commonGlsl,

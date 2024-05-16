@@ -5,3 +5,4 @@ export 'lut_cube_loader.dart';
 
 export 'obj/obj_loader.dart';
 export 'obj/mtl_loader.dart';
+export 'cube_texture_loader.dart';

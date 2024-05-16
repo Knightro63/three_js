@@ -15,3 +15,5 @@ export 'vignette_shader.dart';
 export 'afterimage_shader.dart';
 export 'unpack_depth_rgba_shader.dart';
 export 'outpass_shader.dart';
+export 'luminosity_shader.dart';
+export 'sobel_operator_shader.dart';

@@ -1392,7 +1392,7 @@ class WebGLTextures {
   //   if (texture.onUpdate) texture.onUpdate(texture);
   // }
 
-  void uploadCubeTexture(Map<String, dynamic> textureProperties, Texture texture, slot) {
+  void uploadCubeTexture(Map<String, dynamic> textureProperties, Texture texture, int slot) {
     if (texture.image.length != 6) return;
 
     final forceUpload = initTexture(textureProperties, texture);
@@ -1409,16 +1409,16 @@ class WebGLTextures {
         _gl.pixelStorei(_gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, _gl.NONE);
       }
 
-      final isCompressed = (texture.isCompressedTexture || texture.image[0].isCompressedTexture);
-      final isDataTexture = (texture.image[0] && texture.image[0].isDataTexture);
+      final isCompressed = (texture.isCompressedTexture || texture.image[0] is CompressedTexture);
+      final isDataTexture = (texture.image[0] != null && texture.image[0] is DataTexture);
 
       final cubeImage = [];
 
       for (int i = 0; i < 6; i++) {
         if (!isCompressed && !isDataTexture) {
-          cubeImage[i] = resizeImage(texture.image[i], false, true, maxCubemapSize);
+          cubeImage.add(resizeImage(texture.image[i], false, true, maxCubemapSize));
         } else {
-          cubeImage[i] = isDataTexture ? texture.image[i].image : texture.image[i];
+          cubeImage.add(isDataTexture ? texture.image[i].image : texture.image[i]);
         }
 
         cubeImage[i] = verifyColorSpace(texture, cubeImage[i]);

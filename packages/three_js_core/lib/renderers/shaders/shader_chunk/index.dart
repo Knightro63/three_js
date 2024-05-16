@@ -101,4 +101,5 @@ export './uv_pars_fragment.glsl.dart';
 export './uv_pars_vertex.glsl.dart';
 export './uv_vertex.glsl.dart';
 export './worldpos_vertex.glsl.dart';
-export 'colorspace_pars_fragment.glsl.dart';
+export './colorspace_pars_fragment.glsl.dart';
+export './colorspace_fragment.dart';
