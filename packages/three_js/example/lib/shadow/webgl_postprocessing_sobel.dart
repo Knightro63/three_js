@@ -28,6 +28,7 @@ class _State extends State<WebglPostprocessingSobel> {
     threeJs.dispose();
     three.loading.clear();
     controls.clearListeners();
+    composer.reset(threeJs.renderTarget);
     super.dispose();
   }
 
@@ -42,6 +43,7 @@ class _State extends State<WebglPostprocessingSobel> {
   }
 
   late three.OrbitControls controls;
+  late EffectComposer composer;
 
   Future<void> setup() async {
     threeJs.scene = three.Scene();
@@ -63,13 +65,13 @@ class _State extends State<WebglPostprocessingSobel> {
     final ambientLight = three.AmbientLight( 0xe7e7e7 );
     threeJs.scene.add( ambientLight );
 
-    final pointLight = three.PointLight( 0xffffff, 20 );
+    final pointLight = three.PointLight( 0xffffff, 2 );
     threeJs.camera.add( pointLight );
     threeJs.scene.add( threeJs.camera );
 
     // postprocessing
 
-    final composer = EffectComposer( threeJs.renderer!, threeJs.renderTarget );
+    composer = EffectComposer( threeJs.renderer!, threeJs.renderTarget );
     final renderPass = RenderPass( threeJs.scene, threeJs.camera );
     composer.addPass( renderPass );
 
@@ -91,10 +93,12 @@ class _State extends State<WebglPostprocessingSobel> {
     controls = three.OrbitControls( threeJs.camera, threeJs.globalKey );
     controls.enableZoom = false;
 
+    threeJs.postProcessor = composer.render;
+
     threeJs.addAnimationEvent((dt){
       controls.update();
       // if (params.enable == true ) {
-         composer.render(dt);
+         //composer.render(dt);
       // } 
     });
   }

@@ -499,7 +499,9 @@ class WebGLRenderer {
     int rangeFactor = 1;
     if (material.wireframe == true) {
       index = geometries.getWireframeAttribute(geometry);
-      rangeFactor = 2;
+      if(kIsWeb){
+        rangeFactor = 2;
+      }
     }
 
     if (geometry.morphAttributes["position"] != null || geometry.morphAttributes["normal"] != null) {
@@ -1495,7 +1497,7 @@ class WebGLRenderer {
     else if (isRenderTarget3D) {
       final textureProperties = properties.get(renderTarget!.texture);
       final layer = activeCubeFace;
-      _gl.framebufferTextureLayer( _gl.FRAMEBUFFER, _gl.COLOR_ATTACHMENT0, textureProperties["__webglTexture"], activeMipmapLevel, layer);
+      _gl.gl.framebufferTextureLayer( _gl.FRAMEBUFFER, _gl.COLOR_ATTACHMENT0, textureProperties["__webglTexture"], activeMipmapLevel, layer);
     }
 
     _currentMaterialId = -1; // reset current material to ensure correct uniform bindings
@@ -1553,7 +1555,7 @@ class WebGLRenderer {
     }
   }
 
-  void copyFramebufferToTexture(position, Texture texture, {int level = 0}) {
+  void copyFramebufferToTexture(position, Texture? texture, {int level = 0}) {
     if (texture is! FramebufferTexture) {
       console.warning('WebGLRenderer: copyFramebufferToTexture() can only be used with FramebufferTexture.');
       return;
@@ -1564,10 +1566,13 @@ class WebGLRenderer {
     final height = (texture.image.height * levelScale).floor();
 
     textures.setTexture2D(texture, 0);
-
-    _gl.copyTexSubImage2D(_gl.TEXTURE_2D, level, 0, 0, position.x, position.y, width, height);
-
-    state.unbindTexture();
+    if(kIsWeb){
+      _gl.gl.copyTexSubImage2D(_gl.TEXTURE_2D, level, 0, 0, position.x.toInt(), position.y.toInt(), width, height);
+    }
+    else{
+      _gl.gl.glCopyTexSubImage2D(_gl.TEXTURE_2D, level, 0, 0, position.x.toInt(), position.y.toInt(), width, height);
+    }
+    state.unbindTexture(_gl.TEXTURE_2D);
   }
 
   void copyTextureToTexture(position, Texture srcTexture, dstTexture, {int level = 0}) {

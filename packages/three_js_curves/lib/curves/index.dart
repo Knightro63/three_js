@@ -8,3 +8,4 @@ export 'line_curve3.dart';
 export 'quadratic_bezier_curve.dart';
 export 'quadratic_bezier_curve3.dart';
 export 'spline_curve.dart';
+export 'extra.dart';

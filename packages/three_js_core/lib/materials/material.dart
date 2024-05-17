@@ -576,6 +576,9 @@ class Material with EventDispatcher {
     } else if(key == 'glslVersion'){
       glslVersion = newValue;
     }
+    else if(key == ''){
+
+    }
     else {
       throw ("Material.setValues key: $key newValue: $newValue is not support");
     }

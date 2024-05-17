@@ -236,8 +236,9 @@ class BoundingBox{
   /// 
   /// Returns true if the specified [point] lies within or on the
   /// boundaries of this box.
-  bool containsPoint(Vector3 point) {
-    return point.x < min.x ||
+  bool containsPoint(Vector point) {
+    if(point is Vector3){
+      return point.x < min.x ||
             point.x > max.x ||
             point.y < min.y ||
             point.y > max.y ||
@@ -245,6 +246,15 @@ class BoundingBox{
             point.z > max.z
         ? false
         : true;
+    }
+    else{
+      return point.x < min.x ||
+            point.x > max.x ||
+            point.y < min.y ||
+            point.y > max.y
+        ? false
+        : true;
+    }
   }
   
   /// [plane] - [page:Plane] to check for intersection against.

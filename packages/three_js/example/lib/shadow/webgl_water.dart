@@ -100,16 +100,18 @@ class _State extends State<WebglWater> {
 
     // skybox
 
-    // final cubeTextureLoader = three.CubeTextureLoader();
-    // cubeTextureLoader.setPath( 'assets/textures/cube/Park2/' );
+    final cubeTextureLoader = three.CubeTextureLoader();
+    cubeTextureLoader.setPath( 'assets/textures/cube/Park2/' );
 
-    // final cubeTexture = await cubeTextureLoader.fromAssetList( [
-    //   'posx.jpg', 'negx.jpg',
-    //   'posy.jpg', 'negy.jpg',
-    //   'posz.jpg', 'negz.jpg'
-    // ] );
+    final cubeTexture = await cubeTextureLoader.fromAssetList( [
+      'posx.jpg', 'negx.jpg',
+      'posy.jpg', 'negy.jpg',
+      'posz.jpg', 'negz.jpg'
+    ] );
 
-    // threeJs.scene.background = cubeTexture;
+    print(cubeTexture?.images[0]);
+
+    threeJs.scene.background = cubeTexture;
 
     // light
 

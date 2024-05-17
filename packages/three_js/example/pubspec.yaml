@@ -54,6 +54,7 @@ flutter:
     - assets/models/svg/
     - assets/models/fbx/
     - assets/textures/
+    - assets/textures/lensflare/
     - assets/textures/equirectangular/
     - assets/textures/terrain/
     - assets/textures/patterns/

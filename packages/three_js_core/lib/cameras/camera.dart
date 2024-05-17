@@ -39,20 +39,20 @@ class Camera extends Object3D {
   Matrix4 projectionMatrix = Matrix4.identity();
   Matrix4 projectionMatrixInverse = Matrix4.identity();
 
-  late double fov;
+  double fov = 50;
   double zoom = 1.0;
-  late double near;
-  late double far;
+  double near = 0.1;
+  double far = 2000;
   double focus = 10;
-  late double aspect;
+  double aspect = 1;
   double filmGauge = 35; // width of the film (default in millimeters)
   double filmOffset = 0; // horizontal film offset (same unit as gauge)
 
   //OrthographicCamera
-  late double left;
-  late double right;
-  late double top;
-  late double bottom;
+  double left = -1;
+  double right = 1;
+  double top = 1;
+  double bottom = -1;
 
   CameraView? view;//Map<String, dynamic>? view;
   Vector4? viewport;

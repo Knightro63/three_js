@@ -192,16 +192,17 @@ class Water extends Mesh {
 		this.material = material;
 
 		onBeforeRender = ({
-      renderer, 
-      scene, 
-      camera,
-      mesh,
-      geometry,
-      material,
-      group
+      WebGLRenderer? renderer,
+      RenderTarget? renderTarget,
+      Object3D? mesh,
+      Scene? scene,
+      Camera? camera,
+      BufferGeometry? geometry,
+      Material? material,
+      Map<String, dynamic>? group
     }) {
 			mirrorWorldPosition.setFromMatrixPosition( matrixWorld );
-			cameraWorldPosition.setFromMatrixPosition( camera.matrixWorld );
+			cameraWorldPosition.setFromMatrixPosition( camera!.matrixWorld );
 
 			rotationMatrix.extractRotation( matrixWorld );
 
@@ -275,7 +276,7 @@ class Water extends Mesh {
 
 			// Render
 
-			final currentRenderTarget = renderer.getRenderTarget();
+			final currentRenderTarget = renderer!.getRenderTarget();
 
 			final currentXrEnabled = renderer.xr.enabled;
 			final currentShadowAutoUpdate = renderer.shadowMap.autoUpdate;
@@ -290,7 +291,7 @@ class Water extends Mesh {
 			renderer.state.buffers['depth'].setMask( true ); // make sure the depth buffer is writable so it can be properly cleared, see #18897
 
 			if ( renderer.autoClear == false ) renderer.clear();
-			renderer.render( scene, mirrorCamera );
+			renderer.render( scene!, mirrorCamera );
 
 			visible = true;
 

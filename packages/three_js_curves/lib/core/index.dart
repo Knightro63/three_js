@@ -4,3 +4,4 @@ export 'interpolations.dart';
 export 'path.dart';
 export 'shape.dart';
 export 'shape_path.dart';
+export 'curves.dart';

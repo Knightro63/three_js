@@ -92,7 +92,16 @@ class LightProbeHelper extends Mesh {
 	}
 
   @override
-	Function get onBeforeRender => () {
+	OnBeforeRender get onBeforeRender => ({
+    WebGLRenderer? renderer,
+    RenderTarget? renderTarget,
+    Object3D? mesh,
+    Scene? scene,
+    Camera? camera,
+    BufferGeometry? geometry,
+    Material? material,
+    Map<String, dynamic>? group
+  }) {
 		position.setFrom( lightProbe.position );
 		scale.setValues( 1, 1, 1 ).scale(size);
 		material?.uniforms['intensity']['value'] = lightProbe.intensity;

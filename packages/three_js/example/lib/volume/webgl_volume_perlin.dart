@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gl/flutter_gl.dart';
 import 'package:three_js/three_js.dart' as three;
@@ -193,7 +194,7 @@ class _State extends State<WebglVolumePerlin> {
 
     final geometry = three.BoxGeometry( 1, 1, 1 );
     final material = three.RawShaderMaterial.fromMap({
-      //'glslVersion': three.GLSL3,
+      (kIsWeb?'glslVersion': ''):three.GLSL3,
       'uniforms': {
         'map': { 'value': texture },
         'cameraPos': { 'value': three.Vector3() },

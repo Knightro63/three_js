@@ -50,6 +50,7 @@ class ThreeJS{
     Settings? settings,
     required this.onSetupComplete, 
     this.rendererUpdate,
+    this.postProcessor,
     this.windowResizeUpdate,
     required this.setup,
     Size? size,
@@ -86,6 +87,7 @@ class ThreeJS{
 
   void Function()? rendererUpdate;
   void Function(Size newSize)? windowResizeUpdate;
+  void Function([double? dt])? postProcessor;
   FutureOr<void> Function()? setup;
   List<Function(double dt)> events = [];
 
@@ -94,7 +96,7 @@ class ThreeJS{
   }
   void dispose(){
     disposed = true;
-    //renderTarget?.dispose();
+    renderTarget?.dispose();
     //renderer?.dispose();
     scene.dispose();
     three3dRender.dispose();
@@ -134,7 +136,13 @@ class ThreeJS{
   void render() {
     final gl = three3dRender.gl;
     rendererUpdate?.call();
-    renderer!.render(scene, camera);
+    if(postProcessor == null){
+      //renderer!.setSize(screenSize!.width, screenSize!.height);
+      renderer!.render(scene, camera);
+    }
+    else{
+      postProcessor?.call(clock.getDelta());
+    }
     gl.flush();
     if(!kIsWeb) {
       three3dRender.updateTexture(sourceTexture);
@@ -157,7 +165,7 @@ class ThreeJS{
       if(!kIsWeb){
         options['logarithmicDepthBuffer'] = true;
       }
-
+      
       renderer = lateRenderer ?? core.WebGLRenderer(options);
       renderer!.setPixelRatio(dpr);
       renderer!.setSize(width, height, false);
@@ -194,7 +202,12 @@ class ThreeJS{
       dpr = mqd.devicePixelRatio;
       windowResizeUpdate?.call(screenSize!);
       renderer!.setPixelRatio(dpr);
-      renderer!.setSize(screenSize!.width, screenSize!.height);
+      if(postProcessor == null){
+        renderer!.setSize(screenSize!.width, screenSize!.height);
+      }
+      else{
+        postProcessor?.call(clock.getDelta());
+      }
       render();
     }
   }

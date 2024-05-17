@@ -12,6 +12,7 @@ class ImageElement {
 
   ImageElement({
     this.url,
+    this.src,
     this.data,
     this.width = 1,
     this.height = 1,
@@ -30,7 +31,8 @@ class ImageElement {
       'height': height,
       'src': src,
       'complete': complete,
-      'depth': depth
+      'depth': depth,
+      "data": data.runtimeType
     }.toString();
   }
 }

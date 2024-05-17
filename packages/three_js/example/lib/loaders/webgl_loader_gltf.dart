@@ -20,9 +20,9 @@ class _MyAppState extends State<WebglLoaderGltf> {
       
       onSetupComplete: (){setState(() {});},
       setup: setup,
-      rendererUpdate: (){
-        threeJs.renderer!.clear(true, true, true);
-      },
+      // postProcessor: ([dt]){
+      //   threeJs.renderer!.clear(true, true, true);
+      // },
       settings: three.Settings(
         clearAlpha: 0,
         clearColor: 0xffffff

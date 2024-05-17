@@ -1,6 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
+import 'package:three_js_geometry/three_js_geometry.dart';
+import 'package:three_js_geometry/tube_geometry.dart';
+import 'package:three_js_helpers/three_js_helpers.dart';
 
 class WebglGeometryExtrudeSplines extends StatefulWidget {
   final String fileName;
@@ -25,6 +28,7 @@ class _State extends State<WebglGeometryExtrudeSplines> {
   void dispose() {
     threeJs.dispose();
     three.loading.clear();
+    controls.clearListeners();
     super.dispose();
   }
 
@@ -37,307 +41,206 @@ class _State extends State<WebglGeometryExtrudeSplines> {
       body: threeJs.build()
     );
   }
+  late three.OrbitControls controls;
+  late CameraHelper cameraHelper;
 
-  let container, stats;
+  late three.Camera splineCamera;
+  late three.Mesh cameraEye;
 
-  let camera, scene, renderer, splineCamera, cameraHelper, cameraEye;
+  final direction = three.Vector3();
+  final binormal = three.Vector3();
+  final normal = three.Vector3();
+  final position = three.Vector3();
+  final lookAt = three.Vector3();
 
-  const direction = new THREE.Vector3();
-  const binormal = new THREE.Vector3();
-  const normal = new THREE.Vector3();
-  const position = new THREE.Vector3();
-  const lookAt = new THREE.Vector3();
-
-  const pipeSpline = new THREE.CatmullRomCurve3( [
-    new THREE.Vector3( 0, 10, - 10 ), new THREE.Vector3( 10, 0, - 10 ),
-    new THREE.Vector3( 20, 0, 0 ), new THREE.Vector3( 30, 0, 10 ),
-    new THREE.Vector3( 30, 0, 20 ), new THREE.Vector3( 20, 0, 30 ),
-    new THREE.Vector3( 10, 0, 30 ), new THREE.Vector3( 0, 0, 30 ),
-    new THREE.Vector3( - 10, 10, 30 ), new THREE.Vector3( - 10, 20, 30 ),
-    new THREE.Vector3( 0, 30, 30 ), new THREE.Vector3( 10, 30, 30 ),
-    new THREE.Vector3( 20, 30, 15 ), new THREE.Vector3( 10, 30, 10 ),
-    new THREE.Vector3( 0, 30, 10 ), new THREE.Vector3( - 10, 20, 10 ),
-    new THREE.Vector3( - 10, 10, 10 ), new THREE.Vector3( 0, 0, 10 ),
-    new THREE.Vector3( 10, - 10, 10 ), new THREE.Vector3( 20, - 15, 10 ),
-    new THREE.Vector3( 30, - 15, 10 ), new THREE.Vector3( 40, - 15, 10 ),
-    new THREE.Vector3( 50, - 15, 10 ), new THREE.Vector3( 60, 0, 10 ),
-    new THREE.Vector3( 70, 0, 0 ), new THREE.Vector3( 80, 0, 0 ),
-    new THREE.Vector3( 90, 0, 0 ), new THREE.Vector3( 100, 0, 0 )
+  static final pipeSpline = three.CatmullRomCurve3( points:[
+    three.Vector3( 0, 10, - 10 ), three.Vector3( 10, 0, - 10 ),
+    three.Vector3( 20, 0, 0 ), three.Vector3( 30, 0, 10 ),
+    three.Vector3( 30, 0, 20 ), three.Vector3( 20, 0, 30 ),
+    three.Vector3( 10, 0, 30 ), three.Vector3( 0, 0, 30 ),
+    three.Vector3( - 10, 10, 30 ), three.Vector3( - 10, 20, 30 ),
+    three.Vector3( 0, 30, 30 ), three.Vector3( 10, 30, 30 ),
+    three.Vector3( 20, 30, 15 ), three.Vector3( 10, 30, 10 ),
+    three.Vector3( 0, 30, 10 ), three.Vector3( - 10, 20, 10 ),
+    three.Vector3( - 10, 10, 10 ), three.Vector3( 0, 0, 10 ),
+    three.Vector3( 10, - 10, 10 ), three.Vector3( 20, - 15, 10 ),
+    three.Vector3( 30, - 15, 10 ), three.Vector3( 40, - 15, 10 ),
+    three.Vector3( 50, - 15, 10 ), three.Vector3( 60, 0, 10 ),
+    three.Vector3( 70, 0, 0 ), three.Vector3( 80, 0, 0 ),
+    three.Vector3( 90, 0, 0 ), three.Vector3( 100, 0, 0 )
   ] );
 
-  const sampleClosedSpline = new THREE.CatmullRomCurve3( [
-    new THREE.Vector3( 0, - 40, - 40 ),
-    new THREE.Vector3( 0, 40, - 40 ),
-    new THREE.Vector3( 0, 140, - 40 ),
-    new THREE.Vector3( 0, 40, 40 ),
-    new THREE.Vector3( 0, - 40, 40 )
+  static final sampleClosedSpline = three.CatmullRomCurve3( points: [
+    three.Vector3( 0, - 40, - 40 ),
+    three.Vector3( 0, 40, - 40 ),
+    three.Vector3( 0, 140, - 40 ),
+    three.Vector3( 0, 40, 40 ),
+    three.Vector3( 0, - 40, 40 )
   ] );
-
-  sampleClosedSpline.curveType = 'catmullrom';
-  sampleClosedSpline.closed = true;
 
   // Keep a dictionary of Curve instances
-  const splines = {
-    GrannyKnot: new Curves.GrannyKnot(),
-    HeartCurve: new Curves.HeartCurve( 3.5 ),
-    VivianiCurve: new Curves.VivianiCurve( 70 ),
-    KnotCurve: new Curves.KnotCurve(),
-    HelixCurve: new Curves.HelixCurve(),
-    TrefoilKnot: new Curves.TrefoilKnot(),
-    TorusKnot: new Curves.TorusKnot( 20 ),
-    CinquefoilKnot: new Curves.CinquefoilKnot( 20 ),
-    TrefoilPolynomialKnot: new Curves.TrefoilPolynomialKnot( 14 ),
-    FigureEightPolynomialKnot: new Curves.FigureEightPolynomialKnot(),
-    DecoratedTorusKnot4a: new Curves.DecoratedTorusKnot4a(),
-    DecoratedTorusKnot4b: new Curves.DecoratedTorusKnot4b(),
-    DecoratedTorusKnot5a: new Curves.DecoratedTorusKnot5a(),
-    DecoratedTorusKnot5c: new Curves.DecoratedTorusKnot5c(),
-    PipeSpline: pipeSpline,
-    SampleClosedSpline: sampleClosedSpline
+  final splines = {
+    'GrannyKnot': three.GrannyKnot(),
+    'HeartCurve': three.HeartCurve( 3.5 ),
+    'VivianiCurve': three.VivianiCurve( 70 ),
+    'KnotCurve': three.KnotCurve(),
+    'HelixCurve': three.HelixCurve(),
+    'TrefoilKnot': three.TrefoilKnot(),
+    'TorusKnot': three.TorusKnot( 20 ),
+    'CinquefoilKnot': three.CinquefoilKnot( 20 ),
+    'TrefoilPolynomialKnot': three.TrefoilPolynomialKnot( 14 ),
+    'FigureEightPolynomialKnot': three.FigureEightPolynomialKnot(),
+    'DecoratedTorusKnot4a': three.DecoratedTorusKnot4a(),
+    'DecoratedTorusKnot4b': three.DecoratedTorusKnot4b(),
+    'DecoratedTorusKnot5a': three.DecoratedTorusKnot5a(),
+    'DecoratedTorusKnot5c': three.DecoratedTorusKnot5c(),
+    'PipeSpline': pipeSpline,
+    'SampleClosedSpline': sampleClosedSpline
   };
 
-  let parent, tubeGeometry, mesh;
+  late three.Object3D parent;
+  late TubeGeometry tubeGeometry;
+  three.Mesh? mesh;
 
-  const params = {
-    spline: 'GrannyKnot',
-    scale: 4,
-    extrusionSegments: 100,
-    radiusSegments: 3,
-    closed: true,
-    animationView: false,
-    lookAhead: false,
-    cameraHelper: false,
+  final Map<String,dynamic> params = {
+    'spline': 'GrannyKnot',
+    'scale': 4.0,
+    'extrusionSegments': 100,
+    'radiusSegments': 3,
+    'closed': true,
+    'animationView': false,
+    'lookAhead': false,
+    'cameraHelper': false,
   };
 
-  const material = new THREE.MeshLambertMaterial( { color: 0xff00ff } );
+  final material = three.MeshLambertMaterial.fromMap( { 'color': 0xff00ff } );
 
-  const wireframeMaterial = new THREE.MeshBasicMaterial( { color: 0x000000, opacity: 0.3, wireframe: true, transparent: true } );
+  final wireframeMaterial = three.MeshBasicMaterial.fromMap( { 'color': 0x000000, 'opacity': 0.3, 'wireframe': true, 'transparent': true } );
 
-  function addTube() {
-
-    if ( mesh !== undefined ) {
-
-      parent.remove( mesh );
-      mesh.geometry.dispose();
-
+  void addTube() {
+    if ( mesh != null ) {
+      parent.remove( mesh! );
+      mesh!.geometry?.dispose();
     }
 
-    const extrudePath = splines[ params.spline ];
-
-    tubeGeometry = new THREE.TubeGeometry( extrudePath, params.extrusionSegments, 2, params.radiusSegments, params.closed );
-
+    final extrudePath = splines[ params['spline'] ];
+    tubeGeometry = TubeGeometry( extrudePath, params['extrusionSegments'], 2, params['radiusSegments'], params['closed'] );
     addGeometry( tubeGeometry );
-
     setScale();
-
   }
 
-  function setScale() {
-
-    mesh.scale.set( params.scale, params.scale, params.scale );
-
+  void setScale() {
+    mesh?.scale.setValues( params['scale'], params['scale'], params['scale'] );
   }
 
 
-  function addGeometry( geometry ) {
-
-    // 3D shape
-
-    mesh = new THREE.Mesh( geometry, material );
-    const wireframe = new THREE.Mesh( geometry, wireframeMaterial );
-    mesh.add( wireframe );
-
+  void addGeometry( geometry ) {
+    mesh = three.Mesh( geometry, material );
+    final wireframe = three.Mesh( geometry, wireframeMaterial );
+    mesh?.add( wireframe );
     parent.add( mesh );
-
   }
 
-  function animateCamera() {
-
-    cameraHelper.visible = params.cameraHelper;
-    cameraEye.visible = params.cameraHelper;
-
+  void animateCamera() {
+    cameraHelper.visible = params['cameraHelper'];
+    cameraEye.visible = params['cameraHelper'];
   }
 
   Future<void> setup() async {
-    container = document.getElementById( 'container' );
+    threeJs.camera = three.PerspectiveCamera( 50, threeJs.width / threeJs.height, 0.01, 10000 );
+    threeJs.camera.position.setValues( 0, 50, 500 );
 
-    // camera
-
-    camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 0.01, 10000 );
-    camera.position.set( 0, 50, 500 );
-
-    // scene
-
-    scene = new THREE.Scene();
-    scene.background = new THREE.Color( 0xf0f0f0 );
+    threeJs.scene = three.Scene();
+    threeJs.scene.background = three.Color.fromHex32( 0xf0f0f0 );
 
     // light
 
-    scene.add( new THREE.AmbientLight( 0xffffff ) );
+    threeJs.scene.add( three.AmbientLight( 0xffffff ) );
 
-    const light = new THREE.DirectionalLight( 0xffffff, 1.5 );
-    light.position.set( 0, 0, 1 );
-    scene.add( light );
+    final light = three.DirectionalLight( 0xffffff, 1.5 );
+    light.position.setValues( 0, 0, 1 );
+    threeJs.scene.add( light );
 
     // tube
 
-    parent = new THREE.Object3D();
-    scene.add( parent );
+    parent = three.Object3D();
+    threeJs.scene.add( parent );
 
-    splineCamera = new THREE.PerspectiveCamera( 84, window.innerWidth / window.innerHeight, 0.01, 1000 );
+    splineCamera = three.PerspectiveCamera( 84, threeJs.width / threeJs.height, 0.01, 1000 );
     parent.add( splineCamera );
 
-    cameraHelper = new THREE.CameraHelper( splineCamera );
-    scene.add( cameraHelper );
+    cameraHelper = CameraHelper( splineCamera );
+    threeJs.scene.add( cameraHelper );
 
     addTube();
 
-    // debug camera
+    // debug threeJs.camera
 
-    cameraEye = new THREE.Mesh( new THREE.SphereGeometry( 5 ), new THREE.MeshBasicMaterial( { color: 0xdddddd } ) );
+    cameraEye = three.Mesh( three.SphereGeometry( 5 ), three.MeshBasicMaterial.fromMap( { 'color': 0xdddddd } ) );
     parent.add( cameraEye );
 
-    cameraHelper.visible = params.cameraHelper;
-    cameraEye.visible = params.cameraHelper;
+    cameraHelper.visible = params['cameraHelper'];
+    cameraEye.visible = params['cameraHelper'];
 
-    // renderer
 
-    renderer = new THREE.WebGLRenderer( { antialias: true } );
-    renderer.setPixelRatio( window.devicePixelRatio );
-    renderer.setSize( window.innerWidth, window.innerHeight );
-    container.appendChild( renderer.domElement );
-
-    // stats
-
-    stats = new Stats();
-    container.appendChild( stats.dom );
-
-    // dat.GUI
-
-    const gui = new GUI( { width: 285 } );
-
-    const folderGeometry = gui.addFolder( 'Geometry' );
-    folderGeometry.add( params, 'spline', Object.keys( splines ) ).onChange( function () {
-
-      addTube();
-
-    } );
-    folderGeometry.add( params, 'scale', 2, 10 ).step( 2 ).onChange( function () {
-
-      setScale();
-
-    } );
-    folderGeometry.add( params, 'extrusionSegments', 50, 500 ).step( 50 ).onChange( function () {
-
-      addTube();
-
-    } );
-    folderGeometry.add( params, 'radiusSegments', 2, 12 ).step( 1 ).onChange( function () {
-
-      addTube();
-
-    } );
-    folderGeometry.add( params, 'closed' ).onChange( function () {
-
-      addTube();
-
-    } );
-    folderGeometry.open();
-
-    const folderCamera = gui.addFolder( 'Camera' );
-    folderCamera.add( params, 'animationView' ).onChange( function () {
-
-      animateCamera();
-
-    } );
-    folderCamera.add( params, 'lookAhead' ).onChange( function () {
-
-      animateCamera();
-
-    } );
-    folderCamera.add( params, 'cameraHelper' ).onChange( function () {
-
-      animateCamera();
-
-    } );
-    folderCamera.open();
-
-    const controls = new OrbitControls( camera, renderer.domElement );
+    controls = three.OrbitControls( threeJs.camera, threeJs.globalKey );
     controls.minDistance = 100;
     controls.maxDistance = 2000;
 
-    window.addEventListener( 'resize', onWindowResize );
-
+    threeJs.addAnimationEvent((dt){
+      render();
+      controls.update();
+    });
   }
 
-  function onWindowResize() {
+  void render() {
+    sampleClosedSpline.curveType = 'catmullrom';
+    sampleClosedSpline.closed = true;
+    // animate threeJs.camera along spline
 
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-
-    renderer.setSize( window.innerWidth, window.innerHeight );
-
-  }
-
-  //
-
-  function animate() {
-
-    requestAnimationFrame( animate );
-
-    render();
-    stats.update();
-
-  }
-
-  function render() {
-
-    // animate camera along spline
-
-    const time = Date.now();
+    final time = DateTime.now().millisecondsSinceEpoch;
     const looptime = 20 * 1000;
-    const t = ( time % looptime ) / looptime;
+    final t = ( time % looptime ) / looptime;
 
-    tubeGeometry.parameters.path.getPointAt( t, position );
-    position.multiplyScalar( params.scale );
+    tubeGeometry.parameters?['path'].getPointAt( t, position );
+    position.scale( params['scale'] );
 
     // interpolation
 
-    const segments = tubeGeometry.tangents.length;
-    const pickt = t * segments;
-    const pick = Math.floor( pickt );
-    const pickNext = ( pick + 1 ) % segments;
+    final segments = tubeGeometry.tangents.length;
+    final pickt = t * segments;
+    final pick = pickt.floor();
+    final pickNext = ( pick + 1 ) % segments;
 
-    binormal.subVectors( tubeGeometry.binormals[ pickNext ], tubeGeometry.binormals[ pick ] );
-    binormal.multiplyScalar( pickt - pick ).add( tubeGeometry.binormals[ pick ] );
+    binormal.sub2( tubeGeometry.binormals[ pickNext ], tubeGeometry.binormals[ pick ] );
+    binormal.scale( pickt - pick ).add( tubeGeometry.binormals[ pick ] );
 
-    tubeGeometry.parameters.path.getTangentAt( t, direction );
+    tubeGeometry.parameters?['path'].getTangentAt( t, direction );
     const offset = 15;
 
-    normal.copy( binormal ).cross( direction );
+    normal.setFrom( binormal ).cross( direction );
 
     // we move on a offset on its binormal
 
-    position.add( normal.clone().multiplyScalar( offset ) );
+    position.add( normal.clone().scale( offset ) );
 
-    splineCamera.position.copy( position );
-    cameraEye.position.copy( position );
+    splineCamera.position.setFrom( position );
+    cameraEye.position.setFrom( position );
 
     // using arclength for stablization in look ahead
 
-    tubeGeometry.parameters.path.getPointAt( ( t + 30 / tubeGeometry.parameters.path.getLength() ) % 1, lookAt );
-    lookAt.multiplyScalar( params.scale );
+    tubeGeometry.parameters?['path'].getPointAt( ( t + 30 / tubeGeometry.parameters!['path'].getLength() ) % 1, lookAt );
+    lookAt.scale( params['scale'] );
 
-    // camera orientation 2 - up orientation via normal
+    // threeJs.camera orientation 2 - up orientation via normal
 
-    if ( ! params.lookAhead ) lookAt.copy( position ).add( direction );
+    if (!params['lookAhead']) lookAt.setFrom( position ).add( direction );
     splineCamera.matrix.lookAt( splineCamera.position, lookAt, normal );
     splineCamera.quaternion.setFromRotationMatrix( splineCamera.matrix );
 
     cameraHelper.update();
 
-    renderer.render( scene, params.animationView === true ? splineCamera : camera );
-
+    //renderer.render( threeJs.scene, params.animationView == true ? splineCamera : threeJs.camera );
   }
 }
 

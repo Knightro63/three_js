@@ -22,7 +22,7 @@ class _MyAppState extends State<WebglCamera> {
       
       onSetupComplete: (){setState(() {});},
       setup: setup,
-      rendererUpdate: renderUpdate,
+      postProcessor: postProcessor,
       settings: three.Settings(renderOptions: {
         "minFilter": three.LinearFilter,
         "magFilter": three.LinearFilter,
@@ -54,7 +54,6 @@ class _MyAppState extends State<WebglCamera> {
     return range * (0.5 - math.Random().nextDouble());
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -65,7 +64,7 @@ class _MyAppState extends State<WebglCamera> {
     );
   }
 
-  void renderUpdate() {
+  void postProcessor([double? dt]) {
     final r = DateTime.now().millisecondsSinceEpoch * 0.0005;
 
     mesh.position.x = 700 * math.cos(r);
@@ -101,12 +100,17 @@ class _MyAppState extends State<WebglCamera> {
 
     activeHelper.visible = false;
 
+    threeJs.renderer!.setClearColor( three.Color.fromHex32(0x000000), 1 );
+    threeJs.renderer!.setScissor( 0, 0, threeJs.width / 2, threeJs.height);
     threeJs.renderer!.setViewport(0, 0, threeJs.width / 2, threeJs.height);
     threeJs.renderer!.render(threeJs.scene, activeCamera);
 
     activeHelper.visible = true;
 
+    threeJs.renderer!.setClearColor( three.Color.fromHex32(0x111111), 1 );
+    threeJs.renderer!.setScissor( threeJs.width / 2, 0, threeJs.width / 2, threeJs.height);
     threeJs.renderer!.setViewport(threeJs.width / 2, 0, threeJs.width / 2, threeJs.height);
+    threeJs.renderer!.render( threeJs.scene, threeJs.camera );
   }
 
   void setup(){
@@ -188,6 +192,8 @@ class _MyAppState extends State<WebglCamera> {
     final particles = three.Points(
         geometry, three.PointsMaterial.fromMap({"color": 0x888888}));
     threeJs.scene.add(particles);
+
+    threeJs.renderer!.setScissorTest( true );
   }
 }
 

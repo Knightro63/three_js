@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
 
@@ -96,12 +97,12 @@ class _State extends State<WebglUboArrays> {
 				mat4 viewMatrix;
 			};
 
-			//uniform mat4 modelMatrix;
-			//uniform mat3 normalMatrix;
+			uniform mat4 modelMatrix;
+			uniform mat3 normalMatrix;
 
-			//in vec3 position;
-			//in vec3 normal;
-			//in vec2 uv;
+			in vec3 position;
+			in vec3 normal;
+			in vec2 uv;
 			out vec2 vUv;
 
 			out vec3 vPositionEye;
@@ -179,7 +180,7 @@ class _State extends State<WebglUboArrays> {
       },
       'vertexShader': vertexShader,
       'fragmentShader': fragmentShader,
-      //'glslVersion': three.GLSL3
+      //'glslVersion': kIsWeb?three.GLSL3:three.GLSL1
     } );
 
     final plane = three.Mesh( three.PlaneGeometry( 100, 100 ), material.clone() );

@@ -184,8 +184,8 @@ class WebGLTextures {
         (texture is FramebufferTexture && texture.minFilter != NearestFilter && texture.minFilter != LinearFilter)) {
       return MathUtils.log2(
         math.max(
-          image.width.toDouble(), 
-          image.height.toDouble()
+          image.width,
+          image.height
         )
       ).toInt() + 1;
     } else if (texture.mipmaps.isNotEmpty) {

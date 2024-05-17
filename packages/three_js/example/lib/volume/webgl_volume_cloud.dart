@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gl/flutter_gl.dart';
 import 'package:three_js/three_js.dart' as three;
@@ -214,7 +215,7 @@ class _State extends State<WebglVolumeCloud> {
 
     final geometry = three.BoxGeometry( 1, 1, 1 );
     final material = three.RawShaderMaterial.fromMap( {
-      //'glslVersion': three.GLSL3,
+      (kIsWeb?'glslVersion': ''):three.GLSL3,
       'uniforms': {
         'base': { 'value': three.Color.fromHex32( 0x798aa0 ) },
         'map': { 'value': texture },

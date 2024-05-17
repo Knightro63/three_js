@@ -18,3 +18,4 @@ export 'tetrahedron.dart';
 export 'torus.dart';
 export 'parametric.dart';
 export 'ring.dart';
+export 'tube_geometry.dart';

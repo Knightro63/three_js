@@ -4,6 +4,7 @@ import 'dart:html' as html;
 import '../utils/blob.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:image/image.dart';
 import 'package:three_js_core/three_js_core.dart';
 
 class ImageLoaderLoader {
@@ -34,14 +35,16 @@ class ImageLoaderLoader {
   }
 }
 
+// TODO: Fix this
 ImageElement? imageProcess2(Uint8List? bytes, String? url, bool flipY) {
+  Image? i = bytes == null? null:decodeImage(bytes);
   final image = html.ImageElement(
     src: url,
   );
   return ImageElement(
     url: url,
     data: image,
-    width: image.width ?? 1,
-    height: image.height ?? 1
+    width: i?.width ?? 1,
+    height: i?.height ?? 1
   );
 }

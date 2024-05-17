@@ -460,16 +460,22 @@ mixin WebGLUniformsHelper {
       gl.uniformMatrix3fv(addr, false, v);
 
       copyArray(cache, v);
-    } else {
+    } 
+    else if(kIsWeb){
+      final element = Float32Array.fromList(v!.storage);
+      if (arraysEqual(cache, element)) {
+        return;
+      }
+
+      gl.uniformMatrix3fv(addr, false, element);
+      copyArray(cache, elements);
+    }
+    else {
       if (arraysEqual(cache, elements)) {
         return;
       }
 
-      // TODO ???
-      // mat3array.set( elements );
-
       gl.uniformMatrix3fv(addr, false, elements);
-
       copyArray(cache, elements);
     }
   }
@@ -482,11 +488,7 @@ mixin WebGLUniformsHelper {
       return;
     }
 
-    // TODO
-    // mat4array.set( elements );
-
     gl.uniformMatrix4fv(addr, false, elements);
-
     copyArray(cache, elements);
   }
 

@@ -12,7 +12,7 @@ class WebGLAttributes {
     isWebGL2 = capabilities.isWebGL2;
   }
 
-  Map<String, dynamic> createBuffer(BufferAttribute<NativeArray<num>> attribute, int bufferType, {String? name}) {
+  Map<String, dynamic> createBuffer( attribute, int bufferType, {String? name}) {//BufferAttribute<NativeArray<num>>
     final array = attribute.array;
     final usage = attribute.usage;
 

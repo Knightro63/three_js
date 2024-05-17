@@ -102,7 +102,7 @@ class EffectComposer {
     return true;
   }
 
-  void render(double? deltaTime) {
+  void render([double? deltaTime]) {
     // deltaTime value is in seconds
 
     deltaTime ??= clock.getDelta();
@@ -129,8 +129,7 @@ class EffectComposer {
           //context.stencilFunc( context.NOTEQUAL, 1, 0xffffffff );
           stencil.setFunc(context.NOTEQUAL, 1, 0xffffffff);
 
-          copyPass.render(renderer, writeBuffer, readBuffer,
-              deltaTime: deltaTime);
+          copyPass.render(renderer, writeBuffer, readBuffer, deltaTime: deltaTime);
 
           //context.stencilFunc( context.EQUAL, 1, 0xffffffff );
           stencil.setFunc(context.EQUAL, 1, 0xffffffff);

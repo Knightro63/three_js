@@ -63,8 +63,6 @@ class STLLoader extends Loader {
   late final FileLoader _loader;
 
   /// [manager] — The [loadingManager] for the loader to use. Default is [DefaultLoadingManager].
-  /// 
-  /// Creates a new [MTLLoader].
 	STLLoader([super.manager]){
 		_loader = FileLoader(manager);
   }

@@ -413,6 +413,9 @@ class Uint16BufferAttribute extends BufferAttribute<Uint16Array> {
   factory Uint16BufferAttribute.fromTypedData(Uint16List list, int itemSize,[bool normalized = false]){
     return Uint16BufferAttribute(Uint16Array.fromList(list),itemSize,normalized);
   }
+  factory Uint16BufferAttribute.fromList(List<int> list, int itemSize,[bool normalized = false]){
+    return Uint16BufferAttribute(Uint16Array.fromList(list),itemSize,normalized);
+  }
 }
 
 class Int32BufferAttribute extends BufferAttribute<Int32Array> {
@@ -420,6 +423,9 @@ class Int32BufferAttribute extends BufferAttribute<Int32Array> {
     type = "Int32BufferAttribute";
   }
   factory Int32BufferAttribute.fromTypedData(Int32List list, int itemSize,[bool normalized = false]){
+    return Int32BufferAttribute(Int32Array.fromList(list),itemSize,normalized);
+  }
+  factory Int32BufferAttribute.fromList(List<int> list, int itemSize,[bool normalized = false]){
     return Int32BufferAttribute(Int32Array.fromList(list),itemSize,normalized);
   }
 }
@@ -431,6 +437,9 @@ class Uint32BufferAttribute extends BufferAttribute<Uint32Array> {
   factory Uint32BufferAttribute.fromTypedData(Uint32List list, int itemSize,[bool normalized = false]){
     return Uint32BufferAttribute(Uint32Array.fromList(list),itemSize,normalized);
   }
+  factory Uint32BufferAttribute.fromList(List<int> list, int itemSize,[bool normalized = false]){
+    return Uint32BufferAttribute(Uint32Array.fromList(list),itemSize,normalized);
+  }
 }
 
 class Float16BufferAttribute extends BufferAttribute {
@@ -438,6 +447,9 @@ class Float16BufferAttribute extends BufferAttribute {
     type = "Float16BufferAttribute";
   }
   factory Float16BufferAttribute.fromTypedData(Float32List list, int itemSize,[bool normalized = false]){
+    return Float16BufferAttribute(Float32Array.fromList(list),itemSize,normalized);
+  }
+  factory Float16BufferAttribute.fromList(List<double> list, int itemSize,[bool normalized = false]){
     return Float16BufferAttribute(Float32Array.fromList(list),itemSize,normalized);
   }
 }
@@ -449,6 +461,9 @@ class Float32BufferAttribute extends BufferAttribute<Float32Array> {
   factory Float32BufferAttribute.fromTypedData(Float32List list, int itemSize,[bool normalized = false]){
     return Float32BufferAttribute(Float32Array.fromList(list),itemSize,normalized);
   }
+  factory Float32BufferAttribute.fromList(List<double> list, int itemSize,[bool normalized = false]){
+    return Float32BufferAttribute(Float32Array.fromList(list),itemSize,normalized);
+  }
 }
 
 class Float64BufferAttribute extends BufferAttribute<Float64Array> {
@@ -456,6 +471,9 @@ class Float64BufferAttribute extends BufferAttribute<Float64Array> {
     type = "Float64BufferAttribute";
   }
   factory Float64BufferAttribute.fromTypedData(Float32List list, int itemSize,[bool normalized = false]){
+    return Float64BufferAttribute(Float64Array.fromList(list),itemSize,normalized);
+  }
+  factory Float64BufferAttribute.fromList(List<double> list, int itemSize,[bool normalized = false]){
     return Float64BufferAttribute(Float64Array.fromList(list),itemSize,normalized);
   }
 }

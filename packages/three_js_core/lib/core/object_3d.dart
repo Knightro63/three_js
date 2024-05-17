@@ -13,6 +13,17 @@ import 'event_dispatcher.dart';
 import './layers.dart';
 import './raycaster.dart';
 
+typedef OnBeforeRender = void Function({
+  WebGLRenderer? renderer,
+  RenderTarget? renderTarget,
+  Object3D? mesh,
+  Scene? scene,
+  Camera? camera,
+  BufferGeometry? geometry,
+  Material? material,
+  Map<String, dynamic>? group
+});
+
 int _object3DId = 0;
 
 Vector3 _v1 = Vector3.zero();
@@ -114,7 +125,7 @@ class Object3D with EventDispatcher {
   // onBeforeRender({WebGLRenderer? renderer, scene, Camera? camera, RenderTarget? renderTarget, dynamic? geometry, Material? material, dynamic group}) {
   // print(" Object3D.onBeforeRender ${type} ${id} ");
   // }
-  Function? onBeforeRender;
+  OnBeforeRender? onBeforeRender;
 
   dynamic background;
   Texture? environment;

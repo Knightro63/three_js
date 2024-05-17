@@ -2,6 +2,8 @@ library three_renderers;
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
+
 import '../cameras/index.dart';
 import '../others/index.dart';
 import '../core/index.dart';

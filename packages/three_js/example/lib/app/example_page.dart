@@ -5,11 +5,14 @@ import 'package:example/games/games_fps2.dart';
 import 'package:example/geometry/marching_cubes.dart';
 import 'package:example/geometry/webgl_geometry_dynamic.dart';
 import 'package:example/geometry/webgl_geometry_extrude_shapes.dart';
+import 'package:example/geometry/webgl_geometry_extrude_splines.dart';
+import 'package:example/instancing/webgl_gpgpu_protoplanet.dart';
 import 'package:example/instancing/webgl_instancing_dynamic.dart';
 import 'package:example/instancing/webgl_instancing_raycasting.dart';
 import 'package:example/morphtargets/webgl_morphtargets_face.dart';
 import 'package:example/others/webgl_interactive_voxelpainter.dart';
 import 'package:example/others/webgl_ubo_arrays.dart';
+import 'package:example/shadow/webgl_lensflars.dart';
 import 'package:example/shadow/webgl_lights_rectarealight.dart';
 import 'package:example/shadow/webgl_postprocessing_sobel.dart';
 import 'package:example/shadow/webgl_water.dart';
@@ -109,7 +112,7 @@ class _MyAppState extends State<ExamplePage> {
       page = WebglGeometryDynamic(fileName: fileName);
     }
     else if(fileName == "webgl_geometry_extrude_splines"){
-      page = ;
+      page = WebglGeometryExtrudeSplines(fileName: fileName);
     }
     else if (fileName == "webgl_instancing_performance") {
       page = WebglInstancingPerformance(fileName: fileName);
@@ -117,9 +120,14 @@ class _MyAppState extends State<ExamplePage> {
       page = WebglInstancingRaycast(fileName: fileName);
     } else if(fileName == "webgl_instancing_dynamic"){
       page = WebglInstancingDynamic(fileName: fileName);
-    } else if(fileName == "webgl_interactive_voxelpainter"){
+    } 
+    else if(fileName == "webgl_interactive_voxelpainter"){
       page = WebglInteractiveVoxelpainter(fileName: fileName);
-    } else if (fileName == "webgl_shadowmap_viewer") {
+    } 
+    else if(fileName == "webgl_gpgpu_protoplanet"){
+      page = WebglGpgpuProtoplanet(fileName: fileName);
+    }
+    else if (fileName == "webgl_shadowmap_viewer") {
       page = WebglShadowmapViewer(fileName: fileName);
     } else if (fileName == "webgl_loader_gltf") {
       page = WebglLoaderGltf(fileName: fileName);
@@ -155,12 +163,20 @@ class _MyAppState extends State<ExamplePage> {
       page = WebglAnimationSkinningBlending(fileName: fileName);
     } else if (fileName == "webgl_animation_skinning_additive_blending") {
       page = WebglAnimationSkinningAdditiveBlending(fileName: fileName);
-    } else if (fileName == "webgl_animation_skinning_morph") {
+    } 
+    // else if(fileName == "webgl_animation_skinning_ik"){
+    //   page = ;
+    // }
+    else if (fileName == "webgl_animation_skinning_morph") {
       page = WebglAnimationSkinningMorph(fileName: fileName);
     } else if (fileName == "webgl_camera") {
       page = WebglCamera(fileName: fileName);
-    } else if (fileName == "webgl_geometry_colors") {
+    } 
+    else if (fileName == "webgl_geometry_colors") {
       page = WebglGeometryColors(fileName: fileName);
+    }
+    else if(fileName == "webgl_lensflares"){
+      page = WebglLensflars(fileName: fileName);
     }
     else if(fileName == "webgl_lights_rectarealight"){
       page = WebglLightsRectarealight(fileName: fileName);
