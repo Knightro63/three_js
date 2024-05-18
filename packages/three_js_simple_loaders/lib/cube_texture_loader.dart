@@ -10,8 +10,6 @@ class CubeTextureLoader extends Loader {
   int loaded = 0;
 
   /// [manager] — The [loadingManager] for the loader to use. Default is [DefaultLoadingManager].
-  /// 
-  /// Creates a new [MTLLoader].
 	CubeTextureLoader([super.manager]){
 		_loader = ImageLoader( manager );
     texture.image = [];

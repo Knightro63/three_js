@@ -386,12 +386,13 @@ class WebGLTextures {
 
     if (texture.version > 0 && textureProperties["__version"] != texture.version) {
       final image = texture.image;
-
       if (texture is! OpenGLTexture && image == null) {
         console.warning('WebGLRenderer: Texture marked for update but image is null');
-      } else if (texture is! OpenGLTexture && image.complete == false) {
+      } 
+      else if (texture is! OpenGLTexture && image.complete == false) {
         console.warning('WebGLRenderer: Texture marked for update but image is incomplete');
-      } else {
+      } 
+      else {
         uploadTexture(textureProperties, texture, slot);
         return;
       }

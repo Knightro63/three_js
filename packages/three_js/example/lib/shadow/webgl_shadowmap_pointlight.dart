@@ -1,6 +1,11 @@
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:typed_data';
+import 'dart:ui' as ui;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter_gl/flutter_gl.dart';
 import 'package:three_js/three_js.dart' as three;
 
 class WebglShadowmapPointlight extends StatefulWidget {
@@ -13,6 +18,8 @@ class WebglShadowmapPointlight extends StatefulWidget {
 
 class _State extends State<WebglShadowmapPointlight> {
   late three.ThreeJS threeJs;
+  GlobalKey key = GlobalKey();
+  bool createdPng = false;
 
   @override
   void initState() {
@@ -39,7 +46,28 @@ class _State extends State<WebglShadowmapPointlight> {
       appBar: AppBar(
         title: Text(widget.fileName),
       ),
-      body: threeJs.build()
+      body: Stack(
+        children: [
+          if(!createdPng)RepaintBoundary(
+            key: key,
+            child: Column(
+              children: [
+                Container(
+                  width: 1,
+                  height: 1,
+                  color: Colors.transparent,
+                ),
+                Container(
+                  width: 1,
+                  height: 1,
+                  color: Colors.white,
+                ),
+              ],
+            )
+          ),
+          threeJs.build(),
+        ],
+      )
     );
   }
 
@@ -52,13 +80,13 @@ class _State extends State<WebglShadowmapPointlight> {
     threeJs.scene = three.Scene();
     threeJs.scene.add( three.AmbientLight( 0x111122, 3 ) );
 
-    // lights
+    final test = await generateTexture();
 
     three.PointLight createLight(int color ) {
 
-      const intensity = 200.0;
+      const intensity = (kIsWeb?200.0:20.0);
 
-      final light = three.PointLight( color, intensity, 20 );
+      final light = three.PointLight( color, intensity, (kIsWeb?1000:20) );
       light.castShadow = true;
       light.shadow?.bias = - 0.005; // reduces self-shadowing on double-sided objects
 
@@ -67,8 +95,8 @@ class _State extends State<WebglShadowmapPointlight> {
       material.color.scale( intensity );
       three.Mesh sphere = three.Mesh( geometry, material );
       light.add( sphere );
-
-      final texture = three.CanvasTexture();//
+      
+      final texture = three.CanvasTexture(test);
       texture.magFilter = three.NearestFilter;
       texture.wrapT = three.RepeatWrapping;
       texture.wrapS = three.RepeatWrapping;
@@ -87,7 +115,6 @@ class _State extends State<WebglShadowmapPointlight> {
       light.add( sphere );
 
       return light;
-
     }
 
     final pointLight = createLight( 0x0088ff );
@@ -134,5 +161,21 @@ class _State extends State<WebglShadowmapPointlight> {
       pointLight2.rotation.x = time;
       pointLight2.rotation.z = time;
     });
+  }
+
+  Future<Uint8List> _capturePng() async {
+    RenderRepaintBoundary boundary = key.currentContext!.findRenderObject() as RenderRepaintBoundary;
+    ui.Image image = await boundary.toImage(); 
+    ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+    createdPng = true;
+    return byteData!.buffer.asUint8List();
+  }
+
+  Future<three.ImageElement> generateTexture() async{
+    return three.ImageElement(
+      width: 2,
+      height: 2,
+      data: Uint8Array.from(await _capturePng())
+    );
   }
 }

@@ -56,7 +56,9 @@ class TextureLoader extends Loader {
   }
   @override
   Future<Texture?> fromPath(String filePath) async{
-    final ImageElement? image = await ImageLoader(manager,flipY).fromPath(filePath);
+    final loader = ImageLoader(manager,flipY);
+    loader.setPath(path);
+    final ImageElement? image = await loader.fromPath(filePath);
     return _textureProcess(image,filePath);
   }
   @override
@@ -67,7 +69,9 @@ class TextureLoader extends Loader {
   }
   @override
   Future<Texture?> fromAsset(String asset, {String? package}) async{
-    final ImageElement? image = await ImageLoader(manager,flipY).fromAsset(asset, package: package);
+    final loader = ImageLoader(manager,flipY);
+    loader.setPath(path);
+    final ImageElement? image = await loader.fromAsset(asset, package: package);
     return _textureProcess(image,'$package/$asset');
   }
   @override

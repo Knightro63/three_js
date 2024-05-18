@@ -97,9 +97,6 @@ class _State extends State<WebglPostprocessingSobel> {
 
     threeJs.addAnimationEvent((dt){
       controls.update();
-      // if (params.enable == true ) {
-         //composer.render(dt);
-      // } 
     });
   }
 }

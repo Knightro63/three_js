@@ -61,7 +61,6 @@ class ImageLoader extends Loader {
   }
   @override
   Future<ImageElement?> fromAsset(String asset, {String? package}) async{
-
     asset = package != null?'assets/$package/${path+asset}':path+asset;
     final cacheName = asset;
 

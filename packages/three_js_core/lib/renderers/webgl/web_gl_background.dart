@@ -56,14 +56,13 @@ class WebGLBackground {
     if (background != null && (background is CubeTexture || (background is Texture && background.mapping == CubeUVReflectionMapping))) {
       if (boxMesh == null) {
         boxMesh = Mesh(
-          BoxGeometry(1, 1, 1),
+          BoxGeometry(),
           ShaderMaterial.fromMap({
             "name": 'BackgroundCubeMaterial',
             "uniforms": cloneUniforms(shaderLib["cube"]["uniforms"]),
-            //"vertexShader": shaderLib["cube"]["vertexShader"],
-            //"fragmentShader": shaderLib["cube"]["fragmentShader"],
-            "color": Color.fromHex32(0xfffff),
-            "side": BackSide,
+            "vertexShader": shaderLib["cube"]["vertexShader"],
+            "fragmentShader": shaderLib["cube"]["fragmentShader"],
+            "side": FrontSide,
             "depthTest": false,
             "depthWrite": false,
             "fog": false
@@ -86,23 +85,15 @@ class WebGLBackground {
           boxMesh!.matrixWorld.copyPosition(camera!.matrixWorld);
         };
 
-        // enable code injection for non-built-in material
-        // Object.defineProperty( boxMesh.material, 'envMap', {
-
-        // 	get: function () {
-
-        // 		return this.uniforms.envMap.value;
-
-        // 	}
-
-        // } );
-
         objects.update(boxMesh!);
       }
 
       boxMesh!.material?.uniforms["envMap"]["value"] = background;
-      boxMesh!.material?.uniforms["flipEnvMap"]["value"] =
-          (background is CubeTexture && background is WebGL3DRenderTarget) ? -1 : 1;
+      boxMesh!.material?.uniforms["flipEnvMap"]["value"] = (background is CubeTexture && background is WebGL3DRenderTarget) ? -1 : 1;
+      
+      if (background.matrixAutoUpdate == true) {
+        background.updateMatrix();
+      }
 
       if (currentBackground != background ||
           currentBackgroundVersion != background.version ||
@@ -136,17 +127,6 @@ class WebGLBackground {
         );
 
         planeMesh!.geometry?.deleteAttributeFromString('normal');
-
-        // enable code injection for non-built-in material
-        // Object.defineProperty( planeMesh.material, 'map', {
-
-        // 	get: function () {
-
-        // 		return this.uniforms.t2D.value;
-
-        // 	}
-
-        // } );
 
         objects.update(planeMesh!);
       }
