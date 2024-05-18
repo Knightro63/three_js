@@ -81,7 +81,7 @@ class GCodeLoader extends Loader {
       extruding: false, 
       relative: false 
     );
-		final layers = [];
+		final List<_Line> layers = [];
 
 		_Line? currentLayer;
 
@@ -97,93 +97,97 @@ class GCodeLoader extends Loader {
         pathVertex: [], 
         z: line.z 
       );
-			layers.add( currentLayer );
+			layers.add( currentLayer! );
 		}
 
 		//Create lie segment between p1 and p2
-		void addSegment( p1, p2 ) {
+		void addSegment(_Line p1,_Line p2 ) {
 			if ( currentLayer == null ) {
 				newLayer( p1 );
 			}
 
-			if ( state.extruding! ) {
-				currentLayer?.vertex?.addAll([ p1.x, p1.y, p1.z ]);
-				currentLayer?.vertex?.addAll([ p2.x, p2.y, p2.z ]);
+			if ( state.extruding ) {
+				currentLayer?.vertex?.addAll([ p1.x!, p1.y!, p1.z! ]);
+				currentLayer?.vertex?.addAll([ p2.x!, p2.y!, p2.z! ]);
 			} else {
-				currentLayer?.pathVertex?.addAll([ p1.x, p1.y, p1.z ]);
-				currentLayer?.pathVertex?.addAll([ p2.x, p2.y, p2.z ]);
+				currentLayer?.pathVertex?.addAll([ p1.x!, p1.y!, p1.z! ]);
+				currentLayer?.pathVertex?.addAll([ p2.x!, p2.y!, p2.z! ]);
 			}
 		}
 
 		double delta(double v1, double v2 ) {
-			return state.relative! ? v2 : v2 - v1;
+			return state.relative ? v2 : v2 - v1;
 		}
 
 		double absolute(double v1, double v2 ) {
-			return state.relative! ? v1 + v2 : v2;
+			return state.relative ? v1 + v2 : v2;
 		}
 
-		final lines = data.replaceAll(RegExp(r'/;.+/g'), '' ).split( '\n' );
-
+		final lines = data.replaceAll(RegExp(r'/;+/'), '' ).split( '\n' );
 		for (int i = 0; i < lines.length; i ++ ) {
+      if(!lines[i].startsWith(';')){
+        final tokens = lines[i].split( ' ' );
+        final cmd = tokens[0].toUpperCase();
 
-			final tokens = lines[i].split( ' ' );
-			final cmd = tokens[0].toUpperCase();
+        //Argumments
+        final args = _Line();
+        tokens.removeAt(0);
+        //tokens.forEach( ( token ) {
+        for(final token in tokens){
+          if(token == '' || token[0].contains(';')){
+            break;
+          }
+          final key = token[0].toLowerCase();
+          
+          final value = double.tryParse(token.substring( 1 ));
+          if(value != null){
+            args[key] = value;
+          }
+        }
 
-			//Argumments
-			final args = _Line();
-			tokens.removeAt(0);
-      //tokens.forEach( ( token ) {
-      for(final token in tokens){
-				if (token[0] != '') {
-					final key = token[0].toLowerCase();
-					final value = double.parse(token.substring( 1 ));
-					args[key] = value;
-				}
-			}
+        //Process commands
+        //G0/G1 – Linear Movement
+        if ( cmd == 'G0' || cmd == 'G1' ) {
+          final line = _Line(
+            x: args.x != null ? absolute( state.x!, args.x! ) : state.x,
+            y: args.y != null ? absolute( state.y!, args.y! ) : state.y,
+            z: args.z != null ? absolute( state.z!, args.z! ) : state.z,
+            e: args.e != null ? absolute( state.e!, args.e! ) : state.e,
+            f: args.f != null ? absolute( state.f!, args.f! ) : state.f,
+          );
 
-			//Process commands
-			//G0/G1 – Linear Movement
-			if ( cmd == 'G0' || cmd == 'G1' ) {
-				final line = _Line(
-					x: args.x != null ? absolute( state.x!, args.x! ) : state.x,
-					y: args.y != null ? absolute( state.y!, args.y! ) : state.y,
-					z: args.z != null ? absolute( state.z!, args.z! ) : state.z,
-					e: args.e != null ? absolute( state.e!, args.e! ) : state.e,
-					f: args.f != null ? absolute( state.f!, args.f! ) : state.f,
-        );
+          //Layer change detection is or made by watching Z, it's made by watching when we extrude at a Z position
+          if ( delta( state.e!, line.e! ) > 0 ) {
+            state.extruding = delta( state.e!, line.e! ) > 0;
+            if ( currentLayer == null || line.z != currentLayer!.z ) {
+              newLayer( line );
+            }
+          }
 
-				//Layer change detection is or made by watching Z, it's made by watching when we extrude at a Z position
-				if ( delta( state.e!, line.e! ) > 0 ) {
-					state.extruding = delta( state.e!, line.e! ) > 0;
-					if ( currentLayer == null || line.z != currentLayer!.z ) {
-						newLayer( line );
-					}
-				}
+          addSegment( state, line );
+          state = line;
 
-				addSegment( state, line );
-				state = line;
+        } else if ( cmd == 'G2' || cmd == 'G3' ) {
+          //G2/G3 - Arc Movement ( G2 clock wise and G3 counter clock wise )
+          //console.warn( 'THREE.GCodeLoader: Arc command not supported' );
+        } else if ( cmd == 'G90' ) {
+          //G90: Set to Absolute Positioning
+          state.relative = false;
+        } else if ( cmd == 'G91' ) {
+          //G91: Set to state.relative Positioning
+          state.relative = true;
+        } else if ( cmd == 'G92' ) {
+          //G92: Set Position
+          final line = state;
+          line.x = args.x ?? line.x;
+          line.y = args.y ?? line.y;
+          line.z = args.z ?? line.z;
+          line.e = args.e ?? line.e;
 
-			} else if ( cmd == 'G2' || cmd == 'G3' ) {
-				//G2/G3 - Arc Movement ( G2 clock wise and G3 counter clock wise )
-				//console.warn( 'THREE.GCodeLoader: Arc command not supported' );
-			} else if ( cmd == 'G90' ) {
-				//G90: Set to Absolute Positioning
-				state.relative = false;
-			} else if ( cmd == 'G91' ) {
-				//G91: Set to state.relative Positioning
-				state.relative = true;
-			} else if ( cmd == 'G92' ) {
-				//G92: Set Position
-				final line = state;
-				line.x = args.x ?? line.x;
-				line.y = args.y ?? line.y;
-				line.z = args.z ?? line.z;
-				line.e = args.e ?? line.e;
-
-			} else {
-			  console.warning( 'THREE.GCodeLoader: Command not supported: $cmd');
-			}
+        } else {
+          console.warning( 'THREE.GCodeLoader: Command not supported: $cmd');
+        }
+      }
 		}
 
 		void addObject(List<double> vertex, bool extruding, int i ) {
@@ -200,8 +204,8 @@ class GCodeLoader extends Loader {
 		if (splitLayer ) {
 			for (int i = 0; i < layers.length; i ++ ) {
 				final layer = layers[ i ];
-				addObject( layer.vertex, true, i );
-				addObject( layer.pathVertex, false, i );
+				addObject( layer.vertex!, true, i );
+				addObject( layer.pathVertex!, false, i );
 			}
 		} else {
 			final List<double> vertex = [];
@@ -212,11 +216,11 @@ class GCodeLoader extends Loader {
 				final layerVertex = layer.vertex;
 				final layerPathVertex = layer.pathVertex;
 
-				for(int j = 0; j < layerVertex.length; j ++ ) {
+				for(int j = 0; j < layerVertex!.length; j ++ ) {
 					vertex.add( layerVertex[ j ] );
 				}
 
-				for(int j = 0; j < layerPathVertex.length; j ++ ) {
+				for(int j = 0; j < layerPathVertex!.length; j ++ ) {
 					pathVertex.add( layerPathVertex[ j ] );
 				}
 			}
@@ -237,11 +241,11 @@ class _Line{
   double? e;
   double? f;
 
-  bool? extruding;
-  bool? relative;
+  bool extruding;
+  bool relative;
 
-  List? vertex;
-  List? pathVertex;
+  List<double>? vertex;
+  List<double>? pathVertex;
 
   _Line({
     this.x,
@@ -249,8 +253,8 @@ class _Line{
     this.z,
     this.e,
     this.f,
-    this.extruding,
-    this.relative,
+    this.extruding = false,
+    this.relative = false,
     this.pathVertex,
     this.vertex
   });

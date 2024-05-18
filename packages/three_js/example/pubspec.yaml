@@ -46,6 +46,8 @@ flutter:
     - assets/screenshots/
     - assets/models/obj/male02/
     - assets/models/json/
+    - assets/models/gcode/
+    - assets/models/xyz/
     - assets/models/gltf/
     - assets/models/gltf/test/
     - assets/models/gltf/RobotExpressive/

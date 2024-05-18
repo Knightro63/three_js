@@ -9,12 +9,15 @@ import 'package:example/geometry/webgl_geometry_extrude_splines.dart';
 import 'package:example/instancing/webgl_gpgpu_protoplanet.dart';
 import 'package:example/instancing/webgl_instancing_dynamic.dart';
 import 'package:example/instancing/webgl_instancing_raycasting.dart';
+import 'package:example/loaders/webgl_loader_gcode.dart';
+import 'package:example/loaders/webgl_loader_xyz.dart';
 import 'package:example/morphtargets/webgl_morphtargets_face.dart';
 import 'package:example/others/webgl_interactive_voxelpainter.dart';
 import 'package:example/others/webgl_ubo_arrays.dart';
 import 'package:example/shadow/webgl_lensflars.dart';
 import 'package:example/shadow/webgl_lights_rectarealight.dart';
 import 'package:example/shadow/webgl_postprocessing_sobel.dart';
+import 'package:example/shadow/webgl_shadowmap_pointlight.dart';
 import 'package:example/shadow/webgl_water.dart';
 import 'package:example/volume/webgl_volume_cloud.dart';
 import 'package:example/volume/webgl_volume_perlin.dart';
@@ -94,9 +97,9 @@ class _MyAppState extends State<ExamplePage> {
 
     if (fileName == "webgl_camera_array") {
       page = WebglCameraArray(fileName: fileName);
-    } else if (fileName == "webgl_loader_obj") {
-      page = WebglLoaderObj(fileName: fileName);
-    } else if (fileName == "webgl_materials_browser") {
+    } 
+
+    else if (fileName == "webgl_materials_browser") {
       page = WebglMaterialsBrowser(fileName: fileName);
     } else if (fileName == "webgl_shadow_contact") {
       page = WebglShadowContact(fileName: fileName);
@@ -129,17 +132,42 @@ class _MyAppState extends State<ExamplePage> {
     }
     else if (fileName == "webgl_shadowmap_viewer") {
       page = WebglShadowmapViewer(fileName: fileName);
-    } else if (fileName == "webgl_loader_gltf") {
-      page = WebglLoaderGltf(fileName: fileName);
-    } else if (fileName == "webgl_loader_gltf_test") {
-      page = webgl_loader_gltf_test(fileName: fileName);
-    } else if (fileName == "webgl_loader_obj_mtl") {
-      page = WebglLoaderObjMtl(fileName: fileName);
-    } else if (fileName == "webgl_animation_keyframes") {
-      page = WebglAnimationKeyframes(fileName: fileName);
-    } else if (fileName == "webgl_loader_texture_basis") {
+    }
+    else if(fileName == "webgl_shadowmap_pointlight"){
+      page = WebglShadowmapPointlight(fileName: fileName);
+    }
+    else if (fileName == "webgl_loader_texture_basis") {
       page = WebglLoaderTextureBasis(fileName: fileName);
-    } else if (fileName == "webgl_animation_multiple") {
+    } 
+    else if (fileName == "webgl_loader_svg") {
+      page = WebglLoaderSvg(fileName: fileName);
+    } 
+    else if (fileName == "webgl_loader_fbx") {
+      page = WebglLoaderFbx(fileName: fileName);
+    } 
+    else if (fileName == "webgl_loader_gltf") {
+      page = WebglLoaderGltf(fileName: fileName);
+    } 
+    else if (fileName == "webgl_loader_gltf_test") {
+      page = webgl_loader_gltf_test(fileName: fileName);
+    }
+    else if (fileName == "webgl_loader_obj") {
+      page = WebglLoaderObj(fileName: fileName);
+    }  
+    else if (fileName == "webgl_loader_obj_mtl") {
+      page = WebglLoaderObjMtl(fileName: fileName);
+    } 
+    else if(fileName == "webgl_loader_gcode"){
+      page = WebglLoaderGcode(fileName: fileName);
+    }
+    else if(fileName == "webgl_loader_xyz"){
+      page = WebglLoaderXyz(fileName: fileName);
+    }
+    else if (fileName == "webgl_animation_keyframes") {
+      page = WebglAnimationKeyframes(fileName: fileName);
+    } 
+
+    else if (fileName == "webgl_animation_multiple") {
       page = WebglAnimationMultiple(fileName: fileName);
     } else if (fileName == "webgl_skinning_simple") {
       page = WebglSkinningSimple(fileName: fileName);
@@ -190,9 +218,8 @@ class _MyAppState extends State<ExamplePage> {
     // else if(fileName == "webgl_geometry_csg"){
 
     // } 
-    else if (fileName == "webgl_loader_svg") {
-      page = WebglLoaderSvg(fileName: fileName);
-    } else if (fileName == "webgl_helpers") {
+
+    else if (fileName == "webgl_helpers") {
       page = WebglHelpers(fileName: fileName);
     } else if (fileName == "webgl_morphtargets") {
       page = WebglMorphtargets(fileName: fileName);
@@ -216,9 +243,8 @@ class _MyAppState extends State<ExamplePage> {
       page = MiscControlsFly(fileName: fileName);
     }else if (fileName == "misc_controls_transform") {
       page = MiscControlsTransform(fileName: fileName);
-    } else if (fileName == "webgl_loader_fbx") {
-      page = WebglLoaderFbx(fileName: fileName);
-    } else if (fileName == "multi_views") {
+    } 
+    else if (fileName == "multi_views") {
       page = MultiViews(fileName: fileName);
     }else if (fileName == "games_fps") {
       page = FPSGame2(fileName: fileName);

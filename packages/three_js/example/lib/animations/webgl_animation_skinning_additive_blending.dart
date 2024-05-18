@@ -51,8 +51,8 @@ class _State extends State<WebglAnimationSkinningAdditiveBlending> {
   late three.Object3D model;
 
   Future<void> setup() async {
-    threeJs.camera = three.PerspectiveCamera(45, threeJs.width / threeJs.height, 0.1, 1000);
-    threeJs.camera.position.setValues(-1, 2, 3);
+    threeJs.camera = three.PerspectiveCamera(45, threeJs.width / threeJs.height, 1, 100);
+    threeJs.camera.position.setValues(-1, 3, 3);
     threeJs.camera.lookAt(three.Vector3(0, 1, 0));
 
     controls = three.OrbitControls(threeJs.camera, threeJs.globalKey);

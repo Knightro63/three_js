@@ -60,8 +60,9 @@ class WebGLBackground {
           ShaderMaterial.fromMap({
             "name": 'BackgroundCubeMaterial',
             "uniforms": cloneUniforms(shaderLib["cube"]["uniforms"]),
-            "vertexShader": shaderLib["cube"]["vertexShader"],
-            "fragmentShader": shaderLib["cube"]["fragmentShader"],
+            //"vertexShader": shaderLib["cube"]["vertexShader"],
+            //"fragmentShader": shaderLib["cube"]["fragmentShader"],
+            "color": Color.fromHex32(0xfffff),
             "side": BackSide,
             "depthTest": false,
             "depthWrite": false,

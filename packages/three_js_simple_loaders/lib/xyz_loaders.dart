@@ -75,7 +75,7 @@ class XYZLoader extends Loader {
 		for (String line in lines ) {
 			line = line.trim();
 
-			if (line[0] == '#') continue; // skip comments
+			if (line == '' || line[0] == '#') continue; // skip comments
 
 			final lineValues = line.split(RegExp(r"\s+"));
 

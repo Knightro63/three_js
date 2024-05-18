@@ -20,7 +20,8 @@ class Settings{
     this.localClippingEnabled = false,
     this.clippingPlanes = const [],
     this.outputEncoding = LinearEncoding,
-    this.toneMapping = NoToneMapping
+    this.toneMapping = NoToneMapping,
+    this.shadowMapType = PCFShadowMap
   }){
     this.renderOptions = renderOptions ?? {
       "format": RGBAFormat,
@@ -41,6 +42,7 @@ class Settings{
   List<Plane> clippingPlanes;
   int outputEncoding;
   int toneMapping;
+  int shadowMapType;
 }
 
 /// threeJs utility class. If you want to learn how to connect cannon.js with js, please look at the examples/threejs_* instead.
@@ -183,6 +185,7 @@ class ThreeJS{
       renderer!.localClippingEnabled = settings.localClippingEnabled;
       renderer!.clippingPlanes = settings.clippingPlanes;
       renderer!.toneMapping = settings.toneMapping;
+      renderer!.shadowMap.type = settings.shadowMapType;
     }
 
     if(!kIsWeb){

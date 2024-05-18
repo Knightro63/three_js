@@ -48,8 +48,8 @@ class _MyAppState extends State<WebglLoaderObj> {
   Future<void> setup() async {
     late three.Object3D object;
     late three.Texture texture;
-    threeJs.camera = three.PerspectiveCamera(45, threeJs.width / threeJs.height, 1, 2000);
-    threeJs.camera.position.z = 250;
+    threeJs.camera = three.PerspectiveCamera(45, threeJs.width / threeJs.height, 0.1, 20);
+    threeJs.camera.position.z = 2.5;
 
     threeJs.scene = three.Scene();
 
@@ -81,7 +81,8 @@ class _MyAppState extends State<WebglLoaderObj> {
       }
     });
 
-    object.scale.setValues(0.5, 0.5, 0.5);
+    object.position.y = - 0.95;
+    object.scale.setScalar( 0.01 );
     threeJs.scene.add(object);
 
     threeJs.addAnimationEvent((dt){

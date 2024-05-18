@@ -109,8 +109,6 @@ class _State extends State<WebglWater> {
       'posz.jpg', 'negz.jpg'
     ] );
 
-    print(cubeTexture?.images[0]);
-
     threeJs.scene.background = cubeTexture;
 
     // light
