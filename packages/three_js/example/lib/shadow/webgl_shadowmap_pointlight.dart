@@ -60,7 +60,7 @@ class _State extends State<WebglShadowmapPointlight> {
                 Container(
                   width: 1,
                   height: 1,
-                  color: Colors.white,
+                  color: Colors.black,
                 ),
               ],
             )
@@ -83,10 +83,9 @@ class _State extends State<WebglShadowmapPointlight> {
     final test = await generateTexture();
 
     three.PointLight createLight(int color ) {
+      const intensity = 20.0;
 
-      const intensity = (kIsWeb?200.0:20.0);
-
-      final light = three.PointLight( color, intensity, (kIsWeb?1000:20) );
+      final light = three.PointLight( color, intensity, 10);
       light.castShadow = true;
       light.shadow?.bias = - 0.005; // reduces self-shadowing on double-sided objects
 

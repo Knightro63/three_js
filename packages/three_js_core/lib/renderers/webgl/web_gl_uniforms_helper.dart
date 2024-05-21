@@ -324,7 +324,6 @@ mixin WebGLUniformsHelper {
     final cache = this.cache;
 
     if (cache[0] == v) return;
-
     gl.uniform1f(addr, v.toDouble());
 
     cache[0] = v;
@@ -462,7 +461,7 @@ mixin WebGLUniformsHelper {
       copyArray(cache, v);
     } 
     else if(kIsWeb){
-      final element = Float32Array.fromList(v!.storage);
+      final element = Float32Array.fromList(elements);
       if (arraysEqual(cache, element)) {
         return;
       }
@@ -638,7 +637,7 @@ mixin WebGLUniformsHelper {
 
   Function getSingularSetter(id, activeInfo) {
     final type = activeInfo.type;
-
+    
     switch (type) {
       case 0x1406:
         return setValueV1f; // FLOAT

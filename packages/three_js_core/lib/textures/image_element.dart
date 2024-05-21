@@ -8,15 +8,15 @@ class ImageElement {
 
   // NativeArray or ImageElement from dart:html
   dynamic data;
-  int depth = 1;
+  int depth;
 
   ImageElement({
     this.url,
     this.src,
     this.data,
-    this.width = 1,
-    this.height = 1,
-    this.depth = 1,
+    this.width = 0,
+    this.height = 0,
+    this.depth = 0,
   });
 
   void dispose() {

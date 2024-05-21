@@ -11,7 +11,7 @@ class BloomPass extends Pass {
   late Map<String, dynamic> convolutionUniforms;
   late ShaderMaterial materialConvolution;
 
-  BloomPass(num? strength, num? kernelSize, double? sigma, int? resolution) : super() {
+  BloomPass([num? strength, num? kernelSize, double? sigma, int? resolution]) : super() {
     strength = (strength != null) ? strength : 1;
     kernelSize = (kernelSize != null) ? kernelSize : 25;
     sigma = (sigma != null) ? sigma : 4.0;
@@ -25,11 +25,9 @@ class BloomPass extends Pass {
       "format": RGBAFormat
     };
 
-    renderTargetX = WebGLRenderTarget(
-        resolution, resolution, WebGLRenderTargetOptions(pars));
+    renderTargetX = WebGLRenderTarget(resolution, resolution, WebGLRenderTargetOptions(pars));
     renderTargetX.texture.name = 'BloomPass.x';
-    renderTargetY = WebGLRenderTarget(
-        resolution, resolution, WebGLRenderTargetOptions(pars));
+    renderTargetY = WebGLRenderTarget(resolution, resolution, WebGLRenderTargetOptions(pars));
     renderTargetY.texture.name = 'BloomPass.y';
 
     final postCopyShader = copyShader;

@@ -138,7 +138,6 @@ class ShaderMaterial extends Material {
     uniformsNeedUpdate = false;
 
     glslVersion = null;
-
   }
 
   @override

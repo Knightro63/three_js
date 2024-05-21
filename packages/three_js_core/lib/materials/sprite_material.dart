@@ -49,4 +49,9 @@ class SpriteMaterial extends Material {
     fog = source.fog;
     return this;
   }
+
+  @override
+  SpriteMaterial clone() {
+    return SpriteMaterial().copy(this);
+  }
 }

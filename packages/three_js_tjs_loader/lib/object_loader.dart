@@ -354,19 +354,17 @@ class ObjectLoader extends Loader {
 
         if (image is List) {
           texture = CubeTexture();
-
           if (image.length == 6) texture.needsUpdate = true;
-        } else {
+        }
+         else {
           if (image != null && image.data != null && image.url == null) {
             texture = DataTexture();
           } else {
             texture = Texture();
           }
-
           if (image != null) {
             texture.needsUpdate = true;
           } // textures can have null image data
-
         }
 
         texture.source = source;

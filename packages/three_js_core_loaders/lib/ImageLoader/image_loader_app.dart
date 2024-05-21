@@ -75,7 +75,7 @@ Image imageProcess(DecodeParam param) {
   return image;
 }
 
-ImageElement? imageProcess2(Uint8List? bytes, String? url, bool flipY) {
+Future<ImageElement?> processImage(Uint8List? bytes, String? url, bool flipY) async{
   Image? image = bytes == null? null:decodeImage(bytes);
   if(image != null && flipY) {
     image = flipVertical(image);
@@ -83,6 +83,7 @@ ImageElement? imageProcess2(Uint8List? bytes, String? url, bool flipY) {
   image = image?.convert(format:Format.uint8,numChannels: 4);
   return image != null?ImageElement(
     url: url,
+    src: url,
     data: Uint8Array.from(image.getBytes()),
     width: image.width,
     height: image.height

@@ -306,15 +306,8 @@ class _State extends State<WebglGpgpuProtoplanet> {
 
 			varying vec4 vColor;
 
-			float radiusFromMass( float mass ) {
-				// Calculate radius of a sphere from mass and density
-				return pow( ( 3.0 / ( 4.0 * PI ) ) * mass / density, 1.0 / 3.0 );
-			}
-
 
 			void main() {
-
-
 				vec4 posTemp = texture2D( texturePosition, uv );
 				vec3 pos = posTemp.xyz;
 
@@ -327,8 +320,7 @@ class _State extends State<WebglGpgpuProtoplanet> {
 				vec4 mvPosition = modelViewMatrix * vec4( pos, 1.0 );
 
 				// Calculate radius of a sphere from mass and density
-				//float radius = pow( ( 3.0 / ( 4.0 * PI ) ) * mass / density, 1.0 / 3.0 );
-				float radius = radiusFromMass( mass );
+				float radius = pow( ( 3.0 / ( 4.0 * PI ) ) * mass / density, 1.0 / 3.0 );
 
 				// Apparent size in pixels
 				if ( mass == 0.0 ) {

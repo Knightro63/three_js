@@ -302,10 +302,10 @@ class Water extends Mesh {
 
 			// Restore viewport
 
-			final viewport = (camera as Camera).viewport;
+			final viewport = camera.viewport;
 
 			if ( viewport != null ) {
-				renderer.state.viewport( viewport );
+			  renderer.state.viewport( viewport );
 			}
 		};
 	}

@@ -8,3 +8,5 @@ export 'obj/mtl_loader.dart';
 export 'cube_texture_loader.dart';
 export 'xyz_loaders.dart';
 export 'gcode_loder.dart';
+export 'vox_loder.dart';
+export 'ply_loader.dart';

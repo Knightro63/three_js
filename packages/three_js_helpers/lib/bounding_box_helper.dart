@@ -21,7 +21,7 @@ class BoundingBoxHelper extends LineSegments {
   /// [color] -- (optional) the box's color. Default is 0xffff00.
   /// 
   /// Creates a new wireframe box that represents the passed [BoundingBox].
-  factory BoundingBoxHelper(BoundingBox? box, [color = 0xffff00]) {
+  factory BoundingBoxHelper(BoundingBox? box, [int color = 0xffff00]) {
     final indices = Uint16Array.from([
       0,
       1,

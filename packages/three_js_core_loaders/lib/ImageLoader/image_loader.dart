@@ -30,12 +30,10 @@ class ImageLoader extends Loader {
       manager.itemEnd(cacheName);
       return cached;
     }
-
-    //final resp = await ImageLoaderLoader.loadImage(url, flipY);
     
     final http.Response? response = kIsWeb? null:await http.get(Uri.parse(url));
     final bytes = kIsWeb? null:response!.bodyBytes;
-    final resp = imageProcess2(bytes,url,flipY);
+    final resp = await processImage(bytes,url,flipY);
 
     Cache.add(cacheName,resp);
     return resp;
@@ -55,7 +53,7 @@ class ImageLoader extends Loader {
   Future<ImageElement?> fromBlob(Blob blob) async{
     if(kIsWeb){
       final hblob = uhtml.Blob([blob.data.buffer], blob.options["type"]);
-      return imageProcess2(null, uhtml.Url.createObjectUrl(hblob),flipY);
+      return await processImage(null, uhtml.Url.createObjectUrl(hblob),flipY);
     }
     return await fromBytes(blob.data);
   }
@@ -72,13 +70,17 @@ class ImageLoader extends Loader {
       manager.itemEnd(cacheName);
       return cached;
     }
-
-    //final resp = await ImageLoaderLoader.loadImage(asset, flipY);
-
-    final ByteData fileData = await rootBundle.load(asset);
-    final bytes = fileData.buffer.asUint8List();
-    final resp = imageProcess2(bytes,kIsWeb?'assets/$asset':asset,flipY);
-
+    
+    ImageElement? resp;
+    if(!kIsWeb){
+      final ByteData fileData = await rootBundle.load(asset);
+      final bytes = fileData.buffer.asUint8List();
+      resp = await processImage(bytes,asset,flipY);
+    }
+    else{
+      resp = await processImage(null,asset,flipY);
+    }
+    
     Cache.add(cacheName,resp);
     return resp;
   }
@@ -93,7 +95,7 @@ class ImageLoader extends Loader {
       return cached;
     }
 
-    final resp = imageProcess2(bytes,null,flipY);
+    final resp = await processImage(bytes,null,flipY);
     Cache.add(cacheName,resp);
     return resp;
   }

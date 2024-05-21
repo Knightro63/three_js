@@ -1590,7 +1590,6 @@ class WebGLRenderer {
     _gl.pixelStorei(_gl.UNPACK_ALIGNMENT, dstTexture.unpackAlignment);
 
     if (srcTexture is DataTexture) {
-      
       _gl.texSubImage2D(_gl.TEXTURE_2D, level, position.x, position.y, width, height, glFormat, glType, srcTexture.image.data);
     } 
     else {

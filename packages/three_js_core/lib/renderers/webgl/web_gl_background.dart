@@ -62,7 +62,7 @@ class WebGLBackground {
             "uniforms": cloneUniforms(shaderLib["cube"]["uniforms"]),
             "vertexShader": shaderLib["cube"]["vertexShader"],
             "fragmentShader": shaderLib["cube"]["fragmentShader"],
-            "side": FrontSide,
+            "side": BackSide,
             "depthTest": false,
             "depthWrite": false,
             "fog": false

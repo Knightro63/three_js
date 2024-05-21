@@ -173,7 +173,7 @@ class ThreeJS{
       renderer!.setSize(width, height, false);
       renderer!.alpha = settings.alpha;
       renderer!.shadowMap.enabled = settings.enableShadowMap;
-      renderer!.shadowMap.type = PCFShadowMap;
+      renderer!.shadowMap.type = settings.shadowMapType;
       renderer!.autoClear = settings.autoClear;
       renderer!.setClearColor(
         Color.fromHex32(settings.clearColor), 
@@ -196,6 +196,10 @@ class ThreeJS{
     }
     else{
       renderTarget = null;
+    }
+
+    if(!kIsWeb){
+      renderer?.gl.enable(0x8642);
     }
   }
   void onWindowResize(BuildContext context){

@@ -46,7 +46,7 @@ class WebGLShadowMap {
     shadowMaterialVertical = ShaderMaterial.fromMap({
       "defines": {"VSM_SAMPLES": 8},
       "uniforms": {
-        "shadow_pass": {"value": null},
+        "shadow_pass": <String,dynamic>{"value": null},
         "resolution": {"value": Vector2.zero()},
         "radius": {"value": 4.0}
       },
@@ -186,9 +186,9 @@ class WebGLShadowMap {
 
     // vertical pass
 
-    shadowMaterialVertical.uniforms["shadow_pass"].value = shadow.map!.texture;
-    shadowMaterialVertical.uniforms["resolution"].value = shadow.mapSize;
-    shadowMaterialVertical.uniforms["radius"].value = shadow.radius;
+    shadowMaterialVertical.uniforms["shadow_pass"]['value'] = shadow.map!.texture;
+    shadowMaterialVertical.uniforms["resolution"]['value'] = shadow.mapSize;
+    shadowMaterialVertical.uniforms["radius"]['value'] = shadow.radius;
 
     _renderer.setRenderTarget(shadow.mapPass);
     _renderer.clear();
@@ -196,9 +196,9 @@ class WebGLShadowMap {
 
     // horizontal pass
 
-    shadowMaterialHorizontal.uniforms["shadow_pass"].value = shadow.mapPass!.texture;
-    shadowMaterialHorizontal.uniforms["resolution"].value = shadow.mapSize;
-    shadowMaterialHorizontal.uniforms["radius"].value = shadow.radius;
+    shadowMaterialHorizontal.uniforms["shadow_pass"]['value'] = shadow.mapPass!.texture;
+    shadowMaterialHorizontal.uniforms["resolution"]['value'] = shadow.mapSize;
+    shadowMaterialHorizontal.uniforms["radius"]['value'] = shadow.radius;
 
     _renderer.setRenderTarget(shadow.map);
     _renderer.clear();
@@ -217,7 +217,15 @@ class WebGLShadowMap {
       result = light is PointLight ? _distanceMaterial : _depthMaterial;
     }
 
-    if (_renderer.localClippingEnabled && material.clipShadows == true && material.clippingPlanes!.isNotEmpty) {
+    if ((
+      _renderer.localClippingEnabled && 
+      material.clipShadows == true && 
+      material.clippingPlanes!.isNotEmpty
+      ) || 
+      (material.displacementMap != null && material.displacementScale != 0 ) ||
+			( material.alphaMap  != null&& material.alphaTest > 0 ) ||
+      (material.map != null && material.alphaTest > 0)
+    ) {
       // in this case we need a unique material instance reflecting the
       // appropriate state
 
@@ -250,6 +258,10 @@ class WebGLShadowMap {
     else {
       result.side = (material.shadowSide != null) ? material.shadowSide! : shadowSide[material.side]!;
     }
+
+		result.alphaMap = material.alphaMap;
+		result.alphaTest = material.alphaTest;
+		result.map = material.map;
 
     result.clipShadows = material.clipShadows;
     result.clippingPlanes = material.clippingPlanes;

@@ -3,23 +3,33 @@ import 'package:example/controls/misc_controls_pointerlock.dart';
 import 'package:example/controls/misc_controls_transform.dart';
 import 'package:example/games/games_fps2.dart';
 import 'package:example/geometry/marching_cubes.dart';
+import 'package:example/geometry/webgl_buffergeometry_custom_attributes_particles.dart';
 import 'package:example/geometry/webgl_geometry_dynamic.dart';
 import 'package:example/geometry/webgl_geometry_extrude_shapes.dart';
 import 'package:example/geometry/webgl_geometry_extrude_splines.dart';
+import 'package:example/geometry/webgl_points_sprites.dart';
+import 'package:example/geometry/webgl_sprites.dart';
 import 'package:example/instancing/webgl_gpgpu_protoplanet.dart';
 import 'package:example/instancing/webgl_instancing_dynamic.dart';
 import 'package:example/instancing/webgl_instancing_raycasting.dart';
+import 'package:example/instancing/webgl_instancing_scatter.dart';
 import 'package:example/loaders/webgl_loader_gcode.dart';
 import 'package:example/loaders/webgl_loader_xyz.dart';
 import 'package:example/morphtargets/webgl_morphtargets_face.dart';
 import 'package:example/others/webgl_interactive_voxelpainter.dart';
+import 'package:example/others/webgl_lod.dart';
 import 'package:example/others/webgl_ubo_arrays.dart';
 import 'package:example/shadow/webgl_lensflars.dart';
 import 'package:example/shadow/webgl_lights_rectarealight.dart';
+import 'package:example/shadow/webgl_lights_spotlight.dart';
 import 'package:example/shadow/webgl_postprocessing_sobel.dart';
+import 'package:example/shadow/webgl_shader_lava.dart';
+import 'package:example/shadow/webgl_shadowmap_csm.dart';
 import 'package:example/shadow/webgl_shadowmap_pointlight.dart';
+import 'package:example/shadow/webgl_shadowmap_vsm.dart';
 import 'package:example/shadow/webgl_water.dart';
 import 'package:example/volume/webgl_volume_cloud.dart';
+import 'package:example/volume/webgl_volume_instancing.dart';
 import 'package:example/volume/webgl_volume_perlin.dart';
 import 'package:flutter/material.dart';
 
@@ -101,9 +111,20 @@ class _MyAppState extends State<ExamplePage> {
 
     else if (fileName == "webgl_materials_browser") {
       page = WebglMaterialsBrowser(fileName: fileName);
-    } else if (fileName == "webgl_shadow_contact") {
+    } 
+    else if (fileName == "webgl_shadow_contact") {
       page = WebglShadowContact(fileName: fileName);
-    } else if (fileName == "webgl_geometry_text") {
+    } 
+    else if(fileName == 'webgl_shadowmap_vsm'){
+      page = WebglShadowmapVsm(fileName: fileName);
+    }
+    else if(fileName == 'webgl_shadowmap_csm'){
+      page = WebglShadowmapCsm(fileName: fileName);
+    }
+    else if(fileName == 'webgl_lights_spotlight'){
+      page = WebglLightsSpotlight(fileName: fileName);
+    }
+    else if (fileName == "webgl_geometry_text") {
       page = WebglGeometryText(fileName: fileName);
     } else if (fileName == "webgl_geometry_shapes") {
       page = WebglGeometryShapes(fileName: fileName);
@@ -116,6 +137,18 @@ class _MyAppState extends State<ExamplePage> {
     }
     else if(fileName == "webgl_geometry_extrude_splines"){
       page = WebglGeometryExtrudeSplines(fileName: fileName);
+    }
+    // else if(fileName == "webgl_nodes_points"){
+    //   page = ;
+    // }
+    else if(fileName == "webgl_sprites"){
+      page = WebglSprites(fileName: fileName);
+    }
+    else if(fileName == 'webgl_points_sprites'){
+      page = WebglPointsSprites(fileName: fileName);
+    }
+    else if(fileName == 'webgl_instancing_scatter'){
+      page = WebglInstancingScatter(fileName: fileName);
     }
     else if (fileName == "webgl_instancing_performance") {
       page = WebglInstancingPerformance(fileName: fileName);
@@ -181,9 +214,14 @@ class _MyAppState extends State<ExamplePage> {
       page = WebglClippingStencil(fileName: fileName);
     } else if (fileName == "webgl_clipping") {
       page = WebglClipping(fileName: fileName);
-    } else if (fileName == "webgl_geometries") {
+    } 
+    else if (fileName == "webgl_geometries") {
       page = WebglGeometries(fileName: fileName);
-    } else if (fileName == "webgl_animation_cloth") {
+    } 
+    else if(fileName == "webgl_buffergeometry_custom_attributes_particles"){
+      page = WebglBuffergeometryCustomAttributesParticles(fileName: fileName);
+    }
+    else if (fileName == "webgl_animation_cloth") {
       page = webgl_animation_cloth(fileName: fileName);
     } else if (fileName == "webgl_materials") {
       page = WebglMaterials(fileName: fileName);
@@ -248,13 +286,26 @@ class _MyAppState extends State<ExamplePage> {
       page = MultiViews(fileName: fileName);
     }else if (fileName == "games_fps") {
       page = FPSGame2(fileName: fileName);
-    }else if (fileName == "marching_cubes") {
+    }
+    else if(fileName == "webgl_lod"){
+      page = WebglLod(fileName: fileName);
+    }
+    else if (fileName == "marching_cubes") {
       page = Marching(fileName: fileName);
-    }else if (fileName == "webgl_volume_perlin") {
+    }
+    else if(fileName == 'webgl_shader_lava'){
+      page = WebglShaderLava(fileName: fileName);
+    }
+    else if (fileName == "webgl_volume_perlin") {
       page = WebglVolumePerlin(fileName: fileName);
-    }else if (fileName == "webgl_volume_cloud") {
+    }
+    else if (fileName == "webgl_volume_cloud") {
       page = WebglVolumeCloud(fileName: fileName);
-    }else if (fileName == "webgl_ubo_arrays") {
+    }
+    else if(fileName == 'webgl_volume_instancing'){
+      page = WebglVolumeInstancing(fileName: fileName);
+    }
+    else if (fileName == "webgl_ubo_arrays") {
       page = WebglUboArrays(fileName: fileName);
     }
     else {

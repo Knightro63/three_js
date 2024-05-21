@@ -45,7 +45,7 @@ final Map<String,dynamic> COLOR_SPACES = {
 
 class OutputPass extends Pass {
   dynamic _toneMapping;
-  //dynamic _outputColorSpace;
+  dynamic _outputColorSpace;
 	OutputPass():super(){
 		//
 		const Map<String, dynamic> shader = outputShader;
@@ -64,7 +64,7 @@ class OutputPass extends Pass {
 
 	String? getTransfer(colorSpace) {
 		if ( colorSpace == NoColorSpace ) return LinearTransfer;
-		return COLOR_SPACES[ colorSpace ]['transfer'];
+		return COLOR_SPACES[ colorSpace ]?['transfer'];
 	}
 
   @override
@@ -77,13 +77,14 @@ class OutputPass extends Pass {
 
 		if ( _toneMapping != renderer.toneMapping ) {//_outputColorSpace != renderer.outputColorSpace ||
 
-			//_outputColorSpace = renderer.outputColorSpace;
+			_outputColorSpace = SRGBTransfer;//renderer.outputColorSpace;
 			_toneMapping = renderer.toneMapping;
 
 			material.defines = {};
 
-			//if (getTransfer(_outputColorSpace) == SRGBTransfer ) 
-      material.defines!['SRGB_TRANSFER'] = '';
+			if (getTransfer(_outputColorSpace) == SRGBTransfer ){
+        material.defines!['SRGB_TRANSFER'] = '';
+      }
 
 			if (_toneMapping == LinearToneMapping ){ material.defines!['LINEAR_TONE_MAPPING'] = '';}
 			else if (_toneMapping == ReinhardToneMapping ){ material.defines!['REINHARD_TONE_MAPPING'] = '';}
@@ -98,7 +99,6 @@ class OutputPass extends Pass {
 		//
 
 		if (renderToScreen == true ) {
-
 			renderer.setRenderTarget( null );
 			fsQuad.render( renderer );
 		} 
@@ -106,9 +106,7 @@ class OutputPass extends Pass {
 			renderer.setRenderTarget( writeBuffer );
 			if (clear ) renderer.clear( renderer.autoClearColor, renderer.autoClearDepth, renderer.autoClearStencil );
 			fsQuad.render( renderer );
-
 		}
-
 	}
 
 	void dispose() {

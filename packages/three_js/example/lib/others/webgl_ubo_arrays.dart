@@ -180,7 +180,7 @@ class _State extends State<WebglUboArrays> {
       },
       'vertexShader': vertexShader,
       'fragmentShader': fragmentShader,
-      //'glslVersion': kIsWeb?three.GLSL3:three.GLSL1
+      kIsWeb?'glslVersion':'': three.GLSL3
     } );
 
     final plane = three.Mesh( three.PlaneGeometry( 100, 100 ), material.clone() );
@@ -221,12 +221,6 @@ class _State extends State<WebglUboArrays> {
       animate();
       controls.update();
     });
-
-    // // gui
-    // const gui = new GUI();
-    // gui.add( api, 'count', 1, pointLightsMax ).step( 1 ).onChange( function () {
-    //   lightingUniformsGroup.uniforms[ 2 ].value = api.count;
-    // } );
   }
 
   void animate() {

@@ -47,7 +47,6 @@ class WebGLMaterials {
       refreshUniformsCommon(uniforms, material);
     } else if (material is LineBasicMaterial) {
       refreshUniformsLine(uniforms, material);
-
       if (material is LineDashedMaterial) {
         refreshUniformsDash(uniforms, material);
       }
@@ -60,7 +59,6 @@ class WebGLMaterials {
       uniforms["opacity"]["value"] = material.opacity;
     } else if (material is ShaderMaterial) {
       material.uniformsNeedUpdate = false; // #15581
-
     }
   }
 

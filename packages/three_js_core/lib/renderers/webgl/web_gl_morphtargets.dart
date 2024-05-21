@@ -162,7 +162,6 @@ class WebGLMorphtargets {
       }
 
       final morphBaseInfluence = geometry.morphTargetsRelative ? 1 : 1 - morphInfluencesSum;
-
       program.getUniforms().setValue(gl, 'morphTargetBaseInfluence', morphBaseInfluence);
       program.getUniforms().setValue(gl, 'morphTargetInfluences', objectInfluences);
 

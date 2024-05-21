@@ -180,24 +180,30 @@ class WebGLTextures {
   }
 
   int getMipLevels(Texture texture, image, supportsMips) {
-    if (textureNeedsGenerateMipmaps(texture, supportsMips) == true ||
-        (texture is FramebufferTexture && texture.minFilter != NearestFilter && texture.minFilter != LinearFilter)) {
+    if (
+      textureNeedsGenerateMipmaps(texture, supportsMips) == true ||
+      (texture is FramebufferTexture && 
+        texture.minFilter != NearestFilter && 
+        texture.minFilter != LinearFilter
+      )
+    ){
       return MathUtils.log2(
         math.max(
           image.width,
           image.height
         )
       ).toInt() + 1;
-    } else if (texture.mipmaps.isNotEmpty) {
+    } 
+    else if (texture.mipmaps.isNotEmpty) {
       // user-defined mipmaps
-
       return texture.mipmaps.length;
-    } else if (texture is CompressedTexture && texture.image is List) {
+    } 
+    else if (texture is CompressedTexture && texture.image is List) {
       // Dart: TODO texture.image is List ???
       return image.mipmaps.length;
-    } else {
+    } 
+    else {
       // texture without mipmaps (only base level)
-
       return 1;
     }
   }
@@ -496,6 +502,8 @@ class WebGLTextures {
 
   bool initTexture(Map<String, dynamic> textureProperties, Texture texture) {
     bool forceUpload = false;
+
+    // state.unbindTexture(_gl.TEXTURE_2D);
 
     if (textureProperties["__webglInit"] != true) {
       textureProperties["__webglInit"] = true;
@@ -1091,7 +1099,7 @@ class WebGLTextures {
             if (allocateMemory) {
               state.texStorage2D(_gl.TEXTURE_2D, levels, glInternalFormat, image.width.toInt(), image.height.toInt());
             }
-
+            
             state.texSubImage2DIf(_gl.TEXTURE_2D, 0, 0, 0, glFormat, glType, image);
           } 
           else {
@@ -1410,15 +1418,17 @@ class WebGLTextures {
         _gl.pixelStorei(_gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, _gl.NONE);
       }
 
-      final isCompressed = (texture.isCompressedTexture || texture.image[0] is CompressedTexture);
+      final isCompressed = (texture.isCompressedTexture || texture is CompressedTexture);
       final isDataTexture = (texture.image[0] != null && texture.image[0] is DataTexture);
+      final isCubeTexture = (texture.image[0] != null && texture.image[0] is CubeTexture);
 
       final cubeImage = [];
 
       for (int i = 0; i < 6; i++) {
         if (!isCompressed && !isDataTexture) {
           cubeImage.add(resizeImage(texture.image[i], false, true, maxCubemapSize));
-        } else {
+        } 
+        else {
           cubeImage.add(isDataTexture ? texture.image[i].image : texture.image[i]);
         }
 
@@ -1473,7 +1483,8 @@ class WebGLTextures {
             }
           }
         }
-      } else {
+      } 
+      else {
         mipmaps = texture.mipmaps;
 
         if (useTexStorage && allocateMemory) {
@@ -1487,11 +1498,12 @@ class WebGLTextures {
         }
 
         for (int i = 0; i < 6; i++) {
-          if (isDataTexture) {
+          if (isDataTexture || isCubeTexture) {
             if (useTexStorage) {
               state.texSubImage2D(_gl.TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, 0, 0, cubeImage[i].width, cubeImage[i].height,
                   glFormat, glType, cubeImage[i].data);
-            } else {
+            } 
+            else {
               state.texImage2D(_gl.TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, glInternalFormat, cubeImage[i].width,
                   cubeImage[i].height, 0, glFormat, glType, cubeImage[i].data);
             }
@@ -1508,7 +1520,8 @@ class WebGLTextures {
                     mipmapImage.height, 0, glFormat, glType, mipmapImage.data);
               }
             }
-          } else {
+          } 
+          else {
             if (useTexStorage) {
               state.texSubImage2DIf(_gl.TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, 0, 0, glFormat, glType, cubeImage[i]);
             } else {

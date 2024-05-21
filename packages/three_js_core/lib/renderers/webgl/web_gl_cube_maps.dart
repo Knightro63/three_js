@@ -46,7 +46,7 @@ class WebGLCubeMaps {
     return texture;
   }
 
-  onTextureDispose(event) {
+  void onTextureDispose(event) {
     final texture = event.target;
 
     texture.removeEventListener('dispose', onTextureDispose);

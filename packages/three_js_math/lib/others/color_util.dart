@@ -28,6 +28,9 @@ class Color{
     storage = Float32List.fromList([red,green,blue,alpha]);
   }
   Color.fromList(List<double> list){
+    if(list.length <= 3){
+      list.add(255);
+    }
     storage = Float32List.fromList(list);
   }
   Color.fromHex64(int hex){

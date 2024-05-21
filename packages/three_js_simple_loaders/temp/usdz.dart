@@ -131,6 +131,15 @@ class USDZLoader extends Loader {
 	_parse(Uint8List buffer) {
 		final parser = USDAParser();
 
+		bool isCrateFile(Uint8List buffer){
+			// Check if this a crate file. First 7 bytes of a crate file are "PXR-USDC".
+			final fileHeader = buffer.sublist(0, 7);
+			final crateHeader = Uint8List.fromList([0x50, 0x58, 0x52, 0x2D, 0x55, 0x53, 0x44, 0x43]);
+
+			// If this is not a crate file, we assume it is a plain USDA file.
+			return fileHeader.every((index){return fileHeader[index] == crateHeader[index];});
+		}
+
 		parseAssets(zip) {
 			final data = {};
 			final loader = FileLoader();
@@ -139,7 +148,7 @@ class USDZLoader extends Loader {
 
 			for (final filename in zip ) {
 				if ( filename.endsWith( 'png' ) ) {
-					final blob =  Blob( [ zip[ filename ] ], { type: { type: 'image/png' } } );
+					final blob =  Blob( [ zip[ filename ] ], { 'type': { 'type': 'image/png' } } );
 					data[ filename ] = URL.createObjectURL( blob );
 				}
 
@@ -157,14 +166,7 @@ class USDZLoader extends Loader {
 			return data;
 		}
 
-		bool isCrateFile(Uint8List buffer){
-			// Check if this a crate file. First 7 bytes of a crate file are "PXR-USDC".
-			final fileHeader = buffer.sublist(0, 7);
-			final crateHeader = Uint8List.fromList([0x50, 0x58, 0x52, 0x2D, 0x55, 0x53, 0x44, 0x43]);
 
-			// If this is not a crate file, we assume it is a plain USDA file.
-			return fileHeader.every((index){return fileHeader[index] == crateHeader[index];});
-		}
 
 		findUSD( zip) {
 			if ( zip.length < 1 ) return null;
@@ -266,13 +268,29 @@ class USDZLoader extends Loader {
 			if ('prepend references' in data) {
 				final String reference = data['prepend references'];
 				final parts = reference.split( '@' );
-				final path = parts[1].replaceAll('/^.\//', '');
-				final id = parts[2].replaceAll('/^<\//', '' ).replaceAll('/>\$/', '' );
+				final path = parts[1].replaceAll(r'/^.\//', '');
+				final id = parts[2].replaceAll(r'/^<\//', '' ).replaceAll(r'/>\$/', '' );
 
 				return findGeometry(assets[path], id);
 			}
 
 			return findGeometry(data);
+		}
+
+		toFlatBufferAttribute( attribute, indices ) {
+			final array = attribute.array;
+			final itemSize = attribute.itemSize;
+			final array2 = array.constructor( indices.length * itemSize );
+
+			int index = 0, index2 = 0;
+			for ( int i = 0, l = indices.length; i < l; i ++ ) {
+				index = indices[ i ] * itemSize;
+				for ( int j = 0; j < itemSize; j ++ ) {
+					array2[ index2 ++ ] = array[ index ++ ];
+				}
+			}
+
+			return BufferAttribute( array2, itemSize );
 		}
 
 	  buildGeometry( data ) {
@@ -310,7 +328,7 @@ class USDZLoader extends Loader {
 				if ( 'int[] primvars:st:indices' in data ) {
 					geometry = geometry.toNonIndexed();
 
-					final indices = JSON.parse( data[ 'int[] primvars:st:indices' ] );
+					final indices = jsonDecode( data[ 'int[] primvars:st:indices' ] );
 					geometry.setAttributeFromString( 'uv', toFlatBufferAttribute( attribute, indices ) );
 				} 
         else {
@@ -321,21 +339,7 @@ class USDZLoader extends Loader {
 			return geometry;
 		}
 
-		toFlatBufferAttribute( attribute, indices ) {
-			final array = attribute.array;
-			final itemSize = attribute.itemSize;
-			final array2 = array.constructor( indices.length * itemSize );
 
-			int index = 0, index2 = 0;
-			for ( int i = 0, l = indices.length; i < l; i ++ ) {
-				index = indices[ i ] * itemSize;
-				for ( int j = 0; j < itemSize; j ++ ) {
-					array2[ index2 ++ ] = array[ index ++ ];
-				}
-			}
-
-			return BufferAttribute( array2, itemSize );
-		}
 
 		findMeshMaterial( data ) {
 			if ( ! data ) return null;
@@ -529,14 +533,14 @@ class USDZLoader extends Loader {
 					final sampler = data[ 'def Shader "normal_texture"' ];
 
 					material.normalMap = buildTexture( sampler );
-					material.normalMap.colorSpace = NoColorSpace;
+					//material.normalMap.colorSpace = NoColorSpace;
 				}
 			}
 
 			return material;
 		}
 
-		findTexture( data, id ) {
+		void findTexture( data, id ) {
 			for ( final name in data ) {
 				final object = data[ name ];
 
@@ -544,18 +548,18 @@ class USDZLoader extends Loader {
 					return object;
 				}
 
-				if ( typeof object === 'object' ) {
+				if ( typeof object == 'object' ) {
 					final texture = findTexture( object, id );
 					if ( texture ) return texture;
 				}
 			}
 		}
 
-		buildTexture( data ) {
+		Future<Texture?> buildTexture( data ) async{
 			if ( 'asset inputs:file' in data ) {
-				final path = data[ 'asset inputs:file' ].replace( /@*/g, '' );
+				final path = data[ 'asset inputs:file' ].replaceAll( r'/@*/g', '' );
 				final loader = TextureLoader();
-				final texture = loader.load( assets[ path ] );
+				final texture = await loader.fromAsset( assets[ path ] );
 				final map = {
 					'"clamp"': ClampToEdgeWrapping,
 					'"mirror"': MirroredRepeatWrapping,
@@ -563,11 +567,11 @@ class USDZLoader extends Loader {
 				};
 
 				if ( 'token inputs:wrapS' in data ) {
-					texture.wrapS = map[ data[ 'token inputs:wrapS' ] ];
+					texture?.wrapS = map[ data[ 'token inputs:wrapS' ] ];
 				}
 
 				if ( 'token inputs:wrapT' in data ) {
-					texture.wrapT = map[ data[ 'token inputs:wrapT' ] ];
+					texture?.wrapT = map[ data[ 'token inputs:wrapT' ] ];
 				}
 
 				return texture;
@@ -582,9 +586,9 @@ class USDZLoader extends Loader {
 			final mesh = geometry ? Mesh( geometry, material ) : Object3D();
 
 			if ( 'matrix4d xformOp:transform' in data ) {
-				final array = JSON.parse( '[' + data[ 'matrix4d xformOp:transform' ].replace( /[()]*/g, '' ) + ']' );
+				final array = jsonDecode( '[${data[ 'matrix4d xformOp:transform' ].replaceAll( r'/[()]*/g', '' )}]' );
 
-				mesh.matrix.fromArray( array );
+				mesh.matrix.copyFromArray( array );
 				mesh.matrix.decompose( mesh.position, mesh.quaternion, mesh.scale );
 			}
 
@@ -599,8 +603,8 @@ class USDZLoader extends Loader {
         else if ( name.startsWith( 'def Xform' ) ) {
 					final mesh = buildObject( data[ name ] );
 
-					if ('/def Xform "(\w+)"/'.test( name ) ) {
-						mesh.name = '/def Xform "(\w+)"/'.exec( name )[ 1 ];
+					if (r'/def Xform "(\w+)"/'.contains( name ) ) {
+						mesh.name = r'/def Xform "(\w+)"/'.exec( name )[ 1 ];
 					}
 
 					group.add( mesh );

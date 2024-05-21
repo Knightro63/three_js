@@ -24,7 +24,7 @@ class SpotLightHelper extends Object3D {
   ///
   /// [color] -- (optional) if this is not the set the helper will take
   /// the color of the light.
-  SpotLightHelper(this.light, this.color) : super() {
+  SpotLightHelper(this.light, [this.color]) : super() {
     matrixAutoUpdate = false;
     light.updateMatrixWorld(false);
 

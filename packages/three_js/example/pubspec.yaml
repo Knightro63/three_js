@@ -47,15 +47,19 @@ flutter:
     - assets/models/obj/male02/
     - assets/models/json/
     - assets/models/gcode/
+    - assets/models/ply/binary/
+    - assets/models/vox/
     - assets/models/xyz/
     - assets/models/gltf/
     - assets/models/gltf/test/
+    - assets/models/gltf/Flower/
     - assets/models/gltf/RobotExpressive/
     - assets/models/gltf/DamagedHelmet/glTF/
     - assets/models/gltf/AnimatedMorphSphere/glTF/
     - assets/models/svg/
     - assets/models/fbx/
     - assets/textures/
+    - assets/textures/lava/
     - assets/textures/lensflare/
     - assets/textures/equirectangular/
     - assets/textures/terrain/

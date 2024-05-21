@@ -2,10 +2,8 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'dart:html' as html;
 import '../utils/blob.dart';
-import 'package:flutter_gl/flutter_gl.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:image/image.dart';
 import 'package:three_js_core/three_js_core.dart';
 
 class ImageLoaderLoader {
@@ -37,19 +35,22 @@ class ImageLoaderLoader {
 }
 
 // TODO: Fix this
-ImageElement? imageProcess2(Uint8List? bytes, String? url, bool flipY) {
-  Image? i = bytes == null? null:decodeImage(bytes);
-  final image = html.ImageElement(
-    src: url,
-    width: i?.width ?? 1,
-    height: i?.height ?? 1
-  );
-  
-  return ImageElement(
-    url: url,
-    data: image,//bytes==null?null:Uint8Array.from(bytes),
-    src: url,
-    width: i?.width ?? 1,
-    height: i?.height ?? 1
-  );
+Future<ImageElement?> processImage(Uint8List? bytes, String? url, bool flipY) {
+  final completer = Completer<ImageElement>();
+  final imageDom = html.ImageElement();
+  imageDom.crossOrigin = "";
+  imageDom.src = url;
+
+  imageDom.onLoad.listen((e) {
+    completer.complete(
+      ImageElement(
+        url: url,
+        data: imageDom,
+        width: imageDom.width!.toDouble(),
+        height: imageDom.height!.toDouble()
+      )
+    );
+  });
+
+  return completer.future;
 }

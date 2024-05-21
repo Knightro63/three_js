@@ -1,5 +1,5 @@
 import 'shader_material.dart';
-
+import './material.dart';
 /// This class works just like [ShaderMaterial], except that definitions
 /// of built-in uniforms and attributes are not automatically prepended to the
 /// GLSL shader code.

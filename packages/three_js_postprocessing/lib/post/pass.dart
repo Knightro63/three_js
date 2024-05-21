@@ -45,7 +45,7 @@ class FullScreenQuad {
   BufferGeometry geometry = PlaneGeometry(2, 2);
   late Mesh _mesh;
 
-  FullScreenQuad(material) {
+  FullScreenQuad([Material? material]) {
     geometry.name = "FullScreenQuadGeometry";
     _mesh = Mesh(geometry, material);
   }

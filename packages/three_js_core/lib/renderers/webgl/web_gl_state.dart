@@ -561,7 +561,12 @@ class WebGLState {
   }
 
   void texSubImage2DNoSize(target, level, x, y, glFormat, glType, data) {
-    gl.texSubImage2D(target, level, 0,0, x, y, glFormat, glType, data.data);
+    if (kIsWeb) {
+      gl.texSubImage2D_NOSIZE(target, level, x, y, glFormat, glType, data);
+    } 
+    else {
+      gl.texSubImage2D(target, level, 0, 0, x, y, glFormat, glType, data);
+    }
   }
 
   void texSubImage3D(target, level, xoffset, yoffset, zoffset, width, height, depth, format, type, pixels) {

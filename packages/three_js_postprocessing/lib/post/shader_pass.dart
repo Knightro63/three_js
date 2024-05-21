@@ -23,6 +23,7 @@ class ShaderPass extends Pass {
     uniforms = UniformsUtils.clone(shader?["uniforms"]);
     Map<String, dynamic> _defines = {};
     _defines.addAll(shader?["defines"] ?? {});
+
     material = ShaderMaterial.fromMap({
       "defines": _defines,
       "uniforms": uniforms,
