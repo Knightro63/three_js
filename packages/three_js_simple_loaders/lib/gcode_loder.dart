@@ -68,7 +68,7 @@ class GCodeLoader extends Loader {
     return _parse(tf.data);
   }
 
-	Group _parse(Uint8List bytes) {
+	Future<Group> _parse(Uint8List bytes) async{
     String data = String.fromCharCodes(bytes);
     final object = Group();
 

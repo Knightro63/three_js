@@ -49,6 +49,7 @@ class _State extends State<WebglLoaderGcode> {
 
     final loader = three.GCodeLoader();
     final object = await loader.fromAsset( 'assets/models/gcode/benchy.gcode');
+    print(object?.children.length);
     object?.position.setValues( - 100, - 20, 100 );
 
     threeJs.scene.add( object );

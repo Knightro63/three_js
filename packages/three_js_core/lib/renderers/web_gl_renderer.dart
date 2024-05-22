@@ -806,10 +806,12 @@ class WebGLRenderer {
             if (groups.isNotEmpty) {
               for (int i = 0, l = groups.length; i < l; i++) {
                 Map<String, dynamic> group = groups[i];
-                final groupMaterial = material.children[group["materialIndex"]];
+                if(group["materialIndex"] < material.children.length){
+                  final groupMaterial = material.children[group["materialIndex"]];
 
-                if (groupMaterial.visible) {
-                  currentRenderList!.push(object, geometry, groupMaterial, groupOrder, _vector3.z, group);
+                  if (groupMaterial.visible) {
+                    currentRenderList!.push(object, geometry, groupMaterial, groupOrder, _vector3.z, group);
+                  }
                 }
               }
             } 
@@ -1503,8 +1505,8 @@ class WebGLRenderer {
     _currentMaterialId = -1; // reset current material to ensure correct uniform bindings
   }
 
-  void readRenderTargetPixels(WebGLRenderTarget renderTarget, x, y, width, height, buffer, activeCubeFaceIndex) {
-    Map<String, dynamic>? framebuffer = properties.get(renderTarget)["__webglFramebuffer"];
+  void readRenderTargetPixels(WebGLRenderTarget renderTarget, int x, int y, int width, int height, buffer, [activeCubeFaceIndex]) {
+    dynamic framebuffer = properties.get(renderTarget)["__webglFramebuffer"]; //can be Map or int
 
     if (renderTarget.isWebGLCubeRenderTarget && activeCubeFaceIndex != null) {
       framebuffer = framebuffer?[activeCubeFaceIndex];
@@ -1543,9 +1545,12 @@ class WebGLRenderer {
         // the following if statement ensures valid read requests (no out-of-bounds pixels, see #8604)
 
         if ((x >= 0 && x <= (renderTarget.width - width)) && (y >= 0 && y <= (renderTarget.height - height))) {
-          // _gl.readPixels(x, y, width, height, utils.convert(textureFormat),
-          //     utils.convert(textureType), buffer);
-          _gl.readPixels(x, y, width, height, utils.convert(textureFormat), utils.convert(textureType), buffer);
+          if(kIsWeb){
+            _gl.readPixels(x, y, width, height, utils.convert(textureFormat), utils.convert(textureType), buffer);
+
+          }else{
+            _gl.readPixelsNative(x, y, width, height, utils.convert(textureFormat), utils.convert(textureType), buffer);
+          }
         }
       } finally {
         final framebuffer =

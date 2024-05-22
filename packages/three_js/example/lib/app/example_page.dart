@@ -27,6 +27,7 @@ import 'package:example/shadow/webgl_shader_lava.dart';
 import 'package:example/shadow/webgl_shadowmap_csm.dart';
 import 'package:example/shadow/webgl_shadowmap_pointlight.dart';
 import 'package:example/shadow/webgl_shadowmap_vsm.dart';
+import 'package:example/shadow/webgl_simple_gi.dart';
 import 'package:example/shadow/webgl_water.dart';
 import 'package:example/volume/webgl_volume_cloud.dart';
 import 'package:example/volume/webgl_volume_instancing.dart';
@@ -240,6 +241,9 @@ class _MyAppState extends State<ExamplePage> {
     } 
     else if (fileName == "webgl_geometry_colors") {
       page = WebglGeometryColors(fileName: fileName);
+    }
+    else if(fileName == 'webgl_simple_gi'){
+      page = WebglSimpleGi(fileName: fileName);
     }
     else if(fileName == "webgl_lensflares"){
       page = WebglLensflars(fileName: fileName);

@@ -171,10 +171,12 @@ class _State extends State<WebglShadowmapPointlight> {
   }
 
   Future<three.ImageElement> generateTexture() async{
+    Uint8List buffer = await _capturePng();
+
     return three.ImageElement(
       width: 2,
       height: 2,
-      data: Uint8Array.from(await _capturePng())
+      data: Uint8Array.from(buffer)
     );
   }
 }

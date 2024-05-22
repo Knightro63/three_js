@@ -7,4 +7,25 @@ class GroupMaterial extends Material {
     this.children = children ?? [];
     type = "GroupMaterial";
   }
+
+  void add(Material material){
+    children.add(material);
+  }
+
+  @override
+  GroupMaterial copy(Material source) {
+    super.copy(source);
+
+    if(source is GroupMaterial){
+      children = source.children.sublist(0);
+    }
+
+    return this;
+  }
+
+    /// Return a new material with the same parameters as this material.
+  @override
+  GroupMaterial clone() {
+    return GroupMaterial().copy(this);
+  }
 }

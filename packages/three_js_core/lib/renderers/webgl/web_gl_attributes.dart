@@ -83,8 +83,9 @@ class WebGLAttributes {
     if (updateRange["count"] == -1) {
       // Not using update ranges
       gl.bufferSubData(bufferType, 0, array, 0, array.lengthInBytes);
-    } else {
-      print(" WebGLAttributes.dart gl.bufferSubData need debug confirm.... ");
+    } 
+    else {
+      console.info(" WebGLAttributes.dart gl.bufferSubData need debug confirm.... ");
       gl.bufferSubData(bufferType, updateRange["offset"] * attribute.itemSize, array, updateRange["offset"], updateRange["count"]);
 
       updateRange["count"] = -1; // reset range

@@ -116,10 +116,10 @@ class PLYLoader extends Loader {
 	_parse(Uint8List data ) {
 
 		Map<String,dynamic> parseHeader(String data, [headerLength = 0 ]) {
-			final patternHeader = RegExp(r'/^ply([\s\S]*)end_header(\r\n|\r|\n)/');
+			final patternHeader = RegExp('/^ply([\s\S]*)end_header(\r\n|\r|\n)/');
 			String headerText = '';
 			final result = data.split(patternHeader);//patternHeader.exec( data );
-
+      print(result);
 			if ( result.isNotEmpty ) {
 				headerText = result[ 1 ];
 			}

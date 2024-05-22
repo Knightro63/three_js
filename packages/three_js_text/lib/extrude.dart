@@ -426,9 +426,7 @@ class ExtrudeGeometry extends BufferGeometry {
           }
         }
 
-        scope.addGroup(
-            start.toInt(), (verticesArray.length / 3 - start).toInt(),
-            0);
+        scope.addGroup(start.toInt(), (verticesArray.length / 3 - start).toInt(),0);
       }
 
       void f4(num a, num b, num c, num d) {

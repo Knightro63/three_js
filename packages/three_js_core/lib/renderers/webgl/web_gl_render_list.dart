@@ -63,8 +63,14 @@ class WebGLRenderList {
     transparent.length = 0;
   }
 
-  RenderItem getNextRenderItem(Object3D object, BufferGeometry? geometry, Material? material, int groupOrder, double z,
-      Map<String, dynamic>? group) {
+  RenderItem getNextRenderItem(
+    Object3D object, 
+    BufferGeometry? geometry, 
+    Material? material, 
+    int groupOrder, 
+    double z,
+    Map<String, dynamic>? group
+  ) {
     RenderItem? renderItem = renderItems[renderItemsIndex];
 
     if (renderItem == null) {
@@ -101,10 +107,12 @@ class WebGLRenderList {
 
     if (material.transmission > 0.0) {
       transmissive.add(renderItem);
-    } else {
+    } 
+    else {
       if (material.transparent == true) {
         transparent.add(renderItem);
-      } else {
+      } 
+      else {
         opaque.add(renderItem);
       }
     }

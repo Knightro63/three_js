@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
 import 'package:three_js_geometry/three_js_geometry.dart';
@@ -142,13 +143,16 @@ class _State extends State<WebglShaderLava> {
 
     final renderModel = RenderPass( threeJs.scene, threeJs.camera );
     final effectBloom = BloomPass( 1.25 );
-    final outputPass = OutputPass();
 
     final composer = EffectComposer( threeJs.renderer! );
 
     composer.addPass( renderModel );
     composer.addPass( effectBloom );
-    //composer.addPass( outputPass );
+
+    if(kIsWeb){
+      final outputPass = OutputPass();
+      composer.addPass( outputPass );
+    }
 
     threeJs.addAnimationEvent((dt){
       uniforms[ 'time' ]!['value'] += 0.3 * dt;
