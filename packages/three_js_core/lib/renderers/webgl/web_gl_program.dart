@@ -244,25 +244,20 @@ class WebGLProgram extends DefaultProgram with WebGLProgramExtra {
         parameters.physicallyCorrectLights ? '#define PHYSICALLY_CORRECT_LIGHTS' : '',
 
         parameters.logarithmicDepthBuffer ? '#define USE_LOGDEPTHBUF' : '',
-        (parameters.logarithmicDepthBuffer && parameters.rendererExtensionFragDepth)
-            ? '#define USE_LOGDEPTHBUF_EXT'
-            : '',
+        (parameters.logarithmicDepthBuffer && parameters.rendererExtensionFragDepth)? '#define USE_LOGDEPTHBUF_EXT': '',
 
         'uniform mat4 viewMatrix;',
         'uniform vec3 cameraPosition;',
         'uniform bool isOrthographic;',
 
         (parameters.toneMapping != NoToneMapping) ? '#define TONE_MAPPING' : '',
-        (parameters.toneMapping != NoToneMapping)
-            ? shaderChunk['tonemapping_pars_fragment']
-            : '', // this code is required here because it is used by the toneMapping() defined below
+        (parameters.toneMapping != NoToneMapping)? shaderChunk['tonemapping_pars_fragment']: '', // this code is required here because it is used by the toneMapping() defined below
         (parameters.toneMapping != NoToneMapping) ? getToneMappingFunction('toneMapping', parameters.toneMapping) : '',
 
         parameters.dithering ? '#define DITHERING' : '',
         parameters.opaque ? '#define OPAQUE' : '',
 
-        shaderChunk[
-            'encodings_pars_fragment'], // this code is required here because it is used by the various encoding/decoding defined below
+        shaderChunk['encodings_pars_fragment'], // this code is required here because it is used by the various encoding/decoding defined below
 
         getTexelEncodingFunction('linearToOutputTexel', parameters.outputEncoding),
 

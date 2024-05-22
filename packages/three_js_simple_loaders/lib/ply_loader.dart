@@ -1,7 +1,5 @@
 import "dart:io";
 import "dart:typed_data";
-
-import "package:flutter_gl/flutter_gl.dart";
 import "package:three_js_core/three_js_core.dart";
 import "package:three_js_core_loaders/three_js_core_loaders.dart";
 import "package:three_js_math/three_js_math.dart";
@@ -113,25 +111,26 @@ class PLYLoader extends Loader {
 		customPropertyMapping = mapping;
 	}
 
-	_parse(Uint8List data ) {
+	BufferGeometry _parse(Uint8List data ) {
 
 		Map<String,dynamic> parseHeader(String data, [headerLength = 0 ]) {
-			final patternHeader = RegExp('/^ply([\s\S]*)end_header(\r\n|\r|\n)/');
+			final patternHeader = RegExp(r'/^ply([\s\S]*)end_header(\r\n|\r|\n)/');
 			String headerText = '';
-			final result = data.split(patternHeader);//patternHeader.exec( data );
-      print(result);
+			final result = data.split(patternHeader);
+
 			if ( result.isNotEmpty ) {
-				headerText = result[ 1 ];
+				headerText = result[0];
 			}
 
 			final header = {
 				'comments': [],
 				'elements': [],
 				'headerLength': headerLength,
-				'objInfo': ''
+				'objInfo': '',
+        'format': ''
 			};
 
-			final lines = headerText.split( RegExp(r'/\r\n|\r|\n/') );
+			final lines = headerText.split( RegExp('/\r\n|\r|\n/') );
 			Map<String,dynamic>? currentElement;
 
 			Map<String, dynamic> make_ply_element_property( propertValues, propertyNameMapping ) {
@@ -159,9 +158,9 @@ class PLYLoader extends Loader {
 
 				if ( line == '' ) continue;
 
-				final lineValues = line.split(RegExp(r'/\s+/'));
+				final lineValues = line.split(RegExp(' '));
 				final lineType = lineValues.removeAt(0);
-				line = lineValues.join( ' ' );
+				line = lineValues.join(' ');
 
 				switch ( lineType ) {
 					case 'format':
@@ -236,13 +235,13 @@ class PLYLoader extends Loader {
 
 		Map<String, dynamic> createBuffer() {
 			final Map<String, dynamic> buffer = {
-			  'indices': [],
-			  'vertices': [],
-			  'normals': [],
-			  'uvs': [],
-			  'faceVertexUvs': [],
-			  'colors': [],
-			  'faceVertexColors': []
+			  'indices': <int>[],
+			  'vertices': <double>[],
+			  'normals': <double>[],
+			  'uvs': <double>[],
+			  'faceVertexUvs': <double>[],
+			  'colors': <double>[],
+			  'faceVertexColors': <double>[]
 			};
 
 			for (final customProperty in customPropertyMapping.keys) {
@@ -252,7 +251,7 @@ class PLYLoader extends Loader {
 			return buffer;
 		}
 
-		Map<String, dynamic> mapElementAttributes(Map<String,dynamic> properties ) {
+		Map<String, dynamic> mapElementAttributes(List<dynamic> properties ) {
 			// final String elementNames = properties.map( property => {
 			// 	return property.name;
 			// });
@@ -260,7 +259,7 @@ class PLYLoader extends Loader {
 			String? findAttrName( names ) {
 				for (int i = 0, l = names.length; i < l; i ++ ) {
 					final name = names[ i ];
-					if ( properties.containsKey(name) ) return name;//.contains( name )
+					if ( properties.contains(name) ) return name;//.contains( name )
 				}
 
 				return null;
@@ -334,14 +333,14 @@ class PLYLoader extends Loader {
 
 		void handleElement(Map<String,dynamic> buffer, elementName, element, Map<String,dynamic> cacheEntry ) {
 			if ( elementName == 'vertex' ) {
-				buffer['vertices'].add( element[ cacheEntry['attrX'] ], element[ cacheEntry['attrY'] ], element[ cacheEntry['attrZ'] ] );
+				buffer['vertices'].addAll(<double>[ element[ cacheEntry['attrX'] ].toDouble(), element[ cacheEntry['attrY'] ].toDouble(), element[ cacheEntry['attrZ'] ].toDouble() ]);
 
 				if ( cacheEntry['attrNX'] != null && cacheEntry['attrNY'] != null && cacheEntry['attrNZ'] != null ) {
-					buffer['normals'].add( element[ cacheEntry['attrNX'] ], element[ cacheEntry['attrNY'] ], element[ cacheEntry['attrNZ'] ] );
+					buffer['normals'].addAll(<double>[ element[ cacheEntry['attrNX'] ].toDouble(), element[ cacheEntry['attrNY'] ].toDouble(), element[ cacheEntry['attrNZ'] ].toDouble() ]);
 				}
 
 				if ( cacheEntry['attrS'] != null && cacheEntry['attrT'] != null ) {
-					buffer['uvs'].add( element[ cacheEntry['attrS'] ], element[ cacheEntry['attrT'] ] );
+					buffer['uvs'].addAll(<double>[ element[ cacheEntry['attrS'] ].toDouble(), element[ cacheEntry['attrT'] ].toDouble() ]);
 				}
 
 				if ( cacheEntry['attrR'] != null && cacheEntry['attrG'] != null && cacheEntry['attrB'] != null ) {
@@ -351,7 +350,7 @@ class PLYLoader extends Loader {
 						element[ cacheEntry['attrB'] ] / 255.0
 					).convertSRGBToLinear();
 
-					buffer['colors'].add( _color.red, _color.green, _color.blue );
+					buffer['colors'].addAll([ _color.red, _color.green, _color.blue ]);
 				}
 
 				for (final customProperty in customPropertyMapping.keys) {
@@ -365,17 +364,17 @@ class PLYLoader extends Loader {
 				final texcoord = element['texcoord'];
 
 				if ( vertex_indices.length == 3 ) {
-					buffer['indices'].add( vertex_indices[ 0 ], vertex_indices[ 1 ], vertex_indices[ 2 ] );
+					buffer['indices'].addAll(<int>[vertex_indices[ 0 ], vertex_indices[ 1 ], vertex_indices[ 2 ]] );
 
-					if ( texcoord && texcoord.length == 6 ) {
-						buffer['faceVertexUvs'].add( texcoord[ 0 ], texcoord[ 1 ] );
-						buffer['faceVertexUvs'].add( texcoord[ 2 ], texcoord[ 3 ] );
-						buffer['faceVertexUvs'].add( texcoord[ 4 ], texcoord[ 5 ] );
+					if (texcoord != null && texcoord.length == 6 ) {
+						buffer['faceVertexUvs'].addAll(<double>[ texcoord[ 0 ].toDouble(), texcoord[ 1 ].toDouble() ]);
+						buffer['faceVertexUvs'].addAll(<double>[ texcoord[ 2 ].toDouble(), texcoord[ 3 ].toDouble() ]);
+						buffer['faceVertexUvs'].addAll( <double>[texcoord[ 4 ].toDouble(), texcoord[ 5 ].toDouble() ]);
 					}
 				} 
         else if ( vertex_indices.length == 4 ) {
-					buffer['indices'].add( vertex_indices[ 0 ], vertex_indices[ 1 ], vertex_indices[ 3 ] );
-					buffer['indices'].add( vertex_indices[ 1 ], vertex_indices[ 2 ], vertex_indices[ 3 ] );
+					buffer['indices'].addAll(<int>[vertex_indices[ 0 ].toInt(), vertex_indices[ 1 ].toInt(), vertex_indices[ 3 ].toInt() ]);
+					buffer['indices'].addAll(<int>[ vertex_indices[ 1 ].toInt(), vertex_indices[ 2 ].toInt(), vertex_indices[ 3 ].toInt() ]);
 				}
 
 				// face colors
@@ -386,9 +385,9 @@ class PLYLoader extends Loader {
 						element[ cacheEntry['attrG'] ] / 255.0,
 						element[ cacheEntry['attrB'] ] / 255.0
 					).convertSRGBToLinear();
-					buffer['faceVertexColors'].add( _color.red, _color.green, _color.blue );
-					buffer['faceVertexColors'].add( _color.red, _color.green, _color.blue );
-					buffer['faceVertexColors'].add( _color.red, _color.green, _color.blue );
+					buffer['faceVertexColors'].addAll( [_color.red, _color.green, _color.blue] );
+					buffer['faceVertexColors'].addAll( [_color.red, _color.green, _color.blue ]);
+					buffer['faceVertexColors'].addAll([ _color.red, _color.green, _color.blue ]);
 				}
 			}
 		}
@@ -396,7 +395,7 @@ class PLYLoader extends Loader {
 		BufferGeometry parseASCII( data, header ) {
 			final buffer = createBuffer();
 
-			final patternBody = RegExp(r'/end_header\s+(\S[\s\S]*\S|\S)\s*$/');
+			final patternBody = RegExp('/end_header\s+(\S[\s\S]*\S|\S)\s*/');
 			List<String> body = [];
       String matches = data.split( patternBody );
 
@@ -420,37 +419,37 @@ class PLYLoader extends Loader {
 			return postProcess( buffer );
 		}
 
-		List binaryReadElement( at, properties ) {
+		List binaryReadElement(int at, properties ) {
 			final element = {};
 			int read = 0;
-
+      
 			for ( int i = 0; i < properties.length; i ++ ) {
 				final property = properties[ i ];
-				final valueReader = property['valueReader'];
+				final Map<String,dynamic> valueReader = property['valueReader'];
 
 				if ( property['type'] == 'list' ) {
 					final list = [];
 
-					final n = property['countReader'].read( at + read );
-					read += property['countReader'].size as int;
+					final n = property['countReader']['read']( at + read );
+					read += property['countReader']['size'] as int;
 
 					for ( int j = 0; j < n; j ++ ) {
-						list.add( valueReader.read( at + read ) );
-						read += valueReader.size as int;
+						list.add( valueReader['read']( at + read ) );
+						read += valueReader['size'] as int;
 					}
 
 					element[ property['name'] ] = list;
 				} 
         else {
-					element[ property['name'] ] = valueReader.read( at + read );
-					read += valueReader.size as int;
+					element[ property['name'] ] = valueReader['read']( at + read );
+					read += valueReader['size'] as int;
 				}
 			}
 
 			return [ element, read ];
 		}
 
-		void setPropertyBinaryReaders(Map<String,dynamic> properties, ByteData body, Endian littleEndian ) {
+		void setPropertyBinaryReaders(List<dynamic> properties, ByteData body, Endian littleEndian ) {
 			Map<String,dynamic>? getBinaryReader(ByteData dataview, String type, Endian littleEndian ) {
 				switch ( type ) {
 					// corespondences for non-specific length types here match rply:
@@ -496,27 +495,27 @@ class PLYLoader extends Loader {
 			}
 		}
 
-		BufferGeometry parseBinary(ByteData data, header ) {
+		BufferGeometry parseBinary(ByteData data, Map<String,dynamic> header ) {
 			final buffer = createBuffer();
 
 			final littleEndian = ( header['format'] == 'binary_little_endian' )?Endian.little:Endian.big;
-			final body = data.buffer.asUint8List().sublist(0,header['headerLength']).buffer.asByteData();//DataView( data, header['headerLength'] );
+			final body = data.buffer.asUint8List().sublist(header['headerLength']).buffer.asByteData();//DataView( data, header['headerLength'] );
 			List result;
       int loc = 0;
 
 			for (int currentElement = 0; currentElement < header['elements'].length; currentElement ++ ) {
-				final elementDesc = header.elements[ currentElement ];
-				final properties = elementDesc.properties;
+				final Map<String,dynamic> elementDesc = header['elements'][ currentElement ];
+				final properties = elementDesc['properties'];
 				final attributeMap = mapElementAttributes( properties );
 
 				setPropertyBinaryReaders( properties, body, littleEndian );
-
-				for (int currentElementCount = 0; currentElementCount < elementDesc.count; currentElementCount ++ ) {
+        
+				for (int currentElementCount = 0; currentElementCount < elementDesc['count']; currentElementCount ++ ) {
 					result = binaryReadElement( loc, properties );
 					loc += result[ 1 ] as int;
 					final element = result[ 0 ];
 
-					handleElement( buffer, elementDesc.name, element, attributeMap );
+					handleElement( buffer, elementDesc['name'], element, attributeMap );
 				}
 			}
 
@@ -558,19 +557,19 @@ class PLYLoader extends Loader {
 
 		BufferGeometry geometry;
 		//if ( data is NativeArray ) {
-			final bytes = data.sublist(0);
-      final temp = extractHeaderText( bytes );
-			final headerText = temp['headerText'];
-      final headerLength = temp['headerLength'];
-			final header = parseHeader( headerText, headerLength );
- 
-			if ( header['format'] == 'ascii' ) {
-				final text = String.fromCharCodes(bytes);
-				geometry = parseASCII( text, header );
-			} 
-      else {
-				geometry = parseBinary( data.buffer.asByteData(), header );
-			}
+    final bytes = data.sublist(0);
+    final temp = extractHeaderText( bytes );
+    final headerText = temp['headerText'];
+    final headerLength = temp['headerLength'];
+    final header = parseHeader( headerText, headerLength );
+
+    if ( header['format'] == 'ascii' ) {
+      final text = String.fromCharCodes(bytes);
+      geometry = parseASCII( text, header );
+    } 
+    else {
+      geometry = parseBinary( data.buffer.asByteData(), header );
+    }
 		// } 
     // else {
 		// 	geometry = parseASCII( data, parseHeader( data ) );
@@ -585,7 +584,7 @@ class ArrayStream {
   int i = 0;
 	ArrayStream(this.arr );
 
-	empty() {
+	bool empty() {
 		return i >= arr.length;
 	}
 

@@ -463,7 +463,10 @@ class WebGLState {
       enable(gl.POLYGON_OFFSET_FILL);
 
       if (currentPolygonOffsetFactor != factor || currentPolygonOffsetUnits != units) {
-        gl.polygonOffset(factor, units);
+        gl.gl.glPolygonOffset(
+          factor, 
+          units
+        );
 
         currentPolygonOffsetFactor = factor;
         currentPolygonOffsetUnits = units;

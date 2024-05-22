@@ -2,6 +2,8 @@ import "dart:typed_data";
 
 import "package:flutter_gl/flutter_gl.dart";
 import "package:three_js_core/three_js_core.dart";
+import "package:three_js_math/buffer/buffer_attribute.dart";
+import "package:three_js_math/three_js_math.dart";
 
  areSharedArrayBuffersSupported() {
 	return SharedArrayBuffer != null;
@@ -37,7 +39,7 @@ void ensureIndex(BufferGeometry geo, options ) {
 		final vertexCount = geo.attributes['position'].count;
 		final bufferConstructor = options.useSharedArrayBuffer ? SharedArrayBuffer : ArrayBuffer;
 		final index = getIndexArray( vertexCount, bufferConstructor: bufferConstructor);
-		geo.setIndex( BufferAttribute( index, 1 ) );
+		geo.setIndex( Uint16BufferAttribute( (index as Uint16Array), 1 ) );
 
 		for (int i = 0; i < vertexCount; i ++ ) {
 			index[ i ] = i;

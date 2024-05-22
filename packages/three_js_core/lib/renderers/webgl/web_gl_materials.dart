@@ -32,10 +32,11 @@ class WebGLMaterials {
     } else if (material is MeshStandardMaterial) {
       refreshUniformsCommon(uniforms, material);
       refreshUniformsStandard(uniforms, material);
-      if (material is MeshPhysicalMaterial) {
-        refreshUniformsPhysical(uniforms, material, transmissionRenderTarget);
-      }
-    } else if (material is MeshMatcapMaterial) {
+    } else if (material is MeshPhysicalMaterial) {
+      refreshUniformsCommon(uniforms, material);
+      refreshUniformsStandard(uniforms, material);
+      refreshUniformsPhysical(uniforms, material, transmissionRenderTarget);
+    }else if (material is MeshMatcapMaterial) {
       refreshUniformsCommon(uniforms, material);
       refreshUniformsMatcap(uniforms, material);
     } else if (material is MeshDepthMaterial) {
@@ -47,10 +48,10 @@ class WebGLMaterials {
       refreshUniformsCommon(uniforms, material);
     } else if (material is LineBasicMaterial) {
       refreshUniformsLine(uniforms, material);
-      if (material is LineDashedMaterial) {
-        refreshUniformsDash(uniforms, material);
-      }
-    } else if (material is PointsMaterial) {
+    }else if (material is LineDashedMaterial) {
+      refreshUniformsLine(uniforms, material);
+      refreshUniformsDash(uniforms, material);
+    }else if (material is PointsMaterial) {
       refreshUniformsPoints(uniforms, material, pixelRatio, height);
     } else if (material is SpriteMaterial) {
       refreshUniformsSprites(uniforms, material);

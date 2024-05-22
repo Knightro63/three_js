@@ -94,7 +94,7 @@ mixin WebGLProgramExtra {
         toneMappingName = 'Linear';
     }
 
-    return 'vec3 $functionName}( vec3 color ) { return ${toneMappingName}ToneMapping( color ); }';
+    return 'vec3 $functionName( vec3 color ) { return ${toneMappingName}ToneMapping( color ); }';
   }
 
   String generateExtensions(parameters) {

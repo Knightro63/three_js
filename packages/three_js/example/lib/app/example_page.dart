@@ -15,6 +15,7 @@ import 'package:example/instancing/webgl_instancing_raycasting.dart';
 import 'package:example/instancing/webgl_instancing_scatter.dart';
 import 'package:example/loaders/webgl_loader_gcode.dart';
 import 'package:example/loaders/webgl_loader_xyz.dart';
+import 'package:example/morphtargets/webgl_modifier_subdivision.dart';
 import 'package:example/morphtargets/webgl_morphtargets_face.dart';
 import 'package:example/others/webgl_interactive_voxelpainter.dart';
 import 'package:example/others/webgl_lod.dart';
@@ -263,7 +264,11 @@ class _MyAppState extends State<ExamplePage> {
 
     else if (fileName == "webgl_helpers") {
       page = WebglHelpers(fileName: fileName);
-    } else if (fileName == "webgl_morphtargets") {
+    }
+    else if(fileName == 'webgl_modifier_subdivision'){
+      page = WebglModifierSubdivision(fileName: fileName);
+    }
+    else if (fileName == "webgl_morphtargets") {
       page = WebglMorphtargets(fileName: fileName);
     } else if (fileName == "webgl_morphtargets_sphere") {
       page = WebglMorphtargetsSphere(fileName: fileName);

@@ -73,7 +73,7 @@ class _State extends State<WebglLightsSpotlight> {
       textures[ filename ] = texture;
     }
 
-    final spotLight = three.SpotLight( 0xffffff, 100 );
+    final spotLight = three.SpotLight( 0xffffff, 0.9 );
     spotLight.position.setValues( 2.5, 5, 2.5 );
     spotLight.angle = math.pi / 6;
     spotLight.penumbra = 1;
@@ -105,21 +105,18 @@ class _State extends State<WebglLightsSpotlight> {
 
     //
 
-    three.PLYLoader().fromAsset( 'assets/models/ply/binary/Lucy100k.ply').then(( geometry ) {
+    final plyGeometry = await three.PLYLoader().fromAsset( 'assets/models/ply/binary/Lucy100k.ply');
+    plyGeometry?.scale( 0.0024, 0.0024, 0.0024 );
+    plyGeometry?.computeVertexNormals();
 
-      geometry!.scale( 0.0024, 0.0024, 0.0024 );
-      geometry.computeVertexNormals();
+    final mat= three.MeshPhongMaterial();
 
-      final material = three.MeshLambertMaterial();
-
-      final mesh = three.Mesh( geometry, material );
-      mesh.rotation.y = - math.pi / 2;
-      mesh.position.y = 0.8;
-      mesh.castShadow = true;
-      mesh.receiveShadow = true;
-      threeJs.scene.add( mesh );
-
-    } );
+    final mesh1 = three.Mesh( plyGeometry, mat );
+    mesh1.rotation.y = - math.pi / 2;
+    mesh1.position.y = 0.8;
+    mesh1.castShadow = true;
+    mesh1.receiveShadow = true;
+    threeJs.scene.add( mesh1 );
 
     threeJs.renderer?.shadowMap.type = three.PCFSoftShadowMap;
     threeJs.renderer?.toneMapping = three.ACESFilmicToneMapping;

@@ -53,7 +53,8 @@ class Brush extends Mesh {
 			final array = Uint16Array( triCount );
 			final groups = geometry.groups;
 			for (int i = 0, l = groups.length; i < l; i ++ ) {
-				const { start, count } = groups[ i ];
+				final start = groups[ i ]['start'];
+        final count = groups[ i ]['count'];
 				for (int g = start / 3, lg = ( start + count ) / 3; g < lg; g ++ ) {
 					array[ g ] = i;
 				}

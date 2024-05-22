@@ -227,11 +227,11 @@ class WebGLTextures {
 
     deallocateTexture(texture);
 
-    if (texture.isVideoTexture) {
+    if (texture is VideoTexture) {
       _videoTextures.remove(texture);
     }
 
-    if (texture.isOpenGLTexture) {
+    if (texture is OpenGLTexture) {
       _videoTextures.remove(texture);
     }
   }
@@ -1419,8 +1419,8 @@ class WebGLTextures {
       }
 
       final isCompressed = (texture.isCompressedTexture || texture is CompressedTexture);
-      final isDataTexture = (texture.image[0] != null && texture.image[0] is DataTexture);
-      final isCubeTexture = (texture.image[0] != null && texture.image[0] is CubeTexture);
+      final isDataTexture = (texture.image[0] != null && texture is DataTexture);
+      final isCubeTexture = (texture.image[0] != null && texture is CubeTexture);
 
       final cubeImage = [];
 
@@ -1500,12 +1500,20 @@ class WebGLTextures {
         for (int i = 0; i < 6; i++) {
           if (isDataTexture || isCubeTexture) {
             if (useTexStorage) {
-              state.texSubImage2D(_gl.TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, 0, 0, cubeImage[i].width, cubeImage[i].height,
-                  glFormat, glType, cubeImage[i].data);
+              if(kIsWeb){
+                state.texSubImage2DNoSize(_gl.TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, 0, 0, glFormat, glType, cubeImage[i].data);
+              }
+              else{
+                state.texSubImage2D(_gl.TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, 0, 0, cubeImage[i].width, cubeImage[i].height, glFormat, glType, cubeImage[i].data);
+              }
             } 
             else {
-              state.texImage2D(_gl.TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, glInternalFormat, cubeImage[i].width,
-                  cubeImage[i].height, 0, glFormat, glType, cubeImage[i].data);
+              if(kIsWeb){
+                state.texImage2DNoSize(_gl.TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, glInternalFormat, glFormat, glType, cubeImage[i].data);
+              }
+              else{
+                state.texImage2D(_gl.TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, glInternalFormat, cubeImage[i].width,cubeImage[i].height, 0, glFormat, glType, cubeImage[i].data);
+              }
             }
 
             for (int j = 0; j < mipmaps.length; j++) {

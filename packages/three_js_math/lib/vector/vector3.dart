@@ -684,9 +684,9 @@ class Vector3 extends Vector{
   }
   @override
   Vector3 fromBuffer(BufferAttribute attribute, int index) {
-    x = attribute.getX(index)!.toDouble();
-    y = attribute.getY(index)!.toDouble();
-    z = attribute.getZ(index)!.toDouble();
+    x = attribute.getX(index)?.toDouble() ?? x;
+    y = attribute.getY(index)?.toDouble() ?? y;
+    z = attribute.getZ(index)?.toDouble() ?? z;
 
     return this;
   }

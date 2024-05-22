@@ -17,7 +17,7 @@ final spotLightHelperVector = Vector3();
 /// ```
 class SpotLightHelper extends Object3D {
   late Light light;
-  late Color? color;
+  late int? color;
   late LineSegments cone;
 
   /// [light] -- The [SpotLight] to be visualized.
@@ -103,7 +103,7 @@ class SpotLightHelper extends Object3D {
     cone.lookAt(spotLightHelperVector);
 
     if (color != null) {
-      cone.material!.color.setFrom(color!);
+      cone.material!.color.setFromHex32(color!);
     } 
     else {
       cone.material!.color.setFrom(light.color!);

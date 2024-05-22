@@ -55,6 +55,7 @@ final filesJson = [
   "webgl_water",
   //"webgl_geometry_csg",
   "webgl_helpers",
+  "webgl_modifier_subdivision",
   "webgl_morphtargets",
   "webgl_morphtargets_sphere",
   "webgl_morphtargets_horse",

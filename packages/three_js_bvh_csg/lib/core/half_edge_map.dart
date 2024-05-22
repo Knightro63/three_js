@@ -8,7 +8,6 @@ final _hashes = [ '', '', '' ];
 class HalfEdgeMap {
 
 	HalfEdgeMap(geometry) {
-
 		// result data
 		this.data = null;
 		this.disjointConnections = null;
@@ -92,52 +91,47 @@ class HalfEdgeMap {
 
 		}
 
-		data.fill( - 1 );
+		data.fill(-1);
 
 		// iterate over all triangles
 		let matchedEdges = 0;
 		let unmatchedSet = Set();
-		for ( let i = offset, l = triCount * 3 + offset; i < l; i += 3 ) {
+		for (int i = offset, l = triCount * 3 + offset; i < l; i += 3 ) {
+			final i3 = i;
 
-			const i3 = i;
-			for ( let e = 0; e < 3; e ++ ) {
-
-				let i0 = i3 + e;
+			for (int e = 0; e < 3; e ++ ) {
+				int i0 = i3 + e;
 				if ( indexAttr ) {
-
 					i0 = indexAttr.getX( i0 );
-
 				}
 
 				_hashes[ e ] = hashFunction( i0 );
-
 			}
 
-			for ( let e = 0; e < 3; e ++ ) {
+			for (int e = 0; e < 3; e ++ ) {
+				final nextE = ( e + 1 ) % 3;
+				final vh0 = _hashes[ e ];
+				final vh1 = _hashes[ nextE ];
 
-				const nextE = ( e + 1 ) % 3;
-				const vh0 = _hashes[ e ];
-				const vh1 = _hashes[ nextE ];
-
-				const reverseHash = `${ vh1 }_${ vh0 }`;
-				if ( map.has( reverseHash ) ) {
+				final reverseHash = '${ vh1 }_$vh0';
+				if ( map.containsKey( reverseHash ) ) {
 
 					// create a reference between the two triangles and clear the hash
-					const index = i3 + e;
-					const otherIndex = map.get( reverseHash );
+					final index = i3 + e;
+					final otherIndex = map.get( reverseHash );
 					data[ index ] = otherIndex;
 					data[ otherIndex ] = index;
-					map.delete( reverseHash );
+					map.remove( reverseHash );
 					matchedEdges += 2;
-					unmatchedSet.delete( otherIndex );
+					unmatchedSet.remove( otherIndex );
 
 				} else {
 
 					// save the triangle and triangle edge index captured in one value
 					// triIndex = ~ ~ ( i0 / 3 );
 					// edgeIndex = i0 % 3;
-					const hash = `${ vh0 }_${ vh1 }`;
-					const index = i3 + e;
+					final hash = '${vh0}_$vh1';
+					final index = i3 + e;
 					map.set( hash, index );
 					unmatchedSet.add( index );
 
@@ -156,67 +150,53 @@ class HalfEdgeMap {
 
 			unmatchedSet.clear();
 			fragmentMap.forEach( ( { forward, reverse } ) => {
-
 				forward.forEach( ( { index } ) => unmatchedSet.add( index ) );
 				reverse.forEach( ( { index } ) => unmatchedSet.add( index ) );
-
 			} );
 
 			this.unmatchedDisjointEdges = fragmentMap;
 			this.disjointConnections = disjointConnectivityMap;
 			matchedEdges = triCount * 3 - unmatchedSet.size;
-
 		}
 
 		this.matchedEdges = matchedEdges;
 		this.unmatchedEdges = unmatchedSet.size;
 		this.data = data;
 
-		function hashPositionAttribute( i ) {
-
-			_vec3.fromBufferAttribute( posAttr, i );
+		function hashPositionAttribute(int i ) {
+			_vec3.fromBuffer( posAttr, i );
 			return hashVertex3( _vec3 );
-
 		}
 
-		function hashAllAttributes( i ) {
+		String hashAllAttributes(int i ) {
+			String result = '';
+			for (int k = 0, l = attrKeys.length; k < l; k ++ ) {
 
-			let result = '';
-			for ( let k = 0, l = attrKeys.length; k < l; k ++ ) {
-
-				const attr = attributes[ attrKeys[ k ] ];
+				final attr = attributes[ attrKeys[ k ] ];
 				let str;
 				switch ( attr.itemSize ) {
-
 					case 1:
 						str = hashNumber( attr.getX( i ) );
 						break;
 					case 2:
-						str = hashVertex2( _vec2.fromBufferAttribute( attr, i ) );
+						str = hashVertex2( _vec2.fromBuffer( attr, i ) );
 						break;
 					case 3:
-						str = hashVertex3( _vec3.fromBufferAttribute( attr, i ) );
+						str = hashVertex3( _vec3.fromBuffer( attr, i ) );
 						break;
 					case 4:
-						str = hashVertex4( _vec4.fromBufferAttribute( attr, i ) );
+						str = hashVertex4( _vec4.fromBuffer( attr, i ) );
 						break;
-
 				}
 
-				if ( result !== '' ) {
-
+				if ( result != '' ) {
 					result += '|';
-
 				}
 
 				result += str;
-
 			}
 
 			return result;
-
 		}
-
 	}
-
 }

@@ -179,7 +179,7 @@ class TriangleSplitter {
 				// return it as an intersection (see issue #28)
 				// Because we ignore the start point intersection above we have to make sure we check the end
 				// point intersection here.
-				bool didIntersect = ! ! plane.intersectLine( _edge, _vec );
+				bool didIntersect = plane.intersectLine( _edge, _vec ) != null;
 				if(!didIntersect && endDist.abs() < COPLANAR_EPSILON ) {
 					_vec.setFrom( _edge.end );
 					didIntersect = true;

@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import "package:three_js_bvh_csg/core/brush.dart";
 import "package:three_js_core/three_js_core.dart";
 import "package:three_js_math/three_js_math.dart";
@@ -50,8 +51,7 @@ void prepareAttributesData(BufferGeometry referenceGeometry, targetGeometry, att
 // Assigns the given tracked attribute data to the geometry and returns whether the
 // geometry needs to be disposed of.
 void assignBufferData( geometry, attributeData, groupOrder ) {
-
-	let needsDisposal = false;
+	bool needsDisposal = false;
 	int drawRange = - 1;
 
 	// set the data
@@ -119,7 +119,6 @@ void assignBufferData( geometry, attributeData, groupOrder ) {
 	// TODO: can we have this dispose in the same way that a brush does?
 	// TODO: why are half edges and group indices not removed here?
 	geometry.boundsTree = null;
-
 	if ( needsDisposal ) {
 		geometry.dispose();
 	}
@@ -234,88 +233,64 @@ class Evaluator {
 			}
 
 			// create a map from old to new index and remove materials that aren't used
-			const finalMaterials = [];
-			for ( let i = 0, l = allMaterials.length; i < l; i ++ ) {
+			final finalMaterials = [];
+			for (int i = 0, l = allMaterials.length; i < l; i ++ ) {
+				bool foundGroup = false;
 
-				let foundGroup = false;
-				for ( let g = 0, lg = groups.length; g < lg; g ++ ) {
-
-					const group = groups[ g ];
-					if ( group.materialIndex === i ) {
-
+				for (int g = 0, lg = groups.length; g < lg; g ++ ) {
+					final group = groups[ g ];
+					if ( group.materialIndex == i ) {
 						foundGroup = true;
 						group.materialIndex = finalMaterials.length;
-
 					}
-
 				}
 
 				if ( foundGroup ) {
-
-					finalMaterials.push( allMaterials[ i ] );
-
+					finalMaterials.add( allMaterials[ i ] );
 				}
-
 			}
 
 			targetBrushes.forEach( tb => {
-
 				tb.material = finalMaterials;
+			});
 
-			} );
-
-		} else {
-
-			groups = [ { start: 0, count: Infinity, index: 0, materialIndex: 0 } ];
+		} 
+    else {
+			groups = [{ 'start': 0, 'count': double.maxFinite.toInt(), 'index': 0, 'materialIndex': 0}];
 			targetBrushes.forEach( tb => {
-
 				tb.material = aMaterials[ 0 ];
-
-			} );
-
+			});
 		}
 
 		// apply groups and attribute data to the geometry
-		targetBrushes.forEach( ( brush, i ) => {
-
-			const targetGeometry = brush.geometry;
+		targetBrushes.forEach( ( brush, i ){
+			final targetGeometry = brush.geometry;
 			assignBufferData( targetGeometry, attributeData[ i ], groups );
 			if ( consolidateGroups ) {
-
 				joinGroups( targetGeometry.groups );
-
 			}
-
-		} );
+		});
 
 		return wasArray ? targetBrushes : targetBrushes[ 0 ];
-
 	}
 
 	// TODO: fix
-	evaluateHierarchy( root, target = new Brush() ) {
+	evaluateHierarchy( root, [Brush? target] ) {
+    target ??= Brush();
 
 		root.updateMatrixWorld( true );
 
-		const flatTraverse = ( obj, cb ) => {
-
-			const children = obj.children;
-			for ( let i = 0, l = children.length; i < l; i ++ ) {
-
-				const child = children[ i ];
+		flatTraverse( obj, cb ){
+			final children = obj.children;
+			for (int i = 0, l = children.length; i < l; i ++ ) {
+				final child = children[ i ];
 				if ( child.isOperationGroup ) {
-
 					flatTraverse( child, cb );
-
 				} else {
-
 					cb( child );
-
 				}
-
 			}
-
-		};
+		}
 
 
 		const traverse = brush => {
