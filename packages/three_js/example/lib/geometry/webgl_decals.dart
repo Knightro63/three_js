@@ -205,9 +205,9 @@ class _State extends State<WebglDecals> {
     position.setFrom( intersection['point'] );
     orientation.copy( mouseHelper.rotation );
 
-    orientation.z = math.Random().nextDouble() * 2 * math.pi;
+    //orientation.z = math.Random().nextDouble() * 2 * math.pi;
 
-    final scale = 5 + math.Random().nextDouble() * (10 - 5);
+    final scale = 2 + math.Random().nextDouble() * (5 - 2);
     size.setValues( scale, scale, scale );
 
     final material = decalMaterial.clone();

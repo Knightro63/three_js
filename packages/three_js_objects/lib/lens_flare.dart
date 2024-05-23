@@ -112,7 +112,7 @@ class Lensflare extends Mesh {
 
 		final List elements = [];
 
-		final shader = LensflareElement.Shader;
+		final shader = LensflareElement.shader;
 
 		final material2 = RawShaderMaterial.fromMap( {
 			'name': shader['name'],
@@ -284,7 +284,7 @@ class LensflareElement {
   double distance;
   late Color color;
 
-  static Map<String,dynamic> Shader = _shader;
+  static Map<String,dynamic> shader = _shader;
 
 	LensflareElement(this.texture, [this.size = 1, this.distance = 0, int color = 0xffffff]) {
 		this.color = Color.fromHex32( color);
