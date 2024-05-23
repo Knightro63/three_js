@@ -65,7 +65,7 @@ class GLTFParser {
     // if ( createImageBitmap != null && /Firefox/.test( navigator.userAgent ) == false ) {
     //   this.textureLoader = ImageBitmapLoader( this.options.manager );
     // } else {
-    textureLoader = TextureLoader(this.options["manager"]);
+    textureLoader = TextureLoader(manager: this.options["manager"]);
     // }
 
     textureLoader.setCrossOrigin(this.options["crossOrigin"]);

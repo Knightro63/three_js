@@ -36,6 +36,8 @@ class _MyAppState extends State<WebglGeometryShapes> {
   @override
   void dispose() {
     threeJs.dispose();
+    three.loading.clear();
+    controls.clearListeners();
     super.dispose();
   }
 
@@ -51,6 +53,7 @@ class _MyAppState extends State<WebglGeometryShapes> {
   
   late three.Group group;
   late three.Texture texture;
+  late three.OrbitControls controls;
 
   Future<void> setup() async {
     threeJs.scene = three.Scene();
@@ -268,6 +271,12 @@ class _MyAppState extends State<WebglGeometryShapes> {
       addLineShape(
           smileyShape.holes[i], 0xf000f0, -200, 250, 0, 0, 0, math.pi, 1);
     }
+
+    controls = three.OrbitControls( threeJs.camera, threeJs.globalKey );
+
+    threeJs.addAnimationEvent((dt){
+      controls.update();
+    });
   }
 
   void addShape(shape, three.ExtrudeGeometryOptions extrudeSettings, color, double x, double y, double z, double rx, double ry, double rz, double s) {

@@ -56,6 +56,7 @@ flutter:
     - assets/models/gltf/
     - assets/models/gltf/test/
     - assets/models/gltf/Flower/
+    - assets/models/gltf/LeePerrySmith/
     - assets/models/gltf/RobotExpressive/
     - assets/models/gltf/DamagedHelmet/glTF/
     - assets/models/gltf/AnimatedMorphSphere/glTF/
@@ -69,4 +70,5 @@ flutter:
     - assets/textures/patterns/
     - assets/textures/sprites/
     - assets/textures/planets/
+    - assets/textures/decal/
     - assets/textures/cube/Park2/

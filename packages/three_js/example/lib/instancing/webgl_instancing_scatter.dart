@@ -117,6 +117,7 @@ class _State extends State<WebglInstancingScatter> {
 
       init().then((e){
         threeJs.addAnimationEvent((dt){
+          controls.update();
           render();
         });
       });
@@ -139,6 +140,8 @@ class _State extends State<WebglInstancingScatter> {
     threeJs.scene.add( stemMesh );
     threeJs.scene.add( blossomMesh );
     threeJs.scene.add( surface );
+
+    controls = three.OrbitControls( threeJs.camera, threeJs.globalKey );
   }
 
   void resample() {

@@ -59,18 +59,17 @@ class _MyAppState extends State<WebglLoaderGltf> {
 
     controls = three.OrbitControls(threeJs.camera, threeJs.globalKey);
 
-    three.RGBELoader rgbeLoader = three.RGBELoader();
+    three.RGBELoader rgbeLoader = three.RGBELoader(flipY: true);
     rgbeLoader.setPath('assets/textures/equirectangular/');
     final hdrTexture = await rgbeLoader.fromAsset('royal_esplanade_1k.hdr');
     hdrTexture?.mapping = three.EquirectangularReflectionMapping;
-
+    
     threeJs.scene.background = hdrTexture;
     threeJs.scene.environment = hdrTexture;
 
     threeJs.scene.add( three.AmbientLight( 0xffffff ) );
 
-    three.GLTFLoader loader = three.GLTFLoader()
-        .setPath('assets/models/gltf/DamagedHelmet/glTF/');
+    three.GLTFLoader loader = three.GLTFLoader().setPath('assets/models/gltf/DamagedHelmet/glTF/');
 
     final result = await loader.fromAsset('DamagedHelmet.gltf');
 

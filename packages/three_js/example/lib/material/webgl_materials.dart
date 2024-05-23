@@ -61,8 +61,7 @@ class _MyAppState extends State<WebglMaterials> {
 
     // Materials
 
-    final texture = three.DataTexture(generateTexture().data, 256, 256, null,
-        null, null, null, null, null, null, null, null);
+    final texture = three.DataTexture(generateTexture().data, 256, 256);
     texture.needsUpdate = true;
 
     materials.add(

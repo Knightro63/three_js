@@ -112,7 +112,7 @@ class FBXLoader extends Loader {
 
     // console.log( _fbxTree );
 
-    TextureLoader textureLoader = TextureLoader(manager)
+    TextureLoader textureLoader = TextureLoader(manager: manager)
         .setPath((resourcePath == '' || resourcePath == null) ? path : '')
         .setCrossOrigin(crossOrigin);
 

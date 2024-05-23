@@ -210,7 +210,7 @@ class _MyAppState extends State<webgl_loader_gltf_test> {
 
     camera.lookAt(scene.position);
 
-    var _loader = three.RGBELoader(null);
+    var _loader = three.RGBELoader();
     _loader.setPath('assets/textures/equirectangular/');
     var _hdrTexture = await _loader.fromAsset('royal_esplanade_1k.hdr');
 

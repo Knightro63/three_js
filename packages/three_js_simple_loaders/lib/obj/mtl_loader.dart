@@ -457,7 +457,7 @@ class MaterialCreator {
      TextureLoader? loader = manager.getHandler(url);
 
     if (loader == null) {
-      loader = TextureLoader(manager);
+      loader = TextureLoader(manager: manager);
       loader.flipY = true;
     }
 

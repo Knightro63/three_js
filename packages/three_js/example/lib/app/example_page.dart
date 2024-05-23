@@ -4,6 +4,7 @@ import 'package:example/controls/misc_controls_transform.dart';
 import 'package:example/games/games_fps2.dart';
 import 'package:example/geometry/marching_cubes.dart';
 import 'package:example/geometry/webgl_buffergeometry_custom_attributes_particles.dart';
+import 'package:example/geometry/webgl_decals.dart';
 import 'package:example/geometry/webgl_geometry_dynamic.dart';
 import 'package:example/geometry/webgl_geometry_extrude_shapes.dart';
 import 'package:example/geometry/webgl_geometry_extrude_splines.dart';
@@ -40,7 +41,6 @@ import 'package:example/volume/webgl_volume_perlin.dart';
 import 'package:flutter/material.dart';
 
 import 'package:example/animations/misc_animation_keys.dart';
-import 'package:example/animations/webgl_animation_cloth.dart';
 import 'package:example/animations/webgl_animation_keyframes.dart';
 import 'package:example/animations/webgl_animation_multiple.dart';
 import 'package:example/animations/webgl_animation_skinning_additive_blending.dart';
@@ -144,6 +144,9 @@ class _MyAppState extends State<ExamplePage> {
     else if(fileName == "webgl_geometry_extrude_splines"){
       page = WebglGeometryExtrudeSplines(fileName: fileName);
     }
+    else if(fileName == 'webgl_decals'){
+      page = WebglDecals(fileName: fileName);
+    }
     // else if(fileName == "webgl_nodes_points"){
     //   page = ;
     // }
@@ -239,9 +242,7 @@ class _MyAppState extends State<ExamplePage> {
     else if(fileName == "webgl_buffergeometry_custom_attributes_particles"){
       page = WebglBuffergeometryCustomAttributesParticles(fileName: fileName);
     }
-    else if (fileName == "webgl_animation_cloth") {
-      page = webgl_animation_cloth(fileName: fileName);
-    } else if (fileName == "webgl_materials") {
+    else if (fileName == "webgl_materials") {
       page = WebglMaterials(fileName: fileName);
     } else if (fileName == "webgl_animation_skinning_blending") {
       page = WebglAnimationSkinningBlending(fileName: fileName);

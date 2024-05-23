@@ -211,9 +211,9 @@ abstract class BufferAttribute<TData extends NativeArray> extends BaseBufferAttr
   /// BufferAttribute, interpreting the elements as a direction vectors.
   BufferAttribute transformDirection(Matrix4 m) {
     for (int i = 0, l = count; i < l; i++) {
-      _vector.x = getX(i)!;
-      _vector.y = getY(i)!;
-      _vector.z = getZ(i)!;
+      _vector.x = getX(i)!.toDouble();
+      _vector.y = getY(i)!.toDouble();
+      _vector.z = getZ(i)!.toDouble();
 
       _vector.transformDirection(m);
 
@@ -241,7 +241,7 @@ abstract class BufferAttribute<TData extends NativeArray> extends BaseBufferAttr
   }
 
   /// Returns the x component of the vector at the given index.
-  double? getX(int index) {
+  num? getX(int index) {
     return getAt(index * itemSize);
   }
 
@@ -253,7 +253,7 @@ abstract class BufferAttribute<TData extends NativeArray> extends BaseBufferAttr
   }
 
   /// Returns the y component of the vector at the given index.
-  double? getY(int index) {
+  num? getY(int index) {
     return getAt(index * itemSize + 1);
   }
 
@@ -265,7 +265,7 @@ abstract class BufferAttribute<TData extends NativeArray> extends BaseBufferAttr
   }
 
   /// Returns the z component of the vector at the given index.
-  double? getZ(int index) {
+  num? getZ(int index) {
     return getAt(index * itemSize + 2);
   }
 
@@ -277,7 +277,7 @@ abstract class BufferAttribute<TData extends NativeArray> extends BaseBufferAttr
   }
 
   /// Returns the w component of the vector at the given index.
-  double? getW(int index) {
+  num? getW(int index) {
     return getAt(index * itemSize + 3);
   }
 

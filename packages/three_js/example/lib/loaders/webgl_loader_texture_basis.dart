@@ -60,7 +60,7 @@ class _MyAppState extends State<WebglLoaderTextureBasis> {
 
     threeJs.scene.add(mesh);
 
-    final loader = three.TextureLoader(null);
+    final loader = three.TextureLoader();
     loader.flipY = true;
     final texture = await loader.fromAsset("assets/textures/758px-Canestra_di_frutta_(Caravaggio).jpg");
 

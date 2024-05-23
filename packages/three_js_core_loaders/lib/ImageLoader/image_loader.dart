@@ -70,7 +70,7 @@ class ImageLoader extends Loader {
       manager.itemEnd(cacheName);
       return cached;
     }
-    
+
     ImageElement? resp;
     if(!kIsWeb){
       final ByteData fileData = await rootBundle.load(asset);

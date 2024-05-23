@@ -14,11 +14,12 @@ import 'dart:math' as math;
 class RGBELoader extends DataTextureLoader {
   late final FileLoader _loader;
   int type = HalfFloatType;
+  bool flipY;
 
   /// [manager] — The [loadingManager] for the loader to use. Default is [DefaultLoadingManager].
   /// 
   /// Creates a new [FontLoader].
-  RGBELoader([super.manager]){
+  RGBELoader({LoadingManager? manager, this.flipY = false}):super(manager){
     _loader = FileLoader(manager);
   }
 
@@ -399,7 +400,7 @@ class RGBELoader extends DataTextureLoader {
       return dataRgba;
     }
 
-    rgbeByteToRGBFloat(sourceArray, sourceOffset, destArray, destOffset) {
+    void rgbeByteToRGBFloat(sourceArray, int sourceOffset, destArray, int destOffset) {
       final e = sourceArray[sourceOffset + 3];
       final scale = math.pow(2.0, e - 128.0) / 255.0;
 
@@ -409,7 +410,7 @@ class RGBELoader extends DataTextureLoader {
       destArray[destOffset + 3] = 1;
     }
 
-    rgbeByteToRGBHalf(sourceArray, sourceOffset, destArray, destOffset) {
+    void rgbeByteToRGBHalf(sourceArray, int sourceOffset, destArray, int destOffset) {
       final e = sourceArray[sourceOffset + 3];
       final scale = math.pow(2.0, e - 128.0) / 255.0;
 
@@ -454,9 +455,18 @@ class RGBELoader extends DataTextureLoader {
           case FloatType:
             numElements = imageRgbaData.length ~/ 4;
             final floatArray = Float32Array(numElements * 4);
-
+            int k = numElements-1;
+            int c = 1;
             for (int j = 0; j < numElements; j++) {
-              rgbeByteToRGBFloat(imageRgbaData, j * 4, floatArray, j * 4);
+              // if(j % w == 0){ 
+              //   k = (numElements-1 - (h * c)).toInt();
+              //   c++;
+              // }
+              // else{
+              //   k++;
+              // }
+              rgbeByteToRGBFloat(imageRgbaData, j * 4, floatArray, k * 4);
+              k--;
             }
 
             data = floatArray;
@@ -466,9 +476,19 @@ class RGBELoader extends DataTextureLoader {
           case HalfFloatType:
             numElements = imageRgbaData.length ~/ 4;
             final halfArray = Uint16Array(numElements * 4);
-
+            int k = numElements-1;
+            int c = 0;
+            print('len: $numElements, $w ');
             for (int j = 0; j < numElements; j++) {
-              rgbeByteToRGBHalf(imageRgbaData, j * 4, halfArray, j * 4);
+              // if(j%h == 0){
+              //   c++;
+              //   k = ((h-1) * c).toInt();
+              // }
+              // else{
+              //   k--;
+              // }
+              rgbeByteToRGBHalf(imageRgbaData, j * 4, halfArray, k * 4);
+              k--;
             }
 
             data = halfArray;
@@ -488,7 +508,7 @@ class RGBELoader extends DataTextureLoader {
           gamma: rgbeHeaderInfo["gamma"],
           exposure: rgbeHeaderInfo["exposure"],
           format: format,
-          type: type
+          type: type,
         ).json;
       }
     }

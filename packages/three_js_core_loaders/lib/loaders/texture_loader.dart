@@ -1,12 +1,11 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:convert' as convert;
-import '../utils/blob.dart';
+import 'package:three_js_core_loaders/three_js_core_loaders.dart';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'loader.dart';
 import 'package:three_js_core/three_js_core.dart';
-import '../ImageLoader/image_loader.dart';
 
 /// Class for loading a [texture]. This uses the
 /// [ImageLoader] internally for loading files.
@@ -18,7 +17,7 @@ import '../ImageLoader/image_loader.dart';
 /// final material = MeshBasicMaterial({ MaterialProperty.map:texture});
 /// ```
 class TextureLoader extends Loader {
-  TextureLoader([super.manager,this.flipY = false]);
+  TextureLoader({LoadingManager? manager,this.flipY = false}):super(manager);
   bool flipY;
 
   Texture? _textureProcess(ImageElement? imageElement, String url){

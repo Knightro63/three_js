@@ -235,11 +235,11 @@ class VOXMesh extends Mesh {
 			final index = (x + ( y * offsety ) + ( z * offsetz )).toInt();
 
 			if ( array[ index + 1 ] == 0 || x == size.x - 1 ) add( px, x, z, - y, r, g, b );
-			if ( array[ index - 1 ] == 0 || x == 0 ) add( nx, x, z, - y, r, g, b );
+			if ((index - 1 > 0 && array[ index - 1 ] == 0) || x == 0 ) add( nx, x, z, - y, r, g, b );
 			if ( array[ index + offsety ] == 0 || y == size.y - 1 ) add( ny, x, z, - y, r, g, b );
-			if ( array[ index - offsety ] == 0 || y == 0 ) add( py, x, z, - y, r, g, b );
+			if ((index - offsety > 0 && array[ index - offsety ] == 0) || y == 0 ) add( py, x, z, - y, r, g, b );
 			if ( array[ index + offsetz ] == 0 || z == size.z - 1 ) add( pz, x, z, - y, r, g, b );
-			if ( array[ index - offsetz ] == 0 || z == 0 ) add( nz, x, z, - y, r, g, b );
+			if((index - offsetz > 0 && array[ index - offsetz ] == 0) || z == 0) add( nz, x, z, - y, r, g, b );
 		}
 
 		final geometry = BufferGeometry();

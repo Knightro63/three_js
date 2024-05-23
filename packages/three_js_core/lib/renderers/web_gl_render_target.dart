@@ -76,8 +76,19 @@ class WebGLRenderTarget extends RenderTarget {
 
     final image = ImageElement(width: width, height: height, depth: 1);
 
-    texture = Texture(image, this.options.mapping, this.options.wrapS, this.options.wrapT, this.options.magFilter,
-        this.options.minFilter, this.options.format, this.options.type, this.options.anisotropy, this.options.encoding);
+    texture = Texture(
+      image, 
+      this.options.mapping, 
+      this.options.wrapS, 
+      this.options.wrapT, 
+      this.options.magFilter,
+      this.options.minFilter, 
+      this.options.format, 
+      this.options.type, 
+      this.options.anisotropy, 
+      this.options.encoding
+    );
+    
     texture.isRenderTargetTexture = true;
     texture.flipY = false;
     texture.generateMipmaps = this.options.generateMipmaps;
@@ -144,7 +155,7 @@ class WebGLRenderTarget extends RenderTarget {
 
   @override
   bool is3D() {
-    return texture.isDataTexture3D || texture.isDataTexture2DArray;
+    return texture is Data3DTexture || texture is DataArrayTexture;
   }
 
   @override

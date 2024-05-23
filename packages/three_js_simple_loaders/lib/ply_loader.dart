@@ -114,7 +114,7 @@ class PLYLoader extends Loader {
 	BufferGeometry _parse(Uint8List data ) {
 
 		Map<String,dynamic> parseHeader(String data, [headerLength = 0 ]) {
-			final patternHeader = RegExp(r'/^ply([\s\S]*)end_header(\r\n|\r|\n)/');
+			final patternHeader = RegExp(r'/^ply([\s\S]*)end_header(\r\n|\r|\n)/',caseSensitive: false,multiLine: true);
 			String headerText = '';
 			final result = data.split(patternHeader);
 
@@ -395,7 +395,7 @@ class PLYLoader extends Loader {
 		BufferGeometry parseASCII(String data, header ) {
 			final buffer = createBuffer();
 
-			final patternBody = RegExp(r'/end_header\s+(\S[\s\S]*\S|\S)\s*/');
+			final patternBody = RegExp(r'/end_header\s+(\S[\s\S]*\S|\S)\s*/',caseSensitive: false,multiLine: true);
 			List<String> body = [];
       List<String> matches = data.split( patternBody );
 
