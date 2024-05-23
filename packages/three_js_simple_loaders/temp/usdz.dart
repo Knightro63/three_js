@@ -379,11 +379,11 @@ class USDZLoader extends Loader {
 			}
 
 			if ( data_value[ 'float2 inputs:scale' ] ) {
-				map.repeat = Vector2().fromArray( JSON.parse( '[' + data_value[ 'float2 inputs:scale' ].replace( /[()]*/g, '' ) + ']' ) );
+				map.repeat = Vector2().fromArray( json.decode( '[' + data_value[ 'float2 inputs:scale' ].replace( /[()]*/g, '' ) + ']' ) );
 			}
 
 			if ( data_value[ 'float2 inputs:translation' ] ) {
-				map.offset = Vector2().fromArray( JSON.parse( '[' + data_value[ 'float2 inputs:translation' ].replace( /[()]*/g, '' ) + ']' ) );
+				map.offset = Vector2().fromArray( json.decode( '[' + data_value[ 'float2 inputs:translation' ].replace( /[()]*/g, '' ) + ']' ) );
 			}
 		}
 
@@ -396,7 +396,7 @@ class USDZLoader extends Loader {
 
 					if ( 'color3f inputs:diffuseColor.connect' in surface ) {
 						final path = surface[ 'color3f inputs:diffuseColor.connect' ];
-						final sampler = findTexture( root, /(\w+).output/.exec( path )[ 1 ] );
+						final sampler = findTexture( root, '/(\w+).output/'.exec( path )[ 1 ] );
 
 						material.map = buildTexture( sampler );
 						material.map.colorSpace = SRGBColorSpace;
@@ -413,7 +413,7 @@ class USDZLoader extends Loader {
 
 					if ( 'color3f inputs:emissiveColor.connect' in surface ) {
 						final path = surface[ 'color3f inputs:emissiveColor.connect' ];
-						final sampler = findTexture( root, /(\w+).output/.exec( path )[ 1 ] );
+						final sampler = findTexture( root, ''/(\w+).output/''.exec( path )[ 1 ] );
 
 						material.emissiveMap = buildTexture( sampler );
 						material.emissiveMap.colorSpace = SRGBColorSpace;
@@ -430,7 +430,7 @@ class USDZLoader extends Loader {
 
 					if ( 'normal3f inputs:normal.connect' in surface ) {
 						final path = surface[ 'normal3f inputs:normal.connect' ];
-						final sampler = findTexture( root, /(\w+).output/.exec( path )[ 1 ] );
+						final sampler = findTexture( root, '/(\w+).output/'.exec( path )[ 1 ] );
 
 						material.normalMap = buildTexture( sampler );
 						material.normalMap.colorSpace = NoColorSpace;
@@ -442,7 +442,7 @@ class USDZLoader extends Loader {
 
 					if ( 'float inputs:roughness.connect' in surface ) {
 						final path = surface[ 'float inputs:roughness.connect' ];
-						final sampler = findTexture( root, /(\w+).output/.exec( path )[ 1 ] );
+						final sampler = findTexture( root, '/(\w+).output/'.exec( path )[ 1 ] );
 
 						material.roughness = 1.0;
 						material.roughnessMap = buildTexture( sampler );
@@ -458,7 +458,7 @@ class USDZLoader extends Loader {
 
 					if ( 'float inputs:metallic.connect' in surface ) {
 						final path = surface[ 'float inputs:metallic.connect' ];
-						final sampler = findTexture( root, /(\w+).output/.exec( path )[ 1 ] );
+						final sampler = findTexture( root, '/(\w+).output/'.exec( path )[ 1 ] );
 
 						material.metalness = 1.0;
 						material.metalnessMap = buildTexture( sampler );
@@ -475,7 +475,7 @@ class USDZLoader extends Loader {
 					if ( 'float inputs:clearcoat.connect' in surface ) {
 
 						final path = surface[ 'float inputs:clearcoat.connect' ];
-						final sampler = findTexture( root, /(\w+).output/.exec( path )[ 1 ] );
+						final sampler = findTexture( root, '/(\w+).output/'.exec( path )[ 1 ] );
 
 						material.clearcoat = 1.0;
 						material.clearcoatMap = buildTexture( sampler );
@@ -491,7 +491,7 @@ class USDZLoader extends Loader {
 
 					if ( 'float inputs:clearcoatRoughness.connect' in surface ) {
 						final path = surface[ 'float inputs:clearcoatRoughness.connect' ];
-						final sampler = findTexture( root, /(\w+).output/.exec( path )[ 1 ] );
+						final sampler = findTexture( root, '/(\w+).output/'.exec( path )[ 1 ] );
 
 						material.clearcoatRoughness = 1.0;
 						material.clearcoatRoughnessMap = buildTexture( sampler );
@@ -511,7 +511,7 @@ class USDZLoader extends Loader {
 
 					if ( 'float inputs:occlusion.connect' in surface ) {
 						final path = surface[ 'float inputs:occlusion.connect' ];
-						final sampler = findTexture( root, /(\w+).output/.exec( path )[ 1 ] );
+						final sampler = findTexture( root, '/(\w+).output/'.exec( path )[ 1 ] );
 
 						material.aoMap = buildTexture( sampler );
 						material.aoMap.colorSpace = NoColorSpace;

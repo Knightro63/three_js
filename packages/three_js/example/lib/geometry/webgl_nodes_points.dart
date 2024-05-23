@@ -86,7 +86,7 @@ class _State extends State<WebglNodesPoints> {
 
     // nodes
 
-    final targetPosition = attribute( 'targetPosition', 'vec3' );
+    final targetPosition = threeJs.renderer!.attributes.createBuffer( 'targetPosition', 'vec3' );
     final particleSpeed = attribute( 'particleSpeed', 'float' );
     final particleIntensity = attribute( 'particleIntensity', 'float' );
     final particleSize = attribute( 'particleSize', 'float' );

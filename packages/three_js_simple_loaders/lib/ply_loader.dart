@@ -133,7 +133,7 @@ class PLYLoader extends Loader {
 			final lines = headerText.split( RegExp('/\r\n|\r|\n/') );
 			Map<String,dynamic>? currentElement;
 
-			Map<String, dynamic> make_ply_element_property( propertValues, propertyNameMapping ) {
+			Map<String, dynamic> makePlyElementProperty( propertValues, propertyNameMapping ) {
 				final property = { 'type': propertValues[ 0 ] };
 
 				if ( property['type'] == 'list' ) {
@@ -182,7 +182,7 @@ class PLYLoader extends Loader {
 
 						break;
 					case 'property':
-						currentElement?['properties'].add( make_ply_element_property( lineValues, propertyNameMapping ) );
+						currentElement?['properties'].add( makePlyElementProperty( lineValues, propertyNameMapping ) );
 						break;
 					case 'obj_info':
 						header['objInfo'] = line;
@@ -199,7 +199,7 @@ class PLYLoader extends Loader {
 			return header;
 		}
 
-		num? parseASCIINumber( n, type ) {
+		num? parseASCIINumber(String n, type ) {
 			switch ( type ) {
 				case 'char': case 'uchar': case 'short': case 'ushort': case 'int': case 'uint':
 				case 'int8': case 'uint8': case 'int16': case 'uint16': case 'int32': case 'uint32':
@@ -217,16 +217,16 @@ class PLYLoader extends Loader {
 				if ( tokens.empty() ) return null;
 				if (properties[ i ] is List) {
 					final list = [];
-					final n = parseASCIINumber( tokens.next(), properties[ i ].countType ) ?? 0;
+					final n = parseASCIINumber( tokens.next(), properties[ i ]['countType'] ) ?? 0;
 
 					for (int j = 0; j < n; j ++ ) {
 						if ( tokens.empty() ) return null;
-						list.add( parseASCIINumber( tokens.next(), properties[ i ].itemType ) );
+						list.add( parseASCIINumber( tokens.next(), properties[ i ]['itemType'] ) );
 					}
 
-					element[ properties[ i ].name ] = list;
+					element[ properties[ i ]['name'] ] = list;
 				} else {
-					element[ properties[ i ].name ] = parseASCIINumber( tokens.next(), properties[ i ].type );
+					element[ properties[ i ]['name'] ] = parseASCIINumber( tokens.next(), properties[ i ]['type'] );
 				}
 			}
 
@@ -360,11 +360,11 @@ class PLYLoader extends Loader {
 				}
 			} 
       else if ( elementName == 'face' ) {
-				final vertex_indices = element['vertex_indices'] ?? element['vertex_index']; // issue #9338
+				final vertexIndices = element['vertex_indices'] ?? element['vertex_index']; // issue #9338
 				final texcoord = element['texcoord'];
 
-				if ( vertex_indices.length == 3 ) {
-					buffer['indices'].addAll(<int>[vertex_indices[ 0 ], vertex_indices[ 1 ], vertex_indices[ 2 ]] );
+				if ( vertexIndices.length == 3 ) {
+					buffer['indices'].addAll(<int>[vertexIndices[ 0 ], vertexIndices[ 1 ], vertexIndices[ 2 ]] );
 
 					if (texcoord != null && texcoord.length == 6 ) {
 						buffer['faceVertexUvs'].addAll(<double>[ texcoord[ 0 ].toDouble(), texcoord[ 1 ].toDouble() ]);
@@ -372,9 +372,9 @@ class PLYLoader extends Loader {
 						buffer['faceVertexUvs'].addAll( <double>[texcoord[ 4 ].toDouble(), texcoord[ 5 ].toDouble() ]);
 					}
 				} 
-        else if ( vertex_indices.length == 4 ) {
-					buffer['indices'].addAll(<int>[vertex_indices[ 0 ].toInt(), vertex_indices[ 1 ].toInt(), vertex_indices[ 3 ].toInt() ]);
-					buffer['indices'].addAll(<int>[ vertex_indices[ 1 ].toInt(), vertex_indices[ 2 ].toInt(), vertex_indices[ 3 ].toInt() ]);
+        else if ( vertexIndices.length == 4 ) {
+					buffer['indices'].addAll(<int>[vertexIndices[ 0 ].toInt(), vertexIndices[ 1 ].toInt(), vertexIndices[ 3 ].toInt() ]);
+					buffer['indices'].addAll(<int>[ vertexIndices[ 1 ].toInt(), vertexIndices[ 2 ].toInt(), vertexIndices[ 3 ].toInt() ]);
 				}
 
 				// face colors
@@ -392,27 +392,27 @@ class PLYLoader extends Loader {
 			}
 		}
 
-		BufferGeometry parseASCII( data, header ) {
+		BufferGeometry parseASCII(String data, header ) {
 			final buffer = createBuffer();
 
-			final patternBody = RegExp('/end_header\s+(\S[\s\S]*\S|\S)\s*/');
+			final patternBody = RegExp(r'/end_header\s+(\S[\s\S]*\S|\S)\s*/');
 			List<String> body = [];
-      String matches = data.split( patternBody );
+      List<String> matches = data.split( patternBody );
 
 			if (matches.isNotEmpty) {
-				body = matches[1].split(r'/\s+/');
+				body = matches[0].split(r'/\s+/');
 			} 
 
 			final tokens = ArrayStream( body );
 
-			loop: for (int i = 0; i < header.elements.length; i ++ ) {
-				final elementDesc = header.elements[ i ];
-				final attributeMap = mapElementAttributes( elementDesc.properties );
+			loop: for (int i = 0; i < header['elements'].length; i ++ ) {
+				final elementDesc = header['elements'][ i ];
+				final attributeMap = mapElementAttributes( elementDesc['properties'] );
 
-				for (int j = 0; j < elementDesc.count; j ++ ) {
-					final element = parseASCIIElement( elementDesc.properties, tokens );
+				for (int j = 0; j < elementDesc['count']; j ++ ) {
+					final element = parseASCIIElement( elementDesc['properties'], tokens );
 					if (element == null) break loop;
-					handleElement( buffer, elementDesc.name, element, attributeMap );
+					handleElement( buffer, elementDesc['name'], element, attributeMap );
 				}
 			}
 

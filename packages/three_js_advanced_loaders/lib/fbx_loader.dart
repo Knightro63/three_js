@@ -2016,13 +2016,17 @@ class _AnimationParser {
 
         if (RegExp(r'X').hasMatch(animationCurveRelationship)) {
           curveNodesMap[animationCurveID]["curves"]['x'] = animationCurve;
-        } else if (RegExp(r'Y').hasMatch(animationCurveRelationship)) {
+        } 
+        else if (RegExp(r'Y').hasMatch(animationCurveRelationship)) {
           curveNodesMap[animationCurveID]["curves"]['y'] = animationCurve;
-        } else if (RegExp(r'Z').hasMatch(animationCurveRelationship)) {
+        } 
+        else if (RegExp(r'Z').hasMatch(animationCurveRelationship)) {
           curveNodesMap[animationCurveID]["curves"]['z'] = animationCurve;
-        } else if (RegExp(r'd|DeformPercent')
-                .hasMatch(animationCurveRelationship) &&
-            curveNodesMap.has(animationCurveID)) {
+        } 
+        else if (RegExp(r'd|DeformPercent')
+          .hasMatch(animationCurveRelationship) &&
+          curveNodesMap.has(animationCurveID)
+        ) {
           curveNodesMap[animationCurveID]["curves"]['morph'] = animationCurve;
         }
       }

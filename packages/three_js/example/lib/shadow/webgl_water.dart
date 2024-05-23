@@ -86,17 +86,17 @@ class _State extends State<WebglWater> {
 
     final waterGeometry = three.PlaneGeometry( 20, 20 );
 
-    // final water = Water( waterGeometry, {
-    //   'color': params['color'],
-    //   'scale': params['scale'],
-    //   'flowDirection': three.Vector2( params['flowX'], params['flowY'] ),
-    //   'textureWidth': 1024,
-    //   'textureHeight': 1024
-    // } );
+    final water = Water( waterGeometry, {
+      'color': params['color'],
+      'scale': params['scale'],
+      'flowDirection': three.Vector2( params['flowX'], params['flowY'] ),
+      'textureWidth': 1024,
+      'textureHeight': 1024
+    } );
 
-    // water.position.y = 1;
-    // water.rotation.x = math.pi * - 0.5;
-    // threeJs.scene.add( water );
+    water.position.y = 1;
+    water.rotation.x = math.pi * - 0.5;
+    threeJs.scene.add( water );
 
     // skybox
 

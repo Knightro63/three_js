@@ -48,6 +48,9 @@ flutter:
     - assets/models/json/
     - assets/models/gcode/
     - assets/models/ply/binary/
+    - assets/models/ply/ascii/
+    - assets/models/stl/binary/
+    - assets/models/stl/ascii/
     - assets/models/vox/
     - assets/models/xyz/
     - assets/models/gltf/

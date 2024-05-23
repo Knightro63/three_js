@@ -13,7 +13,11 @@ import 'package:example/instancing/webgl_gpgpu_protoplanet.dart';
 import 'package:example/instancing/webgl_instancing_dynamic.dart';
 import 'package:example/instancing/webgl_instancing_raycasting.dart';
 import 'package:example/instancing/webgl_instancing_scatter.dart';
+import 'package:example/loaders/webgl_loader_fbx_nurbs.dart';
 import 'package:example/loaders/webgl_loader_gcode.dart';
+import 'package:example/loaders/webgl_loader_ply.dart';
+import 'package:example/loaders/webgl_loader_stl.dart';
+import 'package:example/loaders/webgl_loader_vox.dart';
 import 'package:example/loaders/webgl_loader_xyz.dart';
 import 'package:example/morphtargets/webgl_modifier_subdivision.dart';
 import 'package:example/morphtargets/webgl_morphtargets_face.dart';
@@ -174,12 +178,24 @@ class _MyAppState extends State<ExamplePage> {
     else if (fileName == "webgl_loader_texture_basis") {
       page = WebglLoaderTextureBasis(fileName: fileName);
     } 
+    else if(fileName == "webgl_loader_ply"){
+      page = WebglLoaderPly(fileName: fileName);
+    }
+    else if(fileName == "webgl_loader_stl"){
+      page = WebglLoaderStl(fileName: fileName);
+    }
+    else if(fileName == "webgl_loader_vox"){
+      page = WebglLoaderVox(fileName: fileName);
+    }
     else if (fileName == "webgl_loader_svg") {
       page = WebglLoaderSvg(fileName: fileName);
     } 
     else if (fileName == "webgl_loader_fbx") {
       page = WebglLoaderFbx(fileName: fileName);
     } 
+    else if(fileName == "webgl_loader_fbx_nurbs"){
+      page = WebglLoaderFbxNurbs(fileName: fileName);
+    }
     else if (fileName == "webgl_loader_gltf") {
       page = WebglLoaderGltf(fileName: fileName);
     } 
