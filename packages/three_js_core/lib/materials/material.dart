@@ -926,6 +926,31 @@ class Material with EventDispatcher {
   /// [Texture].
   void dispose() {
     dispatchEvent(Event(type: "dispose"));
+
+    matcap?.dispose();
+    clearcoatMap?.dispose();
+    clearcoatRoughnessMap?.dispose();
+    clearcoatNormalMap?.dispose();
+    displacementMap?.dispose();
+    roughnessMap?.dispose();
+    metalnessMap?.dispose();
+    specularMap?.dispose();
+    specularIntensityMap?.dispose();
+    specularColorMap?.dispose();
+    sheenColorMap?.dispose();
+    gradientMap?.dispose();
+    sheenTintMap?.dispose();
+    sheenRoughnessMap?.dispose();
+    transmissionMap?.dispose();
+    thicknessMap?.dispose();
+    map?.dispose();
+    lightMap?.dispose();
+    aoMap?.dispose();
+    alphaMap?.dispose();
+    normalMap?.dispose();
+    bumpMap?.dispose();
+    envMap?.dispose();
+    emissiveMap?.dispose();
   }
 
   Object? getProperty(String propertyName) {

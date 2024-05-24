@@ -3,7 +3,7 @@ part of three_renderers;
 class WebGLRenderer {
   late Map<String, dynamic> parameters;
 
-  late final domElement;
+  late final dynamic domElement;
 
   bool alpha = false;
   bool depth = true;
@@ -399,8 +399,8 @@ class WebGLRenderer {
   }
 
   //
-
   void dispose() {
+    attributes.dispose();
     renderLists.dispose();
     renderStates.dispose();
     properties.dispose();
@@ -412,7 +412,7 @@ class WebGLRenderer {
 
     textures.dispose();
     geometries.dispose();
-    materials.renderer.dispose();
+    //materials.renderer.dispose();
     
     if (_transmissionRenderTarget != null) {
       _transmissionRenderTarget!.dispose();

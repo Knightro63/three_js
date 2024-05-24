@@ -83,11 +83,11 @@ class WebGLCubeUVMaps {
   }
 
   void dispose() {
-    cubeUVmaps = WeakMap();
+    cubeUVmaps.clear();
 
-    if (pmremGenerator != null) {
-      pmremGenerator!.dispose();
+    //if (pmremGenerator != null) {
+      pmremGenerator?.dispose();
       pmremGenerator = null;
-    }
+    //}
   }
 }

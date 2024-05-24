@@ -63,7 +63,7 @@ class WebGLRenderStates {
   }
 
   void dispose() {
-    renderStates = WeakMap();
+    renderStates.clear();
   }
 }
 

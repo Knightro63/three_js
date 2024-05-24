@@ -83,9 +83,9 @@ class _State extends State<WebglShadowmapPointlight> {
     final test = await generateTexture();
 
     three.PointLight createLight(int color ) {
-      const intensity = 20.0;
+      const intensity = 1.0;
 
-      final light = three.PointLight( color, intensity, 10);
+      final light = three.PointLight( color, intensity, 20);
       light.castShadow = true;
       light.shadow?.bias = - 0.005; // reduces self-shadowing on double-sided objects
 
@@ -105,7 +105,7 @@ class _State extends State<WebglShadowmapPointlight> {
       material = three.MeshPhongMaterial.fromMap( {
         'side': three.DoubleSide,
         'alphaMap': texture,
-        'alphaTest': 0.5
+        'alphaTest': 0.25
       } );
 
       sphere = three.Mesh( geometry, material );

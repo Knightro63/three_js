@@ -33,6 +33,7 @@ class _MyAppState extends State<WebglShadowContact> {
   @override
   void dispose() {
     threeJs.dispose();
+    three.loading.clear();
     super.dispose();
   }
 
@@ -225,6 +226,7 @@ class _MyAppState extends State<WebglShadowContact> {
     // like MeshDepthMaterial, but goes from black to transparent
     depthMaterial = three.MeshDepthMaterial();
     depthMaterial.userData["darkness"] = {"value": state["shadow"]["darkness"]};
+
     depthMaterial.onBeforeCompile = (shader, renderer) {
       shader.uniforms["darkness"] = depthMaterial.userData["darkness"];
       shader.fragmentShader = """

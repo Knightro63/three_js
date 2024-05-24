@@ -1,0 +1,34 @@
+name: flutter_angle
+description: "Almost Native Graphics Layer Engine."
+version: 0.0.1
+homepage: https://github.com/Knightro63/three_js/tree/main/packages/flutter_angle
+
+environment:
+  sdk: ">=2.16.0-0 <4.0.0"
+  flutter: ">=1.17.0"
+
+dependencies:
+  dylib: ^0.3.3
+  ffi: ^2.1.2
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  ffigen: ^12.0.0
+  lint: ^2.3.0
+
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: org.fluttergl.flutter_angle
+        pluginClass: FlutterAnglePlugin
+      ios:
+        pluginClass: FlutterAnglePlugin
+      macos:
+        pluginClass: FlutterAnglePlugin
+      windows:
+        pluginClass: FlutterAnglePlugin
+

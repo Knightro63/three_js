@@ -24,6 +24,6 @@ class WebGLRenderLists {
   }
 
   void dispose() {
-    lists = WeakMap();
+    lists.clear();
   }
 }

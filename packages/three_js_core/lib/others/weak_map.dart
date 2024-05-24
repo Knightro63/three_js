@@ -39,20 +39,18 @@
 /// syntax `var y = map[x]` or `var y = map.get(x)`.
 ///
 class WeakMap<K, V> {
-  final Map<K, V> _map;
-  Expando _expando;
-  final List<K> _keys = [];
+  final Map<K, V> _map = {};
+  //Expando expando = Expando();
+  //final List<K> _keys = [];
 
-  WeakMap()
-      : _map = {},
-        _expando = Expando();
+  WeakMap();
 
   static bool _allowedInExpando(Object? value) =>
       value is! String && value is! num && value is! bool && value != null;
 
   void operator []=(K key, V value) => add(key: key, value: value);
 
-  get keys => _keys;
+  get keys => _map.keys;
 
   V? operator [](K key) => get(key);
 
@@ -61,15 +59,15 @@ class WeakMap<K, V> {
   }
 
   void add({required K key, required V value}) {
-    if (_allowedInExpando(key)) {
-      _expando[key!] = value;
-    } else {
+    // if (_allowedInExpando(key)) {
+    //   expando[key!] = value;
+    // } else {
       _map[key] = value;
-    }
+    // }
 
-    if (!contains(key)) {
-      _keys.add(key);
-    }
+    // if (!contains(key)) {
+    //   _keys.add(key);
+    // }
   }
 
   bool contains(K key) => get(key) != null;
@@ -79,24 +77,32 @@ class WeakMap<K, V> {
   V? get(K key) => _map.containsKey(key)
       ? //
       _map[key]
-      : (_allowedInExpando(key) ? _expando[key!] as V : null);
+      : null;//(_allowedInExpando(key) ? expando[key!] as V : null);
 
   void remove(K key) {
     _map.remove(key);
 
-    if (_allowedInExpando(key)) {
-      _expando[key!] = null;
-    }
+    // if (_allowedInExpando(key)) {
+    //   expando[key!] = null;
+    // }
   }
 
   void delete(K key) {
     remove(key);
-    _keys.remove(key);
+    //_keys.remove(key);
   }
 
   void clear() {
     _map.clear();
-    _expando = Expando();
-    _keys.clear();
+    // expando = Expando();
+    // _keys.clear();
+  }
+
+  @override
+  String toString(){
+    return {
+      'keys': keys,
+      'map': _map
+    }.toString();
   }
 }

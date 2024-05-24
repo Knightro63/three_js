@@ -50,19 +50,19 @@ void prepareAttributesData(BufferGeometry referenceGeometry, targetGeometry, att
 
 // Assigns the given tracked attribute data to the geometry and returns whether the
 // geometry needs to be disposed of.
-void assignBufferData( geometry, attributeData, groupOrder ) {
+void assignBufferData(BufferGeometry geometry, attributeData, groupOrder ) {
 	bool needsDisposal = false;
 	int drawRange = - 1;
 
 	// set the data
-	const attributes = geometry.attributes;
-	const referenceAttrSet = attributeData.groupAttributes[ 0 ];
-	for ( const key in referenceAttrSet ) {
+	final attributes = geometry.attributes;
+	final referenceAttrSet = attributeData.groupAttributes[ 0 ];
+	for ( final key in referenceAttrSet ) {
 
-		const requiredLength = attributeData.getTotalLength( key );
-		const type = attributeData.getType( key );
-		const itemSize = attributeData.getItemSize( key );
-		const normalized = attributeData.getNormalized( key );
+		final requiredLength = attributeData.getTotalLength( key );
+		final type = attributeData.getType( key );
+		final itemSize = attributeData.getItemSize( key );
+		final normalized = attributeData.getNormalized( key );
 		let geoAttr = attributes[ key ];
 		if ( ! geoAttr || geoAttr.array.length < requiredLength ) {
 			// create the attribute if it doesn't exist yet
@@ -75,9 +75,9 @@ void assignBufferData( geometry, attributeData, groupOrder ) {
 		// of the groups list
 		int offset = 0;
 		for (int i = 0, l = math.min( groupOrder.length, attributeData.groupCount ); i < l; i ++ ) {
-			const index = groupOrder[ i ].index;
-			const { array, type, length } = attributeData.groupAttributes[ index ][ key ];
-			const trimmedArray = new type( array.buffer, 0, length );
+			final index = groupOrder[ i ].index;
+			final { array, type, length } = attributeData.groupAttributes[ index ][ key ];
+			final trimmedArray = new type( array.buffer, 0, length );
 			geoAttr.array.set( trimmedArray, offset );
 			offset += trimmedArray.length;
 		}
@@ -87,8 +87,8 @@ void assignBufferData( geometry, attributeData, groupOrder ) {
 	}
 
 	// remove or update the index appropriately
-	if ( geometry.index ) {
-		const indexArray = geometry.index.array;
+	if ( geometry.index != null) {
+		final indexArray = geometry.index!.array;
 		if ( indexArray.length < drawRange ) {
 			geometry.index = null;
 			needsDisposal = true;
@@ -104,7 +104,7 @@ void assignBufferData( geometry, attributeData, groupOrder ) {
 	int groupOffset = 0;
 	geometry.clearGroups();
 	for ( int i = 0, l = math.min( groupOrder.length, attributeData.groupCount ); i < l; i ++ ) {
-		const { index, materialIndex } = groupOrder[ i ];
+		final { index, materialIndex } = groupOrder[ i ];
 		final vertCount = attributeData.getCount( index );
 		if (vertCount != 0 ) {
 			geometry.addGroup( groupOffset, vertCount, materialIndex );

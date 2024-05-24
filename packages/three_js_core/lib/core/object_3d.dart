@@ -1071,7 +1071,7 @@ class Object3D with EventDispatcher {
     return this;
   }
 
-  void dispose() {}
+  void dispose(){}
 }
 
 class Object3dMeta {

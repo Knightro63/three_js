@@ -60,6 +60,6 @@ class WebGLCubeMaps {
   }
 
   void dispose() {
-    cubemaps = WeakMap();
+    cubemaps.clear();
   }
 }

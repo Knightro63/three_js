@@ -101,7 +101,15 @@ class WebGLAttributes {
       return buffers.get(attribute);
     }
   }
-
+  void dispose(){
+    final len = buffers.keys.toList();
+    for(int i = 0; i < len.length;i++){
+      if(len[i] is BufferAttribute){
+        remove(len[i]);
+      }
+    }
+    buffers.clear();
+  }
   void remove(BufferAttribute attribute) {
     if (attribute.type == "InterleavedBufferAttribute") {
       final data = buffers.get(attribute.data);

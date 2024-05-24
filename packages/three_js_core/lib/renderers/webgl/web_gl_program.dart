@@ -396,14 +396,9 @@ class WebGLProgram extends DefaultProgram with WebGLProgramExtra {
   }
 
   // free resource
-
   void destroy() {
     bindingStates.releaseStatesOfProgram(this);
-
     gl.deleteProgram(program);
     program = null;
   }
-
-  //
-
 }

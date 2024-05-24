@@ -97,12 +97,15 @@ class ThreeJS{
     events.add(event);
   }
   void dispose(){
-    disposed = true;
+    renderer?.dispose();
     renderTarget?.dispose();
-    //renderer?.dispose();
-    scene.dispose();
     three3dRender.dispose();
+    scene.material?.dispose();
+    scene.children.forEach((element) {
+      element.material?.dispose();
+    });
     //loading.clear();
+    disposed = true;
   }
 
   void initSize(BuildContext context){

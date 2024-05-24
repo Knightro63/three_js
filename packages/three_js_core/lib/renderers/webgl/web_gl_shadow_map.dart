@@ -206,7 +206,13 @@ class WebGLShadowMap {
   }
 
   Material getDepthMaterial(
-      Object3D object, Material material, Light light, double shadowCameraNear, double shadowCameraFar, int type) {
+    Object3D object, 
+    Material material, 
+    Light light, 
+    double shadowCameraNear, 
+    double shadowCameraFar, 
+    int type
+  ) {
     Material? result;
 
     final customMaterial = light is PointLight ? object.customDistanceMaterial : object.customDepthMaterial;
@@ -223,7 +229,7 @@ class WebGLShadowMap {
       material.clippingPlanes!.isNotEmpty
       ) || 
       (material.displacementMap != null && material.displacementScale != 0 ) ||
-			( material.alphaMap  != null&& material.alphaTest > 0 ) ||
+			( material.alphaMap  != null && material.alphaTest > 0 ) ||
       (material.map != null && material.alphaTest > 0)
     ) {
       // in this case we need a unique material instance reflecting the
@@ -276,7 +282,8 @@ class WebGLShadowMap {
       result.farDistance = shadowCameraFar;
 
       return result;
-    } else {
+    } 
+    else {
       return result;
     }
   }
