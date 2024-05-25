@@ -18,7 +18,7 @@ part of 'learn_gl.dart';
 class Lesson7 extends Lesson {
   late Cube cube;
   late GlProgram program;
-  WebGLTexture? texture;
+  int? texture;
 
   bool get isLoaded => texture != null;
 

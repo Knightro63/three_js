@@ -20,13 +20,13 @@ part of 'learn_gl.dart';
 class Lesson3 extends Lesson {
   late GlProgram program;
 
-  late Buffer triangleVertexPositionBuffer, squareVertexPositionBuffer;
-  late Buffer triangleVertexColorBuffer, squareVertexColorBuffer;
+  late dynamic triangleVertexPositionBuffer, squareVertexPositionBuffer;
+  late dynamic triangleVertexColorBuffer, squareVertexColorBuffer;
 
   double rTriangle = 0.0, rSquare = 0.0;
 
   Lesson3() {
-    program = new GlProgram(
+    program = GlProgram(
       '''
           #version 300 es
           precision mediump float;
@@ -56,6 +56,7 @@ class Lesson3 extends Lesson {
       ['aVertexPosition', 'aVertexColor'],
       ['uMVMatrix', 'uPMatrix'],
     );
+
     gl.useProgram(program.program);
 
     // calloc and build the two buffers we need to draw a triangle and box.

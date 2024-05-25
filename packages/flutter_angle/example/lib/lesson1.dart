@@ -18,7 +18,7 @@ part of 'learn_gl.dart';
 class Lesson1 extends Lesson {
   late GlProgram program;
 
-  late Buffer triangleVertexPositionBuffer, squareVertexPositionBuffer;
+  late int triangleVertexPositionBuffer, squareVertexPositionBuffer;
 
   Lesson1() {
     program = new GlProgram(

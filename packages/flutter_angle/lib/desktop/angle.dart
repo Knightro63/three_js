@@ -1,5 +1,6 @@
 library flutter_angle;
 
+import '../shared/options.dart';
 import 'dart:async';
 import 'dart:ffi';
 import 'dart:io';
@@ -62,7 +63,7 @@ class FlutterGLTexture {
 
 class FlutterAngle {
   static const MethodChannel _channel = const MethodChannel('flutter_angle');
-
+  static dynamic element = null;
   static LibOpenGLES? _libOpenGLES;
   static Pointer<Void> _display = nullptr;
   static late Pointer<Void> _EGLconfig;
@@ -85,11 +86,10 @@ class FlutterAngle {
     return _libOpenGLES!;
   }
 
-  static RenderingContext getWebGLContext() {
+  static RenderingContext getContext() {
     assert(_baseAppContext != nullptr,
         "OpenGL isn't initialized! Please call FlutterAngle.initOpenGL");
-    return RenderingContext.create(
-        rawOpenGl, FlutterAngle._baseAppContext.address);
+    return RenderingContext.create(rawOpenGl);
   }
 
   static Future<String> get platformVersion async {
@@ -101,7 +101,7 @@ class FlutterAngle {
   // * test on all plaforms
   // * mulitple textures on Android and the other OSs
 
-  static Future<void> initOpenGL([bool useDebugContext = false]) async {
+  static Future<void> initOpenGL(AngleOptions options) async {
     /// make sure we don't call this twice
     if (_display != nullptr) {
       return;
@@ -176,12 +176,12 @@ class FlutterAngle {
         shareContext: _pluginContext,
         contextClientVersion: 3,
         // Android does not support debugContexts
-        isDebugContext: useDebugContext && !Platform.isAndroid);
+        isDebugContext: options.useDebugContext && !Platform.isAndroid);
 
     /// bind context to this thread. All following OpenGL calls from this thread will use this context
     eglMakeCurrent(_display, _dummySurface, _dummySurface, _baseAppContext);
 
-    if (useDebugContext && Platform.isWindows) {
+    if (options.useDebugContext && Platform.isWindows) {
       rawOpenGl.glEnable(GL_DEBUG_OUTPUT);
       rawOpenGl.glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
       rawOpenGl.glDebugMessageCallback(

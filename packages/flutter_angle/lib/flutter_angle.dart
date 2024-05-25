@@ -1,5 +1,7 @@
 library flutter_angle;
 
-export 'opengl/angle.dart';
-export 'opengl/wrapper.dart';
-export 'opengl/bindings/gles_bindings.dart';
+// export 'desktop/index.dart'
+//   if (dart.library.js) 'web/index.dart';
+export 'web/index.dart';
+export 'shared/webgl.dart';
+export 'shared/options.dart';

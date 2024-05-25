@@ -81,43 +81,43 @@ class STLLoader extends Loader {
   }
 
   @override
-  Future<BufferGeometry?> fromNetwork(Uri uri) async{
+  Future<Mesh?> fromNetwork(Uri uri) async{
     _init();
     ThreeFile? tf = await _loader.fromNetwork(uri);
     return tf == null?null:_parse(tf.data);
   }
   @override
-  Future<BufferGeometry> fromFile(File file) async{
+  Future<Mesh> fromFile(File file) async{
     _init();
     ThreeFile tf = await _loader.fromFile(file);
     return _parse(tf.data);
   }
   @override
-  Future<BufferGeometry?> fromPath(String filePath) async{
+  Future<Mesh?> fromPath(String filePath) async{
     _init();
     ThreeFile? tf = await _loader.fromPath(filePath);
     return tf == null?null:_parse(tf.data);
   }
   @override
-  Future<BufferGeometry> fromBlob(Blob blob) async{
+  Future<Mesh> fromBlob(Blob blob) async{
     _init();
     ThreeFile tf = await _loader.fromBlob(blob);
     return _parse(tf.data);
   }
   @override
-  Future<BufferGeometry?> fromAsset(String asset, {String? package}) async{
+  Future<Mesh?> fromAsset(String asset, {String? package}) async{
     _init();
     ThreeFile? tf = await _loader.fromAsset(asset,package: package);
     return tf == null?null:_parse(tf.data);
   }
   @override
-  Future<BufferGeometry> fromBytes(Uint8List bytes) async{
+  Future<Mesh> fromBytes(Uint8List bytes) async{
     _init();
     ThreeFile tf = await _loader.fromBytes(bytes);
     return _parse(tf.data);
   }
 
-	BufferGeometry _parse(Uint8List data) {
+	Mesh _parse(Uint8List data) {
 
 		bool matchDataViewAt(List<int> query, ByteData reader, int offset ) {
 			// Check if each byte in query matches the corresponding byte from the current offset
@@ -159,14 +159,15 @@ class STLLoader extends Loader {
 			return true;
 		}
 
-		BufferGeometry parseBinary(Uint8List data ) {
+		Mesh parseBinary(Uint8List data ) {
 			final reader = data.buffer.asByteData();
 			final faces = reader.getUint32( 80, Endian.little );
 
 			late double r, g, b;
       bool hasColors = false;
       late Float32Array colors;
-			late double defaultR, defaultG, defaultB, alpha;
+			late double defaultR, defaultG, defaultB;
+      double alpha = 1.0;
 
 			// process STL header
 			// check for default color in header ("COLOR=rgba" sequence).
@@ -245,62 +246,68 @@ class STLLoader extends Loader {
 				//geometry.alpha = alpha;
 			}
 
-			return geometry;
+      return Mesh(geometry,MeshPhongMaterial.fromMap({"color": color.getHex(),"flatShading": false,"side": DoubleSide, 'opacity': alpha}));
 		}
 
-		BufferGeometry parseASCII(String data ) {
+		Mesh parseASCII(String data) {
 			final geometry = BufferGeometry();
-			final patternSolid = RegExp(r'solid([\s\S]*?)endsolid');
-			final patternFace = RegExp(r'facet([\s\S]*?)endfacet',);
-			final patternName = RegExp(r'solid\s(.+)',);
+			final patternSolid = RegExp(r'solid([\s\S]*?)endsolid', multiLine: true);
+			final patternFace = RegExp(r'facet([\s\S]*?)endfacet', multiLine: true);
+			final patternName = RegExp(r'solid\s(.+)');
 			int faceCounter = 0;
 
-			final patternFloat = RegExp(r'[\s]+([+-]?(?:\d*)(?:\.\d*)?(?:[eE][+-]?\d+)?)');
-			final patternVertex = RegExp('vertex$patternFloat$patternFloat$patternFloat');
-			final patternNormal = RegExp('normal$patternFloat$patternFloat$patternFloat');
+			const patternFloat = r'[\s]+([+-]?(?:\d*)(?:\.\d*)?(?:[eE][+-]?\d+)?)';
+			final patternVertex = RegExp('vertex$patternFloat$patternFloat$patternFloat',multiLine: true);
+			final patternNormal = RegExp('normal$patternFloat$patternFloat$patternFloat',multiLine: true);
+      
+      final RegExp patternColor = RegExp(r'endsolid\s+\w+=RGB\((\d+),(\d+),(\d+)\)');
 
 			final List<double> vertices = [];
 			final List<double> normals = [];
 			final List<String> groupNames = [];
 
-			final normal = Vector3();
+      List<Color> colors = patternColor
+          .allMatches(data)
+          .map(
+            (e) => Color(
+              double.parse(e.group(1)!) / 255,
+              double.parse(e.group(2)!) / 255,
+              double.parse(e.group(3)!) / 255,
+            ),
+          )
+          .toList();
 
-			final result = patternSolid.allMatches( data ).toList();
+			final normal = Vector3();
 
 			int groupCount = 0;
 			int startVertex = 0;
 			int endVertex = 0;
 
-			while(result.isNotEmpty){
+			for(RegExpMatch? match1 in patternSolid.allMatches(data)){
 				startVertex = endVertex;
-				final solid = result.removeAt(0).toString();
+				final solid = match1!.group(0);
 
-        final resultPN = patternName.allMatches( solid ).toList();
+        final name = (match1 = patternName.firstMatch(solid!)) != null? match1!.group(1): '';
+				groupNames.add(name!);
 
-				final name = resultPN.isNotEmpty ? resultPN.removeAt(0).toString() : '';
-				groupNames.add( name );
-
-        final resultPF = patternFace.allMatches( solid ).toList();
-				while (resultPF.isNotEmpty) {
+				for (RegExpMatch match2 in patternFace.allMatches(solid)) {
 					int vertexCountPerFace = 0;
 					int normalCountPerFace = 0;
 
-					final text = resultPF.removeAt(0).toString();
+					final text = match2.group(0)!;
 
-          final resultPN = patternNormal.allMatches( text ).toList();
-					while (resultPN.isNotEmpty) {
-						normal.x = double.parse( resultPN.removeAt(0).toString() );
-						normal.y = double.parse( resultPN.removeAt(0).toString() );
-						normal.z = double.parse( resultPN.removeAt(0).toString() );
+					for (Match match in patternNormal.allMatches(text)) {
+						normal.x = double.parse( match.group(1)!);
+						normal.y = double.parse(match.group(2)!);
+						normal.z = double.parse(match.group(3)!);
 						normalCountPerFace ++;
 					}
 
-          final resultPV = patternVertex.allMatches( text ).toList();
-					while (resultPV.isNotEmpty ) {
+					for (Match match in patternVertex.allMatches(text)) {
 						vertices.addAll([ 
-              double.parse( resultPV.removeAt(0).toString() ), 
-              double.parse( resultPV.removeAt(0).toString() ), 
-              double.parse( resultPV.removeAt(0).toString() ) 
+              double.parse(match.group(1)!), 
+              double.parse(match.group(2)!), 
+              double.parse(match.group(3)!) 
             ]);
 						normals.addAll([ normal.x, normal.y, normal.z ]);
 						vertexCountPerFace ++;
@@ -332,7 +339,33 @@ class STLLoader extends Loader {
 			geometry.setAttributeFromString( 'position', Float32BufferAttribute.fromList( vertices, 3 ) );
 			geometry.setAttributeFromString( 'normal', Float32BufferAttribute.fromList( normals, 3 ) );
 
-			return geometry;
+      Material? material;
+      GroupMaterial? groupMaterial;
+
+      if (colors.length != groupCount) {
+        // apply default material to each group
+        List<Material> materials = List.generate(groupCount,(index) => MeshBasicMaterial.fromMap({"color": 0xffffff, "flatShading": true, "side": DoubleSide}));
+
+        if(materials.length == 1){
+          material = materials[0];
+        }
+        else{
+          groupMaterial = GroupMaterial(materials);
+        }
+      } 
+      else {
+        // use extracted colors
+        List<Material> materials = colors.map((e) => MeshBasicMaterial.fromMap({"color": e.getHex(), "flatShading": true, "side": DoubleSide})).toList();
+      
+        if(materials.length == 1){
+          material = materials[0];
+        }
+        else{
+          groupMaterial = GroupMaterial(materials);
+        }
+      }
+
+      return Mesh(geometry, material ?? groupMaterial);
 		}
 
 		String ensureString(Uint8List buffer ) {

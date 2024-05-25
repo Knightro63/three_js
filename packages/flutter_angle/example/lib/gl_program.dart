@@ -18,10 +18,10 @@ part of 'learn_gl.dart';
 /// cache [UniformLocation]s and AttribLocations.
 class GlProgram {
   Map<String, int> attributes = new Map<String, int>();
-  Map<String, UniformLocation> uniforms = new Map<String, UniformLocation>();
-  late Program program;
+  Map<String, int> uniforms = new Map<String, int>();
+  late int program;
 
-  late Shader fragShader, vertShader;
+  late dynamic fragShader, vertShader;
 
   GlProgram(String fragSrc, String vertSrc, List<String> attributeNames, List<String> uniformNames) {
     fragShader = gl.createShader(WebGL.FRAGMENT_SHADER);

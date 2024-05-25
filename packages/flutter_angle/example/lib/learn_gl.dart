@@ -52,7 +52,7 @@ part 'renderable.dart';
 late RenderingContext gl;
 
 void resetLessons() {
-  gl = FlutterAngle.getWebGLContext();
+  gl = FlutterAngle.getContext();
   // Set the fill color to black
   gl.clearColor(0, 0, 0, 1.0);
 }
@@ -157,8 +157,8 @@ abstract class Lesson {
 
 /// Load the given image at [url] and call [handle] to execute some GL code.
 /// Return a [Future] to asynchronously notify when the texture is complete.
-Future<WebGLTexture> loadTexture(
-    String url, Future Function(WebGLTexture tex, Image data) handle) async {
+Future<int> loadTexture(
+    String url, Future Function(int tex, Image data) handle) async {
   var texture = gl.createTexture();
   final data = await gl.loadImageFromAsset('assets/$url');
   await handle(texture, data);
@@ -167,7 +167,7 @@ Future<WebGLTexture> loadTexture(
 
 /// This is a common handler for [loadTexture]. It will be explained in future
 /// lessons that require textures.
-Future handleMipMapTexture(WebGLTexture texture, Image image) async {
+Future handleMipMapTexture(int texture, Image image) async {
   gl.pixelStorei(WebGL.UNPACK_ALIGNMENT, 1);
   gl.bindTexture(WebGL.TEXTURE_2D, texture);
   await gl.texImage2DfromImage(

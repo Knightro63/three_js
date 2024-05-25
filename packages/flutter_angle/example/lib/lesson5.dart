@@ -17,14 +17,14 @@ part of 'learn_gl.dart';
 /// Introducing Textures!
 class Lesson5 extends Lesson {
   late GlProgram program;
-  WebGLTexture? neheTexture;
+  int? neheTexture;
   late Cube cube;
 
   bool get isLoaded => neheTexture != null;
 
   Lesson5() {
     cube = new Cube();
-    loadTexture("dash.png", (WebGLTexture texture, Image data) async {
+    loadTexture("dash.png", (int texture, Image data) async {
       gl.pixelStorei(WebGL.UNPACK_ALIGNMENT, 1);
       gl.bindTexture(WebGL.TEXTURE_2D, texture);
       await gl.texImage2DfromImage(

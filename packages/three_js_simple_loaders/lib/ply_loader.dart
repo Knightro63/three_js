@@ -395,7 +395,7 @@ class PLYLoader extends Loader {
 		BufferGeometry parseASCII(String data, header ) {
 			final buffer = createBuffer();
 
-			final patternBody = RegExp(r'/end_header\s+(\S[\s\S]*\S|\S)\s*/',caseSensitive: false,multiLine: true);
+			final patternBody = RegExp(r'/end_header\s+(\S[\s\S]*\S|\S)\s*/',multiLine: true);
 			List<String> body = [];
       List<String> matches = data.split( patternBody );
 

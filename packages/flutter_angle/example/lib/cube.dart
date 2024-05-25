@@ -15,7 +15,7 @@
 part of 'learn_gl.dart';
 
 class Cube implements Renderable {
-  late Buffer positionBuffer, normalBuffer, textureCoordBuffer, indexBuffer;
+  late dynamic positionBuffer, normalBuffer, textureCoordBuffer, indexBuffer;
 
   Cube() {
     positionBuffer = gl.createBuffer();
@@ -202,7 +202,7 @@ class Cube implements Renderable {
 
 /// Holds a color [Buffer] for our cube's element array
 class CubeColor {
-  late Buffer colorBuffer;
+  late int colorBuffer;
 
   CubeColor() {
     colorBuffer = gl.createBuffer();

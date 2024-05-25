@@ -170,7 +170,7 @@ class ThreeJS{
       if(!kIsWeb){
         options['logarithmicDepthBuffer'] = true;
       }
-      
+
       renderer = lateRenderer ?? core.WebGLRenderer(options);
       renderer!.setPixelRatio(dpr);
       renderer!.setSize(width, height, false);

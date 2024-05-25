@@ -18,8 +18,8 @@ part of 'learn_gl.dart';
 class Lesson2 extends Lesson {
   late GlProgram program;
 
-  late Buffer triangleVertexPositionBuffer, squareVertexPositionBuffer;
-  late Buffer triangleVertexColorBuffer, squareVertexColorBuffer;
+  late int triangleVertexPositionBuffer, squareVertexPositionBuffer;
+  late int triangleVertexColorBuffer, squareVertexColorBuffer;
 
   Lesson2() {
     program = GlProgram(

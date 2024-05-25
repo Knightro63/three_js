@@ -70,8 +70,9 @@ class _State extends State<WebglLoaderStl> {
     await loader.fromAsset( 'assets/models/stl/ascii/slotted_disk.stl').then( ( geometry ) {
 
       final material = three.MeshPhongMaterial.fromMap( { 'color': 0xff9c7c, 'specular': 0x494949, 'shininess': 200 } );
-      final mesh = three.Mesh( geometry, material );
+      final mesh = geometry!;
 
+      mesh.material = material;
       mesh.position.setValues( 0, - 0.25, 0.6 );
       mesh.rotation.set( 0, - math.pi / 2, 0 );
       mesh.scale.setValues( 0.5, 0.5, 0.5 );
@@ -89,8 +90,8 @@ class _State extends State<WebglLoaderStl> {
 
     await loader.fromAsset( 'assets/models/stl/binary/pr2_head_pan.stl').then( ( geometry ) {
 
-      final mesh = three.Mesh( geometry, material );
-
+      final mesh = geometry!;
+      mesh.material = material;
       mesh.position.setValues( 0, - 0.37, - 0.6 );
       mesh.rotation.set( - math.pi / 2, 0, 0 );
       mesh.scale.setValues( 2, 2, 2 );
@@ -104,7 +105,7 @@ class _State extends State<WebglLoaderStl> {
 
     await loader.fromAsset( 'assets/models/stl/binary/pr2_head_tilt.stl').then( ( geometry ) {
 
-      final mesh = three.Mesh( geometry, material );
+      final mesh = geometry!;
 
       mesh.position.setValues( 0.136, - 0.37, - 0.6 );
       mesh.rotation.set( - math.pi / 2, 0.3, 0 );
@@ -119,14 +120,7 @@ class _State extends State<WebglLoaderStl> {
 
     // Colored binary STL
     await loader.fromAsset( 'assets/models/stl/binary/colored.stl').then( ( geometry ) {
-
-      three.Material meshMaterial = material;
-
-      // if ( geometry.hasColors ) {
-      //   meshMaterial = three.MeshPhongMaterial.fromMap( { 'opacity': geometry.alpha, 'vertexColors': true } );
-      // }
-
-      final mesh = three.Mesh( geometry, meshMaterial );
+      final mesh = geometry!;
 
       mesh.position.setValues( 0.5, 0.2, 0 );
       mesh.rotation.set( - math.pi / 2, math.pi / 2, 0 );
