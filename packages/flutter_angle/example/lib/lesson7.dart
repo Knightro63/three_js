@@ -18,12 +18,12 @@ part of 'learn_gl.dart';
 class Lesson7 extends Lesson {
   late Cube cube;
   late GlProgram program;
-  int? texture;
+  WebGLTexture? texture;
 
   bool get isLoaded => texture != null;
 
-  Lesson7() {
-    cube = new Cube();
+  Lesson7(RenderingContext gl):super(gl) {
+    cube = new Cube(gl);
     // loadMipMapTexture(gl.createTexture()).then((t) => texture = t); // works
     loadTexture('crate.png', handleMipMapTexture).then((t) => texture = t); // fails
 
@@ -40,6 +40,7 @@ class Lesson7 extends Lesson {
     ];
 
     program = new GlProgram(
+      gl,
       '''
           precision mediump float;
 

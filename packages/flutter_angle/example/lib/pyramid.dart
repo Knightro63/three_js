@@ -16,10 +16,11 @@
 part of 'learn_gl.dart';
 
 class Pyramid implements Renderable {
-  late int positionBuffer, normalBuffer, textureCoordBuffer;
-  late int colorBuffer;
+  late Buffer positionBuffer, normalBuffer, textureCoordBuffer;
+  late Buffer colorBuffer;
+  RenderingContext gl;
 
-  Pyramid() {
+  Pyramid(this.gl){
     positionBuffer = gl.createBuffer();
     normalBuffer = gl.createBuffer();
     textureCoordBuffer = gl.createBuffer();

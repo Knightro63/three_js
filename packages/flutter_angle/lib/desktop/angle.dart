@@ -1,5 +1,7 @@
 library flutter_angle;
 
+import 'package:flutter/widgets.dart';
+
 import '../shared/options.dart';
 import 'dart:async';
 import 'dart:ffi';
@@ -13,28 +15,46 @@ import 'lib_egl.dart';
 import 'bindings/index.dart';
 
 class FlutterGLTexture {
+  final dynamic element;
   final int textureId;
   final int rboId;
   final int metalAsGLTextureId;
   late final Pointer<Void> androidSurface;
   final int fboId;
-  final int width;
-  final int height;
-  FlutterGLTexture(this.textureId, this.rboId, this.metalAsGLTextureId,
-      int androidSurfaceId, this.fboId, this.width, this.height) {
+  //static LibOpenGLES? _libOpenGLES;
+  late AngleOptions options;
+
+  LibOpenGLES get rawOpenGl {
+    return FlutterAngle._rawOpenGl;
+  }
+
+  FlutterGLTexture(
+    this.textureId, 
+    this.rboId, 
+    this.metalAsGLTextureId,
+    int androidSurfaceId, 
+    this.element,
+    this.fboId, 
+    this.options
+  ) {
     androidSurface = Pointer.fromAddress(androidSurfaceId);
   }
 
   static FlutterGLTexture fromMap(
-      dynamic map, int fboId, int width, int height) {
+    dynamic map, 
+    dynamic element,
+    int fboId, 
+    AngleOptions options
+  ){    
     return FlutterGLTexture(
-        map['textureId']! as int,
-        map['rbo'] as int? ?? 0,
-        map['metalAsGLTexture'] as int? ?? 0,
-        map['surface'] as int? ?? 0,
-        fboId,
-        width,
-        height);
+      map['textureId']! as int,
+      map['rbo'] as int? ?? 0,
+      map['metalAsGLTexture'] as int? ?? 0,
+      map['surface'] as int? ?? 0,
+      element,
+      fboId,
+      options
+    );
   }
 
   Map<String, int> toMap() {
@@ -43,6 +63,11 @@ class FlutterGLTexture {
       'rbo': rboId,
       'metalAsGLTexture': metalAsGLTextureId
     };
+  }
+
+  RenderingContext getContext() {
+    assert(FlutterAngle._baseAppContext != nullptr, "OpenGL isn't initialized! Please call FlutterAngle.initOpenGL");
+    return RenderingContext.create(FlutterAngle._rawOpenGl);
   }
 
   /// Whenever you finished your rendering you have to call this function to signal
@@ -57,13 +82,12 @@ class FlutterGLTexture {
   /// you can start rendering on it. If you forget it you will render into the wrong Texture.
   void activate() {
     FlutterAngle.activateTexture(this);
-    FlutterAngle.rawOpenGl.glViewport(0, 0, width, height);
+    FlutterAngle._rawOpenGl.glViewport(0, 0, options.width, options.height);
   }
 }
 
 class FlutterAngle {
   static const MethodChannel _channel = const MethodChannel('flutter_angle');
-  static dynamic element = null;
   static LibOpenGLES? _libOpenGLES;
   static Pointer<Void> _display = nullptr;
   static late Pointer<Void> _EGLconfig;
@@ -72,24 +96,18 @@ class FlutterAngle {
   static late Pointer<Void> _dummySurface;
   static int? _activeFramebuffer;
 
-  static LibOpenGLES get rawOpenGl {
-    if (_libOpenGLES == null) {
+  static LibOpenGLES get _rawOpenGl {
+    if (FlutterAngle._libOpenGLES == null) {
       if (Platform.isMacOS || Platform.isIOS) {
-        _libOpenGLES = LibOpenGLES(DynamicLibrary.process());
+        FlutterAngle._libOpenGLES = LibOpenGLES(DynamicLibrary.process());
       } else if (Platform.isAndroid) {
-        _libOpenGLES = LibOpenGLES(DynamicLibrary.open('libGLESv3.so'));
+        FlutterAngle._libOpenGLES = LibOpenGLES(DynamicLibrary.open('libGLESv3.so'));
       } else {
-        _libOpenGLES =
+        FlutterAngle._libOpenGLES =
             LibOpenGLES(DynamicLibrary.open(resolveDylibPath('libGLESv2')));
       }
     }
-    return _libOpenGLES!;
-  }
-
-  static RenderingContext getContext() {
-    assert(_baseAppContext != nullptr,
-        "OpenGL isn't initialized! Please call FlutterAngle.initOpenGL");
-    return RenderingContext.create(rawOpenGl);
+    return FlutterAngle._libOpenGLES!;
   }
 
   static Future<String> get platformVersion async {
@@ -101,7 +119,7 @@ class FlutterAngle {
   // * test on all plaforms
   // * mulitple textures on Android and the other OSs
 
-  static Future<void> initOpenGL(AngleOptions options) async {
+  static Future<void> initOpenGL([bool useDebugContext = false]) async {
     /// make sure we don't call this twice
     if (_display != nullptr) {
       return;
@@ -176,17 +194,17 @@ class FlutterAngle {
         shareContext: _pluginContext,
         contextClientVersion: 3,
         // Android does not support debugContexts
-        isDebugContext: options.useDebugContext && !Platform.isAndroid);
+        isDebugContext: useDebugContext && !Platform.isAndroid);
 
     /// bind context to this thread. All following OpenGL calls from this thread will use this context
     eglMakeCurrent(_display, _dummySurface, _dummySurface, _baseAppContext);
 
-    if (options.useDebugContext && Platform.isWindows) {
-      rawOpenGl.glEnable(GL_DEBUG_OUTPUT);
-      rawOpenGl.glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-      rawOpenGl.glDebugMessageCallback(
+    if (useDebugContext && Platform.isWindows) {
+      _rawOpenGl.glEnable(GL_DEBUG_OUTPUT);
+      _rawOpenGl.glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+      _rawOpenGl.glDebugMessageCallback(
           Pointer.fromFunction<GLDEBUGPROC>(glDebugOutput), nullptr);
-      rawOpenGl.glDebugMessageControl(
+      _rawOpenGl.glDebugMessageControl(
           GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
     }
   }
@@ -267,53 +285,55 @@ class FlutterAngle {
     print('\n');
   }
 
-  static Future<FlutterGLTexture> createTexture(int width, int height) async {
+  static Future<FlutterGLTexture> createTexture(AngleOptions options) async {
+    final height = options.height;
+    final width = options.width;
     final result = await _channel
         .invokeMethod('createTexture', {"width": width, "height": height});
 
     if (Platform.isAndroid) {
-      final newTexture = FlutterGLTexture.fromMap(result, 0, width, height);
-      rawOpenGl.glViewport(0, 0, width, height);
+      final newTexture = FlutterGLTexture.fromMap(result, null, 0, options);
+      _rawOpenGl.glViewport(0, 0, width, height);
       return newTexture;
     }
 
     Pointer<Uint32> fbo = calloc();
-    rawOpenGl.glGenFramebuffers(1, fbo);
-    rawOpenGl.glBindFramebuffer(GL_FRAMEBUFFER, fbo.value);
+    _rawOpenGl.glGenFramebuffers(1, fbo);
+    _rawOpenGl.glBindFramebuffer(GL_FRAMEBUFFER, fbo.value);
 
     final newTexture =
-        FlutterGLTexture.fromMap(result, fbo.value, width, height);
+        FlutterGLTexture.fromMap(result, null, fbo.value, options);
 
-    print(rawOpenGl.glGetError());
+    print(_rawOpenGl.glGetError());
 
     if (newTexture.metalAsGLTextureId != 0) {
       // Draw to metal interop texture directly
-      rawOpenGl.glBindTexture(GL_TEXTURE_2D, newTexture.metalAsGLTextureId);
-      rawOpenGl.glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+      _rawOpenGl.glBindTexture(GL_TEXTURE_2D, newTexture.metalAsGLTextureId);
+      _rawOpenGl.glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
           GL_TEXTURE_2D, newTexture.metalAsGLTextureId, 0);
     } else {
-      rawOpenGl.glBindRenderbuffer(GL_RENDERBUFFER, newTexture.rboId);
-      rawOpenGl.glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+      _rawOpenGl.glBindRenderbuffer(GL_RENDERBUFFER, newTexture.rboId);
+      _rawOpenGl.glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
           GL_RENDERBUFFER, newTexture.rboId);
     }
-    var frameBufferCheck = rawOpenGl.glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    var frameBufferCheck = _rawOpenGl.glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if (frameBufferCheck != GL_FRAMEBUFFER_COMPLETE) {
       print("Framebuffer (color) check failed: $frameBufferCheck");
     }
 
     Pointer<Int32> depthBuffer = calloc();
-    rawOpenGl.glGenRenderbuffers(1, depthBuffer.cast());
-    rawOpenGl.glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer.value);
-    rawOpenGl.glRenderbufferStorage(
+    _rawOpenGl.glGenRenderbuffers(1, depthBuffer.cast());
+    _rawOpenGl.glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer.value);
+    _rawOpenGl.glRenderbufferStorage(
         GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, width, height);
 
-    rawOpenGl.glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+    _rawOpenGl.glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
         GL_RENDERBUFFER, depthBuffer.value);
-    frameBufferCheck = rawOpenGl.glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    frameBufferCheck = _rawOpenGl.glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if (frameBufferCheck != GL_FRAMEBUFFER_COMPLETE) {
       print("Framebuffer (depth) check failed: $frameBufferCheck");
     }
-    rawOpenGl.glViewport(0, 0, width, height);
+    _rawOpenGl.glViewport(0, 0, width, height);
     _activeFramebuffer = fbo.value;
 
     calloc.free(fbo);
@@ -326,7 +346,7 @@ class FlutterAngle {
       return;
     }
 
-    rawOpenGl.glFlush();
+    _rawOpenGl.glFlush();
     assert(_activeFramebuffer != null,
         'There is no active FlutterGL Texture to update');
     await _channel
@@ -337,12 +357,12 @@ class FlutterAngle {
     assert(_activeFramebuffer != null,
         'There is no active FlutterGL Texture to delete');
     if (_activeFramebuffer == texture.fboId) {
-      rawOpenGl.glFramebufferRenderbuffer(
+      _rawOpenGl.glFramebufferRenderbuffer(
           GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, 0);
 
       Pointer<Uint32> fbo = calloc();
       fbo.value = texture.fboId;
-      rawOpenGl.glDeleteBuffers(1, fbo);
+      _rawOpenGl.glDeleteBuffers(1, fbo);
       calloc.free(fbo);
     }
     await _channel
@@ -355,13 +375,13 @@ class FlutterAngle {
           _baseAppContext);
       return;
     }
-    rawOpenGl.glBindFramebuffer(GL_FRAMEBUFFER, texture.fboId);
+    _rawOpenGl.glBindFramebuffer(GL_FRAMEBUFFER, texture.fboId);
     if (texture.metalAsGLTextureId != 0) {
       // Draw to metal interop texture directly
-      rawOpenGl.glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+      _rawOpenGl.glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
           GL_TEXTURE_2D, texture.metalAsGLTextureId, 0);
     } else {
-      rawOpenGl.glFramebufferRenderbuffer(
+      _rawOpenGl.glFramebufferRenderbuffer(
           GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, texture.rboId);
     }
     printOpenGLError('activateTextue ${texture.textureId}');
@@ -369,7 +389,7 @@ class FlutterAngle {
   }
 
   static void printOpenGLError(String message) {
-    var glGetError = rawOpenGl.glGetError();
+    var glGetError = _rawOpenGl.glGetError();
     if (glGetError != GL_NO_ERROR) {
       print('$message: $glGetError');
     }

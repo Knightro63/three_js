@@ -18,12 +18,18 @@ part of 'learn_gl.dart';
 /// cache [UniformLocation]s and AttribLocations.
 class GlProgram {
   Map<String, int> attributes = new Map<String, int>();
-  Map<String, int> uniforms = new Map<String, int>();
-  late int program;
+  Map<String, UniformLocation> uniforms = new Map<String, UniformLocation>();
+  late Program program;
 
   late dynamic fragShader, vertShader;
 
-  GlProgram(String fragSrc, String vertSrc, List<String> attributeNames, List<String> uniformNames) {
+  GlProgram(
+    RenderingContext gl,
+    String fragSrc, 
+    String vertSrc, 
+    List<String> attributeNames, 
+    List<String> uniformNames
+  ) {
     fragShader = gl.createShader(WebGL.FRAGMENT_SHADER);
     gl.shaderSource(fragShader, fragSrc);
     gl.compileShader(fragShader);
@@ -38,7 +44,7 @@ class GlProgram {
     gl.linkProgram(program);
 
     for (String attrib in attributeNames) {
-      int attributeLocation = gl.getAttribLocation(program, attrib);
+      int attributeLocation = gl.getAttribLocation(program, attrib).id;
       gl.enableVertexAttribArray(attributeLocation);
       gl.checkError(attrib);
       attributes[attrib] = attributeLocation;
@@ -46,7 +52,7 @@ class GlProgram {
     for (String uniform in uniformNames) {
       var uniformLocation = gl.getUniformLocation(program, uniform);
       gl.checkError(uniform);
-      uniforms[uniform] = uniformLocation;
+      uniforms[uniform] = UniformLocation(uniformLocation.id);
     }
   }
 }

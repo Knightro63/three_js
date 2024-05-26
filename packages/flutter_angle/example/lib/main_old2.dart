@@ -24,7 +24,7 @@ class _MyAppState extends State<ExampleTriangle01> {
   late final glProgram;
 
   Size? screenSize;
-  dynamic _vao;
+  late final RenderingContext _gl;
 
   late FlutterGLTexture sourceTexture;
 
@@ -46,14 +46,7 @@ class _MyAppState extends State<ExampleTriangle01> {
     width = screenSize!.width;
     height = width;
 
-    await FlutterAngle.initOpenGL(
-      AngleOptions(
-        width: width, 
-        height: height, 
-        dpr: dpr,
-        useDebugContext: true
-      )
-    );
+    await FlutterAngle.initOpenGL(true);
     setState(() {});
 
     // web need wait dom ok!!!
@@ -64,8 +57,14 @@ class _MyAppState extends State<ExampleTriangle01> {
 
   void setup() async {
     // web no need use fbo
-    
-    sourceTexture = await FlutterAngle.createTexture(width.toInt(),height.toInt());
+    sourceTexture = await FlutterAngle.createTexture(      
+      AngleOptions(
+        width: width.toInt(), 
+        height: height.toInt(), 
+        dpr: dpr,
+      )
+    );
+    _gl = sourceTexture.getContext();
     ready = true;
 
     setState(() {});
@@ -148,8 +147,6 @@ class _MyAppState extends State<ExampleTriangle01> {
   }
 
   Future<void> render() async{
-    final RenderingContext _gl = FlutterAngle.getContext();
-
     int _current = DateTime.now().millisecondsSinceEpoch;
 
     _gl.viewport(0, 0, width.toInt(), height.toInt());
@@ -173,8 +170,6 @@ class _MyAppState extends State<ExampleTriangle01> {
   }
 
   void prepare() {
-    final RenderingContext _gl = FlutterAngle.getContext();
-    
     String _version = "300 es";
 
     if(!kIsWeb) {
@@ -231,7 +226,7 @@ class _MyAppState extends State<ExampleTriangle01> {
     gl.bufferData(WebGL.ARRAY_BUFFER, vertices, WebGL.STATIC_DRAW);
 
     // Assign the vertices in buffer object to a_Position variable
-    final a_Position = gl.getAttribLocation(glProgram, 'a_Position');
+    final a_Position = gl.getAttribLocation(glProgram, 'a_Position').id;
     if (a_Position < 0) {
       print('Failed to get the storage location of a_Position');
       return -1;

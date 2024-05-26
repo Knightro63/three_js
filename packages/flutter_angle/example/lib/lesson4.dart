@@ -20,13 +20,16 @@ part of 'learn_gl.dart';
 class Lesson4 extends Lesson {
   late GlProgram program;
 
-  Pyramid pyramid = new Pyramid();
-  Cube cube = new Cube();
+  late Pyramid pyramid;
+  late Cube cube;
 
   double rPyramid = 0.0, rCube = 0.0;
 
-  Lesson4() {
+  Lesson4(RenderingContext gl):super(gl) {
+    cube = new Cube(gl);
+    pyramid = new Pyramid(gl);
     program = new GlProgram(
+      gl,
       '''
           #version 300 es
           precision mediump float;
@@ -60,7 +63,7 @@ class Lesson4 extends Lesson {
 
     // Currently this is hardcoded, because well... everything else is textures
     // from here out.
-    cube.addColor(new CubeColor());
+    cube.addColor(new CubeColor(gl));
 
     // Specify the color to clear with (black with 100% alpha) and then enable
     // depth testing.

@@ -49,50 +49,42 @@ part 'renderable.dart';
 // part 'sphere.dart';
 // part 'star.dart';
 
-late RenderingContext gl;
-
-void resetLessons() {
-  gl = FlutterAngle.getContext();
-  // Set the fill color to black
-  gl.clearColor(0, 0, 0, 1.0);
-}
-
-Lesson createLesson(int number) {
+Lesson createLesson(int number,RenderingContext gl) {
   switch (number) {
     case 1:
-      return Lesson1();
+      return Lesson1(gl);
     // case 2:
-    //   return new Lesson2();
+    //   return new Lesson2(gl);
     // case 3:
-    //   return new Lesson3();
+    //   return new Lesson3(gl);
     // case 4:
-    //   return new Lesson4();
+    //   return new Lesson4(gl);
     // case 5:
-    //   return new Lesson5();
+    //   return new Lesson5(gl);
     // case 6
-    //   return new Lesson6();
+    //   return new Lesson6(gl);
     // case 7:
-    //   return new Lesson7();
+    //   return new Lesson7(gl);
     // case 8:
-    //   return new Lesson8();
+    //   return new Lesson8(gl);
     // case 9:
-    //   return new Lesson9();
+    //   return new Lesson9(gl);
     // case 10:
-    //   return new Lesson10();
+    //   return new Lesson10(gl);
     // case 11:
-    //   return new Lesson11();
+    //   return new Lesson11(gl);
     // case 12:
-    //   return new Lesson12();
+    //   return new Lesson12(gl);
     // case 13:
-    //   return new Lesson13();
+    //   return new Lesson13(gl);
     // case 14:
-    //   return new Lesson14();
+    //   return new Lesson14(gl);
     // case 15:
-    //   return new Lesson15();
+    //   return new Lesson15(gl);
     // case 16:
-    //   return new Lesson16();
+    //   return new Lesson16(gl);
     default:
-      return Lesson1();
+      return Lesson1(gl);
   }
 }
 
@@ -122,8 +114,11 @@ void handleDirection({up()?, down()?, left()?, right()?}) {
 
 /// The base for all Learn WebGL lessons.
 abstract class Lesson {
-  Lesson() {
+  late RenderingContext gl;
+
+  Lesson(this.gl) {
     mvMatrix = new Matrix4()..identity();
+    gl.clearColor(0, 0, 0, 1.0);
   }
 
   /// Render the scene to the [viewWidth], [viewHeight], and [aspect] ratio.
@@ -153,43 +148,45 @@ abstract class Lesson {
 
   /// Pop the last matrix off the stack and set the Model View matrix.
   mvPopMatrix() => mvMatrix = mvStack.removeLast();
+
+  /// Load the given image at [url] and call [handle] to execute some GL code.
+  /// Return a [Future] to asynchronously notify when the texture is complete.
+  Future<WebGLTexture> loadTexture(
+      String url, Future Function(WebGLTexture tex, Image data) handle) async {
+    var texture = gl.createTexture();
+    final data = await gl.loadImageFromAsset('assets/$url');
+    await handle(texture, data);
+    return texture;
+  }
+
+  /// This is a common handler for [loadTexture]. It will be explained in future
+  /// lessons that require textures.
+  Future handleMipMapTexture(WebGLTexture texture, Image image) async {
+    gl.pixelStorei(WebGL.UNPACK_ALIGNMENT, 1);
+    gl.bindTexture(WebGL.TEXTURE_2D, texture);
+    await gl.texImage2DfromImage(
+      WebGL.TEXTURE_2D,
+      image,
+      internalformat: WebGL.RGBA,
+      format: WebGL.RGBA,
+      type: WebGL.UNSIGNED_BYTE,
+    );
+    gl.texParameteri(
+      WebGL.TEXTURE_2D,
+      WebGL.TEXTURE_MAG_FILTER,
+      WebGL.LINEAR,
+    );
+    gl.texParameteri(
+      WebGL.TEXTURE_2D,
+      WebGL.TEXTURE_MIN_FILTER,
+      WebGL.LINEAR_MIPMAP_NEAREST,
+    );
+    gl.generateMipmap(WebGL.TEXTURE_2D);
+    gl.bindTexture(WebGL.TEXTURE_2D, null);
+  }
 }
 
-/// Load the given image at [url] and call [handle] to execute some GL code.
-/// Return a [Future] to asynchronously notify when the texture is complete.
-Future<int> loadTexture(
-    String url, Future Function(int tex, Image data) handle) async {
-  var texture = gl.createTexture();
-  final data = await gl.loadImageFromAsset('assets/$url');
-  await handle(texture, data);
-  return texture;
-}
 
-/// This is a common handler for [loadTexture]. It will be explained in future
-/// lessons that require textures.
-Future handleMipMapTexture(int texture, Image image) async {
-  gl.pixelStorei(WebGL.UNPACK_ALIGNMENT, 1);
-  gl.bindTexture(WebGL.TEXTURE_2D, texture);
-  await gl.texImage2DfromImage(
-    WebGL.TEXTURE_2D,
-    image,
-    internalformat: WebGL.RGBA,
-    format: WebGL.RGBA,
-    type: WebGL.UNSIGNED_BYTE,
-  );
-  gl.texParameteri(
-    WebGL.TEXTURE_2D,
-    WebGL.TEXTURE_MAG_FILTER,
-    WebGL.LINEAR,
-  );
-  gl.texParameteri(
-    WebGL.TEXTURE_2D,
-    WebGL.TEXTURE_MIN_FILTER,
-    WebGL.LINEAR_MIPMAP_NEAREST,
-  );
-  gl.generateMipmap(WebGL.TEXTURE_2D);
-  gl.bindTexture(WebGL.TEXTURE_2D, null);
-}
 
 // Future<WebGLTexture> loadMipMapTexture(
 //   WebGLTexture texture,

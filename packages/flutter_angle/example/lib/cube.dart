@@ -15,9 +15,10 @@
 part of 'learn_gl.dart';
 
 class Cube implements Renderable {
+  RenderingContext gl;
   late dynamic positionBuffer, normalBuffer, textureCoordBuffer, indexBuffer;
 
-  Cube() {
+  Cube(this.gl){
     positionBuffer = gl.createBuffer();
     gl.bindBuffer(WebGL.ARRAY_BUFFER, positionBuffer);
     var vertices = [
@@ -202,9 +203,9 @@ class Cube implements Renderable {
 
 /// Holds a color [Buffer] for our cube's element array
 class CubeColor {
-  late int colorBuffer;
+  late Buffer colorBuffer;
 
-  CubeColor() {
+  CubeColor(RenderingContext gl) {
     colorBuffer = gl.createBuffer();
     gl.bindBuffer(WebGL.ARRAY_BUFFER, colorBuffer);
 

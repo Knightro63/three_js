@@ -17,18 +17,19 @@ part of 'learn_gl.dart';
 /// Textures part two: filtering.
 class Lesson6 extends Lesson {
   late GlProgram program;
-  List<int> textures = [];
+  List<WebGLTexture> textures = [];
   late Cube cube;
 
   bool get isLoaded => textures.length == 3;
 
-  Lesson6() {
-    cube = new Cube();
+  Lesson6(RenderingContext gl):super(gl) {
+    cube = new Cube(gl);
 
     var attributes = ['aVertexPosition', 'aTextureCoord'];
     var uniforms = ['uPMatrix', 'uMVMatrix', 'uSampler'];
 
     program = new GlProgram(
+      gl,
       '''
           precision mediump float;
 
@@ -61,7 +62,7 @@ class Lesson6 extends Lesson {
     gl.useProgram(program.program);
 
     // Do some extra texture filters after loading the create texture
-    loadTexture("crate.gif", (int text, Image data) async {
+    loadTexture("crate.gif", (WebGLTexture text, Image data) async {
       textures.add(text);
 
       gl.bindTexture(WebGL.TEXTURE_2D, textures[0]);

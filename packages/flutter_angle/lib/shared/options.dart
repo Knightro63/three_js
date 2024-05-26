@@ -5,13 +5,11 @@ class AngleOptions{
     required this.dpr,
     this.alpha = false,
     this.antialias = false,
-    this.useDebugContext = false
   });
 
-  num width;
-  num height;
+  int width;
+  int height;
   double dpr;
   bool antialias;
   bool alpha;
-  bool useDebugContext;
 }

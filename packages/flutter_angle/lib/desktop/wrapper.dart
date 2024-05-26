@@ -249,7 +249,7 @@ import '../shared/classes.dart';
 //     throw new UnsupportedError("Not supported");
 //   }
 
-//   String? getTranslatedShaderSource(Shader shader);
+//   String? getTranslatedShaderSource(WebGLShader shader);
 // }
 
 // // JS "WebGLDepthTexture,WEBGL_depth_texture")
@@ -576,12 +576,12 @@ class RenderingContext {
 
   // void bindSampler(int unit, Sampler? sampler);
 
-  void bindTransformFeedback(int target, int id){
-    gl.glBindTransformFeedback(target, id);
+  void bindTransformFeedback(int target, TransformFeedback feedback){
+    gl.glBindTransformFeedback(target, feedback.id);
   }
 
-  void bindVertexArray(int array){
-    gl.glBindVertexArray(array);
+  void bindVertexArray(VertexArrayObject array){
+    gl.glBindVertexArray(array.id);
   }
 
   void blitFramebuffer(int srcX0, int srcY0, int srcX1, int srcY1, int dstX0, int dstY0, int dstX1, int dstY1, int mask, int filter){
@@ -653,19 +653,19 @@ class RenderingContext {
 
   // Sampler? createSampler();
 
-  int createTransformFeedback() {
+  TransformFeedback createTransformFeedback() {
     final vPointer = calloc<Uint32>();
     gl.glGenTransformFeedbacks(1, vPointer);
     int _v = vPointer.value;
     calloc.free(vPointer);
-    return _v;
+    return TransformFeedback(_v);
   }
-  int createVertexArray(){
+  VertexArrayObject createVertexArray(){
     final v = calloc<Uint32>();
     gl.glGenVertexArrays(1, v);
     int _v = v.value;
     calloc.free(v);
-    return _v;
+    return VertexArrayObject(_v);
   }
 
   // void deleteQuery(Query? query);
@@ -674,8 +674,8 @@ class RenderingContext {
 
   // void deleteSync(Sync? sync);
 
-  void deleteTransformFeedback(int feedback){
-    final _texturesList = [feedback];
+  void deleteTransformFeedback(TransformFeedback feedback){
+    final List<int> _texturesList = [feedback.id];
     final ptr = calloc<Uint32>(_texturesList.length);
     ptr.asTypedList(1).setAll(0, _texturesList);
     gl.glDeleteTransformFeedbacks(1, ptr);
@@ -683,8 +683,8 @@ class RenderingContext {
     checkError('deleteTransformFeedback');
   }
 
-  void deleteVertexArray(int array){
-    final _texturesList = [array];
+  void deleteVertexArray(VertexArrayObject array){
+    final List<int> _texturesList = [array.id];
     final ptr = calloc<Uint32>(_texturesList.length);
     ptr.asTypedList(1).setAll(0, _texturesList);
     gl.glDeleteVertexArrays(1, ptr);
@@ -793,8 +793,8 @@ class RenderingContext {
 
   // bool isSync(Sync? sync);
 
-  bool isTransformFeedback(int feedback){
-    return gl.glIsTransformFeedback(feedback) == 0?false:true;
+  bool isTransformFeedback(TransformFeedback feedback){
+    return gl.glIsTransformFeedback(feedback.id) == 0?false:true;
   }
 
   // bool isVertexArray(VertexArrayObject? vertexArray);
@@ -1121,14 +1121,14 @@ class RenderingContext {
   //   _transformFeedbackVaryings_1(program, varyings_1, bufferMode);
   //   return;
   // }
-  void transformFeedbackVaryings(int program, int count, List<String> varyings, int bufferMode) {
+  void transformFeedbackVaryings(Program program, int count, List<String> varyings, int bufferMode) {
     final varyingsPtr = calloc<Pointer<Int8>>(varyings.length);
     int i = 0;
     for(final varying in varyings) {
       varyingsPtr[i] = varying.toNativeUtf8().cast<Int8>();
       i = i + 1;
     }
-    gl.glTransformFeedbackVaryings(program, count, varyingsPtr, bufferMode);
+    gl.glTransformFeedbackVaryings(program.id, count, varyingsPtr, bufferMode);
     calloc.free(varyingsPtr);
   }
   // //JS ('transformFeedbackVaryings')
@@ -1229,35 +1229,35 @@ class RenderingContext {
     checkError('activeTexture');
   }
 
-  void attachShader(int program, int shader) {
-    gl.glAttachShader(program, shader);
+  void attachShader(Program program, WebGLShader shader) {
+    gl.glAttachShader(program.id, shader.id);
     checkError('attachShader');
   }
 
-  void bindAttribLocation(int program, int index, String name){
+  void bindAttribLocation(Program program, int index, String name){
     final locationName = name.toNativeUtf8();
-    gl.glBindAttribLocation(program, index,locationName.cast());
+    gl.glBindAttribLocation(program.id, index,locationName.cast());
     checkError('bindAttribLocation');
     calloc.free(locationName);
   }
 
-  void bindBuffer(int target, int buffer) {
-    gl.glBindBuffer(target, buffer);
+  void bindBuffer(int target, Buffer buffer) {
+    gl.glBindBuffer(target, buffer.id);
     checkError('bindBuffer');
   }
 
-  void bindFramebuffer(int target, int framebuffer){
-    gl.glBindFramebuffer(target, framebuffer);
+  void bindFramebuffer(int target, Framebuffer framebuffer){
+    gl.glBindFramebuffer(target, framebuffer.id);
     checkError('bindFramebuffer');
   }
 
-  void bindRenderbuffer(int target, int renderbuffer){
-    gl.glBindRenderbuffer(target, renderbuffer);
+  void bindRenderbuffer(int target, Renderbuffer renderbuffer){
+    gl.glBindRenderbuffer(target, renderbuffer.id);
     checkError('bindRenderbuffer');
   }
 
-  void bindTexture(int target, int? texture) {
-    gl.glBindTexture(target, texture ?? 0);
+  void bindTexture(int target, WebGLTexture? texture) {
+    gl.glBindTexture(target, texture?.id ?? 0);
     checkError('bindTexture');
   }
 
@@ -1351,22 +1351,22 @@ class RenderingContext {
 
   // Future commit() => promiseToFuture(JS("", "#.commit()", this));
 
-  void compileShader(int shader, [bool checkForErrors = true]) {
-    gl.glCompileShader(shader);
+  void compileShader(WebGLShader shader, [bool checkForErrors = true]) {
+    gl.glCompileShader(shader.id);
 
     if (checkForErrors) {
       final compiled = tempInt32s[0];
-      gl.glGetShaderiv(shader, GL_COMPILE_STATUS, compiled);
+      gl.glGetShaderiv(shader.id, GL_COMPILE_STATUS, compiled);
       if (compiled.value == 0) {
         final infoLen = tempInt32s[1];
 
-        gl.glGetShaderiv(shader, GL_INFO_LOG_LENGTH, infoLen);
+        gl.glGetShaderiv(shader.id, GL_INFO_LOG_LENGTH, infoLen);
 
         String message = '';
         if (infoLen.value > 1) {
           final infoLog = calloc<Int8>(infoLen.value);
 
-          gl.glGetShaderInfoLog(shader, infoLen.value, nullptr, infoLog);
+          gl.glGetShaderInfoLog(shader.id, infoLen.value, nullptr, infoLog);
           message = "\nError compiling shader:\n${infoLog.cast<Utf8>().toDartString()}";
 
           calloc.free(infoLog);
@@ -1412,48 +1412,48 @@ class RenderingContext {
 
   // void copyTexSubImage2D(int target, int level, int xoffset, int yoffset, int x, int y, int width, int height);
 
-  int createBuffer() {
+  Buffer createBuffer() {
     Pointer<Uint32> id = tempUint32s[0];
     gl.glGenBuffers(1, id);
     checkError('createBuffer');
-    return id.value;
+    return Buffer(id.value);
   }
 
-  int createFramebuffer(){
+  Framebuffer createFramebuffer(){
     Pointer<Uint32> id = tempUint32s[0];
     gl.glGenFramebuffers(1, id);
     checkError('createFramebuffer');
-    return id.value;
+    return Framebuffer(id.value);
   }
 
-  int createProgram() {
+  Program createProgram() {
     final program = gl.glCreateProgram();
     checkError('createProgram');
-    return program;
+    return Program(program);
   }
 
-  int createRenderbuffer(){
+  Renderbuffer createRenderbuffer(){
     final v = calloc<Uint32>();
     gl.glGenRenderbuffers(1, v);
     int _v = v.value;
     calloc.free(v);
-    return _v;
+    return Renderbuffer(_v);
   }
 
-  int createShader(int type) {
+  WebGLShader createShader(int type) {
     final shader = gl.glCreateShader(type);
     checkError('createShader');
-    return shader;
+    return WebGLShader(shader);
   }
 
-  int createTexture() {
+  WebGLTexture createTexture() {
     Pointer<Uint32> textureId = tempUint32s[0];
     gl.glGenTextures(1, textureId);
     checkError('createBuffer');
-    return textureId.value;
+    return WebGLTexture(textureId.value);
   }
 
-  int getParameter(int key) {
+  WebGLParameter getParameter(int key) {
     // print("OpenGL getParameter key: ${key} ");
 
     List<int> _intValues = [
@@ -1474,7 +1474,7 @@ class RenderingContext {
     if (_intValues.indexOf(key) >= 0) {
       final v = calloc<Int32>(4);
       gl.glGetIntegerv(key, v);
-      return v.value;
+      return WebGLParameter(v.value);
     } else {
       throw (" OpenGL getParameter key: ${key} is not support ");
     }
@@ -1485,8 +1485,8 @@ class RenderingContext {
     checkError('cullFace');
   }
 
-  void deleteBuffer(int buffer){
-    final _texturesList = [buffer];
+  void deleteBuffer(Buffer buffer){
+    final List<int> _texturesList = [buffer.id];
     final ptr = calloc<Uint32>(_texturesList.length);
     ptr.asTypedList(1).setAll(0, _texturesList);
     gl.glDeleteBuffers(1, ptr);
@@ -1494,8 +1494,8 @@ class RenderingContext {
     checkError('deleteBuffer');
   }
 
-  void deleteFramebuffer(int? framebuffer){
-    final _texturesList = [framebuffer ?? 0];
+  void deleteFramebuffer(Framebuffer framebuffer){
+    final List<int> _texturesList = [framebuffer.id];
     final ptr = calloc<Uint32>(_texturesList.length);
     ptr.asTypedList(1).setAll(0, _texturesList);
     gl.glDeleteFramebuffers(1, ptr);
@@ -1503,12 +1503,12 @@ class RenderingContext {
     checkError('deleteFramebuffer');
   }
 
-  void deleteProgram(int program){
-    gl.glDeleteProgram(program);
+  void deleteProgram(Program program){
+    gl.glDeleteProgram(program.id);
   }
 
-  void deleteRenderbuffer(int? renderbuffer){
-    final _texturesList = [renderbuffer ?? 0];
+  void deleteRenderbuffer(Renderbuffer renderbuffer){
+    final List<int> _texturesList = [renderbuffer.id];
     final ptr = calloc<Uint32>(_texturesList.length);
     ptr.asTypedList(1).setAll(0, _texturesList);
     gl.glDeleteRenderbuffers(1, ptr);
@@ -1516,12 +1516,12 @@ class RenderingContext {
     checkError('deleteFramebuffer');
   }
 
-  void deleteShader(int shader){
-    gl.glDeleteShader(shader);
+  void deleteShader(WebGLShader shader){
+    gl.glDeleteShader(shader.id);
   }
 
-  void deleteTexture(int texture){
-    final _texturesList = [texture];
+  void deleteTexture(WebGLTexture texture){
+    final List<int> _texturesList = [texture.id];
     final ptr = calloc<Uint32>(_texturesList.length);
     ptr.asTypedList(1).setAll(0, _texturesList);
     gl.glDeleteTextures(1, ptr);
@@ -1541,7 +1541,7 @@ class RenderingContext {
 
   // void depthRange(num zNear, num zFar);
 
-  // void detachShader(Program program, Shader shader);
+  // void detachShader(Program program, WebGLShader shader);
 
   void disable(int cap) {
     gl.glDisable(cap);
@@ -1582,13 +1582,13 @@ class RenderingContext {
     gl.glFlush();
   }
 
-  void framebufferRenderbuffer(int target, int attachment, int renderbuffertarget, int? renderbuffer){
-    gl.glFramebufferRenderbuffer(target, attachment, renderbuffertarget, renderbuffer ?? 0);
+  void framebufferRenderbuffer(int target, int attachment, int renderbuffertarget, Renderbuffer? renderbuffer){
+    gl.glFramebufferRenderbuffer(target, attachment, renderbuffertarget, renderbuffer?.id ?? 0);
     checkError('framebufferRenderbuffer');
   }
 
-  void framebufferTexture2D(int target, int attachment, int textarget, int texture, int level){
-    gl.glFramebufferTexture2D(target, attachment, textarget, texture, level);
+  void framebufferTexture2D(int target, int attachment, int textarget, WebGLTexture texture, int level){
+    gl.glFramebufferTexture2D(target, attachment, textarget, texture.id, level);
   }
 
   void frontFace(int mode){
@@ -1605,14 +1605,14 @@ class RenderingContext {
 
   // ActiveInfo getActiveUniform(Program program, int index);
 
-  // List<Shader>? getAttachedShaders(Program program);
+  // List<WebGLShader>? getAttachedShaders(Program program);
 
-  int getAttribLocation(int program, String name) {
+  UniformLocation getAttribLocation(Program program, String name) {
     final locationName = name.toNativeUtf8();
-    final location = gl.glGetAttribLocation(program, locationName.cast());
+    final location = gl.glGetAttribLocation(program.id, locationName.cast());
     checkError('getAttribLocation');
     calloc.free(locationName);
-    return location;
+    return UniformLocation(location);
   }
   // Object? getBufferParameter(int target, int pname);
 
@@ -1633,10 +1633,10 @@ class RenderingContext {
 
   // Object? getParameter(int pname);
 
-  String? getProgramInfoLog(int program){
+  String? getProgramInfoLog(Program program){
     var infoLen = calloc<Int32>();
 
-    gl.glGetProgramiv(program, 35716, infoLen);
+    gl.glGetProgramiv(program.id, 35716, infoLen);
 
     int _len = infoLen.value;
     calloc.free(infoLen);
@@ -1645,7 +1645,7 @@ class RenderingContext {
 
     if (_len > 0) {
       final infoLog = calloc<Int8>(_len);
-      gl.glGetProgramInfoLog(program, _len, nullptr, infoLog);
+      gl.glGetProgramInfoLog(program.id, _len, nullptr, infoLog);
 
       message = "\nError compiling shader:\n${infoLog.cast<Utf8>().toDartString()}";
       calloc.free(infoLog);
@@ -1655,18 +1655,18 @@ class RenderingContext {
     return null;
   }
 
-  int getProgramParameter(int program, int pname) {
+  int getProgramParameter(Program program, int pname) {
     final status = tempInt32s[0];
-    gl.glGetProgramiv(program, pname, status);
+    gl.glGetProgramiv(program.id, pname, status);
     checkError('getProgramParameter');
     return status.value;
   }
 
   // Object? getRenderbufferParameter(int target, int pname);
 
-  String? getShaderInfoLog(int shader){
+  String? getShaderInfoLog(WebGLShader shader){
     final infoLen = calloc<Int32>();
-    gl.glGetShaderiv(shader, 35716, infoLen);
+    gl.glGetShaderiv(shader.id, 35716, infoLen);
 
     int _len = infoLen.value;
     calloc.free(infoLen);
@@ -1675,7 +1675,7 @@ class RenderingContext {
     if (_len > 1) {
       final infoLog = calloc<Int8>(_len);
 
-      gl.glGetShaderInfoLog(shader, _len, nullptr, infoLog);
+      gl.glGetShaderInfoLog(shader.id, _len, nullptr, infoLog);
       message = "\nError compiling shader:\n${infoLog.cast<Utf8>().toDartString()}";
       calloc.free(infoLog);
       return message;
@@ -1683,9 +1683,9 @@ class RenderingContext {
     return null;
   }
 
-  int getShaderParameter(int shader, int pname){
+  Object getShaderParameter(WebGLShader shader, int pname){
     var _pointer = calloc<Int32>();
-    gl.glGetShaderiv(shader, pname, _pointer);
+    gl.glGetShaderiv(shader.id, pname, _pointer);
     final _v = _pointer.value;
     calloc.free(_pointer);
     return _v;
@@ -1712,12 +1712,12 @@ class RenderingContext {
 
   // Object? getUniform(Program program, UniformLocation location);
 
-  int getUniformLocation(int program, String name) {
+  UniformLocation getUniformLocation(Program program, String name) {
     final locationName = name.toNativeUtf8();
-    final location = gl.glGetUniformLocation(program, locationName.cast());
+    final location = gl.glGetUniformLocation(program.id, locationName.cast());
     checkError('getProgramParameter');
     calloc.free(locationName);
-    return location;
+    return UniformLocation(location);
   }
 
   // Object? getVertexAttrib(int index, int pname);
@@ -1734,13 +1734,13 @@ class RenderingContext {
 
   // bool isFramebuffer(Framebuffer? framebuffer);
 
-  bool isProgram(int program){
-    return gl.glIsProgram(program) != 0;
+  bool isProgram(Program program){
+    return gl.glIsProgram(program.id) != 0;
   }
 
   // bool isRenderbuffer(Renderbuffer? renderbuffer);
 
-  // bool isShader(Shader? shader);
+  // bool isShader(WebGLShader? shader);
 
   // bool isTexture(WebGLTexture? texture);
 
@@ -1749,21 +1749,21 @@ class RenderingContext {
     checkError('lineWidth');
   }
 
-  void linkProgram(int program, [bool checkForErrors = true]) {
-    gl.glLinkProgram(program);
+  void linkProgram(Program program, [bool checkForErrors = true]) {
+    gl.glLinkProgram(program.id);
     if (checkForErrors) {
       final linked = tempInt32s[0];
-      gl.glGetProgramiv(program, GL_LINK_STATUS, linked);
+      gl.glGetProgramiv(program.id, GL_LINK_STATUS, linked);
       if (linked.value == 0) {
         final infoLen = tempInt32s[1];
 
-        gl.glGetProgramiv(program, GL_INFO_LOG_LENGTH, infoLen);
+        gl.glGetProgramiv(program.id, GL_INFO_LOG_LENGTH, infoLen);
 
         String message = '';
         if (infoLen.value > 1) {
           final infoLog = calloc<Int8>(infoLen.value);
 
-          gl.glGetProgramInfoLog(program, infoLen.value, nullptr, infoLog);
+          gl.glGetProgramInfoLog(program.id, infoLen.value, nullptr, infoLog);
           message = "\nError linking program:\n${infoLog.cast<Utf8>().toDartString()}";
 
           calloc.free(infoLog);
@@ -1796,11 +1796,11 @@ class RenderingContext {
     checkError('scissor');
   }
 
-  void shaderSource(int shader, String shaderSource) {
+  void shaderSource(WebGLShader shader, String shaderSource) {
     var sourceString = shaderSource.toNativeUtf8();
     var arrayPointer = calloc<Pointer<Int8>>();
     arrayPointer.value = Pointer.fromAddress(sourceString.address);
-    gl.glShaderSource(shader, 1, arrayPointer, nullptr);
+    gl.glShaderSource(shader.id, 1, arrayPointer, nullptr);
     calloc.free(arrayPointer);
     calloc.free(sourceString);
     checkError('shaderSource');
@@ -1827,7 +1827,7 @@ class RenderingContext {
   // void stencilOpSeparate(int face, int fail, int zfail, int zpass);
 
   // //JS ('texImage2D')
-  /// passing null for pixels is perfectly fine, in that case an empty Texture is allocated
+  /// passing null for pixels is perfectly fine, in that case an empty WebGLTexture is allocated
   void texImage2D(
     int target, 
     int level, 
@@ -1975,119 +1975,119 @@ class RenderingContext {
   // //JS ('texSubImage2D')
   // void _texSubImage2D_6(target, level, xoffset, yoffset, format, type, ImageBitmap bitmap);
 
-  void uniform1f(int location, double x){
-    gl.glUniform1f(location, x);
+  void uniform1f(UniformLocation location, double x){
+    gl.glUniform1f(location.id, x);
   }
 
-  void uniform1fv(int location, List<double> v){
+  void uniform1fv(UniformLocation location, List<double> v){
     var arrayPointer = floatListToArrayPointer(v);
-    gl.glUniform1fv(location, v.length ~/ 1, arrayPointer);
+    gl.glUniform1fv(location.id, v.length ~/ 1, arrayPointer);
     calloc.free(arrayPointer);
     checkError('uniform1fv');  
   }
 
-  void uniform1i(int location, int x) {
-    gl.glUniform1i(location, x);
+  void uniform1i(UniformLocation location, int x) {
+    gl.glUniform1i(location.id, x);
     checkError('uniform1i');
   }
 
-  void uniform1iv(int location, List<int> v){
+  void uniform1iv(UniformLocation location, List<int> v){
     int count = v.length;
     final valuePtr = calloc<Int32>(count);
     valuePtr.asTypedList(count).setAll(0, v);
-    gl.glUniform1iv(location, count, valuePtr);
+    gl.glUniform1iv(location.id, count, valuePtr);
     calloc.free(valuePtr);
     checkError('uniform1iv'); 
   }
 
-  void uniform2f(int location, double x, double y){
-    gl.glUniform2f(location, x, y);
+  void uniform2f(UniformLocation location, double x, double y){
+    gl.glUniform2f(location.id, x, y);
     checkError('uniform2f'); 
   }
 
-  void uniform2fv(int location, List<double> v){
+  void uniform2fv(UniformLocation location, List<double> v){
     var arrayPointer = floatListToArrayPointer(v);
-    gl.glUniform2fv(location, v.length ~/ 1, arrayPointer);
+    gl.glUniform2fv(location.id, v.length ~/ 1, arrayPointer);
     calloc.free(arrayPointer);
     checkError('uniform2fv'); 
   }
 
   // void uniform2i(UniformLocation? location, int x, int y);
 
-  void uniform2iv(int location, List<int> v){
+  void uniform2iv(UniformLocation location, List<int> v){
     int count = v.length;
     final valuePtr = calloc<Int32>(count);
     valuePtr.asTypedList(count).setAll(0, v);
-    gl.glUniform2iv(location, count, valuePtr);
+    gl.glUniform2iv(location.id, count, valuePtr);
     calloc.free(valuePtr);
     checkError('uniform2iv'); 
   }
 
-  void uniform3f(int location, double x, double y, double z) {
-    gl.glUniform3f(location, x, y, z);
+  void uniform3f(UniformLocation location, double x, double y, double z) {
+    gl.glUniform3f(location.id, x, y, z);
     checkError('uniform3f');
   }
 
-  void uniform3fv(int location, List<double> vectors) {
+  void uniform3fv(UniformLocation location, List<double> vectors) {
     var arrayPointer = floatListToArrayPointer(vectors);
-    gl.glUniform3fv(location, vectors.length ~/ 3, arrayPointer);
+    gl.glUniform3fv(location.id, vectors.length ~/ 3, arrayPointer);
     checkError('uniform3fv');
     calloc.free(arrayPointer);
   }
 
   // void uniform3i(UniformLocation? location, int x, int y, int z);
 
-  void uniform3iv(int location, List<int> v){
+  void uniform3iv(UniformLocation location, List<int> v){
     int count = v.length;
     final valuePtr = calloc<Int32>(count);
     valuePtr.asTypedList(count).setAll(0, v);
-    gl.glUniform3iv(location, count, valuePtr);
+    gl.glUniform3iv(location.id, count, valuePtr);
     calloc.free(valuePtr);
     checkError('uniform2iv'); 
   }
 
-  void uniform4f(int location, double x, double y, double z, double w){
-    gl.glUniform4f(location, x, y, z,w);
+  void uniform4f(UniformLocation location, double x, double y, double z, double w){
+    gl.glUniform4f(location.id, x, y, z,w);
     checkError('uniform4f');
   }
 
-  void uniform4fv(int location, List<double> vectors) {
+  void uniform4fv(UniformLocation location, List<double> vectors) {
     var arrayPointer = floatListToArrayPointer(vectors);
-    gl.glUniform4fv(location, vectors.length ~/ 3, arrayPointer);
+    gl.glUniform4fv(location.id, vectors.length ~/ 3, arrayPointer);
     checkError('uniform4fv');
     calloc.free(arrayPointer);
   }
 
   // void uniform4i(UniformLocation? location, int x, int y, int z, int w);
 
-  void uniform4iv(int location, List<int> v){
+  void uniform4iv(UniformLocation location, List<int> v){
     int count = v.length;
     final valuePtr = calloc<Int32>(count);
     valuePtr.asTypedList(count).setAll(0, v);
-    gl.glUniform4iv(location, count, valuePtr);
+    gl.glUniform4iv(location.id, count, valuePtr);
     calloc.free(valuePtr);
     checkError('uniform2iv'); 
   }
 
   // void uniformMatrix2fv(UniformLocation? location, bool transpose, array);
 
-  void uniformMatrix3fv(int location, bool transpose, List<double> values) {
+  void uniformMatrix3fv(UniformLocation location, bool transpose, List<double> values) {
     var arrayPointer = floatListToArrayPointer(values);
-    gl.glUniformMatrix3fv(location, values.length ~/ 9, transpose ? 1 : 0, arrayPointer);
+    gl.glUniformMatrix3fv(location.id, values.length ~/ 9, transpose ? 1 : 0, arrayPointer);
     checkError('uniformMatrix3fv');
     calloc.free(arrayPointer);
   }
 
   /// be careful, data always has a length that is a multiple of 16
-  void uniformMatrix4fv(int location, bool transpose, List<double> values) {
+  void uniformMatrix4fv(UniformLocation location, bool transpose, List<double> values) {
     var arrayPointer = floatListToArrayPointer(values);
-    gl.glUniformMatrix4fv(location, values.length ~/ 16, transpose ? 1 : 0, arrayPointer);
+    gl.glUniformMatrix4fv(location.id, values.length ~/ 16, transpose ? 1 : 0, arrayPointer);
     checkError('uniformMatrix4fv');
     calloc.free(arrayPointer);
   }
 
-  void useProgram(int program) {
-    gl.glUseProgram(program);
+  void useProgram(Program program) {
+    gl.glUseProgram(program.id);
     checkError('useProgram');
   }
 

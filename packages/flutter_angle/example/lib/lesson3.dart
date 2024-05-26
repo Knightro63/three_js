@@ -20,13 +20,14 @@ part of 'learn_gl.dart';
 class Lesson3 extends Lesson {
   late GlProgram program;
 
-  late dynamic triangleVertexPositionBuffer, squareVertexPositionBuffer;
-  late dynamic triangleVertexColorBuffer, squareVertexColorBuffer;
+  late Buffer triangleVertexPositionBuffer, squareVertexPositionBuffer;
+  late Buffer triangleVertexColorBuffer, squareVertexColorBuffer;
 
   double rTriangle = 0.0, rSquare = 0.0;
 
-  Lesson3() {
+  Lesson3(RenderingContext gl):super(gl) {
     program = GlProgram(
+      gl,
       '''
           #version 300 es
           precision mediump float;

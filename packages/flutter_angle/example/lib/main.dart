@@ -1,34 +1,35 @@
 import 'dart:async';
-import 'dart:math';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_angle/flutter_angle.dart';
+import 'learn_gl.dart';
 
 void main() {
-  runApp(ExampleDemoTest());
+  runApp(MyApp());
 }
 
-class ExampleDemoTest extends StatefulWidget {
+class MyApp extends StatefulWidget {
+  @override
   _MyAppState createState() => _MyAppState();
 }
 
-class _MyAppState extends State<ExampleDemoTest> {
-  late FlutterAngle flutterGlPlugin;
+class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
+  final textures = <FlutterGLTexture>[];
+  int textureId = -1;
+  int textureId2 = -1;
+  Lesson? lesson;
+  Lesson? lesson2;
+  static const textureWidth = 640;
+  static const textureHeight = 320;
+  static const aspect = textureWidth / textureHeight;
 
-  int? fboId;
-  bool ready = false;
   double dpr = 1.0;
   late double width;
   late double height;
-
   Size? screenSize;
-
-  late FlutterGLTexture sourceTexture;
-  late final defaultFramebufferTexture;
-
-  int n = 0;
-
-  int t = DateTime.now().millisecondsSinceEpoch;
 
   @override
   void initState() {
@@ -37,160 +38,180 @@ class _MyAppState extends State<ExampleDemoTest> {
 
   // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initPlatformState() async {
-    width = screenSize!.width;
-    height = width;
-
-    // OpenGLOptions _options = OpenGLOptions(
-    //   antialias: true,
-    //   alpha: false,
-    //   width: width.toInt(),
-    //   height: height.toInt(),
-    //   dpr: dpr
-    // );
-
-    // print("_options: ${_options}  ");
-
-    await FlutterAngle.initOpenGL(
-      AngleOptions(
-        width: width, 
-        height: height, 
-        dpr: dpr,
-        useDebugContext: true
-      )
-    );
-
-    // print(" flutterGlPlugin: textureid: ${flutterGlPlugin.textureId} ");
-
-    setState(() {});
-
-    // web need wait dom ok!!!
-    Future.delayed(Duration(milliseconds: 100), () {
-      setup();
-    });
-  }
-
-  setup() async {
-    // web no need use fbo
-
-      sourceTexture = await FlutterAngle.createTexture(width.toInt(),height.toInt());
-
-      RenderingContext _gl = FlutterAngle.getContext();
-      var _size = _gl.getParameter(WebGL.MAX_TEXTURE_SIZE);
-
-      print(" setup MAX_TEXTURE_SIZE: ${_size}  ");
-
-      //setupDefaultFBO();
-    
-    ready = true;
-
-    animate();
-
-    setState(() {});
-    print(" setup done.... ");
-  }
-
-  initSize(BuildContext context) {
-    if (screenSize != null) {
-      return;
-    }
-
+    didInit = true;
     final mq = MediaQuery.of(context);
-
     screenSize = mq.size;
     dpr = mq.devicePixelRatio;
 
-    print(" screenSize: ${screenSize} dpr: ${dpr} ");
+    width = screenSize!.width;
+    height = width;
 
-    initPlatformState();
+    await FlutterAngle.initOpenGL(true);
+
+    final options = AngleOptions(
+      width: textureWidth, 
+      height: textureHeight, 
+      dpr: dpr,
+    );
+
+    try {
+      textures.add(await FlutterAngle.createTexture(options));
+      textures.add(await FlutterAngle.createTexture(options));
+    } on PlatformException catch (ex) {
+      print("failed to get texture id");
+      return;
+    }
+
+    //resetLessons();
+    lesson = Lesson3(textures[0].getContext());
+    lesson2 = Lesson4(textures[1].getContext());
+
+    // /// Updating all Textues takes a slighllty less than 150ms
+    // /// so we can't get much faster than this at the moment because it could happen that
+    // /// the timer starts a new async function while the last one hasn't finished
+    // /// which creates an OpenGL Exception
+
+    if (!mounted) return;
+    setState(() {
+      textureId = textures[0].textureId;
+      textureId2 = textures[1].textureId;
+    });
+    // timer = Timer.periodic(const Duration(milliseconds: 16), updateTexture);
+    ticker = createTicker(updateTexture);
+    ticker.start();
+  }
+
+  Timer? timer;
+  Stopwatch stopwatch = Stopwatch();
+
+  late Ticker ticker;
+  static bool updating = false;
+  int animationCounter = 0;
+  int totalTime = 0;
+  int iterationCount = 60;
+  int framesOver = 0;
+  bool didInit = false;
+  void updateTexture(_) async {
+    if (textureId < 0) return;
+    if (!updating) {
+      updating = true;
+      stopwatch.reset();
+      stopwatch.start();
+      textures[0].activate();
+      lesson?.handleKeys();
+      lesson?.animate(animationCounter += 2);
+      lesson?.drawScene(-1, 0, aspect);
+      await textures[0].signalNewFrameAvailable();
+      stopwatch.stop();
+      totalTime += stopwatch.elapsedMilliseconds;
+      if (stopwatch.elapsedMilliseconds > 16) {
+        framesOver++;
+      }
+      if (--iterationCount == 0) {
+        // print('Time: ${totalTime / 60} - Framesover $framesOver');
+        totalTime = 0;
+        iterationCount = 60;
+        framesOver = 0;
+      }
+      textures[1].activate();
+      lesson2?.handleKeys();
+      lesson2?.animate(animationCounter += 2);
+      lesson2?.drawScene(-1, 0, aspect);
+      await textures[1].signalNewFrameAvailable();
+      updating = false;
+    } else {
+      print('Too slow');
+    }
+  }
+
+  void dispose() {
+    ticker.dispose();
+    timer?.cancel();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
+        backgroundColor: Colors.red,
         appBar: AppBar(
-          title: const Text('Example app'),
+          title: const Text('Plugin example app'),
         ),
-        body: Builder(
-          builder: (BuildContext context) {
-            initSize(context);
-            return SingleChildScrollView(child: _build(context));
-          },
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            render();
-          },
-          child: Text("Render"),
-        ),
+        body: LayoutBuilder(builder: (context, constraints) {
+          final useRow = constraints.maxWidth > constraints.maxHeight;
+          if(!didInit){
+            initPlatformState();
+          }
+          return GestureDetector(
+            onVerticalDragStart: verticalDragStart,
+            onVerticalDragUpdate: verticalDragUpdate,
+            onHorizontalDragStart: horizontalDragStart,
+            onHorizontalDragUpdate: horizontalDragUpdate,
+            child: Container(
+              child: 
+              kIsWeb?
+                useRow
+                  ? Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Expanded(child: HtmlElementView(viewType: textureId.toString())),
+                      Expanded(child: HtmlElementView(viewType: textureId2.toString())),
+                    ],
+                  )
+                : Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Expanded(child: HtmlElementView(viewType: textureId.toString())),
+                      Expanded(child: HtmlElementView(viewType: textureId2.toString())),
+                    ],
+                  )
+                :useRow
+                  ? Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Expanded(child: Texture(textureId: textureId)),
+                      Expanded(child: Texture(textureId: textureId2)),
+                    ],
+                  )
+                : Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Expanded(child: Texture(textureId: textureId)),
+                      Expanded(child: Texture(textureId: textureId2)),
+                    ],
+                  ),
+            ),
+          );
+        }),
       ),
     );
   }
 
-  Widget _build(BuildContext context) {
-    return Stack(
-      children: [
-        Container(
-            width: width,
-            height: height,
-            color: Colors.black,
-            child: Builder(builder: (BuildContext context) {
-              if (kIsWeb) {
-                return !ready?Container():HtmlElementView(viewType: sourceTexture.textureId.toString());
-              } else {
-                return ready?Texture(textureId: sourceTexture.textureId):Container();
-              }
-            })),
-        Row(
-          children: [],
-        )
-      ],
-    );
+  double lastVertical = 0;
+
+  double lastHorizontal = 0;
+
+  void verticalDragStart(DragStartDetails details) {}
+
+  void verticalDragUpdate(DragUpdateDetails details) {
+    if (details.delta.dy < 0) {
+      movement = Directions.up;
+      print('up');
+    } else if (details.delta.dy > 0) {
+      print('down');
+      movement = Directions.down;
+    }
   }
 
-  animate() {
-    render();
-
-    Future.delayed(Duration(milliseconds: 40), () {
-      sourceTexture.activate();
-      animate();
-    });
-  }
-
-  setupDefaultFBO() {
-    final RenderingContext _gl = FlutterAngle.getContext();
-    int glWidth = (width * dpr).toInt();
-    int glHeight = (height * dpr).toInt();
-
-    final defaultFramebuffer = _gl.createFramebuffer();
-    defaultFramebufferTexture = _gl.createTexture();
-    _gl.activeTexture(WebGL.TEXTURE0);
-
-    _gl.bindTexture(WebGL.TEXTURE_2D, defaultFramebufferTexture);
-    _gl.texImage2D(WebGL.TEXTURE_2D, 0, WebGL.RGBA, glWidth, glHeight, 0, WebGL.RGBA, WebGL.UNSIGNED_BYTE, null);
-    _gl.texParameteri(WebGL.TEXTURE_2D, WebGL.TEXTURE_MIN_FILTER, WebGL.LINEAR);
-    _gl.texParameteri(WebGL.TEXTURE_2D, WebGL.TEXTURE_MAG_FILTER, WebGL.LINEAR);
-
-    _gl.bindFramebuffer(WebGL.FRAMEBUFFER, defaultFramebuffer);
-    _gl.framebufferTexture2D(WebGL.FRAMEBUFFER, WebGL.COLOR_ATTACHMENT0, WebGL.TEXTURE_2D, defaultFramebufferTexture, 0);
-  }
-
-  render() async {
-    //print("render start: ${DateTime.now().millisecondsSinceEpoch} ");
-    final RenderingContext _gl = FlutterAngle.getContext();
-
-    int _current = DateTime.now().millisecondsSinceEpoch;
-
-    double _blue = sin((_current - t) / 500);
-
-    // Clear canvas
-    _gl.clearColor(1.0, 0.0, _blue, 1.0);
-    _gl.clear(WebGL.COLOR_BUFFER_BIT);
-
-    _gl.gl.glFlush();
-
-    if (!kIsWeb) {
-      await FlutterAngle.updateTexture(sourceTexture);
+  void horizontalDragStart(DragStartDetails details) {}
+  void horizontalDragUpdate(DragUpdateDetails details) {
+    if (details.delta.dx < 0) {
+      movement = Directions.right;
+      print('right');
+    } else if (details.delta.dx > 0) {
+      movement = Directions.left;
+      print('left');
     }
   }
 }

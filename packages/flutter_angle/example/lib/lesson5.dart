@@ -17,14 +17,14 @@ part of 'learn_gl.dart';
 /// Introducing Textures!
 class Lesson5 extends Lesson {
   late GlProgram program;
-  int? neheTexture;
+  WebGLTexture? neheTexture;
   late Cube cube;
 
   bool get isLoaded => neheTexture != null;
 
-  Lesson5() {
-    cube = new Cube();
-    loadTexture("dash.png", (int texture, Image data) async {
+  Lesson5(RenderingContext gl):super(gl) {
+    cube = new Cube(gl);
+    loadTexture("dash.png", (WebGLTexture texture, Image data) async {
       gl.pixelStorei(WebGL.UNPACK_ALIGNMENT, 1);
       gl.bindTexture(WebGL.TEXTURE_2D, texture);
       await gl.texImage2DfromImage(
@@ -50,6 +50,7 @@ class Lesson5 extends Lesson {
     var uniforms = ['uPMatrix', 'uMVMatrix', 'uSampler'];
 
     program = new GlProgram(
+      gl,
       '''
           #version 300 es
           precision mediump float;
