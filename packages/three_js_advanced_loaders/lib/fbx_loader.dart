@@ -280,7 +280,7 @@ class __FBXTreeParser {
     } else {
       // Binary Format
 
-      final array = Uint8Array(content);
+      final array = Uint8List(content);
       return createObjectURL(Blob([array], {type: type}));
     }
   }
@@ -2985,7 +2985,7 @@ class _BinaryParser {
 
         // https://pub.dev/packages/archive
         // use archive replace fflate.js
-        // final data = fflate.unzlibSync( Uint8Array( reader.getArrayBuffer( compressedLength ) ) ); // eslint-disable-line no-undef
+        // final data = fflate.unzlibSync( Uint8List( reader.getArrayBuffer( compressedLength ) ) ); // eslint-disable-line no-undef
 
         final data = const ZLibDecoder().decodeBytes(reader.getArrayBuffer(compressedLength), verify: true);
         final reader2 = _BinaryReader(data);
@@ -3195,7 +3195,7 @@ class _BinaryReader {
   }
 
   String getString(int size) {
-    // note: safari 9 doesn't support Uint8Array.indexOf; create intermediate array instead
+    // note: safari 9 doesn't support Uint8List.indexOf; create intermediate array instead
     List<int> a = List<int>.filled(size, 0);
 
     for (int i = 0; i < size; i++) {

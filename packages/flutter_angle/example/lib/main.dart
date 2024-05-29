@@ -190,7 +190,7 @@ class _MyAppState extends State<ExampleDemoTest> {
     _gl.clearColor(1.0, 0.0, _blue, 1.0);
     _gl.clear(WebGL.COLOR_BUFFER_BIT);
 
-    _gl.gl.glFlush();
+    _gl.flush();
 
     if (!kIsWeb) {
       await FlutterAngle.updateTexture(sourceTexture);

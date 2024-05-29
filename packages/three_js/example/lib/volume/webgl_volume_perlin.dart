@@ -194,7 +194,7 @@ class _State extends State<WebglVolumePerlin> {
 
     final geometry = three.BoxGeometry( 1, 1, 1 );
     final material = three.RawShaderMaterial.fromMap({
-      (kIsWeb?'glslVersion': ''):three.GLSL3,
+      'glslVersion':three.GLSL3,
       'uniforms': {
         'map': { 'value': texture },
         'cameraPos': { 'value': three.Vector3() },

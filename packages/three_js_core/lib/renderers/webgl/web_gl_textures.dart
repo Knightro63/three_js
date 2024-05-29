@@ -325,9 +325,9 @@ class WebGLTextures {
       }
     }
 
-    if (renderTarget.isWebGLMultipleRenderTargets) {
-      for (int i = 0, il = texture.length; i < il; i++) {
-        final attachmentProperties = properties.get(texture[i]);
+    if (renderTarget.isWebGLMultipleRenderTargets && texture is GroupTexture) {
+      for (int i = 0, il = texture.children.length; i < il; i++) {
+        final attachmentProperties = properties.get(texture.children[i]);
 
         if (attachmentProperties["__webglTexture"] != null) {
           gl.deleteTexture(attachmentProperties["__webglTexture"]);
@@ -335,7 +335,7 @@ class WebGLTextures {
           info.memory["textures"] = info.memory["textures"]! - 1;
         }
 
-        properties.remove(texture[i]);
+        properties.remove(texture.children[i]);
       }
     }
 
@@ -1650,7 +1650,7 @@ class WebGLTextures {
       gl.framebufferRenderbuffer(WebGL.FRAMEBUFFER, WebGL.DEPTH_STENCIL_ATTACHMENT, WebGL.RENDERBUFFER, renderbuffer);
     } else {
       // Use the first texture for MRT so far
-      final texture = renderTarget.isWebGLMultipleRenderTargets == true ? renderTarget.texture[0] : renderTarget.texture;
+      final texture = renderTarget.isWebGLMultipleRenderTargets == true ? (renderTarget.texture as GroupTexture).children[0] : renderTarget.texture;
 
       final glFormat = utils.convert(texture.format);
       final glType = utils.convert(texture.type);
@@ -1803,14 +1803,16 @@ class WebGLTextures {
       if (isMultipleRenderTargets) {
         if (capabilities.drawBuffers) {
           final textures = renderTarget.texture;
+          if(textures is GroupTexture){
+            final children = textures.children;
+            for (int i = 0, il = children.length; i < il; i++) {
+              final attachmentProperties = properties.get(children[i]);
 
-          for (int i = 0, il = textures.length; i < il; i++) {
-            final attachmentProperties = properties.get(textures[i]);
+              if (attachmentProperties["__webglTexture"] == null) {
+                attachmentProperties["__webglTexture"] = gl.createTexture();
 
-            if (attachmentProperties["__webglTexture"] == null) {
-              attachmentProperties["__webglTexture"] = gl.createTexture();
-
-              info.memory["textures"] = info.memory["textures"]! + 1;
+                info.memory["textures"] = info.memory["textures"]! + 1;
+              }
             }
           }
         } else {
@@ -1861,18 +1863,19 @@ class WebGLTextures {
       state.bindTexture(WebGL.TEXTURE_CUBE_MAP, null);
     } else if (isMultipleRenderTargets) {
       final textures = renderTarget.texture;
+      if(textures is GroupTexture){
+        for (int i = 0, il = textures.children.length; i < il; i++) {
+          final attachment = textures.children[i];
+          final attachmentProperties = properties.get(attachment);
 
-      for (int i = 0, il = textures.length; i < il; i++) {
-        final attachment = textures[i];
-        final attachmentProperties = properties.get(attachment);
+          state.bindTexture(WebGL.TEXTURE_2D, attachmentProperties["__webglTexture"]);
+          setTextureParameters(WebGL.TEXTURE_2D, attachment, supportsMips);
+          setupFrameBufferTexture(renderTargetProperties["__webglFramebuffer"], renderTarget, attachment,
+              WebGL.COLOR_ATTACHMENT0 + i, WebGL.TEXTURE_2D);
 
-        state.bindTexture(WebGL.TEXTURE_2D, attachmentProperties["__webglTexture"]);
-        setTextureParameters(WebGL.TEXTURE_2D, attachment, supportsMips);
-        setupFrameBufferTexture(renderTargetProperties["__webglFramebuffer"], renderTarget, attachment,
-            WebGL.COLOR_ATTACHMENT0 + i, WebGL.TEXTURE_2D);
-
-        if (textureNeedsGenerateMipmaps(attachment, supportsMips)) {
-          generateMipmap(WebGL.TEXTURE_2D);
+          if (textureNeedsGenerateMipmaps(attachment, supportsMips)) {
+            generateMipmap(WebGL.TEXTURE_2D);
+          }
         }
       }
 
@@ -1911,17 +1914,18 @@ class WebGLTextures {
     final supportsMips = isPowerOfTwo(renderTarget) || isWebGL2;
 
     final textures = renderTarget.isWebGLMultipleRenderTargets == true ? renderTarget.texture : [renderTarget.texture];
+    if(textures is GroupTexture){
+      for (int i = 0, il = textures.children.length; i < il; i++) {
+        final texture = textures.children[i];
 
-    for (int i = 0, il = textures.length; i < il; i++) {
-      final texture = textures[i];
+        if (textureNeedsGenerateMipmaps(texture, supportsMips)) {
+          final target = renderTarget.isWebGLCubeRenderTarget ? WebGL.TEXTURE_CUBE_MAP : WebGL.TEXTURE_2D;
+          final webglTexture = properties.get(texture)["__webglTexture"];
 
-      if (textureNeedsGenerateMipmaps(texture, supportsMips)) {
-        final target = renderTarget.isWebGLCubeRenderTarget ? WebGL.TEXTURE_CUBE_MAP : WebGL.TEXTURE_2D;
-        final webglTexture = properties.get(texture)["__webglTexture"];
-
-        state.bindTexture(target, webglTexture);
-        generateMipmap(target);
-        state.bindTexture(target, null);
+          state.bindTexture(target, webglTexture);
+          generateMipmap(target);
+          state.bindTexture(target, null);
+        }
       }
     }
   }

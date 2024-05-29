@@ -1,6 +1,5 @@
 import 'package:three_js_core/textures/index.dart';
 import 'package:three_js_math/three_js_math.dart';
-import './texture.dart';
 
 /// This class can only be used in combination with
 /// [WebGLRenderer.copyFramebufferToTexture]().

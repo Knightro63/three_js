@@ -411,9 +411,33 @@ static id<MTLDevice> GetANGLEMtlDevice(EGLDisplay display)
           @"buildNumber" : [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleVersion"]
               ?: [NSNull null],
         });
-} else {
-    result(FlutterMethodNotImplemented);
-  }
+    } 
+    if ([call.method isEqualToString:@"deleteTexture"]) {
+        NSNumber* textureId;
+        if (call.arguments) {
+            textureId = call.arguments[@"textureId"];
+            if (textureId == NULL)
+            {
+                result([FlutterError errorWithCode: @"deleteTexture Error" message: @"no texture id received by the native part of FlutterGL.deleteTexture"  details:NULL]);
+                return;
+
+            }
+        }
+        else
+        {
+            result([FlutterError errorWithCode: @"No arguments" message: @"No arguments received by the native part of FlutterGL.deleteTexture"  details:NULL]);
+            return;
+        }
+        
+        //flutterGLTextures[textureId].release();
+        //flutterGLTextures.erase(textureId);
+
+        result(nil);
+        return;
+    } 
+    else {
+        result(FlutterMethodNotImplemented);
+    }
 }
 @end
 

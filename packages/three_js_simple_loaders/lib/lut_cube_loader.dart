@@ -108,7 +108,7 @@ class LUTCubeLoader extends Loader {
 
     final reg3 = RegExp(r"[\n\r]+");
     final lines = str.split(reg3);
-    Uint8Array? data;
+    Uint8List? data;
 
     int currIndex = 0;
     for (int i = 0, l = lines.length; i < l; i++) {
@@ -121,10 +121,10 @@ class LUTCubeLoader extends Loader {
           break;
         case 'LUT_3D_SIZE':
           // TODO: A .CUBE LUT file specifies floating point values and could be represented with
-          // more precision than can be captured with Uint8Array.
+          // more precision than can be captured with Uint8List.
           final sizeToken = split[1];
           size = double.parse(sizeToken).toInt();
-          data = Uint8Array(size * size * size * 4);
+          data = Uint8List(size * size * size * 4);
           break;
         case 'DOMAIN_MIN':
           domainMin.x = double.parse(split[1]);

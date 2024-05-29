@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_angle/flutter_angle.dart';
+import 'package:flutter_angle/shared/classes.dart';
 import 'package:three_js_core/three_js_core.dart' as core;
 import 'package:three_js_math/three_js_math.dart';
 
@@ -67,7 +68,7 @@ class ThreeJS{
   final GlobalKey<core.PeripheralsState> globalKey = GlobalKey<core.PeripheralsState>();
   core.PeripheralsState get domElement => globalKey.currentState!;
 
-  FlutterGLTexture? sourceTexture;
+  FlutterGLTexture? texture;
   late final RenderingContext gl;
   core.WebGLRenderTarget? renderTarget;
   core.WebGLRenderer? renderer;
@@ -83,7 +84,7 @@ class ThreeJS{
   double dpr = 1.0;
 
   bool disposed = false;
-  //dynamic sourceTexture;
+  WebGLTexture? sourceTexture;
   bool pause = false;
   bool mounted = false;
 
@@ -97,16 +98,16 @@ class ThreeJS{
     events.add(event);
   }
   void dispose(){
+    disposed = true;
     renderer?.dispose();
     renderTarget?.dispose();
-    FlutterAngle.deleteTexture(sourceTexture!);
+    FlutterAngle.deleteTexture(texture!);
     //three3dRender.dispose();
     scene.material?.dispose();
     scene.children.forEach((element) {
       element.material?.dispose();
     });
     //loading.clear();
-    disposed = true;
   }
 
   void initSize(BuildContext context){
@@ -149,9 +150,7 @@ class ThreeJS{
       postProcessor?.call(clock.getDelta());
     }
     
-    if(!kIsWeb) {
-      await FlutterAngle.updateTexture(sourceTexture!);
-    }
+    await FlutterAngle.updateTexture(texture!,sourceTexture);
   }
   
   void initRenderer() {
@@ -162,7 +161,7 @@ class ThreeJS{
         "height": height,
         "gl": gl,
         "antialias": true,
-        "canvas": sourceTexture?.element,
+        "canvas": texture?.element,
         "alpha": settings.alpha,
         "clearColor": settings.clearColor,
         "clearAlpha": settings.clearAlpha,
@@ -173,7 +172,7 @@ class ThreeJS{
       }
 
       renderer = lateRenderer ?? core.WebGLRenderer(options);
-      // renderer!.setPixelRatio(dpr);
+      renderer!.setPixelRatio(dpr);
       renderer!.setSize(width, height, false);
       renderer!.alpha = settings.alpha;
       renderer!.shadowMap.enabled = settings.enableShadowMap;
@@ -196,14 +195,14 @@ class ThreeJS{
       final core.WebGLRenderTargetOptions pars = core.WebGLRenderTargetOptions(settings.renderOptions);
       renderTarget = core.WebGLRenderTarget((width * dpr).toInt(), (height * dpr).toInt(), pars);
       renderer!.setRenderTarget(renderTarget);
-      //sourceTexture = renderer!.getRenderTargetGLTexture(renderTarget!);
+      sourceTexture = renderer!.getRenderTargetGLTexture(renderTarget!);
     }
     else{
       renderTarget = null;
     }
 
     if(!kIsWeb){
-      //renderer?.gl.enable(0x8642);
+      renderer?.gl.enable(0x8642);
     }
   }
   void onWindowResize(BuildContext context){
@@ -246,18 +245,20 @@ class ThreeJS{
     //   'precision': 'highp'
     // };
     // await three3dRender.initialize(options: options);
-    sourceTexture = await FlutterAngle.createTexture(      
+    texture = await FlutterAngle.createTexture(      
       AngleOptions(
         width: width.toInt(), 
         height: height.toInt(), 
         dpr: dpr,
         alpha: settings.alpha,
-        antialias: true
+        antialias: true,
+        customRenderer: false
       )
     );
-    gl = sourceTexture!.getContext();
+    gl = texture!.getContext();
     Future.delayed(const Duration(milliseconds: 100), () async {
       //await three3dRender.prepareContext();
+      FlutterAngle.activateTexture(texture!);
       initScene();
     });
   }
@@ -280,10 +281,10 @@ class ThreeJS{
                   color: Theme.of(context).canvasColor,
                   child: Builder(builder: (BuildContext context) {
                     if (kIsWeb) {
-                      return sourceTexture != null? HtmlElementView(viewType:sourceTexture!.textureId.toString()):Container();
+                      return texture != null? HtmlElementView(viewType:texture!.textureId.toString()):Container();
                     } 
                     else {
-                      return sourceTexture != null?Texture(textureId: sourceTexture!.textureId):Container();
+                      return texture != null?Texture(textureId: texture!.textureId):Container();
                     }
                   })
                 );

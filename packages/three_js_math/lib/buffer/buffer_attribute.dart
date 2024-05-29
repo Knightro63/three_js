@@ -339,13 +339,13 @@ abstract class BufferAttribute<TData extends NativeArray> extends BaseBufferAttr
     // } else
     if (type == "Float32BufferAttribute") {
       final typed = array as Float32Array;
-      return Float32BufferAttribute(Float32Array(typed.length), itemSize, false).copy(this);
+      return Float32BufferAttribute.fromList(Float32List(typed.length), itemSize, false).copy(this);
     } else if (type == "Uint8BufferAttribute") {
       final typed = array as Uint8Array;
-      return Uint8BufferAttribute(Uint8Array(typed.length), itemSize, false).copy(this);
+      return Uint8BufferAttribute.fromList(Uint8List(typed.length), itemSize, false).copy(this);
     } else if (type == "Uint16BufferAttribute") {
       final typed = array as Uint16Array;
-      return Uint16BufferAttribute(Uint16Array(typed.length), itemSize, false).copy(this);
+      return Uint16BufferAttribute.fromList(Uint16List(typed.length), itemSize, false).copy(this);
     } else {
       throw ("BufferAttribute type: $type clone need support ....  ");
     }

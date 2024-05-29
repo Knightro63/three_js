@@ -362,12 +362,13 @@ Function createAttributesKey = (Map<String, dynamic> attributes) {
   return attributesKey;
 };
 
-num getNormalizedComponentScale(constructor) {
+double getNormalizedComponentScale(constructor) {
   print(constructor.toString());
   // Reference:
   // https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_mesh_quantization#encoding-quantized-data
 
   switch (constructor.toString()) {
+    case "Int8List":
     case "Int8Array":
       return 1 / 127;
     case "Uint8List":
@@ -376,7 +377,7 @@ num getNormalizedComponentScale(constructor) {
     case "Int16List":
     case "Int16Array":
       return 1 / 32767;
-
+    case "Uint16List":
     case "Uint16Array":
       return 1 / 65535;
 

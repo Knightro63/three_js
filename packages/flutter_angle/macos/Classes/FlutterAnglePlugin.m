@@ -348,58 +348,48 @@ static id<MTLDevice> GetANGLEMtlDevice(EGLDisplay display)
 
         return;
     }
-        if ([call.method isEqualToString:@"updateTexture"]) {
-            NSNumber* textureId;
-            if (call.arguments) {
-                textureId = call.arguments[@"textureId"];
-                if (textureId == NULL)
-                {
-                    result([FlutterError errorWithCode: @"updateTexture Error" message: @"no texture id received by the native part of FlutterGL.updateTexture"  details:NULL]);
-                    return;
-
-                }
-            }
-            else
+    if ([call.method isEqualToString:@"updateTexture"]) {
+        NSNumber* textureId;
+        if (call.arguments) {
+            textureId = call.arguments[@"textureId"];
+            if (textureId == NULL)
             {
-              result([FlutterError errorWithCode: @"No arguments" message: @"No arguments received by the native part of FlutterGL.updateTexture"  details:NULL]);
-              return;
+                result([FlutterError errorWithCode: @"updateTexture Error" message: @"no texture id received by the native part of FlutterGL.updateTexture"  details:NULL]);
+                return;
+
             }
-
-                // Check if the received ID is registered
-/*                if (flutterGLTextures.find(textureId) == flutterGLTextures.end())
-                {
-                    result->Error("Invalid texture ID", "Invalid Texture ID: " + std::to_string(textureId));
-                    return;
-                }
-
-                auto currentTexture = flutterGLTextures[textureId].get();
-                
-*/
-                FlutterGlTexture* currentTexture = _flutterGLTexture;
-
-            if (currentTexture.metalAsGLTexture) {
-                // DO NOTHING, metal texture is automatically updated
-            }
-            else {
-                glBindFramebuffer(GL_FRAMEBUFFER, currentTexture.fbo);
-
-                CVPixelBufferLockBaseAddress([currentTexture pixelData], 0);
-                void* buffer = (void*)CVPixelBufferGetBaseAddress([currentTexture pixelData]);
-
-                 glReadPixels(0, 0, (GLsizei)[currentTexture width], (GLsizei)currentTexture.height, GL_RGBA, GL_UNSIGNED_BYTE, (void*)buffer);
-
-                // TODO: swap red & blue channels byte by byte
-
-                CVPixelBufferUnlockBaseAddress([currentTexture pixelData],0);
-            }
-
-                [_textureRegistry textureFrameAvailable:[currentTexture flutterTextureId]];
-                
-                result(nil);
+        }
+        else
+        {
+            result([FlutterError errorWithCode: @"No arguments" message: @"No arguments received by the native part of FlutterGL.updateTexture"  details:NULL]);
             return;
-            }
+        }
+
+        FlutterGlTexture* currentTexture = _flutterGLTexture;
+
+        if (currentTexture.metalAsGLTexture) {
+            // DO NOTHING, metal texture is automatically updated
+        }
+        else {
+            glBindFramebuffer(GL_FRAMEBUFFER, currentTexture.fbo);
+
+            CVPixelBufferLockBaseAddress([currentTexture pixelData], 0);
+            void* buffer = (void*)CVPixelBufferGetBaseAddress([currentTexture pixelData]);
+
+                glReadPixels(0, 0, (GLsizei)[currentTexture width], (GLsizei)currentTexture.height, GL_RGBA, GL_UNSIGNED_BYTE, (void*)buffer);
+
+            // TODO: swap red & blue channels byte by byte
+
+            CVPixelBufferUnlockBaseAddress([currentTexture pixelData],0);
+        }
+
+        [_textureRegistry textureFrameAvailable:[currentTexture flutterTextureId]];
+            
+        result(nil);
+        return;
+    }
         
-        if ([call.method isEqualToString:@"getAll"]) {
+    if ([call.method isEqualToString:@"getAll"]) {
         result(@{
           @"appName" : [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleDisplayName"]
               ?: [NSNull null],
@@ -409,9 +399,33 @@ static id<MTLDevice> GetANGLEMtlDevice(EGLDisplay display)
           @"buildNumber" : [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleVersion"]
               ?: [NSNull null],
         });
-} else {
-    result(FlutterMethodNotImplemented);
-  }
+    } 
+    if ([call.method isEqualToString:@"deleteTexture"]) {
+        NSNumber* textureId;
+        if (call.arguments) {
+            textureId = call.arguments[@"textureId"];
+            if (textureId == NULL)
+            {
+                result([FlutterError errorWithCode: @"deleteTexture Error" message: @"no texture id received by the native part of FlutterGL.deleteTexture"  details:NULL]);
+                return;
+
+            }
+        }
+        else
+        {
+            result([FlutterError errorWithCode: @"No arguments" message: @"No arguments received by the native part of FlutterGL.deleteTexture"  details:NULL]);
+            return;
+        }
+        
+        //flutterGLTextures[textureId].release();
+        //flutterGLTextures.erase(textureId);
+
+        result(nil);
+        return;
+    } 
+    else {
+        result(FlutterMethodNotImplemented);
+    }
 }
 @end
 

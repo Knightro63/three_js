@@ -1690,7 +1690,7 @@ class WebGLRenderer {
     state.unbindTexture();
   }
 
-  int getRenderTargetGLTexture(RenderTarget renderTarget) {
+  WebGLTexture getRenderTargetGLTexture(RenderTarget renderTarget) {
     final textureProperties = properties.get(renderTarget.texture);
     return textureProperties["__webglTexture"];
   }

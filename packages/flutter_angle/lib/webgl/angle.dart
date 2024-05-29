@@ -1,5 +1,6 @@
 library flutter_angle;
 
+import '../shared/classes.dart';
 import '../shared/options.dart';
 import 'dart:async';
 import 'dart:html';
@@ -119,7 +120,7 @@ class FlutterAngle{
   }
 
   static Future<void> initOpenGL([bool useDebugContext = false]) async {}
-  static Future<void> updateTexture(FlutterGLTexture texture) async {}
+  static Future<void> updateTexture(FlutterGLTexture texture,[WebGLTexture? sourceTexture]) async {}
   static Future<void> deleteTexture(FlutterGLTexture texture) async {}
   static void activateTexture(FlutterGLTexture texture) {}
   static void printOpenGLError(String message) {}

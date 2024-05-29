@@ -11,7 +11,7 @@ class DataTexture extends Texture {
   /// to NearestFilter.
   /// 
   /// The interpretation of the data depends on type and format: If the type is
-  /// UnsignedByteType, a Uint8Array will be useful for addressing the
+  /// UnsignedByteType, a Uint8List will be useful for addressing the
   /// texel data. If the format is RGBAFormat, data needs four values for
   /// one texel; Red, Green, Blue and Alpha (typically the opacity).
   /// 
@@ -30,7 +30,7 @@ class DataTexture extends Texture {
   /// const height = 512;
   /// 
   /// final size = width * height;
-  /// final data = Uint8Array( 4 * size );
+  /// final data = Uint8List( 4 * size );
   /// final color = Color.fromHex32( 0xffffff );
   /// 
   /// final r = Math.floor( color.r * 255 );

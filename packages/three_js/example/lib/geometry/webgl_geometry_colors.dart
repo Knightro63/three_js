@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 
@@ -158,7 +159,7 @@ class _MyAppState extends State<WebglGeometryColors> {
   }
 
   generateTexture() {
-    final pixels = three.Uint8Array(256 * 256 * 4);
+    final pixels = Uint8List(256 * 256 * 4);
 
     int x = 0, y = 0, l = pixels.length;
 

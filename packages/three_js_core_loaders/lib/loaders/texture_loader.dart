@@ -27,7 +27,7 @@ class TextureLoader extends Loader {
     if(imageElement != null){
       // ImageElement imageElement = ImageElement(
       //   url: url,
-      //   data: Uint8Array.from(image.getBytes()),
+      //   data: Uint8List.from(image.getBytes()),
       //   width: image.width,
       //   height: image.height
       // );

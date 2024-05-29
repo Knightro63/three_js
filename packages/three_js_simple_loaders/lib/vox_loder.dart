@@ -205,7 +205,7 @@ class VOXMesh extends Mesh {
 		final offsety = size.x.toInt();
 		final offsetz = (size.x * size.y).toInt();
 
-		final array = Uint8Array( (size.x * size.y * size.z).toInt() );
+		final array = Uint8List( (size.x * size.y * size.z).toInt() );
 
 		for (int j = 0; j < data!.length; j += 4 ) {
 			final x = data[ j + 0 ];

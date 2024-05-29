@@ -618,14 +618,14 @@ class WebGLState {
   }
 
   void scissor(Vector4 scissor) {
-    if (currentScissor.equals(scissor) == false) {
+    if (!currentScissor.equals(scissor)) {
       gl.scissor(scissor.x.toInt(), scissor.y.toInt(), scissor.z.toInt(), scissor.w.toInt());
       currentScissor.setFrom(scissor);
     }
   }
 
   void viewport(Vector4 viewport) {
-    if (currentViewport.equals(viewport) == false) {
+    if (!currentViewport.equals(viewport)) {
       gl.viewport(viewport.x.toInt(), viewport.y.toInt(), viewport.z.toInt(), viewport.w.toInt());
       currentViewport.setFrom(viewport);
     }

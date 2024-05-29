@@ -13,4 +13,5 @@ export 'video_texture.dart';
 export 'open_gl_texture.dart';
 export 'framebuffer_texture.dart';
 export './source.dart';
+export 'group_texture.dart';
 

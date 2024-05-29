@@ -253,7 +253,7 @@ class WebGLProgram extends DefaultProgram with WebGLProgramExtra {
         (parameters.toneMapping != NoToneMapping) ? '#define TONE_MAPPING' : '',
         (parameters.toneMapping != NoToneMapping)? shaderChunk['tonemapping_pars_fragment']: '', // this code is required here because it is used by the toneMapping() defined below
         (parameters.toneMapping != NoToneMapping) ? getToneMappingFunction('toneMapping', parameters.toneMapping) : '',
-
+        
         parameters.dithering ? '#define DITHERING' : '',
         parameters.opaque ? '#define OPAQUE' : '',
 
@@ -347,7 +347,7 @@ class WebGLProgram extends DefaultProgram with WebGLProgramExtra {
       bool runnable = true;
       bool haveDiagnostics = true;
 
-      if (gl.getProgramParameter(program!, WebGL.LINK_STATUS) == false) {
+      if (gl.getProgramParameter(program!, WebGL.LINK_STATUS).id == 0) {
         runnable = false;
 
         final vertexErrors = getShaderErrors(gl, glVertexShader, 'vertex');

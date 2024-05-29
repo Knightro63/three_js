@@ -32,11 +32,12 @@ class WebGLShaderCache {
 
   WebGLShaderCache remove(Material material) {
     final materialShaders = materialCache[material];
+    if(materialShaders != null){
+      for (final shaderStage in materialShaders) {
+        shaderStage.usedTimes--;
 
-    for (final shaderStage in materialShaders) {
-      shaderStage.usedTimes--;
-
-      if (shaderStage.usedTimes == 0) shaderCache.remove(shaderStage.code);
+        if (shaderStage.usedTimes == 0) shaderCache.remove(shaderStage.code);
+      }
     }
 
     materialCache.remove(material);

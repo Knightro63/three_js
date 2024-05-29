@@ -26,7 +26,7 @@ abstract class RenderTarget with EventDispatcher {
   bool useRenderbuffer = false;
 
   // Texture or List<Texture> ???
-  dynamic texture;
+  late Texture texture;
   late Vector4 scissor;
   late bool scissorTest;
   late Vector4 viewport;

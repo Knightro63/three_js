@@ -554,11 +554,11 @@ class RenderingContext {
     final glError = gl.glGetError();
     if (glError != WebGL.NO_ERROR) {
       final openGLException = OpenGLException('RenderingContext.$message', glError);
-      assert(() {
+      // assert(() {
         print(openGLException.toString());
-        return true;
-      }());
-      throw openGLException;
+      //   return true;
+      // }());
+      // throw openGLException;
     }
   }
 
@@ -1321,20 +1321,27 @@ class RenderingContext {
   /// Be careful which type of integer you really pass here. Unfortunately an UInt16List
   /// is viewed by the Dart type system just as List<int>, so we jave to specify the native type
   /// here in [nativeType]
-  void bufferData<T extends TypedData>(int target, T data, int usage) {
+  void bufferData(int target, TypedData data, int usage) {
     late Pointer<Void> nativeData;
     late int size;
     if (data is List<double> || data is Float32List) {
       nativeData = floatListToArrayPointer(data as List<double>).cast();
       size = data.lengthInBytes * sizeOf<Float>();
-    } else if (data is Int32List) {
+    } 
+    else if (data is Int32List) {
       nativeData = int32ListToArrayPointer(data).cast();
       size = data.length * sizeOf<Int32>();
-    } else if (data is Uint16List) {
+    } 
+    else if (data is Uint16List) {
       nativeData = uInt16ListToArrayPointer(data).cast();
       size = data.length * sizeOf<Uint16>();
-    } else {
-      throw (OpenGLException('bufferData: unsupported native type $T', -1));
+    } 
+    else if (data is Uint8List) {
+      nativeData = uInt8ListToArrayPointer(data).cast();
+      size = data.length * sizeOf<Uint16>();
+    } 
+    else {
+      throw (OpenGLException('bufferData: unsupported native type ${data.runtimeType}', -1));
     }
     gl.glBufferData(target, size, nativeData, usage);
     calloc.free(nativeData);
@@ -1355,6 +1362,12 @@ class RenderingContext {
 
   Pointer<Uint16> uInt16ListToArrayPointer(List<int> list) {
     final ptr = calloc<Uint16>(list.length);
+    ptr.asTypedList(list.length).setAll(0, list);
+    return ptr;
+  }
+
+  Pointer<Uint8> uInt8ListToArrayPointer(List<int> list) {
+    final ptr = calloc<Uint8>(list.length);
     ptr.asTypedList(list.length).setAll(0, list);
     return ptr;
   }
@@ -1480,17 +1493,21 @@ class RenderingContext {
   }
 
   Buffer createBuffer() {
-    Pointer<Uint32> id = tempUint32s[0];
+    Pointer<Uint32> id = calloc<Uint32>();//tempUint32s[0];
     gl.glGenBuffers(1, id);
     checkError('createBuffer');
-    return Buffer(id.value);
+    int _v = id.value;
+    calloc.free(id);
+    return Buffer(_v);
   }
 
   Framebuffer createFramebuffer(){
-    Pointer<Uint32> id = tempUint32s[0];
+    Pointer<Uint32> id = calloc<Uint32>();//tempUint32s[0];
     gl.glGenFramebuffers(1, id);
     checkError('createFramebuffer');
-    return Framebuffer(id.value);
+    int _v = id.value;
+    calloc.free(id);
+    return Framebuffer(_v);
   }
 
   Program createProgram() {
@@ -1514,10 +1531,12 @@ class RenderingContext {
   }
 
   WebGLTexture createTexture() {
-    Pointer<Uint32> textureId = tempUint32s[0];
-    gl.glGenTextures(1, textureId);
+    Pointer<Uint32> vPointer = calloc<Uint32>();//tempUint32s[0];
+    gl.glGenTextures(1, vPointer);
     checkError('createBuffer');
-    return WebGLTexture(textureId.value);
+    int _v = vPointer.value;
+    calloc.free(vPointer);
+    return WebGLTexture(_v);
   }
 
   int getParameter(int key) {
@@ -1535,7 +1554,8 @@ class RenderingContext {
       WebGL.MAX_SAMPLES,
       WebGL.MAX_COMBINED_TEXTURE_IMAGE_UNITS,
       WebGL.SCISSOR_BOX,
-      WebGL.VIEWPORT
+      WebGL.VIEWPORT,
+      WebGL.MAX_TEXTURE_MAX_ANISOTROPY_EXT
     ];
 
     if (_intValues.indexOf(key) >= 0) {
@@ -1632,8 +1652,8 @@ class RenderingContext {
   }
 
   void enable(int cap) {
-    //gl.glEnable(cap);
-    checkError('enable');
+    gl.glEnable(cap);
+    //checkError('enable');
   }
 
   void enableVertexAttribArray(int index) {

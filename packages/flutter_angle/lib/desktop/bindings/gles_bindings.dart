@@ -1813,8 +1813,7 @@ class LibOpenGLES {
     double v1,
     double v2,
   ) {
-    return (_glUniform3f ??= _dylib
-        .lookupFunction<_c_glUniform3f, _dart_glUniform3f>('glUniform3f'))(
+    return (_glUniform3f ??= _dylib.lookupFunction<_c_glUniform3f, _dart_glUniform3f>('glUniform3f'))(
       location,
       v0,
       v1,
@@ -9365,6 +9364,8 @@ const int GL_BACK = 1029;
 const int GL_FRONT_AND_BACK = 1032;
 
 const int GL_TEXTURE_2D = 3553;
+
+const int GL_TEXTURE_RECTANGLE = 0x84F5;
 
 const int GL_CULL_FACE = 2884;
 

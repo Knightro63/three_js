@@ -78,11 +78,7 @@ using flutter::EncodableValue;
   private:
     std::unique_ptr<uint8_t> pixels;
     size_t request_count_ = 0;
-
-
   }; 
-
-
   
   FlutterGLTexture::FlutterGLTexture(GLsizei width, GLsizei height)
   {

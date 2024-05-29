@@ -215,7 +215,7 @@ class _State extends State<WebglVolumeCloud> {
 
     final geometry = three.BoxGeometry( 1, 1, 1 );
     final material = three.RawShaderMaterial.fromMap( {
-      (kIsWeb?'glslVersion': ''):three.GLSL3,
+      'glslVersion':three.GLSL3,
       'uniforms': {
         'base': { 'value': three.Color.fromHex32( 0x798aa0 ) },
         'map': { 'value': texture },

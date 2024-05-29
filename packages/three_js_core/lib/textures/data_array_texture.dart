@@ -13,7 +13,7 @@ class DataArrayTexture extends Texture {
   /// The properties flipY and generateMipmaps are initially set to false.
   /// 
   /// The interpretation of the data depends on type and format: If the type is
-  /// UnsignedByteType, a Uint8Array will be useful for addressing the
+  /// UnsignedByteType, a Uint8List will be useful for addressing the
   /// texel data. If the format is RGBAFormat, data needs four values for
   /// one texel; Red, Green, Blue and Alpha (typically the opacity).
   /// 
@@ -37,7 +37,7 @@ class DataArrayTexture extends Texture {
   /// const depth = 100;
   /// 
   /// final size = width * height;
-  /// final data = Uint8Array( 4 * size * depth );
+  /// final data = Uint8List( 4 * size * depth );
   /// 
   /// for (int i = 0; i < depth; i ++){
   ///   final color = Color( math.Random().nextDouble(), math.Random().nextDouble(), math.random().nextDouble());

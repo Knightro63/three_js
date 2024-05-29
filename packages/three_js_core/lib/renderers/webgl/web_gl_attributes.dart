@@ -22,8 +22,7 @@ class WebGLAttributes {
     final buffer = gl.createBuffer();
 
     gl.bindBuffer(bufferType, buffer);
-
-    gl.bufferData<TypedData>(bufferType, array.data, usage);
+    gl.bufferData(bufferType, array.data, usage);
 
     if (attribute.onUploadCallback != null) {
       attribute.onUploadCallback!();

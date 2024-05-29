@@ -5,6 +5,7 @@ class AngleOptions{
     required this.dpr,
     this.alpha = false,
     this.antialias = false,
+    this.customRenderer = true
   });
 
   int width;
@@ -12,4 +13,5 @@ class AngleOptions{
   double dpr;
   bool antialias;
   bool alpha;
+  bool customRenderer;
 }
