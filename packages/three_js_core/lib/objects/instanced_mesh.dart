@@ -1,4 +1,3 @@
-import 'package:flutter_gl/flutter_gl.dart';
 import '../core/index.dart';
 import '../materials/index.dart';
 import 'package:three_js_math/three_js_math.dart';

@@ -126,9 +126,9 @@ class SVGLoader extends Loader{
     }
 
     final geometry = BufferGeometry();
-    geometry.setAttributeFromString('position',Float32BufferAttribute.fromTypedData(Float32List.fromList(vertices), 3, false));
-    geometry.setAttributeFromString('normal', Float32BufferAttribute.fromTypedData(Float32List.fromList(normals), 3, false));
-    geometry.setAttributeFromString('uv', Float32BufferAttribute.fromTypedData(Float32List.fromList(uvs), 2, false));
+    geometry.setAttributeFromString('position',Float32BufferAttribute.fromList(Float32List.fromList(vertices), 3, false));
+    geometry.setAttributeFromString('normal', Float32BufferAttribute.fromList(Float32List.fromList(normals), 3, false));
+    geometry.setAttributeFromString('uv', Float32BufferAttribute.fromList(Float32List.fromList(uvs), 2, false));
 
     return geometry;
   }

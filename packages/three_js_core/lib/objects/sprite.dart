@@ -1,4 +1,5 @@
-import 'package:flutter_gl/flutter_gl.dart';
+import 'dart:typed_data';
+
 import '../core/index.dart';
 import '../materials/index.dart';
 import 'package:three_js_math/three_js_math.dart';
@@ -55,7 +56,7 @@ class Sprite extends Object3D {
     if (_geometry == null) {
       _geometry = BufferGeometry();
 
-      final float32List = Float32Array.from([
+      final float32List = Float32List.fromList([
         -0.5,
         -0.5,
         0,
@@ -78,7 +79,7 @@ class Sprite extends Object3D {
         1
       ]);
 
-      final interleavedBuffer = InterleavedBuffer(float32List, 5);
+      final interleavedBuffer = InterleavedBuffer.fromFloat32List(float32List, 5);
 
       _geometry!.setIndex([0, 1, 2, 0, 2, 3]);
       _geometry!.setAttributeFromString('position',InterleavedBufferAttribute(interleavedBuffer, 3, 0, false));

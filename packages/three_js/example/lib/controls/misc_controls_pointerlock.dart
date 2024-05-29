@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_gl/native-array/index.dart';
 import 'package:three_js/three_js.dart' as three;
 
 class MiscControlsPointerlock extends StatefulWidget {
@@ -175,7 +174,7 @@ class _State extends State<MiscControlsPointerlock> {
       colorsFloor.addAll([ color.red, color.green, color.blue ]);
     }
 
-    floorGeometry.setAttributeFromString( 'color', three.Float32BufferAttribute( Float32Array.fromList(colorsFloor) , 3 ) );
+    floorGeometry.setAttributeFromString( 'color', three.Float32BufferAttribute.fromList(colorsFloor , 3 ) );
 
     final floorMaterial = three.MeshBasicMaterial.fromMap( { 'vertexColors': true } );
 
@@ -192,7 +191,7 @@ class _State extends State<MiscControlsPointerlock> {
       colorsBox.addAll( [color.red, color.green, color.blue] );
     }
 
-    boxGeometry.setAttributeFromString( 'color', three.Float32BufferAttribute( Float32Array.fromList(colorsBox), 3 ) );
+    boxGeometry.setAttributeFromString( 'color', three.Float32BufferAttribute.fromList(colorsBox, 3 ) );
 
     for ( int i = 0; i < 500; i ++ ) {
       final boxMaterial = three.MeshPhongMaterial.fromMap( { 'specular': 0xffffff, 'flatShading': true, 'vertexColors': true } );

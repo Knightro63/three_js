@@ -2,7 +2,7 @@ import '../buffer/index.dart';
 import 'dart:math' as math;
 import '../matrix/matrix3.dart';
 import 'vector.dart';
-import 'package:flutter_gl/flutter_gl.dart';
+import '../native-array/native_array.dart';
 
 class Vector2 extends Vector{
   

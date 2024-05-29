@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:flutter_gl/flutter_gl.dart';
+import 'dart:typed_data';
 import '../others/index.dart';
 import '../core/event_dispatcher.dart';
 import 'package:three_js_math/three_js_math.dart';
@@ -113,10 +113,10 @@ class BufferGeometry with EventDispatcher {
       final list = index.map<int>((e) => e.toInt()).toList();
       final max = list.getMaxValue();
       if (max != null && max > 65535) {
-        this.index = Uint32BufferAttribute(Uint32Array.from(list), 1, false);
+        this.index = Uint32BufferAttribute.fromList(list, 1, false);
       } 
       else {
-        this.index = Uint16BufferAttribute(Uint16Array.from(list), 1, false);
+        this.index = Uint16BufferAttribute.fromList(list, 1, false);
       }
     } 
     else {
@@ -329,8 +329,7 @@ class BufferGeometry with EventDispatcher {
       }
     }
 
-    final array = Float32Array.from(position);
-    setAttributeFromString('position', Float32BufferAttribute(array, 3, false));
+    setAttributeFromString('position', Float32BufferAttribute.fromList(position, 3, false));
 
     return this;
   }
@@ -505,7 +504,7 @@ class BufferGeometry with EventDispatcher {
     int nVertices = positions.length ~/ 3;
 
     if (attributes["tangent"] == null) {
-      setAttributeFromString('tangent', Float32BufferAttribute(Float32Array(4 * nVertices), 4));
+      setAttributeFromString('tangent', Float32BufferAttribute.fromList(Float32List(4 * nVertices), 4));
     }
 
     final tangents = attributes["tangent"].array;
@@ -644,7 +643,7 @@ class BufferGeometry with EventDispatcher {
 
       if (normalAttribute == null) {
         final array = List<double>.filled(positionAttribute.count * 3, 0);
-        normalAttribute = Float32BufferAttribute(Float32Array.from(array), 3, false);
+        normalAttribute = Float32BufferAttribute.fromList(array, 3, false);
         setAttributeFromString('normal', normalAttribute);
       } 
       else {
@@ -765,7 +764,7 @@ class BufferGeometry with EventDispatcher {
       final itemSize = attribute.itemSize;
       final normalized = attribute.normalized;
 
-      final array2 = Float32Array(indices.length * itemSize);
+      final array2 = Float32List(indices.length * itemSize);
 
       int index = 0, index2 = 0;
 
@@ -781,7 +780,7 @@ class BufferGeometry with EventDispatcher {
         }
       }
 
-      return Float32BufferAttribute(array2, itemSize, normalized);
+      return Float32BufferAttribute.fromList(array2, itemSize, normalized);
     }
 
     //

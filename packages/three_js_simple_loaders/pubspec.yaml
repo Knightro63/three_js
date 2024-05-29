@@ -10,7 +10,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_gl: ^0.0.21
   three_js_core_loaders:
     path: ../three_js_core_loaders
   three_js_core:

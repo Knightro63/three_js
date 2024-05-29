@@ -1,7 +1,8 @@
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:flutter_gl/flutter_gl.dart';
+
 import 'package:three_js/three_js.dart' as three;
 import 'package:three_js_geometry/three_js_geometry.dart';
 import 'package:three_js_helpers/three_js_helpers.dart';
@@ -55,8 +56,8 @@ class _State extends State<WebglInstancingScatter> {
   final count = 2000;
   final dummy = three.Object3D();
 
-  final ages = Float32Array( 2000 );
-  final scales = Float32Array( 2000 );
+  final ages = Float32List( 2000 );
+  final scales = Float32List( 2000 );
 
   final _position = three.Vector3();
   final _normal = three.Vector3();

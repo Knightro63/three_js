@@ -54,9 +54,9 @@ class WebGLShadowMap {
       "fragmentShader": vsmFrag
     });
 
-    final float32List = Float32Array.from([-1.0, -1.0, 0.5, 3.0, -1.0, 0.5, -1.0, 3.0, 0.5]);
+    final float32List = Float32List.fromList([-1.0, -1.0, 0.5, 3.0, -1.0, 0.5, -1.0, 3.0, 0.5]);
 
-    fullScreenTri.setAttributeFromString('position', Float32BufferAttribute(float32List, 3, false));
+    fullScreenTri.setAttributeFromString('position', Float32BufferAttribute.fromList(float32List, 3, false));
 
     fullScreenMesh = Mesh(fullScreenTri, shadowMaterialVertical);
 

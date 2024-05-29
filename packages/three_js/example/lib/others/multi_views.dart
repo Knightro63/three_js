@@ -1,9 +1,8 @@
 import 'dart:async';
 
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Matrix4;
-import 'package:flutter_gl/flutter_gl.dart';
+import 'package:flutter_angle/flutter_angle.dart';
 import 'package:three_js/three_js.dart' as three;
 
 class MultiViews extends StatefulWidget {
@@ -16,7 +15,7 @@ class MultiViews extends StatefulWidget {
 
 class _MyAppState extends State<MultiViews> {
   three.WebGLRenderer? renderer;
-  FlutterGlPlugin three3dRender = FlutterGlPlugin();
+  late FlutterGLTexture three3dRender;// = FlutterGlPlugin();
 
   @override
   void initState() {
@@ -24,19 +23,27 @@ class _MyAppState extends State<MultiViews> {
   }
   @override
   void dispose() {
-    three3dRender.dispose();
+    //three3dRender.dispose();
     super.dispose();
   }
 
   Future<bool> init() async {
     if(!kIsWeb) {
-      await three3dRender.initialize(options: {"width": 1024, "height": 1024, "dpr": 1.0});
-      await three3dRender.prepareContext();
+      await FlutterAngle.initOpenGL();
+      three3dRender = await FlutterAngle.createTexture(
+        AngleOptions(
+          width: 1024, 
+          height: 1024, 
+          dpr: 1
+        )
+      );
+      //await three3dRender.initialize(options: {"width": 1024, "height": 1024, "dpr": 1.0});
+      //await three3dRender.prepareContext();
 
       Map<String, dynamic> options = {
         "width": 1024,
         "height": 1024,
-        "gl": three3dRender.gl,
+        "gl": three3dRender.rawOpenGl,
         "antialias": true,
       };
       renderer = three.WebGLRenderer(options);

@@ -1,6 +1,4 @@
-import 'package:flutter_gl/flutter_gl.dart';
-import '../others/constants.dart';
-import 'interleaved_buffer.dart';
+import 'package:three_js_math/three_js_math.dart';
 
 abstract class BaseBufferAttribute<TData extends NativeArray> {
   late TData array;

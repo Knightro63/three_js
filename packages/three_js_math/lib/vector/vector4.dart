@@ -4,7 +4,7 @@ import 'dart:math' as math;
 import '../matrix/index.dart';
 import '../rotation/index.dart';
 import 'index.dart';
-import 'package:flutter_gl/flutter_gl.dart';
+import '../native-array/native_array.dart';
 
 class Vector4 extends Vector{
   String type = "Vector4";

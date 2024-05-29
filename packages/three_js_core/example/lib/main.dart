@@ -1,7 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_gl/flutter_gl.dart';
+import 'package:flutter_angle/flutter_angle.dart';
+
 import 'package:three_js_core/three_js_core.dart' as three;
 import 'package:three_js_math/three_js_math.dart' as tmath;
 import 'dart:math' as math;
@@ -34,7 +35,8 @@ class WebglGeometries extends StatefulWidget {
 }
 
 class _State extends State<WebglGeometries> {
-  late FlutterGlPlugin three3dRender;
+  late FlutterGLTexture sourceTexture;
+  late final RenderingContext _gl;
   three.WebGLRenderer? renderer;
 
   int? fboId;
@@ -55,6 +57,7 @@ class _State extends State<WebglGeometries> {
 
   bool verbose = false;
   bool disposed = false;
+  bool ready = false;
 
   late three.Object3D object;
 
@@ -63,9 +66,6 @@ class _State extends State<WebglGeometries> {
   int startTime = 0;
 
   late three.WebGLMultisampleRenderTarget renderTarget;
-
-  dynamic sourceTexture;
-
   bool loaded = false;
 
   @override
@@ -77,7 +77,7 @@ class _State extends State<WebglGeometries> {
   void dispose() {
     print(" dispose ............. ");
     disposed = true;
-    three3dRender.dispose();
+    //three3dRender.dispose();
     super.dispose();
   }
 
@@ -93,33 +93,29 @@ class _State extends State<WebglGeometries> {
     height = screenSize!.height;
     dpr = mqd.devicePixelRatio;
 
-    three3dRender = FlutterGlPlugin();
+    await FlutterAngle.initOpenGL(true);
+    sourceTexture = await FlutterAngle.createTexture(      
+      AngleOptions(
+        width: width.toInt(), 
+        height: height.toInt(), 
+        dpr: dpr,
+      )
+    );
+    _gl = sourceTexture.getContext();
+    ready = true;
 
-    Map<String, dynamic> _options = {
-      "antialias": true,
-      "alpha": false,
-      "width": width.toInt(),
-      "height": height.toInt(),
-      "dpr": dpr
-    };
-
-    await three3dRender.initialize(options: _options);
 
     setState(() {});
 
     Future.delayed(const Duration(milliseconds: 100), () async {
-      await three3dRender.prepareContext();
+      //await three3dRender.prepareContext();
       initScene();
     });
   }
 
   void render() {
     int _t = DateTime.now().millisecondsSinceEpoch;
-
-    final _gl = three3dRender.gl;
-
     renderer!.render(scene, camera);
-
     int _t1 = DateTime.now().millisecondsSinceEpoch;
 
     if (verbose) {
@@ -133,7 +129,7 @@ class _State extends State<WebglGeometries> {
     if (verbose) print(" render: sourceTexture: $sourceTexture ");
 
     if (!kIsWeb) {
-      three3dRender.updateTexture(sourceTexture);
+      FlutterAngle.updateTexture(sourceTexture);
     }
   }
 
@@ -141,9 +137,9 @@ class _State extends State<WebglGeometries> {
     Map<String, dynamic> _options = {
       "width": width,
       "height": height,
-      "gl": three3dRender.gl,
+      "gl": _gl,
       "antialias": true,
-      "canvas": three3dRender.element
+      "canvas": sourceTexture.element
     };
     renderer = three.WebGLRenderer(_options);
     renderer!.setPixelRatio(dpr);
@@ -156,7 +152,7 @@ class _State extends State<WebglGeometries> {
       renderTarget = three.WebGLMultisampleRenderTarget((width * dpr).toInt(), (height * dpr).toInt(), pars);
       renderTarget.samples = 4;
       renderer!.setRenderTarget(renderTarget);
-      sourceTexture = renderer!.getRenderTargetGLTexture(renderTarget);
+      //sourceTexture = renderer!.getRenderTargetGLTexture(renderTarget);
     }
   }
 
@@ -182,7 +178,7 @@ class _State extends State<WebglGeometries> {
 
     final material = three.MeshPhongMaterial({
       three.MaterialProperty.side: tmath.DoubleSide, 
-      three.MaterialProperty.wireframe: true
+      three.MaterialProperty.wireframe: false
     });
 
     object = three.Mesh(three.SphereGeometry(75, 20, 10), material);
@@ -255,14 +251,14 @@ class _State extends State<WebglGeometries> {
             child: Builder(
               builder: (BuildContext context) {
                 if (kIsWeb) {
-                  return three3dRender.isInitialized
+                  return ready
                       ? HtmlElementView(
-                          viewType: three3dRender.textureId!.toString())
+                          viewType: sourceTexture.textureId.toString())
                       : Container();
                 } 
                 else {
-                  return three3dRender.isInitialized
-                      ? Texture(textureId: three3dRender.textureId!)
+                  return ready
+                      ? Texture(textureId: sourceTexture.textureId)
                       : Container();
                 }
             }),

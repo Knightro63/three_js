@@ -2,7 +2,7 @@ part of three_webgl;
 
 class WebGLExtensions {
   Map<String, dynamic> extensions = {};
-  dynamic gl;
+  RenderingContext gl;
 
   WebGLExtensions(this.gl);
 
@@ -79,8 +79,7 @@ class WebGLExtensions {
 
   dynamic hasForApp(name) {
     if (extensions.keys.isEmpty) {
-      List<String> ex = gl.getExtension(name);
-
+      List<String> ex = gl.getExtension(name) as List<String>? ?? [];
       extensions = {};
       for (String element in ex) {
         extensions[element] = element;

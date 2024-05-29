@@ -1,7 +1,6 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:flutter_gl/flutter_gl.dart';
 import 'package:three_js/three_js.dart' as three;
 import 'package:three_js_helpers/three_js_helpers.dart';
 
@@ -187,7 +186,7 @@ class _MyAppState extends State<WebglCamera> {
     }
 
     geometry.setAttributeFromString(
-        'position', three.Float32BufferAttribute(Float32Array.fromList(vertices), 3));
+        'position', three.Float32BufferAttribute.fromList(vertices, 3));
 
     final particles = three.Points(
         geometry, three.PointsMaterial.fromMap({"color": 0x888888}));

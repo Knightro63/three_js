@@ -1,6 +1,7 @@
-import 'package:flutter_gl/flutter_gl.dart';
+import 'dart:typed_data';
 import '../others/constants.dart';
 import '../math/index.dart';
+import '../native-array/native_array.dart';
 
 /// [Interleaved] means that multiple attributes, possibly of different types,
 /// (e.g., position, normal, uv, color) are packed into a single array buffer.
@@ -34,6 +35,13 @@ class InterleavedBuffer {
     version = 0;
 
     uuid = MathUtils.generateUUID();
+  }
+  /// [array] -- A typed array with a shared buffer. Stores the
+  /// geometry data.
+  /// 
+  /// [stride] -- The number of typed-array elements per vertex.
+  factory InterleavedBuffer.fromFloat32List(Float32List array, int stride) {
+    return InterleavedBuffer(Float32Array.fromList(array), stride);  
   }
 
   set needsUpdate(bool value) {

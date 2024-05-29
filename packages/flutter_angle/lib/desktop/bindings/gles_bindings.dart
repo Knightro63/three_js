@@ -909,8 +909,7 @@ class LibOpenGLES {
   _dart_glGetBufferParameteriv? _glGetBufferParameteriv;
 
   int glGetError() {
-    return (_glGetError ??=
-        _dylib.lookupFunction<_c_glGetError, _dart_glGetError>('glGetError'))();
+    return (_glGetError ??= _dylib.lookupFunction<_c_glGetError, _dart_glGetError>('glGetError'))();
   }
 
   _dart_glGetError? _glGetError;

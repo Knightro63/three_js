@@ -178,7 +178,6 @@ class _MyAppState extends State<ExampleTriangle01> {
       }
     }
     
-
     var vs = """#version ${_version}
       #define attribute in
       #define varying out

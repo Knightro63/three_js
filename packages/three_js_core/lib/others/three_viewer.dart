@@ -1,8 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-
-import 'package:flutter_gl/flutter_gl.dart';
+import 'package:flutter_angle/flutter_angle.dart';
 import 'package:three_js_core/three_js_core.dart' as core;
 import 'package:three_js_math/three_js_math.dart';
 
@@ -68,7 +67,8 @@ class ThreeJS{
   final GlobalKey<core.PeripheralsState> globalKey = GlobalKey<core.PeripheralsState>();
   core.PeripheralsState get domElement => globalKey.currentState!;
 
-  late FlutterGlPlugin three3dRender;
+  FlutterGLTexture? sourceTexture;
+  late final RenderingContext gl;
   core.WebGLRenderTarget? renderTarget;
   core.WebGLRenderer? renderer;
   core.WebGLRenderer? lateRenderer;
@@ -83,7 +83,7 @@ class ThreeJS{
   double dpr = 1.0;
 
   bool disposed = false;
-  dynamic sourceTexture;
+  //dynamic sourceTexture;
   bool pause = false;
   bool mounted = false;
 
@@ -99,7 +99,8 @@ class ThreeJS{
   void dispose(){
     renderer?.dispose();
     renderTarget?.dispose();
-    three3dRender.dispose();
+    FlutterAngle.deleteTexture(sourceTexture!);
+    //three3dRender.dispose();
     scene.material?.dispose();
     scene.children.forEach((element) {
       element.material?.dispose();
@@ -138,8 +139,7 @@ class ThreeJS{
     }
   }
 
-  void render() {
-    final gl = three3dRender.gl;
+  Future<void> render() async{
     rendererUpdate?.call();
     if(postProcessor == null){
       //renderer!.setSize(screenSize!.width, screenSize!.height);
@@ -148,20 +148,21 @@ class ThreeJS{
     else{
       postProcessor?.call(clock.getDelta());
     }
-    gl.flush();
+    
     if(!kIsWeb) {
-      three3dRender.updateTexture(sourceTexture);
+      await FlutterAngle.updateTexture(sourceTexture!);
     }
   }
+  
   void initRenderer() {
     renderer = lateRenderer;
     if(renderer == null){
       Map<String, dynamic> options = {
         "width": width,
         "height": height,
-        "gl": three3dRender.gl,
+        "gl": gl,
         "antialias": true,
-        "canvas": three3dRender.element,
+        "canvas": sourceTexture?.element,
         "alpha": settings.alpha,
         "clearColor": settings.clearColor,
         "clearAlpha": settings.clearAlpha,
@@ -172,7 +173,7 @@ class ThreeJS{
       }
 
       renderer = lateRenderer ?? core.WebGLRenderer(options);
-      renderer!.setPixelRatio(dpr);
+      // renderer!.setPixelRatio(dpr);
       renderer!.setSize(width, height, false);
       renderer!.alpha = settings.alpha;
       renderer!.shadowMap.enabled = settings.enableShadowMap;
@@ -195,14 +196,14 @@ class ThreeJS{
       final core.WebGLRenderTargetOptions pars = core.WebGLRenderTargetOptions(settings.renderOptions);
       renderTarget = core.WebGLRenderTarget((width * dpr).toInt(), (height * dpr).toInt(), pars);
       renderer!.setRenderTarget(renderTarget);
-      sourceTexture = renderer!.getRenderTargetGLTexture(renderTarget!);
+      //sourceTexture = renderer!.getRenderTargetGLTexture(renderTarget!);
     }
     else{
       renderTarget = null;
     }
 
     if(!kIsWeb){
-      renderer?.gl.enable(0x8642);
+      //renderer?.gl.enable(0x8642);
     }
   }
   void onWindowResize(BuildContext context){
@@ -234,20 +235,29 @@ class ThreeJS{
     width = screenSize!.width;
     height = screenSize!.height;
 
-    three3dRender = FlutterGlPlugin();
+    await FlutterAngle.initOpenGL(true);
 
-    Map<String, dynamic> options = {
-      "antialias": true,
-      "alpha": settings.alpha,
-      "width": width.toInt(),
-      "height": height.toInt(),
-      "dpr": dpr,
-      'precision': 'highp'
-    };
-    await three3dRender.initialize(options: options);
-
+    // Map<String, dynamic> options = {
+    //   "antialias": true,
+    //   "alpha": settings.alpha,
+    //   "width": width.toInt(),
+    //   "height": height.toInt(),
+    //   "dpr": dpr,
+    //   'precision': 'highp'
+    // };
+    // await three3dRender.initialize(options: options);
+    sourceTexture = await FlutterAngle.createTexture(      
+      AngleOptions(
+        width: width.toInt(), 
+        height: height.toInt(), 
+        dpr: dpr,
+        alpha: settings.alpha,
+        antialias: true
+      )
+    );
+    gl = sourceTexture!.getContext();
     Future.delayed(const Duration(milliseconds: 100), () async {
-      await three3dRender.prepareContext();
+      //await three3dRender.prepareContext();
       initScene();
     });
   }
@@ -270,10 +280,10 @@ class ThreeJS{
                   color: Theme.of(context).canvasColor,
                   child: Builder(builder: (BuildContext context) {
                     if (kIsWeb) {
-                      return three3dRender.isInitialized? HtmlElementView(viewType:three3dRender.textureId!.toString()):Container();
+                      return sourceTexture != null? HtmlElementView(viewType:sourceTexture!.textureId.toString()):Container();
                     } 
                     else {
-                      return three3dRender.isInitialized?Texture(textureId: three3dRender.textureId!):Container();
+                      return sourceTexture != null?Texture(textureId: sourceTexture!.textureId):Container();
                     }
                   })
                 );

@@ -317,6 +317,8 @@ abstract class WebGL {
 
   static const int EQUAL = 0x0202;
 
+  static const int EXTENSIONS = 7939;
+
   static const int FASTEST = 0x1101;
 
   static const int FLOAT = 0x1406;
@@ -544,6 +546,8 @@ abstract class WebGL {
   static const int MAX_TEXTURE_LOD_BIAS = 0x84FD;
 
   static const int MAX_TEXTURE_SIZE = 0x0D33;
+
+  static const int MAX_TEXTURE_MAX_ANISOTROPY_EXT = 0x84FF;
 
   static const int MAX_TRANSFORM_FEEDBACK_INTERLEAVED_COMPONENTS = 0x8C8A;
 
@@ -1038,6 +1042,8 @@ abstract class WebGL {
   static const int TEXTURE_WRAP_S = 0x2802;
 
   static const int TEXTURE_WRAP_T = 0x2803;
+
+  static const int TEXTURE_MAX_ANISOTROPY_EXT = 34046;
 
   static const int TIMEOUT_EXPIRED = 0x911B;
 

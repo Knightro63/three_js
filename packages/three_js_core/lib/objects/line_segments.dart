@@ -1,4 +1,5 @@
-import 'package:flutter_gl/flutter_gl.dart';
+import 'dart:typed_data';
+
 import 'package:three_js_core/others/index.dart';
 import 'package:three_js_math/three_js_math.dart';
 import './line.dart';
@@ -33,7 +34,7 @@ class LineSegments extends Line {
 
       if (geometry.index == null) {
         final positionAttribute = geometry.attributes["position"];
-        final lineDistances = Float32Array(positionAttribute.count);
+        final lineDistances = Float32List(positionAttribute.count);
 
         for (int i = 0, l = positionAttribute.count; i < l; i += 2) {
           _lsstart.fromBuffer(positionAttribute, i);
@@ -43,7 +44,7 @@ class LineSegments extends Line {
           lineDistances[i + 1] = lineDistances[i] + _lsstart.distanceTo(_lsend);
         }
 
-        geometry.setAttributeFromString('lineDistance', Float32BufferAttribute(lineDistances, 1, false));
+        geometry.setAttributeFromString('lineDistance', Float32BufferAttribute.fromList(lineDistances, 1, false));
       } 
       else {
         console.info('LineSegments.computeLineDistances(): Computation only possible with non-indexed BufferGeometry.');

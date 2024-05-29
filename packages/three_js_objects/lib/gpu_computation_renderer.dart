@@ -1,4 +1,4 @@
-import 'package:flutter_gl/flutter_gl.dart';
+import 'dart:typed_data';
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 
@@ -327,7 +327,7 @@ class GPUComputationRenderer {
 		};
 
 		createTexture = () {
-			final data = Float32Array( sizeX * sizeY * 4 );
+			final data = Float32List( sizeX * sizeY * 4 );
 			final texture = DataTexture( data, sizeX, sizeY, RGBAFormat, FloatType );
 			texture.needsUpdate = true;
 			return texture;

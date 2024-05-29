@@ -1,4 +1,4 @@
-import 'package:flutter_gl/native-array/index.dart';
+
 import 'package:three_js_core/others/index.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'animation_clip.dart';

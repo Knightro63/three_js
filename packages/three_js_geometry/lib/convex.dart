@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'package:three_js_core/three_js_core.dart';
 import 'convex_hull.dart';
 import 'package:three_js_math/three_js_math.dart';
@@ -39,7 +38,7 @@ class ConvexGeometry extends BufferGeometry {
 
     // build geometry
 
-    setAttribute(Attribute.position,Float32BufferAttribute.fromTypedData(Float32List.fromList(vertices), 3, false));
-    setAttribute(Attribute.normal,Float32BufferAttribute.fromTypedData(Float32List.fromList(normals), 3, false));
+    setAttribute(Attribute.position,Float32BufferAttribute.fromList(vertices, 3, false));
+    setAttribute(Attribute.normal,Float32BufferAttribute.fromList(normals, 3, false));
   }
 }

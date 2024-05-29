@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gl/flutter_gl.dart';
+
 import 'package:three_js/three_js.dart' as three;
 
 GlobalKey<webgl_animation_keyframesState> webgl_animation_keyframesGlobalKey =

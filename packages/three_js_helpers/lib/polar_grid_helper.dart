@@ -1,4 +1,4 @@
-import 'package:flutter_gl/flutter_gl.dart';
+
 import 'package:three_js_math/three_js_math.dart';
 import 'package:three_js_core/three_js_core.dart';
 import 'dart:math' as math;
@@ -98,8 +98,8 @@ class PolarGridHelper extends LineSegments {
     }
 
     final geometry = BufferGeometry();
-    geometry.setAttributeFromString('position', Float32BufferAttribute(Float32Array.from(vertices), 3));
-    geometry.setAttributeFromString('color', Float32BufferAttribute(Float32Array.from(colors), 3));
+    geometry.setAttributeFromString('position', Float32BufferAttribute.fromList(vertices, 3));
+    geometry.setAttributeFromString('color', Float32BufferAttribute.fromList(colors, 3));
 
     final material = LineBasicMaterial.fromMap({"vertexColors": true, "toneMapped": false});
     final pgh = PolarGridHelper.create(geometry, material);

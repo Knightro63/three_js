@@ -1,4 +1,5 @@
-import 'package:flutter_gl/flutter_gl.dart';
+import 'dart:typed_data';
+
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_helpers/three_js_helpers.dart';
 import 'package:three_js_math/three_js_math.dart';
@@ -16,11 +17,11 @@ class CSMHelper extends Group {
   bool displayShadowBounds = true;
 
 	CSMHelper(this.csm ):super() {
-		final indices = Uint16Array.from( [ 0, 1, 1, 2, 2, 3, 3, 0, 4, 5, 5, 6, 6, 7, 7, 4, 0, 4, 1, 5, 2, 6, 3, 7 ] );
-		final positions = Float32Array( 24 );
+		final indices = Uint16List.fromList( [ 0, 1, 1, 2, 2, 3, 3, 0, 4, 5, 5, 6, 6, 7, 7, 4, 0, 4, 1, 5, 2, 6, 3, 7 ] );
+		final positions = Float32List( 24 );
 		final frustumGeometry = BufferGeometry();
-		frustumGeometry.setIndex( Uint16BufferAttribute( indices, 1 ) );
-		frustumGeometry.setAttributeFromString( 'position', Float32BufferAttribute( positions, 3, false ) );
+		frustumGeometry.setIndex( Uint16BufferAttribute.fromList( indices, 1 ) );
+		frustumGeometry.setAttributeFromString( 'position', Float32BufferAttribute.fromList( positions, 3, false ) );
 		final frustumLines = LineSegments( frustumGeometry, LineBasicMaterial() );
 		add( frustumLines );
 

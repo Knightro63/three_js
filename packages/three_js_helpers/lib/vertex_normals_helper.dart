@@ -1,4 +1,6 @@
-import 'package:flutter_gl/flutter_gl.dart';
+
+import 'dart:typed_data';
+
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 
@@ -35,7 +37,7 @@ class VertexNormalsHelper extends LineSegments {
     final geometry = BufferGeometry();
 
     final nNormals = object.geometry?.attributes["normal"].count;
-    final positions = Float32BufferAttribute(Float32Array(nNormals * 2 * 3), 3, false);
+    final positions = Float32BufferAttribute.fromList(Float32List(nNormals * 2 * 3), 3, false);
 
     geometry.setAttributeFromString('position', positions);
 

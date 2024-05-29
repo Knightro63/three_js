@@ -5,7 +5,7 @@ import 'dart:math' as math;
 import '../math/index.dart';
 import '../buffer/index.dart';
 import 'index.dart';
-import 'package:flutter_gl/flutter_gl.dart';
+import '../native-array/native_array.dart';
 
 final _vector3 = Vector3(0, 0, 0);
 

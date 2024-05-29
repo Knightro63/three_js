@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 import 'package:flutter/services.dart';
-
+import 'dart:html' as html;
 import '../shared/webgl.dart';
 import '../shared/classes.dart';
 import 'dart:async';
@@ -29,9 +29,9 @@ class RenderingContext{
     return ShaderPrecisionFormat();
   }
 
-  // getExtension(String key) {
-  //   _gl.getExtension(key);
-  // }
+  Object? getExtension(String key) {
+    return _gl.getExtension(key);
+  }
 
   // getParameter(key) {
   //   _gl.getParameter(key);
@@ -60,7 +60,7 @@ class RenderingContext{
   void texParameteri(int target, int pname, int param) {
     _gl.texParameteri(target, pname, param);
   }
-
+  
   void checkError([String message = '']) {
     // final glError = _gl.glGetError();
     // if (glError != WebGL.NO_ERROR) {
@@ -73,9 +73,7 @@ class RenderingContext{
     // }
   }
 
-  WebGLParameter getParameter(int key) {
-    print("OpenGL getParameter key: ${key} ");
-
+  int getParameter(int key) {
     List<int> _intValues = [
       WebGL.MAX_TEXTURE_IMAGE_UNITS,
       WebGL.MAX_VERTEX_TEXTURE_IMAGE_UNITS,
@@ -92,9 +90,14 @@ class RenderingContext{
     ];
 
     if (_intValues.contains(key)) {
-      return WebGLParameter(_gl.getParameter(key));
+      dynamic val = _gl.getParameter(key);
+      if(val is List<int>){
+        return ByteData.view(Uint8List.fromList(val).buffer).getUint32(0);
+      }
+      return val;
     } 
     else {
+      return key;
       throw (" OpenGL getParameter key: ${key} is not support ");
     }
   }
@@ -109,14 +112,46 @@ class RenderingContext{
   }
 
   Future<void> texImage2DfromImage(
-    target,
+    int target,
     Image image, {
-    level = 0,
-    internalformat = WebGL.RGBA,
-    format = WebGL.RGBA,
-    type = WebGL.UNSIGNED_BYTE,
+    int level = 0,
+    int internalformat = WebGL.RGBA,
+    int format = WebGL.RGBA,
+    int type = WebGL.UNSIGNED_BYTE,
   }) async {
-    texImage2D(target, level, internalformat, image.width, image.height, 0, format, type, (await image.toByteData())!);
+    final completer = Completer<void>();
+    final bytes = (await image.toByteData())!;
+    final hblob = html.Blob([bytes]);
+    final imageDom = html.ImageElement();
+    imageDom.crossOrigin = "";
+    imageDom.src = html.Url.createObjectUrl(hblob);
+    
+    imageDom.onLoad.listen((e) {
+      completer.complete();
+      texImage2D_NOSIZE(target, level, internalformat, format, type, imageDom);
+    });
+    
+    return completer.future;
+  }
+
+  Future<void> texImage2DfromAsset(
+    int target,
+    String asset, {
+    int level = 0,
+    int internalformat = WebGL.RGBA,
+    int format = WebGL.RGBA,
+    int type = WebGL.UNSIGNED_BYTE,
+  }) async {
+    final completer = Completer<void>();
+    final imageDom = html.ImageElement();
+    imageDom.crossOrigin = "";
+    imageDom.src = asset;
+    imageDom.onLoad.listen((e) {
+      texImage2D_NOSIZE(target, level, internalformat, format, type, imageDom);
+      completer.complete();
+    });
+
+    return completer.future;
   }
 
   void texImage2D(
@@ -137,10 +172,9 @@ class RenderingContext{
     int target, 
     int level, 
     int internalformat, 
-    int border, 
     int format, 
     int type, 
-    TypedData? pixels
+    html.Element? pixels
   ) { 
     _gl.texImage2D(target, level, internalformat, format, type, pixels);
   }
@@ -170,8 +204,8 @@ class RenderingContext{
     _gl.blendEquation(v0);
   }
 
-  void useProgram(Program program) {
-    _gl.useProgram(program.id);
+  void useProgram(Program? program) {
+    _gl.useProgram(program?.id);
   }
 
   void blendFuncSeparate(int srcRGB, int dstRGB, int srcAlpha, int dstAlpha) {
@@ -230,8 +264,8 @@ class RenderingContext{
     _gl.clearColor(red, green, blue, alpha);
   }
 
-  void compressedTexImage2D(int target, int level, int internalformat, int width, int height, int border, int imageSize, TypedData? data){
-    _gl.texImage2D(target, level, internalformat, width, height, border, imageSize, data);
+  void compressedTexImage2D(int target, int level, int internalformat, int width, int height, int border, TypedData? data){
+    _gl.compressedTexImage2D(target, level, internalformat, width, height, border, data);
   }
 
   void generateMipmap(int target) {
@@ -258,9 +292,8 @@ class RenderingContext{
     _gl.pixelStorei(pname, param);
   }
 
-  //TODO
-  getContextAttributes() {
-    _gl.getContextAttributes();
+  dynamic getContextAttributes() {
+    return _gl.getContextAttributes();
   }
 
   WebGLParameter getProgramParameter(Program program, int pname) {
@@ -268,12 +301,22 @@ class RenderingContext{
   }
 
   //TODO
-  getActiveUniform(v0, v1) {
-    _gl.getActiveUniform(v0, v1);
+  ActiveInfo getActiveUniform(Program v0, v1) {
+    final val = _gl.getActiveUniform(v0.id, v1);
+    return ActiveInfo(
+      val.type,
+      val.name,
+      val.size
+    );
   }
-
-  getActiveAttrib(v0, v1) {
-    _gl.getActiveAttrib(v0, v1);
+  
+  ActiveInfo getActiveAttrib(Program v0, v1) {
+    final val = _gl.getActiveAttrib(v0.id, v1);
+    return ActiveInfo(
+      val.type,
+      val.name,
+      val.size
+    );
   }
 
   UniformLocation getUniformLocation(Program program, String name) {
@@ -308,8 +351,8 @@ class RenderingContext{
     _gl.drawArraysInstanced(mode, first, count, instanceCount);
   }
 
-  void bindFramebuffer(int target, Framebuffer framebuffer){
-    _gl.bindFramebuffer(target, framebuffer.id);
+  void bindFramebuffer(int target, Framebuffer? framebuffer){
+    _gl.bindFramebuffer(target, framebuffer?.id);
   }
 
   int checkFramebufferStatus(int target) {
@@ -320,7 +363,7 @@ class RenderingContext{
     _gl.framebufferTexture2D(target, attachment, textarget, texture.id, level);
   }
 
-  void readPixels(int x, int y, int width, int height, int format, int type, TypedData? pixels) {
+  void readPixels(int x, int y, int width, int height, int format, int type,pixels) {
     _gl.readPixels(x, y, width, height, format, type, pixels);
   }
 
@@ -333,11 +376,15 @@ class RenderingContext{
         target, level, internalformat, x, y, width, height, border);
   }
 
-  void texSubImage2D(int target, int level, int xoffset, int yoffset, int width, int height, int format, int type, TypedData? pixels) {
+  void copyTexSubImage2D(int target, int level, int xoffset, int yoffset, int x, int y, int width, int height){
+    _gl.copyTexSubImage2D(target, level, xoffset, yoffset, x,y,width, height);
+  }
+
+  void texSubImage2D(int target, int level, int xoffset, int yoffset, int width, int height, int format, int type, pixels) {
     _gl.texSubImage2D(target, level, xoffset, yoffset, width, height, format,type, pixels);
   }
 
-  void texSubImage2D_NOSIZE(int target, int level, int xoffset, int yoffset, int format, int type, TypedData? pixels){
+  void texSubImage2D_NOSIZE(int target, int level, int xoffset, int yoffset, int format, int type, pixels){
     _gl.texSubImage2D(target, level, xoffset, yoffset, format, type, pixels);
   }
 
@@ -361,8 +408,8 @@ class RenderingContext{
     _gl.compressedTexSubImage2D(target, level, xoffset, yoffset, width, height, format, pixels);
   }
 
-  void bindRenderbuffer(int target, Framebuffer framebuffer){
-    _gl.bindRenderbuffer(target, framebuffer.id);
+  void bindRenderbuffer(int target, Renderbuffer? framebuffer){
+    _gl.bindRenderbuffer(target, framebuffer?.id);
   }
 
   void renderbufferStorageMultisample(int target, int samples, int internalformat, int width, int height){
@@ -493,16 +540,12 @@ class RenderingContext{
     _gl.compileShader(shader.id);
   }
 
-  int getShaderParameter(WebGLShader shader, int pname){
-    return _gl.getShaderParameter(shader.id, pname);
+  bool getShaderParameter(WebGLShader shader, int pname){
+    return _gl.getShaderParameter(shader.id, pname) == 0?false:true;
   }
 
-  Object getShaderSource(WebGLShader shader) {
+  String? getShaderSource(WebGLShader shader) {
     return _gl.getShaderSource(shader.id);
-  }
-
-  void uniformMatrix4fv(UniformLocation location, bool transpose, List<double> values) {
-    _gl.uniformMatrix4fv(location.id, transpose, values);
   }
 
   void uniform1i(UniformLocation location, int x) {
@@ -532,9 +575,16 @@ class RenderingContext{
   void uniform1f(UniformLocation location, double x){
     _gl.uniform1f(location.id, x);
   }
+  void uniformMatrix2fv(UniformLocation location, bool transpose, List<double> values) {
+    _gl.uniformMatrix2fv(location.id, transpose, values);
+  }
 
   void uniformMatrix3fv(UniformLocation location, bool transpose, List<double> values) {
     _gl.uniformMatrix3fv(location.id, transpose, values);
+  }
+
+  void uniformMatrix4fv(UniformLocation location, bool transpose, List<double> values) {
+    _gl.uniformMatrix4fv(location.id, transpose, values);
   }
 
   UniformLocation getAttribLocation(Program program, String name) {
@@ -559,6 +609,41 @@ class RenderingContext{
 
   void uniform4iv(UniformLocation location, List<int> v){
     _gl.uniform4iv(location.id, v);
+  }
+
+  void uniform1uiv(UniformLocation? location, List<int> v){
+    _gl.uniform1uiv(location?.id, v);
+  }
+  
+  void uniform2uiv(UniformLocation? location, List<int> v){
+    _gl.uniform2uiv(location?.id, v);
+  }
+
+  void uniform3uiv(UniformLocation? location, List<int> v){
+    _gl.uniform3uiv(location?.id, v);
+  }
+
+  void uniform4uiv(UniformLocation? location, List<int> v){
+    _gl.uniform4uiv(location?.id, v);
+  }
+
+  void uniform1ui(UniformLocation? location, int v0){
+    _gl.uniform1ui(location?.id, v0);
+  }
+
+  void uniform2ui(UniformLocation? location, int v0, int v1){
+    _gl.uniform2ui(location?.id, v0, v1);
+    checkError('uniform2ui');
+  }
+
+  void uniform3ui(UniformLocation? location, int v0, int v1, int v2){
+    _gl.uniform3ui(location?.id, v0, v1, v2);
+    checkError('uniform2ui');
+  }
+
+  void uniform4ui(UniformLocation? location, int v0, int v1, int v2, int v3){
+    _gl.uniform4ui(location?.id, v0, v1, v2, v3);
+    checkError('uniform2ui');
   }
 
   void uniform4fv(UniformLocation location, List<double> vectors) {

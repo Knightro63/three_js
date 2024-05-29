@@ -1,4 +1,6 @@
-import 'package:flutter_gl/flutter_gl.dart';
+
+import 'dart:typed_data';
+
 import 'package:three_js_math/three_js_math.dart';
 import 'package:three_js_core/three_js_core.dart';
 
@@ -32,7 +34,7 @@ class BoxHelper extends LineSegments {
   /// uses [setFromObject] to calculate the dimensions. Note that this
   /// includes any children.
   factory BoxHelper(object, {int color = 0xffff00}) {
-    final indices = Uint16Array.from([
+    final indices = Uint16List.fromList([
       0,
       1,
       1,
@@ -58,11 +60,11 @@ class BoxHelper extends LineSegments {
       3,
       7
     ]);
-    final positions = Float32Array(8 * 3);
+    final positions = Float32List(8 * 3);
 
     final geometry = BufferGeometry();
-    geometry.setIndex(Uint16BufferAttribute(indices, 1, false));
-    geometry.setAttributeFromString('position', Float32BufferAttribute(positions, 3, false));
+    geometry.setIndex(Uint16BufferAttribute.fromList(indices, 1, false));
+    geometry.setAttributeFromString('position', Float32BufferAttribute.fromList(positions, 3, false));
 
     final boxHelper = BoxHelper.create(
         geometry, LineBasicMaterial.fromMap({"color": color, "toneMapped": false}));

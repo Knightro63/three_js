@@ -5,7 +5,7 @@ class WebGLIndexedBufferRenderer extends BaseWebGLBufferRenderer {
   dynamic mode;
   dynamic type;
   late int bytesPerElement;
-  dynamic gl;
+  RenderingContext gl;
   WebGLExtensions extensions;
   WebGLInfo info;
   WebGLCapabilities capabilities;
@@ -26,14 +26,14 @@ class WebGLIndexedBufferRenderer extends BaseWebGLBufferRenderer {
   }
 
   @override
-  void render(start, count) {
+  void render(int start, int count) {
     gl.drawElements(mode, count, type, start * bytesPerElement);
 
     info.update(count, mode, 1);
   }
 
   @override
-  void renderInstances(num start, num count, int? primcount) {
+  void renderInstances(int start, int count, int primcount) {
     if (primcount == 0) return;
 
     // var extension, methodName;

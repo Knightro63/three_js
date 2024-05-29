@@ -3,7 +3,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'dart:math' as math;
 import 'package:archive/archive.dart';
-import 'package:flutter_gl/flutter_gl.dart';
+
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'package:three_js_animations/three_js_animations.dart';
@@ -1302,8 +1302,8 @@ class _GeometryParser {
     final geoInfo = parseGeoNode(geoNode, skeleton);
     final buffers = genBuffers(geoInfo);
 
-    final positionAttribute = Float32BufferAttribute(
-        Float32Array.fromList(List<double>.from(buffers["vertex"])), 3);
+    final positionAttribute = Float32BufferAttribute.fromList(
+        List<double>.from(buffers["vertex"]), 3);
 
     positionAttribute.applyMatrix4(preTransform);
 
@@ -1316,15 +1316,15 @@ class _GeometryParser {
     if (skeleton != null) {
       geo.setAttributeFromString(
           'skinIndex',
-          Uint16BufferAttribute(
-              Uint16Array.fromList(List<int>.from(buffers["weightsIndices"])),
+          Uint16BufferAttribute.fromList(
+              List<int>.from(buffers["weightsIndices"]),
               4));
 
       geo.setAttributeFromString(
           'skinWeight',
-          Float32BufferAttribute(
-              Float32Array.fromList(List<double>.from(
-                  buffers["vertexWeights"].map((e) => e.toDouble()))),
+          Float32BufferAttribute.fromList(
+              List<double>.from(
+                  buffers["vertexWeights"].map((e) => e.toDouble())),
               4));
 
       // used later to bind the skeleton to the model
@@ -1334,8 +1334,8 @@ class _GeometryParser {
     if (buffers["normal"].length > 0) {
       final normalMatrix = Matrix3.identity().getNormalMatrix(preTransform);
 
-      final normalAttribute = Float32BufferAttribute(
-          Float32Array.fromList(List<double>.from(buffers["normal"])), 3);
+      final normalAttribute = Float32BufferAttribute.fromList(
+          List<double>.from(buffers["normal"]), 3);
       normalAttribute.applyNormalMatrix(normalMatrix);
 
       geo.setAttributeFromString('normal', normalAttribute);
@@ -1352,8 +1352,8 @@ class _GeometryParser {
 
       geo.setAttributeFromString(
           name,
-          Float32BufferAttribute(
-              Float32Array.fromList(List<double>.from(buffers["uvs"][i])), 2));
+          Float32BufferAttribute.fromList(
+              List<double>.from(buffers["uvs"][i]), 2));
     });
 
     if (geoInfo["material"] != null &&

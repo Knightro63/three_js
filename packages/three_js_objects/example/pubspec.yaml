@@ -10,7 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.6
-  flutter_gl: ^0.0.21
+  
   three_js_objects:
     path: ../
   three_js_core:

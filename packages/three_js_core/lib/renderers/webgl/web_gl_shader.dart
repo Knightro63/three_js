@@ -1,7 +1,7 @@
 part of three_webgl;
 
 class WebGLShader {
-  dynamic gl;
+  RenderingContext gl;
   dynamic shader;
   String content;
 
@@ -11,7 +11,7 @@ class WebGLShader {
     gl.shaderSource(shader, content);
     gl.compileShader(shader);
 
-    final status = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
+    final status = gl.getShaderParameter(shader, WebGL.COMPILE_STATUS);
     if (status != 1 && status != true) {
       throw (" WebGLShader comile error.... _status: $content $status ${gl.getShaderInfoLog(shader)} ");
     }

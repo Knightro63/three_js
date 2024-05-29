@@ -16,6 +16,7 @@ import 'package:example/instancing/webgl_instancing_raycasting.dart';
 import 'package:example/instancing/webgl_instancing_scatter.dart';
 import 'package:example/loaders/webgl_loader_fbx_nurbs.dart';
 import 'package:example/loaders/webgl_loader_gcode.dart';
+import 'package:example/loaders/webgl_loader_glb.dart';
 import 'package:example/loaders/webgl_loader_ply.dart';
 import 'package:example/loaders/webgl_loader_stl.dart';
 import 'package:example/loaders/webgl_loader_vox.dart';
@@ -203,7 +204,10 @@ class _MyAppState extends State<ExamplePage> {
       page = WebglLoaderGltf(fileName: fileName);
     } 
     else if (fileName == "webgl_loader_gltf_test") {
-      page = webgl_loader_gltf_test(fileName: fileName);
+      page = WebglLoaderGltfTest(fileName: fileName);
+    }
+    else if (fileName == "webgl_loader_glb") {
+      page = WebglLoaderGlb(fileName: fileName);
     }
     else if (fileName == "webgl_loader_obj") {
       page = WebglLoaderObj(fileName: fileName);

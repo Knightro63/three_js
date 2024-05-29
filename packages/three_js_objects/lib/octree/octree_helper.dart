@@ -1,6 +1,7 @@
+import 'dart:typed_data';
+
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
-import 'package:flutter_gl/flutter_gl.dart';
 import 'octree.dart';
 
 class OctreeHelper extends LineSegments {
@@ -40,10 +41,9 @@ class OctreeHelper extends LineSegments {
 
 		traverse(octree.subTrees);
     geometry?.dispose();
-    Float32Array array = Float32Array.fromList(vertices);
+    Float32List array = Float32List.fromList(vertices);
 		geometry = BufferGeometry();
-		geometry?.setAttributeFromString('position', Float32BufferAttribute(array, 3));
-    array.dispose();
+		geometry?.setAttributeFromString('position', Float32BufferAttribute.fromList(array, 3));
   }
 
   @override

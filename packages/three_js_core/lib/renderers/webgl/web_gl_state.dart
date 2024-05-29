@@ -2,7 +2,7 @@ part of three_webgl;
 
 class WebGLState {
   bool isWebGL2 = true;
-  dynamic gl;
+  RenderingContext gl;
   WebGLExtensions extensions;
   WebGLCapabilities capabilities;
 
@@ -75,9 +75,9 @@ class WebGLState {
     stencilBuffer.enable = enable;
     stencilBuffer.disable = disable;
 
-    maxTextures = gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS);
-    emptyTextures[gl.TEXTURE_2D] = createTexture(gl.TEXTURE_2D, gl.TEXTURE_2D, 1);
-    emptyTextures[gl.TEXTURE_CUBE_MAP] = createTexture(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_CUBE_MAP_POSITIVE_X, 6);
+    maxTextures = gl.getParameter(WebGL.MAX_COMBINED_TEXTURE_IMAGE_UNITS);
+    emptyTextures[WebGL.TEXTURE_2D] = createTexture(WebGL.TEXTURE_2D, WebGL.TEXTURE_2D, 1);
+    emptyTextures[WebGL.TEXTURE_CUBE_MAP] = createTexture(WebGL.TEXTURE_CUBE_MAP, WebGL.TEXTURE_CUBE_MAP_POSITIVE_X, 6);
 
     // init
 
@@ -85,40 +85,40 @@ class WebGLState {
     depthBuffer.setClear(1);
     stencilBuffer.setClear(0);
 
-    enable(gl.DEPTH_TEST);
+    enable(WebGL.DEPTH_TEST);
     depthBuffer.setFunc(LessEqualDepth);
 
     setFlipSided(false);
     setCullFace(CullFaceBack);
-    enable(gl.CULL_FACE);
+    enable(WebGL.CULL_FACE);
 
     setBlending(NoBlending, null, null, null, null, null, null, false);
 
     equationToGL = {
-      AddEquation: gl.FUNC_ADD,
-      SubtractEquation: gl.FUNC_SUBTRACT,
-      ReverseSubtractEquation: gl.FUNC_REVERSE_SUBTRACT
+      AddEquation: WebGL.FUNC_ADD,
+      SubtractEquation: WebGL.FUNC_SUBTRACT,
+      ReverseSubtractEquation: WebGL.FUNC_REVERSE_SUBTRACT
     };
 
-    equationToGL[MinEquation] = gl.MIN;
-    equationToGL[MaxEquation] = gl.MAX;
+    equationToGL[MinEquation] = WebGL.MIN;
+    equationToGL[MaxEquation] = WebGL.MAX;
 
     factorToGL = {
-      ZeroFactor: gl.ZERO,
-      OneFactor: gl.ONE,
-      SrcColorFactor: gl.SRC_COLOR,
-      SrcAlphaFactor: gl.SRC_ALPHA,
-      SrcAlphaSaturateFactor: gl.SRC_ALPHA_SATURATE,
-      DstColorFactor: gl.DST_COLOR,
-      DstAlphaFactor: gl.DST_ALPHA,
-      OneMinusSrcColorFactor: gl.ONE_MINUS_SRC_COLOR,
-      OneMinusSrcAlphaFactor: gl.ONE_MINUS_SRC_ALPHA,
-      OneMinusDstColorFactor: gl.ONE_MINUS_DST_COLOR,
-      OneMinusDstAlphaFactor: gl.ONE_MINUS_DST_ALPHA
+      ZeroFactor: WebGL.ZERO,
+      OneFactor: WebGL.ONE,
+      SrcColorFactor: WebGL.SRC_COLOR,
+      SrcAlphaFactor: WebGL.SRC_ALPHA,
+      SrcAlphaSaturateFactor: WebGL.SRC_ALPHA_SATURATE,
+      DstColorFactor: WebGL.DST_COLOR,
+      DstAlphaFactor: WebGL.DST_ALPHA,
+      OneMinusSrcColorFactor: WebGL.ONE_MINUS_SRC_COLOR,
+      OneMinusSrcAlphaFactor: WebGL.ONE_MINUS_SRC_ALPHA,
+      OneMinusDstColorFactor: WebGL.ONE_MINUS_DST_COLOR,
+      OneMinusDstAlphaFactor: WebGL.ONE_MINUS_DST_ALPHA
     };
 
-    scissorParam = gl.getParameter(gl.SCISSOR_BOX);
-    viewportParam = gl.getParameter(gl.VIEWPORT);
+    scissorParam = gl.getParameter(WebGL.SCISSOR_BOX);
+    viewportParam = gl.getParameter(WebGL.VIEWPORT);
 
     // currentScissor = new Vector4.identity().fromArray( scissorParam );
     // currentViewport = new Vector4.identity().fromArray( viewportParam );
@@ -128,17 +128,17 @@ class WebGLState {
   }
 
   createTexture(int type, int target, int count) {
-    final data = Uint8Array(4);
+    final data = Uint8List(4);
     // 4 is required to match default unpack alignment of 4.
     //
     final texture = gl.createTexture();
 
     gl.bindTexture(type, texture);
-    gl.texParameteri(type, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-    gl.texParameteri(type, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texParameteri(type, WebGL.TEXTURE_MIN_FILTER, WebGL.NEAREST);
+    gl.texParameteri(type, WebGL.TEXTURE_MAG_FILTER, WebGL.NEAREST);
 
     for (int i = 0; i < count; i++) {
-      gl.texImage2D(target + i, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, data);
+      gl.texImage2D(target + i, 0, WebGL.RGBA, 1, 1, 0, WebGL.RGBA, WebGL.UNSIGNED_BYTE, data);
     }
 
     return texture;
@@ -160,7 +160,7 @@ class WebGLState {
 
   bindXRFramebuffer(framebuffer) {
     if (framebuffer != xrFramebuffer) {
-      gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
+      gl.bindFramebuffer(WebGL.FRAMEBUFFER, framebuffer);
 
       xrFramebuffer = framebuffer;
     }
@@ -179,12 +179,12 @@ class WebGLState {
       if (isWebGL2) {
         // gl.DRAW_FRAMEBUFFER is equivalent to gl.FRAMEBUFFER
 
-        if (target == gl.DRAW_FRAMEBUFFER) {
-          currentBoundFramebuffers[gl.FRAMEBUFFER] = framebuffer;
+        if (target == WebGL.DRAW_FRAMEBUFFER) {
+          currentBoundFramebuffers[WebGL.FRAMEBUFFER] = framebuffer;
         }
 
-        if (target == gl.FRAMEBUFFER) {
-          currentBoundFramebuffers[gl.DRAW_FRAMEBUFFER] = framebuffer;
+        if (target == WebGL.FRAMEBUFFER) {
+          currentBoundFramebuffers[WebGL.DRAW_FRAMEBUFFER] = framebuffer;
         }
       }
 
@@ -210,9 +210,9 @@ class WebGLState {
       if (renderTarget.isWebGLMultipleRenderTargets) {
         final textures = renderTarget.texture;
 
-        if (drawBuffers.length != textures.length || drawBuffers[0] != gl.COLOR_ATTACHMENT0) {
+        if (drawBuffers.length != textures.length || drawBuffers[0] != WebGL.COLOR_ATTACHMENT0) {
           for (int i = 0, il = textures.length; i < il; i++) {
-            drawBuffers[i] = gl.COLOR_ATTACHMENT0 + i;
+            drawBuffers[i] = WebGL.COLOR_ATTACHMENT0 + i;
           }
 
           drawBuffers.length = textures.length;
@@ -220,11 +220,11 @@ class WebGLState {
           needsUpdate = true;
         }
       } else {
-        if (drawBuffers.length == 0 || drawBuffers[0] != gl.COLOR_ATTACHMENT0) {
+        if (drawBuffers.length == 0 || drawBuffers[0] != WebGL.COLOR_ATTACHMENT0) {
           if (drawBuffers.length == 0) {
-            drawBuffers.add(gl.COLOR_ATTACHMENT0);
+            drawBuffers.add(WebGL.COLOR_ATTACHMENT0);
           } else {
-            drawBuffers[0] = gl.COLOR_ATTACHMENT0;
+            drawBuffers[0] = WebGL.COLOR_ATTACHMENT0;
           }
 
           drawBuffers.length = 1;
@@ -233,11 +233,11 @@ class WebGLState {
         }
       }
     } else {
-      if (drawBuffers.length == 0 || drawBuffers[0] != gl.BACK) {
+      if (drawBuffers.length == 0 || drawBuffers[0] != WebGL.BACK) {
         if (drawBuffers.length == 0) {
-          drawBuffers.add(gl.BACK);
+          drawBuffers.add(WebGL.BACK);
         } else {
-          drawBuffers[0] = gl.BACK;
+          drawBuffers[0] = WebGL.BACK;
         }
 
         drawBuffers.length = 1;
@@ -275,7 +275,7 @@ class WebGLState {
       bool? premultipliedAlpha]) {
     if (blending == NoBlending) {
       if (currentBlendingEnabled) {
-        disable(gl.BLEND);
+        disable(WebGL.BLEND);
         currentBlendingEnabled = false;
       }
 
@@ -283,14 +283,14 @@ class WebGLState {
     }
 
     if (!currentBlendingEnabled) {
-      enable(gl.BLEND);
+      enable(WebGL.BLEND);
       currentBlendingEnabled = true;
     }
 
     if (blending != CustomBlending) {
       if (blending != currentBlending || premultipliedAlpha != currentPremultipledAlpha) {
         if (currentBlendEquation != AddEquation || currentBlendEquationAlpha != AddEquation) {
-          gl.blendEquation(gl.FUNC_ADD);
+          gl.blendEquation(WebGL.FUNC_ADD);
 
           currentBlendEquation = AddEquation;
           currentBlendEquationAlpha = AddEquation;
@@ -299,19 +299,19 @@ class WebGLState {
         if (premultipliedAlpha != null && premultipliedAlpha) {
           switch (blending) {
             case NormalBlending:
-              gl.blendFuncSeparate(gl.ONE, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+              gl.blendFuncSeparate(WebGL.ONE, WebGL.ONE_MINUS_SRC_ALPHA, WebGL.ONE, WebGL.ONE_MINUS_SRC_ALPHA);
               break;
 
             case AdditiveBlending:
-              gl.blendFunc(gl.ONE, gl.ONE);
+              gl.blendFunc(WebGL.ONE, WebGL.ONE);
               break;
 
             case SubtractiveBlending:
-              gl.blendFuncSeparate(gl.ZERO, gl.ONE_MINUS_SRC_COLOR, gl.ZERO, gl.ONE);
+              gl.blendFuncSeparate(WebGL.ZERO, WebGL.ONE_MINUS_SRC_COLOR, WebGL.ZERO, WebGL.ONE);
               break;
 
             case MultiplyBlending:
-              gl.blendFuncSeparate(gl.ZERO, gl.SRC_COLOR, gl.ZERO, gl.SRC_ALPHA);
+              gl.blendFuncSeparate(WebGL.ZERO, WebGL.SRC_COLOR, WebGL.ZERO, WebGL.SRC_ALPHA);
               break;
 
             default:
@@ -321,19 +321,19 @@ class WebGLState {
         } else {
           switch (blending) {
             case NormalBlending:
-              gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+              gl.blendFuncSeparate(WebGL.SRC_ALPHA, WebGL.ONE_MINUS_SRC_ALPHA, WebGL.ONE, WebGL.ONE_MINUS_SRC_ALPHA);
               break;
 
             case AdditiveBlending:
-              gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+              gl.blendFunc(WebGL.SRC_ALPHA, WebGL.ONE);
               break;
 
             case SubtractiveBlending:
-              gl.blendFuncSeparate(gl.ZERO, gl.ONE_MINUS_SRC_COLOR, gl.ZERO, gl.ONE);
+              gl.blendFuncSeparate(WebGL.ZERO, WebGL.ONE_MINUS_SRC_COLOR, WebGL.ZERO, WebGL.ONE);
               break;
 
             case MultiplyBlending:
-              gl.blendFunc(gl.ZERO, gl.SRC_COLOR);
+              gl.blendFunc(WebGL.ZERO, WebGL.SRC_COLOR);
               break;
 
             default:
@@ -372,7 +372,7 @@ class WebGLState {
         blendSrcAlpha != currentBlendSrcAlpha ||
         blendDstAlpha != currentBlendDstAlpha) {
       gl.blendFuncSeparate(
-          factorToGL[blendSrc], factorToGL[blendDst], factorToGL[blendSrcAlpha], factorToGL[blendDstAlpha]);
+          factorToGL[blendSrc]!, factorToGL[blendDst]!, factorToGL[blendSrcAlpha]!, factorToGL[blendDstAlpha]!);
 
       currentBlendSrc = blendSrc;
       currentBlendDst = blendDst;
@@ -385,7 +385,7 @@ class WebGLState {
   }
 
   void setMaterial(Material material, bool frontFaceCW) {
-    material.side == DoubleSide ? disable(gl.CULL_FACE) : enable(gl.CULL_FACE);
+    material.side == DoubleSide ? disable(WebGL.CULL_FACE) : enable(WebGL.CULL_FACE);
 
     bool flipSided = (material.side == BackSide);
     if (frontFaceCW) flipSided = !flipSided;
@@ -412,7 +412,7 @@ class WebGLState {
 
     setPolygonOffset(material.polygonOffset, material.polygonOffsetFactor, material.polygonOffsetUnits);
 
-    material.alphaToCoverage == true ? enable(gl.SAMPLE_ALPHA_TO_COVERAGE) : disable(gl.SAMPLE_ALPHA_TO_COVERAGE);
+    material.alphaToCoverage == true ? enable(WebGL.SAMPLE_ALPHA_TO_COVERAGE) : disable(WebGL.SAMPLE_ALPHA_TO_COVERAGE);
   }
 
   //
@@ -420,10 +420,10 @@ class WebGLState {
   setFlipSided(bool flipSided) {
     if (currentFlipSided != flipSided) {
       if (flipSided) {
-        gl.frontFace(gl.CW);
+        gl.frontFace(WebGL.CW);
       } 
       else {
-        gl.frontFace(gl.CCW);
+        gl.frontFace(WebGL.CCW);
       }
 
       currentFlipSided = flipSided;
@@ -432,25 +432,25 @@ class WebGLState {
 
   setCullFace(int cullFace) {
     if (cullFace != CullFaceNone) {
-      enable(gl.CULL_FACE);
+      enable(WebGL.CULL_FACE);
 
       if (cullFace != currentCullFace) {
         if (cullFace == CullFaceBack) {
-          gl.cullFace(gl.BACK);
+          gl.cullFace(WebGL.BACK);
         } else if (cullFace == CullFaceFront) {
-          gl.cullFace(gl.FRONT);
+          gl.cullFace(WebGL.FRONT);
         } else {
-          gl.cullFace(gl.FRONT_AND_BACK);
+          gl.cullFace(WebGL.FRONT_AND_BACK);
         }
       }
     } else {
-      disable(gl.CULL_FACE);
+      disable(WebGL.CULL_FACE);
     }
 
     currentCullFace = cullFace;
   }
 
-  setLineWidth(width) {
+  void setLineWidth(width) {
     if (width != currentLineWidth) {
       if (lineWidthAvailable) gl.lineWidth(width);
 
@@ -458,36 +458,33 @@ class WebGLState {
     }
   }
 
-  setPolygonOffset(bool polygonOffset, double? factor, double? units) {
+  void setPolygonOffset(bool polygonOffset, double? factor, double? units) {
     if (polygonOffset) {
-      enable(gl.POLYGON_OFFSET_FILL);
+      enable(WebGL.POLYGON_OFFSET_FILL);
 
       if (currentPolygonOffsetFactor != factor || currentPolygonOffsetUnits != units) {
-        gl.gl.glPolygonOffset(
-          factor, 
-          units
-        );
+        gl.polygonOffset(factor!, units!);
 
         currentPolygonOffsetFactor = factor;
         currentPolygonOffsetUnits = units;
       }
     } else {
-      disable(gl.POLYGON_OFFSET_FILL);
+      disable(WebGL.POLYGON_OFFSET_FILL);
     }
   }
 
-  setScissorTest(bool scissorTest) {
+  void setScissorTest(bool scissorTest) {
     if (scissorTest) {
-      enable(gl.SCISSOR_TEST);
+      enable(WebGL.SCISSOR_TEST);
     } else {
-      disable(gl.SCISSOR_TEST);
+      disable(WebGL.SCISSOR_TEST);
     }
   }
 
   // texture
 
-  activeTexture(int? webglSlot) {
-    webglSlot ??= gl.TEXTURE0 + maxTextures - 1;
+  void activeTexture(int? webglSlot) {
+    webglSlot ??= WebGL.TEXTURE0 + maxTextures - 1;
 
     if (currentTextureSlot != webglSlot) {
       gl.activeTexture(webglSlot);
@@ -496,7 +493,7 @@ class WebGLState {
     }
   }
 
-  bindTexture(webglType, webglTexture) {
+  void bindTexture(webglType, webglTexture) {
     if (currentTextureSlot == null) {
       activeTexture(null);
     }
@@ -527,7 +524,7 @@ class WebGLState {
     // }
   }
 
-  unbindTexture([int? texture]) {
+  void unbindTexture([WebGLTexture? texture]) {
     final boundTexture = currentBoundTextures[currentTextureSlot];
 
     if (boundTexture != null && boundTexture.type != null) {
@@ -538,11 +535,11 @@ class WebGLState {
     }
   }
 
-  compressedTexImage2D(target, level, internalformat, width, height, border, pixels) {
+  void compressedTexImage2D(int target, int level, int internalformat, int width, int height, int border, TypedData? pixels) {
     gl.compressedTexImage2D(target, level, internalformat, width, height, border, pixels);
   }
 
-  texSubImage2D(int target, int level, int x, int y, width, height, int glFormat, int glType, NativeArray data) {
+  void texSubImage2D(int target, int level, int x, int y, num width, num height, int glFormat, int glType, TypedData data) {
     // try {
 
     gl.texSubImage2D(target, level, x, y, width.toInt(), height.toInt(), glFormat, glType, data);
@@ -554,16 +551,17 @@ class WebGLState {
     // }
   }
 
-  void texSubImage2DIf(target, level, x, y, glFormat, glType, image) {
-    if (kIsWeb) {
-      texSubImage2DNoSize(gl.TEXTURE_2D, 0, 0, 0, glFormat, glType, image.data);
+  void texSubImage2DIf(int target, int level, int x, int y, int glFormat, int glType, image) {
+
+    if (kIsWeb && image.data is! Uint8List) {
+      texSubImage2DNoSize(WebGL.TEXTURE_2D, 0, 0, 0, glFormat, glType, image.data);
     } 
     else {
-      texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, image.width, image.height, glFormat, glType, image.data);
+      texSubImage2D(WebGL.TEXTURE_2D, 0, 0, 0, image.width, image.height, glFormat, glType, image.data);
     }
   }
 
-  void texSubImage2DNoSize(target, level, x, y, glFormat, glType, data) {
+  void texSubImage2DNoSize(int target, int level, int x, int y, int glFormat, int glType, data) {
     if (kIsWeb) {
       gl.texSubImage2D_NOSIZE(target, level, x, y, glFormat, glType, data);
     } 
@@ -572,11 +570,20 @@ class WebGLState {
     }
   }
 
-  void texSubImage3D(target, level, xoffset, yoffset, zoffset, width, height, depth, format, type, pixels) {
+  void texSubImage3D(int target, int level, int xoffset, int yoffset, int zoffset, int width, int height, int depth, int format, int type, TypedData? pixels) {
     gl.texSubImage3D(target, level, xoffset, yoffset, zoffset, width, height, depth, format, type, pixels);
   }
 
-  void compressedTexSubImage2D(target, level, xoffset, yoffset, width, height, format, pixels) {
+  void compressedTexSubImage2D(
+    int target,
+    int level,
+    int xoffset,
+    int yoffset,
+    int width,
+    int height,
+    int format,
+    TypedData? pixels,
+  ) {
     gl.compressedTexSubImage2D(target, level, xoffset, yoffset, width, height, format, pixels);
   }
 
@@ -627,42 +634,42 @@ class WebGLState {
   void reset() {
     // reset state
 
-    gl.disable(gl.BLEND);
-    gl.disable(gl.CULL_FACE);
-    gl.disable(gl.DEPTH_TEST);
-    gl.disable(gl.POLYGON_OFFSET_FILL);
-    gl.disable(gl.SCISSOR_TEST);
-    gl.disable(gl.STENCIL_TEST);
-    gl.disable(gl.SAMPLE_ALPHA_TO_COVERAGE);
+    gl.disable(WebGL.BLEND);
+    gl.disable(WebGL.CULL_FACE);
+    gl.disable(WebGL.DEPTH_TEST);
+    gl.disable(WebGL.POLYGON_OFFSET_FILL);
+    gl.disable(WebGL.SCISSOR_TEST);
+    gl.disable(WebGL.STENCIL_TEST);
+    gl.disable(WebGL.SAMPLE_ALPHA_TO_COVERAGE);
 
-    gl.blendEquation(gl.FUNC_ADD);
-    gl.blendFunc(gl.ONE, gl.ZERO);
-    gl.blendFuncSeparate(gl.ONE, gl.ZERO, gl.ONE, gl.ZERO);
+    gl.blendEquation(WebGL.FUNC_ADD);
+    gl.blendFunc(WebGL.ONE, WebGL.ZERO);
+    gl.blendFuncSeparate(WebGL.ONE, WebGL.ZERO, WebGL.ONE, WebGL.ZERO);
 
     gl.colorMask(true, true, true, true);
     gl.clearColor(0, 0, 0, 0);
 
     gl.depthMask(true);
-    gl.depthFunc(gl.LESS);
+    gl.depthFunc(WebGL.LESS);
     gl.clearDepth(1);
 
     gl.stencilMask(0xffffffff);
-    gl.stencilFunc(gl.ALWAYS, 0, 0xffffffff);
-    gl.stencilOp(gl.KEEP, gl.KEEP, gl.KEEP);
+    gl.stencilFunc(WebGL.ALWAYS, 0, 0xffffffff);
+    gl.stencilOp(WebGL.KEEP, WebGL.KEEP, WebGL.KEEP);
     gl.clearStencil(0);
 
-    gl.cullFace(gl.BACK);
-    gl.frontFace(gl.CCW);
+    gl.cullFace(WebGL.BACK);
+    gl.frontFace(WebGL.CCW);
 
     gl.polygonOffset(0, 0);
 
-    gl.activeTexture(gl.TEXTURE0);
+    gl.activeTexture(WebGL.TEXTURE0);
 
     if (isWebGL2 == true) {
-      gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null); // Equivalent to gl.FRAMEBUFFER
-      gl.bindFramebuffer(gl.READ_FRAMEBUFFER, null);
+      gl.bindFramebuffer(WebGL.DRAW_FRAMEBUFFER, null); // Equivalent to gl.FRAMEBUFFER
+      gl.bindFramebuffer(WebGL.READ_FRAMEBUFFER, null);
     } else {
-      gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+      gl.bindFramebuffer(WebGL.FRAMEBUFFER, null);
     }
 
     gl.useProgram(null);
@@ -714,7 +721,7 @@ class WebGLState {
 }
 
 class ColorBuffer {
-  dynamic gl;
+  RenderingContext gl;
 
   bool locked = false;
 
@@ -762,7 +769,7 @@ class ColorBuffer {
 }
 
 class DepthBuffer {
-  dynamic gl;
+  RenderingContext gl;
 
   bool locked = false;
 
@@ -772,15 +779,15 @@ class DepthBuffer {
   bool? currentDepthMask;
 
   int? currentDepthFunc;
-  int? currentDepthClear;
+  double? currentDepthClear;
 
   DepthBuffer(this.gl);
 
   setTest(depthTest) {
     if (depthTest) {
-      enable(gl.DEPTH_TEST);
+      enable(WebGL.DEPTH_TEST);
     } else {
-      disable(gl.DEPTH_TEST);
+      disable(WebGL.DEPTH_TEST);
     }
   }
 
@@ -796,42 +803,42 @@ class DepthBuffer {
       if (depthFunc != null) {
         switch (depthFunc) {
           case NeverDepth:
-            gl.depthFunc(gl.NEVER);
+            gl.depthFunc(WebGL.NEVER);
             break;
 
           case AlwaysDepth:
-            gl.depthFunc(gl.ALWAYS);
+            gl.depthFunc(WebGL.ALWAYS);
             break;
 
           case LessDepth:
-            gl.depthFunc(gl.LESS);
+            gl.depthFunc(WebGL.LESS);
             break;
 
           case LessEqualDepth:
-            gl.depthFunc(gl.LEQUAL);
+            gl.depthFunc(WebGL.LEQUAL);
             break;
 
           case EqualDepth:
-            gl.depthFunc(gl.EQUAL);
+            gl.depthFunc(WebGL.EQUAL);
             break;
 
           case GreaterEqualDepth:
-            gl.depthFunc(gl.GEQUAL);
+            gl.depthFunc(WebGL.GEQUAL);
             break;
 
           case GreaterDepth:
-            gl.depthFunc(gl.GREATER);
+            gl.depthFunc(WebGL.GREATER);
             break;
 
           case NotEqualDepth:
-            gl.depthFunc(gl.NOTEQUAL);
+            gl.depthFunc(WebGL.NOTEQUAL);
             break;
 
           default:
-            gl.depthFunc(gl.LEQUAL);
+            gl.depthFunc(WebGL.LEQUAL);
         }
       } else {
-        gl.depthFunc(gl.LEQUAL);
+        gl.depthFunc(WebGL.LEQUAL);
       }
 
       currentDepthFunc = depthFunc;
@@ -842,7 +849,7 @@ class DepthBuffer {
     locked = lock;
   }
 
-  setClear(int depth) {
+  setClear(double depth) {
     if (currentDepthClear != depth) {
       gl.clearDepth(depth);
       currentDepthClear = depth;
@@ -859,7 +866,7 @@ class DepthBuffer {
 }
 
 class StencilBuffer {
-  dynamic gl;
+  RenderingContext gl;
 
   bool locked = false;
 
@@ -880,9 +887,9 @@ class StencilBuffer {
   setTest(bool stencilTest) {
     if (!locked) {
       if (stencilTest) {
-        enable(gl.STENCIL_TEST);
+        enable(WebGL.STENCIL_TEST);
       } else {
-        disable(gl.STENCIL_TEST);
+        disable(WebGL.STENCIL_TEST);
       }
     }
   }

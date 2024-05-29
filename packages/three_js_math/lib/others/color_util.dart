@@ -1,5 +1,5 @@
 import 'dart:typed_data';
-import 'package:flutter_gl/flutter_gl.dart';
+import '../native-array/native_array.dart';
 import 'package:three_js_math/matrix/matrix3.dart';
 import 'dart:math' as math;
 import '../math/math_util.dart';

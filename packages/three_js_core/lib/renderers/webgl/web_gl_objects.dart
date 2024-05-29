@@ -3,7 +3,7 @@ part of three_webgl;
 class WebGLObjects {
   final updateMap = WeakMap();
   WebGLInfo info;
-  dynamic gl;
+  RenderingContext gl;
   WebGLGeometries geometries;
   WebGLAttributes attributes;
 
@@ -31,10 +31,10 @@ class WebGLObjects {
       }
 
       // print(" WebGLObjects update 2 object: ${object} ${object.instanceMatrix} ");
-      attributes.update(object.instanceMatrix, gl.ARRAY_BUFFER);
+      attributes.update(object.instanceMatrix, WebGL.ARRAY_BUFFER);
 
       if (object.instanceColor != null) {
-        attributes.update(object.instanceColor, gl.ARRAY_BUFFER);
+        attributes.update(object.instanceColor, WebGL.ARRAY_BUFFER);
       }
     }
 

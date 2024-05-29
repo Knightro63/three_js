@@ -1,12 +1,12 @@
 import 'dart:math' as math;
-import 'package:flutter_gl/native-array/index.dart';
+import 'dart:typed_data';
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 
 class MarchingCubes extends Mesh{
-  final vlist = Float32Array( 12 * 3 );
-  final nlist = Float32Array( 12 * 3 );
-  final clist = Float32Array( 12 * 3 );
+  final vlist = Float32List( 12 * 3 );
+  final nlist = Float32List( 12 * 3 );
+  final clist = Float32List( 12 * 3 );
 
   double resolution;
   double isolation = 80.0;
@@ -17,13 +17,13 @@ class MarchingCubes extends Mesh{
   late double halfsize;
   late double delta;
 
-  late Float32Array field;
-  late Float32Array normalCache;
-  late Float32Array palette;
-  late Float32Array positionArray;
-  late Float32Array normalArray;
-  late Float32Array uvArray;
-  late Float32Array colorArray;
+  late Float32List field;
+  late Float32List normalCache;
+  late Float32List palette;
+  late Float32List positionArray;
+  late Float32List normalArray;
+  late Float32List uvArray;
+  late Float32List colorArray;
 
   int maxPolyCount;
   late int yd;
@@ -53,26 +53,26 @@ class MarchingCubes extends Mesh{
     yd = size.toInt();
     zd = size2.toInt();
 
-    field = Float32Array(size3.toInt());
-    normalCache = Float32Array(size3.toInt() * 3);
-    palette = Float32Array(size3.toInt() * 3);
+    field = Float32List(size3.toInt());
+    normalCache = Float32List(size3.toInt() * 3);
+    palette = Float32List(size3.toInt() * 3);
 
     final maxVertexCount = maxPolyCount * 3;
 
-    positionArray = Float32Array(maxVertexCount * 3);
-    geometry!.setAttributeFromString('position', Float32BufferAttribute(positionArray,3));
+    positionArray = Float32List(maxVertexCount * 3);
+    geometry!.setAttributeFromString('position', Float32BufferAttribute.fromList(positionArray,3));
 
-    normalArray = Float32Array( maxVertexCount * 3);
-    geometry!.setAttributeFromString('normal', Float32BufferAttribute(normalArray,3));
+    normalArray = Float32List( maxVertexCount * 3);
+    geometry!.setAttributeFromString('normal', Float32BufferAttribute.fromList(normalArray,3));
 
     if(enableUvs){
-      uvArray = Float32Array(maxVertexCount * 2 );
-      geometry!.setAttributeFromString('uv', Float32BufferAttribute(uvArray,3));
+      uvArray = Float32List(maxVertexCount * 2 );
+      geometry!.setAttributeFromString('uv', Float32BufferAttribute.fromList(uvArray,3));
     }
 
     if (enableColors){
-      colorArray = Float32Array(maxVertexCount * 3 );
-      geometry!.setAttributeFromString('color',Float32BufferAttribute(colorArray,3));
+      colorArray = Float32List(maxVertexCount * 3 );
+      geometry!.setAttributeFromString('color',Float32BufferAttribute.fromList(colorArray,3));
     }
 
     geometry!.boundingSphere = BoundingSphere(Vector3(), 1);
@@ -692,7 +692,7 @@ class MarchingCubes extends Mesh{
 // http://paulbourke.net/geometry/polygonise/
 // who in turn got them from Cory Gene Bloyd.
 
-final edgeTable = Int32Array.fromList( [
+final edgeTable = Int32List.fromList( [
 	0x0, 0x109, 0x203, 0x30a, 0x406, 0x50f, 0x605, 0x70c,
 	0x80c, 0x905, 0xa0f, 0xb06, 0xc0a, 0xd03, 0xe09, 0xf00,
 	0x190, 0x99, 0x393, 0x29a, 0x596, 0x49f, 0x795, 0x69c,
@@ -726,7 +726,7 @@ final edgeTable = Int32Array.fromList( [
 	0xf00, 0xe09, 0xd03, 0xc0a, 0xb06, 0xa0f, 0x905, 0x80c,
 	0x70c, 0x605, 0x50f, 0x406, 0x30a, 0x203, 0x109, 0x0 ] );
 
-final triTable = Int32Array.fromList( [
+final triTable = Int32List.fromList( [
 	- 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1,
 	0, 8, 3, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1,
 	0, 1, 9, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1,

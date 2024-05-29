@@ -1,7 +1,7 @@
 part of three_webgl;
 
 class WebGLAttributes {
-  dynamic gl;
+  RenderingContext gl;
   WebGLCapabilities capabilities;
 
   bool isWebGL2 = true;
@@ -12,25 +12,25 @@ class WebGLAttributes {
     isWebGL2 = capabilities.isWebGL2;
   }
 
-  Map<String, dynamic> createBuffer( attribute, int bufferType, {String? name}) {//BufferAttribute<NativeArray<num>>
+  Map<String, dynamic> createBuffer(dynamic attribute, int bufferType, {String? name}) {//BufferAttribute<NativeArray<num>>
     final array = attribute.array;
     final usage = attribute.usage;
 
-    dynamic type = gl.FLOAT;
+    dynamic type = WebGL.FLOAT;
     int bytesPerElement = 4;
 
     final buffer = gl.createBuffer();
 
     gl.bindBuffer(bufferType, buffer);
 
-    gl.bufferData(bufferType, array.lengthInBytes, array, usage);
+    gl.bufferData<TypedData>(bufferType, array.data, usage);
 
     if (attribute.onUploadCallback != null) {
       attribute.onUploadCallback!();
     }
 
     if (attribute is Float32BufferAttribute) {
-      type = gl.FLOAT;
+      type = WebGL.FLOAT;
       bytesPerElement = Float32List.bytesPerElement;
     } 
     else if (attribute is Float64BufferAttribute) {
@@ -39,30 +39,30 @@ class WebGLAttributes {
     else if (attribute is Float16BufferAttribute) {
       if (isWebGL2) {
         bytesPerElement = 2;
-        type = gl.HALF_FLOAT;
+        type = WebGL.HALF_FLOAT;
       } else {
         console.error('WebGLAttributes: Usage of Float16BufferAttribute requires WebGL2.');
       }
     } else if (attribute is Uint16BufferAttribute) {
       bytesPerElement = Uint16List.bytesPerElement;
-      type = gl.UNSIGNED_SHORT;
+      type = WebGL.UNSIGNED_SHORT;
     } else if (attribute is Int16BufferAttribute) {
       bytesPerElement = Int16List.bytesPerElement;
 
-      type = gl.SHORT;
+      type = WebGL.SHORT;
     } else if (attribute is Uint32BufferAttribute) {
       bytesPerElement = Uint32List.bytesPerElement;
 
-      type = gl.UNSIGNED_INT;
+      type = WebGL.UNSIGNED_INT;
     } else if (attribute is Int32BufferAttribute) {
       bytesPerElement = Int32List.bytesPerElement;
-      type = gl.INT;
+      type = WebGL.INT;
     } else if (attribute is Int8BufferAttribute) {
       bytesPerElement = Int8List.bytesPerElement;
-      type = gl.BYTE;
+      type = WebGL.BYTE;
     } else if (attribute is Uint8BufferAttribute) {
       bytesPerElement = Uint8List.bytesPerElement;
-      type = gl.UNSIGNED_BYTE;
+      type = WebGL.UNSIGNED_BYTE;
     }
 
     return {
@@ -74,19 +74,19 @@ class WebGLAttributes {
     };
   }
 
-  void updateBuffer(buffer, attribute, bufferType) {
+  void updateBuffer(buffer, BufferAttribute attribute, bufferType) {
     final array = attribute.array;
     final updateRange = attribute.updateRange;
 
     gl.bindBuffer(bufferType, buffer);
 
-    if (updateRange["count"] == -1) {
+    if (updateRange!["count"] == -1) {
       // Not using update ranges
-      gl.bufferSubData(bufferType, 0, array, 0, array.lengthInBytes);
+      gl.bufferSubData(bufferType, 0, array.data, 0, array.lengthInBytes);
     } 
     else {
       console.info(" WebGLAttributes.dart gl.bufferSubData need debug confirm.... ");
-      gl.bufferSubData(bufferType, updateRange["offset"] * attribute.itemSize, array, updateRange["offset"], updateRange["count"]);
+      gl.bufferSubData(bufferType, updateRange["offset"]! * attribute.itemSize, array.data, updateRange["offset"]!, updateRange["count"]!);
 
       updateRange["count"] = -1; // reset range
 
@@ -148,7 +148,10 @@ class WebGLAttributes {
     final data = buffers.get(attribute);
 
     if (data == null && attribute != null) {
-      buffers.add(key: attribute, value: createBuffer(attribute, bufferType, name: name));
+      buffers.add(
+        key: attribute, 
+        value: createBuffer(attribute, bufferType, name: name)
+      );
     } 
     else if(data?["version"] != null && data["version"] < attribute.version) {
       updateBuffer(data["buffer"], attribute, bufferType);

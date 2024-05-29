@@ -1,4 +1,3 @@
-import 'package:flutter_gl/flutter_gl.dart';
 import 'package:three_js_math/three_js_math.dart';
 
 final Vector3 _vector = Vector3.zero();

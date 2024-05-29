@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gl/flutter_gl.dart';
+
 import 'package:three_js/three_js.dart' as three;
 import 'package:three_js_objects/three_js_objects.dart';
 
@@ -59,7 +59,7 @@ class _State extends State<WebglVolumeCloud> {
     controls = three.OrbitControls( threeJs.camera, threeJs.globalKey );
 
     const size = 128;
-    final data = Uint8Array( size * size * size );
+    final data = Uint8List( size * size * size );
 
     int i = 0;
     const scale = 0.05;

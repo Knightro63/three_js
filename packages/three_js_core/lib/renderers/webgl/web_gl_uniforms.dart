@@ -46,23 +46,23 @@
 part of three_webgl;
 
 class WebGLUniforms with WebGLUniform {
-  dynamic gl;
+  RenderingContext gl;
   WebGLProgram program;
 
   WebGLUniforms(this.gl, this.program) {
     seq = [];
     map = {};
 
-    final n = gl.getProgramParameter(program.program, gl.ACTIVE_UNIFORMS);
+    final n = gl.getProgramParameter(program.program!, WebGL.ACTIVE_UNIFORMS);
 
-    for (int i = 0; i < n; ++i) {
-      final info = gl.getActiveUniform(program.program, i);
-      final addr = gl.getUniformLocation(program.program, info.name);
+    for (int i = 0; i < n.id; ++i) {
+      final info = gl.getActiveUniform(program.program!, i);
+      final addr = gl.getUniformLocation(program.program!, info.name);
       parseUniform(info, addr, this);
     }
   }
 
-  void setValue(gl, name, value, [WebGLTextures? textures]) {
+  void setValue(RenderingContext gl, String name, dynamic value, [WebGLTextures? textures]) {
     final u = map[name];
     if (u != null) u.setValue(gl, value, textures);
   }
@@ -72,7 +72,7 @@ class WebGLUniforms with WebGLUniform {
     if (v != null) setValue(gl, name, v);
   }
 
-  static void upload(gl, List seq, Map<String, dynamic> values, textures) {
+  static void upload(RenderingContext gl, List seq, Map<String, dynamic> values, [WebGLTextures? textures]) {
     for (int i = 0, n = seq.length; i != n; ++i) {
       final u = seq[i];
       final v = values[u.id];

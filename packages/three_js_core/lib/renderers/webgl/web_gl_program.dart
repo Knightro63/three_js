@@ -12,16 +12,16 @@ class WebGLProgram extends DefaultProgram with WebGLProgramExtra {
   String cacheKey;
   WebGLBindingStates bindingStates;
   int usedTimes = 1;
-  late dynamic gl;
+  late RenderingContext gl;
   WebGLParameters parameters;
-  late dynamic program;
+  late Program? program;
 
   late String vertexShader;
   late String fragmentShader;
   late Map<String, dynamic> diagnostics;
 
   WebGLUniforms? cachedUniforms;
-  Map<String, dynamic>? cachedAttributes;
+  Map<String, AttributeLocations>? cachedAttributes;
 
   WebGLProgram(this.renderer, this.cacheKey, this.parameters, this.bindingStates) {
     name = parameters.shaderName;
@@ -50,7 +50,7 @@ class WebGLProgram extends DefaultProgram with WebGLProgramExtra {
 
     String prefixVertex, prefixFragment;
 
-    String defaultVersionString = (!kIsWeb && (Platform.isMacOS || Platform.isWindows)) ? "#version 410\n" : "";
+    String defaultVersionString = (!kIsWeb && (Platform.isWindows)) ? "#version 410\n" : "";
 
     String versionString = parameters.glslVersion != null ? '#version ${parameters.glslVersion}\n' : defaultVersionString;
 
@@ -280,7 +280,7 @@ class WebGLProgram extends DefaultProgram with WebGLProgramExtra {
 
     if (parameters.isWebGL2 && parameters.isRawShaderMaterial != true) {
       // GLSL 3.0 conversion for built-in materials and ShaderMaterial
-      versionString = (!kIsWeb && (Platform.isMacOS || Platform.isWindows)) ? "#version 410\n" : "#version 300 es\n";
+      versionString = (!kIsWeb && (Platform.isWindows)) ? "#version 410\n" : "#version 300 es\n";
 
       prefixVertex = '${[
         'precision mediump sampler2DArray;',
@@ -315,45 +315,45 @@ class WebGLProgram extends DefaultProgram with WebGLProgramExtra {
     // print("  111 ==================== FRAGMENT ");
     // print(fragmentGlsl);
 
-    final glVertexShader = WebGLShader(gl, gl.VERTEX_SHADER, vertexGlsl);
+    final glVertexShader = WebGLShader(gl, WebGL.VERTEX_SHADER, vertexGlsl);
 
-    final glFragmentShader = WebGLShader(gl, gl.FRAGMENT_SHADER, fragmentGlsl);
+    final glFragmentShader = WebGLShader(gl, WebGL.FRAGMENT_SHADER, fragmentGlsl);
 
     vertexShader = glVertexShader.content;
     fragmentShader = glFragmentShader.content;
 
-    gl.attachShader(program, glVertexShader.shader);
-    gl.attachShader(program, glFragmentShader.shader);
+    gl.attachShader(program!, glVertexShader.shader);
+    gl.attachShader(program!, glFragmentShader.shader);
 
     // Force a particular attribute to index 0.
 
     if (parameters.index0AttributeName != null) {
-      gl.bindAttribLocation(program, 0, parameters.index0AttributeName);
+      gl.bindAttribLocation(program!, 0, parameters.index0AttributeName ?? '');
     } else if (parameters.morphTargets == true) {
       // programs with morphTargets displace position out of attribute 0
-      gl.bindAttribLocation(program, 0, 'position');
+      gl.bindAttribLocation(program!, 0, 'position');
     }
 
     // final _b = gl.isProgram(this.program);
 
-    gl.linkProgram(program);
+    gl.linkProgram(program!);
 
     // check for link errors
     if (renderer.debug["checkShaderErrors"]) {
-      final programLog = gl.getProgramInfoLog(program)?.trim();
+      final programLog = gl.getProgramInfoLog(program!)?.trim();
       final vertexLog = gl.getShaderInfoLog(glVertexShader.shader)?.trim();
       final fragmentLog = gl.getShaderInfoLog(glFragmentShader.shader)?.trim();
 
       bool runnable = true;
       bool haveDiagnostics = true;
 
-      if (gl.getProgramParameter(program, gl.LINK_STATUS) == false) {
+      if (gl.getProgramParameter(program!, WebGL.LINK_STATUS) == false) {
         runnable = false;
 
         final vertexErrors = getShaderErrors(gl, glVertexShader, 'vertex');
         final fragmentErrors = getShaderErrors(gl, glFragmentShader, 'fragment');
 
-        console.error('WebGLProgram: shader error: ${gl.getError()} gl.VALIDATE_STATUS ${gl.getProgramParameter(program, gl.VALIDATE_STATUS)} gl.getProgramInfoLog $programLog  $vertexErrors $fragmentErrors ');
+        console.error('WebGLProgram: shader error: ${gl.getError()} gl.VALIDATE_STATUS ${gl.getProgramParameter(program!, WebGL.VALIDATE_STATUS)} gl.getProgramInfoLog $programLog  $vertexErrors $fragmentErrors ');
       } else if (programLog != '' && programLog != null) {
         console.error('WebGLProgram: gl.getProgramInfoLog() programLog: $programLog vertexLog: $vertexLog fragmentLog: $fragmentLog ');
       } else if (vertexLog == '' || fragmentLog == '') {
@@ -389,7 +389,7 @@ class WebGLProgram extends DefaultProgram with WebGLProgramExtra {
     return cachedUniforms!;
   }
 
-  Map<String, dynamic> getAttributes() {
+  Map<String, AttributeLocations> getAttributes() {
     cachedAttributes ??= fetchAttributeLocations(gl, program);
 
     return cachedAttributes!;
@@ -398,7 +398,7 @@ class WebGLProgram extends DefaultProgram with WebGLProgramExtra {
   // free resource
   void destroy() {
     bindingStates.releaseStatesOfProgram(this);
-    gl.deleteProgram(program);
+    gl.deleteProgram(program!);
     program = null;
   }
 }

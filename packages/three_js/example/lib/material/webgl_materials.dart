@@ -1,8 +1,9 @@
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_gl/flutter_gl.dart';
+
 import 'package:three_js/three_js.dart' as three;
 import 'package:three_js_helpers/three_js_helpers.dart';
 
@@ -136,8 +137,8 @@ class _MyAppState extends State<WebglMaterials> {
     });
   }
 
-  generateTexture() {
-    final pixels = Uint8Array(256 * 256 * 4);
+  three.ImageElement generateTexture() {
+    final pixels = Uint8List(256 * 256 * 4);
 
     int x = 0, y = 0, l = pixels.length;
 

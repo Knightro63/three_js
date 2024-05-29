@@ -5,11 +5,11 @@ class BaseWebGLBufferRenderer {
     throw (" BaseWebGLBufferRenderer.setIndex value: $value  ");
   }
 
-  void render(num start, num count) {
+  void render(int start, int count) {
     throw (" BaseWebGLBufferRenderer.render start: $start $count  ");
   }
 
-  void renderInstances(num start, num count, int? primcount) {
+  void renderInstances(int start, int count, int primcount) {
     throw (" BaseWebGLBufferRenderer.renderInstances start: $start $count primcount: $primcount  ");
   }
 
@@ -19,7 +19,7 @@ class BaseWebGLBufferRenderer {
 }
 
 class WebGLBufferRenderer extends BaseWebGLBufferRenderer {
-  dynamic gl;
+  RenderingContext gl;
   bool isWebGL2 = true;
   dynamic mode;
   WebGLExtensions extensions;
@@ -36,13 +36,13 @@ class WebGLBufferRenderer extends BaseWebGLBufferRenderer {
   }
 
   @override
-  void render(num start, num count) {
+  void render(int start, int count) {
     gl.drawArrays(mode, start, count);
     info.update(count, mode, 1);
   }
 
   @override
-  void renderInstances(num start, num count, int? primcount) {
+  void renderInstances(int start, int count, int primcount) {
     if (primcount == 0) return;
 
     dynamic extension;
@@ -56,7 +56,7 @@ class WebGLBufferRenderer extends BaseWebGLBufferRenderer {
       methodName = 'drawArraysInstancedANGLE';
 
       if (extension == null) {
-        print('three.WebGLBufferRenderer: using three.InstancedBufferGeometry but hardware does not support extension ANGLE_instanced_arrays.');
+        console.info('WebGLBufferRenderer: using three.InstancedBufferGeometry but hardware does not support extension ANGLE_instanced_arrays.');
         return;
       }
       extension[methodName](mode, start, count, primcount);

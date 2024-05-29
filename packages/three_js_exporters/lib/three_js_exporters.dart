@@ -1,7 +1,6 @@
 library three_js_exporters;
 
-/// A Calculator.
-class Calculator {
-  /// Returns [value] plus 1.
-  int addOne(int value) => value + 1;
-}
+export 'obj_exporter.dart';
+export 'ply_exporter.dart';
+export 'stl_binary_exporter.dart';
+export 'stl_export.dart';

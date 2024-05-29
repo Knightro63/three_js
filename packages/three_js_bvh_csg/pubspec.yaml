@@ -10,7 +10,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_gl: ^0.0.21
   three_js_math:
     path: ../three_js_math
   three_js_core:

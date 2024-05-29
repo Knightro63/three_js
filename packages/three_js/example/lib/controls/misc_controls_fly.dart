@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:flutter_gl/flutter_gl.dart';
 import 'package:three_js/three_js.dart' as three;
 import 'package:three_js_postprocessing/post/index.dart';
 
@@ -138,8 +137,8 @@ class _State extends State<MiscControlsFly> {
 
     }
 
-    starsGeometry[ 0 ].setAttributeFromString( 'position', three.Float32BufferAttribute(Float32Array.fromList(vertices1) , 3 ) );
-    starsGeometry[ 1 ].setAttributeFromString( 'position', three.Float32BufferAttribute(Float32Array.fromList(vertices2) , 3 ) );
+    starsGeometry[ 0 ].setAttributeFromString( 'position', three.Float32BufferAttribute.fromList(vertices1 , 3 ) );
+    starsGeometry[ 1 ].setAttributeFromString( 'position', three.Float32BufferAttribute.fromList(vertices2 , 3 ) );
 
     final starsMaterials = [
       three.PointsMaterial.fromMap( { 'color': 0x9c9c9c, 'size': 2, 'sizeAttenuation': false } ),

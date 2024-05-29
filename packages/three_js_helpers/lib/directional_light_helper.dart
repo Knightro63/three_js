@@ -1,4 +1,4 @@
-import 'package:flutter_gl/flutter_gl.dart';
+
 import 'package:three_js_math/three_js_math.dart';
 import 'package:three_js_core/three_js_core.dart';
 
@@ -55,7 +55,7 @@ class DirectionalLightHelper extends Object3D {
       0.0
     ];
 
-    geometry.setAttributeFromString('position', Float32BufferAttribute(Float32Array.from(posData), 3, false));
+    geometry.setAttributeFromString('position', Float32BufferAttribute.fromList(posData, 3, false));
 
     final material = LineBasicMaterial.fromMap({"fog": false, "toneMapped": false});
 
@@ -64,7 +64,7 @@ class DirectionalLightHelper extends Object3D {
 
     geometry = BufferGeometry();
     List<double> d2 = [0, 0, 0, 0, 0, 1];
-    geometry.setAttributeFromString('position',Float32BufferAttribute(Float32Array.from(d2), 3, false));
+    geometry.setAttributeFromString('position',Float32BufferAttribute.fromList(d2, 3, false));
 
     targetLine = Line(geometry, material);
     add(targetLine);

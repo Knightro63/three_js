@@ -178,7 +178,7 @@ class TransformControlsGizmo extends Object3D {
 
     final lineGeometry = BufferGeometry();
     lineGeometry.setAttribute(
-        Attribute.position, Float32BufferAttribute.fromTypedData(Float32List.fromList([0.0, 0.0, 0.0, 1.0, 0.0, 0.0]), 3));
+        Attribute.position, Float32BufferAttribute.fromList(Float32List.fromList([0.0, 0.0, 0.0, 1.0, 0.0, 0.0]), 3));
 
     final lineGeometry2 = geo.CylinderGeometry(0.0075, 0.0075, 0.5, 3);
     lineGeometry2.translate(0, 0.25, 0);
@@ -195,7 +195,7 @@ class TransformControlsGizmo extends Object3D {
     translateHelperGeometry() {
       final geometry = BufferGeometry();
 
-      geometry.setAttribute(Attribute.position, Float32BufferAttribute.fromTypedData(Float32List.fromList([0.0, 0.0, 0.0, 1.0, 1.0, 1.0]), 3));
+      geometry.setAttribute(Attribute.position, Float32BufferAttribute.fromList(Float32List.fromList([0.0, 0.0, 0.0, 1.0, 1.0, 1.0]), 3));
 
       return geometry;
     }

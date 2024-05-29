@@ -1,4 +1,4 @@
-import 'package:flutter_gl/flutter_gl.dart';
+
 import 'package:three_js_math/three_js_math.dart';
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_geometry/three_js_geometry.dart';
@@ -56,7 +56,7 @@ class ArrowHelper extends Object3D {
 
     if (_lineGeometry == null) {
       _lineGeometry = BufferGeometry();
-      _lineGeometry!.setAttributeFromString('position',Float32BufferAttribute(Float32Array.from([0, 0, 0, 0, 1, 0]), 3, false));
+      _lineGeometry!.setAttributeFromString('position',Float32BufferAttribute.fromList([0, 0, 0, 0, 1, 0], 3, false));
 
       _coneGeometry = CylinderGeometry(0, 0.5, 1, 5, 1);
       _coneGeometry!.translate(0, -0.5, 0);

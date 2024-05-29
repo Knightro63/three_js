@@ -8,3 +8,4 @@ export 'rotation/index.dart';
 export 'buffer/index.dart';
 export 'others/index.dart';
 export 'math/index.dart';
+export 'native-array/native_array.dart';

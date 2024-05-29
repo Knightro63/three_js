@@ -1,4 +1,5 @@
-import 'package:flutter_gl/flutter_gl.dart';
+import 'dart:typed_data';
+
 import '../core/index.dart';
 import '../materials/index.dart';
 import 'package:three_js_math/three_js_math.dart';
@@ -80,7 +81,7 @@ class Line extends Object3D {
         final positionAttribute = geometry.attributes["position"];
 
         // List<num> lineDistances = [ 0.0 ];
-        final lineDistances = Float32Array(positionAttribute.count + 1);
+        final lineDistances = Float32List(positionAttribute.count + 1);
 
         lineDistances[0] = 0.0;
 
@@ -92,7 +93,7 @@ class Line extends Object3D {
           lineDistances[i] += _start.distanceTo(_end);
         }
 
-        geometry.setAttributeFromString('lineDistance', Float32BufferAttribute(lineDistances, 1, false));
+        geometry.setAttributeFromString('lineDistance', Float32BufferAttribute.fromList(lineDistances, 1, false));
       }
       // else {
       //   print(

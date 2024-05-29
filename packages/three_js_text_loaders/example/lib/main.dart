@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_gl/flutter_gl.dart';
+
 import 'package:three_js_core/materials/index.dart';
 import 'package:three_js_core/three_js_core.dart' as three;
 import 'package:three_js_text_loaders/three_js_text_loaders.dart';

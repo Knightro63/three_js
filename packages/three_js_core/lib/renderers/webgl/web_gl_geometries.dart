@@ -1,7 +1,7 @@
 part of three_webgl;
 
 class WebGLGeometries {
-  dynamic gl;
+  RenderingContext gl;
   WebGLAttributes attributes;
   WebGLInfo info;
   WebGLBindingStates bindingStates;
@@ -63,7 +63,7 @@ class WebGLGeometries {
     // Updating index buffer in VAO now. See WebGLBindingStates.
 
     for (final name in geometryAttributes.keys) {
-      attributes.update(geometryAttributes[name], gl.ARRAY_BUFFER, name: name);
+      attributes.update(geometryAttributes[name], WebGL.ARRAY_BUFFER, name: name);
     }
 
     // morph targets
@@ -74,7 +74,7 @@ class WebGLGeometries {
       final array = morphAttributes[name]!;
 
       for (int i = 0, l = array.length; i < l; i++) {
-        attributes.update(array[i], gl.ARRAY_BUFFER, name: "$name - morphAttributes i: $i");
+        attributes.update(array[i], WebGL.ARRAY_BUFFER, name: "$name - morphAttributes i: $i");
       }
     }
   }
@@ -113,10 +113,10 @@ class WebGLGeometries {
     BufferAttribute attribute;
     final max = indices.getMaxValue();
     if (max != null && max > 65535) {
-      attribute = Uint32BufferAttribute(Uint32Array.from(indices), 1, false);
+      attribute = Uint32BufferAttribute.fromList(indices, 1, false);
     } 
     else {
-      attribute = Uint16BufferAttribute(Uint16Array.from(indices), 1, false);
+      attribute = Uint16BufferAttribute.fromList(indices, 1, false);
     }
 
     attribute.version = version;

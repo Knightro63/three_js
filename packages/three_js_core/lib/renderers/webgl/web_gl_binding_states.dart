@@ -1,7 +1,7 @@
 part of three_webgl;
 
 class WebGLBindingStates {
-  dynamic gl;
+  RenderingContext gl;
   WebGLExtensions extensions;
   WebGLAttributes attributes;
   WebGLCapabilities capabilities;
@@ -23,7 +23,7 @@ class WebGLBindingStates {
     this.attributes,
     this.capabilities,
   ) {
-    maxVertexAttributes = gl.getParameter(gl.MAX_VERTEX_ATTRIBS);
+    maxVertexAttributes = gl.getParameter(WebGL.MAX_VERTEX_ATTRIBS);
 
     bindingStates = <int, dynamic>{};
 
@@ -73,7 +73,7 @@ class WebGLBindingStates {
     }
 
     if (index != null) {
-      attributes.update(index, gl.ELEMENT_ARRAY_BUFFER);
+      attributes.update(index, WebGL.ELEMENT_ARRAY_BUFFER);
     }
 
     if (updateBuffers || forceUpdate) {
@@ -83,7 +83,7 @@ class WebGLBindingStates {
 
       if (index != null) {
         final buf = attributes.get(index)["buffer"];
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buf);
+        gl.bindBuffer(WebGL.ELEMENT_ARRAY_BUFFER, buf);
       }
     }
   }
@@ -176,13 +176,12 @@ class WebGLBindingStates {
     final geometryAttributes = geometry.attributes;
     int attributesNum = 0;
     final programAttributes = program.getAttributes();
-
     for (final name in programAttributes.keys) {
-      Map programAttribute = programAttributes[name];
+      AttributeLocations programAttribute = programAttributes[name]!;
 
-      if (programAttribute["location"] >= 0) {
+      if (programAttribute.location.id >= 0) {
         final cachedAttribute = cachedAttributes[name];
-        BufferAttribute<NativeArray<num>>? geometryAttribute = geometryAttributes[name];
+        BufferAttribute? geometryAttribute = geometryAttributes[name];
 
         if (geometryAttribute == null) {
           if (name == 'instanceMatrix' && object.instanceMatrix != null) geometryAttribute = object.instanceMatrix;
@@ -212,10 +211,10 @@ class WebGLBindingStates {
     final programAttributes = program.getAttributes();
 
     for (final name in programAttributes.keys) {
-      Map programAttribute = programAttributes[name];
+      AttributeLocations programAttribute = programAttributes[name]!;
 
-      if (programAttribute["location"] >= 0) {
-        BufferAttribute<NativeArray<num>>? attribute = attributes[name];
+      if (programAttribute.location.id >= 0) {
+        BufferAttribute? attribute = attributes[name];
 
         if (attribute == null) {
           if (name == 'instanceMatrix' && object.instanceMatrix != null) attribute = object.instanceMatrix;
@@ -287,7 +286,7 @@ class WebGLBindingStates {
   }
 
   void vertexAttribPointer(index, size, type, normalized, stride, offset) {
-    if (capabilities.isWebGL2 == true && (type == gl.INT || type == gl.UNSIGNED_INT)) {
+    if (capabilities.isWebGL2 == true && (type == WebGL.INT || type == WebGL.UNSIGNED_INT)) {
       gl.vertexAttribIPointer(index, size, type, stride, offset);
     } else {
       gl.vertexAttribPointer(index, size, type, normalized, stride, offset);
@@ -315,7 +314,7 @@ class WebGLBindingStates {
     for (final name in programAttributes.keys) {
       final programAttribute = programAttributes[name];
 
-      if (programAttribute["location"] >= 0) {
+      if (programAttribute!.location.id >= 0) {
         // final geometryAttribute = geometryAttributes[ name ];
         BufferAttribute? geometryAttribute = geometryAttributes[name];
 
@@ -352,8 +351,8 @@ class WebGLBindingStates {
 
             if (data != null && data is InstancedInterleavedBuffer) {
               // enableAttributeAndDivisor( programAttribute, data.meshPerAttribute );
-              for (int i = 0; i < programAttribute["locationSize"]; i++) {
-                enableAttributeAndDivisor(programAttribute["location"] + i, data.meshPerAttribute);
+              for (int i = 0; i < programAttribute.locationSize; i++) {
+                enableAttributeAndDivisor(programAttribute.location.id + i, data.meshPerAttribute);
               }
 
               if (object is! InstancedMesh && geometry.maxInstanceCount == null) {
@@ -361,43 +360,43 @@ class WebGLBindingStates {
               }
             } else {
               // enableAttribute( programAttribute );
-              for (int i = 0; i < programAttribute["locationSize"]; i++) {
-                enableAttribute(programAttribute["location"] + i);
+              for (int i = 0; i < programAttribute.locationSize; i++) {
+                enableAttribute(programAttribute.location.id + i);
               }
             }
 
-            gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+            gl.bindBuffer(WebGL.ARRAY_BUFFER, buffer);
 
             // vertexAttribPointer( programAttribute, size, type, normalized, stride * bytesPerElement, offset * bytesPerElement );
-            for (int i = 0; i < programAttribute["locationSize"]; i++) {
+            for (int i = 0; i < programAttribute.locationSize; i++) {
               vertexAttribPointer(
-                  programAttribute["location"] + i,
-                  size ~/ programAttribute["locationSize"],
+                  programAttribute.location.id + i,
+                  size ~/ programAttribute.locationSize,
                   type,
                   normalized,
                   stride! * bytesPerElement,
-                  (offset + (size ~/ programAttribute["locationSize"]) * i) * bytesPerElement);
+                  (offset + (size ~/ programAttribute.locationSize) * i) * bytesPerElement);
             }
           } else {
             if (geometryAttribute is InstancedBufferAttribute) {
               // enableAttributeAndDivisor( programAttribute, geometryAttribute.meshPerAttribute );
-              for (int i = 0; i < programAttribute["locationSize"]; i++) {
-                enableAttributeAndDivisor(programAttribute["location"] + i, geometryAttribute.meshPerAttribute);
+              for (int i = 0; i < programAttribute.locationSize; i++) {
+                enableAttributeAndDivisor(programAttribute.location.id + i, geometryAttribute.meshPerAttribute);
               }
 
               geometry.maxInstanceCount ??= geometryAttribute.meshPerAttribute * geometryAttribute.count;
             } else {
               // enableAttribute( programAttribute );
-              for (int i = 0; i < programAttribute["locationSize"]; i++) {
-                enableAttribute(programAttribute["location"] + i);
+              for (int i = 0; i < programAttribute.locationSize; i++) {
+                enableAttribute(programAttribute.location.id + i);
               }
             }
 
-            gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+            gl.bindBuffer(WebGL.ARRAY_BUFFER, buffer);
             // vertexAttribPointer( programAttribute, size, type, normalized, 0, 0 );
-            for (int i = 0; i < programAttribute["locationSize"]; i++) {
-              vertexAttribPointer(programAttribute["location"] + i, size ~/ programAttribute["locationSize"], type,
-                  normalized, size * bytesPerElement, (size ~/ programAttribute["locationSize"]) * i * bytesPerElement);
+            for (int i = 0; i < programAttribute.locationSize; i++) {
+              vertexAttribPointer(programAttribute.location.id + i, size ~/ programAttribute.locationSize, type,
+                  normalized, size * bytesPerElement, (size ~/ programAttribute.locationSize) * i * bytesPerElement);
             }
           }
         } else if (materialDefaultAttributeValues != null) {
@@ -406,19 +405,19 @@ class WebGLBindingStates {
           if (value != null) {
             switch (value.length) {
               case 2:
-                gl.vertexAttrib2fv(programAttribute["location"], value);
+                gl.vertexAttrib2fv(programAttribute.location.id, value);
                 break;
 
               case 3:
-                gl.vertexAttrib3fv(programAttribute["location"], value);
+                gl.vertexAttrib3fv(programAttribute.location.id, value);
                 break;
 
               case 4:
-                gl.vertexAttrib4fv(programAttribute["location"], value);
+                gl.vertexAttrib4fv(programAttribute.location.id, value);
                 break;
 
               default:
-                gl.vertexAttrib1fv(programAttribute["location"], value);
+                gl.vertexAttrib1fv(programAttribute.location.id, value);
             }
           }
         }

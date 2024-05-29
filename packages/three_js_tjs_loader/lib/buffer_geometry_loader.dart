@@ -3,7 +3,6 @@ import 'dart:convert' as convert;
 import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:three_js_core/three_js_core.dart';
-import 'package:flutter_gl/flutter_gl.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'package:three_js_core_loaders/three_js_core_loaders.dart';
 
@@ -228,15 +227,15 @@ class BufferGeometryLoader extends Loader {
 
 NativeArray getTypedArray(String type, List buffer) {
   if (type == "Uint32Array" || type == "Uint32List") {
-    return Uint32Array.from(List<int>.from(buffer));
+    return Uint32Array.fromList(List<int>.from(buffer));
   } else if (type == "Uint16Array" || type == "Uint16List") {
-    return Uint16Array.from(List<int>.from(buffer));
+    return Uint16Array.fromList(List<int>.from(buffer));
   } else if (type == "Float32Array" || type == "Float32List") {
     List<double> b = [];
     for(int i = 0; i < buffer.length;i++){
       b.add(buffer[i].toDouble());
     }
-    return Float32Array.from(List<double>.from(b));
+    return Float32Array.fromList(List<double>.from(b));
   } else {
     throw (" Util.dart getTypedArray type: $type is not support ");
   }

@@ -10,7 +10,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_gl: ^0.0.21
   typr_dart: ^0.0.2
   opentype_dart: ^0.0.1
   three_js_core_loaders:

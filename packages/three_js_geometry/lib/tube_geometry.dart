@@ -1,5 +1,4 @@
 import 'dart:math' as math;
-import 'dart:typed_data';
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_curves/three_js_curves.dart';
 import 'package:three_js_math/three_js_math.dart';
@@ -164,9 +163,9 @@ class TubeGeometry extends BufferGeometry {
 		// build geometry
 
 		setIndex( indices );
-		setAttributeFromString( 'position', Float32BufferAttribute.fromTypedData(Float32List.fromList(vertices), 3 ) );
-		setAttributeFromString( 'normal', Float32BufferAttribute.fromTypedData(Float32List.fromList(normals), 3 ) );
-		setAttributeFromString( 'uv', Float32BufferAttribute.fromTypedData(Float32List.fromList(uvs), 2 ) );
+		setAttributeFromString( 'position', Float32BufferAttribute.fromList(vertices, 3 ) );
+		setAttributeFromString( 'normal', Float32BufferAttribute.fromList(normals, 3 ) );
+		setAttributeFromString( 'uv', Float32BufferAttribute.fromList(uvs, 2 ) );
 	}
 
   @override

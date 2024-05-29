@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 
@@ -96,8 +95,8 @@ class ParametricGeometry extends BufferGeometry {
     // build geometry
 
     setIndex(indices);
-    setAttribute(Attribute.position, Float32BufferAttribute.fromTypedData(Float32List.fromList(vertices), 3));
-    setAttribute(Attribute.normal, Float32BufferAttribute.fromTypedData(Float32List.fromList(normals), 3));
-    setAttribute(Attribute.uv, Float32BufferAttribute.fromTypedData(Float32List.fromList(uvs), 2));
+    setAttribute(Attribute.position, Float32BufferAttribute.fromList(vertices, 3));
+    setAttribute(Attribute.normal, Float32BufferAttribute.fromList(normals, 3));
+    setAttribute(Attribute.uv, Float32BufferAttribute.fromList(uvs, 2));
   }
 }

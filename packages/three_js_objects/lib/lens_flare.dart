@@ -1,4 +1,4 @@
-import 'package:flutter_gl/flutter_gl.dart';
+import 'dart:typed_data';
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 
@@ -368,14 +368,14 @@ BufferGeometry _geometry(){
 
 	final geometry = BufferGeometry();
 
-	final float32Array = Float32Array.from( [
+	final float32Array = Float32List.fromList( [
 		- 1, - 1, 0, 0, 0,
 		1, - 1, 0, 1, 0,
 		1, 1, 0, 1, 1,
 		- 1, 1, 0, 0, 1
 	] );
 
-	final interleavedBuffer = InterleavedBuffer( float32Array, 5 );
+	final interleavedBuffer = InterleavedBuffer.fromFloat32List( float32Array, 5 );
 
 	geometry.setIndex( [ 0, 1, 2,	0, 2, 3 ] );
 	geometry.setAttributeFromString( 'position', InterleavedBufferAttribute( interleavedBuffer, 3, 0, false ) );

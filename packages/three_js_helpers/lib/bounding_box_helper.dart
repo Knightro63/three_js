@@ -1,4 +1,6 @@
-import 'package:flutter_gl/flutter_gl.dart';
+
+import 'dart:typed_data';
+
 import 'package:three_js_math/three_js_math.dart';
 import 'package:three_js_core/three_js_core.dart';
 
@@ -22,7 +24,7 @@ class BoundingBoxHelper extends LineSegments {
   /// 
   /// Creates a new wireframe box that represents the passed [BoundingBox].
   factory BoundingBoxHelper(BoundingBox? box, [int color = 0xffff00]) {
-    final indices = Uint16Array.from([
+    final indices = Uint16List.fromList([
       0,
       1,
       1,
@@ -78,8 +80,8 @@ class BoundingBoxHelper extends LineSegments {
 
     final geometry = BufferGeometry();
 
-    geometry.setIndex(Uint16BufferAttribute(indices, 1, false));
-    geometry.setAttributeFromString('position',Float32BufferAttribute(Float32Array.from(positions), 3, false));
+    geometry.setIndex(Uint16BufferAttribute.fromList(indices, 1, false));
+    geometry.setAttributeFromString('position',Float32BufferAttribute.fromList(positions, 3, false));
 
     final bbHelper = BoundingBoxHelper.create(geometry, LineBasicMaterial.fromMap({"color": color, "toneMapped": false}));
 

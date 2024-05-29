@@ -1,4 +1,4 @@
-import 'package:flutter_gl/flutter_gl.dart';
+
 import 'package:three_js_math/three_js_math.dart';
 import 'package:three_js_core/three_js_core.dart';
 import 'dart:math' as math;
@@ -73,7 +73,7 @@ class SpotLightHelper extends Object3D {
           [math.cos(p1), math.sin(p1), 1, math.cos(p2), math.sin(p2), 1]);
     }
 
-    geometry.setAttributeFromString('position',Float32BufferAttribute(Float32Array.from(positions), 3, false));
+    geometry.setAttributeFromString('position',Float32BufferAttribute.fromList(positions, 3, false));
 
     final material = LineBasicMaterial.fromMap({"fog": false, "toneMapped": false});
 

@@ -1,5 +1,5 @@
 import 'dart:math' as math;
-import 'package:flutter_gl/flutter_gl.dart';
+
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 
@@ -24,7 +24,7 @@ class RectAreaLightHelper extends Line {
 		List<double> positions = [ 1, 1, 0, - 1, 1, 0, - 1, - 1, 0, 1, - 1, 0, 1, 1, 0 ];
 
 		final geometry = BufferGeometry();
-		geometry.setAttributeFromString( 'position', Float32BufferAttribute( Float32Array.fromList(positions), 3 ) );
+		geometry.setAttributeFromString( 'position', Float32BufferAttribute.fromList(positions, 3 ) );
 		geometry.computeBoundingSphere();
 
 		final material = LineBasicMaterial.fromMap( { 'fog': false } );
@@ -40,7 +40,7 @@ class RectAreaLightHelper extends Line {
 		List<double> positions2 = [ 1, 1, 0, - 1, 1, 0, - 1, - 1, 0, 1, 1, 0, - 1, - 1, 0, 1, - 1, 0 ];
 
 		final geometry2 = BufferGeometry();
-		geometry2.setAttributeFromString( 'position', Float32BufferAttribute(  Float32Array.fromList(positions2), 3 ) );
+		geometry2.setAttributeFromString( 'position', Float32BufferAttribute.fromList(positions2, 3 ) );
 		geometry2.computeBoundingSphere();
 
 		instance.add( Mesh( geometry2, MeshBasicMaterial.fromMap( { 'side': BackSide, 'fog': false } ) ) );

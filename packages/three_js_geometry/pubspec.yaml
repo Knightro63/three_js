@@ -10,7 +10,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  vector_math: ^2.1.4
   three_js_core:
     path: ../three_js_core
   three_js_math:

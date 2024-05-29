@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:flutter_gl/flutter_gl.dart';
+
 import 'package:three_js/three_js.dart' as three;
 
 class WebglMorphtargets extends StatefulWidget {
@@ -119,10 +119,10 @@ class _State extends State<WebglMorphtargets> {
 
     // add the spherical positions as the first morph target
     // geometry.morphAttributes["position"][ 0 ] = new three.Float32BufferAttribute( spherePositions, 3 );
-    geometry.morphAttributes["position"]!.add(three.Float32BufferAttribute(Float32Array.fromList(spherePositions), 3));
+    geometry.morphAttributes["position"]!.add(three.Float32BufferAttribute.fromList(spherePositions, 3));
 
     // add the twisted positions as the second morph target
-    geometry.morphAttributes["position"]!.add(three.Float32BufferAttribute(Float32Array.fromList(twistPositions), 3));
+    geometry.morphAttributes["position"]!.add(three.Float32BufferAttribute.fromList(twistPositions, 3));
 
     return geometry;
   }

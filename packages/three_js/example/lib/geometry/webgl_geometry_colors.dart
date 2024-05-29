@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:flutter_gl/flutter_gl.dart';
+
 import 'package:three_js/three_js.dart' as three;
 import 'package:three_js_geometry/three_js_geometry.dart';
 
@@ -101,7 +101,7 @@ class _MyAppState extends State<WebglGeometryColors> {
     final geometry1 = IcosahedronGeometry(radius, 1);
 
     final count = geometry1.attributes["position"].count;
-    geometry1.setAttributeFromString('color', three.Float32BufferAttribute( Float32Array(count * 3), 3));
+    geometry1.setAttributeFromString('color', three.Float32BufferAttribute( three.Float32Array(count * 3), 3));
 
     final geometry2 = geometry1.clone();
     final geometry3 = geometry1.clone();
@@ -158,7 +158,7 @@ class _MyAppState extends State<WebglGeometryColors> {
   }
 
   generateTexture() {
-    final pixels = Uint8Array(256 * 256 * 4);
+    final pixels = three.Uint8Array(256 * 256 * 4);
 
     int x = 0, y = 0, l = pixels.length;
 

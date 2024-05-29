@@ -1,6 +1,6 @@
 // This file is part of meshoptimizer library and is distributed under the terms of MIT License.
 // Copyright (C) 2016-2022, by Arseny Kapoulkine (arseny.kapoulkine@gmail.com)
-import 'package:flutter_gl/flutter_gl.dart';
+
 
 MeshoptDecoder(){
 	// Built with clang version 14.0.4

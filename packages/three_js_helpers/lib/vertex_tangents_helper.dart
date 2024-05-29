@@ -1,4 +1,6 @@
-import 'package:flutter_gl/flutter_gl.dart';
+
+import 'dart:typed_data';
+
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 
@@ -34,7 +36,7 @@ class VertexTangentsHelper extends LineSegments {
     final nTangents = object.geometry?.attributes["tangent"].count;
     final geometry = BufferGeometry();
 
-    final positions = Float32BufferAttribute(Float32Array(nTangents * 2 * 3), 3);
+    final positions = Float32BufferAttribute.fromList(Float32List(nTangents * 2 * 3), 3);
 
     geometry.setAttributeFromString('position', positions);
 

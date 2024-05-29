@@ -3,7 +3,6 @@ import 'dart:io';
 import '../utils/blob.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_gl/flutter_gl.dart';
 import 'package:http/http.dart' as http;
 import 'package:image/image.dart';
 import 'package:three_js_core/three_js_core.dart';
@@ -84,7 +83,7 @@ Future<ImageElement?> processImage(Uint8List? bytes, String? url, bool flipY) as
   return image != null?ImageElement(
     url: url,
     src: url,
-    data: Uint8Array.from(image.getBytes()),
+    data: image.getBytes(),
     width: image.width,
     height: image.height
   ):null;

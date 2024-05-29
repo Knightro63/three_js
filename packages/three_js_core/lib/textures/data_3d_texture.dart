@@ -1,4 +1,4 @@
-import 'package:flutter_gl/native-array/index.dart';
+import 'dart:typed_data';
 import 'package:three_js_math/three_js_math.dart';
 import 'image_element.dart';
 import './texture.dart';
@@ -16,7 +16,7 @@ class Data3DTexture extends Texture {
   /// 
   /// [depth] -- depth of the texture.
   /// 
-  Data3DTexture([NativeArray? data, int width = 1, int height = 1, int depth = 1]):super() {
+  Data3DTexture([TypedData? data, int width = 1, int height = 1, int depth = 1]):super() {
     image = ImageElement(data: data, width: width, height: height, depth: depth);
 
     magFilter = LinearFilter;

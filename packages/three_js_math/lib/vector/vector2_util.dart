@@ -1,4 +1,4 @@
-import 'package:flutter_gl/flutter_gl.dart';
+import '../native-array/native_array.dart';
 import 'package:vector_math/vector_math.dart';
 import '../buffer/buffer_attribute.dart';
 

@@ -1,7 +1,8 @@
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:flutter_gl/flutter_gl.dart';
+
 import 'package:three_js/three_js.dart' as three;
 import 'package:three_js_objects/three_js_objects.dart';
 
@@ -266,7 +267,7 @@ class _State extends State<WebglGpgpuProtoplanet> {
   void initProtoplanets() {
     geometry = three.BufferGeometry();
 
-    final positions = Float32Array( numParticles * 3 );
+    final positions = Float32List( numParticles * 3 );
     int p = 0;
 
     for ( int i = 0; i < numParticles; i ++ ) {
@@ -275,7 +276,7 @@ class _State extends State<WebglGpgpuProtoplanet> {
       positions[p ++ ] = ( math.Random().nextDouble() * 2 - 1 ) * effectController['radius']!;
     }
 
-    final uvs = Float32Array( numParticles * 2 );
+    final uvs = Float32List( numParticles * 2 );
     p = 0;
     for ( int j = 0; j < width; j ++ ) {
       for ( int i = 0; i < width; i ++ ) {
@@ -284,8 +285,8 @@ class _State extends State<WebglGpgpuProtoplanet> {
       }
     }
 
-    geometry.setAttributeFromString( 'position', three.Float32BufferAttribute( positions, 3 ) );
-    geometry.setAttributeFromString( 'uv', three.Float32BufferAttribute( uvs, 2 ) );
+    geometry.setAttributeFromString( 'position', three.Float32BufferAttribute.fromList( positions, 3 ) );
+    geometry.setAttributeFromString( 'uv', three.Float32BufferAttribute.fromList( uvs, 2 ) );
 
     particleUniforms = {
       'texturePosition': { 'value': null },

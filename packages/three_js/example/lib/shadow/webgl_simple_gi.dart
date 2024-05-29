@@ -1,7 +1,8 @@
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:flutter_gl/flutter_gl.dart';
+
 import 'package:three_js/three_js.dart' as three;
 import 'package:three_js_geometry/three_js_geometry.dart';
 
@@ -109,8 +110,8 @@ class _State extends State<WebglSimpleGi> {
     int bounces = 0;
     int currentVertex = 0;
 
-    final color = Float32Array( 3 );
-    final Uint8Array buffer = Uint8Array( SIZE2 * 4 );
+    final color = Float32List( 3 );
+    final Uint8List buffer = Uint8List( SIZE2 * 4 );
 
     void compute([double? dt]) {
 
@@ -124,8 +125,8 @@ class _State extends State<WebglSimpleGi> {
       final normals = attributes['normal'].array;
 
       if ( attributes['color'] == null ) {
-        final colors = Float32Array( positions.length );
-        geometry?.setAttributeFromString( 'color', three.Float32BufferAttribute( colors, 3 ).setUsage( three.DynamicDrawUsage ) );
+        final colors = Float32List( positions.length );
+        geometry?.setAttributeFromString( 'color', three.Float32BufferAttribute.fromList( colors, 3 ).setUsage( three.DynamicDrawUsage ) );
       }
 
       final colors = attributes['color'].array;

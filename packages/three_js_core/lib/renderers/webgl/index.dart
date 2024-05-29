@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'dart:math' as math;
 
+import 'package:flutter_angle/flutter_angle.dart';
 import 'package:flutter/foundation.dart';
 import 'package:three_js_math/three_js_math.dart';
 import '../../objects/index.dart';
@@ -20,7 +21,6 @@ import '../shaders/index.dart';
 import '../../math/frustum.dart';
 import '../pmrem_generator.dart';
 
-import 'package:flutter_gl/flutter_gl.dart';
 part 'web_gl_animation.dart';
 part 'web_gl_attributes.dart';
 part 'web_gl_background.dart';

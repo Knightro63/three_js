@@ -11,8 +11,8 @@ dependencies:
   flutter:
     sdk: flutter
   logger: ^2.0.2+1
-  vector_math: ^2.1.4
-  flutter_gl: ^0.0.21
+  flutter_angle:
+    path: ../flutter_angle
   three_js_math:
     path: ../three_js_math
 

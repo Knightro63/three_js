@@ -11,7 +11,6 @@ dependencies:
   flutter:
     sdk: flutter
   universal_html: ^2.2.4
-  flutter_gl: ^0.0.21
   three_js_curves:
     path: ../three_js_curves
   three_js_core_loaders:

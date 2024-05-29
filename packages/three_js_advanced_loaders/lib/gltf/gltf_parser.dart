@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:typed_data';
-import 'package:flutter_gl/flutter_gl.dart';
+
 import 'gltf_mesh_standard_sg_material.dart';
 import 'gltf_helper.dart';
 import 'gltf_cubic_spline_interpolant.dart';

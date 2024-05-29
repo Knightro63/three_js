@@ -1,5 +1,5 @@
 import 'dart:typed_data';
-import 'package:flutter_gl/flutter_gl.dart';
+import '../native-array/native_array.dart';
 import 'index.dart';
 import '../vector/index.dart';
 import '../rotation/index.dart';

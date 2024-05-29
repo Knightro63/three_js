@@ -1,6 +1,5 @@
 import 'dart:math' as math;
 import 'package:three_js_math/three_js_math.dart';
-import 'package:flutter_gl/flutter_gl.dart';
 import 'package:three_js_core/three_js_core.dart';
 
 extension on Vector4{
@@ -19,7 +18,7 @@ extension on Vector4{
 extension on Vector3{
   Vector3 crossFromVector4(Vector4 v, {Vector4? w}) {
     if (w != null) {
-      print('THREE.Vector3: .cross() now only accepts one argument. Use .crossVectors( a, b ) instead.');
+      //print('Vector3: .cross() now only accepts one argument. Use .crossVectors( a, b ) instead.');
       return cross2(v.toVector3(), w.toVector3());
     }
 
@@ -387,7 +386,7 @@ class Projector{
           double x = positions[i];
           double y = positions[i + 1];
           double z = positions[i + 2];
-          List<BufferAttribute<NativeArray<num>>>? morphTargets = geometry.morphAttributes['position'];
+          List<BufferAttribute>? morphTargets = geometry.morphAttributes['position'];
 
           if(morphTargets != null){
             bool morphTargetsRelative = geometry.morphTargetsRelative;
@@ -396,7 +395,7 @@ class Projector{
             for (int t = 0; t < morphTargets.length; t ++) {
               num influence = morphInfluences![t];
               if(influence == 0) continue;
-              BufferAttribute<NativeArray<num>>? target = morphTargets[t];
+              BufferAttribute? target = morphTargets[t];
               if (morphTargetsRelative) {
                 x += target.getX( i ~/ 3 ) !* influence;
                 y += target.getY( i ~/ 3 ) !* influence;

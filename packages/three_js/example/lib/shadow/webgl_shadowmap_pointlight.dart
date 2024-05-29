@@ -5,7 +5,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_gl/flutter_gl.dart';
+
 import 'package:three_js/three_js.dart' as three;
 
 class WebglShadowmapPointlight extends StatefulWidget {
@@ -176,7 +176,7 @@ class _State extends State<WebglShadowmapPointlight> {
     return three.ImageElement(
       width: 2,
       height: 2,
-      data: Uint8Array.from(buffer)
+      data: buffer
     );
   }
 }

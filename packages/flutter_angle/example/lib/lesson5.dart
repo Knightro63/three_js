@@ -27,11 +27,19 @@ class Lesson5 extends Lesson {
     loadTexture("dash.png", (WebGLTexture texture, Image data) async {
       gl.pixelStorei(WebGL.UNPACK_ALIGNMENT, 1);
       gl.bindTexture(WebGL.TEXTURE_2D, texture);
-      await gl.texImage2DfromImage(
-        WebGL.TEXTURE_2D,
-        data,
-        type: WebGL.UNSIGNED_BYTE,
-      );
+      if(kIsWeb){
+        await gl.texImage2DfromAsset(
+          WebGL.TEXTURE_2D,
+          "assets/dash.png",
+          type: WebGL.UNSIGNED_BYTE,
+        );
+      }else{
+        await gl.texImage2DfromImage(
+          WebGL.TEXTURE_2D,
+          data,
+          type: WebGL.UNSIGNED_BYTE,
+        );
+      }
       gl.texParameteri(
         WebGL.TEXTURE_2D,
         WebGL.TEXTURE_MAG_FILTER,

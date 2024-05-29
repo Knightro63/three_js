@@ -10,7 +10,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_gl: ^0.0.21
   vector_math: ^2.1.4
   uuid: ^4.4.0
 

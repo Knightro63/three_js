@@ -4,7 +4,7 @@ class WebGLCapabilities {
   bool isWebGL2 = true;
 
   Map<String, dynamic> parameters;
-  dynamic gl;
+  RenderingContext gl;
   WebGLExtensions extensions;
 
   String precision = 'highp';
@@ -41,21 +41,21 @@ class WebGLCapabilities {
 
     logarithmicDepthBuffer = parameters["logarithmicDepthBuffer"] == true;
 
-    maxTextures = gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS);
-    maxVertexTextures = gl.getParameter(gl.MAX_VERTEX_TEXTURE_IMAGE_UNITS);
-    maxTextureSize = gl.getParameter(gl.MAX_TEXTURE_SIZE);
-    maxCubemapSize = gl.getParameter(gl.MAX_CUBE_MAP_TEXTURE_SIZE);
+    maxTextures = gl.getParameter(WebGL.MAX_TEXTURE_IMAGE_UNITS);
+    maxVertexTextures = gl.getParameter(WebGL.MAX_VERTEX_TEXTURE_IMAGE_UNITS);
+    maxTextureSize = gl.getParameter(WebGL.MAX_TEXTURE_SIZE);
+    maxCubemapSize = gl.getParameter(WebGL.MAX_CUBE_MAP_TEXTURE_SIZE);
 
-    maxAttributes = gl.getParameter(gl.MAX_VERTEX_ATTRIBS);
-    maxVertexUniforms = gl.getParameter(gl.MAX_VERTEX_UNIFORM_VECTORS);
-    maxVaryings = gl.getParameter(gl.MAX_VARYING_VECTORS);
-    maxFragmentUniforms = gl.getParameter(gl.MAX_FRAGMENT_UNIFORM_VECTORS);
+    maxAttributes = gl.getParameter(WebGL.MAX_VERTEX_ATTRIBS);
+    maxVertexUniforms = gl.getParameter(WebGL.MAX_VERTEX_UNIFORM_VECTORS);
+    maxVaryings = gl.getParameter(WebGL.MAX_VARYING_VECTORS);
+    maxFragmentUniforms = gl.getParameter(WebGL.MAX_FRAGMENT_UNIFORM_VECTORS);
 
     vertexTextures = maxVertexTextures > 0;
     floatFragmentTextures = isWebGL2;
     floatVertexTextures = vertexTextures && floatFragmentTextures;
 
-    maxSamples = isWebGL2 ? gl.getParameter(gl.MAX_SAMPLES) : 0;
+    maxSamples = isWebGL2 ? gl.getParameter(WebGL.MAX_SAMPLES) : 0;
   }
 
   num getMaxAnisotropy() {
@@ -64,7 +64,7 @@ class WebGLCapabilities {
     final extension = extensions.get('EXT_texture_filter_anisotropic');
 
     if (extension != null) {
-      maxAnisotropy = gl.getParameter(gl.MAX_TEXTURE_MAX_ANISOTROPY_EXT);
+      maxAnisotropy = gl.getParameter(WebGL.MAX_TEXTURE_MAX_ANISOTROPY_EXT);
     } else {
       maxAnisotropy = 0;
     }

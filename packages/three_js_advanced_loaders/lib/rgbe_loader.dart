@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:typed_data';
 import 'dart:io';
-import 'package:flutter_gl/flutter_gl.dart';
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'package:three_js_core_loaders/three_js_core_loaders.dart';
@@ -454,7 +453,7 @@ class RGBELoader extends DataTextureLoader {
 
           case FloatType:
             numElements = imageRgbaData.length ~/ 4;
-            final floatArray = Float32Array(numElements * 4);
+            final floatArray = Float32List(numElements * 4);
             for (int j = 0; j < numElements; j++) {
               rgbeByteToRGBFloat(imageRgbaData, j * 4, floatArray, j * 4);
             }
@@ -465,7 +464,7 @@ class RGBELoader extends DataTextureLoader {
 
           case HalfFloatType:
             numElements = imageRgbaData.length ~/ 4;
-            final halfArray = Uint16Array(numElements * 4);
+            final halfArray = Uint16List(numElements * 4);
             print('len: $numElements, $w ');
             for (int j = 0; j < numElements; j++) {
               rgbeByteToRGBHalf(imageRgbaData, j * 4, halfArray, j * 4);

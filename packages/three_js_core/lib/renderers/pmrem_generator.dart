@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_gl/flutter_gl.dart';
 import 'package:three_js_core/others/index.dart';
 
 import 'package:three_js_math/three_js_math.dart';
@@ -499,9 +498,9 @@ class PMREMGenerator {
       const uvSize = 2;
       const faceIndexSize = 1;
 
-      final position = Float32Array(positionSize * vertices * cubeFaces);
-      final uv = Float32Array(uvSize * vertices * cubeFaces);
-      final faceIndex = Int32Array(faceIndexSize * vertices * cubeFaces);
+      final position = Float32List(positionSize * vertices * cubeFaces);
+      final uv = Float32List(uvSize * vertices * cubeFaces);
+      final faceIndex = Int32List(faceIndexSize * vertices * cubeFaces);
 
       for (int face = 0; face < cubeFaces; face++) {
         double x = (face % 3) * 2 / 3 - 1;
@@ -533,9 +532,9 @@ class PMREMGenerator {
       }
 
       final planes = BufferGeometry();
-      planes.setAttributeFromString('position', Float32BufferAttribute(position, positionSize, false));
-      planes.setAttributeFromString('uv', Float32BufferAttribute(uv, uvSize, false));
-      planes.setAttributeFromString('faceIndex', Int32BufferAttribute(faceIndex, faceIndexSize, false));
+      planes.setAttributeFromString('position', Float32BufferAttribute.fromList(position, positionSize, false));
+      planes.setAttributeFromString('uv', Float32BufferAttribute.fromList(uv, uvSize, false));
+      planes.setAttributeFromString('faceIndex', Int32BufferAttribute.fromList(faceIndex, faceIndexSize, false));
       lodPlanes.add(planes);
 
       if (lod > lodMin) {

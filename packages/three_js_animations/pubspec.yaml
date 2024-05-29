@@ -14,7 +14,6 @@ dependencies:
     path: ../three_js_core
   three_js_math:
     path: ../three_js_math
-  flutter_gl: ^0.0.21
 
 dev_dependencies:
   flutter_test:

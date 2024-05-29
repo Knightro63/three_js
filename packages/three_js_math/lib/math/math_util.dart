@@ -6,6 +6,10 @@ final _floatView = Float32List(1);
 final _int32View = Int32List.view(_floatView.buffer);
 
 extension ListExtension on List{
+  void set<T>(List<T> newList, [int index = 0]) {
+   setAll(index, newList.sublist(0, math.min(newList.length, length)));
+  }
+
   T? getMinValue<T extends num>() {
     if (isEmpty) return null; //return 9999999;
 

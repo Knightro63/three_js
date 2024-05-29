@@ -1140,9 +1140,19 @@ class RenderingContext {
   // //JS ('uniform1iv')
   // void uniform1iv2(UniformLocation? location, v, int srcOffset, [int? srcLength]);
 
-  // void uniform1ui(UniformLocation? location, int v0);
+  void uniform1ui(UniformLocation? location, int v0){
+    gl.glUniform1ui(location?.id ?? 0, v0);
+    checkError('uniform1ui');
+  }
 
-  // void uniform1uiv(UniformLocation? location, v, [int? srcOffset, int? srcLength]);
+  void uniform1uiv(UniformLocation? location, List<int> v){
+    int count = v.length;
+    final valuePtr = calloc<Uint32>(count);
+    valuePtr.asTypedList(count).setAll(0, v);
+    gl.glUniform1uiv(location?.id ?? 0, count, valuePtr);
+    calloc.free(valuePtr);
+    checkError('uniform1uiv'); 
+  }
 
   // //JS ('uniform2fv')
   // void uniform2fv2(UniformLocation? location, v, int srcOffset, [int? srcLength]);
@@ -1150,30 +1160,57 @@ class RenderingContext {
   // //JS ('uniform2iv')
   // void uniform2iv2(UniformLocation? location, v, int srcOffset, [int? srcLength]);
 
-  // void uniform2ui(UniformLocation? location, int v0, int v1);
+  void uniform2ui(UniformLocation? location, int v0, int v1){
+    gl.glUniform2ui(location?.id ?? 0, v0, v1);
+    checkError('uniform2ui');
+  }
 
-  // void uniform2uiv(UniformLocation? location, v, [int? srcOffset, int? srcLength]);
-
+  void uniform2uiv(UniformLocation? location, List<int> v){
+    int count = v.length;
+    final valuePtr = calloc<Uint32>(count);
+    valuePtr.asTypedList(count).setAll(0, v);
+    gl.glUniform2uiv(location?.id ?? 0, count, valuePtr);
+    calloc.free(valuePtr);
+    checkError('uniform1uiv'); 
+  }
   // //JS ('uniform3fv')
   // void uniform3fv2(UniformLocation? location, v, int srcOffset, [int? srcLength]);
 
   // //JS ('uniform3iv')
   // void uniform3iv2(UniformLocation? location, v, int srcOffset, [int? srcLength]);
 
-  // void uniform3ui(UniformLocation? location, int v0, int v1, int v2);
+  void uniform3ui(UniformLocation? location, int v0, int v1, int v2){
+    gl.glUniform3ui(location?.id ?? 0, v0, v1, v2);
+    checkError('uniform3ui');
+  }
 
-  // void uniform3uiv(UniformLocation? location, v, [int? srcOffset, int? srcLength]);
-
+  void uniform3uiv(UniformLocation? location, List<int> v){
+    int count = v.length;
+    final valuePtr = calloc<Uint32>(count);
+    valuePtr.asTypedList(count).setAll(0, v);
+    gl.glUniform3uiv(location?.id ?? 0, count, valuePtr);
+    calloc.free(valuePtr);
+    checkError('uniform1uiv'); 
+  }
   // //JS ('uniform4fv')
   // void uniform4fv2(UniformLocation? location, v, int srcOffset, [int? srcLength]);
 
   // //JS ('uniform4iv')
   // void uniform4iv2(UniformLocation? location, v, int srcOffset, [int? srcLength]);
 
-  // void uniform4ui(UniformLocation? location, int v0, int v1, int v2, int v3);
+  void uniform4ui(UniformLocation? location, int v0, int v1, int v2, int v3){
+    gl.glUniform4ui(location?.id ?? 0, v0, v1, v2, v3);
+    checkError('uniform4ui');
+  }
 
-  // void uniform4uiv(UniformLocation? location, v, [int? srcOffset, int? srcLength]);
-
+  void uniform4uiv(UniformLocation? location, List<int> v){
+    int count = v.length;
+    final valuePtr = calloc<Uint32>(count);
+    valuePtr.asTypedList(count).setAll(0, v);
+    gl.glUniform4uiv(location?.id ?? 0, count, valuePtr);
+    calloc.free(valuePtr);
+    checkError('uniform1uiv'); 
+  }
   // void uniformBlockBinding(Program program, int uniformBlockIndex, int uniformBlockBinding);
 
   // //JS ('uniformMatrix2fv')
@@ -1246,13 +1283,13 @@ class RenderingContext {
     checkError('bindBuffer');
   }
 
-  void bindFramebuffer(int target, Framebuffer framebuffer){
-    gl.glBindFramebuffer(target, framebuffer.id);
+  void bindFramebuffer(int target, Framebuffer? framebuffer){
+    gl.glBindFramebuffer(target, framebuffer?.id ?? 0);
     checkError('bindFramebuffer');
   }
 
-  void bindRenderbuffer(int target, Renderbuffer renderbuffer){
-    gl.glBindRenderbuffer(target, renderbuffer.id);
+  void bindRenderbuffer(int target, Renderbuffer? renderbuffer){
+    gl.glBindRenderbuffer(target, renderbuffer?.id ?? 0);
     checkError('bindRenderbuffer');
   }
 
@@ -1376,13 +1413,26 @@ class RenderingContext {
     }
   }
 
-  void compressedTexImage2D(int target, int level, int internalformat, int width, int height, int border, int imageSize, TypedData? pixels){
+  void compressedTexImage2D(int target, int level, int internalformat, int width, int height, int border, TypedData? pixels){
     Pointer<Int8>? nativeBuffer;
     if (pixels != null) {
       nativeBuffer = calloc<Int8>(pixels.lengthInBytes);
       nativeBuffer.asTypedList(pixels.lengthInBytes).setAll(0, pixels.buffer.asUint8List());
+    }    
+    late int size;
+    if (pixels is List<double> || pixels is Float32List) {
+      nativeBuffer = floatListToArrayPointer(pixels as List<double>).cast();
+      size = pixels!.lengthInBytes * sizeOf<Float>();
+    } else if (pixels is Int32List) {
+      nativeBuffer = int32ListToArrayPointer(pixels).cast();
+      size = pixels.length * sizeOf<Int32>();
+    } else if (pixels is Uint16List) {
+      nativeBuffer = uInt16ListToArrayPointer(pixels).cast();
+      size = pixels.length * sizeOf<Uint16>();
     }
-    gl.glCompressedTexImage2D(target, level, internalformat, width, height, border, imageSize, nativeBuffer != null ? nativeBuffer.cast() : nullptr);
+
+    gl.glCompressedTexImage2D(target, level, internalformat, width, height, border, size, nativeBuffer != null ? nativeBuffer.cast() : nullptr);
+    
     if (nativeBuffer != null) {
       calloc.free(nativeBuffer);
     }
@@ -1390,13 +1440,26 @@ class RenderingContext {
     checkError('compressedTexImage2D');
   }
 
-  void compressedTexSubImage2D(int target, int level, int xoffset, int yoffset, int width, int height, int format, TypedData? pixels){
+  void compressedTexSubImage2D(int target, int level, int xoffset, int yoffset, int width, int height, int format ,TypedData? pixels){
     Pointer<Int8>? nativeBuffer;
     if (pixels != null) {
       nativeBuffer = calloc<Int8>(pixels.lengthInBytes);
       nativeBuffer.asTypedList(pixels.lengthInBytes).setAll(0, pixels.buffer.asUint8List());
     }
-    gl.glCompressedTexImage2D(target, level, xoffset, yoffset, width, height, format,
+    late int size;
+
+    if (pixels is List<double> || pixels is Float32List) {
+      nativeBuffer = floatListToArrayPointer(pixels as List<double>).cast();
+      size = pixels!.lengthInBytes * sizeOf<Float>();
+    } else if (pixels is Int32List) {
+      nativeBuffer = int32ListToArrayPointer(pixels).cast();
+      size = pixels.length * sizeOf<Int32>();
+    } else if (pixels is Uint16List) {
+      nativeBuffer = uInt16ListToArrayPointer(pixels).cast();
+      size = pixels.length * sizeOf<Uint16>();
+    } 
+
+    gl.glCompressedTexSubImage2D(target, level, xoffset, yoffset, width, height, format, size,
         nativeBuffer != null ? nativeBuffer.cast() : nullptr);
 
     if (nativeBuffer != null) {
@@ -1411,6 +1474,10 @@ class RenderingContext {
   }
 
   // void copyTexSubImage2D(int target, int level, int xoffset, int yoffset, int x, int y, int width, int height);
+  void copyTexSubImage2D(int target, int level, int xoffset, int yoffset, int x, int y, int width, int height){
+    gl.glCopyTexSubImage2D(target, level, xoffset, yoffset, x,y,width, height);
+    checkError('copyTexSubImage2D');
+  }
 
   Buffer createBuffer() {
     Pointer<Uint32> id = tempUint32s[0];
@@ -1453,7 +1520,7 @@ class RenderingContext {
     return WebGLTexture(textureId.value);
   }
 
-  WebGLParameter getParameter(int key) {
+  int getParameter(int key) {
     // print("OpenGL getParameter key: ${key} ");
 
     List<int> _intValues = [
@@ -1474,7 +1541,7 @@ class RenderingContext {
     if (_intValues.indexOf(key) >= 0) {
       final v = calloc<Int32>(4);
       gl.glGetIntegerv(key, v);
-      return WebGLParameter(v.value);
+      return v.value;
     } else {
       throw (" OpenGL getParameter key: ${key} is not support ");
     }
@@ -1565,7 +1632,7 @@ class RenderingContext {
   }
 
   void enable(int cap) {
-    gl.glEnable(cap);
+    //gl.glEnable(cap);
     checkError('enable');
   }
 
@@ -1601,10 +1668,45 @@ class RenderingContext {
     checkError('generateMipmap');
   }
 
-  // ActiveInfo getActiveAttrib(Program program, int index);
+  ActiveInfo getActiveAttrib(Program v0, int v1) {
+    var length = calloc<Int32>();
+    var size = calloc<Int32>();
+    var type = calloc<Uint32>();
+    var name = calloc<Int8>(100);
 
-  // ActiveInfo getActiveUniform(Program program, int index);
+    gl.glGetActiveAttrib(v0.id, v1, 99, length, size, type, name);
 
+    int _type = type.value;
+    String _name = name.cast<Utf8>().toDartString();
+    int _size = size.value;
+
+    calloc.free(type);
+    calloc.free(name);
+    calloc.free(size);
+    calloc.free(length);
+
+    return ActiveInfo(_type, _name, _size);
+  }
+
+  ActiveInfo getActiveUniform(Program v0, int v1) {
+    var length = calloc<Int32>();
+    var size = calloc<Int32>();
+    var type = calloc<Uint32>();
+    var name = calloc<Int8>(100);
+
+    gl.glGetActiveUniform(v0.id, v1, 99, length, size, type, name);
+
+    int _type = type.value;
+    String _name = name.cast<Utf8>().toDartString();
+    int _size = size.value;
+
+    calloc.free(type);
+    calloc.free(name);
+    calloc.free(size);
+    calloc.free(length);
+
+    return ActiveInfo(_type, _name, _size);
+  }
   // List<WebGLShader>? getAttachedShaders(Program program);
 
   UniformLocation getAttribLocation(Program program, String name) {
@@ -1616,9 +1718,9 @@ class RenderingContext {
   }
   // Object? getBufferParameter(int target, int pname);
 
-  // Map? getContextAttributes() {
-  //   return convertNativeToDart_Dictionary(_getContextAttributes_1());
-  // }
+  dynamic getContextAttributes() {
+    return null;
+  }
 
   // //JS ('getContextAttributes')
   // _getContextAttributes_1();
@@ -1627,7 +1729,14 @@ class RenderingContext {
     return gl.glGetError();
   }
 
-  // Object? getExtension(String name);
+  Object? getExtension(String key) {
+    Pointer _v = gl.glGetString(WebGL.EXTENSIONS);
+
+    String _vstr = _v.cast<Utf8>().toDartString();
+    List<String> _extensions = _vstr.split(" ");
+
+    return _extensions;
+  }
 
   // Object? getFramebufferAttachmentParameter(int target, int attachment, int pname);
 
@@ -1655,11 +1764,11 @@ class RenderingContext {
     return null;
   }
 
-  int getProgramParameter(Program program, int pname) {
+  WebGLParameter getProgramParameter(Program program, int pname) {
     final status = tempInt32s[0];
     gl.glGetProgramiv(program.id, pname, status);
     checkError('getProgramParameter');
-    return status.value;
+    return WebGLParameter(status.value);
   }
 
   // Object? getRenderbufferParameter(int target, int pname);
@@ -1683,28 +1792,27 @@ class RenderingContext {
     return null;
   }
 
-  Object getShaderParameter(WebGLShader shader, int pname){
+  bool getShaderParameter(WebGLShader shader, int pname){
     var _pointer = calloc<Int32>();
     gl.glGetShaderiv(shader.id, pname, _pointer);
     final _v = _pointer.value;
     calloc.free(_pointer);
-    return _v;
+    return _v == 0?false:true;
   }
 
   ShaderPrecisionFormat getShaderPrecisionFormat(int shadertype, int precisiontype){
     return ShaderPrecisionFormat();
   }
 
-  // int getShaderSource(int shader){
-  //   var sourceString = shaderSource.toNativeUtf8();
-  //   var arrayPointer = calloc<Pointer<Int8>>();
-  //   arrayPointer.value = Pointer.fromAddress(sourceString.address);
-  //   gl.glGetShaderSource(shader, 1, arrayPointer, nullptr);
-  //   calloc.free(arrayPointer);
-  //   calloc.free(sourceString);
-  //   return 0;
-  //   //return gl.glGetShaderSource(shader, bufSize, length, source);
-  // }
+  String? getShaderSource(int shader){
+    // var sourceString = shaderSource.toNativeUtf8();
+    // var arrayPointer = calloc<Int32>();
+    // arrayPointer.value = Pointer.fromAddress(sourceString.address);
+    // String temp = gl.glGetShaderSource(shader, 1, arrayPointer, nullptr);
+    // calloc.free(arrayPointer);
+    // calloc.free(sourceString);
+    return null;
+  }
 
   // List<String>? getSupportedExtensions();
 
@@ -1858,32 +1966,31 @@ class RenderingContext {
     int target, 
     int level, 
     int internalformat, 
-    int border, 
     int format, 
     int type, 
     TypedData? pixels
   ) {  
-    texImage2D(target, level, internalformat, 0, 0, border, format, type, pixels);
+    texImage2D(target, level, internalformat, 0, 0, 0, format, type, pixels);
   }
 
   Future<void> texImage2DfromImage(
-    target,
+    int target,
     Image image, {
-    level = 0,
-    internalformat = WebGL.RGBA,
-    format = WebGL.RGBA,
-    type = WebGL.UNSIGNED_BYTE,
+    int level = 0,
+    int internalformat = WebGL.RGBA,
+    int format = WebGL.RGBA,
+    int type = WebGL.UNSIGNED_BYTE,
   }) async {
     texImage2D(target, level, internalformat, image.width, image.height, 0, format, type, (await image.toByteData())!);
   }
 
   Future<void> texImage2DfromAsset(
-    target,
+    int target,
     String assetPath, {
-    level = 0,
-    internalformat = WebGL.RGBA32UI,
-    format = WebGL.RGBA,
-    type = WebGL.UNSIGNED_INT,
+    int level = 0,
+    int internalformat = WebGL.RGBA32UI,
+    int format = WebGL.RGBA,
+    int type = WebGL.UNSIGNED_INT,
   }) async {
     final image = await loadImageFromAsset(assetPath);
     texImage2D(target, level, internalformat, image.width, image.height, 0, format, type, (await image.toByteData())!);
@@ -2070,6 +2177,13 @@ class RenderingContext {
   }
 
   // void uniformMatrix2fv(UniformLocation? location, bool transpose, array);
+  void uniformMatrix2fv(UniformLocation location, bool transpose, List<double> values) {
+    var arrayPointer = floatListToArrayPointer(values);
+    gl.glUniformMatrix2fv(location.id, values.length ~/ 9, transpose ? 1 : 0, arrayPointer);
+    checkError('uniformMatrix2fv');
+    calloc.free(arrayPointer);
+    
+  }
 
   void uniformMatrix3fv(UniformLocation location, bool transpose, List<double> values) {
     var arrayPointer = floatListToArrayPointer(values);
@@ -2086,8 +2200,8 @@ class RenderingContext {
     calloc.free(arrayPointer);
   }
 
-  void useProgram(Program program) {
-    gl.glUseProgram(program.id);
+  void useProgram(Program? program) {
+    gl.glUseProgram(program?.id ?? 0);
     checkError('useProgram');
   }
 
@@ -2095,7 +2209,12 @@ class RenderingContext {
 
   // void vertexAttrib1f(int indx, num x);
 
-  // void vertexAttrib1fv(int indx, values);
+  void vertexAttrib1fv(int index, List<double> values){
+    var arrayPointer = floatListToArrayPointer(values);
+    gl.glVertexAttrib1fv(index, arrayPointer);
+    checkError('vertexAttrib2fv');
+    calloc.free(arrayPointer);
+  }
 
   // void vertexAttrib2f(int indx, num x, num y);
 

@@ -1,8 +1,21 @@
 part of three_webgl;
 
+class AttributeLocations{
+  AttributeLocations({
+    this.location,
+    this.locationSize = 0,
+    this.type = 0
+  });
+
+  final dynamic location;
+  final int type;//: info.type,
+  //"location": gl.getAttribLocation(program, name),
+  final int locationSize;//: locationSize
+}
+
 mixin WebGLProgramExtra {
-  String handleSource(String string, int errorLine) {
-    final lines = string.split('\n');
+  String handleSource(String? string, int errorLine) {
+    final lines = string?.split('\n') ?? [];
     final lines2 = [];
 
     int from = math.max(errorLine - 6, 0);
@@ -41,9 +54,9 @@ mixin WebGLProgramExtra {
     }
   }
 
-  String getShaderErrors(dynamic gl, WebGLShader shader, type) {
-    final status = gl.getShaderParameter(shader.shader, gl.COMPILE_STATUS);
-    final errors = gl.getShaderInfoLog(shader.shader).trim();
+  String getShaderErrors(RenderingContext gl, WebGLShader shader, type) {
+    final status = gl.getShaderParameter(shader.shader, WebGL.COMPILE_STATUS);
+    final errors = (gl.getShaderInfoLog(shader.shader)??'').trim();
 
     if (status && errors == '') return '';
 
@@ -139,10 +152,10 @@ mixin WebGLProgramExtra {
     return chunks.join('\n');
   }
 
-  Map<String, dynamic> fetchAttributeLocations(gl, program) {
-    Map<String, dynamic> attributes = {};
+  Map<String, AttributeLocations> fetchAttributeLocations(RenderingContext gl, program) {
+    Map<String, AttributeLocations> attributes = {};
 
-    final n = gl.getProgramParameter(program, gl.ACTIVE_ATTRIBUTES);
+    final n = gl.getProgramParameter(program, WebGL.ACTIVE_ATTRIBUTES).id;
 
     for (int i = 0; i < n; i++) {
       final info = gl.getActiveAttrib(program, i);
@@ -153,17 +166,17 @@ mixin WebGLProgramExtra {
       // attributes[name] = gl.getAttribLocation(program, name);
 
       int locationSize = 1;
-      if (info.type == gl.FLOAT_MAT2) locationSize = 2;
-      if (info.type == gl.FLOAT_MAT3) locationSize = 3;
-      if (info.type == gl.FLOAT_MAT4) locationSize = 4;
+      if (info.type == WebGL.FLOAT_MAT2) locationSize = 2;
+      if (info.type == WebGL.FLOAT_MAT3) locationSize = 3;
+      if (info.type == WebGL.FLOAT_MAT4) locationSize = 4;
 
       // console.log( 'three.WebGLProgram: ACTIVE VERTEX ATTRIBUTE:', name, i );
 
-      attributes[name] = {
-        "type": info.type,
-        "location": gl.getAttribLocation(program, name),
-        "locationSize": locationSize
-      };
+      attributes[name] = AttributeLocations(
+        type: info.type,
+        location: gl.getAttribLocation(program, name),
+        locationSize: locationSize
+      );
     }
 
     return attributes;

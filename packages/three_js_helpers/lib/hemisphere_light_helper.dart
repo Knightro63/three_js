@@ -1,4 +1,6 @@
-import 'package:flutter_gl/flutter_gl.dart';
+
+import 'dart:typed_data';
+
 import 'package:three_js_math/three_js_math.dart';
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_geometry/three_js_geometry.dart';
@@ -39,9 +41,9 @@ class HemisphereLightHelper extends Object3D {
     if (color == null) material?.vertexColors = true;
 
     final position = geometry.getAttributeFromString('position');
-    final colors = Float32Array(position.count * 3);
+    final colors = Float32List(position.count * 3);
 
-    geometry.setAttributeFromString('color', Float32BufferAttribute(colors, 3, false));
+    geometry.setAttributeFromString('color', Float32BufferAttribute.fromList(colors, 3, false));
     add(Mesh(geometry, material));
     update();
   }

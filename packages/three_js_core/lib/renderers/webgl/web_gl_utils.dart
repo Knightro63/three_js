@@ -2,30 +2,29 @@ part of three_webgl;
 
 class WebGLUtils {
   bool isWebGL2 = true;
-  dynamic gl;
   WebGLExtensions extensions;
   WebGLCapabilities capabilities;
 
-  WebGLUtils(this.gl, this.extensions, this.capabilities) {
+  WebGLUtils(this.extensions, this.capabilities) {
     isWebGL2 = capabilities.isWebGL2;
   }
 
-  dynamic convert(p, [encoding]) {
+  dynamic convert(int p, [int? encoding]) {
     dynamic extension;
 
-    if (p == UnsignedByteType) return gl.UNSIGNED_BYTE;
-    if (p == UnsignedShort4444Type) return gl.UNSIGNED_SHORT_4_4_4_4;
-    if (p == UnsignedShort5551Type) return gl.UNSIGNED_SHORT_5_5_5_1;
+    if (p == UnsignedByteType) return WebGL.UNSIGNED_BYTE;
+    if (p == UnsignedShort4444Type) return WebGL.UNSIGNED_SHORT_4_4_4_4;
+    if (p == UnsignedShort5551Type) return WebGL.UNSIGNED_SHORT_5_5_5_1;
 
-    if (p == ByteType) return gl.BYTE;
-    if (p == ShortType) return gl.SHORT;
-    if (p == UnsignedShortType) return gl.UNSIGNED_SHORT;
-    if (p == IntType) return gl.INT;
-    if (p == UnsignedIntType) return gl.UNSIGNED_INT;
-    if (p == FloatType) return gl.FLOAT;
+    if (p == ByteType) return WebGL.BYTE;
+    if (p == ShortType) return WebGL.SHORT;
+    if (p == UnsignedShortType) return WebGL.UNSIGNED_SHORT;
+    if (p == IntType) return WebGL.INT;
+    if (p == UnsignedIntType) return WebGL.UNSIGNED_INT;
+    if (p == FloatType) return WebGL.FLOAT;
 
     if (p == HalfFloatType) {
-      if (isWebGL2) return gl.HALF_FLOAT;
+      if (isWebGL2) return WebGL.HALF_FLOAT;
 
       extension = extensions.get('OES_texture_half_float');
 
@@ -36,17 +35,17 @@ class WebGLUtils {
       }
     }
 
-    if (p == AlphaFormat) return gl.ALPHA;
-    if (p == RGBAFormat) return gl.RGBA;
-    if (p == LuminanceFormat) return gl.LUMINANCE;
-    if (p == LuminanceAlphaFormat) return gl.LUMINANCE_ALPHA;
-    if (p == DepthFormat) return gl.DEPTH_COMPONENT;
-    if (p == DepthStencilFormat) return gl.DEPTH_STENCIL;
-    if (p == RedFormat) return gl.RED;
+    if (p == AlphaFormat) return WebGL.ALPHA;
+    if (p == RGBAFormat) return WebGL.RGBA;
+    if (p == LuminanceFormat) return WebGL.LUMINANCE;
+    if (p == LuminanceAlphaFormat) return WebGL.LUMINANCE_ALPHA;
+    if (p == DepthFormat) return WebGL.DEPTH_COMPONENT;
+    if (p == DepthStencilFormat) return WebGL.DEPTH_STENCIL;
+    if (p == RedFormat) return WebGL.RED;
 
     if (p == RGBFormat) {
       console.warning('WebGLRenderer: RGBFormat has been removed. Use RGBAFormat instead. https://github.com/mrdoob/three.js/pull/23228');
-      return gl.RGBA;
+      return WebGL.RGBA;
     }
 
     // WebGL 1 sRGB fallback
@@ -63,10 +62,10 @@ class WebGLUtils {
 
     // WebGL2 formats.
 
-    if (p == RedIntegerFormat) return gl.RED_INTEGER;
-    if (p == RGFormat) return gl.RG;
-    if (p == RGIntegerFormat) return gl.RG_INTEGER;
-    if (p == RGBAIntegerFormat) return gl.RGBA_INTEGER;
+    if (p == RedIntegerFormat) return WebGL.RED_INTEGER;
+    if (p == RGFormat) return WebGL.RG;
+    if (p == RGIntegerFormat) return WebGL.RG_INTEGER;
+    if (p == RGBAIntegerFormat) return WebGL.RGBA_INTEGER;
 
     // S3TC
 
@@ -285,7 +284,7 @@ class WebGLUtils {
     //
 
     if (p == UnsignedInt248Type) {
-      if (isWebGL2) return gl.UNSIGNED_INT_24_8;
+      if (isWebGL2) return WebGL.UNSIGNED_INT_24_8;
 
       extension = extensions.get('WEBGL_depth_texture');
 
@@ -298,6 +297,6 @@ class WebGLUtils {
 
     // if "p" can't be resolved, assume the user defines a WebGL constant as a string (fallback/workaround for packed RGB formats)
 
-    return (gl[p] != null) ? gl[p] : null;
+    return null;//(gl[p] != null) ? gl[p] : null;
   }
 }

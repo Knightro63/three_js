@@ -1,4 +1,3 @@
-import 'package:flutter_gl/flutter_gl.dart';
 import '../core/index.dart';
 import 'package:three_js_math/three_js_math.dart';
 
@@ -79,9 +78,9 @@ class PlaneGeometry extends BufferGeometry {
     }
 
     setIndex(indices);
-    setAttributeFromString('position',Float32BufferAttribute(Float32Array.from(vertices), 3, false));
-    setAttributeFromString('normal',Float32BufferAttribute(Float32Array.from(normals), 3, false));
-    setAttributeFromString('uv', Float32BufferAttribute(Float32Array.from(uvs), 2, false));
+    setAttributeFromString('position',Float32BufferAttribute.fromList(vertices, 3, false));
+    setAttributeFromString('normal',Float32BufferAttribute.fromList(normals, 3, false));
+    setAttributeFromString('uv', Float32BufferAttribute.fromList(uvs, 2, false));
   }
 
   static fromJson(data) {

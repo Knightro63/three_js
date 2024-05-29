@@ -10,7 +10,8 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.6
-  flutter_gl: ^0.0.21
+  flutter_angle:
+    path: ../../flutter_angle
   three_js:
     path: ../../three_js
   three_js_helpers:
