@@ -360,7 +360,7 @@ class FlutterAngle {
       _rawOpenGl.glBindFramebuffer(GL_FRAMEBUFFER, texture.fboId);
       _rawOpenGl.glClearColor(0.0, 0.0, 0.0, 0.0);
       _rawOpenGl.glClear(GL_COLOR_BUFFER_BIT);
-      //_rawOpenGl.glViewport(0, 0, texture.options.width, texture.options.height);
+      _rawOpenGl.glViewport(0, 0, (texture.options.width*texture.options.dpr).toInt(),( texture.options.height*texture.options.dpr).toInt());
       worker.renderTexture(sourceTexture);
       _rawOpenGl.glFinish();
     }

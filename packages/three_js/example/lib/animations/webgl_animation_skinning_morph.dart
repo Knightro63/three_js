@@ -67,7 +67,7 @@ class _State extends State<WebglAnimationSkinningMorph> {
 
     threeJs.scene.add(dirLight);
 
-    // scene.add( new three.CameraHelper( dirLight.shadow.camera ) );
+    // threeJs.scene.add( three.CameraHelper( dirLight.shadow.camera ) );
 
     final mesh = three.Mesh(three.PlaneGeometry(2000, 2000), three.MeshPhongMaterial.fromMap({"color": 0x999999}));
     mesh.rotation.x = -math.pi / 2;

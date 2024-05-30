@@ -335,7 +335,7 @@ class RenderingContext{
     _gl.bindBuffer(target, buffer.id);
   }
 
-  void bufferData<T extends TypedData>(int target, T data, int usage) {
+  void bufferData(int target, TypedData data, int usage) {
     _gl.bufferData(target, data, usage);
   }
 

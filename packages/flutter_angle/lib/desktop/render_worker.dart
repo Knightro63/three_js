@@ -96,7 +96,7 @@ class RenderWorker{
     _gl.bufferData(WebGL.ARRAY_BUFFER, vertices, WebGL.STATIC_DRAW);
   }
 
-  void drawTexture({required WebGLTexture? texture, vertexBuffer, List<double>? matrix}) {
+  void drawTexture({required WebGLTexture? texture, required Buffer vertexBuffer, List<double>? matrix}) {
     _gl.checkError("drawTexture 01");
     
     final _program = GlProgram(
