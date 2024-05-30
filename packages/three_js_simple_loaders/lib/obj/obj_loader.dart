@@ -663,19 +663,19 @@ class OBJLoader extends Loader {
 
         final buffergeometry = BufferGeometry();
 
-        buffergeometry.setAttributeFromString('position', Float32BufferAttribute(Float32Array.fromList( List<double>.from(geometry["vertices"]) ), 3));
+        buffergeometry.setAttributeFromString('position', Float32BufferAttribute.fromList(List<double>.from(geometry["vertices"]), 3));
 
         if (geometry["normals"].length > 0) {
-          buffergeometry.setAttributeFromString('normal', Float32BufferAttribute(Float32Array.fromList( List<double>.from(geometry["normals"]) ), 3));
+          buffergeometry.setAttributeFromString('normal', Float32BufferAttribute.fromList(List<double>.from(geometry["normals"]), 3));
         }
 
         if (geometry["colors"].length > 0) {
           hasVertexColors = true;
-          buffergeometry.setAttributeFromString('color', Float32BufferAttribute(Float32Array.fromList( List<double>.from(geometry["colors"])), 3));
+          buffergeometry.setAttributeFromString('color', Float32BufferAttribute.fromList(List<double>.from(geometry["colors"]), 3));
         }
 
         if (geometry["hasUVIndices"] == true) {
-          buffergeometry.setAttributeFromString('uv', Float32BufferAttribute(Float32Array.fromList( List<double>.from(geometry["uvs"])), 2));
+          buffergeometry.setAttributeFromString('uv', Float32BufferAttribute.fromList(List<double>.from(geometry["uvs"]), 2));
         }
 
         // Create materials
@@ -766,10 +766,10 @@ class OBJLoader extends Loader {
 
         final buffergeometry = BufferGeometry();
 
-        buffergeometry.setAttributeFromString('position', Float32BufferAttribute(Float32Array.fromList(state.vertices), 3));
+        buffergeometry.setAttributeFromString('position', Float32BufferAttribute.fromList(state.vertices, 3));
 
         if (state.colors.isNotEmpty) {// && state.colors[0] != null
-          buffergeometry.setAttributeFromString('color', Float32BufferAttribute(Float32Array.fromList(state.colors), 3));
+          buffergeometry.setAttributeFromString('color', Float32BufferAttribute.fromList(state.colors, 3));
           material.vertexColors = true;
         }
 

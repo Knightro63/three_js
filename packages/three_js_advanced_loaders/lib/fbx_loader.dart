@@ -14,6 +14,47 @@ late _FBXTree _fbxTree;
 late Map connections;
 late AnimationObject sceneGraph;
 
+class MorphBuffers{
+  MorphBuffers({
+    List<double>? vertex,
+    List<double>? normal,
+    List<double>? colors,
+    List<List<double>>? uvs,
+    List<int>? materialIndex,
+    List<double>? vertexWeights,
+    List<int>? weightsIndices,
+  }){
+    this.vertex = vertex ?? [];
+    this.normal = normal ?? [];
+    this.colors = colors ?? [];
+    this.uvs = uvs ?? [];
+    this.materialIndex = materialIndex ?? [];
+    this.vertexWeights = vertexWeights ?? [];
+    this.weightsIndices = weightsIndices ?? [];
+  }
+
+  List<double> vertex = [];
+  List<double> normal = [];
+  List<double> colors = [];
+  List<List<double>> uvs  = [];
+  List<int> materialIndex = [];
+  List<double> vertexWeights = [];
+  List<int> weightsIndices = [];
+
+  @override
+  String toString(){
+    return {
+      "vertex": vertex,
+      "normal": normal,
+      "colors": colors,
+      "uvs": uvs,
+      "materialIndex": materialIndex,
+      "vertexWeights": vertexWeights,
+      "weightsIndices": weightsIndices,
+    }.toString();
+  }
+}
+
 ///
 /// Loader loads FBX file and generates Group representing FBX scene.
 /// Requires FBX file to be >= 7.0 and in ASCII or >= 6400 in Binary format
@@ -697,7 +738,7 @@ class __FBXTreeParser {
   }
 
   // create the main Group() to be returned by the loader
-  parseScene(deformers, Map geometryMap, Map materialMap) {
+  void parseScene(deformers, Map geometryMap, Map materialMap) {
     sceneGraph = AnimationObject();
 
     Map modelMap = parseModels(deformers["skeletons"], geometryMap, materialMap);
@@ -1303,45 +1344,45 @@ class _GeometryParser {
     final buffers = genBuffers(geoInfo);
 
     final positionAttribute = Float32BufferAttribute.fromList(
-        List<double>.from(buffers["vertex"]), 3);
+        List<double>.from(buffers.vertex), 3);
 
     positionAttribute.applyMatrix4(preTransform);
 
     geo.setAttributeFromString('position', positionAttribute);
 
-    if (buffers["colors"].length > 0) {
-      geo.setAttributeFromString('color', Float32BufferAttribute(buffers["colors"], 3));
+    if (buffers.colors.isNotEmpty) {
+      geo.setAttributeFromString('color', Float32BufferAttribute.fromList(buffers.colors, 3));
     }
 
     if (skeleton != null) {
       geo.setAttributeFromString(
           'skinIndex',
           Uint16BufferAttribute.fromList(
-              List<int>.from(buffers["weightsIndices"]),
+              List<int>.from(buffers.weightsIndices),
               4));
 
       geo.setAttributeFromString(
           'skinWeight',
           Float32BufferAttribute.fromList(
               List<double>.from(
-                  buffers["vertexWeights"].map((e) => e.toDouble())),
+                  buffers.vertexWeights.map((e) => e.toDouble())),
               4));
 
       // used later to bind the skeleton to the model
       geo.userData["FBX_Deformer"] = skeleton;
     }
 
-    if (buffers["normal"].length > 0) {
+    if (buffers.normal.isNotEmpty) {
       final normalMatrix = Matrix3.identity().getNormalMatrix(preTransform);
 
       final normalAttribute = Float32BufferAttribute.fromList(
-          List<double>.from(buffers["normal"]), 3);
+          List<double>.from(buffers.normal), 3);
       normalAttribute.applyNormalMatrix(normalMatrix);
 
       geo.setAttributeFromString('normal', normalAttribute);
     }
 
-    buffers["uvs"].asMap().forEach((i, uvBuffer) {
+    buffers.uvs.asMap().forEach((i, uvBuffer) {
       // subsequent uv buffers are called 'uv1', 'uv2', ...
       String name = 'uv${(i + 1)}';
 
@@ -1350,19 +1391,16 @@ class _GeometryParser {
         name = 'uv';
       }
 
-      geo.setAttributeFromString(
-          name,
-          Float32BufferAttribute.fromList(
-              List<double>.from(buffers["uvs"][i]), 2));
+      geo.setAttributeFromString(name,Float32BufferAttribute.fromList(List<double>.from(buffers.uvs[i]), 2));
     });
 
     if (geoInfo["material"] != null &&
         geoInfo["material"]["mappingType"] != 'AllSame') {
       // Convert the material indices of each vertex into rendering groups on the geometry.
-      int prevMaterialIndex = buffers["materialIndex"][0];
+      int prevMaterialIndex = buffers.materialIndex[0];
       int startIndex = 0;
 
-      buffers["materialIndex"].asMap().forEach((i, currentIndex) {
+      buffers.materialIndex.asMap().forEach((i, currentIndex) {
         if (currentIndex != prevMaterialIndex) {
           geo.addGroup(startIndex, i - startIndex, prevMaterialIndex);
 
@@ -1374,18 +1412,17 @@ class _GeometryParser {
       // the loop above doesn't add the last group, do that here.
       if (geo.groups.isNotEmpty) {
         final lastGroup = geo.groups[geo.groups.length - 1];
-        final lastIndex = lastGroup["start"] + lastGroup["count"];
+        final int lastIndex = (lastGroup["start"] + lastGroup["count"]).toInt();
 
-        if (lastIndex != buffers["materialIndex"].length) {
-          geo.addGroup(lastIndex, buffers["materialIndex"].length - lastIndex,
-              prevMaterialIndex);
+        if (lastIndex != buffers.materialIndex.length) {
+          geo.addGroup(lastIndex, buffers.materialIndex.length - lastIndex,prevMaterialIndex);
         }
       }
 
       // case where there are multiple materials but the whole geometry is only
       // using one of them
       if (geo.groups.isEmpty) {
-        geo.addGroup(0, buffers["materialIndex"].length,buffers["materialIndex"][0].toInt());
+        geo.addGroup(0, buffers.materialIndex.length,buffers.materialIndex[0].toInt());
       }
     }
 
@@ -1412,7 +1449,7 @@ class _GeometryParser {
     }
 
     if (geoNode["LayerElementNormal"] != null) {
-      geoInfo["normal"] = parseNormals(geoNode["LayerElementNormal"][0]);
+      geoInfo['normal'] = parseNormals(geoNode["LayerElementNormal"][0]);
     }
 
     if (geoNode["LayerElementUV"] != null) {
@@ -1453,16 +1490,8 @@ class _GeometryParser {
     return geoInfo;
   }
 
-  genBuffers(geoInfo) {
-    final buffers = {
-      "vertex": [],
-      "normal": [],
-      "colors": [],
-      "uvs": [],
-      "materialIndex": [],
-      "vertexWeights": [],
-      "weightsIndices": [],
-    };
+  MorphBuffers genBuffers(geoInfo) {
+    final buffers = MorphBuffers();
 
     int polygonIndex = 0;
     int faceLength = 0;
@@ -1556,9 +1585,9 @@ class _GeometryParser {
         }
       }
 
-      if (geoInfo["normal"] != null) {
+      if (geoInfo['normal'] != null) {
         final data = _getData(
-            polygonVertexIndex, polygonIndex, vertexIndex, geoInfo["normal"]);
+            polygonVertexIndex, polygonIndex, vertexIndex, geoInfo['normal']);
 
         faceNormals.addAll([data[0], data[1], data[2]]);
       }
@@ -1615,7 +1644,7 @@ class _GeometryParser {
 
   // Generate data for a single face in a geometry. If the face is a quad then split it into 2 tris
   genFace(
-      Map buffers,
+      MorphBuffers buffers,
       Map geoInfo,
       facePositionIndexes,
       materialIndex,
@@ -1626,103 +1655,103 @@ class _GeometryParser {
       faceWeightIndices,
       faceLength) {
     for (int i = 2; i < faceLength; i++) {
-      buffers["vertex"].add(geoInfo["vertexPositions"][facePositionIndexes[0]]);
-      buffers["vertex"].add(geoInfo["vertexPositions"][facePositionIndexes[1]]);
-      buffers["vertex"].add(geoInfo["vertexPositions"][facePositionIndexes[2]]);
+      buffers.vertex.add(geoInfo["vertexPositions"][facePositionIndexes[0]]);
+      buffers.vertex.add(geoInfo["vertexPositions"][facePositionIndexes[1]]);
+      buffers.vertex.add(geoInfo["vertexPositions"][facePositionIndexes[2]]);
 
-      buffers["vertex"]
+      buffers.vertex
           .add(geoInfo["vertexPositions"][facePositionIndexes[(i - 1) * 3]]);
-      buffers["vertex"].add(
+      buffers.vertex.add(
           geoInfo["vertexPositions"][facePositionIndexes[(i - 1) * 3 + 1]]);
-      buffers["vertex"].add(
+      buffers.vertex.add(
           geoInfo["vertexPositions"][facePositionIndexes[(i - 1) * 3 + 2]]);
 
-      buffers["vertex"]
+      buffers.vertex
           .add(geoInfo["vertexPositions"][facePositionIndexes[i * 3]]);
-      buffers["vertex"]
+      buffers.vertex
           .add(geoInfo["vertexPositions"][facePositionIndexes[i * 3 + 1]]);
-      buffers["vertex"]
+      buffers.vertex
           .add(geoInfo["vertexPositions"][facePositionIndexes[i * 3 + 2]]);
 
       if (geoInfo["skeleton"] != null) {
-        buffers["vertexWeights"].add(faceWeights[0]);
-        buffers["vertexWeights"].add(faceWeights[1]);
-        buffers["vertexWeights"].add(faceWeights[2]);
-        buffers["vertexWeights"].add(faceWeights[3]);
+        buffers.vertexWeights.add(faceWeights[0]);
+        buffers.vertexWeights.add(faceWeights[1]);
+        buffers.vertexWeights.add(faceWeights[2]);
+        buffers.vertexWeights.add(faceWeights[3]);
 
-        buffers["vertexWeights"].add(faceWeights[(i - 1) * 4]);
-        buffers["vertexWeights"].add(faceWeights[(i - 1) * 4 + 1]);
-        buffers["vertexWeights"].add(faceWeights[(i - 1) * 4 + 2]);
-        buffers["vertexWeights"].add(faceWeights[(i - 1) * 4 + 3]);
+        buffers.vertexWeights.add(faceWeights[(i - 1) * 4]);
+        buffers.vertexWeights.add(faceWeights[(i - 1) * 4 + 1]);
+        buffers.vertexWeights.add(faceWeights[(i - 1) * 4 + 2]);
+        buffers.vertexWeights.add(faceWeights[(i - 1) * 4 + 3]);
 
-        buffers["vertexWeights"].add(faceWeights[i * 4]);
-        buffers["vertexWeights"].add(faceWeights[i * 4 + 1]);
-        buffers["vertexWeights"].add(faceWeights[i * 4 + 2]);
-        buffers["vertexWeights"].add(faceWeights[i * 4 + 3]);
+        buffers.vertexWeights.add(faceWeights[i * 4]);
+        buffers.vertexWeights.add(faceWeights[i * 4 + 1]);
+        buffers.vertexWeights.add(faceWeights[i * 4 + 2]);
+        buffers.vertexWeights.add(faceWeights[i * 4 + 3]);
 
-        buffers["weightsIndices"].add(faceWeightIndices[0]);
-        buffers["weightsIndices"].add(faceWeightIndices[1]);
-        buffers["weightsIndices"].add(faceWeightIndices[2]);
-        buffers["weightsIndices"].add(faceWeightIndices[3]);
+        buffers.weightsIndices.add(faceWeightIndices[0]);
+        buffers.weightsIndices.add(faceWeightIndices[1]);
+        buffers.weightsIndices.add(faceWeightIndices[2]);
+        buffers.weightsIndices.add(faceWeightIndices[3]);
 
-        buffers["weightsIndices"].add(faceWeightIndices[(i - 1) * 4]);
-        buffers["weightsIndices"].add(faceWeightIndices[(i - 1) * 4 + 1]);
-        buffers["weightsIndices"].add(faceWeightIndices[(i - 1) * 4 + 2]);
-        buffers["weightsIndices"].add(faceWeightIndices[(i - 1) * 4 + 3]);
+        buffers.weightsIndices.add(faceWeightIndices[(i - 1) * 4]);
+        buffers.weightsIndices.add(faceWeightIndices[(i - 1) * 4 + 1]);
+        buffers.weightsIndices.add(faceWeightIndices[(i - 1) * 4 + 2]);
+        buffers.weightsIndices.add(faceWeightIndices[(i - 1) * 4 + 3]);
 
-        buffers["weightsIndices"].add(faceWeightIndices[i * 4]);
-        buffers["weightsIndices"].add(faceWeightIndices[i * 4 + 1]);
-        buffers["weightsIndices"].add(faceWeightIndices[i * 4 + 2]);
-        buffers["weightsIndices"].add(faceWeightIndices[i * 4 + 3]);
+        buffers.weightsIndices.add(faceWeightIndices[i * 4]);
+        buffers.weightsIndices.add(faceWeightIndices[i * 4 + 1]);
+        buffers.weightsIndices.add(faceWeightIndices[i * 4 + 2]);
+        buffers.weightsIndices.add(faceWeightIndices[i * 4 + 3]);
       }
 
       if (geoInfo["color"] != null) {
-        buffers["colors"].add(faceColors[0]);
-        buffers["colors"].add(faceColors[1]);
-        buffers["colors"].add(faceColors[2]);
+        buffers.colors.add(faceColors[0]);
+        buffers.colors.add(faceColors[1]);
+        buffers.colors.add(faceColors[2]);
 
-        buffers["colors"].add(faceColors[(i - 1) * 3]);
-        buffers["colors"].add(faceColors[(i - 1) * 3 + 1]);
-        buffers["colors"].add(faceColors[(i - 1) * 3 + 2]);
+        buffers.colors.add(faceColors[(i - 1) * 3]);
+        buffers.colors.add(faceColors[(i - 1) * 3 + 1]);
+        buffers.colors.add(faceColors[(i - 1) * 3 + 2]);
 
-        buffers["colors"].add(faceColors[i * 3]);
-        buffers["colors"].add(faceColors[i * 3 + 1]);
-        buffers["colors"].add(faceColors[i * 3 + 2]);
+        buffers.colors.add(faceColors[i * 3]);
+        buffers.colors.add(faceColors[i * 3 + 1]);
+        buffers.colors.add(faceColors[i * 3 + 2]);
       }
 
       if (geoInfo["material"] != null &&
           geoInfo["material"]["mappingType"] != 'AllSame') {
-        buffers["materialIndex"].add(materialIndex);
-        buffers["materialIndex"].add(materialIndex);
-        buffers["materialIndex"].add(materialIndex);
+        buffers.materialIndex.add(materialIndex);
+        buffers.materialIndex.add(materialIndex);
+        buffers.materialIndex.add(materialIndex);
       }
 
-      if (geoInfo["normal"] != null) {
-        buffers["normal"].add(faceNormals[0]);
-        buffers["normal"].add(faceNormals[1]);
-        buffers["normal"].add(faceNormals[2]);
+      if (geoInfo['normal'] != null) {
+        buffers.normal.add(faceNormals[0]);
+        buffers.normal.add(faceNormals[1]);
+        buffers.normal.add(faceNormals[2]);
 
-        buffers["normal"].add(faceNormals[(i - 1) * 3]);
-        buffers["normal"].add(faceNormals[(i - 1) * 3 + 1]);
-        buffers["normal"].add(faceNormals[(i - 1) * 3 + 2]);
+        buffers.normal.add(faceNormals[(i - 1) * 3]);
+        buffers.normal.add(faceNormals[(i - 1) * 3 + 1]);
+        buffers.normal.add(faceNormals[(i - 1) * 3 + 2]);
 
-        buffers["normal"].add(faceNormals[i * 3]);
-        buffers["normal"].add(faceNormals[i * 3 + 1]);
-        buffers["normal"].add(faceNormals[i * 3 + 2]);
+        buffers.normal.add(faceNormals[i * 3]);
+        buffers.normal.add(faceNormals[i * 3 + 1]);
+        buffers.normal.add(faceNormals[i * 3 + 2]);
       }
 
       if (geoInfo["uv"] != null) {
         geoInfo["uv"].asMap().forEach((j, uv) {
-          if (buffers["uvs"].length == j) buffers["uvs"].add([]);
+          if (buffers.uvs.length == j) buffers.uvs.add([]);
 
-          buffers["uvs"][j].add(faceUVs[j][0]);
-          buffers["uvs"][j].add(faceUVs[j][1]);
+          buffers.uvs[j].add(faceUVs[j][0]);
+          buffers.uvs[j].add(faceUVs[j][1]);
 
-          buffers["uvs"][j].add(faceUVs[j][(i - 1) * 2]);
-          buffers["uvs"][j].add(faceUVs[j][(i - 1) * 2 + 1]);
+          buffers.uvs[j].add(faceUVs[j][(i - 1) * 2]);
+          buffers.uvs[j].add(faceUVs[j][(i - 1) * 2 + 1]);
 
-          buffers["uvs"][j].add(faceUVs[j][i * 2]);
-          buffers["uvs"][j].add(faceUVs[j][i * 2 + 1]);
+          buffers.uvs[j].add(faceUVs[j][i * 2]);
+          buffers.uvs[j].add(faceUVs[j][i * 2 + 1]);
         });
       }
     }
@@ -1754,16 +1783,13 @@ class _GeometryParser {
   // and a special attribute Index defining which vertices of the original geometry are affected
   // Normal and position attributes only have data for the vertices that are affected by the morph
   genMorphGeometry(parentGeo, parentGeoNode, morphGeoNode, preTransform, name) {
-    final vertexIndices = (parentGeoNode.PolygonVertexIndex != null)
-        ? parentGeoNode.PolygonVertexIndex.a
-        : [];
+    final vertexIndices = (parentGeoNode.PolygonVertexIndex != null)? parentGeoNode.PolygonVertexIndex.a: [];
 
-    final morphPositionsSparse =
-        (morphGeoNode.Vertices != null) ? morphGeoNode.Vertices.a : [];
+    final morphPositionsSparse = (morphGeoNode.Vertices != null) ? morphGeoNode.Vertices.a : [];
     final indices = (morphGeoNode.Indexes != null) ? morphGeoNode.Indexes.a : [];
 
     final length = parentGeo.attributes.position.count * 3;
-    final morphPositions = Float32Array(length);
+    final morphPositions = Float32List(length);
 
     for (int i = 0; i < indices.length; i++) {
       final morphIndex = indices[i] * 3;
@@ -1781,7 +1807,7 @@ class _GeometryParser {
 
     final morphBuffers = genBuffers(morphGeoInfo);
 
-    final positionAttribute = Float32BufferAttribute(morphBuffers.vertex, 3);
+    final positionAttribute = Float32BufferAttribute.fromList(morphBuffers.vertex, 3);
     positionAttribute.name = name ?? morphGeoNode.attrName;
 
     positionAttribute.applyMatrix4(preTransform);

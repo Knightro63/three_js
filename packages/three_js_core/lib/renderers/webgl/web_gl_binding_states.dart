@@ -94,7 +94,7 @@ class WebGLBindingStates {
     return extension.createVertexArrayOES();
   }
 
-  bindVertexArrayObject(vao) {
+  bindVertexArrayObject(VertexArrayObject? vao) {
     if (capabilities.isWebGL2) {
       if (vao != null) {
         return gl.bindVertexArray(vao);
@@ -145,7 +145,7 @@ class WebGLBindingStates {
     return state;
   }
 
-  Map<String, dynamic> createBindingState(vao) {
+  Map<String, dynamic> createBindingState(VertexArrayObject? vao) {
     final newAttributes = List<int>.filled(maxVertexAttributes, 0);
     final enabledAttributes = List<int>.filled(maxVertexAttributes, 0);
     final attributeDivisors = List<int>.filled(maxVertexAttributes, 0);

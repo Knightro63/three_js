@@ -40,8 +40,8 @@ class InterleavedBuffer {
   /// geometry data.
   /// 
   /// [stride] -- The number of typed-array elements per vertex.
-  factory InterleavedBuffer.fromFloat32List(Float32List array, int stride) {
-    return InterleavedBuffer(Float32Array.fromList(array), stride);  
+  factory InterleavedBuffer.fromList(TypedData array, int stride) {
+    return InterleavedBuffer(Float32Array.fromList(array.buffer.asFloat32List()), stride);  
   }
 
   set needsUpdate(bool value) {

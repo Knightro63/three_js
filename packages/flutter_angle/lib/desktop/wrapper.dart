@@ -568,6 +568,7 @@ class RenderingContext {
 
   void beginTransformFeedback(int primitiveMode){
     gl.glBeginTransformFeedback(primitiveMode);
+    checkError('beginTransformFeedback');
   }
 
   // void bindBufferBase(int target, int index, Buffer? buffer);
@@ -578,10 +579,12 @@ class RenderingContext {
 
   void bindTransformFeedback(int target, TransformFeedback feedback){
     gl.glBindTransformFeedback(target, feedback.id);
+    checkError('bindTransformFeedback');
   }
 
   void bindVertexArray(VertexArrayObject array){
     gl.glBindVertexArray(array.id);
+    checkError('bindVertexArray');
   }
 
   void blitFramebuffer(int srcX0, int srcY0, int srcX1, int srcY1, int dstX0, int dstY0, int dstX1, int dstY1, int mask, int filter){
@@ -717,6 +720,7 @@ class RenderingContext {
 
   void endTransformFeedback(){
     gl.glEndTransformFeedback();
+    checkError('endTransformFeedback');
   }
 
   // Sync? fenceSync(int condition, int flags);
@@ -801,6 +805,7 @@ class RenderingContext {
 
   void pauseTransformFeedback(){
     gl.glPauseTransformFeedback();
+    checkError('pauseTransformFeedback'); 
   }
 
   // void readBuffer(int mode);
@@ -815,6 +820,7 @@ class RenderingContext {
 
   void resumeTransformFeedback(){
     gl.glResumeTransformFeedback();
+    checkError('resumeTransformFeedback');
   }
 
   // void samplerParameterf(Sampler sampler, int pname, num param);
@@ -1251,6 +1257,7 @@ class RenderingContext {
     _pointer.value = pointer;
     gl.glVertexAttribIPointer(index, size, type, stride, _pointer.cast<Void>());
     calloc.free(_pointer);
+    checkError('vertexAttribIPointer');
   }
 
   // void waitSync(Sync sync, int flags, int timeout);
@@ -2104,6 +2111,7 @@ class RenderingContext {
 
   void uniform1f(UniformLocation location, double x){
     gl.glUniform1f(location.id, x);
+    checkError('uniform1f');
   }
 
   void uniform1fv(UniformLocation location, List<double> v){
@@ -2265,9 +2273,9 @@ class RenderingContext {
 
   void vertexAttribPointer(int index, int size, int type, bool normalized, int stride, int offset) {
     var offsetPointer = Pointer<Void>.fromAddress(offset);
-    gl.glVertexAttribPointer(index, size, type, normalized ? 1 : 0, stride, offsetPointer.cast());
+    gl.glVertexAttribPointer(index, size, type, normalized ? 1 : 0, stride, offsetPointer.cast<Void>());
     checkError('vertexAttribPointer');
-    calloc.free(offsetPointer);
+    //calloc.free(offsetPointer);
   }
 
   void viewport(int x, int y, int width, int height) {

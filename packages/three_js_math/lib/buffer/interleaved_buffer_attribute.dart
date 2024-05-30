@@ -1,3 +1,4 @@
+import 'package:three_js_math/native-array/native_array.dart';
 import 'package:three_js_math/three_js_math.dart';
 
 final Vector3 _vector = Vector3.zero();
@@ -74,22 +75,22 @@ class InterleavedBufferAttribute extends BufferAttribute {
 
   /// Sets the x component of the item at the given index.
   @override
-  InterleavedBufferAttribute setX(int index, x) {
-    data!.array[index * data!.stride + offset] = x;
+  InterleavedBufferAttribute setX(int index, num x) {
+    data!.array[index * data!.stride + offset] = x.toDouble();
     return this;
   }
 
   /// Sets the y component of the item at the given index.
   @override
-  InterleavedBufferAttribute setY(int index, y) {
-    data!.array[index * data!.stride + offset + 1] = y;
+  InterleavedBufferAttribute setY(int index, num y) {
+    data!.array[index * data!.stride + offset + 1] = y.toDouble();
     return this;
   }
 
   /// Sets the z component of the item at the given index.
   @override
-  InterleavedBufferAttribute setZ(int index, z) {
-    data!.array[index * data!.stride + offset + 2] = z;
+  InterleavedBufferAttribute setZ(int index, num z) {
+    data!.array[index * data!.stride + offset + 2] = z.toDouble();
     return this;
   }
 
@@ -148,13 +149,13 @@ class InterleavedBufferAttribute extends BufferAttribute {
 
   /// Sets the x, y, z and w components of the item at the given index.
   @override
-  InterleavedBufferAttribute setXYZW(int index, x, y, z, w) {
+  InterleavedBufferAttribute setXYZW(int index, num x, num y, num z, num w) {
     index = index * data!.stride + offset;
 
-    data!.array[index + 0] = x;
-    data!.array[index + 1] = y;
-    data!.array[index + 2] = z;
-    data!.array[index + 3] = w;
+    data!.array[index + 0] = x.toDouble();
+    data!.array[index + 1] = y.toDouble();
+    data!.array[index + 2] = z.toDouble();
+    data!.array[index + 3] = w.toDouble();
 
     return this;
   }

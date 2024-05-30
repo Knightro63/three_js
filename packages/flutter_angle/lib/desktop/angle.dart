@@ -292,7 +292,7 @@ class FlutterAngle {
     final height = (options.height*options.dpr).toInt();
     final width = (options.width*options.dpr).toInt();
     final result = await _channel.invokeMethod('createTexture', {"width": width, "height": height});
-
+    
     if (Platform.isAndroid) {
       final newTexture = FlutterGLTexture.fromMap(result, null, 0, options);
       _rawOpenGl.glViewport(0, 0, width, height);
@@ -351,18 +351,18 @@ class FlutterAngle {
   }
 
   static Future<void> updateTexture(FlutterGLTexture texture, [WebGLTexture? sourceTexture]) async {
-    if (Platform.isAndroid) {
-      eglSwapBuffers(_display, _dummySurface);
-      return;
-    }
-
     if(sourceTexture != null){
       _rawOpenGl.glBindFramebuffer(GL_FRAMEBUFFER, texture.fboId);
       _rawOpenGl.glClearColor(0.0, 0.0, 0.0, 0.0);
-      _rawOpenGl.glClear(GL_COLOR_BUFFER_BIT);
+      _rawOpenGl.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
       _rawOpenGl.glViewport(0, 0, (texture.options.width*texture.options.dpr).toInt(),( texture.options.height*texture.options.dpr).toInt());
       worker.renderTexture(sourceTexture);
       _rawOpenGl.glFinish();
+    }
+
+    if (Platform.isAndroid) {
+      eglSwapBuffers(_display, _dummySurface);
+      return;
     }
 
     _rawOpenGl.glFlush();

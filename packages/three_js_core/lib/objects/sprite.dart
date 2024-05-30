@@ -79,7 +79,7 @@ class Sprite extends Object3D {
         1
       ]);
 
-      final interleavedBuffer = InterleavedBuffer.fromFloat32List(float32List, 5);
+      final interleavedBuffer = InterleavedBuffer.fromList(float32List, 5);
 
       _geometry!.setIndex([0, 1, 2, 0, 2, 3]);
       _geometry!.setAttributeFromString('position',InterleavedBufferAttribute(interleavedBuffer, 3, 0, false));

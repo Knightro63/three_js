@@ -102,7 +102,7 @@ class _MyAppState extends State<WebglGeometryColors> {
     final geometry1 = IcosahedronGeometry(radius, 1);
 
     final count = geometry1.attributes["position"].count;
-    geometry1.setAttributeFromString('color', three.Float32BufferAttribute( three.Float32Array(count * 3), 3));
+    geometry1.setAttributeFromString('color', three.Float32BufferAttribute.fromList(Float32List(count * 3), 3));
 
     final geometry2 = geometry1.clone();
     final geometry3 = geometry1.clone();

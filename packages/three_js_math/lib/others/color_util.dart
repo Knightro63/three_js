@@ -112,7 +112,7 @@ class Color{
     }
     return this;
   }
-  NativeArray<num> copyIntoArray(NativeArray<num> array, [int offset = 0]) {
+  NativeArray<num> copyIntoArray(array, [int offset = 0]) {
     array[offset] = storage[0];
     array[offset + 1] = storage[1];
     array[offset + 2] = storage[2];

@@ -1,4 +1,3 @@
-
 import 'package:three_js_core/others/index.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'animation_clip.dart';
@@ -20,16 +19,18 @@ class AnimationUtils {
   }
 
   /// Converts an array to a specific type.
-  static List<num> convertArray(array, String type, [bool forceClone = false]) {
+  static List<num> convertArray(List<num> array, String type, [bool forceClone = false]) {
     // var 'null' and 'null' pass
-    if (array == null || !forceClone && array.runtimeType.toString() == type) {
+    // if (array == null || !forceClone && array.runtimeType.toString() == type) {
+    //   return array;
+    // }
+
+    // if (array is TypedData && type == 'List<num>') {
+    //   return array;
+    // }
+    if(!forceClone && type == 'List<num>'){
       return array;
     }
-
-    if (array is NativeArray && type == 'List<num>') {
-      return array.toDartList();
-    }
-
     if (type == 'List<num>') {
       // create typed array
       return List<num>.from(array);
@@ -151,8 +152,8 @@ class AnimationUtils {
       final track = clip.tracks[i];
       final valueSize = track.getValueSize();
 
-      final times = [];
-      final values = [];
+      final List<num> times = [];
+      final List<num> values = [];
 
       for (int j = 0; j < track.times.length; ++j) {
         final frame = track.times[j] * fps;

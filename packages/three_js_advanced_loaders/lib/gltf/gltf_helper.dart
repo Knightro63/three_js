@@ -536,7 +536,7 @@ Function addPrimitiveAttributes =
 /// @return {BufferGeometry}
 ///
 Function toTrianglesDrawMode = (BufferGeometry geometry, num drawMode) {
-  BufferAttribute<NativeArray<num>>? index = geometry.getIndex();
+  BufferAttribute? index = geometry.getIndex();
 
   // generate index if not present
 

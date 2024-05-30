@@ -6,38 +6,7 @@ import 'angle.dart';
 import '../shared/webgl.dart';
 import '../shared/classes.dart';
 import 'wrapper.dart';
-
-const vertex_shader = """
-#version 300 es
-precision mediump float;
-
-in vec4 Position;
-in vec2 TextureCoords;
-out vec2 TextureCoordsVarying;
-
-uniform mat4 matrix;
-
-void main (void) {
-    gl_Position = matrix * Position;
-    TextureCoordsVarying = TextureCoords;
-}
-
-""";
-    
-const fragment_shader = """
-#version 300 es
-precision mediump float;
-
-uniform sampler2D Texture0;
-in vec2 TextureCoordsVarying;
-
-out vec4 fragColor;
-
-void main (void) {
-    vec4 mask = texture(Texture0, TextureCoordsVarying);
-    fragColor = vec4(mask.rgb, mask.a);
-}
-""";
+import 'shaders.dart';
 
 class RenderWorker{
   late final Buffer vertexBuffer;
@@ -51,7 +20,7 @@ class RenderWorker{
     setupVBO4FBO();
   }
 
-  void renderTexture(WebGLTexture? texture, {List<double>? matrix, bool isFBO = false}){
+  void renderTexture(WebGLTexture? texture, {Float32List? matrix, bool isFBO = false}){
     var _vertexBuffer;
     
     if(isFBO) {
@@ -96,7 +65,7 @@ class RenderWorker{
     _gl.bufferData(WebGL.ARRAY_BUFFER, vertices, WebGL.STATIC_DRAW);
   }
 
-  void drawTexture({required WebGLTexture? texture, required Buffer vertexBuffer, List<double>? matrix}) {
+  void drawTexture({required WebGLTexture? texture, required Buffer vertexBuffer, Float32List? matrix}) {
     _gl.checkError("drawTexture 01");
     
     final _program = GlProgram(
@@ -120,12 +89,12 @@ class RenderWorker{
     _gl.uniform1i(_texture0Uniform, 8);
     _gl.checkError("drawTexture 03");
     
-    List<double> _matrix = [
+    Float32List _matrix = Float32List.fromList([
       1.0, 0.0, 0.0, 0.0,
       0.0, 1.0, 0.0, 0.0,
       0.0, 0.0, 1.0, 0.0,
       0.0, 0.0, 0.0, 1.0
-    ];
+    ]);
     
     if(matrix != null) {
       _matrix = matrix;
@@ -152,7 +121,7 @@ class RenderWorker{
     _gl.checkError("drawTexture 07");
     
     // let textureSlotFirstComponent = UnsafeRawPointer(bitPattern: MemoryLayout<CFloat>.size * 3)
-    _gl.vertexAttribPointer(_textureSlot.id, 2, WebGL.FLOAT, false, step, 0);
+    _gl.vertexAttribPointer(_textureSlot.id, 2, WebGL.FLOAT, false, step, Float32List.bytesPerElement * 3);
     _gl.enableVertexAttribArray(_textureSlot.id);
     
     _gl.checkError("drawTexture 08");

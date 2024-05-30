@@ -375,7 +375,7 @@ BufferGeometry _geometry(){
 		- 1, 1, 0, 0, 1
 	] );
 
-	final interleavedBuffer = InterleavedBuffer.fromFloat32List( float32Array, 5 );
+	final interleavedBuffer = InterleavedBuffer.fromList( float32Array, 5 );
 
 	geometry.setIndex( [ 0, 1, 2,	0, 2, 3 ] );
 	geometry.setAttributeFromString( 'position', InterleavedBufferAttribute( interleavedBuffer, 3, 0, false ) );

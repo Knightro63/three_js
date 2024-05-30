@@ -954,7 +954,7 @@ class Matrix4 {
     return true;
   }
 
-  Matrix4 fromNativeArray(NativeArray array, [int offset = 0]) {
+  Matrix4 fromNativeArray( array, [int offset = 0]) {
     for (int i = 0; i < 16; i++) {
       storage[i] = array[i + offset].toDouble();
     }

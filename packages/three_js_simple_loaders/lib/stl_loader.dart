@@ -165,7 +165,7 @@ class STLLoader extends Loader {
 
 			late double r, g, b;
       bool hasColors = false;
-      late Float32Array colors;
+      late Float32List colors;
 			late double defaultR, defaultG, defaultB;
       double alpha = 1.0;
 
@@ -178,7 +178,7 @@ class STLLoader extends Loader {
 					( reader.getUint8( index + 5 ) == 0x3D /*'='*/ ) ) {
 
 					hasColors = true;
-					colors = Float32Array( faces * 3 * 3 );
+					colors = Float32List( faces * 3 * 3 );
 
 					defaultR = reader.getUint8( index + 6 ) / 255;
 					defaultG = reader.getUint8( index + 7 ) / 255;
@@ -191,8 +191,8 @@ class STLLoader extends Loader {
 			const faceLength = 12 * 4 + 2;
 
 			final geometry = BufferGeometry();
-			final vertices = Float32Array( faces * 3 * 3 );
-			final normals = Float32Array( faces * 3 * 3 );
+			final vertices = Float32List( faces * 3 * 3 );
+			final normals = Float32List( faces * 3 * 3 );
 			final color = Color();
 
 			for (int face = 0; face < faces; face ++ ) {
@@ -237,11 +237,11 @@ class STLLoader extends Loader {
 				}
 			}
 
-			geometry.setAttributeFromString( 'position', Float32BufferAttribute( vertices, 3 ) );
-			geometry.setAttributeFromString( 'normal', Float32BufferAttribute( normals, 3 ) );
+			geometry.setAttributeFromString( 'position', Float32BufferAttribute.fromList( vertices, 3 ) );
+			geometry.setAttributeFromString( 'normal', Float32BufferAttribute.fromList( normals, 3 ) );
 
 			if ( hasColors ) {
-				geometry.setAttributeFromString( 'color', Float32BufferAttribute( colors, 3 ) );
+				geometry.setAttributeFromString( 'color', Float32BufferAttribute.fromList( colors, 3 ) );
 				//geometry.hasColors = true;
 				//geometry.alpha = alpha;
 			}

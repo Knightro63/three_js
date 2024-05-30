@@ -1,4 +1,4 @@
-
+import 'dart:typed_data';
 import 'package:three_js_math/three_js_math.dart';
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_animations/three_js_animations.dart';
@@ -190,7 +190,7 @@ class SkeletonUtils {
 
           if (options.hip == name) {
             if (!boneData.pos) {
-              boneData.pos = {"times": Float32Array(numFrames), "values": Float32Array(numFrames * 3)};
+              boneData.pos = {"times": Float32List(numFrames), "values": Float32List(numFrames * 3)};
             }
 
             if (options.useFirstFramePosition) {
@@ -207,7 +207,7 @@ class SkeletonUtils {
           }
 
           if (!boneData.quat) {
-            boneData.quat = {"times": Float32Array(numFrames), "values": Float32Array(numFrames * 4)};
+            boneData.quat = {"times": Float32List(numFrames), "values": Float32List(numFrames * 4)};
           }
 
           boneData.quat.times[i] = time;
