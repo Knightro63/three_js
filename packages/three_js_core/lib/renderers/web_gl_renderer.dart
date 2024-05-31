@@ -681,11 +681,11 @@ class WebGLRenderer {
     if (_clippingEnabled == true) clipping.beginShadows();
 
     final shadowsArray = currentRenderState!.state.shadowsArray;
-
+    
     shadowMap.render(shadowsArray, scene, camera);
 
-    // currentRenderState!.setupLights(physicallyCorrectLights);
-    // currentRenderState!.setupLightsView(camera);
+    currentRenderState!.setupLights(physicallyCorrectLights);
+    currentRenderState!.setupLightsView(camera);
 
     if (_clippingEnabled == true) clipping.endShadows();
 
@@ -964,7 +964,8 @@ class WebGLRenderer {
       renderBufferDirect(camera, scene, geometry, material, object, group);
 
       material.side = DoubleSide;
-    } else {
+    } 
+    else {
       renderBufferDirect(camera, scene, geometry, material, object, group);
     }
 
@@ -1440,16 +1441,17 @@ class WebGLRenderer {
         // We need to make sure to rebind the framebuffer.
         state.bindFramebuffer(WebGL.FRAMEBUFFER, null);
         useDefaultFramebuffer = false;
-      } else if (renderTargetProperties["__webglFramebuffer"] == null) {
+      } 
+      else if (renderTargetProperties["__webglFramebuffer"] == null) {
         textures.setupRenderTarget(renderTarget);
-      } else if (renderTargetProperties["__hasExternalTextures"] == true) {
+      } 
+      else if (renderTargetProperties["__hasExternalTextures"] == true) {
         // Color and depth texture must be rebound in order for the swapchain to update.
-        textures.rebindTextures(renderTarget, properties.get(renderTarget.texture)["__webglTexture"],
-            properties.get(renderTarget.depthTexture)["__webglTexture"]);
+        textures.rebindTextures(renderTarget, properties.get(renderTarget.texture)["__webglTexture"],properties.get(renderTarget.depthTexture)["__webglTexture"]);
       }
     }
 
-    dynamic framebuffer;
+    Framebuffer? framebuffer;
     bool isCube = false;
     bool isRenderTarget3D = false;
 
@@ -1465,17 +1467,19 @@ class WebGLRenderer {
       if (renderTarget.isWebGLCubeRenderTarget) {
         framebuffer = webglFramebuffer[activeCubeFace];
         isCube = true;
-      } else if ((capabilities.isWebGL2 && renderTarget.samples > 0) &&
-          textures.useMultisampledRenderToTexture(renderTarget) == false) {
+      } 
+      else if ((capabilities.isWebGL2 && renderTarget.samples > 0) && textures.useMultisampledRenderToTexture(renderTarget) == false) {
         framebuffer = properties.get(renderTarget)["__webglMultisampledFramebuffer"];
-      } else {
+      } 
+      else {
         framebuffer = webglFramebuffer;
       }
 
       _currentViewport.setFrom(renderTarget.viewport);
       _currentScissor.setFrom(renderTarget.scissor);
       _currentScissorTest = renderTarget.scissorTest;
-    } else {
+    } 
+    else {
       _currentViewport..setFrom(_viewport)..scale(_pixelRatio)..floor();
       _currentScissor..setFrom(_scissor)..scale(_pixelRatio)..floor();
       _currentScissorTest = _scissorTest;
@@ -1493,14 +1497,13 @@ class WebGLRenderer {
 
     if (isCube) {
       final textureProperties = properties.get(renderTarget!.texture);
-      _gl.framebufferTexture2D(WebGL.FRAMEBUFFER, WebGL.COLOR_ATTACHMENT0, WebGL.TEXTURE_CUBE_MAP_POSITIVE_X + activeCubeFace,
-          textureProperties["__webglTexture"], activeMipmapLevel);
+      _gl.framebufferTexture2D(WebGL.FRAMEBUFFER, WebGL.COLOR_ATTACHMENT0, WebGL.TEXTURE_CUBE_MAP_POSITIVE_X + activeCubeFace, textureProperties["__webglTexture"], activeMipmapLevel);
     } 
     else if (isRenderTarget3D) {
       console.warning('framebufferTextureLayer not supported yet');
       // final textureProperties = properties.get(renderTarget!.texture);
       // final layer = activeCubeFace;
-      // _gl.framebufferTextureLayer( WebGL.FRAMEBUFFER, WebGL.COLOR_ATTACHMENT0, textureProperties["__webglTexture"], activeMipmapLevel, layer);
+      // _gl.gl.glFramebufferTextureLayer( WebGL.FRAMEBUFFER, WebGL.COLOR_ATTACHMENT0, textureProperties["__webglTexture"], activeMipmapLevel, layer);
     }
 
     _currentMaterialId = -1; // reset current material to ensure correct uniform bindings

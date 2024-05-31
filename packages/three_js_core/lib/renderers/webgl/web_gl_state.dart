@@ -17,9 +17,6 @@ class WebGLState {
   late Map<int, int> factorToGL;
 
   Map<String, dynamic> get buffers => {"color": colorBuffer, "depth": depthBuffer, "stencil": stencilBuffer};
-
-  //
-
   Map<int, bool> enabledCapabilities = <int, bool>{};
 
   dynamic xrFramebuffer;
@@ -127,7 +124,7 @@ class WebGLState {
     currentViewport = Vector4.identity();
   }
 
-  createTexture(int type, int target, int count) {
+  WebGLTexture createTexture(int type, int target, int count) {
     final data = Uint8List(4);
     // 4 is required to match default unpack alignment of 4.
     //
@@ -144,21 +141,21 @@ class WebGLState {
     return texture;
   }
 
-  enable(id) {
+  void enable(id) {
     if (enabledCapabilities[id] != true) {
       gl.enable(id);
       enabledCapabilities[id] = true;
     }
   }
 
-  disable(id) {
+  void disable(id) {
     if (enabledCapabilities[id] != false) {
       gl.disable(id);
       enabledCapabilities[id] = false;
     }
   }
 
-  bindXRFramebuffer(framebuffer) {
+  void bindXRFramebuffer(Framebuffer? framebuffer) {
     if (framebuffer != xrFramebuffer) {
       gl.bindFramebuffer(WebGL.FRAMEBUFFER, framebuffer);
 
@@ -166,7 +163,7 @@ class WebGLState {
     }
   }
 
-  bindFramebuffer(target, framebuffer) {
+  bool bindFramebuffer(target, Framebuffer? framebuffer) {
     if (framebuffer == null && xrFramebuffer != null) {
       framebuffer = xrFramebuffer;
     } // use active XR framebuffer if available
@@ -194,7 +191,7 @@ class WebGLState {
     return false;
   }
 
-  drawBuffers(renderTarget, framebuffer) {
+  void drawBuffers(renderTarget, Framebuffer? framebuffer) {
     dynamic drawBuffers = defaultDrawbuffers;
 
     bool needsUpdate = false;
@@ -207,8 +204,8 @@ class WebGLState {
         currentDrawbuffers.set(framebuffer, drawBuffers);
       }
 
-      if (renderTarget.isWebGLMultipleRenderTargets) {
-        final textures = renderTarget.texture;
+      if (renderTarget is WebGLMultipleRenderTargets) {
+        final textures = (renderTarget.texture as GroupTexture).children;
 
         if (drawBuffers.length != textures.length || drawBuffers[0] != WebGL.COLOR_ATTACHMENT0) {
           for (int i = 0, il = textures.length; i < il; i++) {
@@ -219,11 +216,13 @@ class WebGLState {
 
           needsUpdate = true;
         }
-      } else {
+      } 
+      else {
         if (drawBuffers.length == 0 || drawBuffers[0] != WebGL.COLOR_ATTACHMENT0) {
           if (drawBuffers.length == 0) {
             drawBuffers.add(WebGL.COLOR_ATTACHMENT0);
-          } else {
+          } 
+          else {
             drawBuffers[0] = WebGL.COLOR_ATTACHMENT0;
           }
 
@@ -255,7 +254,7 @@ class WebGLState {
     }
   }
 
-  useProgram(program) {
+  bool useProgram(Program? program) {
     if (currentProgram != program) {
       gl.useProgram(program);
       currentProgram = program;
@@ -265,7 +264,7 @@ class WebGLState {
     return false;
   }
 
-  setBlending(int blending,
+  void setBlending(int blending,
       [int? blendEquation,
       int? blendSrc,
       int? blendDst,
@@ -417,7 +416,7 @@ class WebGLState {
 
   //
 
-  setFlipSided(bool flipSided) {
+  void setFlipSided(bool flipSided) {
     if (currentFlipSided != flipSided) {
       if (flipSided) {
         gl.frontFace(WebGL.CW);
@@ -430,7 +429,7 @@ class WebGLState {
     }
   }
 
-  setCullFace(int cullFace) {
+  void setCullFace(int cullFace) {
     if (cullFace != CullFaceNone) {
       enable(WebGL.CULL_FACE);
 
@@ -540,15 +539,7 @@ class WebGLState {
   }
 
   void texSubImage2D(int target, int level, int x, int y, num width, num height, int glFormat, int glType, TypedData data) {
-    // try {
-
     gl.texSubImage2D(target, level, x, y, width.toInt(), height.toInt(), glFormat, glType, data);
-
-    // } catch ( error ) {
-
-    // 	print( 'three.WebGLState: ${error}' );
-
-    // }
   }
 
   void texSubImage2DIf(int target, int level, int x, int y, int glFormat, int glType, image) {
@@ -783,7 +774,7 @@ class DepthBuffer {
 
   DepthBuffer(this.gl);
 
-  setTest(depthTest) {
+  void setTest(depthTest) {
     if (depthTest) {
       enable(WebGL.DEPTH_TEST);
     } else {
@@ -791,14 +782,14 @@ class DepthBuffer {
     }
   }
 
-  setMask(bool depthMask) {
+  void setMask(bool depthMask) {
     if (currentDepthMask != depthMask && !locked) {
       gl.depthMask(depthMask);
       currentDepthMask = depthMask;
     }
   }
 
-  setFunc(int? depthFunc) {
+  void setFunc(int? depthFunc) {
     if (currentDepthFunc != depthFunc) {
       if (depthFunc != null) {
         switch (depthFunc) {
@@ -845,18 +836,18 @@ class DepthBuffer {
     }
   }
 
-  setLocked(lock) {
+  void setLocked(lock) {
     locked = lock;
   }
 
-  setClear(double depth) {
+  void setClear(double depth) {
     if (currentDepthClear != depth) {
       gl.clearDepth(depth);
       currentDepthClear = depth;
     }
   }
 
-  reset() {
+  void reset() {
     locked = false;
 
     currentDepthMask = null;
@@ -884,7 +875,7 @@ class StencilBuffer {
 
   StencilBuffer(this.gl);
 
-  setTest(bool stencilTest) {
+  void setTest(bool stencilTest) {
     if (!locked) {
       if (stencilTest) {
         enable(WebGL.STENCIL_TEST);
@@ -894,14 +885,14 @@ class StencilBuffer {
     }
   }
 
-  setMask(int stencilMask) {
+  void setMask(int stencilMask) {
     if (currentStencilMask != stencilMask && !locked) {
       gl.stencilMask(stencilMask);
       currentStencilMask = stencilMask;
     }
   }
 
-  setFunc(int stencilFunc, int stencilRef, int stencilMask) {
+  void setFunc(int stencilFunc, int stencilRef, int stencilMask) {
     if (currentStencilFunc != stencilFunc || currentStencilRef != stencilRef || currentStencilFuncMask != stencilMask) {
       gl.stencilFunc(stencilFunc, stencilRef, stencilMask);
 
@@ -911,7 +902,7 @@ class StencilBuffer {
     }
   }
 
-  setOp(int stencilFail, int stencilZFail, int stencilZPass) {
+  void setOp(int stencilFail, int stencilZFail, int stencilZPass) {
     if (currentStencilFail != stencilFail ||
         currentStencilZFail != stencilZFail ||
         currentStencilZPass != stencilZPass) {
@@ -923,18 +914,18 @@ class StencilBuffer {
     }
   }
 
-  setLocked(bool lock) {
+  void setLocked(bool lock) {
     locked = lock;
   }
 
-  setClear(int stencil) {
+  void setClear(int stencil) {
     if (currentStencilClear != stencil) {
       gl.clearStencil(stencil);
       currentStencilClear = stencil;
     }
   }
 
-  reset() {
+  void reset() {
     locked = false;
 
     currentStencilMask = null;

@@ -29,6 +29,7 @@
 */android
 */linux
 */windows
+/darwin/*
 
 # Flutter repo-specific
 /bin/cache/

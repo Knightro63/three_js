@@ -191,7 +191,7 @@ class _MyAppState extends State<WebglShadowContact> {
     final planeMaterial = three.MeshBasicMaterial.fromMap({
       "map": renderTarget2.texture,
       "opacity": state["shadow"]!["opacity"]!,
-      "transparent": true,
+      //"transparent": true,
       "depthWrite": false,
     });
     plane = three.Mesh(planeGeometry, planeMaterial);
@@ -208,7 +208,7 @@ class _MyAppState extends State<WebglShadowContact> {
     final fillPlaneMaterial = three.MeshBasicMaterial.fromMap({
       "color": state["plane"]["color"],
       "opacity": state["plane"]["opacity"],
-      "transparent": true,
+      //"transparent": true,
       "depthWrite": false,
     });
     fillPlane = three.Mesh(planeGeometry, fillPlaneMaterial);

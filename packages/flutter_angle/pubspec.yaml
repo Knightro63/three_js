@@ -25,10 +25,12 @@ flutter:
       android:
         package: org.fluttergl.flutter_angle
         pluginClass: FlutterAnglePlugin
-      ios:
-        pluginClass: FlutterAnglePlugin
-      macos:
-        pluginClass: FlutterAnglePlugin
       windows:
         pluginClass: FlutterAnglePlugin
+      ios:
+        pluginClass: FlutterAnglePlugin
+        # sharedDarwinSource: true
+      macos:
+        pluginClass: FlutterAnglePlugin
+        # sharedDarwinSource: true
 

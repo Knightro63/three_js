@@ -146,16 +146,10 @@ class WebGLShadowMap {
 
       for (int vp = 0; vp < viewportCount; vp++) {
         final viewport = shadow.getViewport(vp);
-
-        _viewport.setValues(_viewportSize.x * viewport.x, _viewportSize.y * viewport.y, _viewportSize.x * viewport.z,
-            _viewportSize.y * viewport.w);
-
+        _viewport.setValues(_viewportSize.x * viewport.x, _viewportSize.y * viewport.y, _viewportSize.x * viewport.z, _viewportSize.y * viewport.w);
         state.viewport(_viewport);
-
         shadow.updateMatrices(light, viewportIndex: vp);
-
         _frustum = shadow.getFrustum();
-
         renderObject(scene, camera, shadow.camera!, light, type);
       }
 
@@ -169,7 +163,6 @@ class WebGLShadowMap {
     }
 
     scope.needsUpdate = false;
-
     _renderer.setRenderTarget(currentRenderTarget, activeCubeFace, activeMipmapLevel);
   }
 

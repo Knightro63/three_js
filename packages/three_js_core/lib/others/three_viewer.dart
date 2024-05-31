@@ -140,6 +140,7 @@ class ThreeJS{
   }
 
   Future<void> render() async{
+    
     rendererUpdate?.call();
     if(postProcessor == null){
       renderer!.clear();
@@ -149,7 +150,7 @@ class ThreeJS{
       postProcessor?.call(clock.getDelta());
     }
     FlutterAngle.activateTexture(texture!);
-    await FlutterAngle.updateTexture(texture!);
+    await FlutterAngle.updateTexture(texture!,sourceTexture);
   }
   
   void initRenderer() {
@@ -174,7 +175,7 @@ class ThreeJS{
       renderer!.setPixelRatio(dpr);
       renderer!.setSize(width, height, false);
       renderer!.alpha = settings.alpha;
-      //renderer!.shadowMap.enabled = settings.enableShadowMap;
+      renderer!.shadowMap.enabled = settings.enableShadowMap;
       renderer!.shadowMap.type = settings.shadowMapType;
       renderer!.autoClear = settings.autoClear;
       renderer!.setClearColor(
@@ -187,10 +188,9 @@ class ThreeJS{
       renderer!.localClippingEnabled = settings.localClippingEnabled;
       renderer!.clippingPlanes = settings.clippingPlanes;
       renderer!.toneMapping = settings.toneMapping;
-      renderer!.shadowMap.type = settings.shadowMapType;
     }
 
-    if(!kIsWeb){
+    if(!kIsWeb && settings.enableShadowMap){
       final core.WebGLRenderTargetOptions pars = core.WebGLRenderTargetOptions(settings.renderOptions);
       renderTarget = core.WebGLRenderTarget((width * dpr).toInt(), (height * dpr).toInt(), pars);
       renderer!.setRenderTarget(renderTarget);

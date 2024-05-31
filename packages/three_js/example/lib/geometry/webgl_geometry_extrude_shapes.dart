@@ -59,8 +59,6 @@ class _State extends State<WebglGeometryExtrudeShapes> {
     light.position.setFrom( threeJs.camera.position );
     threeJs.scene.add( light );
 
-    //
-
     final closedSpline = three.CatmullRomCurve3( points: [
       three.Vector3( - 60, - 100, 60 ),
       three.Vector3( - 60, 20, 60 ),
