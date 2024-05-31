@@ -38,7 +38,7 @@ class MorphBuffers{
   List<double> colors = [];
   List<List<double>> uvs  = [];
   List<int> materialIndex = [];
-  List<double> vertexWeights = [];
+  List<num> vertexWeights = [];
   List<int> weightsIndices = [];
 
   @override

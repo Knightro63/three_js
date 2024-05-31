@@ -998,7 +998,6 @@ class WebGLTextures {
             if (allocateMemory) {
               state.texStorage2D(WebGL.TEXTURE_2D, levels, glInternalFormat, image.width.toInt(), image.height.toInt());
             }
-            print(image.data.runtimeType);
             state.texSubImage2D(WebGL.TEXTURE_2D, 0, 0, 0, image.width, image.height, glFormat, glType, image.data);
           } 
           else {

@@ -17,7 +17,6 @@ class _MyAppState extends State<WebglCameraArray> {
   @override
   void initState() {
     threeJs = three.ThreeJS(
-      
       onSetupComplete: (){setState(() {});},
       setup: setup
     );
@@ -92,8 +91,8 @@ class _MyAppState extends State<WebglCameraArray> {
     final materialCylinder = three.MeshPhongMaterial.fromMap({"color": 0xff0000});
 
     mesh = three.Mesh(geometryCylinder, materialCylinder);
-    // mesh.castShadow = true;
-    // mesh.receiveShadow = true;
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
     threeJs.scene.add(mesh);
      
     threeJs.addAnimationEvent(

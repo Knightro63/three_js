@@ -288,7 +288,7 @@ class FlutterAngle {
   }
 
   static Future<FlutterGLTexture> createTexture(AngleOptions options) async {
-    final textureTarget = GL_TEXTURE_RECTANGLE;//GL_TEXTURE_RECTANGLE;//GL_TEXTURE_2D
+    final textureTarget = GL_TEXTURE_2D;//GL_TEXTURE_RECTANGLE;//GL_TEXTURE_2D
     final height = (options.height*options.dpr).toInt();
     final width = (options.width*options.dpr).toInt();
     final result = await _channel.invokeMethod('createTexture', {"width": width, "height": height});
@@ -306,7 +306,7 @@ class FlutterAngle {
     final newTexture = FlutterGLTexture.fromMap(result, null, fbo.value, options);
   
     print(_rawOpenGl.glGetError());
-    _rawOpenGl.glActiveTexture(WebGL.TEXTURE0);
+    _rawOpenGl.glActiveTexture(WebGL.TEXTURE);
 
     if (newTexture.metalAsGLTextureId != 0) {
       // Draw to metal interop texture directly
@@ -325,12 +325,12 @@ class FlutterAngle {
       print("Framebuffer (color) check failed: $frameBufferCheck");
     }
 
-    _rawOpenGl.glViewport(0, 0, width, height);
+    //_rawOpenGl.glViewport(0, 0, width, height);
 
     Pointer<Int32> depthBuffer = calloc();
     _rawOpenGl.glGenRenderbuffers(1, depthBuffer.cast());
     _rawOpenGl.glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer.value);
-    _rawOpenGl.glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
+    _rawOpenGl.glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);//,GL_DEPTH_COMPONENT16
 
     _rawOpenGl.glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer.value);
     _rawOpenGl.glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depthBuffer.value);
@@ -353,11 +353,11 @@ class FlutterAngle {
   static Future<void> updateTexture(FlutterGLTexture texture, [WebGLTexture? sourceTexture]) async {
     if(sourceTexture != null){
       _rawOpenGl.glBindFramebuffer(GL_FRAMEBUFFER, texture.fboId);
-      _rawOpenGl.glClearColor(0.0, 0.0, 0.0, 0.0);
-      _rawOpenGl.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-      _rawOpenGl.glViewport(0, 0, (texture.options.width*texture.options.dpr).toInt(),( texture.options.height*texture.options.dpr).toInt());
-      worker.renderTexture(sourceTexture);
-      _rawOpenGl.glFinish();
+      //_rawOpenGl.glClearColor(0.0, 0.0, 0.0, 0.0);
+      //_rawOpenGl.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+      //_rawOpenGl.glViewport(0, 0, (texture.options.width*texture.options.dpr).toInt(),( texture.options.height*texture.options.dpr).toInt());
+      //worker.renderTexture(sourceTexture);
+      //_rawOpenGl.glFinish();
     }
 
     if (Platform.isAndroid) {

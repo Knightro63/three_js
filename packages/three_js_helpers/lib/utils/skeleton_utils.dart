@@ -330,7 +330,7 @@ class SkeletonUtils {
     }
 
     // TODO how return this;
-    print("SkeletonUtils.renameBones need confirm how return this  ");
+    console.info("SkeletonUtils.renameBones need confirm how return this  ");
 
     // return this;
   }

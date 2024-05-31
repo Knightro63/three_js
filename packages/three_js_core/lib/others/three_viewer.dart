@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_angle/flutter_angle.dart';
-import 'package:flutter_angle/shared/classes.dart';
 import 'package:three_js_core/three_js_core.dart' as core;
 import 'package:three_js_math/three_js_math.dart';
 
@@ -141,9 +140,14 @@ class ThreeJS{
   }
 
   Future<void> render() async{
-    rendererUpdate?.call();
+    //rendererUpdate?.call();
     if(postProcessor == null){
+      renderer!.clear();
       //renderer!.setSize(screenSize!.width, screenSize!.height);
+      //FlutterAngle.activateTexture(texture!);
+      //renderer!.setClearColor( Color.fromHex32(0x111111), 1 );
+      //renderer!.setScissor( width / 2, 0, width / 2, height);
+      renderer!.setViewport(0,0,width,height);
       renderer!.render(scene, camera);
     }
     else{
@@ -196,13 +200,14 @@ class ThreeJS{
       renderTarget = core.WebGLRenderTarget((width * dpr).toInt(), (height * dpr).toInt(), pars);
       renderer!.setRenderTarget(renderTarget);
       sourceTexture = renderer!.getRenderTargetGLTexture(renderTarget!);
+      //print(sourceTexture?.id);
     }
     else{
       renderTarget = null;
     }
 
     if(!kIsWeb){
-      renderer?.gl.enable(0x8642);
+      // renderer?.gl.enable(0x8642);
     }
   }
   void onWindowResize(BuildContext context){
@@ -255,12 +260,10 @@ class ThreeJS{
         customRenderer: false
       )
     );
+    
     gl = texture!.getContext();
-    Future.delayed(const Duration(milliseconds: 100), () async {
-      //await three3dRender.prepareContext();
-      FlutterAngle.activateTexture(texture!);
-      initScene();
-    });
+    //FlutterAngle.activateTexture(texture!);
+    initScene();
   }
 
   Widget build() {

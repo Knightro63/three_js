@@ -15,7 +15,6 @@ class RenderWorker{
 
   RenderWorker(FlutterGLTexture texture){
     _gl = texture.getContext();
-
     setupVBO();
     setupVBO4FBO();
   }
