@@ -350,15 +350,7 @@ class FlutterAngle {
     return newTexture;
   }
 
-  static Future<void> updateTexture(FlutterGLTexture texture, [WebGLTexture? sourceTexture]) async {
-    if(sourceTexture != null){
-      _rawOpenGl.glBindFramebuffer(GL_FRAMEBUFFER, texture.fboId);
-      //_rawOpenGl.glClearColor(0.0, 0.0, 0.0, 0.0);
-      //_rawOpenGl.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-      //_rawOpenGl.glViewport(0, 0, (texture.options.width*texture.options.dpr).toInt(),( texture.options.height*texture.options.dpr).toInt());
-      //worker.renderTexture(sourceTexture);
-      //_rawOpenGl.glFinish();
-    }
+  static Future<void> updateTexture(FlutterGLTexture texture) async {
 
     if (Platform.isAndroid) {
       eglSwapBuffers(_display, _dummySurface);
@@ -368,7 +360,7 @@ class FlutterAngle {
     _rawOpenGl.glFlush();
 
     assert(_activeFramebuffer != null,'There is no active FlutterGL Texture to update');
-    await _channel.invokeMethod('updateTexture', {"textureId": texture.textureId});
+    _channel.invokeMethod('updateTexture', {"textureId": texture.textureId});
   }
 
   static Future<void> deleteTexture(FlutterGLTexture texture) async {

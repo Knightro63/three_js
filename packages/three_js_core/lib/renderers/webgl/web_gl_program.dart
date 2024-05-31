@@ -50,7 +50,7 @@ class WebGLProgram extends DefaultProgram with WebGLProgramExtra {
 
     String prefixVertex, prefixFragment;
 
-    String defaultVersionString = (!kIsWeb && (Platform.isWindows)) ? "#version 410\n" : "";
+    String defaultVersionString = "";
 
     String versionString = parameters.glslVersion != null ? '#version ${parameters.glslVersion}\n' : defaultVersionString;
 
@@ -280,7 +280,7 @@ class WebGLProgram extends DefaultProgram with WebGLProgramExtra {
 
     if (parameters.isWebGL2 && parameters.isRawShaderMaterial != true) {
       // GLSL 3.0 conversion for built-in materials and ShaderMaterial
-      versionString = (!kIsWeb && (Platform.isWindows)) ? "#version 410\n" : "#version 300 es\n";
+      versionString = "#version 300 es\n";
 
       prefixVertex = '${[
         'precision mediump sampler2DArray;',

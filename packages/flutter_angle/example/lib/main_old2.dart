@@ -170,15 +170,8 @@ class _MyAppState extends State<ExampleTriangle01> {
   }
 
   void prepare() {
-    String _version = "300 es";
-
-    if(!kIsWeb) {
-      if (Platform.isWindows) {
-        _version = "150";
-      }
-    }
-    
-    var vs = """#version ${_version}
+    var vs = """
+      #version 300 es
       #define attribute in
       #define varying out
       attribute vec3 a_Position;
@@ -188,7 +181,8 @@ class _MyAppState extends State<ExampleTriangle01> {
       }
     """;
 
-    var fs = """#version ${_version}
+    var fs = """
+      #version 300 es
       out highp vec4 pc_fragColor;
       #define gl_FragColor pc_fragColor
 

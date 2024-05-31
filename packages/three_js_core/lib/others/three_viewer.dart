@@ -140,21 +140,16 @@ class ThreeJS{
   }
 
   Future<void> render() async{
-    //rendererUpdate?.call();
+    rendererUpdate?.call();
     if(postProcessor == null){
       renderer!.clear();
-      //renderer!.setSize(screenSize!.width, screenSize!.height);
-      //FlutterAngle.activateTexture(texture!);
-      //renderer!.setClearColor( Color.fromHex32(0x111111), 1 );
-      //renderer!.setScissor( width / 2, 0, width / 2, height);
-      renderer!.setViewport(0,0,width,height);
       renderer!.render(scene, camera);
     }
     else{
       postProcessor?.call(clock.getDelta());
     }
-    
-    await FlutterAngle.updateTexture(texture!,sourceTexture);
+    FlutterAngle.activateTexture(texture!);
+    await FlutterAngle.updateTexture(texture!);
   }
   
   void initRenderer() {
@@ -179,7 +174,7 @@ class ThreeJS{
       renderer!.setPixelRatio(dpr);
       renderer!.setSize(width, height, false);
       renderer!.alpha = settings.alpha;
-      renderer!.shadowMap.enabled = settings.enableShadowMap;
+      //renderer!.shadowMap.enabled = settings.enableShadowMap;
       renderer!.shadowMap.type = settings.shadowMapType;
       renderer!.autoClear = settings.autoClear;
       renderer!.setClearColor(
@@ -200,15 +195,11 @@ class ThreeJS{
       renderTarget = core.WebGLRenderTarget((width * dpr).toInt(), (height * dpr).toInt(), pars);
       renderer!.setRenderTarget(renderTarget);
       sourceTexture = renderer!.getRenderTargetGLTexture(renderTarget!);
-      //print(sourceTexture?.id);
     }
     else{
       renderTarget = null;
     }
 
-    if(!kIsWeb){
-      // renderer?.gl.enable(0x8642);
-    }
   }
   void onWindowResize(BuildContext context){
     final mqd = MediaQuery.of(context);
@@ -262,7 +253,6 @@ class ThreeJS{
     );
     
     gl = texture!.getContext();
-    //FlutterAngle.activateTexture(texture!);
     initScene();
   }
 

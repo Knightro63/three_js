@@ -127,7 +127,7 @@ class _MyAppState extends State<WebglInstancingPerformance> {
   final quaternion = three.Quaternion();
   final scale = three.Vector3();
 
-  void randomizeMatrix(matrix) {
+  void randomizeMatrix(three.Matrix4 matrix) {
     position.x = math.Random().nextDouble() * 40 - 20;
     position.y = math.Random().nextDouble() * 40 - 20;
     position.z = math.Random().nextDouble() * 40 - 20;

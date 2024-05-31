@@ -62,7 +62,7 @@ class _State extends State<WebglInstancingDynamic> {
     threeJs.scene = three.Scene();
 
     final loader = BufferGeometryLoader();
-    loader.fromAsset( 'assets/models/json/suzanne_buffergeometry.json').then(( geometry ) {
+    await loader.fromAsset( 'assets/models/json/suzanne_buffergeometry.json').then(( geometry ) {
       geometry?.computeVertexNormals();
       geometry?.scale( 0.5, 0.5, 0.5 );
 

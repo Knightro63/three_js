@@ -417,9 +417,6 @@ static id<MTLDevice> GetANGLEMtlDevice(EGLDisplay display)
             return;
         }
         
-        //flutterGLTextures[textureId].release();
-        //flutterGLTextures.erase(textureId);
-
         result(nil);
         return;
     } 
