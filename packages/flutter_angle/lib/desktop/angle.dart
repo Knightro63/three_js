@@ -288,7 +288,7 @@ class FlutterAngle {
   }
 
   static Future<FlutterGLTexture> createTexture(AngleOptions options) async {
-    final textureTarget = GL_TEXTURE_2D;//GL_TEXTURE_RECTANGLE;//GL_TEXTURE_2D
+    final textureTarget = GL_TEXTURE_RECTANGLE;//GL_TEXTURE_RECTANGLE;//GL_TEXTURE_2D
     final height = (options.height*options.dpr).toInt();
     final width = (options.width*options.dpr).toInt();
     final result = await _channel.invokeMethod('createTexture', {"width": width, "height": height});
@@ -311,8 +311,8 @@ class FlutterAngle {
     if (newTexture.metalAsGLTextureId != 0) {
       // Draw to metal interop texture directly
       _rawOpenGl.glBindTexture(textureTarget, newTexture.metalAsGLTextureId);
-      //_rawOpenGl.glTexParameteri(textureTarget, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-      //_rawOpenGl.glTexParameteri(textureTarget, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+      _rawOpenGl.glTexParameteri(textureTarget, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+      _rawOpenGl.glTexParameteri(textureTarget, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
       _rawOpenGl.glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureTarget, newTexture.metalAsGLTextureId, 0);
     } 
     else {
@@ -330,10 +330,10 @@ class FlutterAngle {
     Pointer<Int32> depthBuffer = calloc();
     _rawOpenGl.glGenRenderbuffers(1, depthBuffer.cast());
     _rawOpenGl.glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer.value);
-    _rawOpenGl.glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, width, height);//,GL_DEPTH_COMPONENT16
+    _rawOpenGl.glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);//,GL_DEPTH_COMPONENT16
 
     _rawOpenGl.glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer.value);
-    //_rawOpenGl.glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depthBuffer.value);
+    _rawOpenGl.glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depthBuffer.value);
 
     frameBufferCheck = _rawOpenGl.glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if (frameBufferCheck != GL_FRAMEBUFFER_COMPLETE) {
@@ -351,21 +351,22 @@ class FlutterAngle {
   }
 
   static Future<void> updateTexture(FlutterGLTexture texture,[WebGLTexture? sourceTexture]) async {
-
     if(sourceTexture != null){
       _rawOpenGl.glClearColor(0.0, 0.0, 0.0, 0.0);
       _rawOpenGl.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
       _rawOpenGl.glViewport(0, 0, (texture.options.width*texture.options.dpr).toInt(),( texture.options.height*texture.options.dpr).toInt());
-      //worker.renderTexture(sourceTexture);
+      worker.renderTexture(sourceTexture);
       _rawOpenGl.glFinish();
     }
-
+    
     if (Platform.isAndroid) {
       eglSwapBuffers(_display, _dummySurface);
       return;
     }
 
-    _rawOpenGl.glFlush();
+    if(sourceTexture == null){
+      _rawOpenGl.glFlush();
+    }
 
     assert(_activeFramebuffer != null,'There is no active FlutterGL Texture to update');
     _channel.invokeMethod('updateTexture', {"textureId": texture.textureId});
@@ -398,6 +399,7 @@ class FlutterAngle {
     else {
       _rawOpenGl.glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, texture.rboId);
     }
+    
     printOpenGLError('activateTextue ${texture.textureId}');
     _activeFramebuffer = texture.fboId;
   }

@@ -34,6 +34,7 @@ class _MyAppState extends State<WebglCamera> {
   @override
   void dispose() {
     threeJs.dispose();
+    threeJs.renderer!.setScissor( 0, 0, threeJs.width , threeJs.height);
     super.dispose();
   }
   late three.Mesh mesh;

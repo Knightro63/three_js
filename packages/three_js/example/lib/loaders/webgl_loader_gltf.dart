@@ -17,12 +17,8 @@ class _MyAppState extends State<WebglLoaderGltf> {
   @override
   void initState() {
     threeJs = three.ThreeJS(
-      
       onSetupComplete: (){setState(() {});},
       setup: setup,
-      // postProcessor: ([dt]){
-      //   threeJs.renderer!.clear(true, true, true);
-      // },
       settings: three.Settings(
         clearAlpha: 0,
         clearColor: 0xffffff

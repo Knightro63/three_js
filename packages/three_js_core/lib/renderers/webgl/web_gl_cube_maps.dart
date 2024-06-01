@@ -23,7 +23,8 @@ class WebGLCubeMaps {
         if (cubemaps.has(texture)) {
           final cubemap = cubemaps.get(texture).texture;
           return mapTextureMapping(cubemap, texture.mapping);
-        } else {
+        } 
+        else {
           final image = texture.image;
 
           if (image != null && image.height > 0) {
@@ -34,9 +35,9 @@ class WebGLCubeMaps {
             texture.addEventListener('dispose', onTextureDispose);
 
             return mapTextureMapping(renderTarget.texture, texture.mapping);
-          } else {
+          } 
+          else {
             // image not yet ready. try the conversion next frame
-
             return null;
           }
         }

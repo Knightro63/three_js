@@ -139,18 +139,22 @@ class ThreeJS{
     }
   }
 
-  Future<void> render() async{
-    
+  Future<void> render() async{  
+
+    FlutterAngle.activateTexture(texture!);
     rendererUpdate?.call();
     if(postProcessor == null){
       renderer!.clear();
+      renderer!.setViewport(0,0,width,height);
+
       renderer!.render(scene, camera);
+      gl.flush();
     }
     else{
       postProcessor?.call(clock.getDelta());
     }
-    FlutterAngle.activateTexture(texture!);
-    await FlutterAngle.updateTexture(texture!,sourceTexture);
+    //FlutterAngle.activateTexture(texture!);
+    await FlutterAngle.updateTexture(texture!,null);
   }
   
   void initRenderer() {
@@ -190,16 +194,12 @@ class ThreeJS{
       renderer!.toneMapping = settings.toneMapping;
     }
 
-    if(!kIsWeb && settings.enableShadowMap){
-      final core.WebGLRenderTargetOptions pars = core.WebGLRenderTargetOptions(settings.renderOptions);
-      renderTarget = core.WebGLRenderTarget((width * dpr).toInt(), (height * dpr).toInt(), pars);
-      renderer!.setRenderTarget(renderTarget);
-      sourceTexture = renderer!.getRenderTargetGLTexture(renderTarget!);
+    if(!kIsWeb){
+      // final core.WebGLRenderTargetOptions pars = core.WebGLRenderTargetOptions(settings.renderOptions);
+      // renderTarget = core.WebGLRenderTarget((width * dpr).toInt(), (height * dpr).toInt(), pars);
+      // renderer!.setRenderTarget(renderTarget);
+      //sourceTexture = renderer!.getRenderTargetGLTexture(renderTarget!);
     }
-    else{
-      renderTarget = null;
-    }
-
   }
   void onWindowResize(BuildContext context){
     final mqd = MediaQuery.of(context);

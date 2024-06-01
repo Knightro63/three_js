@@ -28,6 +28,7 @@ class _State extends State<WebglWater> {
   void dispose() {
     threeJs.dispose();
     three.loading.clear();
+    controls.clearListeners();
     super.dispose();
   }
 
@@ -40,6 +41,8 @@ class _State extends State<WebglWater> {
       body: threeJs.build()
     );
   }
+
+  late three.OrbitControls controls;
 
   final Map<String,dynamic> params = {
     'color': '#ffffff',
@@ -117,16 +120,17 @@ class _State extends State<WebglWater> {
     threeJs.scene.add( ambientLight );
 
     final directionalLight = three.DirectionalLight( 0xffffff, 0.4 );
-    directionalLight.position.setValues( - 1, 1, 1 );
+    //directionalLight.position.setValues( - 1, 1, 1 );
     threeJs.scene.add( directionalLight );
 
     //
 
-    final controls = three.OrbitControls( threeJs.camera, threeJs.globalKey);
+    controls = three.OrbitControls( threeJs.camera, threeJs.globalKey);
     controls.minDistance = 5;
     controls.maxDistance = 50;
 
     threeJs.addAnimationEvent((delta){
+      controls.update();
       torusKnot.rotation.x += delta;
       torusKnot.rotation.y += delta * 0.5;
     });

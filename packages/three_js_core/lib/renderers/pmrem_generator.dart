@@ -558,33 +558,6 @@ class PMREMGenerator {
     target.scissor.setValues(x, y, width, height);
   }
 
-  String _getPlatformHelper() {
-    if (kIsWeb) {
-      return "";
-    }
-
-    // if (Platform.isMacOS) {
-    //   return """
-    //     #define varying in
-    //     out highp vec4 pc_fragColor;
-    //     #define gl_FragColor pc_fragColor
-    //     #define gl_FragDepthEXT gl_FragDepth
-    //     #define texture2D texture
-    //     #define textureCube texture
-    //     #define texture2DProj textureProj
-    //     #define texture2DLodEXT textureLod
-    //     #define texture2DProjLodEXT textureProjLod
-    //     #define textureCubeLodEXT textureLod
-    //     #define texture2DGradEXT textureGrad
-    //     #define texture2DProjGradEXT textureProjGrad
-    //     #define textureCubeGradEXT textureGrad
-    //   """;
-    // }
-    return """
-      
-    """;
-  }
-
   ShaderMaterial _getBlurShader(int lodMax, int width, int height) {
     final weights = Float32List(maxSamples);
     final poleAxis = Vector3(0, 1, 0);
@@ -607,7 +580,6 @@ class PMREMGenerator {
       },
       "vertexShader": _getCommonVertexShader(),
       "fragmentShader": """
-        ${_getPlatformHelper()}
 
         precision mediump float;
         precision mediump int;
@@ -682,7 +654,6 @@ class PMREMGenerator {
       "uniforms": {'envMap': {}},
       "vertexShader": _getCommonVertexShader(),
       "fragmentShader": """
-        ${_getPlatformHelper()}
 
         precision mediump float;
         precision mediump int;
@@ -716,7 +687,6 @@ class PMREMGenerator {
       },
       "vertexShader": _getCommonVertexShader(),
       "fragmentShader": """
-        ${_getPlatformHelper()}
         
         precision mediump float;
         precision mediump int;

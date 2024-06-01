@@ -42,6 +42,7 @@ class _MyAppState extends State<WebglInstancingPerformance> {
   @override
   void dispose() {
     threeJs.dispose();
+    three.loading.clear();
     super.dispose();
   }
 

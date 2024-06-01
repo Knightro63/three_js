@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'bindings/gles_bindings.dart';
 import 'dart:ffi';
 import 'dart:async';
@@ -1300,8 +1302,8 @@ class RenderingContext {
     // checkError('bindRenderbuffer');
   }
 
-  void bindTexture(int target, WebGLTexture? texture) {
-    gl.glBindTexture(target, texture?.id ?? 0);
+  void bindTexture(int target, WebGLTexture texture) {
+    gl.glBindTexture(target, texture.id);
     // checkError('bindTexture');
   }
 
@@ -1757,6 +1759,9 @@ class RenderingContext {
   }
 
   Object? getExtension(String key) {
+    if (Platform.isMacOS) {
+      return getExtensionMacos(key);
+    }
     Pointer _v = gl.glGetString(WebGL.EXTENSIONS);
 
     String _vstr = _v.cast<Utf8>().toDartString();
@@ -1765,6 +1770,31 @@ class RenderingContext {
     return _extensions;
   }
 
+  List<String> getExtensionMacos(String key) {
+    List<String> _extensions = [];
+    var nExtension = getIntegerv(33309);
+    for (int i = 0; i < nExtension; i++) {
+      _extensions.add(getStringi(GL_EXTENSIONS, i));
+    }
+
+    return _extensions;
+  }
+
+  String getStringi(int key, int index) {
+    Pointer _v = gl.glGetStringi(key, index);
+    return _v.cast<Utf8>().toDartString();
+  }
+
+  int getIntegerv(int v0) {
+    Pointer<Int32> ptr = calloc<Int32>();
+    gl.glGetIntegerv(v0, ptr);
+
+    int _v = ptr.value;
+    calloc.free(ptr);
+
+    return _v;
+  }
+  
   // Object? getFramebufferAttachmentParameter(int target, int attachment, int pname);
 
   // Object? getParameter(int pname);

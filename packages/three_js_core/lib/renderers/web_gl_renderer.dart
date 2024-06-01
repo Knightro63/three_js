@@ -421,7 +421,7 @@ class WebGLRenderer {
   }
 
   // Events
-  void onContextRestore(/* event */) {
+  void onContextRestore() {
     console.info('WebGLRenderer: Context Restored.');
 
     _isContextLost = false;
@@ -1549,16 +1549,10 @@ class WebGLRenderer {
         // the following if statement ensures valid read requests (no out-of-bounds pixels, see #8604)
 
         if ((x >= 0 && x <= (renderTarget.width - width)) && (y >= 0 && y <= (renderTarget.height - height))) {
-          if(kIsWeb){
-            _gl.readPixels(x, y, width, height, utils.convert(textureFormat), utils.convert(textureType), buffer);
-
-          }else{
-            _gl.readPixels(x, y, width, height, utils.convert(textureFormat), utils.convert(textureType), buffer);
-          }
+          _gl.readPixels(x, y, width, height, utils.convert(textureFormat), utils.convert(textureType), buffer);
         }
       } finally {
-        final framebuffer =
-            (_currentRenderTarget != null) ? properties.get(_currentRenderTarget)["__webglFramebuffer"] : null;
+        final framebuffer = (_currentRenderTarget != null) ? properties.get(_currentRenderTarget)["__webglFramebuffer"] : null;
         state.bindFramebuffer(WebGL.FRAMEBUFFER, framebuffer);
       }
     }

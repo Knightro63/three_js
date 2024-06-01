@@ -28,6 +28,7 @@ class _State extends State<WebglShaderLava> {
   void dispose() {
     threeJs.dispose();
     three.loading.clear();
+    controls.clearListeners();
     super.dispose();
   }
 
@@ -40,6 +41,8 @@ class _State extends State<WebglShaderLava> {
       body: threeJs.build()
     );
   }
+
+  late three.OrbitControls controls;
 
   Future<void> setup() async {
     threeJs.camera = three.PerspectiveCamera( 35, threeJs.width/threeJs.height, 1, 3000 );
@@ -60,7 +63,7 @@ class _State extends State<WebglShaderLava> {
     lavaTexture?.wrapT = three.RepeatWrapping;
 
     final Map<String,dynamic> uniforms = {
-      'fogDensity': { 'value': 0.45 },
+      'fogDensity': { 'value': 0.15 },
       'fogColor': { 'value': three.Vector3( 0, 0, 0 ) },
       'time': { 'value': 1.0 },
       'uvScale': { 'value': three.Vector2( 3.0, 1.0 ) },
@@ -154,7 +157,11 @@ class _State extends State<WebglShaderLava> {
       composer.addPass( outputPass );
     }
 
+    controls = three.OrbitControls( threeJs.camera, threeJs.globalKey);
+
+
     threeJs.addAnimationEvent((dt){
+      controls.update();
       uniforms[ 'time' ]!['value'] += 0.3 * dt;
 
       mesh.rotation.y += 0.0125 * dt;

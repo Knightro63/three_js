@@ -115,7 +115,7 @@ class _State extends State<WebglInstancingScatter> {
       blossomMesh.instanceMatrix?.setUsage( three.DynamicDrawUsage );
 
       resample();
-
+      
       init().then((e){
         threeJs.addAnimationEvent((dt){
           controls.update();
@@ -214,7 +214,7 @@ class _State extends State<WebglInstancingScatter> {
 
     stemMesh.instanceMatrix?.needsUpdate = true;
     blossomMesh.instanceMatrix?.needsUpdate = true;
-
+    
     stemMesh.computeBoundingSphere();
     blossomMesh.computeBoundingSphere();
   }

@@ -73,7 +73,7 @@ class _MyAppState extends State<WebglCameraArray> {
     threeJs.scene.add(ambientLight);
     threeJs.camera.lookAt(threeJs.scene.position);
 
-    final light = three.DirectionalLight(0xffffff, null);
+    final light = three.DirectionalLight(0xffffff);
     light.position.setValues(0.5, 0.5, 1);
     light.castShadow = true;
     light.shadow!.camera!.zoom = 4; // tighter shadow map

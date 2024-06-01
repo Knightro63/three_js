@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
 import 'package:three_js_postprocessing/post/index.dart';
@@ -45,7 +46,6 @@ class _State extends State<MiscControlsFly> {
   Future<void> setup() async {
     const radius = 6371.0;
     const tilt = 0.41;
-    
 
     const cloudsScale = 1.005;
     const moonScale = 0.23;
@@ -174,16 +174,17 @@ class _State extends State<MiscControlsFly> {
 
     final dMoonVec = three.Vector3.zero();
 
-    final renderModel = RenderPass(threeJs.scene, threeJs.camera);
-    final effectFilm = FilmPass(noiseIntensity: 0.35 );
-    //final outputPass = OutputPass();
-
     final composer = EffectComposer(threeJs.renderer!);
+    if(kIsWeb){
+      final renderModel = RenderPass(threeJs.scene, threeJs.camera);
+      final effectFilm = FilmPass(noiseIntensity: 0.35 );
+      final outputPass = OutputPass();
 
-    composer.addPass( renderModel );
-    composer.addPass( effectFilm );
-    //composer.addPass( outputPass );
-
+      composer.addPass( renderModel );
+      composer.addPass( effectFilm );
+      composer.addPass( outputPass );
+    }
+    
     threeJs.addAnimationEvent((delta){
       const rotationSpeed = 0.02;
       double d = 1.0;

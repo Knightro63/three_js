@@ -90,8 +90,10 @@ class _State extends State<WebglGeometryExtrudeShapes> {
     final geometry1 = three.ExtrudeGeometry( [shape1], extrudeSettings1 );
     final material1 = three.MeshLambertMaterial.fromMap( { 'color': 0xb00000, 'wireframe': false } );
     final mesh1 = three.Mesh( geometry1, material1 );
-    threeJs.scene.add( mesh1 );
 
+    mesh1.castShadow = true;
+    mesh1.receiveShadow = true;
+    threeJs.scene.add( mesh1 );
 
     final List<three.Vector3> randomPoints = [];
 

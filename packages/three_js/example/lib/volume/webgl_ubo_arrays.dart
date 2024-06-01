@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:math' as math;
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
 
@@ -180,7 +179,7 @@ class _State extends State<WebglUboArrays> {
       },
       'vertexShader': vertexShader,
       'fragmentShader': fragmentShader,
-      kIsWeb?'glslVersion':'': three.GLSL3
+      'glslVersion': three.GLSL3
     } );
 
     final plane = three.Mesh( three.PlaneGeometry( 100, 100 ), material.clone() );

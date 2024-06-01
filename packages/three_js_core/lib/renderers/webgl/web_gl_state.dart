@@ -527,7 +527,9 @@ class WebGLState {
     final boundTexture = currentBoundTextures[currentTextureSlot];
 
     if (boundTexture != null && boundTexture.type != null) {
-      gl.bindTexture(boundTexture.type!, kIsWeb?null:texture);
+      if(!kIsWeb && texture!= null){
+        gl.bindTexture(boundTexture.type!, texture);
+      }
 
       boundTexture.type = null;
       boundTexture.texture = null;

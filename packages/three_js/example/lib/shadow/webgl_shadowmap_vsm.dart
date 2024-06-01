@@ -51,8 +51,6 @@ class _State extends State<WebglShadowmapVsm> {
     threeJs.scene.background = three.Color.fromHex32( 0x222244 );
     threeJs.scene.fog = three.Fog( 0x222244, 50, 100 );
 
-    // Lights
-
     threeJs.scene.add( three.AmbientLight( 0x444444,0.4 ) );
 
     final spotLight = three.SpotLight( 0xff8888, 0.8 );
@@ -67,7 +65,6 @@ class _State extends State<WebglShadowmapVsm> {
     spotLight.shadow?.bias = - 0.002;
     spotLight.shadow?.radius = 4;
     threeJs.scene.add( spotLight );
-
 
     final dirLight = three.DirectionalLight( 0x8888ff, 0.8 );
     dirLight.position.setValues( 3, 12, 17 );

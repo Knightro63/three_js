@@ -25,7 +25,7 @@ import 'package:example/morphtargets/webgl_modifier_subdivision.dart';
 import 'package:example/morphtargets/webgl_morphtargets_face.dart';
 import 'package:example/others/webgl_interactive_voxelpainter.dart';
 import 'package:example/others/webgl_lod.dart';
-import 'package:example/others/webgl_ubo_arrays.dart';
+import 'package:example/volume/webgl_ubo_arrays.dart';
 import 'package:example/shadow/webgl_lensflars.dart';
 import 'package:example/shadow/webgl_lights_rectarealight.dart';
 import 'package:example/shadow/webgl_lights_spotlight.dart';
@@ -68,7 +68,6 @@ import 'package:example/others/webgl_skinning_simple.dart';
 
 import 'package:example/loaders/webgl_loader_fbx.dart';
 import 'package:example/loaders/webgl_loader_gltf.dart';
-import 'package:example/loaders/webgl_loader_gltf_test.dart';
 import 'package:example/loaders/webgl_loader_obj.dart';
 import 'package:example/loaders/webgl_loader_obj_mtl.dart';
 import 'package:example/loaders/webgl_loader_texture_basis.dart';
@@ -197,15 +196,12 @@ class _MyAppState extends State<ExamplePage> {
     else if (fileName == "webgl_loader_fbx") {
       page = WebglLoaderFbx(fileName: fileName);
     } 
-    else if(fileName == "webgl_loader_fbx_nurbs"){
-      page = WebglLoaderFbxNurbs(fileName: fileName);
-    }
+    // else if(fileName == "webgl_loader_fbx_nurbs"){
+    //   page = WebglLoaderFbxNurbs(fileName: fileName);
+    // }
     else if (fileName == "webgl_loader_gltf") {
       page = WebglLoaderGltf(fileName: fileName);
     } 
-    else if (fileName == "webgl_loader_gltf_test") {
-      page = WebglLoaderGltfTest(fileName: fileName);
-    }
     else if (fileName == "webgl_loader_glb") {
       page = WebglLoaderGlb(fileName: fileName);
     }
@@ -215,9 +211,9 @@ class _MyAppState extends State<ExamplePage> {
     else if (fileName == "webgl_loader_obj_mtl") {
       page = WebglLoaderObjMtl(fileName: fileName);
     } 
-    else if(fileName == "webgl_loader_gcode"){
-      page = WebglLoaderGcode(fileName: fileName);
-    }
+    // else if(fileName == "webgl_loader_gcode"){
+    //   page = WebglLoaderGcode(fileName: fileName);
+    // }
     else if(fileName == "webgl_loader_xyz"){
       page = WebglLoaderXyz(fileName: fileName);
     }
@@ -286,18 +282,20 @@ class _MyAppState extends State<ExamplePage> {
     else if (fileName == "webgl_helpers") {
       page = WebglHelpers(fileName: fileName);
     }
-    else if(fileName == 'webgl_modifier_subdivision'){
-      page = WebglModifierSubdivision(fileName: fileName);
-    }
+    // else if(fileName == 'webgl_modifier_subdivision'){
+    //   page = WebglModifierSubdivision(fileName: fileName);
+    // }
     else if (fileName == "webgl_morphtargets") {
       page = WebglMorphtargets(fileName: fileName);
     } else if (fileName == "webgl_morphtargets_sphere") {
       page = WebglMorphtargetsSphere(fileName: fileName);
     } else if (fileName == "webgl_morphtargets_horse") {
       page = WebglMorphtargetsHorse(fileName: fileName);
-    } else if(fileName == 'webgl_morphtargets_face'){
-      page = WebglMorphtargetsFace(fileName: fileName);
-    } else if (fileName == "misc_controls_orbit") {
+    } 
+    // else if(fileName == 'webgl_morphtargets_face'){
+    //   page = WebglMorphtargetsFace(fileName: fileName);
+    // } 
+    else if (fileName == "misc_controls_orbit") {
       page = MiscControlsOrbit(fileName: fileName);
     } else if (fileName == "misc_controls_trackball") {
       page = MiscControlsTrackball(fileName: fileName);

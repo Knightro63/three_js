@@ -36,6 +36,7 @@ class _MyAppState extends State<WebglGeometryText> {
   void dispose() {
     three.loading.clear();
     threeJs.dispose();
+    controls.clearListeners();
     super.dispose();
   }
 
@@ -50,6 +51,7 @@ class _MyAppState extends State<WebglGeometryText> {
   }
 
   late three.Group group;
+  late three.OrbitControls controls;
   late three.GroupMaterial materials;
 
   Future<void> setup() async {
@@ -104,6 +106,12 @@ class _MyAppState extends State<WebglGeometryText> {
     plane.position.y = -100;
     plane.rotation.x = -math.pi / 2;
     threeJs.scene.add(plane);
+
+    controls = three.OrbitControls( threeJs.camera, threeJs.globalKey);
+
+    threeJs.addAnimationEvent((dt){
+      controls.update();
+    });
   }
 
   Future<three.TYPRFont> loadFont() async {

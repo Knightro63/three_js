@@ -2001,7 +2001,7 @@ class WebGLTextures {
       texture.update();
     }
 
-    final textureType = WebGL.TEXTURE_2D;
+    const textureType = WebGL.TEXTURE_2D;
 
     initTexture(textureProperties, texture);
 

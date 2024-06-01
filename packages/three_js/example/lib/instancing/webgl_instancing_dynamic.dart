@@ -57,12 +57,10 @@ class _State extends State<WebglInstancingDynamic> {
     threeJs.camera = three.PerspectiveCamera( 60, threeJs.width/threeJs.height, 0.1, 100 );
     threeJs.camera.position.setValues( amount * 0.9, amount * 0.9, amount * 0.9 );
     threeJs.camera.lookAt(three.Vector3(0, 0, 0));
-    //threeJs.camera.position.z = 30;
 
     threeJs.scene = three.Scene();
 
-    final loader = BufferGeometryLoader();
-    await loader.fromAsset( 'assets/models/json/suzanne_buffergeometry.json').then(( geometry ) {
+    BufferGeometryLoader().fromAsset( 'assets/models/json/suzanne_buffergeometry.json').then(( geometry ) {
       geometry?.computeVertexNormals();
       geometry?.scale( 0.5, 0.5, 0.5 );
 
@@ -73,7 +71,7 @@ class _State extends State<WebglInstancingDynamic> {
       mesh = three.InstancedMesh( geometry, material, count );
       mesh.instanceMatrix?.setUsage(three.DynamicDrawUsage ); // will be updated every frame
       threeJs.scene.add( mesh );
-
+      render();
       threeJs.addAnimationEvent((dt){
         render();
       });
@@ -102,7 +100,7 @@ class _State extends State<WebglInstancingDynamic> {
       }
     }
 
-    mesh.instanceMatrix?.needsUpdate = true;
-    mesh.computeBoundingSphere();
+    //mesh.instanceMatrix?.needsUpdate = true;
+    //mesh.computeBoundingSphere();
   }
 }
