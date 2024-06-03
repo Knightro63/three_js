@@ -397,7 +397,7 @@ class RenderingContext{
     _gl.bindFramebuffer(target, framebuffer?.id);
     // checkError('bindFramebuffer');
   }
-
+  
   int checkFramebufferStatus(int target) {
     return _gl.checkFramebufferStatus(target);
   }

@@ -3,8 +3,6 @@ part of three_renderers;
 class WebGLRenderer {
   late Map<String, dynamic> parameters;
 
-  late final dynamic domElement;
-
   bool alpha = false;
   bool depth = true;
   bool stencil = true;
@@ -172,10 +170,6 @@ class WebGLRenderer {
     _scissor = Vector4(0, 0, width, height);
 
     _gl = this.parameters["gl"];
-
-    if (this.parameters["canvas"] != null) {
-      domElement = this.parameters["canvas"];
-    }
 
     initGLContext();
   }
@@ -1480,8 +1474,8 @@ class WebGLRenderer {
       _currentScissorTest = renderTarget.scissorTest;
     } 
     else {
-      _currentViewport..setFrom(_viewport)..scale(_pixelRatio)..floor();
-      _currentScissor..setFrom(_scissor)..scale(_pixelRatio)..floor();
+      _currentViewport.setFrom(_viewport).scale(_pixelRatio).floor();
+      _currentScissor.setFrom(_scissor).scale(_pixelRatio).floor();
       _currentScissorTest = _scissorTest;
     }
 

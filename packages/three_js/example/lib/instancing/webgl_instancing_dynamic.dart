@@ -100,7 +100,7 @@ class _State extends State<WebglInstancingDynamic> {
       }
     }
 
-    //mesh.instanceMatrix?.needsUpdate = true;
-    //mesh.computeBoundingSphere();
+    mesh.instanceMatrix?.needsUpdate = true;
+    mesh.computeBoundingSphere();
   }
 }

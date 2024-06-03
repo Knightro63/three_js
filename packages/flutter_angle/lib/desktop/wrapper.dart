@@ -1149,7 +1149,7 @@ class RenderingContext {
   // void uniform1iv2(UniformLocation? location, v, int srcOffset, [int? srcLength]);
 
   void uniform1ui(UniformLocation? location, int v0){
-    gl.glUniform1ui(location?.id ?? 0, v0);
+    gl.glUniform1ui(location?.id  ?? nullptr.address, v0);
     // checkError('uniform1ui');
   }
 
@@ -1157,7 +1157,7 @@ class RenderingContext {
     int count = v.length;
     final valuePtr = calloc<Uint32>(count);
     valuePtr.asTypedList(count).setAll(0, v);
-    gl.glUniform1uiv(location?.id ?? 0, count, valuePtr);
+    gl.glUniform1uiv(location?.id  ?? nullptr.address, count, valuePtr);
     calloc.free(valuePtr);
     // checkError('uniform1uiv'); 
   }
@@ -1169,7 +1169,7 @@ class RenderingContext {
   // void uniform2iv2(UniformLocation? location, v, int srcOffset, [int? srcLength]);
 
   void uniform2ui(UniformLocation? location, int v0, int v1){
-    gl.glUniform2ui(location?.id ?? 0, v0, v1);
+    gl.glUniform2ui(location?.id  ?? nullptr.address, v0, v1);
     // checkError('uniform2ui');
   }
 
@@ -1177,7 +1177,7 @@ class RenderingContext {
     int count = v.length;
     final valuePtr = calloc<Uint32>(count);
     valuePtr.asTypedList(count).setAll(0, v);
-    gl.glUniform2uiv(location?.id ?? 0, count, valuePtr);
+    gl.glUniform2uiv(location?.id  ?? nullptr.address, count, valuePtr);
     calloc.free(valuePtr);
     // checkError('uniform1uiv'); 
   }
@@ -1188,7 +1188,7 @@ class RenderingContext {
   // void uniform3iv2(UniformLocation? location, v, int srcOffset, [int? srcLength]);
 
   void uniform3ui(UniformLocation? location, int v0, int v1, int v2){
-    gl.glUniform3ui(location?.id ?? 0, v0, v1, v2);
+    gl.glUniform3ui(location?.id  ?? nullptr.address, v0, v1, v2);
     // checkError('uniform3ui');
   }
 
@@ -1196,7 +1196,7 @@ class RenderingContext {
     int count = v.length;
     final valuePtr = calloc<Uint32>(count);
     valuePtr.asTypedList(count).setAll(0, v);
-    gl.glUniform3uiv(location?.id ?? 0, count, valuePtr);
+    gl.glUniform3uiv(location?.id  ?? nullptr.address, count, valuePtr);
     calloc.free(valuePtr);
     // checkError('uniform1uiv'); 
   }
@@ -1207,7 +1207,7 @@ class RenderingContext {
   // void uniform4iv2(UniformLocation? location, v, int srcOffset, [int? srcLength]);
 
   void uniform4ui(UniformLocation? location, int v0, int v1, int v2, int v3){
-    gl.glUniform4ui(location?.id ?? 0, v0, v1, v2, v3);
+    gl.glUniform4ui(location?.id  ?? nullptr.address, v0, v1, v2, v3);
     // checkError('uniform4ui');
   }
 
@@ -1215,7 +1215,7 @@ class RenderingContext {
     int count = v.length;
     final valuePtr = calloc<Uint32>(count);
     valuePtr.asTypedList(count).setAll(0, v);
-    gl.glUniform4uiv(location?.id ?? 0, count, valuePtr);
+    gl.glUniform4uiv(location?.id  ?? nullptr.address, count, valuePtr);
     calloc.free(valuePtr);
     // checkError('uniform1uiv'); 
   }
@@ -1293,12 +1293,12 @@ class RenderingContext {
   }
 
   void bindFramebuffer(int target, Framebuffer? framebuffer){
-    gl.glBindFramebuffer(target, framebuffer?.id ?? 0);
+    gl.glBindFramebuffer(target, framebuffer?.id ?? nullptr.address);
     // checkError('bindFramebuffer');
   }
 
   void bindRenderbuffer(int target, Renderbuffer? renderbuffer){
-    gl.glBindRenderbuffer(target, renderbuffer?.id ?? 0);
+    gl.glBindRenderbuffer(target, renderbuffer?.id ?? nullptr.address);
     // checkError('bindRenderbuffer');
   }
 
@@ -1513,7 +1513,7 @@ class RenderingContext {
   Framebuffer createFramebuffer(){
     Pointer<Uint32> id = calloc<Uint32>();//tempUint32s[0];
     gl.glGenFramebuffers(1, id);
-    // checkError('createFramebuffer');
+    checkError('createFramebuffer');
     int _v = id.value;
     calloc.free(id);
     return Framebuffer(_v);
@@ -1679,7 +1679,7 @@ class RenderingContext {
   }
 
   void framebufferRenderbuffer(int target, int attachment, int renderbuffertarget, Renderbuffer? renderbuffer){
-    gl.glFramebufferRenderbuffer(target, attachment, renderbuffertarget, renderbuffer?.id ?? 0);
+    gl.glFramebufferRenderbuffer(target, attachment, renderbuffertarget, renderbuffer?.id  ?? nullptr.address);
     // checkError('framebufferRenderbuffer');
   }
 
@@ -2259,7 +2259,7 @@ class RenderingContext {
   }
 
   void useProgram(Program? program) {
-    gl.glUseProgram(program?.id ?? 0);
+    gl.glUseProgram(program?.id  ?? nullptr.address);
     // checkError('useProgram');
   }
 

@@ -106,7 +106,6 @@ class ThreeJS{
     scene.children.forEach((element) {
       element.material?.dispose();
     });
-    //loading.clear();
   }
 
   void initSize(BuildContext context){
@@ -140,21 +139,17 @@ class ThreeJS{
   }
 
   Future<void> render() async{  
-
-    FlutterAngle.activateTexture(texture!);
     rendererUpdate?.call();
     if(postProcessor == null){
       renderer!.clear();
       renderer!.setViewport(0,0,width,height);
-
       renderer!.render(scene, camera);
-      gl.flush();
     }
     else{
       postProcessor?.call(clock.getDelta());
     }
-    //FlutterAngle.activateTexture(texture!);
-    await FlutterAngle.updateTexture(texture!,null);
+    FlutterAngle.activateTexture(texture!);
+    await FlutterAngle.updateTexture(texture!,sourceTexture);
   }
   
   void initRenderer() {
@@ -165,7 +160,6 @@ class ThreeJS{
         "height": height,
         "gl": gl,
         "antialias": true,
-        "canvas": texture?.element,
         "alpha": settings.alpha,
         "clearColor": settings.clearColor,
         "clearAlpha": settings.clearAlpha,
@@ -195,10 +189,10 @@ class ThreeJS{
     }
 
     if(!kIsWeb){
-      // final core.WebGLRenderTargetOptions pars = core.WebGLRenderTargetOptions(settings.renderOptions);
-      // renderTarget = core.WebGLRenderTarget((width * dpr).toInt(), (height * dpr).toInt(), pars);
-      // renderer!.setRenderTarget(renderTarget);
-      //sourceTexture = renderer!.getRenderTargetGLTexture(renderTarget!);
+      final core.WebGLRenderTargetOptions pars = core.WebGLRenderTargetOptions(settings.renderOptions);
+      renderTarget = core.WebGLMultisampleRenderTarget((width * dpr).toInt(), (height * dpr).toInt(), pars);
+      renderer!.setRenderTarget(renderTarget);
+      sourceTexture = renderer!.getRenderTargetGLTexture(renderTarget!);
     }
   }
   void onWindowResize(BuildContext context){
@@ -232,15 +226,6 @@ class ThreeJS{
 
     await FlutterAngle.initOpenGL(true);
 
-    // Map<String, dynamic> options = {
-    //   "antialias": true,
-    //   "alpha": settings.alpha,
-    //   "width": width.toInt(),
-    //   "height": height.toInt(),
-    //   "dpr": dpr,
-    //   'precision': 'highp'
-    // };
-    // await three3dRender.initialize(options: options);
     texture = await FlutterAngle.createTexture(      
       AngleOptions(
         width: width.toInt(), 
@@ -253,6 +238,7 @@ class ThreeJS{
     );
     
     gl = texture!.getContext();
+    FlutterAngle.activateTexture(texture!);
     initScene();
   }
 
