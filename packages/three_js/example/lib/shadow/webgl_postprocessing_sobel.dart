@@ -20,6 +20,9 @@ class _State extends State<WebglPostprocessingSobel> {
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
       setup: setup,
+      settings: three.Settings(
+        useSourceTexture: true
+      )
     );
     super.initState();
   }
@@ -59,8 +62,6 @@ class _State extends State<WebglPostprocessingSobel> {
 
     final mesh = three.Mesh( geometry, material );
     threeJs.scene.add( mesh );
-
-    //
 
     final ambientLight = three.AmbientLight( 0xe7e7e7 );
     threeJs.scene.add( ambientLight );

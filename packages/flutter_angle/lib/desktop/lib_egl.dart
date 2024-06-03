@@ -324,15 +324,13 @@ void eglMakeCurrent(
   Pointer<Void> read,
   Pointer<Void> context,
 ) {
-  final nativeCallResult =
-      _libEGL!.eglMakeCurrent(display, draw, read, context) == 1;
+  final nativeCallResult = _libEGL!.eglMakeCurrent(display, draw, read, context) == 1;
 
   if (nativeCallResult) {
     return;
   }
 
-  throw EglException(
-      'Failed to make current using display [$display], draw [$draw], read [$read], context [$context].');
+  throw EglException('Failed to make current using display [$display], draw [$draw], read [$read], context [$context].');
 }
 
 void eglSwapBuffers(
@@ -345,8 +343,7 @@ void eglSwapBuffers(
     return;
   }
 
-  throw EglException(
-      'Failed to swap buffers using display [$display], surface [$surface].');
+  throw EglException('Failed to swap buffers using display [$display], surface [$surface].');
 }
 
 void eglDestroyContext(

@@ -4,17 +4,14 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_angle/desktop/render_worker.dart';
 import 'package:flutter_angle/flutter_angle.dart';
 
-import '../shared/options.dart';
 import 'dart:async';
 import 'dart:ffi';
 import 'dart:io';
-import 'wrapper.dart';
 import 'package:dylib/dylib.dart';
 import 'package:ffi/ffi.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'lib_egl.dart';
-import 'bindings/index.dart';
 
 class FlutterGLTexture {
   final dynamic element;
@@ -132,22 +129,19 @@ class FlutterAngle {
     final result = await _channel.invokeMethod('initOpenGL');
 
     if (result == null) {
-      throw EglException(
-          'Plugin.initOpenGL didn\'t return anything. Something is really wrong!');
+      throw EglException('Plugin.initOpenGL didn\'t return anything. Something is really wrong!');
     }
 
     final pluginContextAdress = result['context'] as int?;
     if (pluginContextAdress == null) {
-      throw EglException(
-          'Plugin.initOpenGL didn\'t return a Context. Something is really wrong!');
+      throw EglException('Plugin.initOpenGL didn\'t return a Context. Something is really wrong!');
     }
 
     _pluginContext = Pointer<Void>.fromAddress(pluginContextAdress);
 
     final dummySurfacePointer = result['dummySurface'] as int?;
     if (dummySurfacePointer == null) {
-      throw EglException(
-          'Plugin.initOpenGL didn\'t return a dummy surface. Something is really wrong!');
+      throw EglException('Plugin.initOpenGL didn\'t return a dummy surface. Something is really wrong!');
     }
     _dummySurface = Pointer<Void>.fromAddress(dummySurfacePointer);
 
@@ -194,11 +188,12 @@ class FlutterAngle {
     // }
 
     _baseAppContext = eglCreateContext(_display, _EGLconfig,
-        // we link both contexts so that app and plugin can share OpenGL Objects
-        shareContext: _pluginContext,
-        contextClientVersion: 3,
-        // Android does not support debugContexts
-        isDebugContext: useDebugContext && !Platform.isAndroid);
+      // we link both contexts so that app and plugin can share OpenGL Objects
+      shareContext: _pluginContext,
+      contextClientVersion: 3,
+      // Android does not support debugContexts
+      isDebugContext: useDebugContext && !Platform.isAndroid
+    );
 
     /// bind context to this thread. All following OpenGL calls from this thread will use this context
     eglMakeCurrent(_display, _dummySurface, _dummySurface, _baseAppContext);
@@ -304,15 +299,15 @@ class FlutterAngle {
     _rawOpenGl.glBindFramebuffer(GL_FRAMEBUFFER, fbo.value);
 
     final newTexture = FlutterGLTexture.fromMap(result, null, fbo.value, options);
-  
+    print(newTexture.toMap());
     print(_rawOpenGl.glGetError());
     _rawOpenGl.glActiveTexture(WebGL.TEXTURE);
 
     if (newTexture.metalAsGLTextureId != 0) {
       // Draw to metal interop texture directly
       _rawOpenGl.glBindTexture(textureTarget, newTexture.metalAsGLTextureId);
-      //_rawOpenGl.glTexParameteri(textureTarget, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-      //_rawOpenGl.glTexParameteri(textureTarget, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+      // _rawOpenGl.glTexParameteri(textureTarget, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+      // _rawOpenGl.glTexParameteri(textureTarget, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
       _rawOpenGl.glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureTarget, newTexture.metalAsGLTextureId, 0);
     } 
     else {
@@ -351,10 +346,11 @@ class FlutterAngle {
   }
 
   static Future<void> updateTexture(FlutterGLTexture texture,[WebGLTexture? sourceTexture]) async {
+    
     if(sourceTexture != null){
       _rawOpenGl.glClearColor(0.0, 0.0, 0.0, 0.0);
       _rawOpenGl.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-      _rawOpenGl.glViewport(0, 0, (texture.options.width*texture.options.dpr).toInt(),( texture.options.height*texture.options.dpr).toInt());
+      _rawOpenGl.glViewport(0, 0, (texture.options.width).toInt(),( texture.options.height).toInt());
       worker.renderTexture(sourceTexture);
       _rawOpenGl.glFinish();
     }
@@ -364,11 +360,10 @@ class FlutterAngle {
       return;
     }
 
-    _rawOpenGl.glFlush();
-    
-
     assert(_activeFramebuffer != null,'There is no active FlutterGL Texture to update');
     _channel.invokeMethod('updateTexture', {"textureId": texture.textureId});
+
+    _rawOpenGl.glFlush();
   }
 
   static Future<void> deleteTexture(FlutterGLTexture texture) async {

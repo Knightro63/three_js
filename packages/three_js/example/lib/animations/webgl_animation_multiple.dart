@@ -19,7 +19,9 @@ class _State extends State<WebglAnimationMultiple> {
   @override
   void initState() {
     threeJs = three.ThreeJS(
-      
+      settings: three.Settings(
+        useSourceTexture: true
+      ),
       onSetupComplete: (){setState(() {});},
       setup: setup
     );

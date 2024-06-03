@@ -23,7 +23,8 @@ class _State extends State<WebglClipping> {
       onSetupComplete: (){setState(() {});},
       setup: setup,
       settings: three.Settings(
-        localClippingEnabled: true
+        localClippingEnabled: true,
+        useSourceTexture: true
       )
     );
     super.initState();

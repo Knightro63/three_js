@@ -19,7 +19,9 @@ class _MyAppState extends State<WebglSkinningSimple> {
   @override
   void initState() {
     threeJs = three.ThreeJS(
-      
+      settings: three.Settings(
+        useSourceTexture: true
+      ),
       onSetupComplete: (){setState(() {});},
       setup: setup
     );

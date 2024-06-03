@@ -56,7 +56,7 @@ class UniformsCache {
 class ShadowUniformsCache {
   Map<int, Map<String, dynamic>> lights = {};
 
-  get(light) {
+  Map<String, dynamic>? get(light) {
     if (lights[light.id] != null) {
       return lights[light.id];
     }
@@ -95,7 +95,7 @@ class ShadowUniformsCache {
 
 int nextVersion = 0;
 
-shadowCastingLightsFirst(Light lightA, Light lightB) {
+int shadowCastingLightsFirst(Light lightA, Light lightB) {
   return (lightB.castShadow ? 1 : 0) - (lightA.castShadow ? 1 : 0);
 }
 
@@ -195,20 +195,21 @@ class WebGLLights {
         for (int j = 0; j < 9; j++) {
           state.probe[j].addScaled(light.sh!.coefficients[j], intensity);
         }
-      } else if (light.type == "DirectionalLight") {
+      } 
+      else if (light.type == "DirectionalLight") {
         final uniforms = cache.get(light);
 
-        uniforms["color"]..setFrom(light.color)..scale(light.intensity * scaleFactor);
+        (uniforms["color"] as Color)..setFrom(light.color!)..scale(light.intensity * scaleFactor);
 
         if (light.castShadow) {
           final shadow = light.shadow!;
 
           final shadowUniforms = shadowCache.get(light);
 
-          shadowUniforms["shadowBias"] = shadow.bias;
-          shadowUniforms["shadowNormalBias"] = shadow.normalBias;
-          shadowUniforms["shadowRadius"] = shadow.radius;
-          shadowUniforms["shadowMapSize"] = shadow.mapSize;
+          shadowUniforms?["shadowBias"] = shadow.bias;
+          shadowUniforms?["shadowNormalBias"] = shadow.normalBias;
+          shadowUniforms?["shadowRadius"] = shadow.radius;
+          shadowUniforms?["shadowMapSize"] = Vector2(1024,1024);//hadow.mapSize;
 
           // state.directionalShadow[ directionalLength ] = shadowUniforms;
           state.directionalShadow.listSetter(directionalLength, shadowUniforms);
@@ -229,8 +230,8 @@ class WebGLLights {
       } else if (light.type == "SpotLight") {
         final uniforms = cache.get(light);
 
-        uniforms["position"].setFromMatrixPosition(light.matrixWorld);
-        uniforms["color"]..setFrom(color)..scale(intensity * scaleFactor);
+        (uniforms["position"] as Vector3).setFromMatrixPosition(light.matrixWorld);
+        (uniforms["color"] as Color)..setFrom(color)..scale(intensity * scaleFactor);
 
         uniforms["distance"] = distance;
 
@@ -243,10 +244,10 @@ class WebGLLights {
 
           final shadowUniforms = shadowCache.get(light);
 
-          shadowUniforms["shadowBias"] = shadow.bias;
-          shadowUniforms["shadowNormalBias"] = shadow.normalBias;
-          shadowUniforms["shadowRadius"] = shadow.radius;
-          shadowUniforms["shadowMapSize"] = shadow.mapSize;
+          shadowUniforms?["shadowBias"] = shadow.bias;
+          shadowUniforms?["shadowNormalBias"] = shadow.normalBias;
+          shadowUniforms?["shadowRadius"] = shadow.radius;
+          shadowUniforms?["shadowMapSize"] = shadow.mapSize;
 
           // state.spotShadow[ spotLength ] = shadowUniforms;
           state.spotShadow.listSetter(spotLength, shadowUniforms);
@@ -293,12 +294,12 @@ class WebGLLights {
 
           final shadowUniforms = shadowCache.get(light);
 
-          shadowUniforms["shadowBias"] = shadow.bias;
-          shadowUniforms["shadowNormalBias"] = shadow.normalBias;
-          shadowUniforms["shadowRadius"] = shadow.radius;
-          shadowUniforms["shadowMapSize"] = shadow.mapSize;
-          shadowUniforms["shadowCameraNear"] = shadow.camera!.near;
-          shadowUniforms["shadowCameraFar"] = shadow.camera!.far;
+          shadowUniforms?["shadowBias"] = shadow.bias;
+          shadowUniforms?["shadowNormalBias"] = shadow.normalBias;
+          shadowUniforms?["shadowRadius"] = shadow.radius;
+          shadowUniforms?["shadowMapSize"] = shadow.mapSize;
+          shadowUniforms?["shadowCameraNear"] = shadow.camera!.near;
+          shadowUniforms?["shadowCameraFar"] = shadow.camera!.far;
 
           // state.pointShadow[ pointLength ] = shadowUniforms;
           state.pointShadow.listSetter(pointLength, shadowUniforms);
@@ -396,7 +397,7 @@ class WebGLLights {
     }
   }
 
-  setupView(List<Light> lights, camera) {
+  void setupView(List<Light> lights, Camera camera) {
     int directionalLength = 0;
     int pointLength = 0;
     int spotLength = 0;
@@ -488,7 +489,7 @@ class LightState {
   late List hemi;
   dynamic rectAreaLTC1;
   dynamic rectAreaLTC2;
-
+  
   LightState(Map<String, dynamic> json) {
     version = json["version"];
     hash = json["hash"];

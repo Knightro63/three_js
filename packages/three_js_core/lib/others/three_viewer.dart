@@ -7,6 +7,7 @@ import 'package:three_js_math/three_js_math.dart';
 
 class Settings{
   Settings({
+    this.useSourceTexture = false,
     this.enableShadowMap = true,
     this.autoClear = true,
     Map<String,dynamic>? renderOptions,
@@ -29,6 +30,7 @@ class Settings{
   }
 
   bool animate;
+  bool useSourceTexture;
   bool enableShadowMap;
   bool autoClear;
   bool alpha;
@@ -138,7 +140,10 @@ class ThreeJS{
     }
   }
 
-  Future<void> render() async{  
+  Future<void> render() async{
+    if(sourceTexture == null){
+      FlutterAngle.activateTexture(texture!);
+    }
     rendererUpdate?.call();
     if(postProcessor == null){
       renderer!.clear();
@@ -148,7 +153,9 @@ class ThreeJS{
     else{
       postProcessor?.call(clock.getDelta());
     }
-    FlutterAngle.activateTexture(texture!);
+    if(sourceTexture != null){
+      FlutterAngle.activateTexture(texture!);
+    }
     await FlutterAngle.updateTexture(texture!,sourceTexture);
   }
   
@@ -188,7 +195,7 @@ class ThreeJS{
       renderer!.toneMapping = settings.toneMapping;
     }
 
-    if(!kIsWeb){
+    if(settings.useSourceTexture){
       final core.WebGLRenderTargetOptions pars = core.WebGLRenderTargetOptions(settings.renderOptions);
       renderTarget = core.WebGLMultisampleRenderTarget((width * dpr).toInt(), (height * dpr).toInt(), pars);
       renderer!.setRenderTarget(renderTarget);
@@ -238,7 +245,6 @@ class ThreeJS{
     );
     
     gl = texture!.getContext();
-    FlutterAngle.activateTexture(texture!);
     initScene();
   }
 

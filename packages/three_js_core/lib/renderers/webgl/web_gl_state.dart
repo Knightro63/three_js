@@ -353,8 +353,6 @@ class WebGLState {
       return;
     }
 
-    // custom blending
-
     blendEquationAlpha = blendEquationAlpha ?? blendEquation;
     blendSrcAlpha = blendSrcAlpha ?? blendSrc;
     blendDstAlpha = blendDstAlpha ?? blendDst;
@@ -370,8 +368,7 @@ class WebGLState {
         blendDst != currentBlendDst ||
         blendSrcAlpha != currentBlendSrcAlpha ||
         blendDstAlpha != currentBlendDstAlpha) {
-      gl.blendFuncSeparate(
-          factorToGL[blendSrc]!, factorToGL[blendDst]!, factorToGL[blendSrcAlpha]!, factorToGL[blendDstAlpha]!);
+      gl.blendFuncSeparate(factorToGL[blendSrc]!, factorToGL[blendDst]!, factorToGL[blendSrcAlpha]!, factorToGL[blendDstAlpha]!);
 
       currentBlendSrc = blendSrc;
       currentBlendDst = blendDst;
@@ -499,28 +496,17 @@ class WebGLState {
 
     BoundTexture? boundTexture = currentBoundTextures[currentTextureSlot];
 
-    // print("WebGLState.boundTexture boundTexture: ${boundTexture} currentTextureSlot: ${currentTextureSlot} ");
-
     if (boundTexture == null) {
       boundTexture = BoundTexture();
       currentBoundTextures[currentTextureSlot!] = boundTexture;
     }
 
-    // print(" boundTexture.type != webglType: ${boundTexture.type != webglType} ");
-    // print("boundTexture.texture != webglTexture: ${boundTexture.texture != webglTexture} ");
+    //if (boundTexture.type != webglType || boundTexture.texture != webglTexture) {
+      gl.bindTexture(webglType, webglTexture ?? emptyTextures[webglType]);
 
-    // todo debug
-    // 当注释掉下面的if条件前 在web下工作正常 手机app端 不正常 例如：阴影渲染 第一次正确 第二次失败
-    // 当然绑定纹理失效？
-    // 灵异bug
-    // 暂时先注释掉if条件  原因不明
-    // if (boundTexture.type != webglType || boundTexture.texture != webglTexture) {
-
-    gl.bindTexture(webglType, webglTexture ?? emptyTextures[webglType]);
-
-    boundTexture.type = webglType;
-    boundTexture.texture = webglTexture;
-    // }
+      boundTexture.type = webglType;
+      boundTexture.texture = webglTexture;
+    //}
   }
 
   void unbindTexture([WebGLTexture? texture]) {
@@ -545,7 +531,6 @@ class WebGLState {
   }
 
   void texSubImage2DIf(int target, int level, int x, int y, int glFormat, int glType, image) {
-
     if (kIsWeb && image.data is! Uint8List) {
       texSubImage2DNoSize(WebGL.TEXTURE_2D, 0, 0, 0, glFormat, glType, image.data);
     } 
@@ -625,8 +610,6 @@ class WebGLState {
   }
 
   void reset() {
-    // reset state
-
     gl.disable(WebGL.BLEND);
     gl.disable(WebGL.CULL_FACE);
     gl.disable(WebGL.DEPTH_TEST);
@@ -653,25 +636,19 @@ class WebGLState {
 
     gl.cullFace(WebGL.BACK);
     gl.frontFace(WebGL.CCW);
-
     gl.polygonOffset(0, 0);
-
     gl.activeTexture(WebGL.TEXTURE0);
 
     if (isWebGL2 == true) {
       gl.bindFramebuffer(WebGL.DRAW_FRAMEBUFFER, null); // Equivalent to gl.FRAMEBUFFER
       gl.bindFramebuffer(WebGL.READ_FRAMEBUFFER, null);
+      gl.bindFramebuffer(WebGL.FRAMEBUFFER, null);
     } else {
       gl.bindFramebuffer(WebGL.FRAMEBUFFER, null);
     }
 
     gl.useProgram(null);
-
     gl.lineWidth(1);
-
-    // TODO app gl no canvas ???
-    // gl.scissor( 0, 0, gl.canvas.width, gl.canvas.height );
-    // gl.viewport( 0, 0, gl.canvas.width, gl.canvas.height );
     gl.scissor(0, 0, 0, 0);
     gl.viewport(0, 0, 0, 0);
 
@@ -753,7 +730,7 @@ class ColorBuffer {
     }
   }
 
-  reset() {
+  void reset() {
     locked = false;
 
     currentColorMask = null;

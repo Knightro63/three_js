@@ -84,9 +84,9 @@ class RenderWorker{
     final _textureSlot = _gl.getAttribLocation(_program, "TextureCoords");
     final _texture0Uniform = _gl.getUniformLocation(_program, "Texture0");
     
-    _gl.activeTexture(WebGL.TEXTURE8);
+    _gl.activeTexture(WebGL.TEXTURE10);
     _gl.bindTexture(WebGL.TEXTURE_2D, texture!);
-    _gl.uniform1i(_texture0Uniform, 8);
+    _gl.uniform1i(_texture0Uniform, 10);
     _gl.checkError("drawTexture 03");
     
     Float32List _matrix = Float32List.fromList([

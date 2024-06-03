@@ -80,7 +80,7 @@ class _State extends State<WebglShadowmapPointlight> {
     threeJs.scene = three.Scene();
     threeJs.scene.add( three.AmbientLight( 0x111122, 3 ) );
 
-    //final test = await generateTexture();
+    final test = await generateTexture();
 
     three.PointLight createLight(int color ) {
       const intensity = 1.0;
@@ -95,16 +95,16 @@ class _State extends State<WebglShadowmapPointlight> {
       three.Mesh sphere = three.Mesh( geometry, material );
       light.add( sphere );
       
-      // final texture = three.CanvasTexture(test);
-      // texture.magFilter = three.NearestFilter;
-      // texture.wrapT = three.RepeatWrapping;
-      // texture.wrapS = three.RepeatWrapping;
-      // texture.repeat.setValues( 1, 4.5 );
+      final texture = three.CanvasTexture(test);
+      texture.magFilter = three.NearestFilter;
+      texture.wrapT = three.RepeatWrapping;
+      texture.wrapS = three.RepeatWrapping;
+      texture.repeat.setValues( 1, 4.5 );
 
       geometry = three.SphereGeometry( 2, 32, 8 );
       material = three.MeshPhongMaterial.fromMap( {
         'side': three.DoubleSide,
-        //'alphaMap': texture,
+        'alphaMap': texture,
         'alphaTest': 0.25
       } );
 

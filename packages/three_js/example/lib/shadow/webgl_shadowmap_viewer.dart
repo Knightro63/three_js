@@ -23,6 +23,7 @@ class _MyAppState extends State<WebglShadowmapViewer> {
       onSetupComplete: (){setState(() {});},
       setup: setup,
       settings: three.Settings(
+        useSourceTexture: true,
         renderOptions: {
           "minFilter": three.LinearFilter,
           "magFilter": three.LinearFilter,

@@ -22,7 +22,8 @@ class _State extends State<WebglShadowmapCsm> {
       onSetupComplete: (){setState(() {});},
       setup: setup,
       settings: three.Settings(
-        shadowMapType: three.PCFSoftShadowMap
+        shadowMapType: three.PCFSoftShadowMap,
+        useSourceTexture: true
       )
     );
     super.initState();

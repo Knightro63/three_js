@@ -538,20 +538,7 @@ class RenderingContext {
   /// As allocating and freeing native memory is expensive and we need regularly
   /// buffers to receive values from FFI function we create a small set here that will
   /// be reused constantly
-  final tempInt32s = [calloc<Int32>(), calloc<Int32>(), calloc<Int32>()];
-  final tempUint32s = [calloc<Uint32>(), calloc<Uint32>(), calloc<Uint32>()];
-  final tempInt8 = calloc<Int8>();
-
-  void dispose() {
-    for (final p in tempInt32s) {
-      calloc.free(p);
-    }
-    for (final p in tempUint32s) {
-      calloc.free(p);
-    }
-    calloc.free(tempInt8);
-  }
-
+  /// 
   void checkError([String message = '']) {
     final glError = gl.glGetError();
     if (glError != WebGL.NO_ERROR) {
@@ -598,10 +585,31 @@ class RenderingContext {
   // void bufferData2(int target, TypedData srcData, int usage, int srcOffset, [int? length]);
 
   // //JS ('bufferSubData')
-  void bufferSubData(int target, int dstByteOffset, TypedData srcData, int srcOffset, int length){
-    Pointer<Uint32> nativeBuffer = calloc<Uint32>(srcData.lengthInBytes);
-    gl.glBufferSubData(target, dstByteOffset, length, nativeBuffer.cast<Void>());
-    calloc.free(nativeBuffer);
+  void bufferSubData(int target, int dstByteOffset, TypedData srcData){
+    Pointer<Float>? nativeBuffer;
+    late int size;
+    if (srcData is List<double> || srcData is Float32List) {
+      nativeBuffer = floatListToArrayPointer(srcData as List<double>).cast();
+      size = srcData.lengthInBytes * sizeOf<Float>();
+    } 
+    else if (srcData is Int32List) {
+      nativeBuffer = int32ListToArrayPointer(srcData).cast();
+      size = srcData.length * sizeOf<Int32>();
+    } 
+    else if (srcData is Uint16List) {
+      nativeBuffer = uInt16ListToArrayPointer(srcData).cast();
+      size = srcData.length * sizeOf<Uint16>();
+    } 
+    else if (srcData is Uint8List) {
+      nativeBuffer = uInt8ListToArrayPointer(srcData).cast();
+      size = srcData.length * sizeOf<Uint16>();
+    } 
+
+    gl.glBufferSubData(target, dstByteOffset, size, nativeBuffer != null ? nativeBuffer.cast() : nullptr);
+    
+    if (nativeBuffer != null) {
+      calloc.free(nativeBuffer);
+    }
     // checkError('texSubImage2D');
   }
 
@@ -1293,7 +1301,9 @@ class RenderingContext {
   }
 
   void bindFramebuffer(int target, Framebuffer? framebuffer){
-    gl.glBindFramebuffer(target, framebuffer?.id ?? nullptr.address);
+    if(framebuffer != null){
+      gl.glBindFramebuffer(target, framebuffer?.id ?? nullptr.address);
+    }
     // checkError('bindFramebuffer');
   }
 
@@ -1414,10 +1424,10 @@ class RenderingContext {
     gl.glCompileShader(shader.id);
 
     if (checkForErrors) {
-      final compiled = tempInt32s[0];
+      final compiled = calloc<Int32>();
       gl.glGetShaderiv(shader.id, GL_COMPILE_STATUS, compiled);
       if (compiled.value == 0) {
-        final infoLen = tempInt32s[1];
+        final infoLen = calloc<Int32>();
 
         gl.glGetShaderiv(shader.id, GL_INFO_LOG_LENGTH, infoLen);
 
@@ -1430,18 +1440,17 @@ class RenderingContext {
 
           calloc.free(infoLog);
         }
+        calloc.free(infoLen);
         throw OpenGLException(message, 0);
       }
+      calloc.free(compiled);
     }
   }
 
   void compressedTexImage2D(int target, int level, int internalformat, int width, int height, int border, TypedData? pixels){
-    Pointer<Int8>? nativeBuffer;
-    if (pixels != null) {
-      nativeBuffer = calloc<Int8>(pixels.lengthInBytes);
-      nativeBuffer.asTypedList(pixels.lengthInBytes).setAll(0, pixels.buffer.asUint8List());
-    }    
+    Pointer<Void>? nativeBuffer; 
     late int size;
+
     if (pixels is List<double> || pixels is Float32List) {
       nativeBuffer = floatListToArrayPointer(pixels as List<double>).cast();
       size = pixels!.lengthInBytes * sizeOf<Float>();
@@ -1463,11 +1472,7 @@ class RenderingContext {
   }
 
   void compressedTexSubImage2D(int target, int level, int xoffset, int yoffset, int width, int height, int format ,TypedData? pixels){
-    Pointer<Int8>? nativeBuffer;
-    if (pixels != null) {
-      nativeBuffer = calloc<Int8>(pixels.lengthInBytes);
-      nativeBuffer.asTypedList(pixels.lengthInBytes).setAll(0, pixels.buffer.asUint8List());
-    }
+    Pointer<Void>? nativeBuffer;
     late int size;
 
     if (pixels is List<double> || pixels is Float32List) {
@@ -1502,7 +1507,7 @@ class RenderingContext {
   }
 
   Buffer createBuffer() {
-    Pointer<Uint32> id = calloc<Uint32>();//tempUint32s[0];
+    Pointer<Uint32> id = calloc<Uint32>();
     gl.glGenBuffers(1, id);
     // checkError('createBuffer');
     int _v = id.value;
@@ -1511,7 +1516,7 @@ class RenderingContext {
   }
 
   Framebuffer createFramebuffer(){
-    Pointer<Uint32> id = calloc<Uint32>();//tempUint32s[0];
+    Pointer<Uint32> id = calloc<Uint32>();
     gl.glGenFramebuffers(1, id);
     checkError('createFramebuffer');
     int _v = id.value;
@@ -1540,7 +1545,7 @@ class RenderingContext {
   }
 
   WebGLTexture createTexture() {
-    Pointer<Uint32> vPointer = calloc<Uint32>();//tempUint32s[0];
+    Pointer<Uint32> vPointer = calloc<Uint32>();
     gl.glGenTextures(1, vPointer);
     // checkError('createBuffer');
     int _v = vPointer.value;
@@ -1822,10 +1827,12 @@ class RenderingContext {
   }
 
   WebGLParameter getProgramParameter(Program program, int pname) {
-    final status = tempInt32s[0];
+    final status = calloc<Int32>();
     gl.glGetProgramiv(program.id, pname, status);
+    final _v = status.value;
+    calloc.free(status);
     // checkError('getProgramParameter');
-    return WebGLParameter(status.value);
+    return WebGLParameter(_v);
   }
 
   // Object? getRenderbufferParameter(int target, int pname);
@@ -1917,10 +1924,10 @@ class RenderingContext {
   void linkProgram(Program program, [bool checkForErrors = true]) {
     gl.glLinkProgram(program.id);
     if (checkForErrors) {
-      final linked = tempInt32s[0];
+      final linked = calloc<Int32>();
       gl.glGetProgramiv(program.id, GL_LINK_STATUS, linked);
       if (linked.value == 0) {
-        final infoLen = tempInt32s[1];
+        final infoLen = calloc<Int32>();
 
         gl.glGetProgramiv(program.id, GL_INFO_LOG_LENGTH, infoLen);
 
@@ -1933,8 +1940,10 @@ class RenderingContext {
 
           calloc.free(infoLog);
         }
+        calloc.free(infoLen);
         throw OpenGLException(message, 0);
       }
+      calloc.free(linked);
     }
   }
 

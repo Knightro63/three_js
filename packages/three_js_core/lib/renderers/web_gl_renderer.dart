@@ -394,6 +394,7 @@ class WebGLRenderer {
 
   //
   void dispose() {
+    state.reset();
     attributes.dispose();
     renderLists.dispose();
     renderStates.dispose();
@@ -1059,7 +1060,7 @@ class WebGLRenderer {
       uniforms["pointLights"]["value"] = lights.state.point;
       uniforms["pointLightShadows"]["value"] = lights.state.pointShadow;
       uniforms["hemisphereLights"]["value"] = lights.state.hemi;
-
+      
       uniforms["directionalShadowMap"]["value"] = lights.state.directionalShadowMap;
       uniforms["directionalShadowMatrix"]["value"] = lights.state.directionalShadowMatrix;
       uniforms["spotShadowMap"]["value"] = lights.state.spotShadowMap;
@@ -1480,7 +1481,7 @@ class WebGLRenderer {
     }
 
     final framebufferBound = state.bindFramebuffer(WebGL.FRAMEBUFFER, framebuffer);
-
+    
     if (framebufferBound && capabilities.drawBuffers && useDefaultFramebuffer) {
       state.drawBuffers(renderTarget, framebuffer);
     }
@@ -1553,7 +1554,7 @@ class WebGLRenderer {
   }
 
   void copyFramebufferToTexture(position, Texture? texture, {int level = 0}) {
-    console.warning('copyFramebufferToTexture not supported');
+    //console.warning('copyFramebufferToTexture not supported');
     if (texture is! FramebufferTexture) {
       console.warning('WebGLRenderer: copyFramebufferToTexture() can only be used with FramebufferTexture.');
       return;

@@ -491,7 +491,7 @@ class RenderingContext{
     // checkError('blitFramebuffer');
   }
 
-  void bufferSubData(int target, int dstByteOffset, TypedData srcData, int srcOffset, int length){
+  void bufferSubData(int target, int dstByteOffset, TypedData srcData){
     _gl.bufferSubData(target, dstByteOffset, srcData);
     // checkError('bufferSubData');
   }

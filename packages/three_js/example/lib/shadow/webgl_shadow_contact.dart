@@ -21,7 +21,8 @@ class _MyAppState extends State<WebglShadowContact> {
   void initState() {
     threeJs = three.ThreeJS(
       settings: three.Settings(
-        alpha: true
+        alpha: true,
+        useSourceTexture: true
       ),
       
       onSetupComplete: (){setState(() {});},

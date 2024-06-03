@@ -18,7 +18,10 @@ class _MyAppState extends State<WebglCameraArray> {
   void initState() {
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
-      setup: setup
+      setup: setup,
+      settings: three.Settings(
+        useSourceTexture: true
+      )
     );
     super.initState();
   }

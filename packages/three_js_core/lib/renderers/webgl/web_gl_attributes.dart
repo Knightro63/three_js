@@ -73,7 +73,7 @@ class WebGLAttributes {
     };
   }
 
-  void updateBuffer(buffer, BufferAttribute attribute, bufferType) {
+  void updateBuffer(Buffer buffer, BufferAttribute attribute, int bufferType) {
     final array = attribute.array;
     final updateRange = attribute.updateRange;
 
@@ -81,14 +81,12 @@ class WebGLAttributes {
 
     if (updateRange!["count"] == -1) {
       // Not using update ranges
-      gl.bufferSubData(bufferType, 0, array.data, 0, array.lengthInBytes);
+      gl.bufferSubData(bufferType, 0, array.data);
     } 
     else {
       console.info(" WebGLAttributes.dart gl.bufferSubData need debug confirm.... ");
-      gl.bufferSubData(bufferType, updateRange["offset"]! * attribute.itemSize, array.data, updateRange["offset"]!, updateRange["count"]!);
-
+      gl.bufferSubData(bufferType, updateRange["offset"]! * attribute.itemSize, array.data);
       updateRange["count"] = -1; // reset range
-
     }
   }
 
@@ -132,11 +130,9 @@ class WebGLAttributes {
   void update(attribute, bufferType, {String? name}) {
     if (attribute.type == "GLBufferAttribute") {
       final cached = buffers.get(attribute);
-
       if (cached == null || cached["version"] < attribute.version) {
         buffers.add(key: attribute, value: createBuffer(attribute, bufferType, name: name));
       }
-
       return;
     }
 

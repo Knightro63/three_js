@@ -19,6 +19,9 @@ class _State extends State<WebglLoaderPly> {
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
       setup: setup,
+      settings: three.Settings(
+        useSourceTexture: true
+      )
     );
     super.initState();
   }

@@ -16,7 +16,7 @@ class WebXRManager with EventDispatcher {
   late final state;
   final WebGLRenderer renderer;
   bool isPresenting = false;
-  dynamic gl;
+  RenderingContext gl;
   
   var session = null;
   double framebufferScaleFactor = 1.0;
@@ -136,22 +136,20 @@ class WebXRManager with EventDispatcher {
     glBinding = null;
     session = null;
 
-    //
-
     animation.stop();
 
     isPresenting = false;
     dispatchEvent(Event(type: 'sessionend'));
   }
 
-  setFramebufferScaleFactor( value ) {
+  void setFramebufferScaleFactor( value ) {
     framebufferScaleFactor = value;
     if (isPresenting == true ) {
       console.warning( 'WebXRManager: Cannot change framebuffer scale while presenting.' );
     }
   }
 
-  setReferenceSpaceType ( value ) {
+  void setReferenceSpaceType ( value ) {
     referenceSpaceType = value;
     if (isPresenting == true ) {
       console.warning( 'three.WebXRManager: Cannot change reference space type while presenting.' );
@@ -194,7 +192,7 @@ class WebXRManager with EventDispatcher {
       final attributes = gl.getContextAttributes();
 
       if ( attributes.xrCompatible != true ) {
-        await gl.makeXRCompatible();
+        //await gl.makeXRCompatible();
       }
 
       if ( session.renderState.layers == null ) {
@@ -233,17 +231,17 @@ class WebXRManager with EventDispatcher {
 
         if ( attributes.depth ) {
 
-          clearStyle = gl.DEPTH_BUFFER_BIT;
+          clearStyle = WebGL.DEPTH_BUFFER_BIT;
 
-          if ( attributes.stencil ) clearStyle |= gl.STENCIL_BUFFER_BIT;
+          if ( attributes.stencil ) clearStyle |= WebGL.STENCIL_BUFFER_BIT;
 
-          depthStyle = attributes.stencil ? gl.DEPTH_STENCIL_ATTACHMENT : gl.DEPTH_ATTACHMENT;
-          depthFormat = attributes.stencil ? gl.DEPTH24_STENCIL8 : gl.DEPTH_COMPONENT24;
+          depthStyle = attributes.stencil ? WebGL.DEPTH_STENCIL_ATTACHMENT : WebGL.DEPTH_ATTACHMENT;
+          depthFormat = attributes.stencil ? WebGL.DEPTH24_STENCIL8 : WebGL.DEPTH_COMPONENT24;
 
         }
 
         final projectionlayerInit = {
-          'colorFormat': attributes.alpha ? gl.RGBA8 : gl.RGB8,
+          'colorFormat': attributes.alpha ? WebGL.RGBA8 : WebGL.RGB8,
           'depthFormat': depthFormat,
           'scaleFactor': framebufferScaleFactor
         };
@@ -260,28 +258,28 @@ class WebXRManager with EventDispatcher {
 
           glMultisampledFramebuffer = gl.createFramebuffer();
           glColorRenderbuffer = gl.createRenderbuffer();
-          gl.bindRenderbuffer( gl.RENDERBUFFER, glColorRenderbuffer );
+          gl.bindRenderbuffer( WebGL.RENDERBUFFER, glColorRenderbuffer );
           gl.renderbufferStorageMultisample(
-            gl.RENDERBUFFER,
+            WebGL.RENDERBUFFER,
             4,
-            gl.RGBA8,
+            WebGL.RGBA8,
             glProjLayer.textureWidth,
             glProjLayer.textureHeight );
-          state.bindFramebuffer( gl.FRAMEBUFFER, glMultisampledFramebuffer );
-          gl.framebufferRenderbuffer( gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.RENDERBUFFER, glColorRenderbuffer );
-          gl.bindRenderbuffer( gl.RENDERBUFFER, null );
+          state.bindFramebuffer( WebGL.FRAMEBUFFER, glMultisampledFramebuffer );
+          gl.framebufferRenderbuffer( WebGL.FRAMEBUFFER, WebGL.COLOR_ATTACHMENT0, WebGL.RENDERBUFFER, glColorRenderbuffer );
+          gl.bindRenderbuffer( WebGL.RENDERBUFFER, null );
 
           if ( depthFormat != null ) {
 
             glDepthRenderbuffer = gl.createRenderbuffer();
-            gl.bindRenderbuffer( gl.RENDERBUFFER, glDepthRenderbuffer );
-            gl.renderbufferStorageMultisample( gl.RENDERBUFFER, 4, depthFormat, glProjLayer.textureWidth, glProjLayer.textureHeight );
-            gl.framebufferRenderbuffer( gl.FRAMEBUFFER, depthStyle, gl.RENDERBUFFER, glDepthRenderbuffer );
-            gl.bindRenderbuffer( gl.RENDERBUFFER, null );
+            gl.bindRenderbuffer( WebGL.RENDERBUFFER, glDepthRenderbuffer );
+            gl.renderbufferStorageMultisample( WebGL.RENDERBUFFER, 4, depthFormat, glProjLayer.textureWidth, glProjLayer.textureHeight );
+            gl.framebufferRenderbuffer( WebGL.FRAMEBUFFER, depthStyle, WebGL.RENDERBUFFER, glDepthRenderbuffer );
+            gl.bindRenderbuffer( WebGL.RENDERBUFFER, null );
 
           }
 
-          state.bindFramebuffer( gl.FRAMEBUFFER, null );
+          state.bindFramebuffer( WebGL.FRAMEBUFFER, null );
         }
       }
 
@@ -513,10 +511,10 @@ class WebXRManager with EventDispatcher {
           state.bindXRFramebuffer( glFramebuffer );
 
           if ( glSubImage.depthStencilTexture != null ) {
-            gl.framebufferTexture2D( gl.FRAMEBUFFER, depthStyle, gl.TEXTURE_2D, glSubImage.depthStencilTexture, 0 );
+            gl.framebufferTexture2D( WebGL.FRAMEBUFFER, depthStyle, WebGL.TEXTURE_2D, glSubImage.depthStencilTexture, 0 );
           }
 
-          gl.framebufferTexture2D( gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, glSubImage.colorTexture, 0 );
+          gl.framebufferTexture2D( WebGL.FRAMEBUFFER, WebGL.COLOR_ATTACHMENT0, WebGL.TEXTURE_2D, glSubImage.colorTexture, 0 );
           viewport = glSubImage.viewport;
         }
 
@@ -557,18 +555,18 @@ class WebXRManager with EventDispatcher {
       final width = glProjLayer.textureWidth;
       final height = glProjLayer.textureHeight;
 
-      state.bindFramebuffer( gl.READ_FRAMEBUFFER, glMultisampledFramebuffer );
-      state.bindFramebuffer( gl.DRAW_FRAMEBUFFER, glFramebuffer );
+      state.bindFramebuffer( WebGL.READ_FRAMEBUFFER, glMultisampledFramebuffer );
+      state.bindFramebuffer( WebGL.DRAW_FRAMEBUFFER, glFramebuffer );
       // Invalidate the depth here to avoid flush of the depth data to main memory.
-      gl.invalidateFramebuffer( gl.READ_FRAMEBUFFER, [ depthStyle ] );
-      gl.invalidateFramebuffer( gl.DRAW_FRAMEBUFFER, [ depthStyle ] );
-      gl.blitFramebuffer( 0, 0, width, height, 0, 0, width, height, gl.COLOR_BUFFER_BIT, gl.NEAREST );
+      gl.invalidateFramebuffer( WebGL.READ_FRAMEBUFFER, [ depthStyle ] );
+      gl.invalidateFramebuffer( WebGL.DRAW_FRAMEBUFFER, [ depthStyle ] );
+      gl.blitFramebuffer( 0, 0, width, height, 0, 0, width, height, WebGL.COLOR_BUFFER_BIT, WebGL.NEAREST );
       // Invalidate the MSAA buffer because it's not needed anymore.
-      gl.invalidateFramebuffer( gl.READ_FRAMEBUFFER, [ gl.COLOR_ATTACHMENT0 ] );
-      state.bindFramebuffer( gl.READ_FRAMEBUFFER, null );
-      state.bindFramebuffer( gl.DRAW_FRAMEBUFFER, null );
+      gl.invalidateFramebuffer( WebGL.READ_FRAMEBUFFER, [ WebGL.COLOR_ATTACHMENT0 ] );
+      state.bindFramebuffer( WebGL.READ_FRAMEBUFFER, null );
+      state.bindFramebuffer( WebGL.DRAW_FRAMEBUFFER, null );
 
-      state.bindFramebuffer( gl.FRAMEBUFFER, glMultisampledFramebuffer );
+      state.bindFramebuffer( WebGL.FRAMEBUFFER, glMultisampledFramebuffer );
     }
 
     xrFrame = null;
