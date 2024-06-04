@@ -23,9 +23,9 @@ final mat2array = Float32List(4);
 class SingleUniform with WebGLUniformsHelper {
   late Function setValue;
   late int activeInfoType;
-  late dynamic activeInfo;
+  late ActiveInfo activeInfo;
 
-  SingleUniform(id, this.activeInfo, addr) {
+  SingleUniform(id, this.activeInfo, UniformLocation addr) {
     this.id = id;
     this.addr = addr;
     activeInfoType = activeInfo.type;
@@ -153,11 +153,11 @@ void addUniform(WebGLUniform container, uniformObject) {
   container.map[uniformObject.id] = uniformObject;
 }
 
-void parseUniform(activeInfo, addr, WebGLUniform container) {
+void parseUniform(ActiveInfo activeInfo, UniformLocation addr, WebGLUniform container) {
   final path = activeInfo.name;
   final pathLength = path.length;
 
-  // print("WebGLUniformsHelper.parseUniform path: ${path} addr: ${addr} ");
+  //console.info("WebGLUniformsHelper.parseUniform path: $path addr: ${addr.id} ");
 
   // reset RegExp object, because of the early exit of a previous run
   // RePathPart.lastIndex = 0;
@@ -199,7 +199,7 @@ mixin WebGLUniformsHelper {
   // id string || int
   late dynamic id;
   Map<int, dynamic> cache = <int, dynamic>{};
-  dynamic addr = 0;
+  UniformLocation addr = UniformLocation(0);
   late int size;
 
   List<double> flatten(List array, int nBlocks, int blockSize) {
@@ -637,7 +637,6 @@ mixin WebGLUniformsHelper {
 
   Function getSingularSetter(id, activeInfo) {
     final type = activeInfo.type;
-    
     switch (type) {
       case 0x1406:
         return setValueV1f; // FLOAT

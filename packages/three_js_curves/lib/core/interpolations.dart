@@ -1,6 +1,11 @@
-/// Bezier Curves formulas obtained from
-/// http://en.wikipedia.org/wiki/Bézier_curve
+/// [PathInterpolations] contains spline and Bézier functions internally used by concrete
+/// curve classes.
 class PathInterpolations{
+  /// t -- interpolation weight.
+  /// 
+  /// p0, p1, p2, p3 -- the points defining the spline curve.
+  /// 
+  /// Used internally by [SplineCurve].
   static double catmullRom(double t, double p0, double p1, double p2, double p3) {
     final v0 = (p2 - p0) * 0.5;
     final v1 = (p3 - p1) * 0.5;
@@ -12,8 +17,7 @@ class PathInterpolations{
         p1;
   }
 
-  //
-
+ 
   static double quadraticBezierP0(double t, double p) {
     final k = 1 - t;
     return k * k * p;
@@ -27,6 +31,12 @@ class PathInterpolations{
     return t * t * p;
   }
 
+  /// [t] -- interpolation weight.
+  /// 
+  /// [p0], [p1], [p2] -- the starting, control and end points defining the curve.
+  /// 
+  /// Used internally by [quadraticBezier3] and
+  /// [quadraticBezier].
   static double quadraticBezier(double t, double p0, double p1, double p2) {
     return quadraticBezierP0(t, p0) +
         quadraticBezierP1(t, p1) +
@@ -52,7 +62,14 @@ class PathInterpolations{
   static double cubicBezierP3(double t, double p) {
     return t * t * t * p;
   }
-
+  
+  /// [t] -- interpolation weight.
+  /// 
+  /// [p0], [p1], [p2], [p3] -- the starting, control(twice) and end points defining the
+  /// curve.
+  /// 
+  /// Used internally by [CubicBezierCurve3] and
+  /// [CubicBezierCurve].
   static double cubicBezier(double t, double p0, double p1, double p2, double p3) {
     return cubicBezierP0(t, p0) +
         cubicBezierP1(t, p1) +

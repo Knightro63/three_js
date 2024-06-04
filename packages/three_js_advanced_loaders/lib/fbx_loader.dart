@@ -198,7 +198,6 @@ class __FBXTreeParser {
 
     if (_fbxTree.connections != null) {
       final rawConnections = _fbxTree.connections!["connections"];
-
       rawConnections.forEach((rawConnection) {
         final fromID = rawConnection[0];
         final toID = rawConnection[1];
@@ -484,16 +483,14 @@ class __FBXTreeParser {
 
     if (materialNode["Diffuse"] != null) {
       parameters["color"] = Color.fromList(List<double>.from(materialNode["Diffuse"]["value"]));
-    } else if (materialNode["DiffuseColor"] != null &&
-        (materialNode["DiffuseColor"]["type"] == 'Color' ||
-            materialNode["DiffuseColor"]["type"] == 'ColorRGB')) {
+    } 
+    else if (materialNode["DiffuseColor"] != null && (materialNode["DiffuseColor"]["type"] == 'Color' || materialNode["DiffuseColor"]["type"] == 'ColorRGB')) {
       // The blender exporter exports diffuse here instead of in materialNode.Diffuse
       parameters["color"] = Color.fromList(List<double>.from(materialNode["DiffuseColor"]["value"]));
     }
 
     if (materialNode["DisplacementFactor"] != null) {
-      parameters["displacementScale"] =
-          materialNode["DisplacementFactor"]["value"];
+      parameters["displacementScale"] = materialNode["DisplacementFactor"]["value"];
     }
 
     if (materialNode["Emissive"] != null) {
@@ -527,8 +524,8 @@ class __FBXTreeParser {
 
     if (materialNode["Specular"] != null) {
       parameters["specular"] = Color.fromList(List<double>.from(materialNode["Specular"]["value"]));
-    } else if (materialNode["SpecularColor"] != null &&
-        materialNode["SpecularColor"]["type"] == 'Color') {
+    } 
+    else if (materialNode["SpecularColor"] != null && materialNode["SpecularColor"]["type"] == 'Color') {
       // The blender exporter exports specular color here instead of in materialNode.Specular
       parameters["specular"] = Color.fromList(List<double>.from(materialNode["SpecularColor"]["value"]));
     }
@@ -823,7 +820,7 @@ class __FBXTreeParser {
             break;
           case 'Null':
           default:
-            model = Group();
+            model = AnimationObject();
             break;
         }
 
@@ -953,7 +950,7 @@ class __FBXTreeParser {
   }
 
   // Create a DirectionalLight, PointLight or SpotLight
-  createLight(relationships) {
+  Object3D createLight(relationships) {
     late Object3D model;
     dynamic lightAttribute;
 
@@ -1094,12 +1091,15 @@ class __FBXTreeParser {
     return model;
   }
 
-  Line createCurve(relationships, geometryMap) {
-    final geometry = relationships.children.reduce((geo, child) {
-      if (geometryMap.has(child["ID"])) geo = geometryMap.get(child["ID"]);
+  Line createCurve(Map relationships, Map geometryMap) {
+    late final BufferGeometry geometry;
 
-      return geo;
-    }, null);
+    for(final map in (relationships['children'] as List)) {
+      if (geometryMap.containsKey(map["ID"])){ 
+        geometry = geometryMap[map["ID"]];
+        break;
+      }
+    }
 
     // FBX does not list materials for Nurbs lines, so we'll just put our own in here.
     final material = LineBasicMaterial.fromMap({"color": 0x3300ff, "linewidth": 1});
@@ -1255,10 +1255,9 @@ class _GeometryParser {
   // Parse nodes in _FBXTree.Objects.Geometry
   Map parse(deformers) {
     final geometryMap = {};
-
     if (_fbxTree.objects?["Geometry"] != null) {
       final geoNodes = _fbxTree.objects!["Geometry"];
-
+      
       for (final nodeID in geoNodes.keys) {
         final relationships = connections[_parseInt(nodeID)];
         final geo = parseGeometry(relationships, geoNodes[nodeID], deformers);
@@ -1643,35 +1642,30 @@ class _GeometryParser {
   }
 
   // Generate data for a single face in a geometry. If the face is a quad then split it into 2 tris
-  genFace(
-      MorphBuffers buffers,
-      Map geoInfo,
-      facePositionIndexes,
-      materialIndex,
-      faceNormals,
-      faceColors,
-      faceUVs,
-      faceWeights,
-      faceWeightIndices,
-      faceLength) {
+  void genFace(
+    MorphBuffers buffers,
+    Map geoInfo,
+    facePositionIndexes,
+    materialIndex,
+    faceNormals,
+    faceColors,
+    faceUVs,
+    faceWeights,
+    faceWeightIndices,
+    faceLength
+  ){
     for (int i = 2; i < faceLength; i++) {
       buffers.vertex.add(geoInfo["vertexPositions"][facePositionIndexes[0]]);
       buffers.vertex.add(geoInfo["vertexPositions"][facePositionIndexes[1]]);
       buffers.vertex.add(geoInfo["vertexPositions"][facePositionIndexes[2]]);
 
-      buffers.vertex
-          .add(geoInfo["vertexPositions"][facePositionIndexes[(i - 1) * 3]]);
-      buffers.vertex.add(
-          geoInfo["vertexPositions"][facePositionIndexes[(i - 1) * 3 + 1]]);
-      buffers.vertex.add(
-          geoInfo["vertexPositions"][facePositionIndexes[(i - 1) * 3 + 2]]);
+      buffers.vertex.add(geoInfo["vertexPositions"][facePositionIndexes[(i - 1) * 3]]);
+      buffers.vertex.add(geoInfo["vertexPositions"][facePositionIndexes[(i - 1) * 3 + 1]]);
+      buffers.vertex.add(geoInfo["vertexPositions"][facePositionIndexes[(i - 1) * 3 + 2]]);
 
-      buffers.vertex
-          .add(geoInfo["vertexPositions"][facePositionIndexes[i * 3]]);
-      buffers.vertex
-          .add(geoInfo["vertexPositions"][facePositionIndexes[i * 3 + 1]]);
-      buffers.vertex
-          .add(geoInfo["vertexPositions"][facePositionIndexes[i * 3 + 2]]);
+      buffers.vertex.add(geoInfo["vertexPositions"][facePositionIndexes[i * 3]]);
+      buffers.vertex.add(geoInfo["vertexPositions"][facePositionIndexes[i * 3 + 1]]);
+      buffers.vertex.add(geoInfo["vertexPositions"][facePositionIndexes[i * 3 + 2]]);
 
       if (geoInfo["skeleton"] != null) {
         buffers.vertexWeights.add(faceWeights[0]);
@@ -1922,19 +1916,19 @@ class _GeometryParser {
 
     final degree = order - 1;
 
-    final knots = geoNode['KnotVector'].a;
+    final knots = geoNode['KnotVector']['a'];
     final List<Vector> controlPoints = [];
-    final pointsValues = geoNode['Points'].a;
+    final pointsValues = geoNode['Points']['a'];
 
     for (int i = 0, l = pointsValues.length; i < l; i += 4) {
       controlPoints.add(Vector4.zero().copyFromArray(pointsValues, i));
     }
 
-    late int startKnot, endKnot;
-
+    int? startKnot, endKnot;
     if (geoNode['Form'] == 'Closed') {
       controlPoints.add(controlPoints[0]);
-    } else if (geoNode['Form'] == 'Periodic') {
+    } 
+    else if (geoNode['Form'] == 'Periodic') {
       startKnot = degree;
       endKnot = knots.length - 1 - startKnot;
 
@@ -2524,22 +2518,21 @@ class _TextParser {
     final scope = this;
 
     final split = text.split(RegExp(r'[\r\n]+'));
-
     split.asMap().forEach((i, line) {
       final matchComment = RegExp(r"^[\s\t]*;").hasMatch(line);
       final matchEmpty = RegExp(r"^[\s\t]*$").hasMatch(line);
 
       if (matchComment || matchEmpty) return;
 
-      final matchBeginning = line.startsWith('^\\t{${scope.currentIndent}}(\\w+):(.*){');
-      final matchProperty = line.contains('^\\t{${scope.currentIndent}}(\\w+):[\\s\\t\\r\\n](.*)');
-      final matchEnd = line.endsWith('^\\t{${scope.currentIndent - 1}}}');
-
-      if (matchBeginning) {
-        scope.parseNodeBegin(line, [matchBeginning.toString()]);
+      final matchBeginning = RegExp('\t{${scope.currentIndent}}(\\w+):(.*){').allMatches(line);// line.startsWith();
+      final matchProperty = RegExp('\t{${scope.currentIndent}}(\\w+):[\\s\\t\\r\\n](.*)').allMatches(line);//line.contains();
+      final matchEnd = line.contains(RegExp('^\\t{${scope.currentIndent - 1}}}'));
+      
+      if (matchBeginning.isNotEmpty) {
+        scope.parseNodeBegin(line, matchBeginning.toList());
       } 
-      else if (matchProperty) {
-        scope.parseNodeProperty(line, [matchProperty.toString()], split[++i]);
+      else if (matchProperty.isNotEmpty) {
+        scope.parseNodeProperty(line, matchProperty.toList(), split[++i]);
       } 
       else if (matchEnd) {
         scope.popStack();
@@ -2554,13 +2547,13 @@ class _TextParser {
     return allNodes;
   }
 
-  void parseNodeBegin(String line, List<String> property) {
-    final nodeName = property[1]
+  void parseNodeBegin(String line, List<RegExpMatch> property) {
+    final nodeName = property.first.group(1)!
         .trim()
         .replaceFirst(RegExp(r'^"'), '')
         .replaceAll(RegExp(r'"$'), '');
 
-    final nodeAttrs = property[2].split(',').map((attr) {
+    final nodeAttrs = property.first.group(2)!.split(',').map((attr) {
       return attr
           .trim()
           .replaceFirst(RegExp(r'^"'), '')
@@ -2584,9 +2577,10 @@ class _TextParser {
         // special case Pose needs PoseNodes as an array
         if (nodeName == 'PoseNode') {
           currentNode["PoseNode"].add(node);
-        } else if (currentNode[nodeName].id != null) {
+        } 
+        else if (currentNode[nodeName]['id'] != null) {
           currentNode[nodeName] = {};
-          currentNode[nodeName][currentNode[nodeName].id] =
+          currentNode[nodeName][currentNode[nodeName]['id']] =
               currentNode[nodeName];
         }
         if (attrs.id != null) currentNode[nodeName][attrs.id] = node;
@@ -2629,14 +2623,14 @@ class _TextParser {
     return _NodeAttr(id: id, name: name, type: type);
   }
 
-  parseNodeProperty(String line, List<String> property, String contentLine) {
+  void parseNodeProperty(String line, List<RegExpMatch> property, String contentLine) {
     final regExp = RegExp(r'^"');
     final regExp2 = RegExp(r'"$');
 
     String propName =
-        property[1].replaceFirst(regExp, '').replaceFirst(regExp2, '').trim();
+        property.first.group(1)!.replaceFirst(regExp, '').replaceFirst(regExp2, '').trim();
     String propValue =
-        property[2].replaceFirst(regExp, '').replaceFirst(regExp2, '').trim();
+        property.first.group(2)!.replaceFirst(regExp, '').replaceFirst(regExp2, '').trim();
 
     // for special case: base64 image data follows "Content: ," line
     //	Content: ,
@@ -2658,14 +2652,14 @@ class _TextParser {
 
     // Connections
     if (propName == 'C') {
-      final connProps = propValue.split(',')..removeRange(1,propValue.length);
+      final connProps = propValue.split(',')..removeAt(0);//..removeRange(1,propValue.length);
       final from = int.parse(connProps[0]);
       final to = int.parse(connProps[1]);
-
-      List<String> rest = propValue.split(',')..removeRange(3, propValue.length);
+      List<String> rest = propValue.split(',');
+      rest = rest..removeRange(3, rest.length);
 
       rest = rest.map((elem) {
-        return elem.trim().replaceFirst(RegExp(r'^"'), '');
+        return elem.trim().replaceFirst(RegExp(r'"'), '');
       }).toList();
 
       propName = 'connections';
@@ -2678,12 +2672,18 @@ class _TextParser {
     }
 
     // Node
-    if (propName == 'Node') currentNode.id = propValue;
+    if (propName == 'Node') currentNode['id'] = propValue;
 
     // connections
     if (currentNode.keys.contains(propName) && currentNode[propName] is List) {
-      currentNode[propName].add(propValue);
-    } else {
+      List pv = propValue.split(',');
+      List<double> temp = [];
+      for(int i = 0; i < pv.length;i++){
+        temp.add(double.parse(pv[i]));
+      }
+      currentNode[propName].add(temp);
+    } 
+    else {
       if (propName != 'a'){
         currentNode[propName] = propValue;
       }
@@ -3544,7 +3544,7 @@ String _convertArrayBufferToString(Uint8List buffer, [int? from, int? to]) {
 
 void _append(a, b) {
   for (int i = 0, j = a.length, l = b.length; i < l; i++, j++) {
-    a[j] = b[i];
+    a+= ', ${b[i]}';
   }
 }
 

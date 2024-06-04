@@ -71,7 +71,7 @@ class TextureLoader extends Loader {
     final loader = ImageLoader(manager,flipY);
     loader.setPath(path);
     final ImageElement? image = await loader.fromAsset(asset, package: package);
-    return _textureProcess(image, package == null?asset:'$package/$asset');
+    return _textureProcess(image, package == null?asset:'packages/$package/$asset');
   }
   @override
   Future<Texture?> fromBytes(Uint8List bytes) async{

@@ -174,7 +174,7 @@ class ThreeJS{
       };
 
       if(!kIsWeb){
-        options['logarithmicDepthBuffer'] = true;
+        //options['logarithmicDepthBuffer'] = true;
       }
 
       renderer = lateRenderer ?? core.WebGLRenderer(options);
@@ -196,7 +196,7 @@ class ThreeJS{
       renderer!.toneMapping = settings.toneMapping;
     }
 
-    if(settings.useSourceTexture){
+    if(settings.useSourceTexture && !kIsWeb){
       final core.WebGLRenderTargetOptions pars = core.WebGLRenderTargetOptions(settings.renderOptions);
       renderTarget = core.WebGLMultisampleRenderTarget((width * dpr).toInt(), (height * dpr).toInt(), pars);
       renderer!.setRenderTarget(renderTarget);

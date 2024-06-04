@@ -513,10 +513,7 @@ class WebGLState {
     final boundTexture = currentBoundTextures[currentTextureSlot];
 
     if (boundTexture != null && boundTexture.type != null) {
-      if(!kIsWeb && texture!= null){
-        gl.bindTexture(boundTexture.type!, texture);
-      }
-
+      gl.bindTexture(boundTexture.type!, texture);
       boundTexture.type = null;
       boundTexture.texture = null;
     }
@@ -576,13 +573,13 @@ class WebGLState {
   void texImage2DIf(int target, int level, int internalformat, int format, int type, image) {
     if (kIsWeb) {
       texImage2DNoSize(target, level, internalformat, format, type, image.data);
-    } else {
+    } 
+    else {
       texImage2D(target, level, internalformat, image.width, image.height, 0, format, type, image.data);
     }
   }
 
-  void texImage2D(
-      int target, int level, int internalformat, int width, int height, border, int format, int type, data) {
+  void texImage2D(int target, int level, int internalformat, int width, int height, border, int format, int type, data) {
     gl.texImage2D(target, level, internalformat, width, height, border, format, type, data);
   }
 
@@ -590,8 +587,7 @@ class WebGLState {
     gl.texImage2D_NOSIZE(target, level, internalformat, format, type, data);
   }
 
-  void texImage3D(int target, int level, int internalformat, int width, int height, int depth, int border, int format,
-      int type, offset) {
+  void texImage3D(int target, int level, int internalformat, int width, int height, int depth, int border, int format,int type, offset) {
     gl.texImage3D(target, level, internalformat, width, height, depth, border, format, type, offset);
   }
 

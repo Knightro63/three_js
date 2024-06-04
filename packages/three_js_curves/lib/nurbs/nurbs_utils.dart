@@ -15,7 +15,7 @@ U : knot vector
 
 returns the span
 */
-int findSpan(int p, int u, List<double> U ) {
+int findSpan(int p, num u, List<double> U ) {
 	final n = U.length - p - 1;
 
 	if ( u >= U[ n ] ) {
@@ -54,10 +54,10 @@ U    : knot vector
 
 returns array[p+1] with basis functions values.
 */
-List<double> calcBasisFunctions(int span, int u, int p, List<double> U ) {
-	final List<double> N = [];
-	final left = [];
-	final right = [];
+List<double> calcBasisFunctions(int span, num u, int p, List<double> U ) {
+	final List<double> N = List.filled(p+1, 0);
+	final left = List.filled(p+1, 0.0);
+	final right = List.filled(p+1, 0.0);
 	N[0] = 1.0;
 
 	for (int j = 1; j <= p; ++ j ) {
@@ -91,7 +91,7 @@ u : parametric point
 
 returns point for given u
 */
-Vector4 calcBSplinePoint( p, U, P, u ) {
+Vector4 calcBSplinePoint(int p, List<double> U, List<Vector4> P, num u ) {
 	final span = findSpan( p, u, U );
 	final N = calcBasisFunctions( span, u, p, U );
 	final C = Vector4( 0, 0, 0, 0 );
@@ -121,7 +121,7 @@ U    : knot vector
 
 returns array[n+1][p+1] with basis functions derivatives
 */
-List<List<double>> calcBasisFunctionDerivatives(int span, u, int p, int n, List<double> U ) {
+List<List<double>> calcBasisFunctionDerivatives(int span, num u, int p, int n, List<double> U ) {
 
 	final List<double> zeroArr = [];
 	for ( int i = 0; i <= p; ++ i ){
@@ -339,7 +339,7 @@ nd : number of derivatives
 
 returns array with derivatives.
 */
-List<Vector3> calcNURBSDerivatives(int p, List<double> U, List<Vector> P, int u, int nd ) {
+List<Vector3> calcNURBSDerivatives(int p, List<double> U, List<Vector> P, num u, int nd ) {
 	final pDers = calcBSplineDerivatives( p, U, P, u, nd );
 	return calcRationalCurveDerivatives( pDers );
 }

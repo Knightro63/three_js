@@ -175,9 +175,7 @@ class PropertyMixer {
 
     if (weightAdditive > 0) {
       // accuN := accuN + additive accuN
-
-      _mixBufferRegionAdditive(
-          buffer, offset, _addIndex * stride, 1, stride);
+      _mixBufferRegionAdditive(buffer, offset, _addIndex * stride, 1, stride);
     }
 
     for (int i = stride, e = stride + stride; i != e; ++i) {

@@ -385,7 +385,6 @@ class WebGLProgram extends DefaultProgram with WebGLProgramExtra {
 
   WebGLUniforms getUniforms() {
     cachedUniforms ??= WebGLUniforms(gl, this);
-
     return cachedUniforms!;
   }
 

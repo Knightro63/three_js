@@ -20,7 +20,7 @@ class _MyAppState extends State<WebglSkinningSimple> {
   void initState() {
     threeJs = three.ThreeJS(
       settings: three.Settings(
-        useSourceTexture: true
+        //useSourceTexture: true
       ),
       onSetupComplete: (){setState(() {});},
       setup: setup
@@ -83,7 +83,7 @@ class _MyAppState extends State<WebglSkinningSimple> {
 
     final dirLight = three.DirectionalLight(0xffffff, 0.8);
     dirLight.position.setValues(0, 20, 10);
-    dirLight.castShadow = true;
+    //dirLight.castShadow = true;
     dirLight.shadow!.camera!.top = 18;
     dirLight.shadow!.camera!.bottom = -10;
     dirLight.shadow!.camera!.left = -12;
@@ -94,8 +94,8 @@ class _MyAppState extends State<WebglSkinningSimple> {
 
     final loader = three.GLTFLoader().setPath('assets/models/gltf/');
 
-    //final result = await loader.fromAsset( 'Parrot.gltf');
-    final result = await loader.fromAsset('SimpleSkinning.gltf');
+    final result = await loader.fromAsset( 'Parrot.gltf');
+    //final result = await loader.fromAsset('SimpleSkinning.gltf');
 
     three.console.info(" gltf load sucess result: $result  ");
 

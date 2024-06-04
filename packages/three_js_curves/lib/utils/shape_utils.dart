@@ -1,9 +1,16 @@
 import 'package:three_js_math/three_js_math.dart';
 import './earcut.dart';
 
+/// A class containing utility functions for shapes.
+///
+/// Note that these are all linear functions so it is necessary to calculate
+/// separately for x, y (and z, w if present) components of a vector.
 class ShapeUtils {
   // calculate area of the contour polygon
 
+  /// [contour] -- 2D polygon. An array of Vector2()
+  /// 
+  /// Calculate area of a ( 2D ) contour polygon.
   static double area(List<Vector?> contour) {
     final n = contour.length;
     double a = 0.0;
@@ -17,10 +24,24 @@ class ShapeUtils {
     return a * 0.5;
   }
 
+  /// [pts] -- points defining a 2D polygon
+  /// 
+  /// Note that this is a linear function so it is necessary to calculate
+  /// separately for x, y components of a polygon.
+  /// 
+  /// Used internally by [Path], [ExtrudeGeometry] and [ShapeGeometry].
   static bool isClockWise(List<Vector?> pts) {
     return ShapeUtils.area(pts) < 0;
   }
 
+  /// [contour] -- 2D polygon. An array of [Vector2].
+  /// 
+  /// [holes] -- An array that holds arrays of [Vector2]s. Each array
+  /// represents a single hole definition.
+  /// 
+  /// Used internally by [ExtrudeGeometry] and
+  /// [ShapeGeometry] to calculate faces in shapes with
+  /// holes.
   static List<List<num>> triangulateShape(List<Vector?> contour, List<List<Vector?>> holes) {
     final List<double> vertices = []; // flat array of vertices like [ x0,y0, x1,y1, x2,y2, ... ]
     List<int> holeIndices = []; // array of hole indices

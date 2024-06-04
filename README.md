@@ -18,24 +18,28 @@ This is a dart conversion of three.js and three_dart, originally created by [@mr
 ## Requirements
 
 **MacOS**
- - Minimum os Deployment Target: 10.11
+ - Minimum os Deployment Target: 10.13
  - Xcode 13 or newer
  - Swift 5
+ - Metal and OpenGL supported
 
 **iOS**
  - Minimum os Deployment Target: 11.0
  - Xcode 13 or newer
  - Swift 5
+ - Metal and OpenGL supported
 
 **Android**
  - compileSdkVersion: 34
+ - Vulkan and OpenGL supported
 
  **Windows**
- - Intel support only.
- - AMD has some issues due to limited openGL support.
+ - Intel supported.
+ - AMD supported.
+ - Direct3D 11 and OpenGL supported
 
 **Web**
- - WebGl support only, WebGL2 is not fully supported at this time.
+ - WebGL2 support.
 
 **Linux**
  - Unsupported

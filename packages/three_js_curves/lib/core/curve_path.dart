@@ -3,11 +3,8 @@ import 'curve.dart';
 import '../curves/line_curve.dart';
 import '../curves/line_curve3.dart';
 
-/// ************************************************************
-///	Curved Path - a curve path is simply a array of connected
-///  curves, but retains the api of a curve
-///*************************************************************/
-
+/// An abstract base class extending [Curve]. A CurvePath is simply an
+/// array of connected curves, but retains the api of a curve.
 class CurvePath extends Curve {
   CurvePath() : super() {
     curves = [];
@@ -28,6 +25,7 @@ class CurvePath extends Curve {
     curves.add(curve);
   }
 
+  /// Adds a [lineCurve] to close the path.
   void closePath() {
     // Add a line curve if start and end of lines are not connected
     final startPoint = curves[0].getPoint(0);
@@ -37,15 +35,6 @@ class CurvePath extends Curve {
       curves.add(LineCurve(endPoint, startPoint));
     }
   }
-
-  // To get accurate point with reference to
-  // entire path distance at time t,
-  // following has to be done:
-
-  // 1. Length of each sub path have to be known
-  // 2. Locate and identify type of curve
-  // 3. Get t for the curve
-  // 4. Return curve.getPointAt(t')
 
   @override
   Vector? getPoint(double t, [Vector? optionalTarget]) {
@@ -77,7 +66,6 @@ class CurvePath extends Curve {
   // We cannot use the default THREE.Curve getPoint() with getLength() because in
   // THREE.Curve, getLength() depends on getPoint() but in THREE.CurvePath
   // getPoint() depends on getLength
-
   @override
   double getLength() {
     final lens = getCurveLengths();
@@ -138,6 +126,14 @@ class CurvePath extends Curve {
     return points;
   }
 
+  /// divisions -- number of pieces to divide the curve into. Default is
+  /// `12`.
+  /// 
+  /// Returns an array of points representing a sequence of curves. The
+  /// `division` parameter defines the number of pieces each curve is divided
+  /// into. However, for optimization and quality purposes, the actual sampling
+  /// resolution for each curve depends on its type. For example, for a
+  /// [page:LineCurve], the returned number of points is always just 2.
   @override
   List<Vector?> getPoints([int divisions = 12]) {
     final List<Vector?> points = [];

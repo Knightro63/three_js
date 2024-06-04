@@ -115,6 +115,9 @@ class _MyAppState extends State<WebglLoaderFbx> {
     final loader = three.FBXLoader(width: threeJs.width.toInt(), height: threeJs.height.toInt());
     final object = await loader.fromAsset( 'assets/models/fbx/SambaDancing.fbx');
     mixer = three.AnimationMixer(object!);
+    object.children.forEach((element) {
+      element.material?.flatShading = true;
+    });
 
     final action = mixer!.clipAction( object.animations[ 1 ] );
     action!.play();

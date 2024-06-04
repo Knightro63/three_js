@@ -30,10 +30,15 @@ import 'shape.dart';
 ///
 /// A series of curves can be represented as a THREE.CurvePath.
 ///
-///*/
-
 class Curve {
+  
+  /// This value determines the amount of divisions when calculating the
+  /// cumulative segment lengths of a curve via [getLengths]. To ensure
+  /// precision when using methods like [getSpacedPoints], it is
+  /// recommended to increase [arcLengthDivisions] if the curve is very
+  /// large. Default is `200`.
   late int arcLengthDivisions;
+
   bool needsUpdate = false;
 
   List<double>? cacheArcLengths;
@@ -89,16 +94,23 @@ class Curve {
     return null;
   }
 
-  // Get point at relative position in curve according to arc length
-  // - u [0 .. 1]
-
+  /// [u] - A position on the curve according to the arc length. Must
+  /// be in the range [ 0, 1 ].
+  /// 
+  /// [optionalTarget] — (optional) If specified, the result will be
+  /// copied into this Vector, otherwise a new Vector will be created.
+  /// 
+  /// 
+  /// Returns a vector for a given position on the curve according to the arc
+  /// length.
   Vector? getPointAt(double u, [Vector? optionalTarget]) {
     final t = getUtoTmapping(u);
     return getPoint(t, optionalTarget);
   }
 
-  // Get sequence of points using getPoint( t )
-
+  /// divisions -- number of pieces to divide the curve into. Default is `5`.
+  /// 
+  /// Returns a set of divisions + 1 points using getPoint( t ).
   List<Vector?> getPoints([int divisions = 5]) {
     final List<Vector?> points = [];
 
@@ -109,8 +121,9 @@ class Curve {
     return points;
   }
 
-  // Get sequence of points using getPointAt( u )
-
+  /// divisions -- number of pieces to divide the curve into. Default is `5`.
+  /// 
+  /// Returns a set of divisions + 1 equi-spaced points using getPointAt( u ).
   List<Vector?> getSpacedPoints([int divisions = 5, int offset = 0]) {
     final List<Vector?> points = [];
 
@@ -121,15 +134,13 @@ class Curve {
     return points;
   }
 
-  // Get total curve arc length
-
+  /// Get total curve arc length
   double getLength() {
     final lengths = getLengths(null);
     return lengths[lengths.length - 1];
   }
 
-  // Get list of cumulative segment lengths
-
+  /// Get list of cumulative segment lengths
   List<double> getLengths(int? divisions) {
     divisions ??= arcLengthDivisions;
 
@@ -162,13 +173,18 @@ class Curve {
     return cache; // { sums: cache, sum: sum }; Sum is in the last element.
   }
 
+  /// Update the cumulative segment distance cache. The method must be called
+  /// every time curve parameters are changed. If an updated curve is part of a
+  /// composed curve like [CurvePath], [updateArcLengths] must be
+  /// called on the composed curve, too.
   void updateArcLengths() {
     needsUpdate = true;
     getLengths(null);
   }
 
-  // Given u ( 0 .. 1 ), get a t to find p. This gives you points which are equidistant
-
+  /// Given u in the range ( 0 .. 1 ), returns [t] also in the range
+  /// ( 0 .. 1 ). u and t can then be used to give you points which are
+  /// equidistant from the ends of the curve, using [getPoint].
   double getUtoTmapping(double u, [double? distance]) {
     final arcLengths = getLengths(null);
 
@@ -230,11 +246,15 @@ class Curve {
     return t;
   }
 
-  // Returns a unit vector tangent at t
-  // In case any sub curve does not implement its tangent derivation,
-  // 2 points a small delta apart will be used to find its gradient
-  // which seems to give a reasonable approximation
-
+  /// [t] - A position on the curve. Must be in the range [ 0, 1 ].
+  /// 
+  /// [optionalTarget] — (optional) If specified, the result will be
+  /// copied into this Vector, otherwise a new Vector will be created.
+  /// 
+  /// 
+  /// Returns a unit vector tangent at t. If the derived curve does not
+  /// implement its tangent derivation, two points a small delta apart will be
+  /// used to find its gradient which seems to give a reasonable approximation.
   Vector getTangent(double t, [Vector? optionalTarget]) {
     const delta = 0.0001;
     double t1 = t - delta;
@@ -258,11 +278,22 @@ class Curve {
     return tangent;
   }
 
+  /// [u] - A position on the curve according to the arc length. Must
+  /// be in the range [ 0, 1 ]. 
+  /// 
+  /// [optionalTarget] — (optional) If specified, the result will be
+  /// copied into this Vector, otherwise a new Vector will be created.
+  /// 
+  /// 
+  /// Returns tangent at a point which is equidistant to the ends of the curve
+  /// from the point given in [getTangent].
   Vector getTangentAt(double u, [Vector? optionalTarget]) {
     final t = getUtoTmapping(u);
     return getTangent(t, optionalTarget);
   }
 
+  /// Generates the Frenet Frames. Requires a curve definition in 3D space. Used
+  /// in geometries like [TubeGeometry] or [ExtrudeGeometry].
   FrenetFrames computeFrenetFrames(int segments, bool closed) {
     // see http://www.cs.indiana.edu/pub/techreports/TR425.pdf
 
@@ -357,16 +388,19 @@ class Curve {
     return FrenetFrames(tangents: tangents, normals: normals, binormals: binormals);
   }
 
+  /// Creates a clone of this instance.
   Curve clone() {
     return Curve().copy(this);
   }
 
+  /// Copies another [name] object to this instance.
   Curve copy(Curve source) {
     arcLengthDivisions = source.arcLengthDivisions;
     return this;
   }
 
-   Map<String,dynamic> toJson() {
+  /// Returns a JSON object representation of this instance.
+  Map<String,dynamic> toJson() {
     Map<String, dynamic> data = {
       "metadata": {"version": 4.5, "type": 'Curve', "generator": 'Curve.toJson'}
     };
@@ -377,6 +411,7 @@ class Curve {
     return data;
   }
 
+  /// Copies the data from the given JSON object to this instance.
   Curve fromJson(Map<String,dynamic> json) {
     arcLengthDivisions = json['arcLengthDivisions'];
 

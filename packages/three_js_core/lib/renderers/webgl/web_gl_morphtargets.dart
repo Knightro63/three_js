@@ -8,17 +8,20 @@ int absNumericalSort(a, b) {
   return b[1].abs() >= a[1].abs() ? 1 : -1;
 }
 
-void denormalize(morph, BufferAttribute attribute) {
-  int denominator = 1;
+void denormalize(Vector morph, BufferAttribute attribute) {
+  double denominator = 1;
   NativeArray array = attribute is InterleavedBufferAttribute ? attribute.data!.array : attribute.array;
 
   if (array is Int8Array) {
     denominator = 127;
-  } else if (array is Int16Array) {
+  } 
+  else if (array is Int16Array) {
     denominator = 32767;
-  } else if (array is Int32Array) {
+  } 
+  else if (array is Int32Array) {
     denominator = 2147483647;
-  } else {
+  } 
+  else {
     console.error('three.WebGLMorphtargets: Unsupported morph attribute data type: $array');
   }
 
@@ -45,16 +48,11 @@ class WebGLMorphtargets {
 
   void update(Object3D object, BufferGeometry geometry, Material material, WebGLProgram program) {
     List<num>? objectInfluences = object.morphTargetInfluences;
-    
     if (capabilities.isWebGL2) {
-      // instead of using attributes, the WebGL 2 code path encodes morph targets
-      // into an array of data textures. Each layer represents a single morph target.
-
       final morphAttribute = geometry.morphAttributes["position"] ?? geometry.morphAttributes["normal"] ?? geometry.morphAttributes["color"];
       final morphTargetsCount = (morphAttribute != null) ? morphAttribute.length : 0;
 
       Map? entry = morphTextures.get(geometry);
-
       if (entry == null || (entry["count"] != morphTargetsCount)) {
         if (entry != null) entry["texture"].dispose();
 
@@ -85,8 +83,6 @@ class WebGLMorphtargets {
         texture.type = FloatType;
         texture.needsUpdate = true;
 
-        // fill buffer
-
         int vertexDataStride = vertexDataCount * 4;
 
         for (int i = 0; i < morphTargetsCount; i++) {
@@ -97,10 +93,10 @@ class WebGLMorphtargets {
           for (int j = 0; j < morphTarget.count; j++) {
             final stride = j * vertexDataStride;
 
-            if (hasMorphPosition == true) {
+            if (hasMorphPosition) {
               morph.fromBuffer(morphTarget, j);
 
-              if (morphTarget.normalized == true) {
+              if (morphTarget.normalized) {
                 denormalize(morph, morphTarget);
               }
 
@@ -110,7 +106,7 @@ class WebGLMorphtargets {
               buffer[offset + stride + 3] = 0;
             }
 
-            if (hasMorphNormals == true) {
+            if (hasMorphNormals) {
               final morphNormal = morphNormals[i];
               morph.fromBuffer(morphNormal, j);
 
@@ -124,11 +120,11 @@ class WebGLMorphtargets {
               buffer[offset + stride + 7] = 0;
             }
 
-            if (hasMorphColors == true) {
+            if (hasMorphColors) {
               final morphColor = morphColors[i];
               morph.fromBuffer(morphColor, j);
 
-              if (morphColor.normalized == true) {
+              if (morphColor.normalized) {
                 denormalize(morph, morphColor);
               }
 
@@ -144,11 +140,9 @@ class WebGLMorphtargets {
 
         morphTextures.set(geometry, entry);
 
-        disposeTexture() {
+        void disposeTexture() {
           texture.dispose();
-
           morphTextures.delete(geometry);
-
           geometry.removeEventListener('dispose', disposeTexture);
         }
 
@@ -177,8 +171,6 @@ class WebGLMorphtargets {
       List<List<num>>? influences = influencesList[geometry.id];
 
       if (influences == null || influences.length != length) {
-        // initialise list
-
         influences = [];
 
         for (int i = 0; i < length; i++) {
@@ -192,7 +184,6 @@ class WebGLMorphtargets {
 
       for (int i = 0; i < length; i++) {
         final influence = influences[i];
-
         influence[0] = i;
         influence[1] = objectInfluences![i];
       }
@@ -232,7 +223,8 @@ class WebGLMorphtargets {
 
           morphInfluences[i] = value.toDouble();
           morphInfluencesSum += value;
-        } else {
+        } 
+        else {
           if (morphTargets != null && geometry.hasAttributeFromString('morphTarget$i') == true) {
             geometry.deleteAttributeFromString('morphTarget$i');
           }
@@ -249,7 +241,6 @@ class WebGLMorphtargets {
       // This allows us to switch between absolute morphs and relative morphs without changing shader code
       // When baseinfluence = 1 - sum(influence), the above is equivalent to sum((target - base) * influence)
       final morphBaseInfluence = geometry.morphTargetsRelative ? 1 : 1 - morphInfluencesSum;
-
       program.getUniforms().setValue(gl, 'morphTargetBaseInfluence', morphBaseInfluence);
       program.getUniforms().setValue(gl, 'morphTargetInfluences', morphInfluences);
     }

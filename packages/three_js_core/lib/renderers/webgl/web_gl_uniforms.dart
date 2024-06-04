@@ -67,7 +67,7 @@ class WebGLUniforms with WebGLUniform {
     if (u != null) u.setValue(gl, value, textures);
   }
 
-  void setOptional(gl, object, name) {
+  void setOptional(RenderingContext gl, object, String name) {
     final v = object.getValue(name);
     if (v != null) setValue(gl, name, v);
   }
@@ -109,10 +109,8 @@ class WebGLUniforms with WebGLUniform {
 
   static List<dynamic> seqWithValue(List seq, Map<String, dynamic> values) {
     List<dynamic> r = [];
-
     for (int i = 0, n = seq.length; i != n; ++i) {
       final u = seq[i];
-
       // print("seqWithValue  u.id: ${u.id} ");
 
       if (values.keys.contains(u.id)) {
@@ -121,7 +119,6 @@ class WebGLUniforms with WebGLUniform {
         // print("seqWithValue  u.id: ${u.id} is not add ");
       }
     }
-
     return r;
   }
 }

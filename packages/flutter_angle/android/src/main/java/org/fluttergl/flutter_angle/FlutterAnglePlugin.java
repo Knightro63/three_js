@@ -108,9 +108,9 @@ public class FlutterAnglePlugin implements FlutterPlugin, MethodCallHandler {
   /// This local reference serves to register the plugin with the Flutter Engine and unregister it
   /// when the Flutter Engine is detached from the Activity
   private MethodChannel channel;
-  private EGLContext context=null;
+  private EGLContext context = null;
   private TextureRegistry textureRegistry;
-  private OpenGLManager openGLManager;
+  private OpenGLManager openGLManager = null;
   private Map<Long,FlutterGLTexture> textureMap;
 
   @Override
@@ -127,44 +127,30 @@ public class FlutterAnglePlugin implements FlutterPlugin, MethodCallHandler {
     Map<String, Object> arguments = (Map<String, Object>) call.arguments;
     if (call.method.equals("getPlatformVersion")) {
       result.success("Android " + android.os.Build.VERSION.RELEASE);
-
     }
-      else if (call.method.equals("initOpenGL")) {
-      if (context != null) {
-        // TODO this isn't fully handled on the dart side yet
-        // this means initOpenGL() was already called, which makes sense if you want to access a Texture not only
-        // from the main thread but also from an isolate. On the plugin layer here that doesn't bother because all
-        // by `initOpenGL``in Dart created contexts will be linked to the one we got from the very first call to `initOpenGL`
-        // we return this information so that the Dart side can dispose of one context.
-        long handle = context.getNativeHandle();
-                result.success(handle);
+    else if (call.method.equals("initOpenGL")) {
+      openGLManager = openGLManager == null? new OpenGLManager():openGLManager;
 
-        return;
-      }
-      openGLManager = new OpenGLManager();
-
-      if(!openGLManager.initGL())
-      {
+      if(!openGLManager.initGL()){
         result.error("OpenGL Init Error",openGLManager.getError(),null);
         return;
       }
-      context = openGLManager.getEGLContext();
+      context = context == null?openGLManager.getEGLContext():context;
 
       TextureRegistry.SurfaceTextureEntry surfaceTextureEntry = textureRegistry.createSurfaceTexture();
       SurfaceTexture surfaceTexture = surfaceTextureEntry.surfaceTexture();
       surfaceTexture.setDefaultBufferSize(638,320);
       long surface = openGLManager.createSurfaceFromTexture(surfaceTexture).getNativeHandle();
 
-       
-
       Map<String, Object> response = new HashMap<>();
       response.put("context", context.getNativeHandle());
       response.put("eglConfigId",openGLManager.getConfigId());
-      response.put("dummySurface",surface );
-      // response.put("dummySurface",openGLManager.createDummySurface().getNativeHandle());
+      //response.put("dummySurface",surface );
+      response.put("dummySurface",openGLManager.createDummySurface().getNativeHandle());
       result.success(response);
+      return;
     }
-      else if (call.method.equals("createTexture")){
+    else if (call.method.equals("createTexture")){
 
       int width = (int) arguments.get("width");
       int height = (int) arguments.get("height");

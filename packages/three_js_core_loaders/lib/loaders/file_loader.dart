@@ -87,7 +87,7 @@ class FileLoader extends Loader {
   }
   @override
   Future<ThreeFile?> fromAsset(String asset, {String? package}) async{
-    asset = package != null?'assets/$package/${path+asset}':path+asset;
+    asset = package != null?'packages/$package/${path+asset}':path+asset;
     asset = manager.resolveURL(asset);
     final cacheName = asset;
 

@@ -1,8 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
-
 import 'package:three_js/three_js.dart' as three;
 
 class WebglMorphtargets extends StatefulWidget {

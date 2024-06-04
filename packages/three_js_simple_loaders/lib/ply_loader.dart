@@ -199,7 +199,7 @@ class PLYLoader extends Loader {
 			return header;
 		}
 
-		num? parseASCIINumber(String n, type ) {
+		num? parseASCIINumber(String n, String type ) {
 			switch ( type ) {
 				case 'char': case 'uchar': case 'short': case 'ushort': case 'int': case 'uint':
 				case 'int8': case 'uint8': case 'int16': case 'uint16': case 'int32': case 'uint32':
@@ -210,23 +210,23 @@ class PLYLoader extends Loader {
       return null;
 		}
 
-		Map<String, dynamic>? parseASCIIElement( properties, tokens ) {
+		Map<String, dynamic>? parseASCIIElement(List<dynamic> properties,List<String> tokens ) {
 			Map<String, dynamic> element = {};
 
 			for (int i = 0; i < properties.length; i ++ ) {
-				if ( tokens.empty() ) return null;
-				if (properties[ i ] is List) {
+				if ( tokens.isEmpty ) return null;
+				if (properties[ i ]['type'] == 'list') {
 					final list = [];
-					final n = parseASCIINumber( tokens.next(), properties[ i ]['countType'] ) ?? 0;
+					final n = parseASCIINumber( tokens.removeAt(0), properties[ i ]['countType'] ) ?? 0;
 
 					for (int j = 0; j < n; j ++ ) {
-						if ( tokens.empty() ) return null;
-						list.add( parseASCIINumber( tokens.next(), properties[ i ]['itemType'] ) );
+						if ( tokens.isEmpty ) return null;
+						list.add( parseASCIINumber( tokens.removeAt(0), properties[ i ]['itemType'] ) );
 					}
 
 					element[ properties[ i ]['name'] ] = list;
 				} else {
-					element[ properties[ i ]['name'] ] = parseASCIINumber( tokens.next(), properties[ i ]['type'] );
+					element[ properties[ i ]['name'] ] = parseASCIINumber( tokens.removeAt(0), properties[ i ]['type'] );
 				}
 			}
 
@@ -331,7 +331,7 @@ class PLYLoader extends Loader {
 			return geometry;
 		}
 
-		void handleElement(Map<String,dynamic> buffer, elementName, element, Map<String,dynamic> cacheEntry ) {
+		void handleElement(Map<String,dynamic> buffer, String elementName, element, Map<String,dynamic> cacheEntry ) {
 			if ( elementName == 'vertex' ) {
 				buffer['vertices'].addAll(<double>[ element[ cacheEntry['attrX'] ].toDouble(), element[ cacheEntry['attrY'] ].toDouble(), element[ cacheEntry['attrZ'] ].toDouble() ]);
 
@@ -360,7 +360,7 @@ class PLYLoader extends Loader {
 				}
 			} 
       else if ( elementName == 'face' ) {
-				final vertexIndices = element['vertex_indices'] ?? element['vertex_index']; // issue #9338
+				final vertexIndices = element['vertex_indices'] ?? element['vertex_index'];
 				final texcoord = element['texcoord'];
 
 				if ( vertexIndices.length == 3 ) {
@@ -392,24 +392,24 @@ class PLYLoader extends Loader {
 			}
 		}
 
-		BufferGeometry parseASCII(String data, header ) {
+		BufferGeometry parseASCII(String data, Map<String,dynamic> header ) {
+      print(header);
 			final buffer = createBuffer();
 
-			final patternBody = RegExp(r'/end_header\s+(\S[\s\S]*\S|\S)\s*/',multiLine: true);
+			final patternBody = RegExp(r'/end_header\s+(\S[\s\S]*\S|\S)\s*/');
 			List<String> body = [];
-      List<String> matches = data.split( patternBody );
-      print(matches[0]);
-			if (matches.isNotEmpty) {
-				body = matches[0].split(RegExp(r'/\s+/'));
+      String match = data.split('end_header')[1];
+      //print(match);
+			if (match.isNotEmpty) {
+				body = match.split('\n')..removeAt(0)..removeLast();
 			} 
-			final tokens = ArrayStream( body );
-
+      int k = 0;
 			for (int i = 0; i < header['elements'].length; i ++ ) {
 				final elementDesc = header['elements'][i];
 				final attributeMap = mapElementAttributes( elementDesc['properties'] );
-        print(attributeMap);
 				for (int j = 0; j < elementDesc['count']; j ++ ) {
-					final element = parseASCIIElement( elementDesc['properties'], tokens );
+					final element = parseASCIIElement( elementDesc['properties'], body[k].split(' ') );
+          k++;
 					if (element == null) break;
 					handleElement( buffer, elementDesc['name'], element, attributeMap );
 				}
@@ -575,19 +575,5 @@ class PLYLoader extends Loader {
 		// }
 
 		return geometry;
-	}
-}
-
-class ArrayStream {
-  dynamic arr;
-  int i = 0;
-	ArrayStream(this.arr );
-
-	bool empty() {
-		return i >= arr.length;
-	}
-
-	next() {
-		return arr[i ++];
 	}
 }

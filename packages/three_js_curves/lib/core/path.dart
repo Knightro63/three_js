@@ -7,7 +7,33 @@ import '../curves/line_curve.dart';
 import '../curves/quadratic_bezier_curve.dart';
 import '../curves/spline_curve.dart';
 
+/// A 2D path representation. The class provides methods for creating paths
+/// and contours of 2D shapes similar to the 2D Canvas API.
+/// 
+/// ```
+/// final path = Path();
+///
+/// path.lineTo( 0, 0.8 );
+/// path.quadraticCurveTo( 0, 1, 0.2, 1 );
+/// path.lineTo( 1, 1 );
+///
+/// final points = path.getPoints();
+///
+/// final geometry = BufferGeometry().setFromPoints( points );
+/// final material = LineBasicMaterial( { color: 0xffffff } );
+///
+/// final line = Line( geometry, material );
+/// scene.add( line );
+///```
 class Path extends CurvePath {
+  /// [points] -- (optional) array of [Vector2].
+  /// 
+  /// Creates a Path from the points. The first point defines the offset, then
+  /// successive points are added to the [curves] array as
+  /// [LineCurves].
+  /// 
+  /// If no points are specified, an empty path is created and the
+  /// [currentPoint] is set to the origin.
   Path([List<Vector2>? points]) : super() {
     if (points != null) {
       setFromPoints(points);
@@ -18,6 +44,10 @@ class Path extends CurvePath {
     currentPoint.copyFromArray(json["currentPoint"]);
   }
 
+  /// [points] -- array of [Vector2].
+  /// 
+  /// Points are added to the [curves] array as
+  /// [LineCurves].
   Path setFromPoints(List<Vector2> points) {
     moveTo(points[0].x, points[0].y);
 
@@ -28,11 +58,13 @@ class Path extends CurvePath {
     return this;
   }
 
+  /// Move the [currentPoint] to x, y.
   Path moveTo(double x, double y) {
     currentPoint.setValues(x, y);
     return this;
   }
 
+  /// Connects a [LineCurve] from [currentPoint] to x, y onto the path.
   Path lineTo(double x, double y) {
     final curve = LineCurve(currentPoint.clone(), Vector2(x, y));
     curves.add(curve);
@@ -40,6 +72,8 @@ class Path extends CurvePath {
     return this;
   }
 
+  /// Creates a quadratic curve from [currentPoint] with cpX and cpY as
+  /// control point and updates [currentPoint] to x and y.
   Path quadraticCurveTo(double aCPx, double aCPy, double aX, double aY) {
     final curve = QuadraticBezierCurve(
       currentPoint.clone(),
@@ -52,6 +86,9 @@ class Path extends CurvePath {
     return this;
   }
 
+  /// This creates a bezier curve from [currentPoint] with (cp1X, cp1Y)
+  /// and (cp2X, cp2Y) as control points and updates [currentPoint] to x
+  /// and y.
   Path bezierCurveTo(double aCP1x, double aCP1y, double aCP2x, double aCP2y, double aX, double aY) {
     final curve = CubicBezierCurve(
       currentPoint.clone(),
@@ -65,7 +102,10 @@ class Path extends CurvePath {
     return this;
   }
 
-  Path splineThru(List<Vector2> pts /*Array of Vector*/) {
+  /// [points] - An array of [Vector2]
+  /// 
+  /// Connects a new [SplineCurve] onto the path.
+  Path splineThru(List<Vector2> pts) {
     final npts = [currentPoint.clone()];
     npts.addAll(pts);
 
@@ -77,6 +117,18 @@ class Path extends CurvePath {
     return this;
   }
 
+  /// [aX], [aY] -- The center of the arc offset from the last call.
+  /// 
+  /// [aRadius] -- The radius of the arc.
+  /// 
+  /// [aStartAngle] -- The start angle in radians.
+  /// 
+  /// [aEndAngle] -- The end angle in radians.
+  /// 
+  /// [aClockwise] -- Sweep the arc clockwise. Defaults to `false`.
+  /// 
+  /// Adds an [EllipseCurve] to the path, positioned relative
+  /// to [page:.currentPoint].
   Path arc(double aX, double aY, double aRadius, double aStartAngle, double aEndAngle, [bool? aClockwise]) {
     final x0 = currentPoint.x;
     final y0 = currentPoint.y;
@@ -86,6 +138,18 @@ class Path extends CurvePath {
     return this;
   }
 
+  /// [aX], [aY] -- The absolute center of the arc.
+  /// 
+  /// [aRadius] -- The radius of the arc.
+  /// 
+  /// [aStartAngle] -- The start angle in radians.
+  /// 
+  /// [aEndAngle] -- The end angle in radians.
+  /// 
+  /// [aClockwise] -- Sweep the arc clockwise. Defaults to `false`.
+  /// 
+  /// Adds an absolutely positioned [EllipseCurve] to the
+  /// path.
   Path absarc(double aX, double aY, double aRadius, double aStartAngle, double aEndAngle, [bool? aClockwise]) {
     absellipse(
         aX, aY, aRadius, aRadius, aStartAngle, aEndAngle, aClockwise);
@@ -93,6 +157,23 @@ class Path extends CurvePath {
     return this;
   }
 
+  /// [aX], [aY] -- The center of the ellipse offset from the last call.
+  /// 
+  /// [xRadius] -- The radius of the ellipse in the x axis.
+  /// 
+  /// [yRadius] -- The radius of the ellipse in the y axis.
+  /// 
+  /// [aStartAngle] -- The start angle in radians.
+  /// 
+  /// [aEndAngle] -- The end angle in radians.
+  /// 
+  /// [aClockwise] -- Sweep the ellipse clockwise. Defaults to `false`.
+  /// 
+  /// [aRotation] -- The rotation angle of the ellipse in radians, counterclockwise
+  /// from the positive X axis. Optional, defaults to `0`.
+  /// 
+  /// Adds an [EllipseCurve] to the path, positioned relative
+  /// to [currentPoint].
   Path ellipse(double aX, double aY, double xRadius, double yRadius, double aStartAngle, double aEndAngle, [bool? aClockwise, double? aRotation]) {
     final x0 = currentPoint.x;
     final y0 = currentPoint.y;
@@ -103,6 +184,23 @@ class Path extends CurvePath {
     return this;
   }
 
+  /// [aX], [aY] -- The absolute center of the ellipse.
+  /// 
+  /// [xRadius] -- The radius of the ellipse in the x axis.
+  /// 
+  /// [yRadius] -- The radius of the ellipse in the y axis.
+  /// 
+  /// [aStartAngle] -- The start angle in radians.
+  /// 
+  /// [aEndAngle] -- The end angle in radians.
+  /// 
+  /// [aClockwise] -- Sweep the ellipse clockwise. Defaults to false.
+  /// 
+  /// [aRotation] -- The rotation angle of the ellipse in radians, counterclockwise
+  /// from the positive X axis. Optional, defaults to `0`.
+  /// 
+  /// Adds an absolutely positioned [EllipseCurve] to the
+  /// path.
   Path absellipse(double aX, double aY, double xRadius, double yRadius, double aStartAngle, double aEndAngle, [bool? aClockwise, double? aRotation]) {
     final curve = EllipseCurve(aX, aY, xRadius, yRadius, aStartAngle,
         aEndAngle, aClockwise, aRotation);

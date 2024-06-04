@@ -12,9 +12,9 @@ import '../core/curve.dart';
 /// *
 
 class NURBSCurve extends Curve {
-  dynamic degree;
-  dynamic knots;
-  late List<Vector> controlPoints;
+  int degree;
+  List<double> knots;
+  late List<Vector4> controlPoints;
   late int startKnot;
   late int endKnot;
 
@@ -36,13 +36,13 @@ class NURBSCurve extends Curve {
 			// ensure Vector4 for control points
 			final point = controlPoints[i];
       if(point is Vector4){
-        this.controlPoints[i] = Vector4(point.x, point.y, point.z, point.w);
+        this.controlPoints.add(Vector4(point.x, point.y, point.z, point.w));
       }
       else if(point is Vector3){
-        this.controlPoints[i] = Vector4(point.x, point.y, point.z);
+        this.controlPoints.add(Vector4(point.x, point.y, point.z));
       }
       else{
-        this.controlPoints[i] = Vector4(point.x, point.y);
+        this.controlPoints.add(Vector4(point.x, point.y));
       }
 			
 		}

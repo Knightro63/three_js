@@ -123,7 +123,7 @@ class GCodeLoader extends Loader {
 			return state.relative ? v1 + v2 : v2;
 		}
 
-		final lines = data.replaceAll(RegExp(r'/;+/'), '' ).split( '\n' );
+		final lines = data.replaceAll(RegExp(';.+/'), '').split( '\n' );
 		for (int i = 0; i < lines.length; i ++ ) {
       if(!lines[i].startsWith(';')){
         final tokens = lines[i].split( ' ' );
@@ -132,7 +132,6 @@ class GCodeLoader extends Loader {
         //Argumments
         final args = _Line();
         tokens.removeAt(0);
-        //tokens.forEach( ( token ) {
         for(final token in tokens){
           if(token == '' || token[0].contains(';')){
             break;
@@ -185,7 +184,7 @@ class GCodeLoader extends Loader {
           line.e = args.e ?? line.e;
 
         } else {
-          console.warning( 'THREE.GCodeLoader: Command not supported: $cmd');
+          //console.warning( 'THREE.GCodeLoader: Command not supported: $cmd');
         }
       }
 		}
@@ -198,7 +197,6 @@ class GCodeLoader extends Loader {
 			object.add( segments );
 		}
 
-		
 		object.name = 'gcode';
 
 		if (splitLayer ) {
@@ -207,7 +205,8 @@ class GCodeLoader extends Loader {
 				addObject( layer.vertex!, true, i );
 				addObject( layer.pathVertex!, false, i );
 			}
-		} else {
+		} 
+    else {
 			final List<double> vertex = [];
 			final List<double> pathVertex = [];
 
@@ -259,7 +258,7 @@ class _Line{
     this.vertex
   });
 
-  operator []=(String key, dynamic value) => (){
+  operator []=(String key, dynamic value){
     switch (key.toLowerCase()) {
       case 'x':
         x = value;
@@ -289,5 +288,5 @@ class _Line{
         vertex = value;
         break;
     }
-  };
+  }
 }

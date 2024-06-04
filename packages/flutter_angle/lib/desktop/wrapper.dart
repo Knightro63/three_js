@@ -1302,7 +1302,7 @@ class RenderingContext {
 
   void bindFramebuffer(int target, Framebuffer? framebuffer){
     if(framebuffer != null){
-      gl.glBindFramebuffer(target, framebuffer?.id ?? nullptr.address);
+      gl.glBindFramebuffer(target, framebuffer.id);
     }
     // checkError('bindFramebuffer');
   }
@@ -1312,8 +1312,10 @@ class RenderingContext {
     // checkError('bindRenderbuffer');
   }
 
-  void bindTexture(int target, WebGLTexture texture) {
-    gl.glBindTexture(target, texture.id);
+  void bindTexture(int target, WebGLTexture? texture) {
+    if(texture != null){
+      gl.glBindTexture(target, texture.id);
+    }
     // checkError('bindTexture');
   }
 

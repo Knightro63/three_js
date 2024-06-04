@@ -213,7 +213,7 @@ class KeyframeTrack {
   /// Note: This is useful, for example, for conversions to a certain rate of
   /// frames per seconds (as it is done internally by
   /// [animationClip.CreateFromMorphTargetSequence]).
-  KeyframeTrack scale(timeScale) {
+  KeyframeTrack scale(double timeScale) {
     if (timeScale != 1.0) {
       final times = this.times;
 

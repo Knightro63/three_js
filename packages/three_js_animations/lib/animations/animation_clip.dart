@@ -37,8 +37,7 @@ class AnimationClip {
   /// [CreateClipsFromMorphTargetSequences]) or from animation hierarchies
   /// ([parseAnimation]) - if your model doesn't already
   /// hold AnimationClips in its geometry's animations array.
-  AnimationClip(this.name,
-    [this.duration = -1, List<KeyframeTrack>? tracks, this.blendMode = NormalAnimationBlendMode]) {
+  AnimationClip(this.name,[this.duration = -1, List<KeyframeTrack>? tracks, this.blendMode = NormalAnimationBlendMode]) {
     this.tracks = tracks ?? [];
 
     uuid = MathUtils.generateUUID();

@@ -3,6 +3,8 @@ import 'shape.dart';
 import '../utils/shape_utils.dart';
 import 'package:three_js_math/three_js_math.dart';
 
+/// This class is used to convert a series of shapes to an array of
+/// [Path]s, for example an SVG shape to a path.
 class ShapePath {
   String type = "ShapePath";
   Color color = Color(1, 1, 1);
@@ -10,8 +12,13 @@ class ShapePath {
   late Path currentPath;
   Map<String, dynamic>? userData;
 
+  /// Creates a new ShapePath. Unlike a [Path], no points are passed in as
+  /// the ShapePath is designed to be generated after creation.
   ShapePath();
 
+  /// Starts a new [Path] and calls [Path.moveTo]( x, y ) on that
+  /// [Path]. Also points [ShapePath.currentPath currentPath] to that
+  /// [Path].
   ShapePath moveTo(double x, double y) {
     currentPath = Path(null);
     subPaths.add(currentPath);
@@ -19,26 +26,38 @@ class ShapePath {
     return this;
   }
 
+  /// This creates a line from the [currentPath]'s
+  /// offset to X and Y and updates the offset to X and Y.
   ShapePath lineTo(double x, double y) {
     currentPath.lineTo(x, y);
     return this;
   }
 
+  /// This creates a quadratic curve from the [currentPath]'s offset to x and y with cpX and cpY as control point and
+  /// updates the [currentPath]'s offset to x and y.
   ShapePath quadraticCurveTo(double aCPx, double aCPy, double aX, double aY) {
     currentPath.quadraticCurveTo(aCPx, aCPy, aX, aY);
     return this;
   }
 
+  /// This creates a bezier curve from the [currentPath]'s offset to x and y with cp1X, cp1Y and cp2X, cp2Y as control
+  /// points and updates the [currentPath]'s offset
+  /// to x and y.
   ShapePath bezierCurveTo(double aCP1x, double aCP1y, double aCP2x, double aCP2y, double aX, double aY) {
     currentPath.bezierCurveTo(aCP1x, aCP1y, aCP2x, aCP2y, aX, aY);
     return this;
   }
 
+  /// Connects a new [SplineCurve] onto the [currentPath].
   ShapePath splineThru(List<Vector2> pts) {
     currentPath.splineThru(pts);
     return this;
   }
 
+  /// Converts the [subPaths] array into an array of
+  /// Shapes. By default solid shapes are defined clockwise (CW) and holes are
+  /// defined counterclockwise (CCW). If isCCW is set to true, then those are
+  /// flipped.
   List<Shape> toShapes(bool isCCW, bool noHoles) {
     toShapesNoHoles(inSubpaths) {
       List<Shape> shapes = [];

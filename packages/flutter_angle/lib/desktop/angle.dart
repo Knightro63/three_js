@@ -127,7 +127,7 @@ class FlutterAngle {
     loadEGL();
     // Initialize native part of he plugin
     final result = await _channel.invokeMethod('initOpenGL');
-
+    print(result);
     if (result == null) {
       throw EglException('Plugin.initOpenGL didn\'t return anything. Something is really wrong!');
     }
@@ -291,6 +291,11 @@ class FlutterAngle {
     if (Platform.isAndroid) {
       final newTexture = FlutterGLTexture.fromMap(result, null, 0, options);
       _rawOpenGl.glViewport(0, 0, width, height);
+
+      if(!options.customRenderer){
+        worker = RenderWorker(newTexture);
+      }
+
       return newTexture;
     }
 
@@ -346,27 +351,27 @@ class FlutterAngle {
   }
 
   static Future<void> updateTexture(FlutterGLTexture texture,[WebGLTexture? sourceTexture]) async {
-    
     if(sourceTexture != null){
       _rawOpenGl.glClearColor(0.0, 0.0, 0.0, 0.0);
       _rawOpenGl.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
       _rawOpenGl.glViewport(0, 0, (texture.options.width*texture.options.dpr).toInt(),( texture.options.height*texture.options.dpr).toInt());
-      worker.renderTexture(sourceTexture);
+      worker.renderTexture(sourceTexture, isFBO: Platform.isAndroid);
       _rawOpenGl.glFinish();
     }
-    
+
     if (Platform.isAndroid) {
-      eglSwapBuffers(_display, _dummySurface);
+      eglSwapBuffers(_display, texture.androidSurface);
       return;
     }
-
     _rawOpenGl.glFlush();
-
     assert(_activeFramebuffer != null,'There is no active FlutterGL Texture to update');
     _channel.invokeMethod('updateTexture', {"textureId": texture.textureId});    
   }
 
   static Future<void> deleteTexture(FlutterGLTexture texture) async {
+    if (Platform.isAndroid) {
+      return;
+    }
     assert(_activeFramebuffer != null, 'There is no active FlutterGL Texture to delete');
     if (_activeFramebuffer == texture.fboId) {
       _rawOpenGl.glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, 0);
@@ -381,11 +386,11 @@ class FlutterAngle {
   }
 
   static void activateTexture(FlutterGLTexture texture) {
+    _rawOpenGl.glBindFramebuffer(GL_FRAMEBUFFER, texture.fboId);
     if (Platform.isAndroid) {
       eglMakeCurrent(_display, texture.androidSurface, texture.androidSurface,_baseAppContext);
       return;
     }
-    _rawOpenGl.glBindFramebuffer(GL_FRAMEBUFFER, texture.fboId);
     if (texture.metalAsGLTextureId != 0) {
       // Draw to metal interop texture directly
       _rawOpenGl.glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D, texture.metalAsGLTextureId, 0);
@@ -394,7 +399,7 @@ class FlutterAngle {
       _rawOpenGl.glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, texture.rboId);
     }
     
-    printOpenGLError('activateTextue ${texture.textureId}');
+    //printOpenGLError('activateTextue ${texture.textureId}');
     _activeFramebuffer = texture.fboId;
   }
 

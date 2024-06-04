@@ -196,9 +196,9 @@ class _MyAppState extends State<ExamplePage> {
     else if (fileName == "webgl_loader_fbx") {
       page = WebglLoaderFbx(fileName: fileName);
     } 
-    // else if(fileName == "webgl_loader_fbx_nurbs"){
-    //   page = WebglLoaderFbxNurbs(fileName: fileName);
-    // }
+    else if(fileName == "webgl_loader_fbx_nurbs"){
+      page = WebglLoaderFbxNurbs(fileName: fileName);
+    }
     else if (fileName == "webgl_loader_gltf") {
       page = WebglLoaderGltf(fileName: fileName);
     } 
@@ -211,9 +211,9 @@ class _MyAppState extends State<ExamplePage> {
     else if (fileName == "webgl_loader_obj_mtl") {
       page = WebglLoaderObjMtl(fileName: fileName);
     } 
-    // else if(fileName == "webgl_loader_gcode"){
-    //   page = WebglLoaderGcode(fileName: fileName);
-    // }
+    else if(fileName == "webgl_loader_gcode"){
+      page = WebglLoaderGcode(fileName: fileName);
+    }
     else if(fileName == "webgl_loader_xyz"){
       page = WebglLoaderXyz(fileName: fileName);
     }
