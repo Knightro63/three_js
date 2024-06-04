@@ -350,7 +350,7 @@ class FlutterAngle {
     if(sourceTexture != null){
       _rawOpenGl.glClearColor(0.0, 0.0, 0.0, 0.0);
       _rawOpenGl.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-      _rawOpenGl.glViewport(0, 0, (texture.options.width).toInt(),( texture.options.height).toInt());
+      _rawOpenGl.glViewport(0, 0, (texture.options.width*texture.options.dpr).toInt(),( texture.options.height*texture.options.dpr).toInt());
       worker.renderTexture(sourceTexture);
       _rawOpenGl.glFinish();
     }
@@ -360,10 +360,10 @@ class FlutterAngle {
       return;
     }
 
-    assert(_activeFramebuffer != null,'There is no active FlutterGL Texture to update');
-    _channel.invokeMethod('updateTexture', {"textureId": texture.textureId});
-
     _rawOpenGl.glFlush();
+
+    assert(_activeFramebuffer != null,'There is no active FlutterGL Texture to update');
+    _channel.invokeMethod('updateTexture', {"textureId": texture.textureId});    
   }
 
   static Future<void> deleteTexture(FlutterGLTexture texture) async {

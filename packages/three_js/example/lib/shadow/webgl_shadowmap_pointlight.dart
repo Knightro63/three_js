@@ -48,7 +48,7 @@ class _State extends State<WebglShadowmapPointlight> {
       ),
       body: Stack(
         children: [
-          if(!createdPng)RepaintBoundary(
+          RepaintBoundary(
             key: key,
             child: Column(
               children: [

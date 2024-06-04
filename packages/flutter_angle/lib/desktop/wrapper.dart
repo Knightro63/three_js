@@ -1342,6 +1342,7 @@ class RenderingContext {
   /// here in [nativeType]
   void bufferData(int target, TypedData data, int usage) {
     late Pointer<Void> nativeData;
+
     late int size;
     if (data is List<double> || data is Float32List) {
       nativeData = floatListToArrayPointer(data as List<double>).cast();
@@ -1350,6 +1351,10 @@ class RenderingContext {
     else if (data is Int32List) {
       nativeData = int32ListToArrayPointer(data).cast();
       size = data.length * sizeOf<Int32>();
+    } 
+    else if (data is Uint32List) {
+      nativeData = uInt32ListToArrayPointer(data).cast();
+      size = data.length * sizeOf<Uint32>();
     } 
     else if (data is Uint16List) {
       nativeData = uInt16ListToArrayPointer(data).cast();
@@ -1375,6 +1380,12 @@ class RenderingContext {
 
   Pointer<Int32> int32ListToArrayPointer(List<int> list) {
     final ptr = calloc<Int32>(list.length);
+    ptr.asTypedList(list.length).setAll(0, list);
+    return ptr;
+  }
+
+  Pointer<Uint32> uInt32ListToArrayPointer(List<int> list) {
+    final ptr = calloc<Uint32>(list.length);
     ptr.asTypedList(list.length).setAll(0, list);
     return ptr;
   }

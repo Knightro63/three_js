@@ -30,18 +30,18 @@ class Water extends Mesh {
 
 		//
 		final mirrorPlane = Plane();
-		final normal = Vector3();
-		final mirrorWorldPosition = Vector3();
-		final cameraWorldPosition = Vector3();
-		final rotationMatrix = Matrix4();
+		final normal = Vector3.zero();
+		final mirrorWorldPosition = Vector3.zero();
+		final cameraWorldPosition = Vector3.zero();
+		final rotationMatrix = Matrix4.identity();
 		final lookAtPosition = Vector3( 0, 0, - 1 );
-		final clipPlane = Vector4();
+		final clipPlane = Vector4.identity();
 
-		final view = Vector3();
-		final target = Vector3();
-		final q = Vector4();
+		final view = Vector3.zero();
+		final target = Vector3.zero();
+		final q = Vector4.identity();
 
-		final textureMatrix = Matrix4();
+		final textureMatrix = Matrix4.identity();
 
 		final mirrorCamera = PerspectiveCamera();
 

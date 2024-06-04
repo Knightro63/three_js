@@ -103,11 +103,11 @@ class PLYLoader extends Loader {
   Map<String,dynamic> propertyNameMapping = {};
   Map<String,dynamic> customPropertyMapping = {};
 
-	setPropertyNameMapping( mapping ) {
+	void setPropertyNameMapping( mapping ) {
 		propertyNameMapping = mapping;
 	}
 
-	setCustomPropertyNameMapping( mapping ) {
+	void setCustomPropertyNameMapping( mapping ) {
 		customPropertyMapping = mapping;
 	}
 
@@ -398,20 +398,19 @@ class PLYLoader extends Loader {
 			final patternBody = RegExp(r'/end_header\s+(\S[\s\S]*\S|\S)\s*/',multiLine: true);
 			List<String> body = [];
       List<String> matches = data.split( patternBody );
-
+      print(matches[0]);
 			if (matches.isNotEmpty) {
-				body = matches[0].split(r'/\s+/');
+				body = matches[0].split(RegExp(r'/\s+/'));
 			} 
-
 			final tokens = ArrayStream( body );
 
-			loop: for (int i = 0; i < header['elements'].length; i ++ ) {
-				final elementDesc = header['elements'][ i ];
+			for (int i = 0; i < header['elements'].length; i ++ ) {
+				final elementDesc = header['elements'][i];
 				final attributeMap = mapElementAttributes( elementDesc['properties'] );
-
+        print(attributeMap);
 				for (int j = 0; j < elementDesc['count']; j ++ ) {
 					final element = parseASCIIElement( elementDesc['properties'], tokens );
-					if (element == null) break loop;
+					if (element == null) break;
 					handleElement( buffer, elementDesc['name'], element, attributeMap );
 				}
 			}

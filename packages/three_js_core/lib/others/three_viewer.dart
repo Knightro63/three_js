@@ -102,8 +102,9 @@ class ThreeJS{
     disposed = true;
     renderer?.dispose();
     renderTarget?.dispose();
-    FlutterAngle.deleteTexture(texture!);
-    //three3dRender.dispose();
+    if(texture != null){
+      FlutterAngle.deleteTexture(texture!);
+    }
     scene.material?.dispose();
     scene.children.forEach((element) {
       element.material?.dispose();

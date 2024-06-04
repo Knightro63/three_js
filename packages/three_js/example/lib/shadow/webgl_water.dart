@@ -45,7 +45,7 @@ class _State extends State<WebglWater> {
   late three.OrbitControls controls;
 
   final Map<String,dynamic> params = {
-    'color': '#ffffff',
+    'color': 0xffffff,
     'scale': 4,
     'flowX': 1.0,
     'flowY': 1.0
@@ -87,19 +87,19 @@ class _State extends State<WebglWater> {
 
     // water
 
-    // final waterGeometry = three.PlaneGeometry( 20, 20 );
+    final waterGeometry = three.PlaneGeometry( 20, 20 );
 
-    // final water = Water( waterGeometry, {
-    //   'color': params['color'],
-    //   'scale': params['scale'],
-    //   'flowDirection': three.Vector2( params['flowX'], params['flowY'] ),
-    //   'textureWidth': 1024,
-    //   'textureHeight': 1024
-    // } );
+    final water = Water( waterGeometry, {
+      'color': params['color'],
+      'scale': params['scale'],
+      'flowDirection': three.Vector2( params['flowX'], params['flowY'] ),
+      'textureWidth': 1024,
+      'textureHeight': 1024
+    } );
 
-    // water.position.y = 1;
-    // water.rotation.x = math.pi * - 0.5;
-    // threeJs.scene.add( water );
+    water.position.y = 1;
+    water.rotation.x = math.pi * - 0.5;
+    threeJs.scene.add( water );
 
     // skybox
 
@@ -120,7 +120,7 @@ class _State extends State<WebglWater> {
     threeJs.scene.add( ambientLight );
 
     final directionalLight = three.DirectionalLight( 0xffffff, 0.4 );
-    //directionalLight.position.setValues( - 1, 1, 1 );
+    directionalLight.position.setValues( - 1, 1, 1 );
     threeJs.scene.add( directionalLight );
 
     //
