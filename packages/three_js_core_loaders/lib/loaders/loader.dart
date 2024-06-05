@@ -15,11 +15,11 @@ abstract class Loader {
   late Map<String, dynamic> requestHeader;
   String responseType = "text";
   late String mimeType;
-  //bool flipY = false;
+  bool flipY = false;
 
   /// [manager] — The [loadingManager]
   /// for the loader to use. Default is [DefaultLoadingManager].
-  Loader([LoadingManager? manager]) {
+  Loader([LoadingManager? manager, this.flipY = false]) {
     this.manager = (manager != null) ? manager : defaultLoadingManager;
 
     crossOrigin = 'anonymous';

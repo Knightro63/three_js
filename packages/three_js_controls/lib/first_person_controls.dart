@@ -11,14 +11,22 @@ enum LookType{active,position}
 /// This class is an alternative implementation of [FlyControls].
 class FirstPersonControls with EventDispatcher {
 
-  /// [object] - The camera to be controlled.
+  /// [camera] - The camera to be controlled.
   /// 
   /// [listenableKey] - The element used for event listeners.
-  FirstPersonControls(this.object,this.listenableKey):super(){
+  FirstPersonControls({
+    required this.camera,
+    required this.listenableKey,
+    this.lookType = LookType.active,
+    Vector3? offset
+  }):super(){
+    this.offset = offset ?? Vector3.zero();
     domElement.addEventListener( PeripheralType.contextmenu, contextmenu, false );
-    domElement.addEventListener( PeripheralType.pointerHover, onMouseMove, false );
-    domElement.addEventListener( PeripheralType.pointerdown, onMouseDown, false );
-    domElement.addEventListener( PeripheralType.pointerup, onMouseUp, false );
+    if(lookType == LookType.active){
+      domElement.addEventListener( PeripheralType.pointerHover, onMouseMove, false );
+      domElement.addEventListener( PeripheralType.pointerdown, onMouseDown, false );
+      domElement.addEventListener( PeripheralType.pointerup, onMouseUp, false );
+    }
     //this.domElement.setAttribute( 'tabindex', - 1 );
     domElement.addEventListener( PeripheralType.keydown, onKeyDown, false );
     domElement.addEventListener( PeripheralType.keyup, onKeyUp, false );
@@ -30,7 +38,7 @@ class FirstPersonControls with EventDispatcher {
   late GlobalKey<PeripheralsState> listenableKey;
   PeripheralsState get domElement => listenableKey.currentState!;
 
-	Camera object;
+	Camera camera;
 
 	// API
 
@@ -79,6 +87,7 @@ class FirstPersonControls with EventDispatcher {
 	double lon = 0;
 
 	Vector3 lookDirection = Vector3();
+  Vector3 offset = Vector3.zero();
 	Spherical spherical = Spherical();
 	Vector3 target = Vector3();
   Vector3 targetPosition = Vector3();
@@ -111,8 +120,8 @@ class FirstPersonControls with EventDispatcher {
 
 	void onMouseMove(event) {
     if(lookType == LookType.position){
-      object.rotation.y -= event.movementX*lookSpeed;
-      object.rotation.x -= event.movementY*lookSpeed;
+      camera.rotation.y -= event.movementX*lookSpeed;
+      camera.rotation.x -= event.movementY*lookSpeed;
     }
     else{
       mouseX = event.pageX - domElement.offsetLeft - viewHalfX;
@@ -184,26 +193,26 @@ class FirstPersonControls with EventDispatcher {
 	}
 
 	FirstPersonControls lookAt (Vector3 v) {
-		target.setFrom(v);
-		object.lookAt( target );
+		target.setFrom(v).add(offset);
+		camera.lookAt( target );
 		setOrientation( this );
 		return this;
 	}
   Vector3 getForwardVector() {
-    object.getWorldDirection(targetPosition);
+    camera.getWorldDirection(targetPosition);
     targetPosition.y = 0;
     targetPosition.normalize();
     return targetPosition;
   }
   Vector3 getSideVector() {
-    object.getWorldDirection( targetPosition );
+    camera.getWorldDirection( targetPosition );
     targetPosition.y = 0;
     targetPosition.normalize();
-    targetPosition.cross( object.up );
+    targetPosition.cross( camera.up );
     return targetPosition;
   }
   Vector3 getUpVector(){
-    object.getWorldDirection( targetPosition );
+    camera.getWorldDirection( targetPosition );
     targetPosition.x = 0;
     targetPosition.z = 0;
     targetPosition.y = 1;
@@ -216,7 +225,7 @@ class FirstPersonControls with EventDispatcher {
     if(enabled == false) return;
 
     if(heightSpeed) {
-      double y = MathUtils.clamp<double>(object.position.y, heightMin, heightMax );
+      double y = MathUtils.clamp<double>(camera.position.y, heightMin, heightMax );
       var heightDelta = y - heightMin;
       autoSpeedFactor = delta * (heightDelta * heightCoef);
     }
@@ -246,7 +255,7 @@ class FirstPersonControls with EventDispatcher {
     }
 
     
-    object.position.setFrom(velocity);
+    camera.position.setFrom(velocity).add(offset);
 
     if (LookType.active == lookType ) {
       double actualLookSpeed = delta * lookSpeed*100;
@@ -268,67 +277,12 @@ class FirstPersonControls with EventDispatcher {
         phi = MathUtils.mapLinear( phi, 0, math.pi, verticalMin, verticalMax ).toDouble();
       }
 
-      final position = object.position;
+      final position = camera.position;
       targetPosition.setFromSphericalCoords( 1, phi, theta ).add( position );
-      object.lookAt( targetPosition );
+      camera.lookAt( targetPosition );
     }
+
   }
-	// void update2(double delta) {
-  //   if ( this.enabled == false ) return;
-
-  //   if ( this.heightSpeed ) {
-  //     double y = MathUtils.clamp<double>( this.object.position.y, this.heightMin, this.heightMax );
-  //     var heightDelta = y - this.heightMin;
-  //     this.autoSpeedFactor = delta * ( heightDelta * this.heightCoef );
-  //   }
-  //   else {
-  //     this.autoSpeedFactor = 0.0;
-  //   }
-
-  //   var actualMoveSpeed = delta * this.movementSpeed;
-
-  //   if ( this.moveForward || ( this.autoForward && ! this.moveBackward ) ) this.object.translateZ( - ( actualMoveSpeed + this.autoSpeedFactor ) );
-  //   if ( this.moveBackward ) this.object.translateZ( actualMoveSpeed );
-
-  //   if ( this.moveLeft ) this.object.translateX( - actualMoveSpeed );
-  //   if ( this.moveRight ) this.object.translateX( actualMoveSpeed );
-
-  //   if ( this.moveUp ) this.object.translateY( actualMoveSpeed );
-  //   if ( this.moveDown ) this.object.translateY( - actualMoveSpeed );
-
-  //   double actualLookSpeed = delta * this.lookSpeed;
-
-  //   if (LookType.active == lookType ) {
-  //     //actualLookSpeed = 0;
-  //     double verticalLookRatio = 1;
-
-  //     if ( this.constrainVertical ) {
-
-  //       verticalLookRatio = math.pi / ( this.verticalMax - this.verticalMin );
-
-  //     }
-
-  //     lon -= this.mouseX * actualLookSpeed;
-  //     if ( this.lookVertical ) lat -= this.mouseY * actualLookSpeed * verticalLookRatio;
-
-  //     lat = math.max( - 85, math.min( 85, lat ) );
-
-  //     num phi = MathUtils.degToRad( 90 - lat );
-  //     num theta = MathUtils.degToRad( lon );
-
-  //     if ( this.constrainVertical ) {
-
-  //       phi = MathUtils.mapLinear( phi, 0, math.pi, this.verticalMin, this.verticalMax );
-
-  //     }
-
-  //     var position = this.object.position;
-
-  //     targetPosition.setFromSphericalCoords( 1, phi, theta ).add( position );
-
-  //     this.object.lookAt( targetPosition );
-  //   }
-	// }
 
 	void contextmenu( event ) {
 		event.preventDefault();
@@ -346,7 +300,7 @@ class FirstPersonControls with EventDispatcher {
 	}
 
 	void setOrientation( controls ) {
-		final quaternion = controls.object.quaternion;
+		final quaternion = controls.camera.quaternion;
 
 		lookDirection.setValues( 0, 0, - 1 ).applyQuaternion( quaternion );
 		spherical.setFromVector3( lookDirection );

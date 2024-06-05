@@ -72,7 +72,7 @@ class _State extends State<WebglGeometryDynamic> {
     mesh.frustumCulled = false;
     threeJs.scene.add( mesh );
 
-    controls = three.FirstPersonControls( threeJs.camera, threeJs.globalKey );
+    controls = three.FirstPersonControls(camera:threeJs.camera, listenableKey:  threeJs.globalKey );
 
     controls.movementSpeed = 50;
     controls.lookSpeed = 0.01;

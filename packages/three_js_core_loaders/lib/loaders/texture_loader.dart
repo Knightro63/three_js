@@ -17,8 +17,7 @@ import 'package:three_js_core/three_js_core.dart';
 /// final material = MeshBasicMaterial({ MaterialProperty.map:texture});
 /// ```
 class TextureLoader extends Loader {
-  TextureLoader({LoadingManager? manager,this.flipY = false}):super(manager);
-  bool flipY;
+  TextureLoader({LoadingManager? manager,bool flipY = false}):super(manager,flipY);
 
   Texture? _textureProcess(ImageElement? imageElement, String url){
     final Texture texture = Texture();

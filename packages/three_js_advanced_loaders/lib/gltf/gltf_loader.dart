@@ -44,10 +44,10 @@ class GLTFLoader extends Loader {
   late dynamic _ddsLoader;
   late dynamic _meshoptDecoder;
 
-  /// [manager] — The [loadingManager] for the loader to use. Default is [DefaultLoadingManager].
+  /// [manager] — The [LoadingManager] for the loader to use. Default is [DefaultLoadingManager].
   /// 
-  /// Creates a new [FontLoader].
-  GLTFLoader([super.manager]){
+  /// Creates a new [GLTFLoader].
+  GLTFLoader({LoadingManager? manager,bool flipY=false}):super(manager,flipY){
     _loader = FileLoader(manager);
     _dracoLoader = null;
     _ddsLoader = null;
@@ -225,6 +225,7 @@ class GLTFLoader extends Loader {
       "crossOrigin": crossOrigin,
       "requestHeader": requestHeader,
       "manager": manager,
+      "flipY": flipY,
       "_ktx2Loader": _ktx2Loader,
       "_meshoptDecoder": _meshoptDecoder
     });

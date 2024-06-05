@@ -15,8 +15,7 @@ import 'image_loader_app.dart' if (dart.library.js) 'image_loader_web.dart';
 class ImageLoader extends Loader {
   /// [manager] — The [loadingManager]
   /// for the loader to use. Default is [DefaultLoadingManager].
-  ImageLoader([super.manager, this.flipY = false]);
-  bool flipY;
+  ImageLoader([super.manager, super.flipY = false]);
 
   @override
   Future<ImageElement?> fromNetwork(Uri uri) async{

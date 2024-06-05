@@ -270,7 +270,11 @@ class ThreeJS{
                       return texture != null? HtmlElementView(viewType:texture!.textureId.toString()):Container();
                     } 
                     else {
-                      return texture != null?Texture(textureId: texture!.textureId):Container();
+                      return texture != null?
+                      Transform.scale(
+                        scaleY: settings.useSourceTexture?1:-1,
+                        child:Texture(textureId: texture!.textureId)
+                      ):Container();
                     }
                   })
                 );

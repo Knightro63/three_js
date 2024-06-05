@@ -136,7 +136,7 @@ class _FPSGame2PageState extends State<FPSGame2> {
       });
     });
 
-    fpsControl = three.FirstPersonControls(threeJs.camera, threeJs.globalKey);
+    fpsControl = three.FirstPersonControls(camera:threeJs.camera, listenableKey:threeJs.globalKey);
     fpsControl.lookSpeed = 1/100;
     fpsControl.movementSpeed = 15.0;
     fpsControl.lookType = three.LookType.position;
