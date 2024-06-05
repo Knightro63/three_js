@@ -20,7 +20,7 @@ class _MyAppState extends State<WebglSkinningSimple> {
   void initState() {
     threeJs = three.ThreeJS(
       settings: three.Settings(
-        //useSourceTexture: true
+        useSourceTexture: true
       ),
       onSetupComplete: (){setState(() {});},
       setup: setup
@@ -60,8 +60,7 @@ class _MyAppState extends State<WebglSkinningSimple> {
     // ground
 
     final geometry = three.PlaneGeometry(500, 500);
-    final material =
-        three.MeshPhongMaterial.fromMap({"color": 0x999999, "depthWrite": false});
+    final material = three.MeshPhongMaterial.fromMap({"color": 0x999999, "depthWrite": false});
 
     final ground = three.Mesh(geometry, material);
     ground.position.setValues(0, -5, 0);
@@ -75,15 +74,13 @@ class _MyAppState extends State<WebglSkinningSimple> {
     grid.material?.transparent = true;
     threeJs.scene.add(grid);
 
-    // lights
-
     final hemiLight = three.HemisphereLight(0xffffff, 0x444444, 0.6);
     hemiLight.position.setValues(0, 200, 0);
     threeJs.scene.add(hemiLight);
 
     final dirLight = three.DirectionalLight(0xffffff, 0.8);
     dirLight.position.setValues(0, 20, 10);
-    //dirLight.castShadow = true;
+    dirLight.castShadow = true;
     dirLight.shadow!.camera!.top = 18;
     dirLight.shadow!.camera!.bottom = -10;
     dirLight.shadow!.camera!.left = -12;
@@ -94,8 +91,8 @@ class _MyAppState extends State<WebglSkinningSimple> {
 
     final loader = three.GLTFLoader().setPath('assets/models/gltf/');
 
-    final result = await loader.fromAsset( 'Parrot.gltf');
-    //final result = await loader.fromAsset('SimpleSkinning.gltf');
+    //final result = await loader.fromAsset( 'Parrot.gltf');
+    final result = await loader.fromAsset('SimpleSkinning.gltf');
 
     three.console.info(" gltf load sucess result: $result  ");
 

@@ -285,7 +285,7 @@ class WebGLBindingStates {
     }
   }
 
-  void vertexAttribPointer(index, size, type, normalized, stride, offset) {
+  void vertexAttribPointer(int index, int size, int type, bool normalized, int stride, int offset) {
     if (capabilities.isWebGL2 == true && (type == WebGL.INT || type == WebGL.UNSIGNED_INT)) {
       gl.vertexAttribIPointer(index, size, type, stride, offset);
     } else {
@@ -370,22 +370,24 @@ class WebGLBindingStates {
             // vertexAttribPointer( programAttribute, size, type, normalized, stride * bytesPerElement, offset * bytesPerElement );
             for (int i = 0; i < programAttribute.locationSize; i++) {
               vertexAttribPointer(
-                  programAttribute.location.id + i,
-                  size ~/ programAttribute.locationSize,
-                  type,
-                  normalized,
-                  stride! * bytesPerElement,
-                  (offset + (size ~/ programAttribute.locationSize) * i) * bytesPerElement);
+                programAttribute.location.id + i,
+                size ~/ programAttribute.locationSize,
+                type,
+                normalized,
+                (stride! * bytesPerElement).toInt(),
+                ((offset + (size ~/ programAttribute.locationSize) * i) * bytesPerElement).toInt()
+              );
             }
-          } else {
+          } 
+          else {
             if (geometryAttribute is InstancedBufferAttribute) {
               // enableAttributeAndDivisor( programAttribute, geometryAttribute.meshPerAttribute );
               for (int i = 0; i < programAttribute.locationSize; i++) {
                 enableAttributeAndDivisor(programAttribute.location.id + i, geometryAttribute.meshPerAttribute);
               }
-
               geometry.maxInstanceCount ??= geometryAttribute.meshPerAttribute * geometryAttribute.count;
-            } else {
+            } 
+            else {
               // enableAttribute( programAttribute );
               for (int i = 0; i < programAttribute.locationSize; i++) {
                 enableAttribute(programAttribute.location.id + i);
@@ -393,13 +395,20 @@ class WebGLBindingStates {
             }
 
             gl.bindBuffer(WebGL.ARRAY_BUFFER, buffer);
-            // vertexAttribPointer( programAttribute, size, type, normalized, 0, 0 );
+            //vertexAttribPointer( programAttribute, size, type, normalized, 0, 0 );
             for (int i = 0; i < programAttribute.locationSize; i++) {
-              vertexAttribPointer(programAttribute.location.id + i, size ~/ programAttribute.locationSize, type,
-                  normalized, size * bytesPerElement, (size ~/ programAttribute.locationSize) * i * bytesPerElement);
+              vertexAttribPointer(
+                programAttribute.location.id + i, 
+                size ~/ programAttribute.locationSize, 
+                type,
+                normalized, 
+                (size * bytesPerElement).toInt(), 
+                ((size ~/ programAttribute.locationSize) * i * bytesPerElement).toInt()
+              );
             }
           }
-        } else if (materialDefaultAttributeValues != null) {
+        } 
+        else if (materialDefaultAttributeValues != null) {
           final value = materialDefaultAttributeValues[name];
 
           if (value != null) {

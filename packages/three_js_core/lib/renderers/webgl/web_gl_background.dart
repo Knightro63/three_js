@@ -32,7 +32,6 @@ class WebGLBackground {
     }
 
     // Ignore background in AR
-    // TODO: Reconsider this.
 
     final xr = renderer.xr;
     final session = xr.getSession();
@@ -96,8 +95,9 @@ class WebGLBackground {
       }
 
       if (currentBackground != background ||
-          currentBackgroundVersion != background.version ||
-          currentTonemapping != renderer.toneMapping) {
+        currentBackgroundVersion != background.version ||
+        currentTonemapping != renderer.toneMapping
+      ) {
         boxMesh!.material?.needsUpdate = true;
 
         currentBackground = background;

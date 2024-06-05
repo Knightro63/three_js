@@ -64,7 +64,7 @@ import 'package:example/geometry/webgl_geometry_text.dart';
 import 'package:example/others/multi_views.dart';
 import 'package:example/others/webgl_helpers.dart';
 import 'package:example/instancing/webgl_instancing_performance.dart';
-import 'package:example/others/webgl_skinning_simple.dart';
+import 'package:example/morphtargets/webgl_skinning_simple.dart';
 
 import 'package:example/loaders/webgl_loader_fbx.dart';
 import 'package:example/loaders/webgl_loader_gltf.dart';

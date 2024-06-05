@@ -100,9 +100,9 @@ class WebGLMorphtargets {
                 denormalize(morph, morphTarget);
               }
 
-              buffer[offset + stride + 0] = morph.x.toDouble();
-              buffer[offset + stride + 1] = morph.y.toDouble();
-              buffer[offset + stride + 2] = morph.z.toDouble();
+              buffer[offset + stride + 0] = morph.x;
+              buffer[offset + stride + 1] = morph.y;
+              buffer[offset + stride + 2] = morph.z;
               buffer[offset + stride + 3] = 0;
             }
 
@@ -114,9 +114,9 @@ class WebGLMorphtargets {
                 denormalize(morph, morphNormal);
               }
 
-              buffer[offset + stride + 4] = morph.x.toDouble();
-              buffer[offset + stride + 5] = morph.y.toDouble();
-              buffer[offset + stride + 6] = morph.z.toDouble();
+              buffer[offset + stride + 4] = morph.x;
+              buffer[offset + stride + 5] = morph.y;
+              buffer[offset + stride + 6] = morph.z;
               buffer[offset + stride + 7] = 0;
             }
 
@@ -128,10 +128,10 @@ class WebGLMorphtargets {
                 denormalize(morph, morphColor);
               }
 
-              buffer[offset + stride + 8] = morph.x.toDouble();
-              buffer[offset + stride + 9] = morph.y.toDouble();
-              buffer[offset + stride + 10] = morph.z.toDouble();
-              buffer[offset + stride + 11] = ((morphColor.itemSize == 4) ? morph.w : 1).toDouble();
+              buffer[offset + stride + 8] = morph.x;
+              buffer[offset + stride + 9] = morph.y;
+              buffer[offset + stride + 10] = morph.z;
+              buffer[offset + stride + 11] = ((morphColor.itemSize == 4) ? morph.w : 1);
             }
           }
         }

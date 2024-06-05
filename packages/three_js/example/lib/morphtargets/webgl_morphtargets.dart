@@ -76,7 +76,6 @@ class _State extends State<WebglMorphtargets> {
 
       mesh.morphTargetInfluences![0] = v0;
       mesh.morphTargetInfluences![1] = v1;
-      // mesh.morphTargetInfluences![0] = 0.2;
     });
   }
 

@@ -248,7 +248,8 @@ class WebGLState {
     if (needsUpdate) {
       if (capabilities.isWebGL2) {
         gl.drawBuffers(List<int>.from(drawBuffers));
-      } else {
+      } 
+      else {
         extensions.get('WEBGL_draw_buffers').drawBuffersWEBGL(List<int>.from(drawBuffers));
       }
     }
@@ -317,7 +318,8 @@ class WebGLState {
               console.error('WebGLState: Invalid blending: $blending');
               break;
           }
-        } else {
+        } 
+        else {
           switch (blending) {
             case NormalBlending:
               gl.blendFuncSeparate(WebGL.SRC_ALPHA, WebGL.ONE_MINUS_SRC_ALPHA, WebGL.ONE, WebGL.ONE_MINUS_SRC_ALPHA);

@@ -36,18 +36,16 @@ class Reflector extends Mesh {
 
 	  renderTarget = WebGLRenderTarget( textureWidth, textureHeight, WebGLRenderTargetOptions({'samples': multisample, 'type': HalfFloatType }));
 
-		final material =  ShaderMaterial.fromMap( {
+		material =  ShaderMaterial.fromMap( {
 			'name': shader['name'] ?? 'unspecified',
 			'uniforms': UniformsUtils.clone( shader['uniforms'] ),
 			'fragmentShader': shader['fragmentShader'],
 			'vertexShader': shader['vertexShader']
 		} );
 
-		material.uniforms[ 'tDiffuse' ]['value'] = renderTarget.texture;
-		material.uniforms[ 'color' ]['value'] = color;
-		material.uniforms[ 'textureMatrix' ]['value'] = textureMatrix;
-
-		this.material = material;
+		material?.uniforms[ 'tDiffuse' ]['value'] = renderTarget.texture;
+		material?.uniforms[ 'color' ]['value'] = color;
+		material?.uniforms[ 'textureMatrix' ]['value'] = textureMatrix;
 
 		onBeforeRender = ({
       WebGLRenderer? renderer,

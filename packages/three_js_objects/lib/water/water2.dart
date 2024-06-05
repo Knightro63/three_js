@@ -122,7 +122,7 @@ class Water extends Mesh {
       updateTextureMatrix( camera! );
       updateFlow();
 
-      visible = false;
+      visible = true;
 
       reflector.matrixWorld.setFrom(matrixWorld );
       refractor.matrixWorld.setFrom(matrixWorld );

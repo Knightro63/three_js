@@ -1479,7 +1479,7 @@ class WebGLRenderer {
       _currentScissor.setFrom(_scissor).scale(_pixelRatio).floor();
       _currentScissorTest = _scissorTest;
     }
-
+    
     final framebufferBound = state.bindFramebuffer(WebGL.FRAMEBUFFER, framebuffer);
     
     if (framebufferBound && capabilities.drawBuffers && useDefaultFramebuffer) {

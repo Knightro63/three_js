@@ -66,7 +66,7 @@ class _State extends State<WebglMorphtargetsHorse> {
     light2.position.setValues(-1, -1, -1).normalize();
     threeJs.scene.add(light2);
 
-    final loader = three.GLTFLoader(null);
+    final loader = three.GLTFLoader();
     final gltf = (await loader.fromAsset('assets/models/gltf/Horse.gltf'))!;
 
     mesh = gltf.scene.children[0];

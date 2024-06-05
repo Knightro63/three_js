@@ -67,7 +67,7 @@ class _State extends State<WebglShadowmapPointlight> {
       const intensity = 1.0;
 
       final light = three.PointLight( color, intensity, 20);
-      //light.castShadow = true;
+      light.castShadow = true;
       light.shadow?.bias = - 0.005; // reduces self-shadowing on double-sided objects
 
       three.SphereGeometry geometry = three.SphereGeometry( 0.3, 12, 6 );
