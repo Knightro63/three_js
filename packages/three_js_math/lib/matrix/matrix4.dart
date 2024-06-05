@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-import '../native-array/native_array.dart';
 import 'index.dart';
 import '../vector/index.dart';
 import '../rotation/index.dart';

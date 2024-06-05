@@ -4,6 +4,23 @@ import 'dart:io';
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_core_loaders/three_js_core_loaders.dart';
 
+/// [CubeTextureLoader] can be used to load cube maps. The loader returns an instance of [CubeTexture] and expects the cube map to
+/// be defined as six separate images representing the sides of a cube. Other cube map definitions like vertical and horizontal cross, 
+/// column and row layouts are not supported.
+/// 
+/// ```
+/// final scene = Scene();
+/// scene.background = CubeTextureLoader()
+/// .setPath( 'asstes/textures/cubeMaps/' )
+/// .fromAssetList([
+///   'px.png',
+///   'nx.png',
+///   'py.png',
+///   'ny.png',
+///   'pz.png',
+///   'nz.png'
+/// ]);
+///```
 class CubeTextureLoader extends Loader {
   late final ImageLoader _loader;
   final texture = CubeTexture();

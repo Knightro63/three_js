@@ -77,13 +77,13 @@ void assignBufferData(BufferGeometry geometry, attributeData, groupOrder ) {
 		for (int i = 0, l = math.min( groupOrder.length, attributeData.groupCount ); i < l; i ++ ) {
 			final index = groupOrder[ i ].index;
 			final { array, type, length } = attributeData.groupAttributes[ index ][ key ];
-			final trimmedArray = new type( array.buffer, 0, length );
+			final trimmedArray = type( array.buffer, 0, length );
 			geoAttr.array.set( trimmedArray, offset );
 			offset += trimmedArray.length;
 		}
 
 		geoAttr.needsUpdate = true;
-		drawRange = requiredLength / geoAttr.itemSize;
+		drawRange = requiredLength / geoAttr.itemSize; 
 	}
 
 	// remove or update the index appropriately

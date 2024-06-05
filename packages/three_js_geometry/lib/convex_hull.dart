@@ -3,7 +3,6 @@ import 'dart:math' as math;
 import 'package:three_js_math/three_js_math.dart';
 
 /// Ported from: https://github.com/maurizzzio/quickhull3d/ by Mauricio Poppe (https://github.com/maurizzzio)
-
 const visible = 0;
 const deleted = 1;
 
@@ -12,8 +11,7 @@ class ConvexHull {
 
   num tolerance = -1;
   List<Face2> faces = []; // the generated faces of the convex hull
-  List<Face2> newFace2s =
-      []; // this array holds the faces that are generated within a single iteration
+  List<Face2> newFace2s = []; // this array holds the faces that are generated within a single iteration
 
   VertexList assigned = VertexList();
   VertexList unassigned = VertexList();
@@ -31,7 +29,6 @@ class ConvexHull {
   //      |             |
   //  a.outside     b.outside
   //
-
   ConvexHull();
 
   ConvexHull setFromPoints(List<Vector3> points) {

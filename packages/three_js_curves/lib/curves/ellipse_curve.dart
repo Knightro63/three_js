@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'package:three_js_math/three_js_math.dart';
 import '../core/curve.dart';
 
+///Creates a 2d curve in the shape of an ellipse. Setting the [xRadius] equal to the [yRadius] will result in a circle.
 class EllipseCurve extends Curve {
   late num aX;
   late num aY;
@@ -13,6 +14,27 @@ class EllipseCurve extends Curve {
   late bool aClockwise;
   late num aRotation;
 
+  /// [aX] – The X center of the ellipse. Default is `0`.
+  /// 
+  /// [aY] – The Y center of the ellipse. Default is `0`.
+  /// 
+  /// [xRadius] – The radius of the ellipse in the x direction.
+  /// Default is `1`.
+  /// 
+  /// [yRadius] – The radius of the ellipse in the y direction.
+  /// Default is `1`.
+  /// 
+  /// [aStartAngle] – The start angle of the curve in radians
+  /// starting from the positive X axis. Default is `0`.
+  /// 
+  /// [aEndAngle] – The end angle of the curve in radians starting
+  /// from the positive X axis. Default is `2 x Math.PI`.
+  /// 
+  /// [aClockwise] – Whether the ellipse is drawn clockwise.
+  /// Default is `false`.
+  /// 
+  /// [aRotation] – The rotation angle of the ellipse in radians,
+  /// counterclockwise from the positive X axis (optional). Default is `0`.
   EllipseCurve(aX, aY, xRadius, yRadius, [aStartAngle, aEndAngle, aClockwise, aRotation]) {
 
     this.aX = aX ?? 0;

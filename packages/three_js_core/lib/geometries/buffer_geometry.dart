@@ -757,7 +757,7 @@ class BufferGeometry with EventDispatcher {
 
   /// Return a non-index version of an indexed BufferGeometry.
   BufferGeometry toNonIndexed() {
-    convertBufferAttribute(attribute, indices) {
+    Float32BufferAttribute convertBufferAttribute(BufferAttribute attribute, indices) {
       console.info("BufferGeometry.convertBufferAttribute todo");
 
       final array = attribute.array;
@@ -776,7 +776,7 @@ class BufferGeometry with EventDispatcher {
         }
 
         for (int j = 0; j < itemSize; j++) {
-          array2[index2++] = array[index++];
+          array2[index2++] = array[index++].toDouble();
         }
       }
 

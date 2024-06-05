@@ -2,22 +2,6 @@ import 'dart:math' as math;
 import 'package:three_js_math/three_js_math.dart';
 import '../core/curve.dart';
 
-/// Centripetal CatmullRom Curve - which is useful for avoiding
-/// cusps and self-intersections in non-uniform catmull rom curves.
-/// http://www.cemyuksel.com/research/catmullrom_param/catmullrom.pdf
-///
-/// curve.type accepts centripetal(default), chordal and catmullrom
-/// curve.tension is used for catmullrom which defaults to 0.5
-
-/*
-Based on an optimized c++ solution in
- - http://stackoverflow.com/questions/9489736/catmull-rom-curve-with-no-cusps-and-no-self-intersections/
- - http://ideone.com/NoEbVM
-
-This CubicPoly class could be used for reusing some variables and calculations,
-but for three.js curve use, it could be possible inlined and flatten into a single function call
-which can be placed in CurveUtils.
-*/
 
 class CubicPoly {
   num c0 = 0, c1 = 0, c2 = 0, c3 = 0;
@@ -57,6 +41,26 @@ class CubicPoly {
 final tmp = Vector3();
 final px = CubicPoly(), py = CubicPoly(), pz = CubicPoly();
 
+/// Create a smooth 3d spline curve from a series of points using the
+/// [Catmull-Rom](https://en.wikipedia.org/wiki/Centripetal_Catmull-Rom_spline)  algorithm.
+/// ```
+/// //Create a closed wavey loop
+/// final curve = CatmullRomCurve3( [
+///   Vector3( -10, 0, 10 ),
+///   Vector3( -5, 5, 5 ),
+///   Vector3( 0, 0, 0 ),
+///   Vector3( 5, -5, 5 ),
+///   Vector3( 10, 0, 10 )
+/// ] );
+///
+/// final points = curve.getPoints( 50 );
+/// final geometry = BufferGeometry().setFromPoints( points );
+///
+/// final material = LineBasicMaterial( { color: 0xff0000 } );
+///
+/// // Create the final object to add to the scene
+// final curveObject = Line( geometry, material );
+///```
 class CatmullRomCurve3 extends Curve {
   bool isCatmullRomCurve3 = true;
 
@@ -64,6 +68,13 @@ class CatmullRomCurve3 extends Curve {
   late String curveType;
   late num tension;
 
+  /// [points] – An array of [Vector3] points
+  /// 
+  /// [closed] – Whether the curve is closed. Default is `false`.
+  /// 
+  /// [curveType] – Type of the curve. Default is `centripetal`.
+  /// 
+  /// [tension] – Tension of the curve. Default is `0.5`.
   CatmullRomCurve3({List<Vector>? points, this.closed = false, this.curveType = 'centripetal', this.tension = 0.5}): super() {
     this.points = points ?? [];
   }

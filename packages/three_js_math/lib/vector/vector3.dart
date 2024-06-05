@@ -556,7 +556,7 @@ class Vector3 extends Vector{
     return distance;
   }
 
-  manhattanDistanceTo(Vector3 v) {
+  double manhattanDistanceTo(Vector3 v) {
     return (x - v.x).abs() + (y - v.y).abs() + (z - v.z).abs();
   }
 
@@ -719,5 +719,9 @@ class Vector3 extends Vector{
   @override
   List<double> toList() {
     return [x, y];
+  }
+  @override
+  String toString(){
+    return toJson().toString();
   }
 }

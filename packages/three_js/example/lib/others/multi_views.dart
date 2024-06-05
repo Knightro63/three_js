@@ -43,7 +43,7 @@ class _MyAppState extends State<MultiViews> {
       Map<String, dynamic> options = {
         "width": 1024,
         "height": 1024,
-        "gl": three3dRender.rawOpenGl,
+        "gl": three3dRender.getContext(),
         "antialias": true,
       };
       renderer = three.WebGLRenderer(options);
@@ -61,6 +61,7 @@ class _MyAppState extends State<MultiViews> {
       body: FutureBuilder<bool>(
         future: init(),
         builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
+          print(snapshot);
           if (!snapshot.hasData) {
             return const CircularProgressIndicator();
           }

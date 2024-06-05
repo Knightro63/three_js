@@ -1,9 +1,17 @@
 import '../core/curve.dart';
 import '../core/interpolations.dart';
 import 'package:three_js_math/three_js_math.dart';
+
+/// Create a smooth 3d [quadratic bezier curve]http://en.wikipedia.org/wiki/B%C3%A9zier_curve#mediaviewer/File:B%C3%A9zier_2_big.gif), 
+/// defined by a startpoint, endpoint and a single control point.
 class QuadraticBezierCurve3 extends Curve{
   bool isQuadraticBezierCurve3 = true;
 
+  /// [v0] – The startpoint.
+  /// 
+  /// [v1] – The control point.
+  /// 
+  /// [v2] – The endpoint.
   QuadraticBezierCurve3([Vector3? v0, Vector3? v1, Vector3? v2]):super(){
     this.v0 = v0 ?? Vector3.zero();
     this.v1 = v1 ?? Vector3.zero();

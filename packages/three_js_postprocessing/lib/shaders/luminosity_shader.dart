@@ -1,5 +1,3 @@
-import 'package:flutter/foundation.dart';
-
 const luminosityShader = {
 	'uniforms': {
 		'tDiffuse': { 'value': null }

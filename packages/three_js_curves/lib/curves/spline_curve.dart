@@ -2,6 +2,27 @@ import 'package:three_js_math/three_js_math.dart';
 import '../core/curve.dart';
 import '../core/interpolations.dart';
 
+/// Create a smooth 2d spline curve from a series of points. Internally this
+/// uses [page:Interpolations.CatmullRom] to create the curve.
+/// 
+/// ```
+// Create a sine-like wave
+/// final curve = SplineCurve( [
+///   Vector2( -10, 0 ),
+///   Vector2( -5, 5 ),
+///   Vector2( 0, 0 ),
+///   Vector2( 5, -5 ),
+///   Vector2( 10, 0 )
+/// ] );
+///
+/// final points = curve.getPoints( 50 );
+/// final geometry = BufferGeometry().setFromPoints( points );
+///
+/// final material = LineBasicMaterial( { color: 0xff0000 } );
+///
+/// // Create the final object to add to the scene
+/// final splineObject = Line( geometry, material );
+///```
 class SplineCurve extends Curve {
   SplineCurve(List<Vector> points) : super() {
     this.points = points;

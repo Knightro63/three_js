@@ -25,8 +25,8 @@ class PropertyMixer {
   late int _workIndex;
   late int useCount;
   late int referenceCount;
-  late int cumulativeWeight;
-  late int cumulativeWeightAdditive;
+  late double cumulativeWeight;
+  late double cumulativeWeightAdditive;
   late List buffer;
   late int? cacheIndex;
 
@@ -100,14 +100,14 @@ class PropertyMixer {
   /// `incoming` region into `accu[i]`.
 
   /// If weight is `0` this does nothing.
-  void accumulate(int accuIndex, int weight) {
+  void accumulate(int accuIndex, double weight) {
     // note: happily accumulating nothing when weight = 0, the caller knows
     // the weight and shouldn't have made the call in the first place
 
     final buffer = this.buffer;
     int stride = valueSize;
     int offset = accuIndex * stride + stride;
-    int currentWeight = cumulativeWeight;
+    double currentWeight = cumulativeWeight;
 
     if (currentWeight == 0) {
       // accuN := incoming * weight
@@ -129,7 +129,7 @@ class PropertyMixer {
   /// Accumulate data in the `incoming` region into 'add'.
   /// 
 	/// If weight is `0` this does nothing.
-  void accumulateAdditive(int weight) {
+  void accumulateAdditive(double weight) {
     final buffer = this.buffer,
         stride = valueSize,
         offset = stride * _addIndex;

@@ -2,10 +2,36 @@ import 'package:three_js_math/three_js_math.dart';
 import '../core/curve.dart';
 import '../core/interpolations.dart';
 
+/// Create a smooth 3d [cubic bezier curve](http://en.wikipedia.org/wiki/B%C3%A9zier_curve#mediaviewer/File:Bezier_curve.svg), 
+/// defined by a start point, endpoint and two control points.
+/// 
+/// ```
+/// final curve = CubicBezierCurve(
+///   Vector3( -10, 0, 0 ),
+///   Vector3( -5, 15, 0 ),
+///   Vector3( 20, 15, 0 ),
+///   Vector3( 10, 0, 0 )
+/// );
+///
+/// final points = curve.getPoints( 50 );
+/// final geometry = BufferGeometry().setFromPoints( points );
+///
+/// final material = LineBasicMaterial.fromMap( { 'color': 0xff0000 } );
+///
+/// // Create the final object to add to the scene
+/// final curveObject = Line( geometry, material );
+///```
 class CubicBezierCurve3 extends Curve{
   bool isCubicBezierCurve3 = true;
   late Vector3 v3;
 
+  /// [v0] – The starting point.
+  /// 
+  /// [v1] – The first control point
+  /// 
+  /// [v2] – The second control point.
+  /// 
+  /// [v3] – The ending point.
   CubicBezierCurve3([Vector3? v0, Vector3? v1, Vector3? v2, Vector3? v3]):super(){
     this.v0 = v0 ?? Vector3.zero();
     this.v1 = v1 ?? Vector3.zero();

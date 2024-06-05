@@ -7,3 +7,5 @@ export 'drag_controls.dart';
 export './first_person_controls.dart';
 export './fly_controls.dart';
 export './device_orientation_controls.dart';
+export 'third_person_controls.dart';
+export 'joystick.dart';

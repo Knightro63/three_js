@@ -17,13 +17,13 @@ class MarchingCubes extends Mesh{
   late double halfsize;
   late double delta;
 
-  late Float32List field;
-  late Float32List normalCache;
-  late Float32List palette;
-  late Float32List positionArray;
-  late Float32List normalArray;
-  late Float32List uvArray;
-  late Float32List colorArray;
+  late Float32Array field;
+  late Float32Array normalCache;
+  late Float32Array palette;
+  late Float32Array positionArray;
+  late Float32Array normalArray;
+  late Float32Array uvArray;
+  late Float32Array colorArray;
 
   int maxPolyCount;
   late int yd;
@@ -37,8 +37,7 @@ class MarchingCubes extends Mesh{
 	MarchingCubes(this.resolution, [Material? material, this.enableUvs = false, this.enableColors = false, this.maxPolyCount = 10000 ]):super(BufferGeometry(), material ){
     _init();
   }
-  
-  //@override
+
   void _init() {
     geometry = BufferGeometry();
     count = 0;
@@ -53,26 +52,26 @@ class MarchingCubes extends Mesh{
     yd = size.toInt();
     zd = size2.toInt();
 
-    field = Float32List(size3.toInt());
-    normalCache = Float32List(size3.toInt() * 3);
-    palette = Float32List(size3.toInt() * 3);
+    field = Float32Array(size3.toInt());
+    normalCache = Float32Array(size3.toInt() * 3);
+    palette = Float32Array(size3.toInt() * 3);
 
     final maxVertexCount = maxPolyCount * 3;
 
-    positionArray = Float32List(maxVertexCount * 3);
-    geometry!.setAttributeFromString('position', Float32BufferAttribute.fromList(positionArray,3));
+    positionArray = Float32Array(maxVertexCount * 3);
+    geometry!.setAttributeFromString('position', Float32BufferAttribute(positionArray,3));
 
-    normalArray = Float32List( maxVertexCount * 3);
-    geometry!.setAttributeFromString('normal', Float32BufferAttribute.fromList(normalArray,3));
+    normalArray = Float32Array( maxVertexCount * 3);
+    geometry!.setAttributeFromString('normal', Float32BufferAttribute(normalArray,3));
 
     if(enableUvs){
-      uvArray = Float32List(maxVertexCount * 2 );
-      geometry!.setAttributeFromString('uv', Float32BufferAttribute.fromList(uvArray,3));
+      uvArray = Float32Array(maxVertexCount * 2 );
+      geometry!.setAttributeFromString('uv', Float32BufferAttribute(uvArray,3));
     }
 
     if (enableColors){
-      colorArray = Float32List(maxVertexCount * 3 );
-      geometry!.setAttributeFromString('color',Float32BufferAttribute.fromList(colorArray,3));
+      colorArray = Float32Array(maxVertexCount * 3 );
+      geometry!.setAttributeFromString('color',Float32BufferAttribute(colorArray,3));
     }
 
     geometry!.boundingSphere = BoundingSphere(Vector3(), 1);
@@ -425,7 +424,7 @@ class MarchingCubes extends Mesh{
   // a fixed distance, determined by strength and subtract.
 
   void addBall(double ballx,double bally,double ballz, double strength,int subtract, [dynamic colors]) {
-    final sign = strength.sign ;
+    final sign = strength.sign;
     strength = strength.abs();
     bool userDefineColor = colors != null;
     Color ballColor = Color( ballx, bally, ballz );
@@ -668,17 +667,17 @@ class MarchingCubes extends Mesh{
 
     // set the draw range to only the processed triangles
 
-    geometry!.setDrawRange(0, count!);
+    geometry!.setDrawRange( 0, count! );
 
     // update geometry data
     geometry!.getAttributeFromString('position').needsUpdate = true;
     geometry!.getAttributeFromString('normal').needsUpdate = true;
 
-    if(enableUvs) geometry!.getAttributeFromString( 'uv' ).needsUpdate = true;
-    if(enableColors) geometry!.getAttributeFromString( 'color' ).needsUpdate = true;
+    if (enableUvs ) geometry!.getAttributeFromString( 'uv' ).needsUpdate = true;
+    if (enableColors ) geometry!.getAttributeFromString( 'color' ).needsUpdate = true;
 
     // safety check
-    if(count! / 3 > maxPolyCount){ 
+    if (count! / 3 > maxPolyCount ){ 
       throw( 'THREE.MarchingCubes: Geometry buffers too small for rendering. Please create an instance with a higher poly count.' );
     }
   }

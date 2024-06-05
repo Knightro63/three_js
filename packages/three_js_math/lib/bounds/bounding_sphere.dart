@@ -95,7 +95,11 @@ class BoundingSphere{
     return box.intersectsSphere(this);
   }
 
-	BoundingSphere expandByPoint( point ) {
+  /// [point] - [Vector3] that should be included in the
+  /// box.
+  ///
+  /// Expands the boundaries of this box to include [point].
+	BoundingSphere expandByPoint(Vector point ) {
 		if(isEmpty()){
 			center.setFrom( point );
 			radius = 0;
@@ -117,6 +121,11 @@ class BoundingSphere{
 		return this;
 	}
 
+  /// [sphere] - Bounding sphere that will be unioned with this
+  /// sphere.
+  /// 
+  /// Expands this sphere to enclose both the original sphere and the given
+  /// sphere.
 	BoundingSphere union(BoundingSphere sphere ) {
 		if (sphere.isEmpty()) {
 			return this;

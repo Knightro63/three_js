@@ -2,9 +2,16 @@ import 'package:three_js_math/three_js_math.dart';
 import '../core/curve.dart';
 import '../core/interpolations.dart';
 
+/// Create a smooth 2d [quadratic bezier curve]http://en.wikipedia.org/wiki/B%C3%A9zier_curve#mediaviewer/File:B%C3%A9zier_2_big.gif), 
+/// defined by a startpoint, endpoint and a single control point.
 class QuadraticBezierCurve extends Curve {
-  QuadraticBezierCurve(Vector2? v0, Vector2? v1, Vector2? v2) {
 
+  /// [v0] – The startpoint.
+  /// 
+  /// [v1] – The control point.
+  /// 
+  /// [v2] – The endpoint.
+  QuadraticBezierCurve(Vector2? v0, Vector2? v1, Vector2? v2) {
     this.v0 = v0 ?? Vector2();
     this.v1 = v1 ?? Vector2();
     this.v2 = v2 ?? Vector2();

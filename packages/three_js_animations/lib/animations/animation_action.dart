@@ -31,7 +31,7 @@ class AnimationAction {
   late int _loopCount;
   late num? _startTime;
   late num _effectiveTimeScale;
-  late int weight;
+  late double weight;
   late num _effectiveWeight;
   late num repetitions;
   late bool paused;
@@ -218,7 +218,7 @@ class AnimationAction {
   /// 
   /// Note: .`enabled` will not be switched to `false` automatically, if
   /// .`weight` is set to `0` by this method.
-  AnimationAction setEffectiveWeight(int weight) {
+  AnimationAction setEffectiveWeight(double weight) {
     this.weight = weight;
 
     // note: same logic as when updated at runtime
@@ -442,7 +442,7 @@ class AnimationAction {
     // note: _updateTime may disable the action resulting in
     // an effective weight of 0
 
-    int weight = _updateWeight(time);
+    double weight = _updateWeight(time);
 
     if (weight > 0) {
       final interpolants = this.interpolants;
@@ -471,8 +471,8 @@ class AnimationAction {
     }
   }
 
-  int _updateWeight(num time) {
-    int weight = 0;
+  double _updateWeight(num time) {
+    double weight = 0;
 
     if (enabled) {
       weight = this.weight;

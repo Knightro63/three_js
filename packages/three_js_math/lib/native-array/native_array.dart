@@ -21,7 +21,7 @@ abstract class NativeArray<T extends num>{
     toDartList()[index] = value;
   }
 
-  late int _size;
+  late final int _size;
   late int oneByteSize;
   int get length => _size;
   int get lengthInBytes => length * oneByteSize;

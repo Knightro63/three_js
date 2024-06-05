@@ -700,4 +700,8 @@ class Vector4 extends Vector{
   Map<String, dynamic> toJson() {
     return {'x': x, 'y': y, 'z': z, 'w': w};
   }
+  @override
+  String toString(){
+    return toJson().toString();
+  }
 }

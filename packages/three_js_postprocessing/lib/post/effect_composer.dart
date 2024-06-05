@@ -106,7 +106,7 @@ class EffectComposer {
     // deltaTime value is in seconds
 
     deltaTime ??= clock.getDelta();
-    final currentRenderTarget = renderer.getRenderTarget();
+    //final currentRenderTarget = renderer.getRenderTarget();
 
     bool maskActive = false;
 
@@ -121,22 +121,22 @@ class EffectComposer {
       pass.renderToScreen = (renderToScreen && isLastEnabledPass(i));
       pass.render(renderer, writeBuffer, readBuffer,deltaTime: deltaTime, maskActive: maskActive);
 
-    //   if (pass.needsSwap) {
-    //     if (maskActive) {
-    //       final context = renderer.getContext();
-    //       final stencil = renderer.state.buffers["stencil"];
+      if (pass.needsSwap) {
+        if (maskActive) {
+          final context = renderer.getContext();
+          final stencil = renderer.state.buffers["stencil"];
 
-    //       //context.stencilFunc( context.NOTEQUAL, 1, 0xffffffff );
-    //       stencil.setFunc(context.NOTEQUAL, 1, 0xffffffff);
+          //context.stencilFunc( context.NOTEQUAL, 1, 0xffffffff );
+          stencil.setFunc(context.NOTEQUAL, 1, 0xffffffff);
 
-    //       copyPass.render(renderer, writeBuffer, readBuffer, deltaTime: deltaTime);
+          copyPass.render(renderer, writeBuffer, readBuffer, deltaTime: deltaTime);
 
-    //       //context.stencilFunc( context.EQUAL, 1, 0xffffffff );
-    //       stencil.setFunc(context.EQUAL, 1, 0xffffffff);
-    //     }
+          //context.stencilFunc( context.EQUAL, 1, 0xffffffff );
+          stencil.setFunc(context.EQUAL, 1, 0xffffffff);
+        }
 
-    //     swapBuffers();
-    //   }
+        swapBuffers();
+      }
 
       //if (pass != null) {
         if (pass is MaskPass) {

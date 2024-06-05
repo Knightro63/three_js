@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
 import 'package:flutter/services.dart';
+import 'package:three_js_objects/three_js_objects.dart';
 
 class FlutterGame extends StatefulWidget {
   final String fileName;
@@ -18,12 +19,8 @@ class _MyAppState extends State<FlutterGame> {
   @override
   void initState() {
     threeJs = three.ThreeJS(
-      
       onSetupComplete: (){setState(() {});},
       setup: setup,
-      // postProcessor: ([dt]){
-      //   threeJs.renderer!.clear(true, true, true);
-      // },
       settings: three.Settings(
         clearAlpha: 0,
         clearColor: 0xffffff
@@ -34,8 +31,9 @@ class _MyAppState extends State<FlutterGame> {
   @override
   void dispose() {
     threeJs.dispose();
-    fpsControl.clearListeners();
+    player.dispose();
     three.loading.clear();
+    joystick.dispose();
     super.dispose();
   }
 
@@ -57,21 +55,16 @@ class _MyAppState extends State<FlutterGame> {
     LogicalKeyboardKey.arrowRight: false,
   };
 
-  late three.FirstPersonControls fpsControl;
-  late three.AnimationMixer mixer;
-  late final three.Vector3 playerVelocity;
+  late Player player;
+  double gravity = 30;
+  int stepsPerFrame = 5;
+  late three.Joystick joystick;
   
   Future<void> setup() async {
+    joystick = three.Joystick(screenSize: Size(threeJs.width, threeJs.height), listenableKey: threeJs.globalKey);
     threeJs.camera = three.PerspectiveCamera(45, threeJs.width / threeJs.height, 1, 2200);
     threeJs.camera.position.setValues(3, 6, 10);
-    fpsControl = three.FirstPersonControls(
-      camera: threeJs.camera, 
-      listenableKey: threeJs.globalKey,
-      lookType: three.LookType.position,
-      offset: three.Vector3(10,10,10)
-    );
-    playerVelocity = fpsControl.velocity;
-    
+
     threeJs.scene = three.Scene();
 
     final ambientLight = three.AmbientLight(0xffffff, 0.3);
@@ -91,8 +84,11 @@ class _MyAppState extends State<FlutterGame> {
     //final result = await loader.fromAsset( 'coffeemat.glb' );
     var sky = await loader.fromAsset( 'sky_sphere.glb' );
     threeJs.scene.add(sky!.scene);
-    var ground = await loader.fromAsset('ground.glb');
-    threeJs.scene.add(ground!.scene);
+
+    var groundGLB = await loader.fromAsset('ground.glb');
+    final ground = groundGLB!.scene;
+    ground.rotation.y = 90*(math.pi/180);
+    threeJs.scene.add(ground);
 
     final List<three.Vector3> coinPositions = [
       three.Vector3(-1.4 - 0.8 * 0, 1.5, -6 - 2 * 0),
@@ -111,32 +107,47 @@ class _MyAppState extends State<FlutterGame> {
       three.Vector3(7 + 2 * 3, 1.5, -16 + 1.3 * 3),
     ];
 
-    var coin = await loader.fromAsset('coin.glb');
-
+    final coin = await loader.fromAsset('coin.glb');
     List<Coin> coins = []; 
     for(final pos in coinPositions){
-      coins.add(Coin(pos,coin!.scene));
-      threeJs.scene.add(coin.scene);
+      final object = coin!.scene.clone();
+      coins.add(Coin(pos,object));
+      threeJs.scene.add(object);
     }
-    var logo = await loader.fromAsset('flutter_logo.glb');
-    threeJs.scene.add(logo!.scene);
 
-    var dash = await loader.fromAsset('dash.glb');
-    final object = dash!.scene;
-    threeJs.scene.add(object);
-    mixer = three.AnimationMixer(object);
-    mixer.clipAction(dash.animations![4])!.play();
+    // final logo = await loader.fromAsset('flutter_logo.glb');
+    // threeJs.scene.add(logo!.scene);
+
+    final dash = await loader.fromAsset('dash.glb');
+    Player player = Player(
+      dash!.scene,dash.animations!,
+      threeJs.camera,
+      threeJs.globalKey
+    );
+    threeJs.scene.add(dash.scene);
 
     threeJs.addAnimationEvent((dt){
-      mixer.update(dt);
-      fpsControl.update(dt);
+      joystick.update();
+      player.update(dt);
+      for(final coin in coins){
+        coin.update(player.position, dt);
+      }
     });
+    
+    threeJs.renderer?.autoClear = false; // To allow render overlay on top of sprited sphere
+
+    threeJs.postProcessor = ([double? dt]){
+      threeJs.renderer!.setViewport(0,0,threeJs.width,threeJs.height);
+      threeJs.renderer!.clear();
+      threeJs.renderer!.render( threeJs.scene, threeJs.camera );
+      threeJs.renderer!.clearDepth();
+      threeJs.renderer!.render( joystick.scene, joystick.camera);
+    };
   }
 }
 
 class Coin {
   three.Vector3 position;
-  double rotation = 0;
   bool collected = false;
 
   three.Vector3 startAnimPosition = three.Vector3.zero();
@@ -144,33 +155,116 @@ class Coin {
 
   late three.Object3D object;
 
-  Coin(this.position, three.Object3D object){
-    this.object = object.clone();
+  Coin(this.position, this.object){
     object.position = position;
   }
 
-  void update(three.Vector3 playerPosition, double deltaSeconds) {
+  void update(three.Vector3 playerPosition, double dt) {
     if (collected && collectAnimation == 1) {
+      object.visible = false;
       return;
     }
 
     if (!collected) {
-      double distance = playerPosition.sub(position).length;
+      double distance = playerPosition.clone().sub(position).length;
       if (distance < 2.2) {
         collected = true;
         startAnimPosition = position;
       }
     }
     if (collected) {
-      collectAnimation = math.min(1, collectAnimation + deltaSeconds * 2);
+      collectAnimation = math.min(1, collectAnimation + dt * 2);
       object.position.y = startAnimPosition.y + math.sin(collectAnimation * 5) * 0.4;
-      rotation += deltaSeconds * 10;
+      object.rotation.y *= 5;
     }
-
-    rotation += deltaSeconds * 2;
+    object.rotation.y += 0.07;
   }
 }
 
-class Charcter{
-  
+enum PlayerAction{blink,idle,walk,run}
+
+class Player{
+  three.Vector3 get position => object.position;
+  late three.Object3D object;
+  late three.AnimationMixer mixer;
+  late List animations;
+
+  late final three.Vector3 playerVelocity;
+  bool playerOnFloor = false;
+  Capsule playerCollider = Capsule(three.Vector3( 0, 1, 0 ), three.Vector3( 0, 3, 0 ), 3);
+
+  PlayerAction currentAction = PlayerAction.idle;
+  late three.ThirdPersonControls tpsControl;
+  Map<PlayerAction,three.AnimationAction> actions = {};
+
+  Player(
+    this.object, 
+    this.animations, three.Camera camera, 
+    GlobalKey<three.PeripheralsState> globalKey,
+  ){
+    mixer = three.AnimationMixer(object);
+    actions = {
+      PlayerAction.blink: mixer.clipAction(animations[0])!,
+      PlayerAction.idle: mixer.clipAction(animations[2])!,
+      PlayerAction.walk: mixer.clipAction(animations[3])!,
+      PlayerAction.run: mixer.clipAction(animations[4])!
+    };
+
+    for(final act in actions.keys){
+			actions[act]!.enabled = true;
+      actions[act]!.setEffectiveTimeScale( 1 );
+      double weight = 0;
+      if(act == PlayerAction.idle){
+        weight = 1;
+      }
+      actions[act]!.setEffectiveWeight( weight );
+      actions[act]!.play();
+    }
+
+    camera.rotation.x = math.sin(-60*(math.pi/180));
+
+    tpsControl = three.ThirdPersonControls(
+      camera: camera, 
+      listenableKey: globalKey,
+      object: object,
+      offset: three.Vector3(5,15,10),
+      movementSpeed: 5
+    );
+
+    playerVelocity = tpsControl.velocity;
+
+    //jump
+    tpsControl.domElement.addEventListener(three.PeripheralType.keyup, (event){
+      if(event.keyId == 32){
+        playerVelocity.y = 15;
+      }
+    });
+  }
+  void deactivateActions(){
+    for(final act in actions.keys){
+      actions[act]!.setEffectiveWeight( 0 );
+    }
+  }
+  void updateAction(PlayerAction action){
+    if(currentAction == action) return;
+    currentAction = action;
+    deactivateActions();
+    actions[action]!.setEffectiveWeight( 1 );
+  }
+
+  void update(double dt) {
+    tpsControl.update(dt);
+    if(tpsControl.isMoving){
+      updateAction(PlayerAction.walk);
+    }
+    else{
+      updateAction(PlayerAction.idle);
+    }
+
+    mixer.update(dt);
+  }
+
+  void dispose() {
+    tpsControl.clearListeners();
+  }
 }

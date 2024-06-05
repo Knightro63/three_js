@@ -3,7 +3,6 @@ import 'package:flutter/widgets.dart' hide Matrix4;
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'spherical.dart';
-
 import 'package:flutter/material.dart' hide Matrix4;
 
 enum LookType{active,position}
@@ -18,15 +17,12 @@ class FirstPersonControls with EventDispatcher {
     required this.camera,
     required this.listenableKey,
     this.lookType = LookType.active,
-    Vector3? offset
+    this.movementSpeed = 1.0
   }):super(){
-    this.offset = offset ?? Vector3.zero();
     domElement.addEventListener( PeripheralType.contextmenu, contextmenu, false );
-    if(lookType == LookType.active){
-      domElement.addEventListener( PeripheralType.pointerHover, onMouseMove, false );
-      domElement.addEventListener( PeripheralType.pointerdown, onMouseDown, false );
-      domElement.addEventListener( PeripheralType.pointerup, onMouseUp, false );
-    }
+    domElement.addEventListener( PeripheralType.pointerHover, onMouseMove, false );
+    domElement.addEventListener( PeripheralType.pointerdown, onMouseDown, false );
+    domElement.addEventListener( PeripheralType.pointerup, onMouseUp, false );
     //this.domElement.setAttribute( 'tabindex', - 1 );
     domElement.addEventListener( PeripheralType.keydown, onKeyDown, false );
     domElement.addEventListener( PeripheralType.keyup, onKeyUp, false );
@@ -39,8 +35,6 @@ class FirstPersonControls with EventDispatcher {
   PeripheralsState get domElement => listenableKey.currentState!;
 
 	Camera camera;
-
-	// API
 
 	bool enabled = true;
   bool clickMove = false;
@@ -87,7 +81,6 @@ class FirstPersonControls with EventDispatcher {
 	double lon = 0;
 
 	Vector3 lookDirection = Vector3();
-  Vector3 offset = Vector3.zero();
 	Spherical spherical = Spherical();
 	Vector3 target = Vector3();
   Vector3 targetPosition = Vector3();
@@ -130,7 +123,6 @@ class FirstPersonControls with EventDispatcher {
 	}
 
 	void onKeyDown(event) {
-    print(event);
 		switch ( event.keyId ) {
 			case 4294968068: /*up*/
 			case 119: /*W*/ 
@@ -193,7 +185,7 @@ class FirstPersonControls with EventDispatcher {
 	}
 
 	FirstPersonControls lookAt (Vector3 v) {
-		target.setFrom(v).add(offset);
+		target.setFrom(v);
 		camera.lookAt( target );
 		setOrientation( this );
 		return this;
@@ -255,7 +247,7 @@ class FirstPersonControls with EventDispatcher {
     }
 
     
-    camera.position.setFrom(velocity).add(offset);
+    camera.position.setFrom(velocity);
 
     if (LookType.active == lookType ) {
       double actualLookSpeed = delta * lookSpeed*100;

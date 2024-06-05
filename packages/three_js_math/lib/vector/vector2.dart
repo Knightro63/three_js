@@ -398,4 +398,9 @@ class Vector2 extends Vector{
   Map<String, dynamic> toJson() {
     return {'x': x, 'y': y};
   }
+
+  @override
+  String toString(){
+    return toJson().toString();
+  }
 }

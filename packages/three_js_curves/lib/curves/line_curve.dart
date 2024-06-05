@@ -1,7 +1,12 @@
 import 'package:three_js_math/three_js_math.dart';
 import '../core/curve.dart';
 
+/// A curve representing a 2d line segment.
 class LineCurve extends Curve {
+
+  /// [v1] – The start point.
+  /// 
+  /// [v2] - The end point.
   LineCurve(Vector v1, Vector v2) {
     if(v1 is! Vector2){
       v1 = Vector2(v1.x,v1.y);

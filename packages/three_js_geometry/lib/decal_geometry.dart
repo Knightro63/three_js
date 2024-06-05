@@ -1,23 +1,24 @@
 import "package:three_js_core/three_js_core.dart";
 import "package:three_js_math/three_js_math.dart";
 
-/**
- * You can use this geometry to create a decal mesh, that serves different kinds of purposes.
- * e.g. adding unique details to models, performing dynamic visual environmental changes or covering seams.
- *
- * Constructor parameter:
- *
- * mesh — Any mesh object
- * position — Position of the decal projector
- * orientation — Orientation of the decal projector
- * size — Size of the decal projector
- *
- * reference: http://blog.wolfire.com/2009/06/how-to-project-decals/
- *
- */
-
+/// [DecalGeometry] can be used to create a decal mesh that serves different kinds of purposes e.g. adding unique details
+/// to models, performing dynamic visual environmental changes or covering seams.
+/// 
+/// ```
+/// final geometry =  DecalGeometry( mesh, position, orientation, size );
+/// final material = MeshBasicMaterial.fromMap( { 'color': 0x00ff00 } );
+/// final mesh = Mesh( geometry, material );
+/// scene.add( mesh );
+///```
 class DecalGeometry extends BufferGeometry {
 
+  /// [mesh] — Any mesh object.
+  /// 
+  /// [position] — Position of the decal projector.
+  /// 
+  /// [orientation] — Orientation of the decal projector.
+  /// 
+  /// [size] — Size of the decal projector.
 	DecalGeometry(Mesh mesh, Vector3 position, Euler orientation, Vector3 size ):super(){
 
 		final List<double> vertices = [];

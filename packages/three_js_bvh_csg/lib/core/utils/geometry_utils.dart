@@ -16,7 +16,7 @@ import "package:three_js_math/three_js_math.dart";
 	final buffer = array.buffer;
 	final sharedBuffer = SharedArrayBuffer( buffer.byteLength );
 
-	final uintArray = Uint8Array( buffer );
+	final uintArray = Uint8Array.fromList( buffer );
 	final sharedUintArray = Uint8Array( sharedBuffer );
 	sharedUintArray.copy(uintArray);
 

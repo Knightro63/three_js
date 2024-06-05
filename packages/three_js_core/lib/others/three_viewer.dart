@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_angle/flutter_angle.dart';
@@ -145,6 +146,7 @@ class ThreeJS{
     if(sourceTexture == null){
       FlutterAngle.activateTexture(texture!);
     }
+
     rendererUpdate?.call();
     if(postProcessor == null){
       renderer!.clear();
@@ -154,6 +156,7 @@ class ThreeJS{
     else{
       postProcessor?.call(clock.getDelta());
     }
+    
     if(sourceTexture != null){
       FlutterAngle.activateTexture(texture!);
     }
@@ -272,7 +275,7 @@ class ThreeJS{
                     else {
                       return texture != null?
                       Transform.scale(
-                        scaleY: settings.useSourceTexture?1:-1,
+                        scaleY: settings.useSourceTexture || Platform.isAndroid?1:-1,
                         child:Texture(textureId: texture!.textureId)
                       ):Container();
                     }

@@ -393,11 +393,10 @@ class PLYLoader extends Loader {
 		}
 
 		BufferGeometry parseASCII(String data, Map<String,dynamic> header ) {
-      print(header);
 			final buffer = createBuffer();
-
-			final patternBody = RegExp(r'/end_header\s+(\S[\s\S]*\S|\S)\s*/');
-			List<String> body = [];
+			//final patternBody = RegExp(r'/end_header\s+(\S[\s\S]*\S|\S)\s*/');
+			
+      List<String> body = [];
       String match = data.split('end_header')[1];
       //print(match);
 			if (match.isNotEmpty) {

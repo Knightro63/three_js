@@ -53,6 +53,7 @@ class _MarchingState extends State<Marching> {
       onSetupComplete: (){setState(() {});},
       setup: setup,
       settings: three.Settings(
+        //useSourceTexture: true,
         renderOptions: {"format": three.RGBAFormat,"samples": 8}
       )
     );
@@ -128,15 +129,15 @@ class _MarchingState extends State<Marching> {
     threeJs.camera.position.setValues( - 500, 500, 1500 );
 
     // lights
-    three.DirectionalLight light = three.DirectionalLight( 0xffffff, 3 );
+    three.DirectionalLight light = three.DirectionalLight( 0xffffff, 5 );
     light.position.setValues( 0.5, 0.5, 1 );
     threeJs.scene.add(light);
 
-    three.PointLight pointLight = three.PointLight( 0xff7c00, 3, 0, 0 );
+    three.PointLight pointLight = three.PointLight( 0xff7c00, 5, 0, 0 );
     pointLight.position.setValues( 0, 0, 100 );
     threeJs.scene.add( pointLight );
 
-    three.AmbientLight ambientLight = three.AmbientLight( 0x323232, 3 );
+    three.AmbientLight ambientLight = three.AmbientLight( 0x323232, 5 );
     threeJs.scene.add( ambientLight );
 
     // MATERIALS

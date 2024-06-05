@@ -5,8 +5,39 @@ import 'package:three_js_curves/three_js_curves.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'dart:math' as math;
 
+/// Creates extruded geometry from a path shape.
+/// 
+/// ```
+/// const length = 12, width = 8;
+/// 
+/// final shape = Shape();
+/// shape.moveTo( 0,0 );
+/// shape.lineTo( 0, width );
+/// shape.lineTo( length, width );
+/// shape.lineTo( length, 0 );
+/// shape.lineTo( 0, 0 );
+/// 
+// final ExtrudeGeometryOptions extrudeSettings = ExtrudeGeometryOptions(
+///   steps: 2,
+///   depth: 16,
+///   bevelEnabled: true,
+///   bevelThickness: 1,
+///   bevelSize: 1,
+///   bevelOffset: 0,
+///   bevelSegments: 1
+/// );
+/// 
+/// final geometry = ExtrudeGeometry( [shape], extrudeSettings );
+/// final material = MeshBasicMaterial.fromMap( { 'color': 0x00ff00 } );
+/// final mesh = Mesh( geometry, material ) ;
+/// scene.add( mesh );
+///```
 class ExtrudeGeometry extends BufferGeometry {
   List<Shape> shapes;
+
+  /// [shapes] — Shape or an array of shapes.
+  /// 
+  /// [options] — Object that can contain the following parameters.
   ExtrudeGeometry(this.shapes, ExtrudeGeometryOptions options) : super() {
     type = "ExtrudeGeometry";
     parameters = {"shapes": shapes, "options": options};

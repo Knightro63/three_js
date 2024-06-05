@@ -2,9 +2,22 @@ import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 
 /// Parametric Surfaces Geometry
-/// based on the brilliant article by @prideout https://prideout.net/blog/old/blog/index.html@p=44.html
-
+/// based on the brilliant article by [prideout](https://prideout.net/blog/old/blog/index.html@p=44.html)
+/// 
+/// ```
+/// final geometry = ParametricGeometry(ParametricGeometries.klein, 25, 25 );
+/// final material = MeshBasicMaterial.fromMap( { 'color': 0x00ff00 } );
+/// final klein = Mesh( geometry, material );
+/// scene.add( klein );
+///```
 class ParametricGeometry extends BufferGeometry {
+
+  /// [func] — A function that takes in a [u] and [v] value each between 0 and 1 and 
+  /// modifies a third [Vector3] argument. Default is a function that generates a curved plane surface.
+  /// 
+  /// [slices] — The count of slices to use for the parametric function. Default is *8*.
+  /// 
+  /// [stacks] — The count of stacks to use for the parametric function. Default is *8*.
   ParametricGeometry(Function(double,double,Vector3) func, int slices, int stacks) : super() {
     type = "ParametricGeometry";
     parameters = {"func": func, "slices": slices, "stacks": stacks};
@@ -22,14 +35,6 @@ class ParametricGeometry extends BufferGeometry {
 
     final p0 = Vector3.zero(), p1 = Vector3.zero();
     final pu = Vector3.zero(), pv = Vector3.zero();
-
-    // if ( func.length < 3 ) {
-
-    // 	print( 'THREE.ParametricGeometry: Function must now modify a Vector3 as third parameter.' );
-
-    // }
-
-    // generate vertices, normals and uvs
 
     final sliceCount = slices + 1;
 
