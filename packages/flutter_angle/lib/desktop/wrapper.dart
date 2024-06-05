@@ -1364,7 +1364,11 @@ class RenderingContext {
     } 
     else if (data is Uint8List) {
       nativeData = uInt8ListToArrayPointer(data).cast();
-      size = data.length * sizeOf<Uint16>();
+      size = data.length * sizeOf<Uint8>();
+    } 
+    else if (data is Int8List) {
+      nativeData = int8ListToArrayPointer(data).cast();
+      size = data.length * sizeOf<Int8>();
     } 
     else {
       throw (OpenGLException('bufferData: unsupported native type ${data.runtimeType}', -1));
@@ -1400,6 +1404,12 @@ class RenderingContext {
 
   Pointer<Uint8> uInt8ListToArrayPointer(List<int> list) {
     final ptr = calloc<Uint8>(list.length);
+    ptr.asTypedList(list.length).setAll(0, list);
+    return ptr;
+  }
+
+  Pointer<Int8> int8ListToArrayPointer(List<int> list) {
+    final ptr = calloc<Int8>(list.length);
     ptr.asTypedList(list.length).setAll(0, list);
     return ptr;
   }

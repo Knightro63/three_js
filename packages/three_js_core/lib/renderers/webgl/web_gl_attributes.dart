@@ -92,7 +92,7 @@ class WebGLAttributes {
 
   dynamic get(BaseBufferAttribute attribute) {
     if (attribute.type == "InterleavedBufferAttribute") {
-      return buffers.get(attribute.data!);
+      return buffers.get(attribute.data);
     } 
     else {
       return buffers.get(attribute);

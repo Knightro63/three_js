@@ -49,6 +49,7 @@ class _MyAppState extends State<WebglLoaderGlb> {
   }
 
   late three.OrbitControls controls;
+  late three.AnimationMixer mixer;
   
   Future<void> setup() async {
     threeJs.camera = three.PerspectiveCamera(45, threeJs.width / threeJs.height, 1, 2200);
@@ -68,22 +69,19 @@ class _MyAppState extends State<WebglLoaderGlb> {
 
     threeJs.camera.lookAt(threeJs.scene.position);
 
-    three.GLTFLoader loader = three.GLTFLoader().setPath('assets/models/gltf/');
+    three.GLTFLoader loader = three.GLTFLoader().setPath('assets/models/gltf/flutter/');
 
     //final result = await loader.fromAsset( 'coffeemat.glb' );
-    var result = await loader.fromAsset( 'BoomBox.glb' );
+    var result = await loader.fromAsset( 'dash.glb' );
     // var result = await loader.loadAsync('untitled.glb');
 
     final object = result!.scene;
-
-    print(object);
-
-    object.scale.setValues(80, 80, 80);
-    object.rotation.set(0, 180 * math.pi / 180.0, 0);
-
     threeJs.scene.add(object);
-
+    mixer = three.AnimationMixer(object);
+    mixer.clipAction(result.animations![4], null, null)!.play();
+    
     threeJs.addAnimationEvent((dt){
+      mixer.update(dt);
       controls.update();
     });
   }

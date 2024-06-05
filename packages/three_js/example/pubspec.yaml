@@ -56,6 +56,7 @@ flutter:
     - assets/models/xyz/
     - assets/models/gltf/
     - assets/models/gltf/test/
+    - assets/models/gltf/flutter/
     - assets/models/gltf/Flower/
     - assets/models/gltf/LeePerrySmith/
     - assets/models/gltf/RobotExpressive/

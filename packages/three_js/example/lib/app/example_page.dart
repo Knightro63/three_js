@@ -1,6 +1,7 @@
 import 'package:example/controls/misc_controls_fly.dart';
 import 'package:example/controls/misc_controls_pointerlock.dart';
 import 'package:example/controls/misc_controls_transform.dart';
+import 'package:example/games/flutter_game.dart';
 import 'package:example/games/games_fps2.dart';
 import 'package:example/geometry/marching_cubes.dart';
 import 'package:example/geometry/webgl_buffergeometry_custom_attributes_particles.dart';
@@ -314,6 +315,9 @@ class _MyAppState extends State<ExamplePage> {
       page = MultiViews(fileName: fileName);
     }else if (fileName == "games_fps") {
       page = FPSGame2(fileName: fileName);
+    }
+    else if (fileName == "flutter_game") {
+      page = FlutterGame(fileName: fileName);
     }
     else if(fileName == "webgl_lod"){
       page = WebglLod(fileName: fileName);

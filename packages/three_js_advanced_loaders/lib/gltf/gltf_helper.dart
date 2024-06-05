@@ -208,15 +208,13 @@ Function createDefaultMaterial = (GLTFRegistry cache) {
   return cache.get("DefaultMaterial");
 };
 
-Function addUnknownExtensionsToUserData =
-    (knownExtensions, object, Map<String, dynamic> objectDef) {
+Function addUnknownExtensionsToUserData = (knownExtensions,object, Map<String, dynamic> objectDef) {
   // Add unknown glTF extensions to an object's userData.
-
   if (objectDef["extensions"] != null) {
     objectDef["extensions"].forEach((name, value) {
       if (knownExtensions[name] == null) {
-        object["userData"]["gltfExtensions"] = object["userData"]["gltfExtensions"] ?? {};
-        object["userData"]["gltfExtensions"][name] = objectDef["extensions"][name];
+        object?.userData["gltfExtensions"] = object.userData["gltfExtensions"] ?? {};
+        object?.userData["gltfExtensions"][name] = objectDef["extensions"][name];
       }
     });
   }

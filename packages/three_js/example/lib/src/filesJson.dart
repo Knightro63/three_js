@@ -72,6 +72,7 @@ final filesJson = [
   'misc_controls_fly',
   "multi_views",
   'games_fps',
+  'flutter_game',
   'webgl_lod',
   'marching_cubes',
   'misc_controls_transform',
