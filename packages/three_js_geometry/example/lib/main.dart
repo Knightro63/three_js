@@ -1,7 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
-
 import 'package:three_js_core/three_js_core.dart' as three;
 import 'package:three_js_math/three_js_math.dart' as tmath;
 import 'package:three_js_geometry/three_js_geometry.dart';
@@ -30,188 +28,83 @@ class MyApp extends StatelessWidget {
 
 class WebglGeometries extends StatefulWidget {
   const WebglGeometries({super.key});
+
   @override
   createState() => _State();
 }
 
 class _State extends State<WebglGeometries> {
-  late FlutterGlPlugin three3dRender;
-  three.WebGLRenderer? renderer;
-
-  int? fboId;
-  late double width;
-  late double height;
-
-  Size? screenSize;
-
-  late three.Scene scene;
-  late three.Camera camera;
-  late three.Mesh mesh;
-
-  three.Clock clock = three.Clock();
-
-  double dpr = 1.0;
-
-  final int amount = 4;
-
-  bool verbose = false;
-  bool disposed = false;
-
-  late three.Object3D object;
-
-  late three.Texture texture;
-
-  int startTime = 0;
-
-  late three.WebGLMultisampleRenderTarget renderTarget;
-
-  dynamic sourceTexture;
-
-  bool loaded = false;
+  late three.ThreeJS threeJs;
 
   @override
   void initState() {
+    threeJs = three.ThreeJS(
+      
+      onSetupComplete: (){setState(() {});},
+      setup: setup,
+      settings: three.Settings(
+        localClippingEnabled: true,
+      )
+    );
     super.initState();
   }
-
   @override
   void dispose() {
-    print(" dispose ............. ");
-    disposed = true;
-    three3dRender.dispose();
+    threeJs.dispose();
     super.dispose();
   }
 
-
-  void initSize(BuildContext context) async {
-    if(screenSize != null){
-      return;
-    }
-
-    final mqd = MediaQuery.of(context);
-    screenSize = mqd.size;
-    width = screenSize!.width;
-    height = screenSize!.height;
-    dpr = mqd.devicePixelRatio;
-
-    three3dRender = FlutterGlPlugin();
-
-    Map<String, dynamic> _options = {
-      "antialias": true,
-      "alpha": false,
-      "width": width.toInt(),
-      "height": height.toInt(),
-      "dpr": dpr
-    };
-
-    await three3dRender.initialize(options: _options);
-
-    setState(() {});
-
-    Future.delayed(const Duration(milliseconds: 100), () async {
-      await three3dRender.prepareContext();
-      initScene();
-    });
+  @override
+  Widget build(BuildContext context) {
+    return threeJs.build();
   }
 
-  void render() {
-    int _t = DateTime.now().millisecondsSinceEpoch;
+  int startTime = 0;
 
-    final _gl = three3dRender.gl;
+  Future<void> setup() async {
+    threeJs.camera = three.PerspectiveCamera(45, threeJs.width / threeJs.height, 1, 2000);
+    threeJs.camera.position.y = 400;
 
-    renderer!.render(scene, camera);
-
-    int _t1 = DateTime.now().millisecondsSinceEpoch;
-
-    if (verbose) {
-      print("render cost: ${_t1 - _t} ");
-      print(renderer!.info.memory);
-      print(renderer!.info.render);
-    }
-
-    _gl.flush();
-
-    if (verbose) print(" render: sourceTexture: $sourceTexture ");
-
-    if (!kIsWeb) {
-      three3dRender.updateTexture(sourceTexture);
-    }
-  }
-
-  void initRenderer() {
-    Map<String, dynamic> _options = {
-      "width": width,
-      "height": height,
-      "gl": three3dRender.gl,
-      "antialias": true,
-      "canvas": three3dRender.element
-    };
-    renderer = three.WebGLRenderer(_options);
-    renderer!.setPixelRatio(dpr);
-    renderer!.setSize(width, height, false);
-    renderer!.shadowMap.enabled = true;
-    renderer!.localClippingEnabled = true;
-
-    if (!kIsWeb) {
-      final pars = three.WebGLRenderTargetOptions({"format": tmath.RGBAFormat});
-      renderTarget = three.WebGLMultisampleRenderTarget(
-          (width * dpr).toInt(), (height * dpr).toInt(), pars);
-      renderTarget.samples = 4;
-      renderer!.setRenderTarget(renderTarget);
-      sourceTexture = renderer!.getRenderTargetGLTexture(renderTarget);
-    }
-  }
-
-  Future<void> initScene() async{
-    initRenderer();
-    await initPage();
-  }
-
-  Future<void> initPage() async {
-    camera = three.PerspectiveCamera(45, width / height, 1, 2000);
-    camera.position.y = 200;
-
-    scene = three.Scene();
+    threeJs.scene = three.Scene();
 
     three.Mesh object;
 
     final ambientLight = three.AmbientLight(0xcccccc, 0.4);
-    scene.add(ambientLight);
+    threeJs.scene.add(ambientLight);
 
     final pointLight = three.PointLight(0xffffff, 0.8);
-    camera.add(pointLight);
-    scene.add(camera);
+    threeJs.camera.add(pointLight);
+    threeJs.scene.add(threeJs.camera);
 
-    final material = three.MeshPhongMaterial({
-      three.MaterialProperty.side: tmath.DoubleSide, 
-      three.MaterialProperty.wireframe: false
-    });
+    final material = three.MeshPhongMaterial.fromMap({"side": tmath.DoubleSide});
+
+    //
 
     object = three.Mesh(three.SphereGeometry(75, 20, 10), material);
     object.position.setValues(-300, 0, 200);
-    scene.add(object);
+    threeJs.scene.add(object);
 
     object = three.Mesh(IcosahedronGeometry(75, 1), material);
     object.position.setValues(-100, 0, 200);
-    scene.add(object);
+    threeJs.scene.add(object);
 
     object = three.Mesh(OctahedronGeometry(75, 2), material);
     object.position.setValues(100, 0, 200);
-    scene.add(object);
+    threeJs.scene.add(object);
 
     object = three.Mesh(TetrahedronGeometry(75, 0), material);
     object.position.setValues(300, 0, 200);
-    scene.add(object);
+    threeJs.scene.add(object);
 
     //
 
     object = three.Mesh(three.PlaneGeometry(100, 100, 4, 4), material);
     object.position.setValues(-300, 0, 0);
-    scene.add(object);
+    threeJs.scene.add(object);
 
     object = three.Mesh(three.BoxGeometry(100, 100, 100, 4, 4, 4), material);
     object.position.setValues(-100, 0, 0);
-    scene.add(object);
+    threeJs.scene.add(object);
 
     object = three.Mesh(
         CircleGeometry(
@@ -221,17 +114,17 @@ class _State extends State<WebglGeometries> {
             thetaLength: math.pi * 2),
         material);
     object.position.setValues(100, 0, 0);
-    scene.add(object);
+    threeJs.scene.add(object);
 
     object = three.Mesh(RingGeometry(10, 50, 20, 5, 0, math.pi * 2), material);
     object.position.setValues(300, 0, 0);
-    scene.add(object);
+    threeJs.scene.add(object);
 
     //
 
     object = three.Mesh(CylinderGeometry(25, 75, 100, 40, 5), material);
     object.position.setValues(-300, 0, -200);
-    scene.add(object);
+    threeJs.scene.add(object);
 
     List<tmath.Vector2> points = [];
 
@@ -243,88 +136,31 @@ class _State extends State<WebglGeometries> {
 
     object = three.Mesh(LatheGeometry(points, segments: 20), material);
     object.position.setValues(-100, 0, -200);
-    scene.add(object);
+    threeJs.scene.add(object);
 
     object = three.Mesh(TorusGeometry(50, 20, 20, 20), material);
     object.position.setValues(100, 0, -200);
-    scene.add(object);
+    threeJs.scene.add(object);
 
     object = three.Mesh(TorusKnotGeometry(50, 10, 50, 20), material);
     object.position.setValues(300, 0, -200);
-    scene.add(object);
+    threeJs.scene.add(object);
 
     startTime = DateTime.now().millisecondsSinceEpoch;
-    loaded = true;
 
-    animate();  
-  }
+    threeJs.addAnimationEvent((dt){
+      final timer = DateTime.now().millisecondsSinceEpoch * 0.0001;
 
-  void clickRender() {
-    print("clickRender..... ");
-    animate();
-  }
+      threeJs.camera.position.x = math.cos(timer) * 800;
+      threeJs.camera.position.z = math.sin(timer) * 800;
+      threeJs.camera.lookAt(threeJs.scene.position);
 
-  void animate() {
-    if (!mounted || disposed) {
-      return;
-    }
-
-    if (!loaded) {
-      return;
-    }
-
-    final timer = DateTime.now().millisecondsSinceEpoch * 0.0001;
-
-    camera.position.x = math.cos(timer) * 800;
-    camera.position.z = math.sin(timer) * 800;
-
-    //print(camera.position);
-
-    camera.lookAt(scene.position);
-
-    scene.traverse((object) {
-      if (object is three.Mesh) {
-        object.rotation.x = timer * 5;
-        object.rotation.y = timer * 2.5;
-      }
+      threeJs.scene.traverse((object) {
+        if (object is three.Mesh) {
+          object.rotation.x = timer * 5;
+          object.rotation.y = timer * 2.5;
+        }
+      });
     });
-
-    render();
-
-    Future.delayed(const Duration(milliseconds: 40), () {
-      animate();
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-
-    return Scaffold(
-      body: Builder(
-        builder: (BuildContext context) {
-          initSize(context);
-          return Container(
-            width: width,
-            height: height,
-            color: Colors.black,
-            child: Builder(
-              builder: (BuildContext context) {
-                if (kIsWeb) {
-                  return three3dRender.isInitialized
-                      ? HtmlElementView(
-                          viewType: three3dRender.textureId!.toString())
-                      : Container();
-                } 
-                else {
-                  return three3dRender.isInitialized
-                      ? Texture(textureId: three3dRender.textureId!)
-                      : Container();
-                }
-            }),
-          );
-        },
-      ),
-    );
   }
 }
-

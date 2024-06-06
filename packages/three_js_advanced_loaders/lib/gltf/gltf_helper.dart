@@ -212,8 +212,6 @@ Function addUnknownExtensionsToUserData = (Map<dynamic,dynamic> knownExtensions,
   // Add unknown glTF extensions to an object's userData.
   if (objectDef["extensions"] != null) {
     objectDef["extensions"].forEach((name, value) {
-      print('K: $knownExtensions');
-      print(objectDef["extensions"][name]);
       if (knownExtensions[name] == null) {
         object?.userData["gltfExtensions"] = object.userData["gltfExtensions"] ?? {};
         object?.userData["gltfExtensions"][name] = objectDef["extensions"][name];

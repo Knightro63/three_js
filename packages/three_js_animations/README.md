@@ -6,6 +6,10 @@
 
 A type of three_js api that allows users to add animation to thier models.
 
+<picture>
+  <img alt="Gif of dash." src="https://github.com/Knightro63/three_js/tree/main/packages/three_js_animatons/assets/example.gif?raw=true">
+</picture>
+
 This is a dart conversion of three.js and three_dart, originally created by [@mrdoob](https://github.com/mrdoob) and has a coverted dart fork by [@wasabia](https://github.com/wasabia).
 
 ## Usage

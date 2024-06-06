@@ -9,4 +9,3 @@ export 'package:three_js_core_loaders/three_js_core_loaders.dart';
 export 'package:three_js_curves/three_js_curves.dart';
 export 'package:three_js_simple_loaders/three_js_simple_loaders.dart';
 export 'package:three_js_text/three_js_text.dart';
-export 'package:three_js_text_loaders/three_js_text_loaders.dart';

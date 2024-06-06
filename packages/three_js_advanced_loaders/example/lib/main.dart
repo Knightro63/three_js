@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 
 import 'package:three_js_core/three_js_core.dart' as three;
 import 'package:three_js_animations/three_js_animations.dart';
@@ -25,281 +24,258 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const WebglGeometries(),
+      home: const WebglAnimationMultiple(),
     );
   }
 }
 
+class WebglAnimationMultiple extends StatefulWidget {
+  const WebglAnimationMultiple({super.key});
 
-class WebglGeometries extends StatefulWidget {
-  const WebglGeometries({super.key});
   @override
   createState() => _State();
 }
 
-class _State extends State<WebglGeometries> {
-  late FlutterGlPlugin three3dRender;
-  three.WebGLRenderer? renderer;
-
-  int? fboId;
-  late double width;
-  late double height;
-
-  Size? screenSize;
-
-  late three.Scene scene;
-  late three.Camera camera;
-  late three.Object3D mesh;
-
-  AnimationMixer? mixer;
-  three.Clock clock = three.Clock();
-  OrbitControls? controls;
-
-  double dpr = 1.0;
-
-  bool verbose = false;
-  bool disposed = false;
-
-  var radius = 600;
-  double theta = 0;
-  var prevTime = DateTime.now().millisecondsSinceEpoch;
-
-  late three.Object3D object;
-
-  late three.Texture texture;
-
-  late three.PointLight light;
-
-  VertexNormalsHelper? vnh;
-  VertexTangentsHelper? vth;
-
-  late three.WebGLMultisampleRenderTarget renderTarget;
-
-  dynamic sourceTexture;
-
-  bool loaded = false;
-
-  late three.Object3D model;
+class _State extends State<WebglAnimationMultiple> {
+  late three.ThreeJS threeJs;
 
   @override
   void initState() {
+    threeJs = three.ThreeJS(
+      settings: three.Settings(
+        useSourceTexture: true
+      ),
+      onSetupComplete: (){setState(() {});},
+      setup: setup
+    );
     super.initState();
   }
-
-  // Platform messages are asynchronous, so we initialize in an async method.
-  Future<void> initPlatformState() async {
-    width = screenSize!.width;
-    height = screenSize!.height;
-
-    three3dRender = FlutterGlPlugin();
-
-    Map<String, dynamic> _options = {
-      "antialias": true,
-      "alpha": false,
-      "width": width.toInt(),
-      "height": height.toInt(),
-      "dpr": dpr
-    };
-
-    await three3dRender.initialize(options: _options);
-
-    setState(() {});
-
-    // TODO web wait dom ok!!!
-    Future.delayed(const Duration(milliseconds: 100), () async {
-      await three3dRender.prepareContext();
-      initScene();
-    });
-  }
-
-  initSize(BuildContext context) {
-    if (screenSize != null) {
-      return;
-    }
-
-    final mqd = MediaQuery.of(context);
-
-    screenSize = mqd.size;
-    dpr = mqd.devicePixelRatio;
-
-    initPlatformState();
+  @override
+  void dispose() {
+    threeJs.dispose();
+    controls.clearListeners();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Builder(
-        builder: (BuildContext context) {
-          initSize(context);
-          return SingleChildScrollView(child: _build(context));
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        child: const Text("render"),
-        onPressed: () {
-          clickRender();
-        },
-      ),
-    );
+    return threeJs.build();
   }
 
-  Widget _build(BuildContext context) {
-    return Column(
-      children: [
-        Container(
-          child: Stack(
-            children: [
-              Container(
-                  child: Container(
-                      width: width,
-                      height: height,
-                      color: Colors.black,
-                      child: Builder(builder: (BuildContext context) {
-                        if (kIsWeb) {
-                          return three3dRender.isInitialized
-                              ? HtmlElementView(
-                                  viewType: three3dRender.textureId!.toString())
-                              : Container();
-                        } else {
-                          return three3dRender.isInitialized
-                              ? Texture(textureId: three3dRender.textureId!)
-                              : Container();
-                        }
-                      }))),
-            ],
-          ),
-        ),
-      ],
-    );
+  late OrbitControls controls;
+
+  late List<Map<String, dynamic>> models;
+  late List<Map<String, dynamic>> units;
+  final List<AnimationMixer> mixers = []; // All the three.AnimationMixer objects for all the animations in the scene
+  int numLoadedModels = 0;
+
+  Future<void> setup() async {
+    models = [
+      {"name": "Soldier"},
+      {"name": "Parrot"},
+    ];
+
+    // Here we define instances of the models that we want to place in the scene, their position, scale and the animations
+    // that must be played.
+    units = [
+      {
+        "modelName": "Soldier", // Will use the 3D model from file models/gltf/Soldier.glb
+        "meshName": "vanguard_Mesh", // Name of the main mesh to animate
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        }, // Where to put the unit in the scene
+        "scale": 1, // Scaling of the unit. 1.0 means: use original size, 0.1 means "10 times smaller", etc.
+        "animationName": "Idle" // Name of animation to run
+      },
+      {
+        "modelName": "Soldier",
+        "meshName": "vanguard_Mesh",
+        "position": {"x": 3, "y": 0, "z": 0},
+        "scale": 2,
+        "animationName": "Walk"
+      },
+      {
+        "modelName": "Soldier",
+        "meshName": "vanguard_Mesh",
+        "position": {"x": 1, "y": 0, "z": 0},
+        "scale": 1,
+        "animationName": "Run"
+      },
+      {
+        "modelName": "Parrot",
+        "meshName": "mesh_0",
+        "position": {"x": -4, "y": 0, "z": 0},
+        "rotation": {"x": 0, "y": math.pi, "z": 0},
+        "scale": 0.01,
+        "animationName": "parrot_A_"
+      },
+      {
+        "modelName": "Parrot",
+        "meshName": "mesh_0",
+        "position": {"x": -2, "y": 0, "z": 0},
+        "rotation": {"x": 0, "y": math.pi / 2, "z": 0},
+        "scale": 0.02,
+        "animationName": null
+      },
+    ];
+
+    setup2();
+    loadModels();
   }
 
-  render() {
-    int _t = DateTime.now().millisecondsSinceEpoch;
+  void setup2() {
+    threeJs.camera = three.PerspectiveCamera(45, threeJs.width / threeJs.height, 1, 10000);
+    threeJs.camera.position.setValues(3, 6, -10);
+    threeJs.camera.lookAt(tmath.Vector3(0, 1, 0));
 
-    final _gl = three3dRender.gl;
+    threeJs.scene = three.Scene();
+    threeJs.scene.background = tmath.Color.fromHex32(0xa0a0a0);
+    threeJs.scene.fog = three.Fog(0xa0a0a0, 10, 22);
 
-    renderer!.render(scene, camera);
+    final hemiLight = three.HemisphereLight(0xffffff, 0x444444);
+    hemiLight.position.setValues(0, 20, 0);
+    threeJs.scene.add(hemiLight);
 
-    int _t1 = DateTime.now().millisecondsSinceEpoch;
+    final dirLight = three.DirectionalLight(0xffffff);
+    dirLight.position.setValues(-3, 10, -10);
+    dirLight.castShadow = true;
+    dirLight.shadow!.camera!.top = 10;
+    dirLight.shadow!.camera!.bottom = -10;
+    dirLight.shadow!.camera!.left = -10;
+    dirLight.shadow!.camera!.right = 10;
+    dirLight.shadow!.camera!.near = 0.1;
+    dirLight.shadow!.camera!.far = 40;
+    threeJs.scene.add(dirLight);
 
-    if (verbose) {
-      print("render cost: ${_t1 - _t} ");
-      print(renderer!.info.memory);
-      print(renderer!.info.render);
+    controls = OrbitControls(threeJs.camera, threeJs.globalKey);
+
+    // ground
+    final groundMesh = three.Mesh(three.PlaneGeometry(40, 40), three.MeshPhongMaterial.fromMap({"color": 0x999999, "depthWrite": false}));
+
+    groundMesh.rotation.x = -math.pi / 2;
+    groundMesh.receiveShadow = true;
+    threeJs.scene.add(groundMesh);
+  }
+
+  void loadModels() {
+    for (int i = 0; i < models.length; ++i) {
+      final m = models[i];
+
+      loadGltfModel(m, () {
+        ++numLoadedModels;
+
+        if (numLoadedModels == models.length) {
+          three.console.info("All models loaded, time to instantiate units...");
+          instantiateUnits();
+        }
+      });
+    }
+  }
+
+  void instantiateUnits() {
+    int numSuccess = 0;
+
+    for (int i = 0; i < units.length; ++i) {
+      final u = units[i];
+      final model = getModelByName(u["modelName"]);
+
+      if (model != null) {
+        final clonedScene = SkeletonUtils.clone(model["scene"]);
+
+        if (clonedScene != null) {
+          // three.Scene is cloned properly, let's find one mesh and launch animation for it
+          final clonedMesh = clonedScene.getObjectByName(u["meshName"]);
+
+          if (clonedMesh != null) {
+            final mixer = startAnimation(
+                clonedMesh,
+                List<AnimationClip>.from(model["animations"]),
+                u["animationName"]);
+
+            // Save the animation mixer in the list, will need it in the animation loop
+            mixers.add(mixer);
+            numSuccess++;
+          }
+          
+          threeJs.scene.add(clonedScene);
+
+          if (u["position"] != null) {
+            clonedScene.position.setValues(
+                u["position"]["x"].toDouble(), u["position"]["y"].toDouble(), u["position"]["z"].toDouble());
+          }
+
+          if (u["scale"] != null) {
+            clonedScene.scale.setValues(u["scale"].toDouble(), u["scale"].toDouble(), u["scale"].toDouble());
+          }
+
+          if (u["rotation"] != null) {
+            clonedScene.rotation.x = u["rotation"]["x"].toDouble();
+            clonedScene.rotation.y = u["rotation"]["y"].toDouble();
+            clonedScene.rotation.z = u["rotation"]["z"].toDouble();
+          }
+        }
+      } else {
+        three.console.info("Can not find model ${u["modelName"]}");
+      }
     }
 
-    
-    _gl.flush();
+    three.console.info(" Successfully instantiated $numSuccess units ");
 
-    if (verbose) print(" render: sourceTexture: $sourceTexture ");
+    threeJs.addAnimationEvent((dt){
+      for (int i = 0; i < mixers.length; ++i) {
+        mixers[i].update(dt);
+      }
 
-    if (!kIsWeb) {
-      three3dRender.updateTexture(sourceTexture);
-    }
-  }
-
-  initRenderer() {
-    Map<String, dynamic> _options = {
-      "width": width,
-      "height": height,
-      "gl": three3dRender.gl,
-      "antialias": true,
-      "canvas": three3dRender.element
-    };
-    renderer = three.WebGLRenderer(_options);
-    renderer!.setPixelRatio(dpr);
-    renderer!.setSize(width, height, false);
-    renderer!.shadowMap.enabled = false;
-
-    if (!kIsWeb) {
-      var pars = three.WebGLRenderTargetOptions({"format": tmath.RGBAFormat});
-      renderTarget = three.WebGLMultisampleRenderTarget(
-          (width * dpr).toInt(), (height * dpr).toInt(), pars);
-      renderTarget.samples = 4;
-      renderer!.setRenderTarget(renderTarget);
-      sourceTexture = renderer!.getRenderTargetGLTexture(renderTarget);
-    }
-  }
-
-  initScene() {
-    initRenderer();
-    initPage();
-  }
-
-  initPage() async {
-    camera = three.PerspectiveCamera(50, width / height, 1, 10000);
-    camera.position.y = 300;
-
-    scene = three.Scene();
-    scene.background = tmath.Color.fromHex32(0xf0f0f0);
-
-    var light1 = three.DirectionalLight(0xefefff, 1.5);
-    light1.position.setValues(1, 1, 1).normalize();
-    scene.add(light1);
-
-    var light2 = three.DirectionalLight(0xffefef, 1.5);
-    light2.position.setValues(-1, -1, -1).normalize();
-    scene.add(light2);
-
-    final loader = GLTFLoader();
-    final gltf = await loader.fromAsset('assets/Horse.glb');
-
-    mesh = gltf!.scene.children[0];
-    mesh.scale.setValues(1.5, 1.5, 1.5);
-    scene.add(mesh);
-
-    mixer = AnimationMixer(mesh);
-    mixer!.clipAction(gltf.animations![0])?.play();
-
-    loaded = true;
-
-    animate();
-
-    // scene.overrideMaterial = new three.MeshBasicMaterial();
-  }
-
-  clickRender() {
-    print("clickRender..... ");
-    animate();
-  }
-
-  animate() {
-    if (!mounted || disposed) {
-      return;
-    }
-
-    if (!loaded) {
-      return;
-    }
-
-    theta += 0.1;
-
-    camera.position.x =radius * math.sin(theta.toRad());
-    camera.position.z =radius * math.cos(theta.toRad());
-
-    camera.lookAt(tmath.Vector3(0, 150, 0));
-
-    if (mixer != null) {
-      var time = DateTime.now().millisecondsSinceEpoch;
-      mixer!.update((time - prevTime) * 0.001);
-
-      prevTime = time;
-    }
-
-    render();
-
-    Future.delayed(const Duration(milliseconds: 40), () {
-      animate();
+      controls.update();
     });
   }
 
-  @override
-  void dispose() {
-    print(" dispose ............. ");
-    disposed = true;
-    three3dRender.dispose();
+  AnimationMixer startAnimation(
+    three.Object3D skinnedMesh, 
+    List<AnimationClip> animations, 
+    String animationName
+  ) {
+    final mixer = AnimationMixer(skinnedMesh);
+    final clip = AnimationClip.findByName(animations, animationName);
 
-    super.dispose();
+    if (clip != null) {
+      final action = mixer.clipAction(clip);
+      action!.play();
+    }
+
+    return mixer;
+  }
+
+  Map<String, dynamic>? getModelByName(String name) {
+    for (int i = 0; i < models.length; ++i) {
+      if (models[i]["name"] == name) {
+        return models[i];
+      }
+    }
+
+    return null;
+  }
+
+  void loadGltfModel(model, onLoaded) {
+    final loader = GLTFLoader();
+    final modelName = "assets/${model["name"]}.gltf";
+
+    loader.fromAsset(modelName).then((gltf) {
+      final scene = gltf!.scene;
+
+      model["animations"] = gltf.animations;
+      model["scene"] = scene;
+
+      gltf.scene.traverse((object) {
+        if (object is three.Mesh) {
+          object.castShadow = true;
+        }
+      });
+
+      three.console.info("Done loading model ${model["name"]} ");
+      onLoaded();
+    });
   }
 }
-

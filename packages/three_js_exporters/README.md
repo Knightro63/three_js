@@ -6,10 +6,6 @@
 
 A type of three_js model exporter that allows users to export either obj, ply, or stl files from thier projects.
 
-<!-- <picture>
-  <img alt="" src="">
-</picture> -->
-
 This is a dart conversion of three.js and three_dart, originally created by [@mrdoob](https://github.com/mrdoob) and has a coverted dart fork by [@wasabia](https://github.com/wasabia).
 
 ### Getting started

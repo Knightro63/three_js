@@ -14,6 +14,8 @@ dependencies:
     path: ../../three_js_core_loaders
   three_js_core:
     path: ../../three_js_core
+  three_js_controls:
+    path: ../../three_js_controls
   three_js_helpers:
     path: ../../three_js_helpers
   three_js_math:
@@ -31,11 +33,5 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    # - assets/helvetiker_bold.typeface.json
-    - assets/SambaDancing.fbx
-    - assets/nurbs.fbx
-    - assets/stanford-bunny.fbx
-    - assets/royal_esplanade_1k.hdr
-    - assets/DamagedHelmet/
-    - assets/Horse.glb
+    - assets/Parrot.gltf
     - assets/Soldier.gltf

@@ -4,7 +4,11 @@
 [![analysis](https://github.com/Knightro63/three_js/actions/workflows/flutter.yml/badge.svg)](https://github.com/Knightro63/three_js/actions/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-purple.svg)](https://opensource.org/licenses/MIT)
 
-A type of three_js api that allows users to create and manipulate buffer geometries to their projects.
+This is the core of the three_js api that allows users to view, edit and manipulate their 3D objects in their projects.
+
+<picture>
+  <img alt="Gif of dash playing a game." src="https://github.com/Knightro63/three_js/tree/main/packages/three_js_core/assets/example.gif?raw=true">
+</picture>
 
 This is a dart conversion of three.js and three_dart, originally created by [@mrdoob](https://github.com/mrdoob) and has a coverted dart fork by [@wasabia](https://github.com/wasabia).
 

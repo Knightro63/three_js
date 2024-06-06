@@ -6,6 +6,10 @@
 
 A type of three_js api that allows users to create and manipulate curve geometries in their projects.
 
+<picture>
+  <img alt="Picture of curves." src="https://github.com/Knightro63/three_js/tree/main/packages/three_js_curves/assets/example.png?raw=true">
+</picture>
+
 This is a dart conversion of three.js and three_dart, originally created by [@mrdoob](https://github.com/mrdoob) and has a coverted dart fork by [@wasabia](https://github.com/wasabia).
 
 ## Usage

@@ -1,19 +1,18 @@
 # three_js
 
-[![Pub Version](https://img.shields.io/pub/v/three_js_transform_controls)](https://pub.dev/packages/three_js_transform_controls)
+[![Pub Version](https://img.shields.io/pub/v/three_js)](https://pub.dev/packages/three_js)
 [![analysis](https://github.com/Knightro63/three_js/actions/workflows/flutter.yml/badge.svg)](https://github.com/Knightro63//three_js/actions/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-purple.svg)](https://opensource.org/licenses/MIT)
 
-A 3D rendering engine for dart (based on [three.js](https://github.com/mrdoob/three.js) and [three_dart](https://github.com/wasabia/three_dart)) that allows users to view, edit and manipulate their 3D objects. The current builds only include a openGL for desktop and mobile, and webGL for web applications.
+A 3D rendering engine for dart (based on [three.js](https://github.com/mrdoob/three.js) and [three_dart](https://github.com/wasabia/three_dart)) that allows users to view, edit and manipulate their 3D objects. The current builds uses [angle](https://github.com/google/angle) for desktop and mobile, and WebGL2 for web applications.
+
+## Features
 
 <picture>
   <img alt="Gif of dash playing a game." src="https://github.com/Knightro63/three_js/blob/main/assets/flutter_game.gif?raw=true">
 </picture>
 
 This is a dart conversion of three.js and three_dart, originally created by [@mrdoob](https://github.com/mrdoob) and has a coverted dart fork by [@wasabia](https://github.com/wasabia).
-
-## Features
-
 
 ## Requirements
 
@@ -46,7 +45,7 @@ This is a dart conversion of three.js and three_dart, originally created by [@mr
 
 ## Getting started
 
-To get started add three_js add this to your pubspec.yaml file.
+To get started add three_js to your pubspec.yaml file.
 
 ## Usage
 
@@ -54,7 +53,7 @@ This project is a simple 3D rendering engine for flutter to view, edit, or manip
 
 ## Example
 
-Find the example for this API [here](https://github.com/Knightro63/three_js/tree/main/packages/three_js/example/).
+Find the example for this API [here](https://github.com/Knightro63/three_js/tree/main/packages/three_js/example/), for a preview go [here].
 
 ## Contributing
 

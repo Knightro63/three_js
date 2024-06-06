@@ -15,6 +15,14 @@ dependencies:
     path: ../
   three_js_helpers:
     path: ../../three_js_helpers
+  three_js_geometry:
+    path: ../../three_js_geometry
+  three_js_core:
+    path: ../../three_js_core
+  three_js_math:
+    path: ../../three_js_math
+  three_js_curves:
+    path: ../../three_js_curves
 
 dev_dependencies:
   flutter_test:
