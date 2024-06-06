@@ -31,9 +31,8 @@ class _MyAppState extends State<FlutterGame> {
   @override
   void dispose() {
     threeJs.dispose();
-    player.dispose();
     three.loading.clear();
-    joystick.dispose();
+    joystick?.dispose();
     super.dispose();
   }
 
@@ -55,13 +54,17 @@ class _MyAppState extends State<FlutterGame> {
     LogicalKeyboardKey.arrowRight: false,
   };
 
-  late Player player;
   double gravity = 30;
   int stepsPerFrame = 5;
-  late three.Joystick joystick;
+  three.Joystick? joystick;
   
   Future<void> setup() async {
-    joystick = three.Joystick(screenSize: Size(threeJs.width, threeJs.height), listenableKey: threeJs.globalKey);
+    joystick = threeJs.width < 850?three.Joystick(
+      size: 150,
+      margin: const EdgeInsets.only(left: 35, bottom: 35),
+      screenSize: Size(threeJs.width, threeJs.height), 
+      listenableKey: threeJs.globalKey
+    ):null;
     threeJs.camera = three.PerspectiveCamera(45, threeJs.width / threeJs.height, 1, 2200);
     threeJs.camera.position.setValues(3, 6, 10);
 
@@ -122,12 +125,13 @@ class _MyAppState extends State<FlutterGame> {
     Player player = Player(
       dash!.scene,dash.animations!,
       threeJs.camera,
-      threeJs.globalKey
+      threeJs.globalKey,
+      joystick
     );
     threeJs.scene.add(dash.scene);
 
     threeJs.addAnimationEvent((dt){
-      joystick.update();
+      joystick?.update();
       player.update(dt);
       for(final coin in coins){
         coin.update(player.position, dt);
@@ -135,14 +139,15 @@ class _MyAppState extends State<FlutterGame> {
     });
     
     threeJs.renderer?.autoClear = false; // To allow render overlay on top of sprited sphere
-
-    threeJs.postProcessor = ([double? dt]){
-      threeJs.renderer!.setViewport(0,0,threeJs.width,threeJs.height);
-      threeJs.renderer!.clear();
-      threeJs.renderer!.render( threeJs.scene, threeJs.camera );
-      threeJs.renderer!.clearDepth();
-      threeJs.renderer!.render( joystick.scene, joystick.camera);
-    };
+    if(joystick != null){
+      threeJs.postProcessor = ([double? dt]){
+        threeJs.renderer!.setViewport(0,0,threeJs.width,threeJs.height);
+        threeJs.renderer!.clear();
+        threeJs.renderer!.render( threeJs.scene, threeJs.camera );
+        threeJs.renderer!.clearDepth();
+        threeJs.renderer!.render( joystick!.scene, joystick!.camera);
+      };
+    }
   }
 }
 
@@ -184,6 +189,7 @@ class Coin {
 enum PlayerAction{blink,idle,walk,run}
 
 class Player{
+  three.Joystick? joystick;
   three.Vector3 get position => object.position;
   late three.Object3D object;
   late three.AnimationMixer mixer;
@@ -201,13 +207,14 @@ class Player{
     this.object, 
     this.animations, three.Camera camera, 
     GlobalKey<three.PeripheralsState> globalKey,
+    [this.joystick]
   ){
     mixer = three.AnimationMixer(object);
     actions = {
       PlayerAction.blink: mixer.clipAction(animations[0])!,
       PlayerAction.idle: mixer.clipAction(animations[2])!,
-      PlayerAction.walk: mixer.clipAction(animations[3])!,
-      PlayerAction.run: mixer.clipAction(animations[4])!
+      PlayerAction.walk: mixer.clipAction(animations[4])!,
+      PlayerAction.run: mixer.clipAction(animations[3])!
     };
 
     for(final act in actions.keys){
@@ -232,19 +239,14 @@ class Player{
     );
 
     playerVelocity = tpsControl.velocity;
-
-    //jump
-    tpsControl.domElement.addEventListener(three.PeripheralType.keyup, (event){
-      if(event.keyId == 32){
-        playerVelocity.y = 15;
-      }
-    });
   }
+
   void deactivateActions(){
     for(final act in actions.keys){
       actions[act]!.setEffectiveWeight( 0 );
     }
   }
+
   void updateAction(PlayerAction action){
     if(currentAction == action) return;
     currentAction = action;
@@ -252,10 +254,34 @@ class Player{
     actions[action]!.setEffectiveWeight( 1 );
   }
 
+  void _updateDirection(){
+    tpsControl.moveBackward= false;
+    tpsControl.moveLeft = false;
+    tpsControl.moveForward = false;
+    tpsControl.moveRight = false;
+
+    object.rotation.y = -joystick!.radians-math.pi/2;
+    if(joystick!.isMoving){
+      tpsControl.moveForward = true;
+      tpsControl.movementSpeed = joystick!.intensity*5;
+    }
+    else{
+      tpsControl.movementSpeed = 5;
+    }
+  }
   void update(double dt) {
     tpsControl.update(dt);
+    if(joystick != null){
+      _updateDirection();
+    }
+
     if(tpsControl.isMoving){
-      updateAction(PlayerAction.walk);
+      if(tpsControl.movementSpeed > 4){
+        updateAction(PlayerAction.run);
+      }
+      else{
+        updateAction(PlayerAction.walk);
+      }
     }
     else{
       updateAction(PlayerAction.idle);

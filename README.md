@@ -6,9 +6,9 @@
 
 A 3D rendering engine for dart (based on [three.js](https://github.com/mrdoob/three.js) and [three_dart](https://github.com/wasabia/three_dart)) that allows users to view, edit and manipulate their 3D objects. The current builds only include a openGL for desktop and mobile, and webGL for web applications.
 
-<!-- <picture>
-  <img alt="" src="">
-</picture> -->
+<picture>
+  <img alt="Gif of dash playing a game." src="https://github.com/Knightro63/three_js/assets/flutter_game.gif">
+</picture>
 
 This is a dart conversion of three.js and three_dart, originally created by [@mrdoob](https://github.com/mrdoob) and has a coverted dart fork by [@wasabia](https://github.com/wasabia).
 

@@ -18,8 +18,7 @@ Map<String, String> extensions = {
   "KHR_LIGHTS_PUNCTUAL": 'KHR_lights_punctual',
   "KHR_MATERIALS_CLEARCOAT": 'KHR_materials_clearcoat',
   "KHR_MATERIALS_IOR": 'KHR_materials_ior',
-  "KHR_MATERIALS_PBR_SPECULAR_GLOSSINESS":
-      'KHR_materials_pbrSpecularGlossiness',
+  "KHR_MATERIALS_PBR_SPECULAR_GLOSSINESS": 'KHR_materials_pbrSpecularGlossiness',
   "KHR_MATERIALS_SHEEN": 'KHR_materials_sheen',
   "KHR_MATERIALS_SPECULAR": 'KHR_materials_specular',
   "KHR_MATERIALS_TRANSMISSION": 'KHR_materials_transmission',
@@ -747,9 +746,10 @@ class GLTFBinaryExtension extends GLTFExtension {
     };
 
     if (header["magic"] != behm) {
-      throw ('THREE.GLTFLoader: Unsupported glTF-Binary header.');
-    } else if (header["version"] < 2.0) {
-      throw ('THREE.GLTFLoader: Legacy binary file detected.');
+      throw ('GLTFLoader: Unsupported glTF-Binary header.');
+    } 
+    else if (header["version"] < 2.0) {
+      throw ('GLTFLoader: Legacy binary file detected.');
     }
 
     // final chunkView = DataView( data, BINARY_EXTENSION_HEADER_LENGTH );

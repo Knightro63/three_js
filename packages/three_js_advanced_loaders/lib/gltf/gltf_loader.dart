@@ -212,8 +212,7 @@ class GLTFLoader extends Loader {
     else {
       content = LoaderUtils.decodeText(data);
     }
-    
-
+  
     Map<String, dynamic> json = convert.jsonDecode(content);
 
     if (json["asset"] == null || num.parse(json["asset"]["version"]) < 2.0) {

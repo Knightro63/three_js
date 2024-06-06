@@ -208,10 +208,12 @@ Function createDefaultMaterial = (GLTFRegistry cache) {
   return cache.get("DefaultMaterial");
 };
 
-Function addUnknownExtensionsToUserData = (knownExtensions,object, Map<String, dynamic> objectDef) {
+Function addUnknownExtensionsToUserData = (Map<dynamic,dynamic> knownExtensions,object, Map<String, dynamic> objectDef) {
   // Add unknown glTF extensions to an object's userData.
   if (objectDef["extensions"] != null) {
     objectDef["extensions"].forEach((name, value) {
+      print('K: $knownExtensions');
+      print(objectDef["extensions"][name]);
       if (knownExtensions[name] == null) {
         object?.userData["gltfExtensions"] = object.userData["gltfExtensions"] ?? {};
         object?.userData["gltfExtensions"][name] = objectDef["extensions"][name];
@@ -361,7 +363,6 @@ Function createAttributesKey = (Map<String, dynamic> attributes) {
 };
 
 double getNormalizedComponentScale(constructor) {
-  print(constructor.toString());
   // Reference:
   // https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_mesh_quantization#encoding-quantized-data
 
