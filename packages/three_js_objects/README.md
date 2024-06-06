@@ -1,4 +1,4 @@
-# three_js_text
+# three_js_objects
 
 [![Pub Version](https://img.shields.io/pub/v/three_js_objects)](https://pub.dev/packages/three_js_objects)
 [![analysis](https://github.com/Knightro63/three_js/actions/workflows/flutter.yml/badge.svg)](https://github.com/Knightro63/three_js/actions/)
@@ -7,7 +7,7 @@
 A type of three_js api that allows users to add complex objects to their projects.
 
 <picture>
-  <img alt="Picture of curves." src="https://github.com/Knightro63/three_js/blob/main/packages/three_js_objects/assets/example.png?raw=true">
+  <img alt="Picture of metaballs." src="https://github.com/Knightro63/three_js/blob/main/packages/three_js_objects/assets/example.gif?raw=true">
 </picture>
 
 This is a dart conversion of three.js and three_dart, originally created by [@mrdoob](https://github.com/mrdoob) and has a coverted dart fork by [@wasabia](https://github.com/wasabia).
