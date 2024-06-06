@@ -7,7 +7,7 @@
 A type of three_js svg loader and exporter that allows users to add or export svgs to and from thier projects.
 
 <picture>
-  <img alt="Picture of a tiger svg." src="https://github.com/Knightro63/three_js/tree/main/packages/three_js_svg/assets/example.jpg?raw=true">
+  <img alt="Picture of a tiger svg." src="https://github.com/Knightro63/three_js/blob/main/packages/three_js_svg/assets/example.jpg?raw=true">
 </picture>
 
 This is a dart conversion of three.js and three_dart, originally created by [@mrdoob](https://github.com/mrdoob) and has a coverted dart fork by [@wasabia](https://github.com/wasabia).

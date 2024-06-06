@@ -7,7 +7,7 @@
 A type of three_js model loader that allows users to add three.js json files to thier projects.
 
 <picture>
-  <img alt="Gif suzanne modle rotating." src="https://github.com/Knightro63/three_js/tree/main/packages/three_js_tjs_loaders/assets/example.gif?raw=true">
+  <img alt="Gif suzanne modle rotating." src="https://github.com/Knightro63/three_js/blob/main/packages/three_js_tjs_loaders/assets/example.gif?raw=true">
 </picture>
 
 
