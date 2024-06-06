@@ -22,8 +22,6 @@ import 'package:example/loaders/webgl_loader_ply.dart';
 import 'package:example/loaders/webgl_loader_stl.dart';
 import 'package:example/loaders/webgl_loader_vox.dart';
 import 'package:example/loaders/webgl_loader_xyz.dart';
-import 'package:example/morphtargets/webgl_modifier_subdivision.dart';
-import 'package:example/morphtargets/webgl_morphtargets_face.dart';
 import 'package:example/others/webgl_interactive_voxelpainter.dart';
 import 'package:example/others/webgl_lod.dart';
 import 'package:example/volume/webgl_ubo_arrays.dart';

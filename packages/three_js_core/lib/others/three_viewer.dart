@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_angle/flutter_angle.dart';
+import 'package:three_js_core/others/index.dart';
 import 'package:three_js_core/three_js_core.dart' as core;
 import 'package:three_js_math/three_js_math.dart';
 
@@ -22,7 +23,8 @@ class Settings{
     this.clippingPlanes = const [],
     this.outputEncoding = LinearEncoding,
     this.toneMapping = NoToneMapping,
-    this.shadowMapType = PCFShadowMap
+    this.shadowMapType = PCFShadowMap,
+    this.forceOpenGL = false
   }){
     this.renderOptions = renderOptions ?? {
       "format": RGBAFormat,
@@ -45,6 +47,7 @@ class Settings{
   int outputEncoding;
   int toneMapping;
   int shadowMapType;
+  bool forceOpenGL;
 }
 
 /// threeJs utility class. If you want to learn how to connect cannon.js with js, please look at the examples/threejs_* instead.
@@ -59,12 +62,14 @@ class ThreeJS{
     required this.setup,
     Size? size,
     core.WebGLRenderer? renderer,
+    this.texture
   }){
     this.settings = settings ?? Settings();
     _size = size;
     lateRenderer = renderer;
   }
 
+  bool _allowDeleteTexture = true;
   Size? _size;
   late Settings settings;
   final GlobalKey<core.PeripheralsState> globalKey = GlobalKey<core.PeripheralsState>();
@@ -103,7 +108,7 @@ class ThreeJS{
     disposed = true;
     renderer?.dispose();
     renderTarget?.dispose();
-    if(texture != null){
+    if(texture != null && _allowDeleteTexture){
       FlutterAngle.deleteTexture(texture!);
     }
     scene.material?.dispose();
@@ -223,7 +228,7 @@ class ThreeJS{
     }
   }
 
-  void initScene() async{
+  Future<void> initScene() async{
     initRenderer();
     await setup?.call();
     mounted = true;
@@ -234,22 +239,25 @@ class ThreeJS{
   Future<void> initPlatformState() async {
     width = screenSize!.width;
     height = screenSize!.height;
+    if(texture == null){
+      await FlutterAngle.initOpenGL(true);
+      
+      texture = await FlutterAngle.createTexture(      
+        AngleOptions(
+          width: width.toInt(), 
+          height: height.toInt(), 
+          dpr: dpr,
+          alpha: settings.alpha,
+          antialias: true,
+          customRenderer: false,
+          forceOpenGL: settings.forceOpenGL
+        )
+      );
+    }
 
-    await FlutterAngle.initOpenGL(true);
-
-    texture = await FlutterAngle.createTexture(      
-      AngleOptions(
-        width: width.toInt(), 
-        height: height.toInt(), 
-        dpr: dpr,
-        alpha: settings.alpha,
-        antialias: true,
-        customRenderer: false
-      )
-    );
-    
+    console.info(texture?.toMap());
     gl = texture!.getContext();
-    initScene();
+    await initScene();
   }
 
   Widget build() {

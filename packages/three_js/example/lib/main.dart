@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:three_js/three_js.dart';
 import 'dart:async';
 import 'dart:math' as math;
 import 'package:three_js/three_js.dart' as three;
@@ -7,8 +6,6 @@ import 'package:flutter/services.dart';
 import 'package:three_js_objects/three_js_objects.dart';
 
 void main() {
-  Cache.enabled = false;
-  Console.isVerbose = true;
   runApp(const ExampleApp());
 }
 
@@ -52,10 +49,6 @@ class _FlutterGameState extends State<FlutterGame> {
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
       setup: setup,
-      settings: three.Settings(
-        clearAlpha: 0,
-        clearColor: 0xffffff
-      ),
     );
     super.initState();
   }

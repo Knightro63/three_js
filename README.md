@@ -30,7 +30,7 @@ This is a dart conversion of three.js and three_dart, originally created by [@mr
 
 **Android**
  - compileSdkVersion: 34
- - Vulkan and OpenGL supported
+ - OpenGL supported
 
  **Windows**
  - Intel supported.
