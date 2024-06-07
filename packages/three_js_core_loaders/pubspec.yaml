@@ -12,7 +12,7 @@ dependencies:
     sdk: flutter
   three_js_core:
     path: ../three_js_core
-  image: ^4.0.02
+  image: ^4.2.0
   http: ^0.13.4
   universal_html: ^2.0.8
 

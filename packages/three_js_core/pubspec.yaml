@@ -10,10 +10,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  logger: ^2.0.2+1
+  logger: ^2.3.0
   flutter_angle:
-    git:
-      url: https://github.com/Knightro63/flutter_angle.git
+    path: ../../../flutter_angle
   three_js_math:
     path: ../three_js_math
 

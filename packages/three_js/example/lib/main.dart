@@ -101,7 +101,7 @@ class _FlutterGameState extends State<FlutterGame> {
 
     threeJs.camera.lookAt(threeJs.scene.position);
 
-    three.GLTFLoader loader = three.GLTFLoader(flipY: true).setPath('assets/models/gltf/flutter/');
+    three.GLTFLoader loader = three.GLTFLoader(flipY: true).setPath('assets/');
 
     //final result = await loader.fromAsset( 'coffeemat.glb' );
     var sky = await loader.fromAsset( 'sky_sphere.glb' );
@@ -136,9 +136,6 @@ class _FlutterGameState extends State<FlutterGame> {
       coins.add(Coin(pos,object));
       threeJs.scene.add(object);
     }
-
-    // final logo = await loader.fromAsset('flutter_logo.glb');
-    // threeJs.scene.add(logo!.scene);
 
     final dash = await loader.fromAsset('dash.glb');
     Player player = Player(

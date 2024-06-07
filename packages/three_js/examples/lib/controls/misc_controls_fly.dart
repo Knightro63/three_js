@@ -50,7 +50,7 @@ class _State extends State<MiscControlsFly> {
     const cloudsScale = 1.005;
     const moonScale = 0.23;
 
-    final textureLoader = three.TextureLoader();
+    final textureLoader = three.TextureLoader()..flipY = true;
 
     threeJs.camera = three.PerspectiveCamera( 25, threeJs.width / threeJs.height, 50, 1e7 );
     threeJs.camera.position.z = radius * 5;

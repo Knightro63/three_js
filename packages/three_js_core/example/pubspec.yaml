@@ -10,9 +10,6 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.6
-  flutter_angle:
-    git:
-      url: https://github.com/Knightro63/flutter_angle.git
   three_js_core:
     path: ../
   three_js_math:

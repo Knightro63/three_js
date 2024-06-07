@@ -227,7 +227,8 @@ class WebGLLights {
         state.directional.listSetter(directionalLength, uniforms);
 
         directionalLength++;
-      } else if (light.type == "SpotLight") {
+      } 
+      else if (light.type == "SpotLight") {
         final uniforms = cache.get(light);
 
         (uniforms["position"] as Vector3).setFromMatrixPosition(light.matrixWorld);
@@ -266,7 +267,8 @@ class WebGLLights {
         state.spot.listSetter(spotLength, uniforms);
 
         spotLength++;
-      } else if (light.type == "RectAreaLight") {
+      } 
+      else if (light.type == "RectAreaLight") {
         final uniforms = cache.get(light);
 
         // (a) intensity is the total visible light emitted
@@ -282,7 +284,8 @@ class WebGLLights {
         state.rectArea.listSetter(rectAreaLength, uniforms);
 
         rectAreaLength++;
-      } else if (light.type == "PointLight") {
+      } 
+      else if (light.type == "PointLight") {
         final uniforms = cache.get(light);
 
         (uniforms["color"] as Color)..setFrom(light.color!)..scale(light.intensity * scaleFactor);
@@ -317,7 +320,8 @@ class WebGLLights {
         state.point.listSetter(pointLength, uniforms);
 
         pointLength++;
-      } else if (light.type == "HemisphereLight") {
+      } 
+      else if (light.type == "HemisphereLight") {
         final uniforms = cache.get(light);
 
         uniforms["skyColor"]..setFrom(light.color)..scale(intensity * scaleFactor);
@@ -327,7 +331,8 @@ class WebGLLights {
         state.hemi.listSetter(hemiLength, uniforms);
 
         hemiLength++;
-      } else {
+      } 
+      else {
         throw (" WebGLLigts type: ${light.type} is not support ..... ");
       }
     }

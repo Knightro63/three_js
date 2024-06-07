@@ -25,9 +25,9 @@ class _State extends State<WebglLensflars> {
   }
   @override
   void dispose() {
+    controls.dispose();
     threeJs.dispose();
     three.loading.clear();
-    controls.dispose();
     super.dispose();
   }
 

@@ -53,6 +53,7 @@ class WebGLMorphtargets {
       final morphTargetsCount = (morphAttribute != null) ? morphAttribute.length : 0;
 
       Map? entry = morphTextures.get(geometry);
+
       if (entry == null || (entry["count"] != morphTargetsCount)) {
         if (entry != null) entry["texture"].dispose();
 

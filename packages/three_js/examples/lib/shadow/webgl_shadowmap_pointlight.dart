@@ -24,7 +24,7 @@ class _State extends State<WebglShadowmapPointlight> {
       onSetupComplete: (){setState(() {});},
       setup: setup,
       settings: three.Settings(
-        //useSourceTexture: true,
+        useSourceTexture: true,
         shadowMapType: three.BasicShadowMap
       )
     );

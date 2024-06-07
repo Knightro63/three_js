@@ -35,39 +35,7 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - assets/pingfang.ttf
-    - assets/kenpixel.ttf
-    - assets/winter.jpg
-    - assets/lut.cube
-    - assets/demo.png
-    - assets/KOMO-v5.cube
-    - assets/screenshots/
-    - assets/models/obj/male02/
-    - assets/models/json/
-    - assets/models/gcode/
-    - assets/models/ply/binary/
-    - assets/models/ply/ascii/
-    - assets/models/stl/binary/
-    - assets/models/stl/ascii/
-    - assets/models/vox/
-    - assets/models/xyz/
-    - assets/models/gltf/
-    - assets/models/gltf/test/
-    - assets/models/gltf/flutter/
-    - assets/models/gltf/Flower/
-    - assets/models/gltf/LeePerrySmith/
-    - assets/models/gltf/RobotExpressive/
-    - assets/models/gltf/DamagedHelmet/glTF/
-    - assets/models/gltf/AnimatedMorphSphere/glTF/
-    - assets/models/svg/
-    - assets/models/fbx/
-    - assets/textures/
-    - assets/textures/lava/
-    - assets/textures/lensflare/
-    - assets/textures/equirectangular/
-    - assets/textures/terrain/
-    - assets/textures/patterns/
-    - assets/textures/sprites/
-    - assets/textures/planets/
-    - assets/textures/decal/
-    - assets/textures/cube/Park2/
+    - assets/coin.glb
+    - assets/dash.glb
+    - assets/ground.glb
+    - assets/sky_sphere.glb
