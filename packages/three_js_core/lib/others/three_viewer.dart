@@ -24,7 +24,6 @@ class Settings{
     this.outputEncoding = LinearEncoding,
     this.toneMapping = NoToneMapping,
     this.shadowMapType = PCFShadowMap,
-    this.forceOpenGL = false
   }){
     this.renderOptions = renderOptions ?? {
       "format": RGBAFormat,
@@ -47,7 +46,6 @@ class Settings{
   int outputEncoding;
   int toneMapping;
   int shadowMapType;
-  bool forceOpenGL;
 }
 
 /// threeJs utility class. If you want to learn how to connect cannon.js with js, please look at the examples/threejs_* instead.
@@ -250,7 +248,6 @@ class ThreeJS{
           alpha: settings.alpha,
           antialias: true,
           customRenderer: false,
-          forceOpenGL: settings.forceOpenGL
         )
       );
     }

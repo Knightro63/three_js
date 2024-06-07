@@ -17,7 +17,6 @@ class _State extends State<WebglMorphtargets> {
   @override
   void initState() {
     threeJs = three.ThreeJS(
-      
       onSetupComplete: (){setState(() {});},
       setup: setup
     );

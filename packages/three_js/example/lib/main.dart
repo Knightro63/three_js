@@ -103,7 +103,6 @@ class _FlutterGameState extends State<FlutterGame> {
 
     three.GLTFLoader loader = three.GLTFLoader(flipY: true).setPath('assets/');
 
-    //final result = await loader.fromAsset( 'coffeemat.glb' );
     var sky = await loader.fromAsset( 'sky_sphere.glb' );
     threeJs.scene.add(sky!.scene);
 
