@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'package:three_js_postprocessing/post/index.dart';
@@ -78,7 +77,7 @@ class GlitchPass extends Pass {
   }
 
   DataTexture generateHeightmap(int dtSize) {
-    final dataArr = Float32List(dtSize * dtSize * 3);
+    final dataArr = Float32Array(dtSize * dtSize * 3);
     final length = dtSize * dtSize;
 
     for (int i = 0; i < length; i++) {

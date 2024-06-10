@@ -107,9 +107,6 @@ class SVGLoaderParser {
     }
 
     String theUnit = 'px';
-
-    // print("SvgLoader.parseFloatWithUnits ${string} runtimeType: ${string.runtimeType} ");
-
     for (int i = 0, n = units.length; i < n; i++) {
       final u = units[i];
 
@@ -147,9 +144,6 @@ class SVGLoaderParser {
       strs = strs.sublist(0, 2);
       str = strs.join(".");
     }
-
-    // print(" string: ${_str} ");
-
     return scale * num.parse(str);
   }
 
@@ -560,7 +554,6 @@ class SVGLoaderParser {
         final style = node.style;
         final value = style.getPropertyValue(svgName);
         if (value != "") {
-          // print("svgName: ${svgName} value: ${_value} ");
           style2[jsName] = adjustFunction(value);
         }
       }
@@ -1024,9 +1017,6 @@ class SVGLoaderParser {
 
         case 'Z':
         case 'z':
-
-          // print("path.currentPath: ${path.currentPath} ");
-
           path.currentPath.autoClose = true;
 
           if (path.currentPath.curves.isNotEmpty) {
@@ -1035,9 +1025,7 @@ class SVGLoaderParser {
             path.currentPath.currentPoint.setFrom(point);
             isFirstPoint = true;
           }
-
           break;
-
         default:
           console.warning("SvgLoader.parsePathNode command is not support ...\nConnamd: $command");
       }
@@ -1116,13 +1104,9 @@ class SVGLoaderParser {
     String points = node.getAttribute('points');
     final matches = regex.allMatches(points);
 
-    // print(" _points: ${_points} ");
-
     for (final match in matches) {
       final a = match.group(1);
       final b = match.group(2);
-
-      // print("index: ${index} a: ${a} b: ${b} ");
 
       final x = parseFloatWithUnits(a);
       final y = parseFloatWithUnits(b);

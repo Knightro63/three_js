@@ -91,7 +91,6 @@ class WebGLShadowMap {
       final shadow = light.shadow;
 
       if (shadow == null) {
-        // print( 'three.WebGLShadowMap: ${light} has no shadow.' );
         continue;
       }
 
@@ -309,7 +308,6 @@ class WebGLShadowMap {
         } 
         else if (material != null && material.visible) {
           final depthMaterial = getDepthMaterial(object, material, light, shadowCamera.near, shadowCamera.far, type);
-          // print("WebGLShadowMap object: ${object} light: ${light} depthMaterial: ${depthMaterial} ");
           _renderer.renderBufferDirect(shadowCamera, null, geometry, depthMaterial, object, null);
         }
       }

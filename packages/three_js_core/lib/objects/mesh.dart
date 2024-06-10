@@ -110,8 +110,6 @@ class Mesh extends Object3D {
   /// are not ordered.
   @override
   void raycast(Raycaster raycaster, List<Intersection> intersects) {
-    // print(" raycast: ${this.name} ${this} ");
-
     final geometry = this.geometry!;
     final material = this.material;
     final matrixWorld = this.matrixWorld;

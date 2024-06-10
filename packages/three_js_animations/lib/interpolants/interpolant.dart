@@ -155,9 +155,6 @@ class Interpolant {
 
         while (i1 < right) {
           final mid = (i1 + right) >> 1;
-
-          // print(" Interpolant i1: ${i1} right: ${right} pp: ${pp.length} mid: ${mid} ");
-
           if (t < pp[mid]) {
             right = mid;
           } else {

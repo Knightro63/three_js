@@ -429,7 +429,7 @@ class SVGLoader extends Loader{
           "for": isHoleFor
         };
       } else {
-        print('fill-rule: $_fillRule is currently not implemented.');
+        console.info('fill-rule: $_fillRule is currently not implemented.');
       }
     }
 

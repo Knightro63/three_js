@@ -451,8 +451,6 @@ class AnimationAction {
       switch (blendMode) {
         case AdditiveAnimationBlendMode:
           for (int j = 0, m = interpolants.length; j != m; ++j) {
-            //print("AnimationAction j: $j ${interpolants[ j ]} ${propertyMixers[ j ]} ");
-
             interpolants[j]!.evaluate(clipTime);
             propertyMixers[j]!.accumulateAdditive(weight);
           }
@@ -462,9 +460,7 @@ class AnimationAction {
         case NormalAnimationBlendMode:
         default:
           for (int j = 0; j < interpolants.length; ++j) {
-            //print("AnimationAction22 j: $j ${interpolants[ j ]} ${propertyMixers[ j ]} ");
             interpolants[j]!.evaluate(clipTime);
-            //print("AnimationAction22 j: $j ----- ");
             propertyMixers[j]!.accumulate(accuIndex, weight);
           }
       }

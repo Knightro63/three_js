@@ -473,9 +473,7 @@ class USDZIP{
     for (var r = '', i = 0;;) {
       int c = d[i++];
       int eb = (c > 127?1:0) + (c > 223?1:0) + (c > 239?1:0);
-      //print('${d.length} , ${i + eb}');
       if ((i + eb) > d.length){
-        print('dutf8 done');
         return [r, slc(d, i - 1)];
       }
       if (eb == 0){

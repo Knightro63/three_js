@@ -1071,7 +1071,13 @@ class Object3D with EventDispatcher {
     return this;
   }
 
-  void dispose(){}
+  void dispose(){
+    material?.dispose();
+
+    children.forEach((child){
+      child.dispose();
+    });
+  }
 }
 
 class Object3dMeta {

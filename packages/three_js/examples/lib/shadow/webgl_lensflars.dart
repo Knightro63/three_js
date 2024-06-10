@@ -76,7 +76,6 @@ class _State extends State<WebglLensflars> {
       mesh.updateMatrix();
 
       threeJs.scene.add( mesh );
-
     }
 
 

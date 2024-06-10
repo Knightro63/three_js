@@ -143,7 +143,6 @@ class _MyAppState extends State<webgl_loader_gltf_2> {
   }
 
   clickRender() {
-    print(" click render... ");
     animate();
   }
 

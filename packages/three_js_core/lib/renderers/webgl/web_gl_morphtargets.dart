@@ -78,7 +78,7 @@ class WebGLMorphtargets {
           width = capabilities.maxTextureSize.toInt();
         }
 
-        final buffer = Float32List((width * height * 4 * morphTargetsCount).toInt());
+        final buffer = Float32Array((width * height * 4 * morphTargetsCount).toInt());
 
         final texture = DataArrayTexture(buffer, width, height, morphTargetsCount);
         texture.type = FloatType;

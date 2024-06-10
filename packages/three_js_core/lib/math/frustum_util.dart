@@ -26,9 +26,6 @@ extension FrustumUtil on vmath.Frustum{
 
     for (int i = 0; i < 6; i++) {
       final distance = planes[i].distanceToVector3((center as vmath.Vector3));
-
-      // print("i: ${i} distance: ${distance} negRadius: ${negRadius} ${distance < negRadius} ");
-
       if (distance < negRadius) {
         return false;
       }

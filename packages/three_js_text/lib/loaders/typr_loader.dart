@@ -79,8 +79,6 @@ class TYPRLoader extends Loader {
 
       // 	final path = font.glyphToPath(i);
 
-      //   // print(path);
-
       // 	if ( path != null ) {
       //     final aWidths = font.hmtx["aWidth"];
 

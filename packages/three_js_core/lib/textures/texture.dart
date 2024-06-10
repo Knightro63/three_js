@@ -208,7 +208,8 @@ class Texture with EventDispatcher {
       image.forEach((img) {
         img.dispose();
       });
-    } else {
+    }
+    else {
       image?.dispose();
     }
   }

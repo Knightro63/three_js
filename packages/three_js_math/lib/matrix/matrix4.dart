@@ -1,5 +1,5 @@
-import 'dart:typed_data';
 import 'index.dart';
+import 'package:flutter_angle/flutter_angle.dart';
 import '../vector/index.dart';
 import '../rotation/index.dart';
 import 'dart:math' as math;
@@ -14,10 +14,10 @@ final _matrix4z = Vector3.zero();
 
 class Matrix4 {
   String type = "Matrix4";
-  late Float32List storage;
+  late Float32Array storage;
 
  Matrix4() {
-    storage = Float32List.fromList([
+    storage = Float32Array.fromList([
       1.0,
       0.0,
       0.0,
@@ -37,7 +37,7 @@ class Matrix4 {
     ]);
   }
   Matrix4.identity() {
-    storage = Float32List.fromList([
+    storage = Float32Array.fromList([
       1.0,
       0.0,
       0.0,
@@ -57,7 +57,7 @@ class Matrix4 {
     ]);
   }
   Matrix4.zero() {
-    storage = Float32List.fromList([
+    storage = Float32Array.fromList([
       0.0,
       0.0,
       0.0,
@@ -134,7 +134,7 @@ class Matrix4 {
   }
 
   Matrix4 clone() {
-    return Matrix4.identity().copyFromArray(storage);
+    return Matrix4.identity().copyFromArray(storage.toList());
   }
 
   Matrix4 setFrom(Matrix4 m) {
@@ -517,9 +517,6 @@ class Matrix4 {
             n12 * n23 * n31);
 
     final result = (v1 + v2 + v3 + v4);
-
-    // print(" v1: ${v1} v2: ${v2} v3: ${v3} v4: ${v4}  result: ${result} ");
-
     return result;
   }
 
@@ -551,15 +548,9 @@ class Matrix4 {
   // x is Vector3 | num
   Matrix4 setPosition(double x, double y, double z) {
     final te = storage;
-
-    // if (x is Vector3) {
-    //   print("warn use setPositionFromVector3 ........... ");
-    //   return setPositionFromVector3(x);
-    // } else {
-      te[12] = x.toDouble();
-      te[13] = y.toDouble();
-      te[14] = z.toDouble();
-    //}
+    te[12] = x.toDouble();
+    te[13] = y.toDouble();
+    te[14] = z.toDouble();
 
     return this;
   }

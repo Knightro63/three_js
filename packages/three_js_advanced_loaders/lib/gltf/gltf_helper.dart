@@ -81,7 +81,7 @@ class GLTypeData {
     }
   }
 
-  static dynamic createBufferAttribute(List array, int itemSize, bool normalized) {
+  static BufferAttribute createBufferAttribute(List array, int itemSize, bool normalized) {
     if (array is Int8List) {
       return Int8BufferAttribute.fromList(array, itemSize, normalized);
     } else if (array is Uint8List) {
@@ -388,8 +388,7 @@ double getNormalizedComponentScale(constructor) {
 /// @param {GLTF.Primitive} primitiveDef
 /// @param {GLTFParser} parser
 ///
-Function computeBounds =
-    (BufferGeometry geometry, Map<String, dynamic> primitiveDef, GLTFParser parser) {
+Function computeBounds = (BufferGeometry geometry, Map<String, dynamic> primitiveDef, GLTFParser parser) {
   Map<String, dynamic> attributes = primitiveDef["attributes"];
 
   final box = BoundingBox();

@@ -22,7 +22,7 @@ class WebGLAttributes {
     final buffer = gl.createBuffer();
 
     gl.bindBuffer(bufferType, buffer);
-    gl.bufferData(bufferType, array.data, usage);
+    gl.bufferData(bufferType, array, usage);
 
     if (attribute.onUploadCallback != null) {
       attribute.onUploadCallback!();
@@ -74,18 +74,17 @@ class WebGLAttributes {
   }
 
   void updateBuffer(Buffer buffer, BufferAttribute attribute, int bufferType) {
-    final array = attribute.array;
     final updateRange = attribute.updateRange;
 
     gl.bindBuffer(bufferType, buffer);
 
     if (updateRange!["count"] == -1) {
       // Not using update ranges
-      gl.bufferSubData(bufferType, 0, array.data);
+      gl.bufferSubData(bufferType, 0, attribute.array);
     } 
     else {
       console.info(" WebGLAttributes.dart gl.bufferSubData need debug confirm.... ");
-      gl.bufferSubData(bufferType, updateRange["offset"]! * attribute.itemSize, array.data);
+      gl.bufferSubData(bufferType, updateRange["offset"]! * attribute.itemSize, attribute.array);
       updateRange["count"] = -1; // reset range
     }
   }

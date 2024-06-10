@@ -119,16 +119,11 @@ mixin EventDispatcher {
   /// Fire an event type.
   void dispatchEvent(Event event) {
     if (_listeners == null || _listeners!.isEmpty) return;
-
     final listeners = _listeners!;
     final listenerArray = listeners[event.type];
 
-    // print("dispatchEvent event: ${event.type} ");
-
     if (listenerArray != null) {
       event.target = this;
-
-      // Make a copy, in case listeners are removed while iterating.
       final array = listenerArray.sublist(0);
 
       for (int i = 0, l = array.length; i < l; i++) {

@@ -76,8 +76,6 @@ class SvgPath {
         s = svgPathStr.substring(sidx, idx);
         // return isFloat ? num.parse(s) : int.parse( s );
 
-        // print("s: ${s}  sidx: ${sidx} idx: ${idx} c: ${c}");
-
         return double.parse(s);
       }
 

@@ -9,7 +9,8 @@ class WebGLCubeMaps {
   Texture mapTextureMapping(Texture texture, int? mapping) {
     if (mapping == EquirectangularReflectionMapping) {
       texture.mapping = CubeReflectionMapping;
-    } else if (mapping == EquirectangularRefractionMapping) {
+    } 
+    else if (mapping == EquirectangularRefractionMapping) {
       texture.mapping = CubeRefractionMapping;
     }
     return texture;

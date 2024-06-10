@@ -107,9 +107,6 @@ class Frustum {
 
     for (int i = 0; i < 6; i++) {
       final distance = planes[i].distanceToPoint(center);
-
-      // print("i: ${i} distance: ${distance} negRadius: ${negRadius} ${distance < negRadius} ");
-
       if (distance < negRadius) {
         return false;
       }

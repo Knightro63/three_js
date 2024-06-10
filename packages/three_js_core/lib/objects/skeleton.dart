@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:three_js_core/others/index.dart';
 import 'package:three_js_math/three_js_math.dart';
 import '../textures/index.dart';
@@ -41,7 +39,7 @@ class Skeleton {
   String uuid = MathUtils.generateUUID();
   late List<Bone> bones;
   late List<Matrix4> boneInverses;
-  late Float32List boneMatrices;
+  Float32Array? boneMatrices;
   DataTexture? boneTexture;
   late int boneTextureSize;
   double frame = -1;
@@ -77,8 +75,8 @@ class Skeleton {
     int size = getSize.toInt();
 
     boneTextureSize = size;
-
-    boneMatrices = Float32List(size * size * 4);
+    boneMatrices?.dispose();
+    boneMatrices = Float32Array(size * size * 4);
 
     // calculate inverse bone matrices if necessary
 
@@ -155,7 +153,7 @@ class Skeleton {
       final matrix = bones[i].matrixWorld;
 
       _offsetMatrix.multiply2(matrix, boneInverses[i]);
-      _offsetMatrix.copyIntoArray(boneMatrices, i * 16);
+      _offsetMatrix.copyIntoArray(boneMatrices!.toList(), i * 16);
     }
 
     if (boneTexture != null) {
@@ -260,9 +258,9 @@ class Skeleton {
     return data;
   }
 
-  Float32List getValue(String name) {
+  Float32Array getValue(String name) {
     if(name == "boneMatrices") {
-      return boneMatrices;
+      return boneMatrices!;
     } else {
       throw("Skeleton getValue name: $name is not support  ");
     }

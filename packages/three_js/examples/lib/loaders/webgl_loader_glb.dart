@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
 
@@ -70,10 +69,7 @@ class _MyAppState extends State<WebglLoaderGlb> {
     threeJs.camera.lookAt(threeJs.scene.position);
 
     three.GLTFLoader loader = three.GLTFLoader().setPath('assets/models/gltf/flutter/');
-
-    //final result = await loader.fromAsset( 'coffeemat.glb' );
-    var result = await loader.fromAsset( 'dash.glb' );
-    // var result = await loader.loadAsync('untitled.glb');
+    three.GLTFData? result = await loader.fromAsset( 'dash.glb' );
 
     final object = result!.scene;
     threeJs.scene.add(object);

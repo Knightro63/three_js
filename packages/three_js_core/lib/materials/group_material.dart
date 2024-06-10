@@ -23,7 +23,16 @@ class GroupMaterial extends Material {
     return this;
   }
 
-    /// Return a new material with the same parameters as this material.
+  @override
+  void dispose(){
+    super.dispose();
+
+    children.forEach((mat){
+      mat.dispose();
+    });
+  }
+
+  /// Return a new material with the same parameters as this material.
   @override
   GroupMaterial clone() {
     return GroupMaterial().copy(this);

@@ -189,9 +189,6 @@ extension SVGColor on Color{
 
       if (reg2.hasMatch(style)) {
         final match = reg2.firstMatch(style)!;
-
-        // print(" match.groupCount: ${match.groupCount} 1: ${match.group(1)} 2: ${match.group(2)} ");
-
         final name = match.group(1)!;
         final components = match.group(2)!;
 

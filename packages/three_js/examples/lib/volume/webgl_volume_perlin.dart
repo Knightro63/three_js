@@ -59,7 +59,7 @@ class _State extends State<WebglVolumePerlin> {
     // Texture
 
     const size = 128;
-    final data = Uint8List( size * size * size );
+    final data = three.Uint8Array( size * size * size );
 
     int i = 0;
     final perlin = ImprovedNoise();

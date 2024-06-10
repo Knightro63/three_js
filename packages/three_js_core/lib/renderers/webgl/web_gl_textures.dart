@@ -427,8 +427,6 @@ class WebGLTextures {
       }
 
       if (texture.anisotropy > 1 || properties.get(texture)["__currentAnisotropy"] != null) {
-        // print("extension: ${extension} ... extension.TEXTURE_MAX_ANISOTROPY_EXT: ${extension.TEXTURE_MAX_ANISOTROPY_EXT} ");
-
         if (kIsWeb) {
           gl.texParameterf(textureType, extension.TEXTURE_MAX_ANISOTROPY_EXT,
               math.min(texture.anisotropy, capabilities.getMaxAnisotropy()).toDouble());

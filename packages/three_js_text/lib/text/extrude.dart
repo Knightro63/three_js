@@ -388,8 +388,6 @@ class ExtrudeGeometry extends BufferGeometry {
       }
 
       void addVertex(num index) {
-        // print(" addVertex index: ${index} ${placeholder.length} ");
-
         verticesArray.add(placeholder[index.toInt() * 3 + 0]);
         verticesArray.add(placeholder[index.toInt() * 3 + 1]);
         verticesArray.add(placeholder[index.toInt() * 3 + 2]);

@@ -252,28 +252,8 @@ class WebGLRenderer {
   }
 
   void setSize(double width, double height, [bool updateStyle = false]) {
-    // if ( xr.isPresenting ) {
-
-    // 	print( 'three.WebGLRenderer: Can\'t change size while VR device is presenting.' );
-    // 	return;
-
-    // }
-
     _width = width;
     _height = height;
-
-    // print(" WebGLRenderer setSize ......... ");
-
-    // _canvas.width = math.floor( width * _pixelRatio );
-    // _canvas.height = math.floor( height * _pixelRatio );
-
-    // if ( updateStyle != false ) {
-
-    // 	_canvas.style.width = width + 'px';
-    // 	_canvas.style.height = height + 'px';
-
-    // }
-
     setViewport(0, 0, width, height);
   }
 
@@ -286,14 +266,8 @@ class WebGLRenderer {
   void setDrawingBufferSize(double width, double height, double pixelRatio) {
     _width = width;
     _height = height;
-
     _pixelRatio = pixelRatio;
-
     console.info("WebGLRenderer setDrawingBufferSize ");
-
-    // _canvas.width = math.floor( width * pixelRatio );
-    // _canvas.height = math.floor( height * pixelRatio );
-
     setViewport(0, 0, width, height);
   }
 
@@ -321,12 +295,6 @@ class WebGLRenderer {
   }
 
   void setScissor(double x, double y, double width, double height) {
-    // if (x.isVector4) {
-    //   _scissor.set(x.x, x.y, x.z, x.w);
-    // } else {
-    //   _scissor.set(x, y, width, height);
-    // }
-
     _scissor.setValues(x, y, width, height);
     _currentScissor.setFrom(_scissor);
     _currentScissor.scale(_pixelRatio);
@@ -622,7 +590,7 @@ class WebGLRenderer {
   void Function(double)? onAnimationFrameCallback;
 
   void onAnimationFrame(double time) {
-    // if ( xr.isPresenting ) return;
+    if ( xr.isPresenting ) return;
     if (onAnimationFrameCallback != null) onAnimationFrameCallback!(time);
   }
 
@@ -639,7 +607,7 @@ class WebGLRenderer {
     if (camera.parent == null) camera.updateMatrixWorld();
 
     if ( xr.enabled == true && xr.isPresenting == true ) {
-    	camera = xr.getCamera();//xr.getCamera( camera )
+    	camera = xr.getCamera();
     }
 
     if (scene is Scene) {
@@ -1504,7 +1472,7 @@ class WebGLRenderer {
     _currentMaterialId = -1; // reset current material to ensure correct uniform bindings
   }
 
-  void readRenderTargetPixels(WebGLRenderTarget renderTarget, int x, int y, int width, int height, TypedData buffer, [activeCubeFaceIndex]) {
+  void readRenderTargetPixels(WebGLRenderTarget renderTarget, int x, int y, int width, int height, NativeArray buffer, [activeCubeFaceIndex]) {
     dynamic framebuffer = properties.get(renderTarget)["__webglFramebuffer"]; //can be Map or int
 
     if (renderTarget.isWebGLCubeRenderTarget && activeCubeFaceIndex != null) {

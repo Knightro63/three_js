@@ -144,8 +144,7 @@ class GLTFLightsExtension extends GLTFExtension {
         if (nodeDef["extensions"] != null &&
             nodeDef["extensions"][name] != null &&
             nodeDef["extensions"][name]["light"] != null) {
-          parser.addNodeRef(
-              cache, nodeDef["extensions"][name]["light"]);
+          parser.addNodeRef(cache, nodeDef["extensions"][name]["light"]);
         }
       }
     };

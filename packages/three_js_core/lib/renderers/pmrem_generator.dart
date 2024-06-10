@@ -292,19 +292,23 @@ class PMREMGenerator {
         scene.background = null;
         useSolidColor = true;
       }
-    } else {
+    } 
+    else {
       backgroundMaterial.color.setFrom(_clearColor);
       useSolidColor = true;
     }
+
     for (int i = 0; i < 6; i++) {
       final col = i % 3;
       if (col == 0) {
         cubeCamera.up.setValues(0, upSign[i], 0);
         cubeCamera.lookAt(Vector3(forwardSign[i], 0, 0));
-      } else if (col == 1) {
+      } 
+      else if (col == 1) {
         cubeCamera.up.setValues(0, 0, upSign[i]);
         cubeCamera.lookAt(Vector3(0, forwardSign[i], 0));
-      } else {
+      } 
+      else {
         cubeCamera.up.setValues(0, upSign[i], 0);
         cubeCamera.lookAt(Vector3(0, 0, forwardSign[i]));
       }

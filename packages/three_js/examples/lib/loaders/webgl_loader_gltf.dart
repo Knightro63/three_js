@@ -66,31 +66,8 @@ class _MyAppState extends State<WebglLoaderGltf> {
     threeJs.scene.add( three.AmbientLight( 0xffffff ) );
 
     three.GLTFLoader loader = three.GLTFLoader().setPath('assets/models/gltf/DamagedHelmet/glTF/');
-
     final result = await loader.fromAsset('DamagedHelmet.gltf');
-
-    three.console.info(" gltf load sucess result: $result  ");
-
     final object = result!.scene;
-
-    // final geometry = new three.PlaneGeometry(2, 2);
-    // final material = new three.MeshBasicMaterial();
-
-    // object.traverse( ( child ) {
-    //   if ( child is three.Mesh ) {
-    //     material.map = child.material.map;
-    //   }
-    // } );
-
-    // final mesh = new three.Mesh(geometry, material);
-    // scene.add(mesh);
-
-    // object.traverse( ( child ) {
-    //   if ( child.isMesh ) {
-    // child.material.map = texture;
-    //   }
-    // } );
-
     threeJs.scene.add(object);
   
     threeJs.addAnimationEvent((dt){

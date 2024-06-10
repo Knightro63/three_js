@@ -1,11 +1,8 @@
 library three_renderers;
 
 import 'dart:math' as math;
-import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter_angle/flutter_angle.dart';
-import 'package:flutter_angle/shared/classes.dart';
 
 import '../cameras/index.dart';
 import '../others/index.dart';

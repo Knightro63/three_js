@@ -24,7 +24,6 @@ class _State extends State<WebglShadowmapPointlight> {
       onSetupComplete: (){setState(() {});},
       setup: setup,
       settings: three.Settings(
-        useSourceTexture: true,
         shadowMapType: three.BasicShadowMap
       )
     );
@@ -145,7 +144,7 @@ class _State extends State<WebglShadowmapPointlight> {
     return three.ImageElement(
       width: 2,
       height: 2,
-      data: Uint8List.fromList([0,0,0,0,0,0,0,0,255,255,255,255,255,255,255,255])
+      data: three.Uint8Array.fromList([0,0,0,0,0,0,0,0,255,255,255,255,255,255,255,255])
     );
   }
 }

@@ -18,7 +18,6 @@ extension on Vector4{
 extension on Vector3{
   Vector3 crossFromVector4(Vector4 v, {Vector4? w}) {
     if (w != null) {
-      //print('Vector3: .cross() now only accepts one argument. Use .crossVectors( a, b ) instead.');
       return cross2(v.toVector3(), w.toVector3());
     }
 

@@ -5,7 +5,7 @@ import 'dart:math' as math;
 import '../math/index.dart';
 import '../buffer/index.dart';
 import 'index.dart';
-import '../native-array/native_array.dart';
+import 'package:flutter_angle/flutter_angle.dart';
 
 final _vector3 = Vector3(0, 0, 0);
 

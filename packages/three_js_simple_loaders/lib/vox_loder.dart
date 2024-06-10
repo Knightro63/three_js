@@ -258,7 +258,7 @@ class VOXMesh extends Mesh {
 }
 
 class VOXData3DTexture extends Data3DTexture {
-  VOXData3DTexture.create([TypedData? data, int width = 1, int height = 1, int depth = 1]):super( data, width,height,depth){
+  VOXData3DTexture.create([NativeArray? data, int width = 1, int height = 1, int depth = 1]):super( data, width,height,depth){
 		format = RedFormat;
 		minFilter = NearestFilter;
 		magFilter = LinearFilter;
@@ -274,7 +274,7 @@ class VOXData3DTexture extends Data3DTexture {
 		final offsety = size.x;
 		final offsetz = size.x * size.y;
 
-		final array = Uint8List( (size.x * size.y * size.z).toInt() );
+		final array = Uint8Array( (size.x * size.y * size.z).toInt() );
 
 		for (int j = 0; j < data!.length; j += 4 ) {
 			final x = data[ j + 0 ];

@@ -461,7 +461,7 @@ class GLTFParser {
       } 
       else {
         final array = typedArray.view(bufferView, byteOffset, accessorDef["count"] * itemSize);
-        bufferAttribute =GLTypeData.createBufferAttribute(array, itemSize, normalized);
+        bufferAttribute = GLTypeData.createBufferAttribute(array, itemSize, normalized);
       }
     }
 
@@ -521,24 +521,13 @@ class GLTFParser {
     Map<String, dynamic> textureDef = json["textures"][textureIndex];
     final sourceIndex = textureDef["source"] ?? 0;
     final sourceDef = json["images"][sourceIndex];
-
     final textureExtensions = textureDef["extensions"] ?? {};
-
-    // final source;
-
-    // if (textureExtensions[extensions["MSFT_TEXTURE_DDS"]] != null) {
-    //   source = json["images"]
-    //       [textureExtensions[extensions["MSFT_TEXTURE_DDS"]]["source"]];
-    // } else {
-    //   source = json["images"][textureDef["source"]];
-    // }
 
     dynamic loader;
 
     if (sourceDef["uri"] != null) {
-      loader = options["manager"].getHandler(sourceDef["uri"]);
+      loader = (options["manager"] as LoadingManager).getHandler(sourceDef["uri"]);
     }
-
 
     loader ??= textureExtensions[extensions["MSFT_TEXTURE_DDS"]] != null
         ? parser.extensions[extensions["MSFT_TEXTURE_DDS"]]["ddsLoader"]
@@ -549,18 +538,13 @@ class GLTFParser {
   }
 
   Future<Texture?> loadTextureImage(textureIndex, sourceIndex, loader) async {
-    // print(" GLTFParser.loadTextureImage source: ${source} textureIndex: ${textureIndex} loader: ${loader} ");
-
     final parser = this;
     final json = this.json;
 
     Map textureDef = json["textures"][textureIndex];
     Map sourceDef = json["images"][sourceIndex];
 
-    // final URL = self.URL || self.webkitURL;
-
-    final cacheKey =
-        '${(sourceDef["uri"] ?? sourceDef["bufferView"])}:${textureDef["sampler"]}';
+    final cacheKey = '${(sourceDef["uri"] ?? sourceDef["bufferView"])}:${textureDef["sampler"]}';
 
     if (textureCache[cacheKey] != null) {
       // See https://github.com/mrdoob/three.js/issues/21559.
@@ -602,21 +586,11 @@ class GLTFParser {
     }
 
     Map sourceDef = json["images"][sourceIndex];
-
-    // final URL = self.URL || self.webkitURL;
-
     String? sourceURI = sourceDef["uri"];
-    //bool isObjectURL = false;
 
     if (sourceDef["bufferView"] != null) {
-      // Load binary image data from bufferView, if provided.
-
       final bufferView = await parser.getDependency('bufferView', sourceDef["bufferView"]);
-
-      //isObjectURL = true;
       final blob = Blob(bufferView.asUint8List(), {"type": sourceDef["mimeType"]});
-      // sourceURI = URL.createObjectURL( blob );
-
       texture = await loader.fromBlob(blob);
     }
     else if (sourceURI != null) {
@@ -643,7 +617,7 @@ class GLTFParser {
   /// @param {Object} mapDef
   /// @return {Promise}
   ///
-  Future<Texture?> assignTexture(materialParams, mapName, Map<String, dynamic> mapDef, [encoding]) async {
+  Future<Texture?> assignTexture(materialParams, mapName, Map<String, dynamic> mapDef, [int? encoding]) async {
     final parser = this;
 
     Texture? texture = await getDependency('texture', mapDef["index"]);
@@ -663,8 +637,7 @@ class GLTFParser {
 
       if (transform != null) {
         final gltfReference = parser.associations[texture];
-        texture = parser.extensions[extensions["KHR_TEXTURE_TRANSFORM"]]
-            .extendTexture(texture, transform);
+        texture = parser.extensions[extensions["KHR_TEXTURE_TRANSFORM"]].extendTexture(texture, transform);
         parser.associations[texture] = gltfReference;
       }
     }
@@ -705,8 +678,7 @@ class GLTFParser {
         pointsMaterial.copy(material);
         pointsMaterial.color.setFrom(material.color);
         pointsMaterial.map = material.map;
-        pointsMaterial.sizeAttenuation =
-            false; // glTF spec says points should be 1px
+        pointsMaterial.sizeAttenuation = false; // glTF spec says points should be 1px
 
         cache.add(cacheKey, pointsMaterial);
       }

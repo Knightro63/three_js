@@ -101,8 +101,7 @@ class _MyAppState extends State<WebglMaterials> {
       "opacity": 0.9,
       "transparent": true
     }));
-    materials.add(
-        three.MeshBasicMaterial.fromMap({"map": texture, "transparent": true}));
+    materials.add(three.MeshBasicMaterial.fromMap({"map": texture, "transparent": true}));
 
     // Spheres geometry
 
@@ -128,8 +127,7 @@ class _MyAppState extends State<WebglMaterials> {
     pointLight = three.PointLight(0xffffff, 1);
     threeJs.scene.add(pointLight);
 
-    pointLight.add(three.Mesh(three.SphereGeometry(4, 8, 8),
-        three.MeshBasicMaterial.fromMap({"color": 0xffffff})));
+    pointLight.add(three.Mesh(three.SphereGeometry(4, 8, 8),three.MeshBasicMaterial.fromMap({"color": 0xffffff})));
 
     threeJs.addAnimationEvent((dt){
       controls.update();
@@ -138,7 +136,7 @@ class _MyAppState extends State<WebglMaterials> {
   }
 
   three.ImageElement generateTexture() {
-    final pixels = Uint8List(256 * 256 * 4);
+    final pixels = three.Uint8Array(256 * 256 * 4);
 
     int x = 0, y = 0, l = pixels.length;
 

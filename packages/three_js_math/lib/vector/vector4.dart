@@ -4,7 +4,7 @@ import 'dart:math' as math;
 import '../matrix/index.dart';
 import '../rotation/index.dart';
 import 'index.dart';
-import '../native-array/native_array.dart';
+import 'package:flutter_angle/flutter_angle.dart';
 
 class Vector4 extends Vector{
   String type = "Vector4";
@@ -270,11 +270,6 @@ class Vector4 extends Vector{
   // multiply( v, w ) {
 
   Vector4 multiply(Vector4 v) {
-    // if ( w != null ) {
-    // 	print( 'THREE.Vector4: .multiply() now only accepts one argument. Use .multiplyVectors( a, b ) instead.' );
-    // 	return this.multiplyVectors( v, w );
-    // }
-
     x *= v.x;
     y *= v.y;
     z *= v.z;

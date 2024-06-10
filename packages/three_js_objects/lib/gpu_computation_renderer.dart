@@ -327,7 +327,7 @@ class GPUComputationRenderer {
 		};
 
 		createTexture = () {
-			final data = Float32List( sizeX * sizeY * 4 );
+			final data = Float32Array( sizeX * sizeY * 4 );
 			final texture = DataTexture( data, sizeX, sizeY, RGBAFormat, FloatType );
 			texture.needsUpdate = true;
 			return texture;

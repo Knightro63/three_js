@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 import '../others/constants.dart';
 import '../math/index.dart';
-import '../native-array/native_array.dart';
+import 'package:flutter_angle/flutter_angle.dart';
 
 /// [Interleaved] means that multiple attributes, possibly of different types,
 /// (e.g., position, normal, uv, color) are packed into a single array buffer.

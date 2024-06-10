@@ -95,14 +95,7 @@ class Line extends Object3D {
 
         geometry.setAttributeFromString('lineDistance', Float32BufferAttribute.fromList(lineDistances, 1, false));
       }
-      // else {
-      //   print(
-      //       'THREE.Line.computeLineDistances(): Computation only possible with non-indexed BufferGeometry.');
-      // }
     }
-    // else if (geometry.isGeometry) {
-    //   throw ('THREE.Line.computeLineDistances() no longer supports THREE.Geometry. Use THREE.BufferGeometry instead.');
-    // }
 
     return this;
   }
@@ -237,14 +230,5 @@ class Line extends Object3D {
         }
       }
     }
-
-    // else {
-    //   final morphTargets = geometry.morphTargets;
-
-    //   if (morphTargets != null && morphTargets.length > 0) {
-    //     print(
-    //         'THREE.Line.updateMorphTargets() does not support THREE.Geometry. Use THREE.BufferGeometry instead.');
-    //   }
-    // }
   }
 }

@@ -111,7 +111,7 @@ class _State extends State<WebglSimpleGi> {
     int currentVertex = 0;
 
     final color = Float32List( 3 );
-    final Uint8List buffer = Uint8List( SIZE2 * 4 );
+    final three.Uint8Array buffer = three.Uint8Array( SIZE2 * 4 );
 
     void compute([double? dt]) {
 

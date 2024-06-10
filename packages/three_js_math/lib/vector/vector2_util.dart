@@ -1,4 +1,4 @@
-import '../native-array/native_array.dart';
+import 'package:flutter_angle/flutter_angle.dart';
 import 'package:vector_math/vector_math.dart';
 import '../buffer/buffer_attribute.dart';
 

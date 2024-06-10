@@ -151,8 +151,7 @@ class ThreeJS{
     if(sourceTexture == null){
       FlutterAngle.activateTexture(texture!);
     }
-
-    rendererUpdate?.call();
+    rendererUpdate?.call(); 
     if(postProcessor == null){
       renderer!.clear();
       renderer!.setViewport(0,0,width,height);

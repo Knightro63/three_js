@@ -452,7 +452,7 @@ class RGBELoader extends DataTextureLoader {
 
           case FloatType:
             numElements = imageRgbaData.length ~/ 4;
-            final floatArray = Float32List(numElements * 4);
+            final floatArray = Float32Array(numElements * 4);
             for (int j = 0; j < numElements; j++) {
               rgbeByteToRGBFloat(imageRgbaData, j * 4, floatArray, j * 4);
             }
@@ -463,7 +463,7 @@ class RGBELoader extends DataTextureLoader {
 
           case HalfFloatType:
             numElements = imageRgbaData.length ~/ 4;
-            final halfArray = Uint16List(numElements * 4);
+            final halfArray = Uint16Array(numElements * 4);
             for (int j = 0; j < numElements; j++) {
               rgbeByteToRGBHalf(imageRgbaData, j * 4, halfArray, j * 4);
             }

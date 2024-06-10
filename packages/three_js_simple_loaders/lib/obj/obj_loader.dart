@@ -154,8 +154,6 @@ class ParserState {
   }
 
   void startObject(String? name, bool? fromDeclaration) {
-    // print(" startObject name: ${name} fromDeclaration: ${fromDeclaration} ");
-    // print(" startObject object: ${this.object} this.object.fromDeclaration: ${this.object?.fromDeclaration} ");
     // If the current object (initial from reset) is not from a g/o declaration in the parsed
     // file. We need to use it for the first parsed g/o to keep things in sync.
     if (object != null && object!.fromDeclaration == false) {
@@ -459,15 +457,10 @@ class OBJLoader extends Loader {
 
     for (int i = 0, l = lines.length; i < l; i++) {
       line = lines[i];
-
       line = line.trimLeft();
-
-      // print("i: ${i} line: ${line} ");
-
       lineLength = line.length;
 
       if (lineLength == 0) continue;
-
       lineFirstChar = line[0];
 
       // @todo invoke passed in handler if any
@@ -510,12 +503,6 @@ class OBJLoader extends Loader {
         final lineData = line.substring(1).trim();
         final vertexData = lineData.split(RegExp(r"\s+"));
         List<List> faceVertices = [];
-
-        // Parse the face vertex data into an easy to work with format
-
-        // print(" lineFirstChar is f .................. ");
-        // print(vertexData);
-
         for (int j = 0, jl = vertexData.length; j < jl; j++) {
           final vertex = vertexData[j];
 

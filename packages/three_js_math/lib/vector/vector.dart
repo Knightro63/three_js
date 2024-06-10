@@ -1,5 +1,5 @@
 import 'dart:typed_data';
-import '../native-array/native_array.dart';
+import 'package:flutter_angle/flutter_angle.dart';
 import '../buffer/index.dart';
 import '../matrix/matrix3.dart';
 

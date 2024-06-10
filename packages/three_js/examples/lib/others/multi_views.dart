@@ -61,7 +61,6 @@ class _MyAppState extends State<MultiViews> {
       body: FutureBuilder<bool>(
         future: init(),
         builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
-          print(snapshot);
           if (!snapshot.hasData) {
             return const CircularProgressIndicator();
           }

@@ -764,10 +764,6 @@ class TransformControlsGizmo extends Object3D {
     handles.addAll(gizmo[mode].children);
     handles.addAll(helper[mode].children);
 
-    // print("TransformControlsGizmo cameraQuaternion ${this.cameraQuaternion.toJSON()} ");
-
-    // print("TransformControlsGizmo updateMatrixWorld mode: ${this.mode} handles: ${handles.length}  ");
-
     for (int i = 0; i < handles.length; i++) {
       final handle = handles[i];
 

@@ -375,13 +375,6 @@ class BufferGeometry with EventDispatcher {
     } else {
       boundingBox!.empty();
     }
-
-    // if (boundingBox!.min.x == null ||
-    //     boundingBox!.min.y == null ||
-    //     boundingBox!.min.z == null) {
-    //   print(
-    //       'THREE.BufferGeometry.computeBoundingBox(): Computed min/max have NaN values. The "position" attribute is likely to have NaN values. ${this}');
-    // }
   }
 
   /// Computes the bounding sphere of the geometry, and updates the [boundingSphere] attribute.
@@ -709,12 +702,6 @@ class BufferGeometry with EventDispatcher {
   }
 
   BufferGeometry merge(BufferGeometry geometry, [int? offset]) {
-    // if (!(geometry && geometry.isBufferGeometry)) {
-    //   print(
-    //       'THREE.BufferGeometry.merge(): geometry not an instance of THREE.BufferGeometry. $geometry');
-    //   return;
-    // }
-
     if (offset == null) {
       offset = 0;
 

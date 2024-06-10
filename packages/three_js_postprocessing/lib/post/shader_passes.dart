@@ -103,9 +103,6 @@ class ShaderPasses extends Pass {
   }
 
   void renderPass(renderer, passMaterial, renderTarget, clearColor, clearAlpha, bool clear) {
-    // print("renderPass passMaterial: ${passMaterial} renderTarget: ${renderTarget}  ");
-    // print(passMaterial.uniforms);
-
     // setup pass state
     renderer.autoClear = false;
 

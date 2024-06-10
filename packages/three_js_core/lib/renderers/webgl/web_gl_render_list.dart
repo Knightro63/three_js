@@ -181,8 +181,6 @@ class WebGLRenderList {
   }
 
   int reversePainterSortStable(RenderItem a, RenderItem b) {
-    // print("3 reversePainterSortStable ${a.id} ${b.id} ");
-
     if (a.groupOrder != b.groupOrder) {
       return a.groupOrder - b.groupOrder;
     } else if (a.renderOrder != b.renderOrder) {

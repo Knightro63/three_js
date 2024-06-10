@@ -1776,7 +1776,7 @@ class _GeometryParser {
   // in _FBXTree.Objects.Geometry, however it can only have attributes for position, normal
   // and a special attribute Index defining which vertices of the original geometry are affected
   // Normal and position attributes only have data for the vertices that are affected by the morph
-  genMorphGeometry(parentGeo, parentGeoNode, morphGeoNode, preTransform, name) {
+  void genMorphGeometry(parentGeo, parentGeoNode, morphGeoNode, preTransform, name) {
     final vertexIndices = (parentGeoNode.PolygonVertexIndex != null)? parentGeoNode.PolygonVertexIndex.a: [];
 
     final morphPositionsSparse = (morphGeoNode.Vertices != null) ? morphGeoNode.Vertices.a : [];
@@ -1810,7 +1810,7 @@ class _GeometryParser {
   }
 
   // Parse normal from _FBXTree.Objects.Geometry.LayerElementNormal if it exists
-  parseNormals(Map normalNode) {
+  Map<String,dynamic> parseNormals(Map normalNode) {
     final mappingType = normalNode["MappingInformationType"];
     final referenceType = normalNode["ReferenceInformationType"];
     final buffer = normalNode["Normals"]["a"];
@@ -1833,7 +1833,7 @@ class _GeometryParser {
   }
 
   // Parse UVs from _FBXTree.Objects.Geometry.LayerElementUV if it exists
-  parseUVs(Map uvNode) {
+  Map<String,dynamic> parseUVs(Map uvNode) {
     final mappingType = uvNode["MappingInformationType"];
     final referenceType = uvNode["ReferenceInformationType"];
     final buffer = uvNode["UV"]["a"];
@@ -1871,7 +1871,7 @@ class _GeometryParser {
   }
 
   // Parse mapping and material data in _FBXTree.Objects.Geometry.LayerElementMaterial if it exists
-  parseMaterialIndices(Map materialNode) {
+  Map<String,dynamic> parseMaterialIndices(Map materialNode) {
     final mappingType = materialNode["MappingInformationType"];
     final referenceType = materialNode["ReferenceInformationType"];
 

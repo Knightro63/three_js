@@ -81,7 +81,6 @@ class _MyAppState extends State<WebglLoaderSvg> {
     SVGLoader loader = SVGLoader();
 
     loader.fromAsset(url).then((data) {
-      print(data);
       List<three.ShapePath> paths = data!.paths;
 
       three.Group group = three.Group();

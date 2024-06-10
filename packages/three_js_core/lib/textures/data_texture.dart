@@ -1,5 +1,6 @@
 import 'image_element.dart';
 import './texture.dart';
+import 'package:three_js_math/three_js_math.dart';
 
 /// Creates a texture directly from raw data, width and height.
 class DataTexture extends Texture {
@@ -50,7 +51,7 @@ class DataTexture extends Texture {
   /// texture.needsUpdate = true;
   /// ```
   DataTexture([
-    data,
+    NativeArray? data,
     int? width,
     int? height,
     int? format,
