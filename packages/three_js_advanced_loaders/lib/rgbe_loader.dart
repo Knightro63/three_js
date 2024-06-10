@@ -164,9 +164,11 @@ class RGBELoader extends DataTextureLoader {
       String s = '';
       String chunk = String.fromCharCodes(buffer.sublist(p, p + chunkSize));
 
-      while ((0 > (i = chunk.indexOf(newLine))) &&
-          (len < lineLimit) &&
-          (p < buffer.lengthInBytes)) {
+      while (
+        (0 > (i = chunk.indexOf(newLine))) &&
+        (len < lineLimit) &&
+        (p < buffer.lengthInBytes)
+      ) {
         s += chunk;
         len += chunk.length;
         p += chunkSize;
@@ -414,12 +416,9 @@ class RGBELoader extends DataTextureLoader {
       final scale = math.pow(2.0, e - 128.0) / 255.0;
 
       // clamping to 65504, the maximum representable value in float16
-      destArray[destOffset + 0] = MathUtils.toHalfFloat(
-          math.min<double>(sourceArray[sourceOffset + 0] * scale, 65504));
-      destArray[destOffset + 1] = MathUtils.toHalfFloat(
-          math.min<double>(sourceArray[sourceOffset + 1] * scale, 65504));
-      destArray[destOffset + 2] = MathUtils.toHalfFloat(
-          math.min<double>(sourceArray[sourceOffset + 2] * scale, 65504));
+      destArray[destOffset + 0] = MathUtils.toHalfFloat(math.min<double>(sourceArray[sourceOffset + 0] * scale, 65504));
+      destArray[destOffset + 1] = MathUtils.toHalfFloat(math.min<double>(sourceArray[sourceOffset + 1] * scale, 65504));
+      destArray[destOffset + 2] = MathUtils.toHalfFloat(math.min<double>(sourceArray[sourceOffset + 2] * scale, 65504));
       destArray[destOffset + 3] = MathUtils.toHalfFloat(1.0);
     }
 
@@ -465,7 +464,6 @@ class RGBELoader extends DataTextureLoader {
           case HalfFloatType:
             numElements = imageRgbaData.length ~/ 4;
             final halfArray = Uint16List(numElements * 4);
-            print('len: $numElements, $w ');
             for (int j = 0; j < numElements; j++) {
               rgbeByteToRGBHalf(imageRgbaData, j * 4, halfArray, j * 4);
             }

@@ -15,7 +15,7 @@ class MultiViews extends StatefulWidget {
 
 class _MyAppState extends State<MultiViews> {
   three.WebGLRenderer? renderer;
-  late FlutterGLTexture three3dRender;// = FlutterGlPlugin();
+  late FlutterAngleTexture three3dRender;// = FlutterGlPlugin();
 
   @override
   void initState() {

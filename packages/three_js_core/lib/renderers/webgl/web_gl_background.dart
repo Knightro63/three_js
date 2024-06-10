@@ -140,8 +140,9 @@ class WebGLBackground {
       planeMesh!.material?.uniforms["uvTransform"]["value"].setFrom(background.matrix);
 
       if (currentBackground != background ||
-          currentBackgroundVersion != background.version ||
-          currentTonemapping != renderer.toneMapping) {
+        currentBackgroundVersion != background.version ||
+        currentTonemapping != renderer.toneMapping
+      ) {
         planeMesh!.material?.needsUpdate = true;
 
         currentBackground = background;

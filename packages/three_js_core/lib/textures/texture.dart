@@ -33,6 +33,7 @@ class Texture with EventDispatcher {
   
   late Source source;
 
+  String colorSpace = NoColorSpace;
   int id = textureId++;
   String uuid = MathUtils.generateUUID();
   String name = "";

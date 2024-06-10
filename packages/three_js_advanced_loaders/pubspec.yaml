@@ -8,6 +8,7 @@ environment:
   flutter: ">=1.17.0"
 
 dependencies:
+  archive: ^3.6.1
   flutter:
     sdk: flutter
   three_js_core:

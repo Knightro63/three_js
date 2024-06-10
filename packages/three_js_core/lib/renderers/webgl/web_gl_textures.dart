@@ -633,8 +633,7 @@ class WebGLTextures {
             if (useTexStorage) {
               state.texSubImage2D(WebGL.TEXTURE_2D, i, 0, 0, mipmap.width, mipmap.height, glFormat, glType, mipmap.data);
             } else {
-              state.texImage2D(
-                  WebGL.TEXTURE_2D, i, glInternalFormat, mipmap.width, mipmap.height, 0, glFormat, glType, mipmap.data);
+              state.texImage2D(WebGL.TEXTURE_2D, i, glInternalFormat, mipmap.width, mipmap.height, 0, glFormat, glType, mipmap.data);
             }
           }
 
@@ -648,8 +647,7 @@ class WebGLTextures {
             state.texSubImage2D(WebGL.TEXTURE_2D, 0, 0, 0, image.width, image.height, glFormat, glType, image.data);
           } 
           else {
-            state.texImage2D(
-                WebGL.TEXTURE_2D, 0, glInternalFormat, image.width, image.height, 0, glFormat, glType, image.data);
+            state.texImage2D(WebGL.TEXTURE_2D, 0, glInternalFormat, image.width, image.height, 0, glFormat, glType, image.data);
           }
         }
       } 
@@ -664,11 +662,9 @@ class WebGLTextures {
           if (texture.format != RGBAFormat) {
             if (glFormat != null) {
               if (useTexStorage) {
-                state.compressedTexSubImage2D(
-                    WebGL.TEXTURE_2D, i, 0, 0, mipmap.width, mipmap.height, glFormat, mipmap.data);
+                state.compressedTexSubImage2D(WebGL.TEXTURE_2D, i, 0, 0, mipmap.width, mipmap.height, glFormat, mipmap.data);
               } else {
-                state.compressedTexImage2D(
-                    WebGL.TEXTURE_2D, i, glInternalFormat, mipmap.width, mipmap.height, 0, mipmap.data);
+                state.compressedTexImage2D(WebGL.TEXTURE_2D, i, glInternalFormat, mipmap.width, mipmap.height, 0, mipmap.data);
               }
             } else {
               console.warning('WebGLRenderer: Attempt to load unsupported compressed texture format in .uploadTexture()');
@@ -677,8 +673,7 @@ class WebGLTextures {
             if (useTexStorage) {
               state.texSubImage2D(WebGL.TEXTURE_2D, i, 0, 0, mipmap.width, mipmap.height, glFormat, glType, mipmap.data);
             } else {
-              state.texImage2D(
-                  WebGL.TEXTURE_2D, i, glInternalFormat, mipmap.width, mipmap.height, 0, glFormat, glType, mipmap.data);
+              state.texImage2D(WebGL.TEXTURE_2D, i, glInternalFormat, mipmap.width, mipmap.height, 0, glFormat, glType, mipmap.data);
             }
           }
         }
@@ -1254,7 +1249,7 @@ class WebGLTextures {
         if (isWebGL2) {
           glTextureType = renderTarget is WebGL3DRenderTarget ? WebGL.TEXTURE_3D : WebGL.TEXTURE_2D_ARRAY;
         } else {
-          print('three.DataTexture3D and three.DataTexture2DArray only supported with WebGL2.');
+          console.info('3D and three.DataTexture2DArray only supported with WebGL2.');
         }
       }
 

@@ -51,6 +51,7 @@ flutter:
     - assets/models/stl/binary/
     - assets/models/stl/ascii/
     - assets/models/vox/
+    - assets/models/usdz/
     - assets/models/xyz/
     - assets/models/gltf/
     - assets/models/gltf/test/

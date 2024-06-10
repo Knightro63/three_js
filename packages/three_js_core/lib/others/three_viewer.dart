@@ -24,6 +24,7 @@ class Settings{
     this.outputEncoding = LinearEncoding,
     this.toneMapping = NoToneMapping,
     this.shadowMapType = PCFShadowMap,
+    this.toneMappingExposure = 1.0
   }){
     this.renderOptions = renderOptions ?? {
       "format": RGBAFormat,
@@ -46,6 +47,7 @@ class Settings{
   int outputEncoding;
   int toneMapping;
   int shadowMapType;
+  double toneMappingExposure;
 }
 
 /// threeJs utility class. If you want to learn how to connect cannon.js with js, please look at the examples/threejs_* instead.
@@ -73,7 +75,7 @@ class ThreeJS{
   final GlobalKey<core.PeripheralsState> globalKey = GlobalKey<core.PeripheralsState>();
   core.PeripheralsState get domElement => globalKey.currentState!;
 
-  FlutterGLTexture? texture;
+  FlutterAngleTexture? texture;
   late final RenderingContext gl;
   core.WebGLRenderTarget? renderTarget;
   core.WebGLRenderer? renderer;
@@ -200,6 +202,7 @@ class ThreeJS{
       renderer!.localClippingEnabled = settings.localClippingEnabled;
       renderer!.clippingPlanes = settings.clippingPlanes;
       renderer!.toneMapping = settings.toneMapping;
+      renderer!.toneMappingExposure = settings.toneMappingExposure;
     }
 
     if(settings.useSourceTexture && !kIsWeb){
