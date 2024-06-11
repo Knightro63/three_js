@@ -62,7 +62,7 @@ class Joystick with EventDispatcher{
     camera.position.z = 10;
 
     final loader = TextureLoader();
-    loader.fromAsset('assets/joystick_background.png',package: 'three_js_controls').then((value){
+    loader.fromAsset('assets/joystick_background.png', package: 'three_js_controls').then((value){
       final material = SpriteMaterial.fromMap({'map': value});
       _backgroundSprite = Sprite( material );
       _backgroundSprite!.center.setValues( 0.0, 0.0 );
@@ -191,7 +191,6 @@ class Joystick with EventDispatcher{
   }
 
   void dispose(){
-    
-  }
-  
+    clearListeners();
+  } 
 }

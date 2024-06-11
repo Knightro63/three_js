@@ -16,6 +16,7 @@ final _objectChangeEvent = Event(type: 'objectChange');
 Pointer? _pointer0;
 
 class TransformControls extends Object3D {
+  bool disposed = false;
   bool isTransformControls = true;
 
   late GlobalKey<PeripheralsState> listenableKey;
@@ -710,13 +711,18 @@ class TransformControls extends Object3D {
     axis = null;
   }
 
-  @override
-  void dispose() {
+  void dissconnect(){
     domElement.removeEventListener(PeripheralType.pointerdown, _onPointerDown);
     domElement.removeEventListener(PeripheralType.pointerHover, _onPointerHover);
     domElement.removeEventListener(PeripheralType.pointermove, _onPointerMove);
     domElement.removeEventListener(PeripheralType.pointerup, _onPointerUp);
+  }
 
+  @override
+  void dispose() {
+    if(disposed) return;
+    disposed = true;  
+    clearListeners();
     traverse((child) {
       child.geometry?.dispose();
       child.material?.dispose();

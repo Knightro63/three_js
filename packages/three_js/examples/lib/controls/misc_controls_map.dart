@@ -33,8 +33,8 @@ class _MyAppState extends State<MiscControlsMap> {
   }
   @override
   void dispose() {
+    controls.dispose();
     threeJs.dispose();
-    controls.clearListeners();
     super.dispose();
   }
 

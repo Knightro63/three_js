@@ -25,6 +25,7 @@ class _State extends State<WebglLod> {
   }
   @override
   void dispose() {
+    controls.dispose();
     threeJs.dispose();
     three.loading.clear();
     super.dispose();
@@ -39,6 +40,8 @@ class _State extends State<WebglLod> {
       body: threeJs.build()
     );
   }
+
+  late three.FlyControls controls;
 
   Future<void> setup() async {
     threeJs.camera = three.PerspectiveCamera( 45, threeJs.width/threeJs.height, 1, 15000 );
@@ -85,7 +88,7 @@ class _State extends State<WebglLod> {
 
     }
 
-    final controls = three.FlyControls( threeJs.camera, threeJs.globalKey );
+    controls = three.FlyControls( threeJs.camera, threeJs.globalKey );
     controls.movementSpeed = 1000;
     controls.rollSpeed = math.pi / 10;
 

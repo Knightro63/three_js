@@ -48,15 +48,14 @@ Event _removedEvent = Event(type: "removed");
 /// Note that this can be used for grouping objects via the [add] method which adds the object as a child, however it is better to
 /// use [Group] for this.
 class Object3D with EventDispatcher {
+  bool didDispose = true;
   static Vector3 defaultUp = Vector3(0.0, 1.0, 0.0);
   static bool defaultMatrixAutoUpdate = true;
 
   int id = _object3DId++;
 
   String uuid = MathUtils.generateUUID();
-
   String? tag;
-
   String name = '';
   String type = 'Object3D';
 
@@ -64,7 +63,6 @@ class Object3D with EventDispatcher {
   List<Object3D> children = [];
 
   bool castShadow = false;
-
   bool autoUpdate = false; // checked by the renderer
 
   Matrix4 matrix = Matrix4.identity();
@@ -85,11 +83,9 @@ class Object3D with EventDispatcher {
   bool isImmediateRenderObject = false;
 
   Map<String, dynamic> userData = {};
-
   Map<String, dynamic> extra = {};
 
   BufferGeometry? geometry;
-
   Vector3 up = Object3D.defaultUp.clone();
 
   Vector3 position = Vector3(0, 0, 0);
@@ -1072,11 +1068,33 @@ class Object3D with EventDispatcher {
   }
 
   void dispose(){
+    if(didDispose) return;
+    didDispose = true;
+    parent?.dispose();
     material?.dispose();
+    overrideMaterial?.dispose();
+    customDepthMaterial?.dispose();
+    customDistanceMaterial?.dispose();
+    
+    // matrix.dispose();
+    // matrixWorld.dispose();
+    modelViewMatrix.dispose();
+    normalMatrix.dispose();
+    bindMatrix?.dispose();
+
+    geometry?.dispose();
+    environment?.dispose();
+
+    instanceMatrix?.dispose();
+    instanceColor?.dispose();
 
     children.forEach((child){
       child.dispose();
     });
+
+    if(background is NativeArray || background is ImageElement || background is Texture){
+      background.dispose();
+    }
   }
 }
 

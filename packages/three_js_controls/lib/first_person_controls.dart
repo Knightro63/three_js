@@ -281,7 +281,7 @@ class FirstPersonControls with EventDispatcher {
 	}
 
   /// Should be called if the controls is no longer required.
-	void dispose() {
+	void deactivate() {
 		domElement.removeEventListener( PeripheralType.contextmenu, contextmenu, false );
 		domElement.removeEventListener( PeripheralType.pointerdown, onMouseDown, false );
 	  domElement.removeEventListener( PeripheralType.pointerHover, onMouseMove, false );
@@ -289,7 +289,11 @@ class FirstPersonControls with EventDispatcher {
 
 		domElement.removeEventListener( PeripheralType.keydown, onKeyDown, false );
 		domElement.removeEventListener( PeripheralType.keyup, onKeyUp, false );
-	}
+  }
+
+  void dispose(){
+    clearListeners();
+  }
 
 	void setOrientation( controls ) {
 		final quaternion = controls.camera.quaternion;

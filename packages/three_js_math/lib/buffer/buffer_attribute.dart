@@ -60,7 +60,6 @@ abstract class BufferAttribute<TData extends NativeArray> extends BaseBufferAttr
 
   BufferAttribute setUsage(int value) {
     usage = value;
-
     return this;
   }
 

@@ -24,8 +24,8 @@ class _State extends State<WebglMorphtargets> {
   }
   @override
   void dispose() {
+    controls.dispose();
     threeJs.dispose();
-    controls.clearListeners();
     three.loading.clear();
     super.dispose();
   }

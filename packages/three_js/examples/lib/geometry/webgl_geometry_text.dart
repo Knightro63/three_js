@@ -34,9 +34,9 @@ class _MyAppState extends State<WebglGeometryText> {
   }
   @override
   void dispose() {
+    controls.dispose();
     three.loading.clear();
     threeJs.dispose();
-    controls.clearListeners();
     super.dispose();
   }
 

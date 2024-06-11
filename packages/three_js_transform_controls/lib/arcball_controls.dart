@@ -56,6 +56,7 @@ Vector3 _scalePointTemp = Vector3();
 /// To use this, as with all files in the /examples directory, you will have to
 /// include the file separately in your HTML.
 class ArcballControls with EventDispatcher {
+  bool disposed = false;
   Vector3 target = Vector3();
   final Vector3 _currentTarget = Vector3();
   double radiusFactor = 0.67;
@@ -1700,26 +1701,40 @@ class ArcballControls with EventDispatcher {
       }
     }
   }
-
-	/// Remove all listeners, stop animations and clean scene
-	///
-  void dispose() {
-    if (_animationId != -1) {
-      cancelAnimationFrame(_animationId);
-    }
-
+  void disconnect(){
     domElement.removeEventListener(PeripheralType.pointerdown, onPointerDown);
     domElement.removeEventListener(PeripheralType.pointercancel, onPointerCancel);
     domElement.removeEventListener(PeripheralType.wheel, onWheel);
     domElement.removeEventListener(PeripheralType.contextmenu, onContextMenu);
-
     domElement.removeEventListener(PeripheralType.pointermove, onPointerMove);
     domElement.removeEventListener(PeripheralType.pointerup, onPointerUp);
-
     domElement.removeEventListener(PeripheralType.resize, onWindowResize);
+  }
+	/// Remove all listeners, stop animations and clean scene
+	///
+  void dispose() {
+    if(disposed) return;
+    disposed = true;
+    if (_animationId != -1) {
+      cancelAnimationFrame(_animationId);
+    }
+
+    clearListeners();
 
     if (scene != null) scene!.remove(_gizmos);
+    _gizmos.dispose();
     disposeGrid();
+
+    _m4_1.dispose();
+    _m4_2.dispose();
+    _translationMatrix.dispose();
+    _rotationMatrix.dispose();
+    _scaleMatrix.dispose();
+    _cameraMatrixState.dispose();
+    _cameraProjectionState.dispose();
+    _gizmoMatrixState.dispose();
+    _cameraMatrixState0.dispose();
+    _gizmoMatrixState0.dispose();
   }
 	/// remove the grid from the scene
 	///

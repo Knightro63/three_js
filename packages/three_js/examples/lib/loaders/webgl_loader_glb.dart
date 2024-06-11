@@ -31,8 +31,8 @@ class _MyAppState extends State<WebglLoaderGlb> {
   }
   @override
   void dispose() {
+    controls.dispose();
     threeJs.dispose();
-    controls.clearListeners();
     three.loading.clear();
     super.dispose();
   }

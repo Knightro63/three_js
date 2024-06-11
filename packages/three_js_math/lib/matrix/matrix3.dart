@@ -9,6 +9,10 @@ class Matrix3 {
 
   late Float32Array storage;
 
+  void dispose(){
+    storage.dispose();
+  }
+
   /// Creates a 3x3 matrix with the given arguments in row-major order. If no arguments are provided, the constructor initializes
   /// the [Matrix3] to the 3x3 [identity matrix](https://en.wikipedia.org/wiki/Identity_matrix).
   Matrix3.identity() {

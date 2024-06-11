@@ -26,9 +26,9 @@ class _State extends State<WebglShaderLava> {
   }
   @override
   void dispose() {
+    controls.dispose();
     threeJs.dispose();
     three.loading.clear();
-    controls.clearListeners();
     super.dispose();
   }
 

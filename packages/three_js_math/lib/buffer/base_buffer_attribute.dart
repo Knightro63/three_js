@@ -22,4 +22,9 @@ abstract class BaseBufferAttribute<TData extends NativeArray> {
   int? elementSize;
 
   BaseBufferAttribute();
+
+  void dispose(){
+    data?.dispose();
+    array.dispose();
+  }
 }

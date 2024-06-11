@@ -24,9 +24,9 @@ class _State extends State<WebglGeometryExtrudeShapes> {
   }
   @override
   void dispose() {
+    controls.dispose();
     threeJs.dispose();
     three.loading.clear();
-    controls.clearListeners();
     super.dispose();
   }
 

@@ -29,8 +29,8 @@ class _MyAppState extends State<WebglSkinningSimple> {
   }
   @override
   void dispose() {
+    controls.dispose();
     threeJs.dispose();
-    controls.clearListeners();
     three.loading.clear();
     super.dispose();
   }

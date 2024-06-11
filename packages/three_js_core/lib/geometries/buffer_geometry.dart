@@ -62,6 +62,7 @@ class BufferGeometry with EventDispatcher {
   late List<MorphTarget> morphTargets;
   late BufferGeometry directGeometry;
 
+  bool disposed = true;
   bool elementsNeedUpdate = false;
   bool verticesNeedUpdate = false;
   bool uvsNeedUpdate = false;
@@ -207,17 +208,15 @@ class BufferGeometry with EventDispatcher {
 
     if (normal != null) {
       final normalMatrix = Matrix3.identity().getNormalMatrix(matrix);
-
       normal.applyNormalMatrix(normalMatrix);
-
       normal.needsUpdate = true;
+      normalMatrix.dispose();
     }
 
     final tangent = attributes["tangent"];
 
     if (tangent != null) {
       tangent.transformDirection(matrix);
-
       tangent.needsUpdate = true;
     }
 
@@ -1023,6 +1022,16 @@ class BufferGeometry with EventDispatcher {
   void dispose() {
     console.info(" BufferGeometry dispose ........... ");
     dispatchEvent(Event(type: "dispose"));
+
+    if(disposed) return;
+    disposed = true;
+    for(final temp in attributes.keys){
+      attributes[temp].dispose();
+    }
+
+    for(final temp in morphAttributes.keys){
+      (morphAttributes[temp] as BufferAttribute).dispose();
+    }
   }
 }
 

@@ -30,7 +30,7 @@ class _State extends State<WebglAnimationMultiple> {
   @override
   void dispose() {
     threeJs.dispose();
-    controls.clearListeners();
+    controls.dispose();
     super.dispose();
   }
 

@@ -588,8 +588,10 @@ class TrackballControls with EventDispatcher {
 
     return _pointerPositions[pointer.pointerId];
   }
-
-  void dispose() {
+  void dispose(){
+    clearListeners();
+  } 
+  void disconnect() {
     scope.domElement.removeEventListener(PeripheralType.contextmenu, contextmenu);
 
     scope.domElement.removeEventListener(PeripheralType.pointerdown, onPointerDown);

@@ -87,7 +87,7 @@ class PointerLockControls with EventDispatcher {
   }
 
   void dispose() {
-    disconnect();
+    clearListeners();
   }
 
   Camera get getObject => camera;

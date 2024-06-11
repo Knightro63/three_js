@@ -21,6 +21,7 @@ class LightShadow {
 
   bool autoUpdate = true;
   bool needsUpdate = false;
+  bool disposed = true;
 
   final Frustum frustum = Frustum();
   final frameExtents = Vector2(1, 1);
@@ -131,5 +132,10 @@ class LightShadow {
     if (mapPass != null) {
       mapPass!.dispose();
     }
+
+    if(disposed) return;
+    disposed = true;
+    matrix.dispose();
+    projScreenMatrix.dispose();
   }
 }

@@ -173,4 +173,15 @@ class LOD extends Object3D{
 
 		return data;
 	}
+
+  @override
+  void dispose(){
+    if(didDispose) return;
+    super.dispose();
+    didDispose = true;
+    object?.dispose();
+    levels.forEach((level){
+      level.dispose();
+    });
+  }
 }

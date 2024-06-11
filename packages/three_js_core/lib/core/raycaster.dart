@@ -149,7 +149,7 @@ class Raycaster {
   /// first. Intersections are of the same form as those returned by
   /// [intersectObject].
   List<Intersection> intersectObjects(List<Object3D> objects, bool recursive, [List<Intersection>? intersects]) {
-    intersects = intersects ?? List<Intersection>.from([]);
+    intersects ??= List<Intersection>.from([]);
 
     for (int i = 0, l = objects.length; i < l; i++) {
       intersectObject4(objects[i], this, intersects, recursive);

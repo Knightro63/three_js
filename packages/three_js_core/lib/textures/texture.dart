@@ -22,6 +22,7 @@ class Texture with EventDispatcher {
   static String? defaultImage;
   static int defaultMapping = UVMapping;
 
+  bool disposed = false;
   bool isTexture = true;
   bool isWebGLRenderTarget = false;
   bool isVideoTexture = false;
@@ -66,13 +67,9 @@ class Texture with EventDispatcher {
   // Also changing the encoding after already used by a Material will not automatically make the Material
   // update. You need to explicitly call Material.needsUpdate to trigger it to recompile.
   int encoding = LinearEncoding;
-
   Map userData = {};
-
   int version = 0;
-
   Function? onUpdate;
-
   List mipmaps = [];
 
   Texture([
@@ -212,6 +209,9 @@ class Texture with EventDispatcher {
     else {
       image?.dispose();
     }
+    if(disposed) return;
+    disposed = true;
+    matrix.dispose();
   }
 
   Vector2 transformUv(Vector2 uv) {

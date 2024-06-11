@@ -24,8 +24,8 @@ class _MyAppState extends State<MiscControlsArcball> {
   }
   @override
   void dispose() {
+    controls.dispose();
     threeJs.dispose();
-    controls.clearListeners();
     super.dispose();
   }
 

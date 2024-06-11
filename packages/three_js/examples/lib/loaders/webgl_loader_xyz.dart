@@ -23,6 +23,7 @@ class _State extends State<WebglLoaderXyz> {
   }
   @override
   void dispose() {
+    controls.dispose();
     threeJs.dispose();
     three.loading.clear();
     super.dispose();

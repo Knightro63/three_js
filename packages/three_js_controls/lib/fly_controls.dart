@@ -246,7 +246,7 @@ class FlyControls{
 	}
 
   /// Should be called if the controls is no longer required.
-	void dispose(){
+	void deactivate(){
 		domElement.removeEventListener( PeripheralType.contextmenu, contextmenu, false );
 		domElement.removeEventListener( PeripheralType.pointerdown, mousedown, false );
 		domElement.removeEventListener( PeripheralType.pointerHover, mousemove, false );
@@ -254,4 +254,6 @@ class FlyControls{
 		domElement.removeEventListener( PeripheralType.keydown, keydown, false );
 		domElement.removeEventListener( PeripheralType.keyup, keyup, false );
 	}
+
+  void dispose(){}
 }

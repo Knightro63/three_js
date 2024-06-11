@@ -26,7 +26,7 @@ class _State extends State<WebglNodesPoints> {
   void dispose() {
     threeJs.dispose();
     three.loading.clear();
-    controls.clearListeners();
+    controls.dispose();
     super.dispose();
   }
 

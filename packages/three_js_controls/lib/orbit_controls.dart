@@ -365,16 +365,18 @@ class OrbitControls with EventDispatcher {
     return false;
   }
 
-  void dispose() {
+  void deactivate() {
     scope.domElement.removeEventListener(PeripheralType.contextmenu, onContextMenu);
-
     scope.domElement.removeEventListener(PeripheralType.pointerdown, onPointerDown);
     scope.domElement.removeEventListener(PeripheralType.pointercancel, onPointerCancel);
     scope.domElement.removeEventListener(PeripheralType.wheel, onMouseWheel);
-
     scope.domElement.removeEventListener(PeripheralType.pointermove, onPointerMove);
     scope.domElement.removeEventListener(PeripheralType.pointerup, onPointerUp);
   }
+
+  void dispose(){
+    clearListeners();
+  } 
 
   double get getAutoRotationAngle => 2 * math.pi / 60 / 60 * scope.autoRotateSpeed;
 

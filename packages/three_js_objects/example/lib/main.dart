@@ -82,7 +82,7 @@ class _MarchingState extends State<Marching> {
   @override
   void dispose() {
     threeJs.dispose();
-    controls.clearListeners();
+    controls.dispose();
     super.dispose();
   }
 

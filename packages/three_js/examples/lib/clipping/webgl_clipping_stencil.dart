@@ -34,8 +34,8 @@ class _State extends State<WebglClippingStencil> {
   }
   @override
   void dispose() {
+    controls.dispose();
     threeJs.dispose();
-    controls.clearListeners();
     super.dispose();
   }
 

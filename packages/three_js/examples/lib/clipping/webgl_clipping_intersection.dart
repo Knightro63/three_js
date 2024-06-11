@@ -30,8 +30,8 @@ class _State extends State<WebglClippingIntersection> {
   }
   @override
   void dispose() {
+    controls.dispose();
     threeJs.dispose();
-    controls.clearListeners();
     super.dispose();
   }
 

@@ -22,6 +22,10 @@ class InterleavedBuffer {
 
   String type = "InterleavedBuffer";
 
+  void dispose(){
+    array.dispose();
+  }
+
   /// [array] -- A typed array with a shared buffer. Stores the
   /// geometry data.
   /// 

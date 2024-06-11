@@ -27,9 +27,9 @@ class _State extends State<WebglLoaderUsdz> {
   }
   @override
   void dispose() {
+    controls.dispose();
     threeJs.dispose();
     three.loading.clear();
-    controls.clearListeners();
     super.dispose();
   }
 
@@ -63,7 +63,7 @@ class _State extends State<WebglLoaderUsdz> {
 
     threeJs.scene.background = rgbeLoader;
     // threeJs.scene.backgroundBlurriness = 0.5;
-    //threeJs.scene.environment = rgbeLoader;
+    threeJs.scene.environment = rgbeLoader;
 
     usdzLoader.position.y = 0.25;
     usdzLoader.position.z = - 0.25;

@@ -16,7 +16,11 @@ class Matrix4 {
   String type = "Matrix4";
   late Float32Array storage;
 
- Matrix4() {
+  void dispose(){
+    storage.dispose();
+  }
+
+  Matrix4() {
     storage = Float32Array.fromList([
       1.0,
       0.0,

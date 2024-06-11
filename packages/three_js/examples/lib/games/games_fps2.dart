@@ -49,9 +49,9 @@ class _FPSGame2PageState extends State<FPSGame2> {
   }
   @override
   void dispose() {
+    fpsControl.dispose();
     threeJs.dispose();
     three.loading.clear();
-    fpsControl.clearListeners();
     super.dispose();
   }
 

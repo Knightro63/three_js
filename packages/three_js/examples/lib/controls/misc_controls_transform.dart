@@ -37,8 +37,8 @@ class _MyAppState extends State<MiscControlsTransform> {
   }
   @override
   void dispose() {
+    control.dispose();
     threeJs.dispose();
-    control.clearListeners();
     orbit.clearListeners();
     super.dispose();
   }

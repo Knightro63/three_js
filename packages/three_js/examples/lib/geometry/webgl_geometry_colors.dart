@@ -29,8 +29,8 @@ class _MyAppState extends State<WebglGeometryColors> {
   }
   @override
   void dispose() {
+    controls.dispose();
     threeJs.dispose();
-    controls.clearListeners();
     super.dispose();
   }
 

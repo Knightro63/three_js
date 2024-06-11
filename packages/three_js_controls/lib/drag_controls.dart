@@ -58,7 +58,7 @@ class DragControls with EventDispatcher {
 
   /// Should be called if the controls is no longer required.
   void dispose() {
-    deactivate();
+    clearListeners();
   }
 
   get getObjects => _objects;

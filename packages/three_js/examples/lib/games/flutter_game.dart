@@ -30,9 +30,9 @@ class _MyAppState extends State<FlutterGame> {
   }
   @override
   void dispose() {
+    joystick?.dispose();
     threeJs.dispose();
     three.loading.clear();
-    joystick?.dispose();
     super.dispose();
   }
 

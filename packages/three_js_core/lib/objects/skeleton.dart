@@ -43,6 +43,7 @@ class Skeleton {
   DataTexture? boneTexture;
   late int boneTextureSize;
   double frame = -1;
+  bool disposed = true;
 
   /// [bones] - The array of [bones]. Default is an empty
   /// array.
@@ -203,11 +204,18 @@ class Skeleton {
   /// Frees the GPU-related resources allocated by this instance. Call this
   /// method whenever this instance is no longer used in your app.
   void dispose() {
-    if (boneTexture != null) {
-      boneTexture!.dispose();
+    if(disposed) return;
+    disposed = true;
+    boneTexture?.dispose();
+    boneMatrices?.dispose();
 
-      boneTexture = null;
-    }
+    boneInverses.forEach((bone){
+      bone.dispose();
+    });
+
+    bones.forEach((bone){
+      bone.dispose();
+    });
   }
 
   Skeleton fromJson(Map<String,dynamic> json, Map<String,Bone?> bones) {

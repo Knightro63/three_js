@@ -87,7 +87,5 @@ class DeviceOrientationControls{
     }
 	}
 
-	void dispose(){
-	  disconnect();
-	}
+	void dispose(){}
 }

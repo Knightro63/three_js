@@ -34,8 +34,8 @@ class _MyAppState extends State<MiscControlsTrackball> {
   }
   @override
   void dispose() {
+    controls.dispose();
     threeJs.dispose();
-    controls.clearListeners();
     super.dispose();
   }
 

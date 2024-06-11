@@ -37,6 +37,7 @@ import 'directional_light_shadow.dart';
 /// ```
 class DirectionalLight extends Light {
   bool isDirectionalLight = true;
+  bool disposed = true;
 
   /// [color] - (optional) hexadecimal color of the light.
   /// Default is 0xffffff.
@@ -69,5 +70,8 @@ class DirectionalLight extends Light {
   @override
   void dispose() {
     shadow!.dispose();
+    if(disposed) return;
+    disposed = true;
+    super.dispose();
   }
 }

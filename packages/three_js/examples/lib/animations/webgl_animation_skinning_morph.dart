@@ -27,7 +27,7 @@ class _State extends State<WebglAnimationSkinningMorph> {
   @override
   void dispose() {
     threeJs.dispose();
-    controls.clearListeners();
+    controls.dispose();
     three.loading.clear();
     super.dispose();
   }

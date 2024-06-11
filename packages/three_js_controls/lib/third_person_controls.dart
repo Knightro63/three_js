@@ -179,7 +179,7 @@ class ThirdPersonControls with EventDispatcher {
   }
 
   /// Should be called if the controls is no longer required.
-	void dispose() {
+	void disconnect() {
     if(onMouseDown != null){
 		  domElement.removeEventListener( PeripheralType.pointerdown, onMouseDown!, false );
     }
@@ -190,6 +190,10 @@ class ThirdPersonControls with EventDispatcher {
 		domElement.removeEventListener( PeripheralType.keydown, onKeyDown, false );
 		domElement.removeEventListener( PeripheralType.keyup, onKeyUp, false );
 	}
+
+  void dispose(){
+    clearListeners();
+  } 
 
 	void setOrientation( controls ) {
 		final quaternion = controls.camera.quaternion;

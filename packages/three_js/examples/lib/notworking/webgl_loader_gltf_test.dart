@@ -32,7 +32,7 @@ class _MyAppState extends State<WebglLoaderGltfTest> {
   @override
   void dispose() {
     threeJs.dispose();
-    controls.clearListeners();
+    controls.dispose();
     three.loading.clear();
     super.dispose();
   }

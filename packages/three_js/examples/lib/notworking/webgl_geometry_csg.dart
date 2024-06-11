@@ -27,7 +27,7 @@ class _State extends State<WebglGeometryCSG> {
   void dispose() {
     threeJs.dispose();
     three.loading.clear();
-    controls.clearListeners();
+    controls.dispose();
     super.dispose();
   }
 

@@ -26,6 +26,7 @@ class _State extends State<MiscControlsFly> {
   }
   @override
   void dispose() {
+    controls.dispose();
     threeJs.dispose();
     three.loading.clear();
     super.dispose();
