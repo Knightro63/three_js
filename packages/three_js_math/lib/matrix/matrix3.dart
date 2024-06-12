@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter_angle/flutter_angle.dart';
 import 'dart:math' as math;
 import 'index.dart';
@@ -6,17 +8,12 @@ import 'index.dart';
 /// [matrix](https://en.wikipedia.org/wiki/Matrix_(mathematics)).
 class Matrix3 {
   String type = "Matrix3";
-
-  late Float32Array storage;
-
-  void dispose(){
-    storage.dispose();
-  }
+  late Float32List storage;
 
   /// Creates a 3x3 matrix with the given arguments in row-major order. If no arguments are provided, the constructor initializes
   /// the [Matrix3] to the 3x3 [identity matrix](https://en.wikipedia.org/wiki/Identity_matrix).
   Matrix3.identity() {
-    storage = Float32Array.fromList([1, 0, 0, 0, 1, 0, 0, 0, 1]);
+    storage = Float32List.fromList([1, 0, 0, 0, 1, 0, 0, 0, 1]);
   }
 
   Matrix3 setValues(double n11, double n12, double n13, double n21, double n22, double n23, double n31, double n32, double n33) {

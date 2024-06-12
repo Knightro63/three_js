@@ -209,10 +209,6 @@ class Skeleton {
     boneTexture?.dispose();
     boneMatrices?.dispose();
 
-    boneInverses.forEach((bone){
-      bone.dispose();
-    });
-
     bones.forEach((bone){
       bone.dispose();
     });

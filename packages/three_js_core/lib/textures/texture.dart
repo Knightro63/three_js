@@ -22,7 +22,6 @@ class Texture with EventDispatcher {
   static String? defaultImage;
   static int defaultMapping = UVMapping;
 
-  bool disposed = false;
   bool isTexture = true;
   bool isWebGLRenderTarget = false;
   bool isVideoTexture = false;
@@ -209,9 +208,6 @@ class Texture with EventDispatcher {
     else {
       image?.dispose();
     }
-    if(disposed) return;
-    disposed = true;
-    matrix.dispose();
   }
 
   Vector2 transformUv(Vector2 uv) {

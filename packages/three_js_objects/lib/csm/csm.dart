@@ -254,22 +254,22 @@ class CSM{
 			shader.uniforms!['cameraNear'] = { ['value']: scope.camera.near };
 			shader.uniforms!['shadowFar'] = { ['value']: far };
 
-			shaders['material'] = shader;//.set material, shader );
+			shaders[material] = shader;//.set material, shader );
 		};
 
-		shaders['material'] = null;//.set( material, null );
+		shaders[material] = null;//.set( material, null );
 	}
 
 	void updateUniforms() {
 		final far = math.min( data.camera.far, data.maxFar );
 		final shaders = this.shaders;
 
-		shaders.forEach(( shader, material ) {
-      shader as Material?;
+		shaders.forEach((material,shader ) {
+      shader as WebGLParameters?;
       material as Material;
 			if ( shader != null ) {
 				final uniforms = shader.uniforms;
-				getExtendedBreaks( uniforms['CSM_cascades']['value'] );
+				getExtendedBreaks( uniforms!['CSM_cascades']['value'] );
 				uniforms['cameraNear']['value'] = data.camera.near;
 				uniforms['shadowFar']['value'] = far;
 			}
@@ -317,18 +317,18 @@ class CSM{
 
 	void dispose() {
 		final shaders = this.shaders;
-		shaders.forEach(( shader, material ) {
+		shaders.forEach((material,shader ) {
+      shader as WebGLParameters?;
       material as Material;
-      shader as Material?;
-			material.onBeforeCompile;
+			//material.onBeforeCompile;
 			material.defines?.remove('USE_CSM');
 			material.defines?.remove('CSM_CASCADES');
 			material.defines?.remove('CSM_FADE');
 
 			if ( shader != null ) {
-				shader.uniforms.remove('CSM_cascades');
-				shader.uniforms.remove('cameraNear');
-				shader.uniforms.remove('shadowFar');
+				shader.uniforms?.remove('CSM_cascades');
+				shader.uniforms?.remove('cameraNear');
+				shader.uniforms?.remove('shadowFar');
 			}
 
 			material.needsUpdate = true;

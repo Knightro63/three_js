@@ -1713,28 +1713,16 @@ class ArcballControls with EventDispatcher {
 	/// Remove all listeners, stop animations and clean scene
 	///
   void dispose() {
+    clearListeners();
     if(disposed) return;
     disposed = true;
     if (_animationId != -1) {
       cancelAnimationFrame(_animationId);
     }
 
-    clearListeners();
-
     if (scene != null) scene!.remove(_gizmos);
     _gizmos.dispose();
     disposeGrid();
-
-    _m4_1.dispose();
-    _m4_2.dispose();
-    _translationMatrix.dispose();
-    _rotationMatrix.dispose();
-    _scaleMatrix.dispose();
-    _cameraMatrixState.dispose();
-    _cameraProjectionState.dispose();
-    _gizmoMatrixState.dispose();
-    _cameraMatrixState0.dispose();
-    _gizmoMatrixState0.dispose();
   }
 	/// remove the grid from the scene
 	///

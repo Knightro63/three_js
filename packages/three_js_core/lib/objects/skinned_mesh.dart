@@ -63,7 +63,6 @@ final _matrix = Matrix4.identity();
 class SkinnedMesh extends Mesh {
   String bindMode = "attached";
   Matrix4 bindMatrixInverse = Matrix4.identity();
-  bool disposed = true;
 
   /// [geometry] - an instance of [BufferGeometry].
   /// 
@@ -191,13 +190,5 @@ class SkinnedMesh extends Mesh {
     else {
       return super.getValue(name);
     }
-  }
-
-  @override
-  void dispose(){
-    if(disposed) return;
-    disposed = true;
-    super.dispose();
-    bindMatrixInverse.dispose();
   }
 }

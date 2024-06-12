@@ -48,7 +48,7 @@ Event _removedEvent = Event(type: "removed");
 /// Note that this can be used for grouping objects via the [add] method which adds the object as a child, however it is better to
 /// use [Group] for this.
 class Object3D with EventDispatcher {
-  bool didDispose = true;
+  bool disposed = false;
   static Vector3 defaultUp = Vector3(0.0, 1.0, 0.0);
   static bool defaultMatrixAutoUpdate = true;
 
@@ -1068,32 +1068,35 @@ class Object3D with EventDispatcher {
   }
 
   void dispose(){
-    if(didDispose) return;
-    didDispose = true;
-    parent?.dispose();
+    if(disposed) return;
+    disposed = true;
+
+    for(final child in children){
+      child.dispose();
+    }
+
     material?.dispose();
+    material = null;
     overrideMaterial?.dispose();
+    overrideMaterial = null;
     customDepthMaterial?.dispose();
+    customDepthMaterial = null;
     customDistanceMaterial?.dispose();
-    
-    // matrix.dispose();
-    // matrixWorld.dispose();
-    modelViewMatrix.dispose();
-    normalMatrix.dispose();
-    bindMatrix?.dispose();
+    customDistanceMaterial = null;
 
     geometry?.dispose();
+    geometry = null;
     environment?.dispose();
+    environment = null;
 
     instanceMatrix?.dispose();
+    instanceMatrix = null;
     instanceColor?.dispose();
-
-    children.forEach((child){
-      child.dispose();
-    });
+    instanceColor = null;
 
     if(background is NativeArray || background is ImageElement || background is Texture){
-      background.dispose();
+      background?.dispose();
+      background = null;
     }
   }
 }

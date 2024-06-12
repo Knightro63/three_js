@@ -100,18 +100,28 @@ class ThreeJS{
   void Function([double? dt])? postProcessor;
   FutureOr<void> Function()? setup;
   List<Function(double dt)> events = [];
+  List<Function()> disposeEvents = [];
 
   void addAnimationEvent(Function(double dt) event){
     events.add(event);
   }
+  void toDispose(Function() event){
+    disposeEvents.add(event);
+  }
+
   void dispose(){
+    if(disposed) return;
     disposed = true;
+    print('dispose');
     renderer?.dispose();
     renderTarget?.dispose();
     if(texture != null && _allowDeleteTexture){
       FlutterAngle.deleteTexture(texture!);
     }
     scene.dispose();
+    disposeEvents.forEach((event){
+      event.call();
+    });
   }
 
   void initSize(BuildContext context){

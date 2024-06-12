@@ -19,6 +19,7 @@ import 'package:example/loaders/webgl_loader_fbx_nurbs.dart';
 import 'package:example/loaders/webgl_loader_gcode.dart';
 import 'package:example/loaders/webgl_loader_glb.dart';
 import 'package:example/loaders/webgl_loader_ply.dart';
+import 'package:example/loaders/webgl_loader_scn.dart';
 import 'package:example/loaders/webgl_loader_stl.dart';
 import 'package:example/loaders/webgl_loader_usdz.dart';
 import 'package:example/loaders/webgl_loader_vox.dart';
@@ -214,6 +215,9 @@ class _MyAppState extends State<ExamplePage> {
     } 
     else if(fileName == "webgl_loader_gcode"){
       page = WebglLoaderGcode(fileName: fileName);
+    }
+    else if(fileName == "webgl_loader_scn"){
+      page = WebglLoaderSCN(fileName: fileName);
     }
     else if(fileName == "webgl_loader_usdz"){
       page = WebglLoaderUsdz(fileName: fileName);

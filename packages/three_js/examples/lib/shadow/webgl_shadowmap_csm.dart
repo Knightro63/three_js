@@ -48,7 +48,6 @@ class _State extends State<WebglShadowmapCsm> {
 
   late three.OrbitControls controls;
   late three.OrthographicCamera orthoCamera;
-  late CSMHelper csmHelper;
 
   final Map<String,dynamic> params = {
     'orthographic': false,
@@ -65,10 +64,6 @@ class _State extends State<WebglShadowmapCsm> {
   };
 
   Future<void> setup() async {
-    params['updateHelper'] = () {
-      csmHelper.update();
-    };
-
     threeJs.scene = three.Scene();
     threeJs.scene.background = three.Color.fromHex32(0x454e61);
     threeJs.camera = three.PerspectiveCamera( 70, threeJs.width/threeJs.height, 0.1, 5000 );
@@ -99,10 +94,6 @@ class _State extends State<WebglShadowmapCsm> {
       )
     );
 
-    csmHelper = CSMHelper( csm );
-    csmHelper.visible = false;
-    threeJs.scene.add( csmHelper );
-
     final floorMaterial = three.MeshPhongMaterial.fromMap( { 'color': 0x252a34 } );
     csm.setupMaterial( floorMaterial );
 
@@ -121,7 +112,6 @@ class _State extends State<WebglShadowmapCsm> {
     final geometry = three.BoxGeometry( 10, 10, 10 );
 
     for (int i = 0; i < 40; i ++ ) {
-
       final cube1 = three.Mesh( geometry, i % 2 == 0 ? material1 : material2 );
       cube1.castShadow = true;
       cube1.receiveShadow = true;
@@ -135,12 +125,15 @@ class _State extends State<WebglShadowmapCsm> {
       threeJs.scene.add( cube2 );
       cube2.position.setValues( - i * 25, 20, - 30 );
       cube2.scale.y = math.Random().nextDouble() * 2 + 6;
-
     }
 
     threeJs.addAnimationEvent((dt) {
       //updateOrthoCamera();
       animate();
+    });
+
+    threeJs.toDispose((){
+      csm.dispose();
     });
   }
 
@@ -165,18 +158,8 @@ class _State extends State<WebglShadowmapCsm> {
     controls.update();
 
     if (params['orthographic']) {
-
       updateOrthoCamera();
       csm.updateFrustums();
-
-      if ( params['autoUpdateHelper'] ) {
-        csmHelper.update();
-      }
     } 
-    else {
-      if ( params['autoUpdateHelper'] ) {
-        csmHelper.update();
-      }
-    }
   }
 }

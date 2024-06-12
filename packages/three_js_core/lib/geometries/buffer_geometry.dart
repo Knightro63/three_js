@@ -62,7 +62,7 @@ class BufferGeometry with EventDispatcher {
   late List<MorphTarget> morphTargets;
   late BufferGeometry directGeometry;
 
-  bool disposed = true;
+  bool disposed = false;
   bool elementsNeedUpdate = false;
   bool verticesNeedUpdate = false;
   bool uvsNeedUpdate = false;
@@ -210,7 +210,6 @@ class BufferGeometry with EventDispatcher {
       final normalMatrix = Matrix3.identity().getNormalMatrix(matrix);
       normal.applyNormalMatrix(normalMatrix);
       normal.needsUpdate = true;
-      normalMatrix.dispose();
     }
 
     final tangent = attributes["tangent"];
@@ -1020,7 +1019,6 @@ class BufferGeometry with EventDispatcher {
   /// Frees the GPU-related resources allocated by this instance. Call this
   /// method whenever this instance is no longer used in your app.
   void dispose() {
-    console.info(" BufferGeometry dispose ........... ");
     dispatchEvent(Event(type: "dispose"));
 
     if(disposed) return;

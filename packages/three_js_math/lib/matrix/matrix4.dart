@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'index.dart';
 import 'package:flutter_angle/flutter_angle.dart';
 import '../vector/index.dart';
@@ -14,14 +16,10 @@ final _matrix4z = Vector3.zero();
 
 class Matrix4 {
   String type = "Matrix4";
-  late Float32Array storage;
-
-  void dispose(){
-    storage.dispose();
-  }
+  late Float32List storage;
 
   Matrix4() {
-    storage = Float32Array.fromList([
+    storage = Float32List.fromList([
       1.0,
       0.0,
       0.0,
@@ -41,7 +39,7 @@ class Matrix4 {
     ]);
   }
   Matrix4.identity() {
-    storage = Float32Array.fromList([
+    storage = Float32List.fromList([
       1.0,
       0.0,
       0.0,
@@ -61,7 +59,7 @@ class Matrix4 {
     ]);
   }
   Matrix4.zero() {
-    storage = Float32Array.fromList([
+    storage = Float32List.fromList([
       0.0,
       0.0,
       0.0,

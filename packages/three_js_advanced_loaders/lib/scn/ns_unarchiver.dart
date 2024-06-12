@@ -1,39 +1,52 @@
 import 'dart:typed_data';
 import 'dart:math' as math;
-import 'package:three_js_advanced_loaders/scn/binary_reader.dart';
+import 'binary_reader_old.dart';
 import 'package:three_js_core/three_js_core.dart';
 
+final Map<String,dynamic> _classForKey = {};
+const _loadingSymbol = Symbol('loading');
+
+class _UID {
+  late NsUnarchiver _unarchiver;
+  late int _value; 
+
+  _UID(NsUnarchiver unarchiver, int value) {
+    _unarchiver = unarchiver;
+   _value = value;
+  }
+
+  int get value => _value;
+  NsUnarchiver get obj => _unarchiver._parsedObj[r'$objects'][_value];
+}
+
 class NsUnarchiver{
-  Uint8List data;
-  NsUnarchiver(Uint8List? data, [Map? options]){
+  NsUnarchiver([Uint8List? data, Map? options]){
     options ??= {};
 
     if(data != null){
       _reader = BinaryReader(data, true, 'utf8');//String.fromCharCodes(data);
-      _checkHeader(_reader);
+      _checkHeader(data);
       _parsedObj = _parseBPlist();
     }
   }
 
-  BinaryReader _reader;
-  int _offsetSize;
-  int _objCount;
-  List<int> _offsetArray;
+  late BinaryReader _reader;
+  late int _offsetSize;
+  late int _objCount;
+  List<int> _offsetArray = [];
   dynamic _parsedObj;
-  String _filePath;
-  List _dataObj;
+  String? _filePath;
+  Map<int,dynamic> _dataObj = {};
   bool _requiresSecureCoding = false;
   dynamic delegate;
-  _decodingFailurePolicy;
-  _resolveFunctions;
-  _refObj;
-  _decodingFinished;
+  Map<int,List?> _resolveFunctions = {};
+  dynamic _refObj;
+  bool _decodingFinished = false;
 
   NsUnarchiver copy() {
     final coder = NsUnarchiver();
     coder._requiresSecureCoding = _requiresSecureCoding;
     coder.delegate = delegate;
-    coder._decodingFailurePolicy = _decodingFailurePolicy;
     coder._reader = _reader;
     coder._offsetSize = _offsetSize;
     coder._objCount = _objCount;
@@ -51,12 +64,13 @@ class NsUnarchiver{
     options ??= {};
     final unarchiver = NsUnarchiver(data, options);
     unarchiver._filePath = path;
-    final topObjIndex = unarchiver._parsedObj.$top.root.value;
+    print(unarchiver._parsedObj);
+    final topObjIndex = unarchiver._parsedObj[r'$top']['root'];
     return unarchiver._parseClassAt(topObjIndex);
   }
 
-  bool _checkHeader(BinaryReader text) {
-    final header = text.readString(8);
+  bool _checkHeader(Uint8List text) {
+    final header = String.fromCharCodes(text.sublist(0,8));
     if(header != 'bplist00'){
       console.warning('unsupported file format: $header');
       return false;
@@ -75,12 +89,12 @@ class NsUnarchiver{
     final topIndex = reader.readUnsignedLongLong();
     final tablePos = reader.readUnsignedLongLong();
 
-    //console.log('dataLen: ${dataLen}')
-    //console.log('intSize: ${intSize}')
-    //console.log('offsetSize: ${this._offsetSize}')
-    //console.log('objCount: ${this._objCount}')
-    //console.log('topIndex: ${topIndex}')
-    //console.log('tablePos: ${tablePos}')
+    print('dataLen: $dataLen');
+    print('intSize: $intSize');
+    print('offsetSize: $_offsetSize');
+    print('objCount: $_objCount');
+    print('topIndex: $topIndex');
+    print('tablePos: $tablePos');
 
     _offsetArray = [];
     int pos = tablePos;
@@ -95,7 +109,7 @@ class NsUnarchiver{
   }
 
   _parseObjAtIndex(index) {
-    return _parseObj(_offsetArray[index]);
+    return _parseObj(_offsetArray.isEmpty?null:_offsetArray[index]);
   }
 
   _parseObj([int? offset, bool signed = false]) {
@@ -106,85 +120,85 @@ class NsUnarchiver{
     final type = reader.readUnsignedByte();
     final type1 = type & 0xF0;
     final type2 = type & 0x0F;
-    //console.log('parseObj: type: ${type1} ${type2}')
+    //print('parseObj: type: ${type1} ${type2}')
     if(type1 == 0x00){
       // null, boolean
       if(type2 == 0){
-        //console.log('   type: null')
+        //print('   type: null')
         return null;
       }else if(type2 == 8){
-        //console.log('   type: boolean')
+        //print('   type: boolean')
         return false;
       }else if(type2 == 9){
-        //console.log('   type: boolean')
+        //print('   type: boolean')
         return true;
       }
     }else if(type1 == 0x10){
       // Int
       final int len = math.pow(2, type2).toInt();
-      //console.log('   type: integer ' + len)
+      //print('   type: integer ' + len)
       return reader.readInteger(len, signed);
     }else if(type1 == 0x20){
       // Float
       final len = math.pow(2, type2);
       if(len == 4){
-        //console.log('   type: float')
+        //print('   type: float')
         return reader.readFloat();
       }else if(len == 8){
-        //console.log('   type: double')
+        //print('   type: double')
         return reader.readDouble();
       }
       throw('unsupported float size: $len');
     }else if(type1 == 0x30){
       // Date
-      //console.log('   type: Date')
+      //print('   type: Date')
     }else if(type1 == 0x40){
       // Data
-      final count = this._getDataSize(type2);
-      //console.log('   type: Data: length: ${count}')
+      final count = _getDataSize(type2);
+      //print('   type: Data: length: ${count}')
       return reader.readData(count);
     }else if(type1 == 0x50){
       // ASCII
-      final count = this._getDataSize(type2);
-      //console.log('   type: ascii ' + count)
+      final count = _getDataSize(type2);
+      //print('   type: ascii ' + count)
       return reader.readString(count, 'ascii');
     }else if(type1 == 0x60){
       // UTF-16
-      final count = this._getDataSize(type2);
-      //console.log('   type: UTF-16 ' + count)
+      final count = _getDataSize(type2);
+      //print('   type: UTF-16 ' + count)
       return reader.readString(count, 'utf16be'); // Big Endian might not be supported...
     }else if(type1 == 0x80){
       // UID
       final uid = reader.readInteger(type2 + 1, false);
-      //console.log('   type: UID: ' + uid)
+      //print('   type: UID: ' + uid)
       return _UID(this, uid);
     }
     else if(type1 == 0xA0){
       // Array
-      final count = this._getDataSize(type2);
-      //console.log('   type: array: ' + count)
+      final count = _getDataSize(type2);
+      //print('   type: array: ' + count)
       final arrIndex = [];
       for(int i=0; i<count; i++){
         arrIndex.add(reader.readInteger(_offsetSize, false));
       }
       final arr = arrIndex.map((index) => _parseObjAtIndex(index));
-      //console.log('***arr.length: ${arr.length}')
+      //print('***arr.length: ${arr.length}')
       return arr;
     }
     else if(type1 == 0xC0){
       // Set
-      final count = this._getDataSize(type2);
+      final count = _getDataSize(type2);
       final setIndex = [];
       for(int i=0; i<count; i++){
         setIndex.add(reader.readInteger(_offsetSize, false));
       }
       final arr = setIndex.map((index) => _parseObjAtIndex(index));
-      return Set(arr);
+      return arr;
     }
     else if(type1 == 0xD0){
       // Dictionary
-      //console.log('   type: dictionary')
-      final count = this._getDataSize(type2);
+      //print('   type: dictionary')
+      final count = _getDataSize(type2);
       final keyIndex = [];
       final valueIndex = [];
       for(int i=0; i<count; i++){
@@ -196,9 +210,9 @@ class NsUnarchiver{
       final result = {};
       for(int i=0; i<count; i++){
         final key = _parseObjAtIndex(keyIndex[i]);
-        //console.log('key: ' + key)
+        //print('key: ' + key)
         final val = _parseObjAtIndex(valueIndex[i]);
-        //console.log('val: ' + val)
+        //print('val: ' + val)
         result[key] = val;
       }
       return result;
@@ -207,40 +221,63 @@ class NsUnarchiver{
     throw('unknown data type: $type');
   }
 
-  _parseClassAt(index) {
-    final obj = this._parsedObj.$objects[index]
-    if(this._dataObj[index] === _loadingSymbol){
-      // it seems to be a reference loop; return Promise
-      return new Promise((resolve, reject) => {
-        if(typeof this._resolveFunctions[index] === 'undefined'){
-          this._resolveFunctions[index] = []
-        }
-        this._resolveFunctions[index].push(resolve)
-      })
-    }else if(typeof this._dataObj[index] !== 'undefined'){
-      return this._dataObj[index]
+  int _getDataSize(int type2) {
+    int count = 0;
+    if(type2 != 0x0F){
+      count = type2;
+    }else{
+      count = _parseObj(null, false);
     }
-    this._dataObj[index] = _loadingSymbol
-    final data = this._parseClass(obj)
-    this._dataObj[index] = data
-    if(Array.isArray(this._resolveFunctions[index])){
-      this._resolveFunctions[index].forEach((resolve) => {
-        resolve(data)
-      })
-      delete this._resolveFunctions[index]
-    }
-    return data
+    return count;
   }
 
-  _parseClass(obj) {
-    final className = obj.$class.obj.$classname;
-    //console.log(`parseClass ${className}`)
+  _parseClassAt(index) async {
+    final obj = _parsedObj[r'$objects'][index];
+    if(_dataObj[index] == _loadingSymbol){
+      // it seems to be a reference loop; return Promise
+      return ((resolve, reject){
+        if(_resolveFunctions[index] == null){
+          _resolveFunctions[index] = [];
+        }
+        _resolveFunctions[index]?.add(resolve);
+      });
+    }
+    else if(_dataObj[index] != null){
+      return _dataObj[index];
+    }
+    _dataObj[index] = _loadingSymbol;
+    final data = _parseClass(obj);
+    _dataObj[index] = data;
+    if(_resolveFunctions[index] != null && _resolveFunctions[index]!.isNotEmpty){
+      _resolveFunctions[index]?.forEach((resolve){
+        resolve(data);
+      });
+      _resolveFunctions[index] = null;
+    }
+    return data;
+  }
+
+  dynamic _parseClass(obj) {
+    final className = obj[r'$class'].obj[r'$classname'];
+    //print(`parseClass ${className}`)
     final classObj = NsUnarchiver.classForClassName(className);
-    if(classObj){
-      final unarchiver = this.copy();
+    if(classObj != null){
+      final unarchiver = copy();
       unarchiver._refObj = obj;
       return classObj.initWithCoder(unarchiver);
     }
-    return null
+    return null;
+  }
+
+  static void setClassForClassName(cls, String codedName) {
+    _classForKey[codedName] =  cls;
+  }
+
+  static dynamic classForClassName(codedName) {
+    final classObj = _classForKey[codedName];
+    if(classObj != null){
+      return classObj;
+    }
+    //return _ClassList.get(codedName);
   }
 }

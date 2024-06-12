@@ -7,3 +7,4 @@ export 'textures/data_texture_loader.dart';
 export 'ktx_loader.dart';
 export 'textures/compressed_texture_loader.dart';
 export 'usdz/usdz_loader.dart';
+export 'scn/scn_loader.dart';

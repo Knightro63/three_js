@@ -667,14 +667,14 @@ class MarchingCubes extends Mesh{
 
     // set the draw range to only the processed triangles
 
-    geometry!.setDrawRange( 0, count! );
+    geometry?.setDrawRange( 0, count! );
 
     // update geometry data
-    geometry!.getAttributeFromString('position').needsUpdate = true;
-    geometry!.getAttributeFromString('normal').needsUpdate = true;
+    geometry?.getAttributeFromString('position').needsUpdate = true;
+    geometry?.getAttributeFromString('normal').needsUpdate = true;
 
-    if (enableUvs ) geometry!.getAttributeFromString( 'uv' ).needsUpdate = true;
-    if (enableColors ) geometry!.getAttributeFromString( 'color' ).needsUpdate = true;
+    if (enableUvs ) geometry?.getAttributeFromString( 'uv' ).needsUpdate = true;
+    if (enableColors ) geometry?.getAttributeFromString( 'color' ).needsUpdate = true;
 
     // safety check
     if (count! / 3 > maxPolyCount ){ 

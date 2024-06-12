@@ -6,7 +6,6 @@ import 'light_shadow.dart';
 /// properties and methods described here.
 class Light extends Object3D {
   late double intensity;
-  bool disposed = true;
   Color? color;
   double? distance;
   LightShadow? shadow;
@@ -99,16 +98,6 @@ class Light extends Object3D {
     }
 
     return data;
-  }
-
-  /// Abstract dispose method for classes that extend this class; implemented by
-  /// subclasses that have disposable GPU-related resources.
-  @override
-  void dispose() {
-    if(disposed) return;
-    disposed = true;
-    super.dispose();
-    target?.dispose();
   }
 
   @override

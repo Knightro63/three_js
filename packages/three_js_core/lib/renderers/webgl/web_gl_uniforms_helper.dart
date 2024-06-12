@@ -9,14 +9,14 @@ final emptyCubeTexture = CubeTexture();
 
 // Array Caches (provide typed arrays for temporary by size)
 
-Map<int, Float32Array> arrayCacheF32 = {};
+Map<int, Float32List> arrayCacheF32 = {};
 Map arrayCacheI32 = {};
 
 // Float32List caches used for uploading Matrix uniforms
 
-final mat4array = Float32Array(16);
-final mat3array = Float32Array(9);
-final mat2array = Float32Array(4);
+final mat4array = Float32List(16);
+final mat3array = Float32List(9);
+final mat2array = Float32List(4);
 
 // --- Uniform Classes ---
 
@@ -202,7 +202,7 @@ mixin WebGLUniformsHelper {
   UniformLocation addr = UniformLocation(0);
   late int size;
 
-  Float32Array flatten(List array, int nBlocks, int blockSize) {
+  List<double> flatten(List array, int nBlocks, int blockSize) {
     final firstElem = array[0];
 
     if (firstElem is num || firstElem is double || firstElem is int) {
@@ -212,33 +212,19 @@ mixin WebGLUniformsHelper {
         array2.add(element.toDouble());
       }
 
-      return Float32Array.fromList(array2);
+      return array2;
     }
 
-    // // unoptimized: ! isNaN( firstElem )
-    // // see http://jacksondunstan.com/articles/983
-
     final n = nBlocks * blockSize;
-    Float32Array? r = arrayCacheF32[n];
+    Float32List? r = arrayCacheF32[n];
 
     if (r == null) {
-      r = Float32Array(n);
+      r = Float32List(n);
       arrayCacheF32[n] = r;
     }
 
     if (nBlocks != 0) {
-      // firstElem.toArray( r.data, 0 );
-
-      // for ( final i = 1, offset = 0; i != nBlocks; ++ i ) {
-
-      //   offset += blockSize;
-      //   array[ i ].toArray( r.data, offset );
-
-      // }
-
       for (int i = 0; i < nBlocks; i++) {
-        // print(" i: ${i} this: ${this} nBlocks: ${nBlocks} ");
-
         List<num> data = array[i].storage.toList();
 
         data.asMap().forEach((index, element) {
@@ -246,33 +232,6 @@ mixin WebGLUniformsHelper {
           r![idx] = element.toDouble();
         });
       }
-
-      // bool stringKey = false;
-
-      // if(array[0] == null) {
-      //   stringKey = true;
-      // }
-
-      // if(!stringKey) {
-      //   for ( final i = 0; i < nBlocks; i++ ) {
-      //     List<num> _data = array[ i ].toJson();
-
-      //     _data.asMap().forEach((index, element) {
-      //       int _idx = i * blockSize + index;
-      //       r[_idx] = element;
-      //     });
-      //   }
-      // } else {
-      //   for ( final i = 0; i < nBlocks; i++ ) {
-      //     List<num> _data = array[ i.toString() ].toJson();
-
-      //     _data.asMap().forEach((index, element) {
-      //       int _idx = i * blockSize + index;
-      //       r[_idx] = element;
-      //     });
-      //   }
-      // }
-
     }
     return r;
   }
@@ -297,11 +256,11 @@ mixin WebGLUniformsHelper {
 
   // Texture unit allocation
 
-  Int32Array allocTexUnits(textures, n) {
-    Int32Array? r = arrayCacheI32[n];
+  Int32List allocTexUnits(textures, n) {
+    Int32List? r = arrayCacheI32[n];
 
     if (r == null) {
-      r = Int32Array(n);
+      r = Int32List(n);
       arrayCacheI32[n] = r;
     }
 
@@ -380,7 +339,7 @@ mixin WebGLUniformsHelper {
       }
     } else {
       if (arraysEqual(cache, v)) return;
-      gl.uniform3fv(addr, Float32Array.fromList(v));
+      gl.uniform3fv(addr, Float32List.fromList(v));
 
       copyArray(cache, v);
     }
@@ -460,7 +419,7 @@ mixin WebGLUniformsHelper {
       copyArray(cache, v);
     } 
     else if(kIsWeb){
-      final element = elements.clone();
+      final element = elements.sublist(0);
       if (arraysEqual(cache, element)) {
         return;
       }
@@ -563,10 +522,9 @@ mixin WebGLUniformsHelper {
   void setValueV2i(RenderingContext gl, Vector v, [WebGLTextures? textures]) {
     final cache = this.cache;
     if (arraysEqual(cache, v)) return;
-    Int32Array iv = Int32Array.fromList([v.x.toInt(),v.y.toInt()]);
+    Int32List iv = Int32List.fromList([v.x.toInt(),v.y.toInt()]);
     gl.uniform2iv(addr, iv);
     copyArray(cache, v.copyIntoArray());
-    iv.dispose();
   }
 
   void setValueV3i(RenderingContext gl, v, [WebGLTextures? textures]) {

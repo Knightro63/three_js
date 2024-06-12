@@ -9,6 +9,8 @@ environment:
 
 dependencies:
   archive: ^3.6.1
+  file_picker: ^6.0.0
+  path_provider: ^2.0.11
   flutter:
     sdk: flutter
   three_js_core:
@@ -25,7 +27,7 @@ dependencies:
     path: ../three_js_animations
   three_js_controls:
     path: ../three_js_controls
-
+    
 dev_dependencies:
   flutter_test:
     sdk: flutter

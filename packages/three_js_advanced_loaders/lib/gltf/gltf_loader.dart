@@ -155,25 +155,25 @@ class GLTFLoader extends Loader {
     return this;
   }
 
-  GLTFLoader setDRACOLoader(dracoLoader) {
-    _dracoLoader = dracoLoader;
-    return this;
-  }
+  // GLTFLoader setDRACOLoader(dracoLoader) {
+  //   _dracoLoader = dracoLoader;
+  //   return this;
+  // }
 
-  GLTFLoader setDDSLoader(ddsLoader) {
-    _ddsLoader = ddsLoader;
-    return this;
-  }
+  // GLTFLoader setDDSLoader(ddsLoader) {
+  //   _ddsLoader = ddsLoader;
+  //   return this;
+  // }
 
-  GLTFLoader setKTX2Loader(ktx2Loader) {
-    _ktx2Loader = ktx2Loader;
-    return this;
-  }
+  // GLTFLoader setKTX2Loader(ktx2Loader) {
+  //   _ktx2Loader = ktx2Loader;
+  //   return this;
+  // }
 
-  GLTFLoader setMeshoptDecoder(meshoptDecoder) {
-    _meshoptDecoder = meshoptDecoder;
-    return this;
-  }
+  // GLTFLoader setMeshoptDecoder(meshoptDecoder) {
+  //   _meshoptDecoder = meshoptDecoder;
+  //   return this;
+  // }
 
   GLTFLoader register(Function callback) {
     if (pluginCallbacks.contains(callback)) {
