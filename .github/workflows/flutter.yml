@@ -1,0 +1,101 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+name: Dart
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      # - uses: actions/setup-java@v3.11.0
+      #   with:
+      #     java-version: 11
+      #     distribution: temurin
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.22.0'
+          channel: 'stable'
+          architecture: x64
+          cache: true
+
+      - name: Install dependencies for three_js
+        working-directory: ./packages/three_js
+        run: flutter pub get
+        
+      - name: Install dependencies for three_js_advanced_loaders
+        working-directory: ./packages/three_js_advanced_loaders
+        run: flutter pub get
+        
+      - name: Install dependencies for three_js_animations
+        working-directory: ./packages/three_js_animations
+        run: flutter pub get
+        
+      - name: Install dependencies for three_js_controls
+        working-directory: ./packages/three_js_controls
+        run: flutter pub get
+        
+      - name: Install dependencies for three_js_core
+        working-directory: ./packages/three_js_core
+        run: flutter pub get
+
+      - name: Install dependencies for three_js_core_loaders
+        working-directory: ./packages/three_js_core_loaders
+        run: flutter pub get
+        
+      - name: Install dependencies for three_js_curves
+        working-directory: ./packages/three_js_curves
+        run: flutter pub get
+
+      - name: Install dependencies for three_js_exporters
+        working-directory: ./packages/three_js_exporters
+        run: flutter pub get
+
+      - name: Install dependencies for three_js_geometry
+        working-directory: ./packages/three_js_geometry
+        run: flutter pub get
+
+      - name: Install dependencies for three_js_helpers
+        working-directory: ./packages/three_js_helpers
+        run: flutter pub get
+    
+      - name: Install dependencies for three_js_math
+        working-directory: ./packages/three_js_math
+        run: flutter pub get
+
+      - name: Install dependencies for three_js_objects
+        working-directory: ./packages/three_js_objects
+        run: flutter pub get
+
+      - name: Install dependencies for three_js_postprocessing
+        working-directory: ./packages/three_js_postprocessing
+        run: flutter pub get
+
+      - name: Install dependencies for three_js_simple_loaders
+        working-directory: ./packages/three_js_simple_loaders
+        run: flutter pub get
+
+      - name: Install dependencies for three_js_svg
+        working-directory: ./packages/three_js_svg
+        run: flutter pub get
+
+      - name: Install dependencies for three_js_text
+        working-directory: ./packages/three_js_text
+        run: flutter pub get
+
+      - name: Install dependencies for three_js_tjs_loader
+        working-directory: ./packages/three_js_tjs_loader
+        run: flutter pub get
+
+      - name: Install dependencies for three_js_transform_controls
+        working-directory: ./packages/three_js_transform_controls
+        run: flutter pub get

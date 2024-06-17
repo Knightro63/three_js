@@ -55,6 +55,7 @@ class _MyAppState extends State<WebglLoaderGlb> {
     threeJs.camera.position.setValues(3, 6, 10);
     controls = three.OrbitControls(threeJs.camera, threeJs.globalKey);
     threeJs.scene = three.Scene();
+    threeJs.scene.background = three.Color.fromHex32(0xffffff);
 
     final ambientLight = three.AmbientLight(0xffffff, 0.9);
     threeJs.scene.add(ambientLight);

@@ -664,10 +664,10 @@ class WebGLRenderer {
 
       for (int i = 0, l = cameras.length; i < l; i++) {
         final camera2 = cameras[i];
-
         renderScene(currentRenderList!, scene, camera2, camera2.viewport);
       }
-    } else {
+    } 
+    else {
       renderScene(currentRenderList!, scene, camera);
     }
 

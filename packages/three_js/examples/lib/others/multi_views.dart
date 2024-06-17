@@ -15,7 +15,7 @@ class MultiViews extends StatefulWidget {
 
 class _MyAppState extends State<MultiViews> {
   three.WebGLRenderer? renderer;
-  late FlutterAngleTexture three3dRender;// = FlutterGlPlugin();
+  late FlutterAngleTexture three3dRender;
 
   @override
   void initState() {
@@ -23,7 +23,6 @@ class _MyAppState extends State<MultiViews> {
   }
   @override
   void dispose() {
-    //three3dRender.dispose();
     super.dispose();
   }
 
@@ -37,8 +36,6 @@ class _MyAppState extends State<MultiViews> {
           dpr: 1
         )
       );
-      //await three3dRender.initialize(options: {"width": 1024, "height": 1024, "dpr": 1.0});
-      //await three3dRender.prepareContext();
 
       Map<String, dynamic> options = {
         "width": 1024,
@@ -119,7 +116,6 @@ class _multi_views1_State extends State<MultiViews1> {
   @override
   Widget build(BuildContext context) {
     return threeJs.build();
-    
   }
 
   Future<void> setup() async {

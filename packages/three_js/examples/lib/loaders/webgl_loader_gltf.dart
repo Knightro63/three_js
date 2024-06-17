@@ -22,6 +22,7 @@ class _MyAppState extends State<WebglLoaderGltf> {
       settings: three.Settings(
         clearAlpha: 0,
         clearColor: 0xffffff,
+        alpha: true
       ),
     );
     super.initState();

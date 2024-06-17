@@ -1,7 +1,5 @@
 import 'dart:async';
 import 'dart:math' as math;
-import 'dart:typed_data';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
 
@@ -24,7 +22,8 @@ class _State extends State<WebglShadowmapPointlight> {
       onSetupComplete: (){setState(() {});},
       setup: setup,
       settings: three.Settings(
-        shadowMapType: three.BasicShadowMap
+        shadowMapType: three.BasicShadowMap,
+        useSourceTexture: true
       )
     );
     super.initState();
@@ -102,7 +101,7 @@ class _State extends State<WebglShadowmapPointlight> {
     final pointLight2 = createLight( 0xff8888 );
     threeJs.scene.add( pointLight2 );
 
-    final geometry = three.BoxGeometry( 30, 30, 30 );
+    final geometry = three.BoxGeometry( 30,30,30 );
     final material = three.MeshPhongMaterial.fromMap( {
       'color': 0xa0adaf,
       'shininess': 10,

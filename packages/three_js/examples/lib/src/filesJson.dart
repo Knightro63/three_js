@@ -35,7 +35,7 @@ final filesJson = [
   "webgl_loader_obj",
   "webgl_loader_obj_mtl",
   "webgl_loader_gcode",
-  "webgl_loader_scn",
+  //"webgl_loader_scn",
   "webgl_loader_usdz",
   'webgl_loader_xyz',
   "webgl_animation_keyframes",

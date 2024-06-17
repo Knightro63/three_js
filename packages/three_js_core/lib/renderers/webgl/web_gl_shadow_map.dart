@@ -75,7 +75,7 @@ class WebGLShadowMap {
     final currentRenderTarget = _renderer.getRenderTarget();
     final activeCubeFace = _renderer.getActiveCubeFace();
     final activeMipmapLevel = _renderer.getActiveMipmapLevel();
-
+    
     final state = _renderer.state;
 
     // Set GL state for depth map.
