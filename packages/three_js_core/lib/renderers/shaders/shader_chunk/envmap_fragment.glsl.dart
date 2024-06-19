@@ -36,7 +36,7 @@ String envmapFragment = """
 
 	#ifdef ENVMAP_TYPE_CUBE
 
-		vec4 envColor = textureCube( envMap, vec3( flipEnvMap * reflectVec.x, reflectVec.yz ) );
+		vec4 envColor = textureCube( envMap, vec3( flipEnvMapX * reflectVec.x,flipEnvMapY * reflectVec.yz ) );
 
 	#elif defined( ENVMAP_TYPE_CUBE_UV )
 

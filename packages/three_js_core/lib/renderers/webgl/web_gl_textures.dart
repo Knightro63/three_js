@@ -71,12 +71,11 @@ class WebGLTextures {
     gl.generateMipmap(target);
   }
 
-  getInternalFormat(internalFormatName, glFormat, glType, encoding, [bool isVideoTexture = false]) {
+  getInternalFormat(internalFormatName, int glFormat, int glType, int encoding, [bool isVideoTexture = false]) {
     if (isWebGL2 == false) return glFormat;
 
     if (internalFormatName != null) {
-      // if ( gl[ internalFormatName ] != null ) return gl[ internalFormatName ];
-
+      if ( WebGL.get(internalFormatName) != null ) return WebGL.get(internalFormatName);
       console.warning('WebGLRenderer: Attempt to use non-existing WebGL internal format $internalFormatName');
     }
 
@@ -398,7 +397,8 @@ class WebGLTextures {
 
       gl.texParameteri(textureType, WebGL.TEXTURE_MAG_FILTER, filterToGL[texture.magFilter]!);
       gl.texParameteri(textureType, WebGL.TEXTURE_MIN_FILTER, filterToGL[texture.minFilter]!);
-    } else {
+    } 
+    else {
       gl.texParameteri(textureType, WebGL.TEXTURE_WRAP_S, WebGL.CLAMP_TO_EDGE);
       gl.texParameteri(textureType, WebGL.TEXTURE_WRAP_T, WebGL.CLAMP_TO_EDGE);
 
@@ -428,12 +428,10 @@ class WebGLTextures {
 
       if (texture.anisotropy > 1 || properties.get(texture)["__currentAnisotropy"] != null) {
         if (kIsWeb) {
-          gl.texParameterf(textureType, extension.TEXTURE_MAX_ANISOTROPY_EXT,
-              math.min(texture.anisotropy, capabilities.getMaxAnisotropy()).toDouble());
+          gl.texParameterf(textureType, extension.TEXTURE_MAX_ANISOTROPY_EXT,math.min(texture.anisotropy, capabilities.getMaxAnisotropy()).toDouble());
         } 
         else {
-          gl.texParameterf(textureType, WebGL.TEXTURE_MAX_ANISOTROPY_EXT,
-              math.min(texture.anisotropy, capabilities.getMaxAnisotropy()).toDouble());
+          gl.texParameterf(textureType, WebGL.TEXTURE_MAX_ANISOTROPY_EXT,math.min(texture.anisotropy, capabilities.getMaxAnisotropy()).toDouble());
         }
 
         properties.get(texture)["__currentAnisotropy"] = texture.anisotropy;
@@ -541,9 +539,8 @@ class WebGLTextures {
 
       final supportsMips = isPowerOfTwo(image) || isWebGL2, glFormat = utils.convert(texture.format, texture.encoding);
 
-      dynamic glType = utils.convert(texture.type),
-          glInternalFormat =
-              getInternalFormat(texture.internalFormat, glFormat, glType, texture.encoding, texture is VideoTexture);
+      int glType = utils.convert(texture.type);
+      int glInternalFormat = getInternalFormat(texture.internalFormat, glFormat, glType, texture.encoding, texture is VideoTexture);
 
       setTextureParameters(textureType, texture, supportsMips);
 
@@ -568,9 +565,9 @@ class WebGLTextures {
             glInternalFormat = WebGL.DEPTH24_STENCIL8;
           } else {
             glInternalFormat = WebGL.DEPTH_COMPONENT16; // WebGL2 requires sized internalformat for glTexImage2D
-
           }
-        } else {
+        } 
+        else {
           if (texture.type == FloatType) {
             console.error('WebGLRenderer: Floating point depth texture requires WebGL2.');
           }
@@ -627,7 +624,6 @@ class WebGLTextures {
 
           for (int i = 0, il = mipmaps.length; i < il; i++) {
             mipmap = mipmaps[i];
-
             if (useTexStorage) {
               state.texSubImage2D(WebGL.TEXTURE_2D, i, 0, 0, mipmap.width, mipmap.height, glFormat, glType, mipmap.data);
             } else {
@@ -775,7 +771,7 @@ class WebGLTextures {
     state.activeTexture(WebGL.TEXTURE0 + slot);
     state.bindTexture(WebGL.TEXTURE_CUBE_MAP, textureProperties['__webglTexture']);
 
-    if (source.version != source.currentVersion || forceUpload == true) {
+    if (source.version != source.currentVersion || forceUpload) {
       _gl.pixelStorei(WebGL.UNPACK_FLIP_Y_WEBGL, texture.flipY ? 1 : 0);
       _gl.pixelStorei(WebGL.UNPACK_PREMULTIPLY_ALPHA_WEBGL, texture.premultiplyAlpha ? 1 : 0);
       _gl.pixelStorei(WebGL.UNPACK_ALIGNMENT, texture.unpackAlignment);
@@ -1099,15 +1095,12 @@ class WebGLTextures {
 
         for (int i = 0; i < 6; i++) {
           state.bindFramebuffer(WebGL.FRAMEBUFFER, renderTargetProperties["__webglFramebuffer"][i]);
-
-          // renderTargetProperties["__webglDepthbuffer"][ i ] = gl.createRenderbuffer();
           renderTargetProperties["__webglDepthbuffer"].add(gl.createRenderbuffer());
-
           setupRenderBufferStorage(renderTargetProperties["__webglDepthbuffer"][i], renderTarget, false);
         }
-      } else {
+      } 
+      else {
         state.bindFramebuffer(WebGL.FRAMEBUFFER, renderTargetProperties["__webglFramebuffer"]);
-
         renderTargetProperties["__webglDepthbuffer"] = gl.createRenderbuffer();
         setupRenderBufferStorage(renderTargetProperties["__webglDepthbuffer"], renderTarget, false);
       }
@@ -1253,8 +1246,7 @@ class WebGLTextures {
 
       state.bindTexture(glTextureType, textureProperties["__webglTexture"]);
       setTextureParameters(glTextureType, texture, supportsMips);
-      setupFrameBufferTexture(
-          renderTargetProperties["__webglFramebuffer"], renderTarget, texture, WebGL.COLOR_ATTACHMENT0, glTextureType);
+      setupFrameBufferTexture(renderTargetProperties["__webglFramebuffer"], renderTarget, texture, WebGL.COLOR_ATTACHMENT0, glTextureType);
 
       if (textureNeedsGenerateMipmaps(texture, supportsMips)) {
         generateMipmap(glTextureType);

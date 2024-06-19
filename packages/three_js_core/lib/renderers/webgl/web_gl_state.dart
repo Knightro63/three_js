@@ -458,7 +458,7 @@ class WebGLState {
     }
   }
 
-  void setPolygonOffset(bool polygonOffset, double? factor, double? units) {
+  void setPolygonOffset(bool polygonOffset, [double? factor, double? units]) {
     if (polygonOffset) {
       enable(WebGL.POLYGON_OFFSET_FILL);
 

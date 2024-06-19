@@ -13,12 +13,12 @@ import 'dart:math' as math;
 class RGBELoader extends DataTextureLoader {
   late final FileLoader _loader;
   int type = HalfFloatType;
-  bool flipY;
 
   /// [manager] — The [loadingManager] for the loader to use. Default is [DefaultLoadingManager].
   /// 
   /// Creates a new [FontLoader].
-  RGBELoader({LoadingManager? manager, this.flipY = false}):super(manager){
+  RGBELoader({LoadingManager? manager, bool flipY = false}):super(manager){
+    this.flipY = flipY;
     _loader = FileLoader(manager);
   }
 

@@ -9,8 +9,6 @@ environment:
 
 dependencies:
   archive: ^3.6.1
-  file_picker: ^6.0.0
-  path_provider: ^2.0.11
   flutter:
     sdk: flutter
   three_js_core:

@@ -337,8 +337,8 @@ class PMREMGenerator {
     if (isCubeTexture) {
       _cubemapMaterial ??= _getCubemapShader();
 
-      _cubemapMaterial.uniforms["flipEnvMap"]["value"] =
-          (texture.isRenderTargetTexture == false) ? -1 : 1;
+      _cubemapMaterial.uniforms["flipEnvMapX"]["value"] = (texture.isRenderTargetTexture == false) ? -1 : 1;
+      _cubemapMaterial.uniforms["flipEnvMapY"]["value"] = 1;
     } else {
       _equirectMaterial ??= _getEquirectMaterial();
     }
@@ -687,7 +687,8 @@ class PMREMGenerator {
       "name": 'CubemapToCubeUV',
       "uniforms": {
         'envMap': {},
-        'flipEnvMap': {"value": -1}
+        'flipEnvMapX': {"value": -1},
+        'flipEnvMapY': {"value": 1}
       },
       "vertexShader": _getCommonVertexShader(),
       "fragmentShader": """
@@ -695,7 +696,8 @@ class PMREMGenerator {
         precision mediump float;
         precision mediump int;
 
-        uniform float flipEnvMap;
+        uniform float flipEnvMapX;
+        uniform float flipEnvMapY;
 
         varying vec3 vOutputDirection;
 
@@ -703,7 +705,7 @@ class PMREMGenerator {
 
         void main() {
 
-          gl_FragColor = textureCube( envMap, vec3( flipEnvMap * vOutputDirection.x, vOutputDirection.yz ) );
+          gl_FragColor = textureCube( envMap, vec3( flipEnvMapX * vOutputDirection.x, flipEnvMapY *vOutputDirection.yz ) );
 
         }
       """,

@@ -24,7 +24,8 @@ class Settings{
     this.outputEncoding = LinearEncoding,
     this.toneMapping = NoToneMapping,
     this.shadowMapType = PCFShadowMap,
-    this.toneMappingExposure = 1.0
+    this.toneMappingExposure = 1.0,
+    this.logarithmicDepthBuffer = false
   }){
     this.renderOptions = renderOptions ?? {
       "format": RGBAFormat,
@@ -33,6 +34,7 @@ class Settings{
   }
 
   bool animate;
+  bool logarithmicDepthBuffer;
   bool useSourceTexture;
   bool enableShadowMap;
   bool autoClear;
@@ -77,6 +79,11 @@ class ThreeJS{
 
   FlutterAngleTexture? texture;
   late final RenderingContext gl;
+  
+  core.WebGLRenderTarget? falseRenderTarget;
+  late final core.Camera falseCamera;
+  late final core.Mesh falseMesh;
+
   core.WebGLRenderTarget? renderTarget;
   core.WebGLRenderer? renderer;
   core.WebGLRenderer? lateRenderer;
@@ -115,6 +122,7 @@ class ThreeJS{
     print('dispose');
     renderer?.dispose();
     renderTarget?.dispose();
+    falseRenderTarget?.dispose();
     if(texture != null && _allowDeleteTexture){
       FlutterAngle.deleteTexture(texture!);
     }
@@ -153,13 +161,19 @@ class ThreeJS{
       });
     }
   }
-
   Future<void> render() async{
     if(sourceTexture == null){
       FlutterAngle.activateTexture(texture!);
     }
     rendererUpdate?.call(); 
     if(postProcessor == null){
+      // false target to get it to run
+      if(sourceTexture != null && !kIsWeb){
+        renderer!.setRenderTarget(falseRenderTarget);
+        renderer!.render(falseMesh,falseCamera );
+        renderer!.setRenderTarget(renderTarget);
+      }
+      
       renderer!.clear();
       renderer!.setViewport(0,0,width,height);
       renderer!.render(scene, camera);
@@ -185,12 +199,9 @@ class ThreeJS{
         "alpha": settings.alpha,
         "clearColor": settings.clearColor,
         "clearAlpha": settings.clearAlpha,
+        "logarithmicDepthBuffer": settings.logarithmicDepthBuffer
       };
-
-      if(!kIsWeb){
-        //options['logarithmicDepthBuffer'] = true;
-      }
-
+      
       renderer = lateRenderer ?? core.WebGLRenderer(options);
       renderer!.setPixelRatio(dpr);
       renderer!.setSize(width, height, false);
@@ -216,6 +227,10 @@ class ThreeJS{
       renderTarget = core.WebGLMultisampleRenderTarget((width * dpr).toInt(), (height * dpr).toInt(), pars);
       renderer!.setRenderTarget(renderTarget);
       sourceTexture = renderer!.getRenderTargetGLTexture(renderTarget!);
+
+      falseMesh = core.Mesh(core.PlaneGeometry(0, 0), null);
+      falseRenderTarget = core.WebGLRenderTarget(0, 0, core.WebGLRenderTargetOptions({}));
+      falseCamera = core.Camera();
     }
   }
   void onWindowResize(BuildContext context){
@@ -288,10 +303,10 @@ class ThreeJS{
                     } 
                     else {
                       return texture != null?
-                      Transform.scale(
-                        scaleY: settings.useSourceTexture || Platform.isAndroid?1:-1,
-                        child:Texture(textureId: texture!.textureId)
-                      ):Container();
+                        Transform.scale(
+                          scaleY: sourceTexture != null || Platform.isAndroid?1:-1,
+                          child:Texture(textureId: texture!.textureId)
+                        ):Container();
                     }
                   })
                 );

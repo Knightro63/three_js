@@ -21,6 +21,9 @@ class _State extends State<WebglWater> {
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
       setup: setup,
+      settings: three.Settings(
+        useSourceTexture: true
+      )
     );
     super.initState();
   }
@@ -99,7 +102,7 @@ class _State extends State<WebglWater> {
 
     water.position.y = 1;
     water.rotation.x = math.pi * - 0.5;
-    //threeJs.scene.add( water );
+    threeJs.scene.add( water );
 
     // skybox
 

@@ -4,8 +4,6 @@ import 'dart:typed_data';
 import 'dart:math' as math;
 
 import 'package:three_js_advanced_loaders/scn/bplist_parser.dart';
-import 'package:three_js_advanced_loaders/scn/ns_unarchiver.dart';
-import 'package:three_js_advanced_loaders/scn/platform_saveFile.dart';
 import 'package:three_js_animations/three_js_animations.dart';
 import 'package:three_js_core_loaders/three_js_core_loaders.dart';
 
@@ -70,11 +68,6 @@ class SCNLoader extends Loader {
   }
 
   Future<AnimationObject?> _parse(Uint8List bufferBytes) async{
-    // SaveFile.saveString(
-    //   printName: 'scene2', 
-    //   fileType: 'json', 
-    //   data: NsUnarchiver.unarchiveObjectWithData(bufferBytes).toString()
-    // );
     Map temp = BPlist.parseBuffer(bufferBytes);
     final keys = temp.keys.toList();
     print(temp[keys[1]].length);

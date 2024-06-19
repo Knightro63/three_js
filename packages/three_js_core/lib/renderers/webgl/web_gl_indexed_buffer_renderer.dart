@@ -28,7 +28,6 @@ class WebGLIndexedBufferRenderer extends BaseWebGLBufferRenderer {
   @override
   void render(int start, int count) {
     gl.drawElements(mode, count, type, start * bytesPerElement);
-
     info.update(count, mode, 1);
   }
 

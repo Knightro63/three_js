@@ -207,14 +207,8 @@ class WebGLRenderer {
 
     info.programs = programCache.programs;
 
-    // xr
     xr = WebXRManager(this, _gl);
-
-    // shadow map
-
     shadowMap = WebGLShadowMap(this, objects, capabilities);
-
-    // print("3 initGLContext ..... ");
   }
 
   // API
@@ -439,8 +433,6 @@ class WebGLRenderer {
     Object3D object,
     Map<String, dynamic>? group,
   ) {
-    // print("renderBufferDirect .............material: ${material.runtimeType}  ");
-    // renderBufferDirect second parameter used to be fog (could be null)
     scene ??= _emptyScene;
     final frontFaceCW = (object is Mesh && object.matrixWorld.determinant() < 0);
 
@@ -451,7 +443,6 @@ class WebGLRenderer {
     BufferAttribute? index = geometry.index;
     BufferAttribute? position = geometry.attributes["position"];
 
-    // print(" WebGLRenderer.renderBufferDirect geometry.index ${index?.count} - ${index} position: - ${position}  ");
     if (index == null) {
       if (position == null || position.count == 0) return;
     } 
@@ -479,8 +470,6 @@ class WebGLRenderer {
     if (index != null) {
       attribute = attributes.get(index);
       renderer = indexedBufferRenderer;
-      // print(index);
-      // print("WebGLRenderer.renderBufferDirect index attribute: ${attribute}  ");
       renderer.setIndex(attribute);
     }
 
@@ -501,7 +490,7 @@ class WebGLRenderer {
     if (drawCount == 0) return;
 
     if (object is Mesh) {
-      if (material.wireframe == true) {
+      if (material.wireframe) {
         state.setLineWidth(material.wireframeLinewidth! * getTargetPixelRatio());
         renderer.setMode(WebGL.LINES);
       } 
@@ -543,11 +532,7 @@ class WebGLRenderer {
     else {
       renderer.render(drawStart, drawCount);
     }
-
-    // print("renderBufferDirect - 1: ${DateTime.now().millisecondsSinceEpoch} - ${DateTime.now().microsecondsSinceEpoch}  ");
   }
-
-  // Compile
 
   void compile(Object3D scene, Camera camera) {
     currentRenderState = renderStates.get(scene);
@@ -706,13 +691,9 @@ class WebGLRenderer {
   }
 
   void projectObject(Object3D object, Camera camera, int groupOrder, bool sortObjects) {
-    // print("projectObject object: ${object} name: ${object.name} tag: ${object.tag}  ${object.visible} ${object.scale.toJson()} ${object.children.length}  ");
-
     if (object.visible == false) return;
 
     bool visible = object.layers.test(camera.layers);
-
-    // print("projectObject object: ${object.type} ${object.id} visible: ${visible} groupOrder: ${groupOrder} sortObjects: ${sortObjects} ");
 
     if (visible) {
       if (object is Group || object.type == "AnimationObject") {
@@ -816,20 +797,16 @@ class WebGLRenderer {
     }
 
     if (opaqueObjects.isNotEmpty) renderObjects(opaqueObjects, scene, camera);
-    if (transmissiveObjects.isNotEmpty) {
-      renderObjects(transmissiveObjects, scene, camera);
-    }
-    if (transparentObjects.isNotEmpty) {
-      renderObjects(transparentObjects, scene, camera);
-    }
-
+    if (transmissiveObjects.isNotEmpty) renderObjects(transmissiveObjects, scene, camera);
+    if (transparentObjects.isNotEmpty)renderObjects(transparentObjects, scene, camera);
+  
     // Ensure depth buffer writing is enabled so it can be cleared on next render
 
     state.buffers["depth"].setTest(true);
     state.buffers["depth"].setMask(true);
     state.buffers["color"].setMask(true);
 
-    state.setPolygonOffset(false, null, null);
+    state.setPolygonOffset(false);
   }
 
   void renderTransmissionPass(List<RenderItem> opaqueObjects, Object3D scene, Camera camera) {
@@ -880,7 +857,7 @@ class WebGLRenderer {
 
   void renderObjects(List<RenderItem> renderList, Object3D scene, Camera camera) {
     final overrideMaterial = scene is Scene ? scene.overrideMaterial : null;
-    for (int i = 0, l = renderList.length; i < l; i++) {
+    for (int i = 0; i < renderList.length; i++) {
       final renderItem = renderList[i];
 
       final object = renderItem.object!;
@@ -895,27 +872,20 @@ class WebGLRenderer {
   }
 
   void renderObject(Object3D object, scene, Camera camera, BufferGeometry geometry, Material material, Map<String, dynamic>? group) {
-    // print(" render renderObject  type: ${object.type} material: ${material} name: ${object.name}  geometry: ${geometry}");
-    // print("1 render renderObject type: ${object.type} name: ${object.name}  ${DateTime.now().millisecondsSinceEpoch}");
-
-    if (object.onBeforeRender != null) {
-      object.onBeforeRender!(
-        renderer: this,
-        mesh: object,
-        scene: scene,
-        camera: camera,
-        geometry: geometry,
-        material: material,
-        group: group
-      );
-    }
+    object.onBeforeRender?.call(
+      renderer: this,
+      mesh: object,
+      scene: scene,
+      camera: camera,
+      geometry: geometry,
+      material: material,
+      group: group
+    );
 
     object.modelViewMatrix.multiply2(camera.matrixWorldInverse, object.matrixWorld);
     object.normalMatrix.getNormalMatrix(object.modelViewMatrix);
 
-    if (material.onBeforeRender != null) {
-      material.onBeforeRender!(this, scene, camera, geometry, object, group);
-    }
+    material.onBeforeRender?.call(this, scene, camera, geometry, object, group);
 
     if (material.transparent == true && material.side == DoubleSide) {
       material.side = BackSide;
@@ -933,8 +903,6 @@ class WebGLRenderer {
     }
 
     object.onAfterRender(renderer: this, scene: scene, camera: camera, geometry: geometry, material: material, group: group);
-
-    // print("2 render renderObject type: ${object.type} name: ${object.name} ${DateTime.now().millisecondsSinceEpoch}");
   }
 
   WebGLProgram? getProgram(Material material, Object3D? scene, Object3D object) {

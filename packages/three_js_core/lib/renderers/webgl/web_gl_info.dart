@@ -12,7 +12,7 @@ class WebGLInfo {
 
   WebGLInfo(this.gl);
 
-  void update(count, mode, instanceCount) {
+  void update(int count, int mode, int instanceCount) {
     render["calls"] = render["calls"]! + 1;
 
     if (mode == WebGL.TRIANGLES) {

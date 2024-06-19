@@ -20,13 +20,13 @@ This is a dart conversion of three.js and three_dart, originally created by [@mr
  - Minimum os Deployment Target: 10.13
  - Xcode 13 or newer
  - Swift 5
- - Metal and OpenGL supported
+ - Metal supported
 
 **iOS**
  - Minimum os Deployment Target: 11.0
  - Xcode 13 or newer
  - Swift 5
- - Metal and OpenGL supported
+ - Metal supported
 
 **Android**
  - compileSdkVersion: 34
@@ -54,6 +54,32 @@ This project is a simple 3D rendering engine for flutter to view, edit, or manip
 ## Example
 
 Find the example for this API [here](https://github.com/Knightro63/three_js/tree/main/packages/three_js/example/), for a preview go [here].
+
+## Know Issues
+
+**MacOS**
+ - Morphtargets do not work at this time
+ - Sobel postprocessing does not function correctly
+ - Small memory leak when opening and closing multiple projects
+
+**iOS**
+ - Sobel postprocessing does not function correctly
+ - Random crashes
+ - Small memory leak when opening and closing multiple projects
+ - Buffer Validation issues
+ - Protoplanets does not function correctly
+
+**Android**
+ - Morphtargets do not work at this time
+ - Sobel postprocessing does not function correctly
+ - Small memory leak when opening and closing multiple projects
+
+ **Windows**
+ - Sobel postprocessing does not function correctly
+ - Small memory leak when opening and closing multiple projects
+
+**Web**
+ - Lens Flare not working correctly
 
 ## Contributing
 

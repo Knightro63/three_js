@@ -110,9 +110,8 @@ class WebGLAttributes {
     if (attribute.type == "InterleavedBufferAttribute") {
       final data = buffers.get(attribute.data);
 
-      if (data) {
+      if (data != null) {
         gl.deleteBuffer(data.buffer);
-
         buffers.delete(attribute.data);
       }
     } else {

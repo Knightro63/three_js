@@ -21,6 +21,7 @@ class _State extends State<WebglLoaderUsdz> {
       settings: three.Settings(
         toneMapping: three.ACESFilmicToneMapping,
         toneMappingExposure: 2.0,
+        useSourceTexture: true
       )
     );
     super.initState();

@@ -15,7 +15,8 @@ Map<String, dynamic> uniformsLib = {
   },
   "envmap": {
     "envMap": {},
-    "flipEnvMap": {"value": -1},
+    "flipEnvMapX": {"value": -1},
+    "flipEnvMapY": {"value": 1},
     "reflectivity": {"value": 1.0}, // basic, lambert, phong
     "ior": {"value": 1.5}, // physical
     "refractionRatio": {"value": 0.98}, // basic, lambert, phong

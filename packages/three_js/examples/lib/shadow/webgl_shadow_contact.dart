@@ -107,7 +107,6 @@ class _MyAppState extends State<WebglShadowContact> {
     blurShadow(state["shadow"]["blur"] * 0.4);
 
     // reset and render the normal scene
-    threeJs.renderer!.setRenderTarget(threeJs.renderTarget);
     threeJs.scene.background = initialBackground;
   }
 

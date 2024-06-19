@@ -120,14 +120,15 @@ class WebGLRenderList {
 
   void unshift(Object3D object, BufferGeometry? geometry, Material? material, int groupOrder, double z, Map<String, dynamic>? group) {
     final renderItem = getNextRenderItem(object, geometry, material, groupOrder, z, group);
-
+    
     if ((material?.transmission ?? 0) > 0.0) {
       transmissive.insert(0, renderItem);
     } 
     else {
       if (material?.transparent == true) {
         transparent.insert(0, renderItem);
-      } else {
+      } 
+      else {
         opaque.insert(0, renderItem);
       }
     }

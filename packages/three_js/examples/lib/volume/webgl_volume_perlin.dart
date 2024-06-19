@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:three_js/three_js.dart' as three;
@@ -213,17 +212,5 @@ class _State extends State<WebglVolumePerlin> {
       mesh.material?.uniforms['cameraPos']['value'].setFrom( threeJs.camera.position );
       controls.update();
     });
-
-    //
-    // Map parameters = {'threshold': 0.6, 'steps': 200 };
-
-    // void update() {
-    //   material.uniforms['threshold'].value = parameters['threshold'];
-    //   material.uniforms['steps'].value = parameters['steps'];
-    // }
-
-    // const gui = GUI();
-    // gui.add( parameters, 'threshold', 0, 1, 0.01 ).onChange( update );
-    // gui.add( parameters, 'steps', 0, 300, 1 ).onChange( update );
   }
 }

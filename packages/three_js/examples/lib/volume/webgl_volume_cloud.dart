@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:three_js/three_js.dart' as three;
@@ -234,27 +233,6 @@ class _State extends State<WebglVolumeCloud> {
 
     final mesh = three.Mesh( geometry, material );
     threeJs.scene.add( mesh );
-
-    //
-    // final parameters = {
-    //   'threshold': 0.25,
-    //   'opacity': 0.25,
-    //   'range': 0.1,
-    //   'steps': 100
-    // };
-
-    // void update() {
-    //   material.uniforms['threshold']['value'] = parameters['threshold'];
-    //   material.uniforms['opacity']['value'] = parameters['opacity'];
-    //   material.uniforms['range']['value'] = parameters['range'];
-    //   material.uniforms['steps']['value'] = parameters['steps'];
-    // }
-
-    // final gui = GUI();
-    // gui.add( parameters, 'threshold', 0, 1, 0.01 ).onChange( update );
-    // gui.add( parameters, 'opacity', 0, 1, 0.01 ).onChange( update );
-    // gui.add( parameters, 'range', 0, 1, 0.01 ).onChange( update );
-    // gui.add( parameters, 'steps', 0, 200, 1 ).onChange( update );
 
     threeJs.addAnimationEvent((dt){
 				mesh.material?.uniforms['cameraPos']['value'].setFrom( threeJs.camera.position );
