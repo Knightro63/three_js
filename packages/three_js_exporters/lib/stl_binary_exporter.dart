@@ -49,7 +49,7 @@ class STLBinaryExporter{
         int triangles = indices.length~/3;
         offset = 80; // skip header
         int bufferLength = triangles * 2 + triangles * 3 * 4 * 4 + 80 + 4;
-        //var arrayBuffer = new ArrayBuffer( bufferLength );
+        //final arrayBuffer = new ArrayBuffer( bufferLength );
         _output = ByteData(bufferLength);
         _output.setUint32( offset, triangles, Endian.little ); offset += 4;
       }
@@ -68,7 +68,7 @@ class STLBinaryExporter{
         _output.setFloat32( offset, toNormal.y, Endian.little ); offset += 4;
         _output.setFloat32( offset, toNormal.z, Endian.little ); offset += 4;
 
-        for ( var j = 0; j < 3; j ++ ) {
+        for ( int j = 0; j < 3; j ++ ) {
           _output.setFloat32( offset, vecsToNormal[j].x, Endian.little ); offset += 4; // vertices
           _output.setFloat32( offset, vecsToNormal[j].y, Endian.little ); offset += 4;
           _output.setFloat32( offset, vecsToNormal[j].z, Endian.little ); offset += 4;
@@ -102,7 +102,7 @@ class STLBinaryExporter{
 
     offset = 80; // skip header
     int bufferLength = triangles * 2 + triangles * 3 * 4 * 4 + 80 + 4;
-    //var arrayBuffer = new ArrayBuffer( bufferLength );
+    //final arrayBuffer = new ArrayBuffer( bufferLength );
     _output = ByteData(bufferLength);
     _output.setUint32( offset, triangles, Endian.little ); offset += 4;
 

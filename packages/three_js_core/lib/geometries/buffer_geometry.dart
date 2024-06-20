@@ -1019,21 +1019,21 @@ class BufferGeometry with EventDispatcher {
   /// Frees the GPU-related resources allocated by this instance. Call this
   /// method whenever this instance is no longer used in your app.
   void dispose() {
-    dispatchEvent(Event(type: "dispose"));
-
     if(disposed) return;
     disposed = true;
+
+    dispatchEvent(Event(type: "dispose"));
+
     if(attributes.isNotEmpty){
       for(final temp in attributes.keys){
-        attributes[temp].dispose();
+        (attributes[temp] as BaseBufferAttribute?)?.dispose();
       }
-      attributes.clear();
     }
+
     if(morphAttributes.isNotEmpty){
       for(final temp in morphAttributes.keys){
-        (morphAttributes[temp] as BufferAttribute).dispose();
+        (morphAttributes[temp] as BaseBufferAttribute?)?.dispose();
       }
-      morphAttributes.clear();
     }
   }
 }

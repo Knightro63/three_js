@@ -20,7 +20,7 @@ class AnimationUtils {
 
   /// Converts an array to a specific type.
   static List<num> convertArray(List<num> array, String type, [bool forceClone = false]) {
-    // var 'null' and 'null' pass
+    // final 'null' and 'null' pass
     // if (array == null || !forceClone && array.runtimeType.toString() == type) {
     //   return array;
     // }
@@ -95,7 +95,7 @@ class AnimationUtils {
 
     // if (key == null) return; // no data
 
-    // var value = key[valuePropertyName];
+    // final value = key[valuePropertyName];
     // if (value == null) return; // no data
 
     // // if ( Array.isArray( value ) ) {

@@ -35,7 +35,7 @@ class WebGLIndexedBufferRenderer extends BaseWebGLBufferRenderer {
   void renderInstances(int start, int count, int primcount) {
     if (primcount == 0) return;
 
-    // var extension, methodName;
+    // final extension, methodName;
 
     // if ( isWebGL2 ) {
 

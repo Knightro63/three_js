@@ -46,7 +46,7 @@ extension Buffer on Uint8List{
     return sum;
   }
   int decodeInt(data, int bits, bool signed){
-    // var b = new this.Buffer(this.bigEndian, data), x = b.readBits(0, bits), max = Math.pow(2, bits);
+    // final b = new this.Buffer(this.bigEndian, data), x = b.readBits(0, bits), max = Math.pow(2, bits);
     // return signed && x >= max / 2 ? x - max : x;
     final x = readBits(0, bits);
     final max = math.pow(2, bits).toInt();

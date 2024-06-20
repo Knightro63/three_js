@@ -78,7 +78,7 @@ class _MyAppState extends State<WebglLoaderGlb> {
 
     GLTFLoader loader = GLTFLoader();
 
-    var result = await loader.fromAsset( 'assets/dash.glb' );
+    final result = await loader.fromAsset( 'assets/dash.glb' );
 
     final object = result!.scene;
     threeJs.scene.add(object);

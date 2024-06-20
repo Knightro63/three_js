@@ -128,8 +128,8 @@ class MeshSurfaceSampler {
   }
 
   MeshSurfaceSampler sampleFace(int faceIndex,Vector3 targetPosition,[Vector3? targetNormal,Color? targetColor ]) {
-    var u = randomFunction();
-    var v = randomFunction();
+    double u = randomFunction();
+    double v = randomFunction();
 
     if ( u + v > 1 ) {
       u = 1 - u;

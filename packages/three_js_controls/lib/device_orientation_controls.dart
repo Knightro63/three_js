@@ -26,7 +26,6 @@ class DeviceOrientationControls{
     object.rotation.reorder(RotationOrders.yxz);
   }
 
-	//var changeEvent = { type: 'change' };
 	double eps = 0.000001;
 	bool enabled = true;
 

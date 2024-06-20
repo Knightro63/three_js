@@ -14,7 +14,7 @@ extension ListExtension on List{
     if (isEmpty) return null; //return 9999999;
 
     List l = sublist(0);
-    var min = l[0];
+    T min = l[0];
 
     for (int i = 1; i < length; ++i) {
       if (l[i] < min) min = l[i];
@@ -28,10 +28,10 @@ extension ListExtension on List{
 
     List l = sublist(0);
 
-    var max = l[0];
+    T max = l[0];
 
     for (int i = 1; i < length; ++i) {
-      var newVal = l[i];
+      final newVal = l[i];
       if (newVal > max) max = l[i];
     }
     return max;
@@ -98,9 +98,9 @@ class MathUtils{
   static T? listGetMaxValue<T extends num>(List<T> array) {
     if (array.isEmpty) return null; // return -99999999;
 
-    var max = array[0];
+    T max = array[0];
 
-    for (var i = 1, l = array.length; i < l; ++i) {
+    for (int i = 1, l = array.length; i < l; ++i) {
       if (array[i] > max) max = array[i];
     }
 

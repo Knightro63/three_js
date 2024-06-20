@@ -58,10 +58,10 @@ class _MyAppState extends State<WebglLoaderGltfTest> {
 
     threeJs.scene = three.Scene();
 
-    var ambientLight = three.AmbientLight(0xcccccc, 0.4);
+    final ambientLight = three.AmbientLight(0xcccccc, 0.4);
     threeJs.scene.add(ambientLight);
 
-    var pointLight = three.PointLight(0xffffff, 0.8);
+    final pointLight = three.PointLight(0xffffff, 0.8);
 
     pointLight.position.setValues(0, 0, 18);
 
@@ -84,7 +84,7 @@ class _MyAppState extends State<WebglLoaderGltfTest> {
     threeJs.scene.background = _hdrTexture;
     threeJs.scene.environment = _hdrTexture;
 
-    var textureLoader = three.TextureLoader();
+    final textureLoader = three.TextureLoader();
     final texture = (await textureLoader.fromAsset('assets/textures/uv_grid_directx.jpg'))!;
 
     texture.magFilter = three.LinearFilter;
@@ -92,7 +92,7 @@ class _MyAppState extends State<WebglLoaderGltfTest> {
     texture.generateMipmaps = true;
     texture.needsUpdate = true;
 
-    // var loader = three.GLTFLoader( null ).setPath( 'assets/models/gltf/DamagedHelmet/glTF/' );
+    // final loader = three.GLTFLoader( null ).setPath( 'assets/models/gltf/DamagedHelmet/glTF/' );
     final loader = three.GLTFLoader().setPath('assets/models/gltf/test/');
     final result = await loader.fromAsset('animate7.gltf');
 

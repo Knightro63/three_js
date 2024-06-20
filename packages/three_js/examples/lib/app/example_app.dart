@@ -42,8 +42,8 @@ class AppRouteInformationParser extends RouteInformationParser<AppRoutePath> {
     // Handle '/examples/:id'
     if (uri.pathSegments.length == 2) {
       if (uri.pathSegments[0] != 'examples') return AppRoutePath.unknown();
-      var remaining = uri.pathSegments[1];
-      var id = remaining;
+      final remaining = uri.pathSegments[1];
+      final id = remaining;
       // if (id == null) return AppRoutePath.unknown();
       return AppRoutePath.details(id);
     }

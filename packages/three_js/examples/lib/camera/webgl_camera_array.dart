@@ -44,14 +44,14 @@ class _MyAppState extends State<WebglCameraArray> {
   void setup() {
     late three.Mesh mesh;
     int amount = 4;
-    var width = (threeJs.width / amount) * threeJs.dpr;
-    var height = (threeJs.height / amount) * threeJs.dpr;
+    final width = (threeJs.width / amount) * threeJs.dpr;
+    final height = (threeJs.height / amount) * threeJs.dpr;
 
     List<three.Camera> cameras = [];
 
-    for (var y = 0; y < amount; y++) {
-      for (var x = 0; x < amount; x++) {
-        var subcamera = three.PerspectiveCamera(40, threeJs.width / threeJs.height, 0.1, 10);
+    for (int y = 0; y < amount; y++) {
+      for (int x = 0; x < amount; x++) {
+        final subcamera = three.PerspectiveCamera(40, threeJs.width / threeJs.height, 0.1, 10);
         subcamera.viewport = three.Vector4(
             (x * width).floorToDouble(),
             (y * height).floorToDouble(),

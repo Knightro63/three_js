@@ -525,7 +525,7 @@ class WebGLTextures {
     state.activeTexture(WebGL.TEXTURE0 + slot);
     state.bindTexture(textureType, textureProperties["__webglTexture"]);
 
-    if (source.version != source.currentVersion || forceUpload == true) {
+    if (source.version != source.currentVersion || forceUpload) {
       _gl.pixelStorei(WebGL.UNPACK_FLIP_Y_WEBGL, texture.flipY ? 1 : 0);
       _gl.pixelStorei(WebGL.UNPACK_PREMULTIPLY_ALPHA_WEBGL, texture.premultiplyAlpha ? 1 : 0);
       _gl.pixelStorei(WebGL.UNPACK_ALIGNMENT, texture.unpackAlignment);
@@ -537,7 +537,8 @@ class WebGLTextures {
       dynamic image = texture.image;//resizeImage(texture.image, needsPowerOfTwo, false, maxTextureSize);
       image = verifyColorSpace(texture, image);
 
-      final supportsMips = isPowerOfTwo(image) || isWebGL2, glFormat = utils.convert(texture.format, texture.encoding);
+      final bool supportsMips = isPowerOfTwo(image) || isWebGL2;
+      final int glFormat = utils.convert(texture.format, texture.encoding);
 
       int glType = utils.convert(texture.type);
       int glInternalFormat = getInternalFormat(texture.internalFormat, glFormat, glType, texture.encoding, texture is VideoTexture);
@@ -613,6 +614,7 @@ class WebGLTextures {
         }
       } 
       else if (texture is DataTexture) {
+        
         // use manually created mipmaps if available
         // if there are no manual mipmaps
         // set 0 level mipmap and then use GL to generate other mipmap levels
@@ -654,7 +656,7 @@ class WebGLTextures {
           mipmap = mipmaps[i];
 
           if (texture.format != RGBAFormat) {
-            if (glFormat != null) {
+            if (glFormat > 0) {
               if (useTexStorage) {
                 state.compressedTexSubImage2D(WebGL.TEXTURE_2D, i, 0, 0, mipmap.width, mipmap.height, glFormat, mipmap.data);
               } else {
@@ -725,7 +727,6 @@ class WebGLTextures {
 
           for (int i = 0, il = mipmaps.length; i < il; i++) {
             mipmap = mipmaps[i];
-
             if (useTexStorage) {
               state.texSubImage2DIf(WebGL.TEXTURE_2D, i, 0, 0, glFormat, glType, mipmap);
             } 
@@ -741,7 +742,6 @@ class WebGLTextures {
             if (allocateMemory) {
               state.texStorage2D(WebGL.TEXTURE_2D, levels, glInternalFormat, image.width.toInt(), image.height.toInt());
             }
-            
             state.texSubImage2DIf(WebGL.TEXTURE_2D, 0, 0, 0, glFormat, glType, image);
           } 
           else {
@@ -802,7 +802,7 @@ class WebGLTextures {
           glType = utils.convert(texture.type),
           glInternalFormat = getInternalFormat(texture.internalFormat, glFormat, glType, texture.encoding);
 
-      final useTexStorage = (isWebGL2 && texture.isVideoTexture != true);
+      final useTexStorage = (isWebGL2 && texture is! VideoTexture);
       final allocateMemory = (textureProperties['__version'] == null);
       int levels = getMipLevels(texture, image, supportsMips);
 

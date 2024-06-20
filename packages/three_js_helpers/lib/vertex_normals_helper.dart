@@ -61,7 +61,7 @@ class VertexNormalsHelper extends LineSegments {
     _normalMatrix.getNormalMatrix(object.matrixWorld);
 
     final matrixWorld = object.matrixWorld;
-    final position = geometry!.attributes["position"];
+    final position = geometry?.attributes["position"];
 
   
     BufferGeometry? objGeometry = object.geometry;

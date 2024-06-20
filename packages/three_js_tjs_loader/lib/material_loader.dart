@@ -76,7 +76,7 @@ class MaterialLoader extends Loader {
 
   Material parseJson(Map<String,dynamic> json) {
     
-    var textures = this.textures;
+    final textures = this.textures;
 
     getTexture(name) {
       if (textures[name] == null) {
@@ -101,7 +101,7 @@ class MaterialLoader extends Loader {
       throw (" MaterialLoader ${json["type"]} is not support  ");
     }
 
-    // var material = new Materials[ json.type ]();
+    // final material = new Materials[ json.type ]();
 
     if (json["uuid"] != null) material.uuid = json["uuid"];
     if (json["name"] != null) material.name = json["name"];
@@ -230,8 +230,8 @@ class MaterialLoader extends Loader {
     // Shader Material
 
     if (json["uniforms"] != null) {
-      for (var name in json["uniforms"]) {
-        var uniform = json["uniforms"][name];
+      for (final name in json["uniforms"]) {
+        final uniform = json["uniforms"][name];
 
         material.uniforms[name] = {};
 
@@ -285,7 +285,7 @@ class MaterialLoader extends Loader {
     }
 
     if (json["extensions"] != null) {
-      for (var key in json["extensions"]) {
+      for (final key in json["extensions"]) {
         material.extensions?[key] = json["extensions"][key];
       }
     }
@@ -322,7 +322,7 @@ class MaterialLoader extends Loader {
       material.normalMapType = json["normalMapType"];
     }
     if (json["normalScale"] != null) {
-      var normalScale = json["normalScale"];
+      dynamic normalScale = json["normalScale"];
 
       if (normalScale is! List) {
         // Blender exporter used to export a scalar. See #7459

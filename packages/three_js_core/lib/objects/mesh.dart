@@ -110,7 +110,7 @@ class Mesh extends Object3D {
   /// are not ordered.
   @override
   void raycast(Raycaster raycaster, List<Intersection> intersects) {
-    final geometry = this.geometry!;
+    final geometry = this.geometry;
     final material = this.material;
     final matrixWorld = this.matrixWorld;
 
@@ -118,9 +118,11 @@ class Mesh extends Object3D {
 
     // Checking boundingSphere distance to ray
 
-    if (geometry.boundingSphere == null) geometry.computeBoundingSphere();
-
-    _meshsphere.setFrom(geometry.boundingSphere!);
+    if (geometry?.boundingSphere == null) geometry?.computeBoundingSphere();
+    
+    if(geometry != null){
+      _meshsphere.setFrom(geometry.boundingSphere!);
+    }
     _meshsphere.applyMatrix4(matrixWorld);
 
     if (raycaster.ray.intersectsSphere(_meshsphere) == false) return;
@@ -130,29 +132,29 @@ class Mesh extends Object3D {
 
     // Check boundingBox before continuing
 
-    if (geometry.boundingBox != null) {
-      if (_meshray.intersectsBox(geometry.boundingBox!) == false) return;
+    if (geometry?.boundingBox != null) {
+      if (!_meshray.intersectsBox(geometry!.boundingBox!)) return;
     }
 
     Intersection? intersection;
-    final index = geometry.index;
-    final position = geometry.attributes["position"];
-    final morphPosition = geometry.morphAttributes["position"];
-    final morphTargetsRelative = geometry.morphTargetsRelative;
-    final uv = geometry.attributes["uv"];
-    final uv2 = geometry.attributes["uv2"];
-    final groups = geometry.groups;
-    final drawRange = geometry.drawRange;
+    final index = geometry?.index;
+    final position = geometry?.attributes["position"];
+    final morphPosition = geometry?.morphAttributes["position"];
+    final morphTargetsRelative = geometry?.morphTargetsRelative;
+    final uv = geometry?.attributes["uv"];
+    final uv2 = geometry?.attributes["uv2"];
+    final groups = geometry?.groups;
+    final drawRange = geometry?.drawRange;
 
     if (index != null) {
       // indexed buffer geometry
 
       if (material is GroupMaterial) {
-        for (int i = 0, il = groups.length; i < il; i++) {
-          final group = groups[i];
+        for (int i = 0, il = groups?.length ?? 0; i < il; i++) {
+          final group = groups![i];
           final groupMaterial = material.children[group["materialIndex"]];
 
-          final start = math.max<int>(group["start"], drawRange["start"]!);
+          final start = math.max<int>(group["start"], drawRange!["start"]!);
           final end = math.min<int>((group["start"] + group["count"]),
               (drawRange["start"]! + drawRange["count"]!));
 
@@ -184,7 +186,7 @@ class Mesh extends Object3D {
           }
         }
       } else {
-        final start = math.max(0, drawRange["start"]!);
+        final start = math.max(0, drawRange!["start"]!);
         final end = math.min(index.count, (drawRange["start"]! + drawRange["count"]!));
 
         for (int i = start, il = end; i < il; i += 3) {
@@ -217,11 +219,11 @@ class Mesh extends Object3D {
       // non-indexed buffer geometry
 
       if (material is GroupMaterial) {
-        for (int i = 0, il = groups.length; i < il; i++) {
-          final group = groups[i];
+        for (int i = 0, il = groups?.length ?? 0; i < il; i++) {
+          final group = groups![i];
           final groupMaterial = material.children[group["materialIndex"]];
 
-          final start = math.max<int>(group["start"], drawRange["start"]!);
+          final start = math.max<int>(group["start"], drawRange!["start"]!);
           final end = math.min<int>((group["start"] + group["count"]),
               (drawRange["start"]! + drawRange["count"]!));
 
@@ -253,7 +255,7 @@ class Mesh extends Object3D {
           }
         }
       } else {
-        final start = math.max(0, drawRange["start"]!);
+        final start = math.max(0, drawRange!["start"]!);
         final end = math.min<int>(
             position.count, (drawRange["start"]! + drawRange["count"]!));
 

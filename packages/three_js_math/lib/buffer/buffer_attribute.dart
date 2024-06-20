@@ -234,7 +234,6 @@ abstract class BufferAttribute<TData extends NativeArray> extends BaseBufferAttr
   /// a [TypedData].
   BufferAttribute set(value, {int offset = 0}) {
     array[offset] = value;
-
     return this;
   }
 
@@ -246,7 +245,6 @@ abstract class BufferAttribute<TData extends NativeArray> extends BaseBufferAttr
   /// Sets the x component of the vector at the given index.
   BufferAttribute setX(int index, num x) {
     array[index * itemSize] = x;
-
     return this;
   }
 
@@ -327,7 +325,6 @@ abstract class BufferAttribute<TData extends NativeArray> extends BaseBufferAttr
 
   BufferAttribute onUpload(void Function()? callback) {
     onUploadCallback = callback;
-
     return this;
   }
 

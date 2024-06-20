@@ -8,13 +8,13 @@
 ///
 /// To create a map:
 /// ```
-/// var map = WeakMap();
+/// final map = WeakMap();
 /// ```
 ///
 /// To add and retrieve a value:
 /// ```
 /// map["John"] = 42;
-/// var age = map["John"];
+/// final age = map["John"];
 /// ```
 ///
 /// The following map methods work as expected:
@@ -36,7 +36,7 @@
 /// garbage-collected. All other types of object may be garbage-collected.
 ///
 /// 2. To retrieve a value added to the map, you can use the equivalent
-/// syntax `var y = map[x]` or `var y = map.get(x)`.
+/// syntax `final y = map[x]` or `final y = map.get(x)`.
 ///
 class WeakMap<K, V> {
   final Map<K, V> _map = {};

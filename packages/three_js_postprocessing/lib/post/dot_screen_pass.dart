@@ -5,7 +5,7 @@ import "pass.dart";
 
 class DotScreenPass extends Pass {
   DotScreenPass(Vector2? center, num? angle, num? scale) : super() {
-    var shader = dotScreenShader;
+    final shader = dotScreenShader;
 
     uniforms = UniformsUtils.clone(shader["uniforms"]);
 

@@ -9,7 +9,7 @@ class LoaderUtils {
   }
 
   static String extractUrlBase(String url) {
-    var index = url.lastIndexOf('/');
+    final index = url.lastIndexOf('/');
 
     if (index == -1) return './';
 

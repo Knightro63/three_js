@@ -125,7 +125,6 @@ class ThreeJS{
       FlutterAngle.deleteTexture(texture!);
     }
     scene.dispose();
-    //disposeEvents.forEach((event){
     for(final event in disposeEvents){
       event.call();
     }

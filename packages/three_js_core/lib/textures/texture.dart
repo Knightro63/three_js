@@ -208,6 +208,8 @@ class Texture with EventDispatcher {
     else {
       image?.dispose();
     }
+
+    source.dispose();
   }
 
   Vector2 transformUv(Vector2 uv) {

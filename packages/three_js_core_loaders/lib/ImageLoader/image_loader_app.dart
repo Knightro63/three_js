@@ -60,7 +60,7 @@ void decodeIsolate(DecodeParam param) {
   // Read an image from file (webp in this case).
   // decodeImage will identify the format of the image and use the appropriate
   // decoder.
-  var image2 = imageProcess(param);
+  final image2 = imageProcess(param);
 
   param.sendPort?.send(image2);
 }

@@ -47,18 +47,18 @@ class _MyAppState extends State<WebglMaterialsBrowser> {
 
     threeJs.scene = three.Scene();
 
-    var ambientLight = three.AmbientLight(0xcccccc, 0.4);
+    final ambientLight = three.AmbientLight(0xcccccc, 0.4);
     threeJs.scene.add(ambientLight);
 
-    var pointLight = three.PointLight(0xffffff, 0.8);
+    final pointLight = three.PointLight(0xffffff, 0.8);
     threeJs.camera.add(pointLight);
     threeJs.scene.add(threeJs.camera);
 
     // texture
-    var geometry = TorusKnotGeometry(10, 3, 200, 32).toNonIndexed();
-    var material = three.MeshPhysicalMaterial.fromMap({"color": 0xff0abb, "roughness": 0});
+    final geometry = TorusKnotGeometry(10, 3, 200, 32).toNonIndexed();
+    final material = three.MeshPhysicalMaterial.fromMap({"color": 0xff0abb, "roughness": 0});
 
-    var object = three.Mesh(geometry, material);
+    final object = three.Mesh(geometry, material);
 
     threeJs.scene.add(object);
   }

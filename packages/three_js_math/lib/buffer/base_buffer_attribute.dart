@@ -5,9 +5,7 @@ abstract class BaseBufferAttribute<TData extends NativeArray> {
   late int itemSize;
 
   InterleavedBuffer? data;
-
   late String type;
-
   String? name;
 
   int count = 0;
@@ -24,7 +22,8 @@ abstract class BaseBufferAttribute<TData extends NativeArray> {
   BaseBufferAttribute();
 
   void dispose(){
-    data?.dispose();
-    array.dispose();
+    // data?.dispose();
+    // data = null;
+    // array.dispose();
   }
 }

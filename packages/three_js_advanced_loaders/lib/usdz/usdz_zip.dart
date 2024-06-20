@@ -221,7 +221,7 @@ class USDZIP{
             break;
           }
           else {
-            var add = sym - 254;
+            int add = sym - 254;
             // no extra bits needed if less
             if (sym > 264) {
                 // index
@@ -404,7 +404,7 @@ class USDZIP{
       o = b4(data, e + 48);
     }
     for (int i = 0; i < c; ++i) {
-      var _a = zh(data, o, z), c_2 = _a[0], sc = _a[1], su = _a[2], fn = _a[3], no = _a[4], off = _a[5], b = slzh(data, off);
+      final _a = zh(data, o, z), c_2 = _a[0], sc = _a[1], su = _a[2], fn = _a[3], no = _a[4], off = _a[5], b = slzh(data, off);
       o = no;
       if (c_2 == 0){
         files[fn] = slc(data, b, b + sc);
@@ -456,7 +456,7 @@ class USDZIP{
     //   return td.decode(dat);
     // }
     else {
-      var _a = dutf8(dat), out = _a[0], ext = _a[1];
+      final _a = dutf8(dat), out = _a[0], ext = _a[1];
       if (ext.length > 0){
         throw 'invalid utf-8 data';
       }
@@ -470,7 +470,7 @@ class USDZIP{
   }
 
   static dutf8(List<int> d) {
-    for (var r = '', i = 0;;) {
+    for (dynamic r = '', i = 0;;) {
       int c = d[i++];
       int eb = (c > 127?1:0) + (c > 223?1:0) + (c > 239?1:0);
       if ((i + eb) > d.length){

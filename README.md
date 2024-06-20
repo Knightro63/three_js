@@ -60,26 +60,31 @@ Find the example for this API [here](https://github.com/Knightro63/three_js/tree
 **MacOS**
  - Morphtargets do not work at this time
  - Sobel postprocessing does not function correctly
+ - BackSide with shadows showing white screen
  - Small memory leak when opening and closing multiple projects
 
 **iOS**
  - Sobel postprocessing does not function correctly
- - Random crashes
  - Small memory leak when opening and closing multiple projects
  - Buffer Validation issues
+ - BackSide with shadows showing white screen
  - Protoplanets does not function correctly
 
 **Android**
  - Morphtargets do not work at this time
  - Sobel postprocessing does not function correctly
+ - BackSide with shadows showing white screen
  - Small memory leak when opening and closing multiple projects
 
- **Windows**
+**Windows**
+ - Morphtargets do not work at this time
  - Sobel postprocessing does not function correctly
+ - BackSide with shadows showing white screen
  - Small memory leak when opening and closing multiple projects
 
 **Web**
  - Lens Flare not working correctly
+ - Multi Views works someof the times
 
 ## Contributing
 

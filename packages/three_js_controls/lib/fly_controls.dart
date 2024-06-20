@@ -58,7 +58,6 @@ class FlyControls{
 	bool dragToLook = false;
 	bool autoForward = false;
 
-	//var changeEvent = {type: 'change' };
 	double eps = 0.000001;
 
 	Quaternion tmpQuaternion = Quaternion.identity();
@@ -153,9 +152,9 @@ class FlyControls{
 
 	void mousemove( event ) {
 		if (!dragToLook || mouseStatus > 0 ) {
-			var container = _getContainerDimensions();
-			var halfWidth = container.size.width / 2;
-			var halfHeight = container.size.height / 2;
+			final container = _getContainerDimensions();
+			final halfWidth = container.size.width / 2;
+			final halfHeight = container.size.height / 2;
 
 			moveState.yawLeft = - ( ( event.pageX - container.offset.dx ) - halfWidth ) / halfWidth;
 			moveState.pitchDown = ( ( event.pageY - container.offset.dy ) - halfHeight ) / halfHeight;

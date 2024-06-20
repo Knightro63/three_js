@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
 
@@ -22,15 +23,16 @@ class _State extends State<WebglShadowmapPointlight> {
       onSetupComplete: (){setState(() {});},
       setup: setup,
       settings: three.Settings(
+        enableShadowMap: true,
         shadowMapType: three.BasicShadowMap,
-        useSourceTexture: true
+        localClippingEnabled: true,
+        useSourceTexture: true,
       )
     );
     super.initState();
   }
   @override
   void dispose() {
-    controls.dispose();
     threeJs.dispose();
     three.loading.clear();
     super.dispose();
@@ -50,7 +52,7 @@ class _State extends State<WebglShadowmapPointlight> {
     );
   }
 
-  late three.OrbitControls controls;
+  late final three.Plane localPlane;
 
   Future<void> setup() async {
     threeJs.camera = three.PerspectiveCamera( 45, threeJs.width/threeJs.height, 1, 1000 );
@@ -101,22 +103,21 @@ class _State extends State<WebglShadowmapPointlight> {
     final pointLight2 = createLight( 0xff8888 );
     threeJs.scene.add( pointLight2 );
 
+    localPlane = three.Plane(three.Vector3(0, 0, -14.9), 0.8);
+
     final geometry = three.BoxGeometry( 30,30,30 );
     final material = three.MeshPhongMaterial.fromMap( {
       'color': 0xa0adaf,
       'shininess': 10,
       'specular': 0x111111,
-      'side': three.BackSide
+      'side': kIsWeb?three.BackSide:three.DoubleSide,
+      "clippingPlanes": kIsWeb?null:[localPlane],
     } );
 
     final mesh = three.Mesh( geometry, material );
     mesh.position.y = 10;
     mesh.receiveShadow = true;
     threeJs.scene.add( mesh );
-
-    controls = three.OrbitControls( threeJs.camera, threeJs.globalKey );
-    controls.target.setValues( 0, 10, 0 );
-    controls.update();
 
     threeJs.addAnimationEvent((dt){
       double time = DateTime.now().millisecondsSinceEpoch * 0.001;

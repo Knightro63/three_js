@@ -23,7 +23,7 @@ class _MyAppState extends State<FlutterGame> {
       setup: setup,
       settings: three.Settings(
         clearAlpha: 0,
-        clearColor: 0xffffff
+        clearColor: 0xffffff,
       ),
     );
     super.initState();
@@ -85,10 +85,10 @@ class _MyAppState extends State<FlutterGame> {
     three.GLTFLoader loader = three.GLTFLoader(flipY: true).setPath('assets/models/gltf/flutter/');
 
     //final result = await loader.fromAsset( 'coffeemat.glb' );
-    var sky = await loader.fromAsset( 'sky_sphere.glb' );
+    final sky = await loader.fromAsset( 'sky_sphere.glb' );
     threeJs.scene.add(sky!.scene);
 
-    var groundGLB = await loader.fromAsset('ground.glb');
+    final groundGLB = await loader.fromAsset('ground.glb');
     final ground = groundGLB!.scene;
     ground.rotation.y = 90*(math.pi/180);
     threeJs.scene.add(ground);

@@ -575,7 +575,7 @@ class AnimationMixer with EventDispatcher {
     final rootUuid = root.uuid;
     final actionsByClip = this.actionsByClip;
 
-    // for ( var clipUuid in actionsByClip ) {
+    // for ( final clipUuid in actionsByClip ) {
     actionsByClip.forEach((clipUuid, value) {
       final actionByRoot = actionsByClip[clipUuid].actionByRoot,
           action = actionByRoot[rootUuid];

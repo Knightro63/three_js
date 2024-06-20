@@ -4,28 +4,58 @@ import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_animations/three_js_animations.dart';
 import '../skeleton_helper.dart';
 
+class SkeletonUtilsOptions{
+  SkeletonUtilsOptions({
+    this.preserveMatrix = true,
+    this.preservePosition = true,
+    this.preserveHipPosition = false,
+    this.useTargetMatrix = false,
+    this.useFirstFramePosition = false,
+    this.fps = 30,
+    this.hip = 'hip',
+    this.offsets,
+    Map<String,dynamic>? names
+  }){
+    this.names = names ?? {};
+  }
+  
+  bool preserveMatrix;
+  bool preservePosition;
+  bool preserveHipPosition;
+  bool useTargetMatrix;
+  bool useFirstFramePosition;
+  int fps;
+  String hip;
+  dynamic offsets;
+  Map<String,dynamic> names = {};
+}
+
 class SkeletonUtils {
-  static retarget(target, source, [options]) {
-    var pos = Vector3(),
+  static retarget(target, source, [SkeletonUtilsOptions? options]) {
+    final pos = Vector3(),
         quat = Quaternion(),
         scale = Vector3(),
         bindBoneMatrix = Matrix4(),
         relativeMatrix = Matrix4(),
         globalMatrix = Matrix4();
 
-    options = options ?? {};
+    options = options ?? SkeletonUtilsOptions();
 
-    options.preserveMatrix = options.preserveMatrix ?? true;
-    options.preservePosition = options.preservePosition ?? true;
-    options.preserveHipPosition = options.preserveHipPosition ?? false;
-    options.useTargetMatrix = options.useTargetMatrix ?? false;
-    options.hip = options.hip ?? 'hip';
-    options.names = options.names ?? {};
+    options.preserveMatrix = options.preserveMatrix;
+    options.preservePosition = options.preservePosition;
+    options.preserveHipPosition = options.preserveHipPosition;
+    options.useTargetMatrix = options.useTargetMatrix;
+    options.hip = options.hip;
+    options.names = options.names;
 
-    List<Bone> sourceBones = source is Object3D ? source.skeleton?.bones : getBones(source);
-    List<Bone> bones = target is Object3D ? target.skeleton?.bones : getBones(target);
+    List<Bone> sourceBones = source is Object3D ? (source.skeleton?.bones ?? []) : getBones(source);
+    List<Bone> bones = target is Object3D ? (target.skeleton?.bones ?? []) : getBones(target);
 
-    var bindBones, bone, name, boneTo, bonesPosition;
+    List? bindBones;
+    Bone bone;
+    String name;
+    Bone? boneTo;
+    List<Vector3> bonesPosition = [];
 
     // reset bones
 
@@ -39,53 +69,45 @@ class SkeletonUtils {
     if (options.preservePosition) {
       bonesPosition = [];
 
-      for (var i = 0; i < bones.length; i++) {
-        bonesPosition.push(bones[i].position.clone());
+      for (int i = 0; i < bones.length; i++) {
+        bonesPosition.add(bones[i].position.clone());
       }
     }
 
     if (options.preserveMatrix) {
-      // reset matrix
-
       target.updateMatrixWorld();
-
       target.matrixWorld.identity();
-
-      // reset children matrix
-
-      for (var i = 0; i < target.children.length; ++i) {
+      for (int i = 0; i < target.children.length; ++i) {
         target.children[i].updateMatrixWorld(true);
       }
     }
 
-    if (options.offsets) {
+    if (options.offsets != null) {
       bindBones = [];
 
-      for (var i = 0; i < bones.length; ++i) {
+      for (int i = 0; i < bones.length; ++i) {
         bone = bones[i];
-        name = options.names[bone.name] || bone.name;
+        name = options.names[bone.name] ?? bone.name;
 
         if (options.offsets && options.offsets[name]) {
           bone.matrix.multiply(options.offsets[name]);
-
           bone.matrix.decompose(bone.position, bone.quaternion, bone.scale);
-
           bone.updateMatrixWorld();
         }
 
-        bindBones.push(bone.matrixWorld.clone());
+        bindBones.add(bone.matrixWorld.clone());
       }
     }
 
-    for (var i = 0; i < bones.length; ++i) {
+    for (int i = 0; i < bones.length; ++i) {
       bone = bones[i];
-      name = options.names[bone.name] || bone.name;
+      name = options.names[bone.name] ?? bone.name;
 
       boneTo = getBoneByName(name, sourceBones);
 
       globalMatrix.setFrom(bone.matrixWorld);
 
-      if (boneTo) {
+      if (boneTo != null) {
         boneTo.updateMatrixWorld();
 
         if (options.useTargetMatrix) {
@@ -104,11 +126,11 @@ class SkeletonUtils {
 
         globalMatrix.makeRotationFromQuaternion(quat.setFromRotationMatrix(relativeMatrix));
 
-        if (target.isObject3D) {
-          var boneIndex = bones.indexOf(bone),
-              wBindMatrix = bindBones
+        if (target is Object3D) {
+          final boneIndex = bones.indexOf(bone),
+              wBindMatrix = bindBones != null
                   ? bindBones[boneIndex]
-                  : bindBoneMatrix.setFrom(target.skeleton.boneInverses[boneIndex]).invert();
+                  : bindBoneMatrix.setFrom(target.skeleton!.boneInverses[boneIndex]).invert();
 
           globalMatrix.multiply(wBindMatrix);
         }
@@ -116,15 +138,15 @@ class SkeletonUtils {
         globalMatrix.copyPosition(relativeMatrix);
       }
 
-      if (bone.parent && bone.parent.isBone) {
-        bone.matrix.copy(bone.parent.matrixWorld).invert();
+      if (bone.parent != null && bone.parent is Bone) {
+        bone.matrix.setFrom(bone.parent!.matrixWorld).invert();
         bone.matrix.multiply(globalMatrix);
       } else {
-        bone.matrix.copy(globalMatrix);
+        bone.matrix.setFrom(globalMatrix);
       }
 
       if (options.preserveHipPosition && name == options.hip) {
-        bone.matrix.setPosition(pos.setValues(0, bone.position.y, 0));
+        bone.matrix.setPositionFromVector3(pos.setValues(0, bone.position.y, 0));
       }
 
       bone.matrix.decompose(bone.position, bone.quaternion, bone.scale);
@@ -133,12 +155,12 @@ class SkeletonUtils {
     }
 
     if (options.preservePosition) {
-      for (var i = 0; i < bones.length; ++i) {
+      for (int i = 0; i < bones.length; ++i) {
         bone = bones[i];
-        name = options.names[bone.name] || bone.name;
+        name = options.names[bone.name] ?? bone.name;
 
         if (name != options.hip) {
-          bone.position.copy(bonesPosition[i]);
+          bone.position.setFrom(bonesPosition[i]);
         }
       }
     }
@@ -150,47 +172,51 @@ class SkeletonUtils {
     }
   }
 
-  static retargetClip(target, source, clip, [options]) {
-    options = options ?? {};
+  static retargetClip(target, source, AnimationClip clip, [SkeletonUtilsOptions? options]) {
+    options = options ?? SkeletonUtilsOptions();
 
-    options.useFirstFramePosition = options.useFirstFramePosition ?? false;
-    options.fps = options.fps ?? 30;
-    options.names = options.names ?? [];
+    options.useFirstFramePosition = options.useFirstFramePosition;
+    options.fps = options.fps;
+    options.names = options.names;
 
-    if (!source.isObject3D) {
+    if (source is! Object3D) {
       source = getHelperFromSkeleton(source);
     }
 
-    var numFrames = (clip.duration * (options.fps / 1000) * 1000).round(),
+    final numFrames = (clip.duration * (options.fps / 1000) * 1000).round(),
         delta = 1 / options.fps,
         convertedTracks = <KeyframeTrack>[],
         mixer = AnimationMixer(source),
         bones = getBones(target.skeleton),
         boneDatas = [];
-    var positionOffset, bone, boneTo, boneData, name;
+        
+    Vector3? positionOffset;
+    Bone? bone, boneTo; 
+    Map? boneData;
+    String name;
 
     mixer.clipAction(clip)?.play();
     mixer.update(0);
 
     source.updateMatrixWorld();
 
-    for (var i = 0; i < numFrames; ++i) {
-      var time = i * delta;
+    for (int i = 0; i < numFrames; ++i) {
+      double time = i * delta;
 
       retarget(target, source, options);
 
-      for (var j = 0; j < bones.length; ++j) {
-        name = options.names[bones[j].name] || bones[j].name;
+      for (int j = 0; j < bones.length; ++j) {
+        name = options.names[bones[j].name] ?? bones[j].name;
 
-        boneTo = getBoneByName(name, source.skeleton);
+        boneTo = getBoneFromSkeleton(name, source.skeleton!);
 
-        if (boneTo) {
+        if (boneTo != null) {
           bone = bones[j];
           boneData = boneDatas[j] = boneDatas[j] ?? {"bone": bone};
 
           if (options.hip == name) {
-            if (!boneData.pos) {
-              boneData.pos = {"times": Float32List(numFrames), "values": Float32List(numFrames * 3)};
+            if (boneData!['pos'] == null) {
+              boneData['pos'] = {"times": Float32List(numFrames), "values": Float32List(numFrames * 3)};
             }
 
             if (options.useFirstFramePosition) {
@@ -198,21 +224,21 @@ class SkeletonUtils {
                 positionOffset = bone.position.clone();
               }
 
-              bone.position.sub(positionOffset);
+              bone.position.sub(positionOffset!);
             }
 
-            boneData.pos.times[i] = time;
+            boneData['pos']['times'][i] = time;
 
-            bone.position.toArray(boneData.pos.values, i * 3);
+            bone.position.copyIntoArray(boneData['pos']['values'], i * 3);
           }
 
-          if (!boneData.quat) {
-            boneData.quat = {"times": Float32List(numFrames), "values": Float32List(numFrames * 4)};
+          if (boneData!['quat'] == null) {
+            boneData['quat'] = {"times": Float32List(numFrames), "values": Float32List(numFrames * 4)};
           }
 
-          boneData.quat.times[i] = time;
+          boneData['quat']['times'][i] = time;
 
-          bone.quaternion.toArray(boneData.quat.values, i * 4);
+          bone.quaternion.toArray(boneData['quat']['values'], i * 4);
         }
       }
 
@@ -221,17 +247,15 @@ class SkeletonUtils {
       source.updateMatrixWorld();
     }
 
-    for (var i = 0; i < boneDatas.length; ++i) {
+    for (int i = 0; i < boneDatas.length; ++i) {
       boneData = boneDatas[i];
 
-      if (boneData) {
-        if (boneData.pos) {
-          convertedTracks.add(VectorKeyframeTrack(
-              '.bones[' + boneData.bone.name + '].position', boneData.pos.times, boneData.pos.values, null));
+      if (boneData != null) {
+        if (boneData['pos']) {
+          convertedTracks.add(VectorKeyframeTrack('.bones[${boneData['bone']['name']}].position', boneData['pos']['times'], boneData['pos']['values'], null));
         }
 
-        convertedTracks.add(QuaternionKeyframeTrack(
-            '.bones[' + boneData.bone.name + '].quaternion', boneData.quat.times, boneData.quat.values, null));
+        convertedTracks.add(QuaternionKeyframeTrack('.bones[${boneData['bone']['name']}].quaternion', boneData['quat']['times'], boneData['quat']['values'], null));
       }
     }
 
@@ -240,57 +264,59 @@ class SkeletonUtils {
     return AnimationClip(clip.name, -1, convertedTracks);
   }
 
-  static getHelperFromSkeleton(skeleton) {
-    var source = SkeletonHelper(skeleton.bones[0]);
+  static SkeletonHelper getHelperFromSkeleton(Skeleton skeleton) {
+    final source = SkeletonHelper(skeleton.bones[0]);
     source.skeleton = skeleton;
-
     return source;
   }
 
-  static getSkeletonOffsets(target, source, [options]) {
-    options = options ?? {};
+  static Map<String,dynamic> getSkeletonOffsets(target, source, [SkeletonUtilsOptions? options]) {
+    options = options ?? SkeletonUtilsOptions();
 
-    var targetParentPos = Vector3(),
+    final targetParentPos = Vector3(),
         targetPos = Vector3(),
         sourceParentPos = Vector3(),
         sourcePos = Vector3(),
         targetDir = Vector2(),
         sourceDir = Vector2();
 
-    options.hip = options.hip ?? 'hip';
-    options.names = options.names ?? {};
+    options.hip = options.hip;
+    options.names = options.names;
 
-    if (!source.isObject3D) {
+    if (source is! Object3D) {
       source = getHelperFromSkeleton(source);
     }
 
-    var nameKeys = options.names.keys,
-        nameValues = options.names.values,
-        sourceBones = source.isObject3D ? source.skeleton.bones : getBones(source),
-        bones = target.isObject3D ? target.skeleton.bones : getBones(target),
-        offsets = [];
+    final List<String> nameKeys = options.names.keys.toList();
+    final List<String> nameValues = options.names.values.toList() as List<String>;
+    final List<Bone> sourceBones = source is Object3D ? (source.skeleton?.bones ?? []) : getBones(source),
+      bones = target is Object3D ? (target.skeleton?.bones ?? []) : getBones(target);
+    Map<String,dynamic> offsets = {};
 
-    var bone, boneTo, name, i;
+    Bone bone;
+    Bone? boneTo;
+    String name;
+    int i;
 
     target.skeleton.pose();
 
     for (i = 0; i < bones.length; ++i) {
       bone = bones[i];
-      name = options.names[bone.name] || bone.name;
+      name = options.names[bone.name] ?? bone.name;
 
       boneTo = getBoneByName(name, sourceBones);
 
-      if (boneTo && name != options.hip) {
-        var boneParent = getNearestBone(bone.parent, nameKeys),
-            boneToParent = getNearestBone(boneTo.parent, nameValues);
+      if (boneTo != null && name != options.hip) {
+        final boneParent = getNearestBone(bone.parent!, nameKeys.toList()),
+            boneToParent = getNearestBone(boneTo.parent!, nameValues.toList());
 
-        boneParent.updateMatrixWorld();
-        boneToParent.updateMatrixWorld();
+        boneParent?.updateMatrixWorld();
+        boneToParent?.updateMatrixWorld();
 
-        targetParentPos.setFromMatrixPosition(boneParent.matrixWorld);
+        targetParentPos.setFromMatrixPosition(boneParent!.matrixWorld);
         targetPos.setFromMatrixPosition(bone.matrixWorld);
 
-        sourceParentPos.setFromMatrixPosition(boneToParent.matrixWorld);
+        sourceParentPos.setFromMatrixPosition(boneToParent!.matrixWorld);
         sourcePos.setFromMatrixPosition(boneTo.matrixWorld);
 
         targetDir
@@ -301,16 +327,12 @@ class SkeletonUtils {
             .sub2(Vector2(sourcePos.x, sourcePos.y), Vector2(sourceParentPos.x, sourceParentPos.y))
             .normalize();
 
-        var laterialAngle = targetDir.angle() - sourceDir.angle();
-
-        var offset = Matrix4().makeRotationFromEuler(Euler(0, 0, laterialAngle));
+        final laterialAngle = targetDir.angle() - sourceDir.angle();
+        final offset = Matrix4().makeRotationFromEuler(Euler(0, 0, laterialAngle));
 
         bone.matrix.multiply(offset);
-
         bone.matrix.decompose(bone.position, bone.quaternion, bone.scale);
-
         bone.updateMatrixWorld();
-
         offsets[name] = offset;
       }
     }
@@ -318,53 +340,62 @@ class SkeletonUtils {
     return offsets;
   }
 
-  static renameBones(skeleton, names) {
-    var bones = getBones(skeleton);
+  static void renameBones(skeleton, names) {
+    final bones = getBones(skeleton);
 
-    for (var i = 0; i < bones.length; ++i) {
-      var bone = bones[i];
+    for (int i = 0; i < bones.length; ++i) {
+      final bone = bones[i];
 
       if (names[bone.name]) {
         bone.name = names[bone.name];
       }
     }
 
-    // TODO how return this;
     console.info("SkeletonUtils.renameBones need confirm how return this  ");
-
-    // return this;
   }
 
-  static getBones(skeleton) {
+  static List<Bone> getBones( skeleton) {
     return skeleton is List ? skeleton : skeleton.bones;
   }
 
-  static getBoneByName(name, skeleton) {
-    for (var i = 0, bones = getBones(skeleton); i < bones.length; i++) {
+  static Bone? getBoneFromSkeleton(String name, Skeleton skeleton) {
+    final bones = getBones(skeleton);
+    for (int i = 0; i < bones.length; i++) {
       if (name == bones[i].name) return bones[i];
     }
+
+    return null;
   }
 
-  static getNearestBone(bone, names) {
-    while (bone.isBone) {
-      if (names.indexOf(bone.name) != -1) {
+  static Bone? getBoneByName(String name, List<Bone> bones) {
+    for (int i = 0; i < bones.length; i++) {
+      if (name == bones[i].name) return bones[i];
+    }
+
+    return null;
+  }
+
+  static Bone? getNearestBone(Object3D bone, List<String> names) {
+    while (bone is Bone) {
+      if (names.contains(bone.name)) {
         return bone;
       }
 
-      bone = bone.parent;
+      bone = bone.parent!;
     }
+
+    return null;
   }
 
-  static findBoneTrackData(name, tracks) {
-    var regexp = RegExp(r"\[(.*)\]\.(.*)");
+  static Map<String,dynamic> findBoneTrackData(String name, List<KeyframeTrack> tracks) {
+    final regexp = RegExp(r"\[(.*)\]\.(.*)");
 
-    var result = {"name": name};
+    final Map<String,dynamic> result = {"name": name};
 
-    for (var i = 0; i < tracks.length; ++i) {
+    for (int i = 0; i < tracks.length; ++i) {
       // 1 is track name
       // 2 is track type
-      var trackData = regexp.firstMatch(tracks[i].name);
-
+      final trackData = regexp.firstMatch(tracks[i].name);
       if (trackData != null && name == trackData.group(1)) {
         result[trackData.group(2)!] = i;
       }
@@ -373,17 +404,18 @@ class SkeletonUtils {
     return result;
   }
 
-  static getEqualsBonesNames(skeleton, targetSkeleton) {
-    var sourceBones = getBones(skeleton), targetBones = getBones(targetSkeleton), bones = [];
+  static List<Bone> getEqualsBonesNames(Skeleton skeleton, Skeleton targetSkeleton) {
+    final sourceBones = getBones(skeleton);
+    final targetBones = getBones(targetSkeleton);
+    final List<Bone> bones = [];
 
     search:
-    for (var i = 0; i < sourceBones.length; i++) {
-      var boneName = sourceBones[i].name;
+    for (int i = 0; i < sourceBones.length; i++) {
+      final boneName = sourceBones[i].name;
 
-      for (var j = 0; j < targetBones.length; j++) {
+      for (int j = 0; j < targetBones.length; j++) {
         if (boneName == targetBones[j].name) {
-          bones.add(boneName);
-
+          bones.add(targetBones[j]);
           continue search;
         }
       }
@@ -392,16 +424,13 @@ class SkeletonUtils {
     return bones;
   }
 
-  static clone(source) {
-    var sourceLookup = {};
-    var cloneLookup = {};
+  static clone(Object3D source) {
+    final sourceLookup = {};
+    final cloneLookup = {};
 
-    var clone = source.clone();
+    final clone = source.clone();
 
     parallelTraverse(source, clone, (sourceNode, clonedNode) {
-      // sourceLookup.set( clonedNode, sourceNode );
-      // cloneLookup.set( sourceNode, clonedNode );
-
       sourceLookup[clonedNode] = sourceNode;
       cloneLookup[sourceNode] = clonedNode;
     });
@@ -409,34 +438,35 @@ class SkeletonUtils {
     clone.traverse((node) {
       if (!node.runtimeType.toString().contains("SkinnedMesh")) return;
 
-      var clonedMesh = node;
-      var sourceMesh = sourceLookup[node];
-      var sourceBones = sourceMesh.skeleton.bones;
+      final clonedMesh = node;
+      final Object3D sourceMesh = sourceLookup[node];
+      final sourceBones = sourceMesh.skeleton?.bones;
 
-      clonedMesh.skeleton = sourceMesh.skeleton.clone();
-      clonedMesh.bindMatrix.setFrom(sourceMesh.bindMatrix);
+      clonedMesh.skeleton = sourceMesh.skeleton?.clone();
+      clonedMesh.bindMatrix?.setFrom(sourceMesh.bindMatrix!);
 
-      clonedMesh.skeleton.bones = List<Bone>.from(sourceBones.map((bone) {
+      clonedMesh.skeleton?.bones = List<Bone>.from(sourceBones!.map((bone) {
         return cloneLookup[bone];
       }).toList());
-
-      clonedMesh.bind(clonedMesh.skeleton, clonedMesh.bindMatrix);
+      
+      if(clonedMesh is SkinnedMesh){
+        clonedMesh.bind(clonedMesh.skeleton!, clonedMesh.bindMatrix);
+      }
     });
 
     return clone;
   }
 
-  static parallelTraverse(a, b, callback) {
+  static void parallelTraverse(Object3D? a, Object3D? b, void Function(Object3D?,Object3D?) callback) {
     callback(a, b);
-
-    for (int i = 0; i < a.children.length; i++) {
-      var _bc;
-
-      if (b != null && i < b.children.length) {
-        _bc = b.children[i];
+    if(a != null){
+      for (int i = 0; i < a.children.length; i++) {
+        Object3D? bc;
+        if (b != null && i < b.children.length) {
+          bc = b.children[i];
+        }
+        parallelTraverse(a.children[i], bc, callback);
       }
-
-      parallelTraverse(a.children[i], _bc, callback);
     }
   }
 }

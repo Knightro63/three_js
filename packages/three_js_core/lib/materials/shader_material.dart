@@ -173,15 +173,15 @@ class ShaderMaterial extends Material {
 
   // toJson( meta ) {
 
-  //   var data = super.toJson( meta );
+  //   final data = super.toJson( meta );
 
   //   data.glslVersion = this.glslVersion;
   //   data.uniforms = {};
 
-  //   for ( var name in this.uniforms ) {
+  //   for ( final name in this.uniforms ) {
 
-  //     var uniform = this.uniforms[ name ];
-  //     var value = uniform.value;
+  //     final uniform = this.uniforms[ name ];
+  //     final value = uniform.value;
 
   //     if ( value && value.isTexture ) {
 
@@ -249,9 +249,9 @@ class ShaderMaterial extends Material {
   //   data.vertexShader = this.vertexShader;
   //   data.fragmentShader = this.fragmentShader;
 
-  //   var extensions = {};
+  //   final extensions = {};
 
-  //   for ( var key in this.extensions ) {
+  //   for ( final key in this.extensions ) {
 
   //     if ( this.extensions[ key ] === true ) extensions[ key ] = true;
 

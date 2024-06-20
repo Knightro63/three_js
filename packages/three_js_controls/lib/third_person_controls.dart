@@ -148,7 +148,7 @@ class ThirdPersonControls with EventDispatcher {
 
     if(heightSpeed) {
       double y = MathUtils.clamp<double>(object.position.y, heightMin, heightMax );
-      var heightDelta = y - heightMin;
+      final heightDelta = y - heightMin;
       autoSpeedFactor = delta * (heightDelta * heightCoef);
     }
     else {

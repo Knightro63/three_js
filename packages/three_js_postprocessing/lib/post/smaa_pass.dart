@@ -32,7 +32,7 @@
 // 		this.weightsRT.texture.name = 'SMAAPass.weights';
 
 
-// 		var areaTextureImage = new Image();
+// 		final areaTextureImage = new Image();
 // 		areaTextureImage.src = this.getAreaTexture();
 // 		areaTextureImage.onload = () {
 // 			// asigning data to HTMLImageElement.src is asynchronous (see #15162)
@@ -47,7 +47,7 @@
 // 		this.areaTexture.generateMipmaps = false;
 // 		this.areaTexture.flipY = false;
 
-// 		var searchTextureImage = new Image();
+// 		final searchTextureImage = new Image();
 // 		searchTextureImage.src = this.getSearchTexture();
 // 		searchTextureImage.onload = () {
 // 			// assigning data to HTMLImageElement.src is asynchronous (see #15162)

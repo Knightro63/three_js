@@ -103,7 +103,7 @@ class _State extends State<WebglAnimationSkinningMorph> {
     // final walkAction = mixer.clipAction(animations[2]);
     // final runAction = mixer.clipAction(animations[1]);
 
-    // var actions = [ idleAction, walkAction, runAction ];
+    // final actions = [ idleAction, walkAction, runAction ];
     idleAction!.play();
 
     threeJs.addAnimationEvent((delta){

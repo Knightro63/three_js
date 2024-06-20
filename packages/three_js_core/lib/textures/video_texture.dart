@@ -70,7 +70,7 @@ class VideoTexture extends Texture {
   void update() {
     throw('This is not implimented yet.');
     // final video = image;
-    // var hasVideoFrameCallback = 'requestVideoFrameCallback' in video;
+    // final hasVideoFrameCallback = 'requestVideoFrameCallback' in video;
     // if ( hasVideoFrameCallback == false && video.readyState >= video.HAVE_CURRENT_DATA ) {
     // 	needsUpdate = true;
     // }

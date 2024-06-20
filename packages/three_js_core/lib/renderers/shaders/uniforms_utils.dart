@@ -1,13 +1,13 @@
 part of three_shaders;
 
 Map<String, dynamic> cloneUniforms(Map<String, dynamic> src) {
-  var dst = <String, dynamic>{};
+  final dst = <String, dynamic>{};
 
-  for (var u in src.keys) {
+  for (final u in src.keys) {
     dst[u] = {};
 
-    for (var p in src[u].keys) {
-      var property = src[u][p];
+    for (final p in src[u].keys) {
+      final property = src[u][p];
 
       if (property != null &&
           (property is Color ||
@@ -33,10 +33,10 @@ Map<String, dynamic> cloneUniforms(Map<String, dynamic> src) {
 Map<String, dynamic> mergeUniforms(uniforms) {
   Map<String, dynamic> merged = <String, dynamic>{};
 
-  for (var u = 0; u < uniforms.length; u++) {
-    var tmp = cloneUniforms(uniforms[u]);
+  for (int u = 0; u < uniforms.length; u++) {
+    final tmp = cloneUniforms(uniforms[u]);
 
-    for (var p in tmp.keys) {
+    for (final p in tmp.keys) {
       merged[p] = tmp[p];
     }
   }

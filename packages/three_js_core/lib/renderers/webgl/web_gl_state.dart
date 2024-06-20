@@ -533,10 +533,10 @@ class WebGLState {
 
   void texSubImage2DIf(int target, int level, int x, int y, int glFormat, int glType, ImageElement image) {
     if (kIsWeb && image.data is! NativeArray) {
-      texSubImage2DNoSize(WebGL.TEXTURE_2D, 0, 0, 0, glFormat, glType, image.data);
+      texSubImage2DNoSize(WebGL.TEXTURE_2D, level, x, y, glFormat, glType, image.data);
     } 
     else {
-      texSubImage2D(WebGL.TEXTURE_2D, 0, 0, 0, image.width, image.height, glFormat, glType, image.data);
+      texSubImage2D(WebGL.TEXTURE_2D, level, x, y, image.width, image.height, glFormat, glType, image.data);
     }
   }
 

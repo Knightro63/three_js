@@ -10,7 +10,7 @@ class TexturePass extends Pass {
   // dynamic fsQuad;
 
   TexturePass(map, opacity) : super() {
-    var shader = copyShader;
+    final shader = copyShader;
 
     map = map;
     this.opacity = (opacity != null) ? opacity : 1.0;
@@ -32,7 +32,7 @@ class TexturePass extends Pass {
 
   @override
   void render(renderer, writeBuffer, readBuffer,{double? deltaTime, bool? maskActive}) {
-    var oldAutoClear = renderer.autoClear;
+    final oldAutoClear = renderer.autoClear;
     renderer.autoClear = false;
 
     fsQuad.material = material;
