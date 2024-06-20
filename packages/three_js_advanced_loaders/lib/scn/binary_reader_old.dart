@@ -372,12 +372,12 @@ class BinaryReader {
   }
 
   _convert(String data, String encoding) {
-    String escapeString = '';
-    if(encoding == 'utf16be'){
-      escapeString = _escapeBE(data);
-    }else{
-      escapeString = _escapeLE(data);
-    }
+    // String escapeString = '';
+    // if(encoding == 'utf16be'){
+    //   escapeString = _escapeBE(data);
+    // }else{
+    //   escapeString = _escapeLE(data);
+    // }
 
     return data;
       
@@ -402,7 +402,7 @@ class BinaryReader {
     // }
 
 
-    throw ('unsupported encoding: $encoding');
+    //throw ('unsupported encoding: $encoding');
   }
 
   int getAvailableDataLength() {

@@ -1023,12 +1023,17 @@ class BufferGeometry with EventDispatcher {
 
     if(disposed) return;
     disposed = true;
-    for(final temp in attributes.keys){
-      attributes[temp].dispose();
+    if(attributes.isNotEmpty){
+      for(final temp in attributes.keys){
+        attributes[temp].dispose();
+      }
+      attributes.clear();
     }
-
-    for(final temp in morphAttributes.keys){
-      (morphAttributes[temp] as BufferAttribute).dispose();
+    if(morphAttributes.isNotEmpty){
+      for(final temp in morphAttributes.keys){
+        (morphAttributes[temp] as BufferAttribute).dispose();
+      }
+      morphAttributes.clear();
     }
   }
 }

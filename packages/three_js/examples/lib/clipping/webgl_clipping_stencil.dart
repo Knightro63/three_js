@@ -143,7 +143,7 @@ class _State extends State<WebglClippingStencil> {
       final plane = planes[i];
       final stencilGroup = createPlaneStencilGroup(geometry, plane, i + 1);
 
-      List<three.Plane> _planes = planes.where((p) => p != plane).toList();
+      //List<three.Plane> _planes = planes.where((p) => p != plane).toList();
 
       // plane is clipped by the other clipping planes
       final planeMat = three.MeshStandardMaterial.fromMap({

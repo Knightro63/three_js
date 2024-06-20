@@ -141,9 +141,7 @@ class _State extends State<WebglDecals> {
     }
   }
 
-  void checkIntersection(double x,double y ) {
-    if ( mesh == null ) return;
-
+  void checkIntersection(double x, double y) {
     mouse.x = ( x / threeJs.width ) * 2 - 1;
     mouse.y = - ( y / threeJs.height ) * 2 + 1;
 
@@ -182,7 +180,7 @@ class _State extends State<WebglDecals> {
     final map = await textureLoader.fromAsset( 'assets/models/gltf/LeePerrySmith/Map-COL.jpg');
     //map.colorSpace = THREE.SRGBColorSpace;
     final specularMap = await textureLoader.fromAsset( 'assets/models/gltf/LeePerrySmith/Map-SPEC.jpg' );
-    final normalMap = await textureLoader.fromAsset( 'assets/models/gltf/LeePerrySmith/Infinite-Level_02_Tangent_SmoothUV.jpg' );
+    //final normalMap = await textureLoader.fromAsset( 'assets/models/gltf/LeePerrySmith/Infinite-Level_02_Tangent_SmoothUV.jpg' );
 
     final loader = three.GLTFLoader();
 

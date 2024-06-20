@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_angle/flutter_angle.dart';
 import 'package:three_js_core/others/index.dart';
 import 'package:three_js_core/three_js_core.dart' as core;
 import 'package:three_js_math/three_js_math.dart';
@@ -71,7 +70,7 @@ class ThreeJS{
     lateRenderer = renderer;
   }
 
-  bool _allowDeleteTexture = true;
+  //bool _allowDeleteTexture = true;
   Size? _size;
   late Settings settings;
   final GlobalKey<core.PeripheralsState> globalKey = GlobalKey<core.PeripheralsState>();
@@ -119,17 +118,17 @@ class ThreeJS{
   void dispose(){
     if(disposed) return;
     disposed = true;
-    print('dispose');
     renderer?.dispose();
     renderTarget?.dispose();
     falseRenderTarget?.dispose();
-    if(texture != null && _allowDeleteTexture){
+    if(texture != null){
       FlutterAngle.deleteTexture(texture!);
     }
     scene.dispose();
-    disposeEvents.forEach((event){
+    //disposeEvents.forEach((event){
+    for(final event in disposeEvents){
       event.call();
-    });
+    }
   }
 
   void initSize(BuildContext context){
@@ -224,13 +223,14 @@ class ThreeJS{
 
     if(settings.useSourceTexture && !kIsWeb){
       final core.WebGLRenderTargetOptions pars = core.WebGLRenderTargetOptions(settings.renderOptions);
-      renderTarget = core.WebGLMultisampleRenderTarget((width * dpr).toInt(), (height * dpr).toInt(), pars);
+      renderTarget = core.WebGLRenderTarget((width * dpr).toInt(), (height * dpr).toInt(), pars);
       renderer!.setRenderTarget(renderTarget);
       sourceTexture = renderer!.getRenderTargetGLTexture(renderTarget!);
 
       falseMesh = core.Mesh(core.PlaneGeometry(0, 0), null);
       falseRenderTarget = core.WebGLRenderTarget(0, 0, core.WebGLRenderTargetOptions({}));
       falseCamera = core.Camera();
+      renderer!.setRenderTarget(falseRenderTarget);
     }
   }
   void onWindowResize(BuildContext context){

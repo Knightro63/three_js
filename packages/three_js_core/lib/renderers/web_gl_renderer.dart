@@ -713,7 +713,7 @@ class WebGLRenderer {
       else if (object is Sprite) {
         if (!object.frustumCulled || _frustum.intersectsSprite(object)) {
           if (sortObjects) {
-            _vector3..setFromMatrixPosition(object.matrixWorld)..applyMatrix4(projScreenMatrix);
+            _vector3.setFromMatrixPosition(object.matrixWorld).applyMatrix4(projScreenMatrix);
           }
 
           BufferGeometry geometry = objects.update(object);

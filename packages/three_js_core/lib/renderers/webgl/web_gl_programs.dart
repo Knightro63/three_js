@@ -352,9 +352,7 @@ class WebGLPrograms {
     if (parameters.physicallyCorrectLights) _programLayers.enable(9);
     if (parameters.doubleSided) _programLayers.enable(10);
     if (parameters.flipSided) _programLayers.enable(11);
-    if (parameters.useDepthPacking) {
-      _programLayers.enable(12);
-    }
+    if (parameters.useDepthPacking) _programLayers.enable(12);
     if (parameters.dithering) _programLayers.enable(13);
     if (parameters.specularIntensityMap) _programLayers.enable(14);
     if (parameters.specularColorMap) _programLayers.enable(15);

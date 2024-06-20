@@ -44,7 +44,7 @@ class DirectionalLight extends Light {
   /// 
   /// [intensity] - (optional) numeric value of the light's
   /// strength/intensity. Default is `1`.
-  DirectionalLight(super.color, [super.intensity]){
+  DirectionalLight([super.color, super.intensity]){
     type = "DirectionalLight";
     position.setFrom(Object3D.defaultUp);
     updateMatrix();

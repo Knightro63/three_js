@@ -110,17 +110,10 @@ class PlaneHelper extends Line {
   @override
   void updateMatrixWorld([bool force = false]) {
     double scale = -plane!.constant;
-
     if (scale.abs() < 1e-8) scale = 1e-8; // sign does not matter
-
     this.scale.setValues(0.5 * size, 0.5 * size, scale);
-
-    children[0].material?.side = (scale < 0)
-        ? BackSide
-        : FrontSide; // renderer flips side when determinant < 0; flipping not wanted here
-
+    children[0].material?.side = (scale < 0)? BackSide : FrontSide; // renderer flips side when determinant < 0; flipping not wanted here
     lookAt(plane!.normal);
-
     super.updateMatrixWorld(force);
   }
 }

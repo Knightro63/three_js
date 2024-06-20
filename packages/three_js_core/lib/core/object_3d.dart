@@ -1093,7 +1093,7 @@ class Object3D with EventDispatcher {
     instanceMatrix = null;
     instanceColor?.dispose();
     instanceColor = null;
-
+    
     if(background is NativeArray || background is ImageElement || background is Texture){
       background?.dispose();
       background = null;

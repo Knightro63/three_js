@@ -181,7 +181,7 @@ class BPlist{
 
       String parsePlistString ([bool isUtf16 = false]) {
         int utf16 = isUtf16?1:0;
-        String enc = "utf8";
+        //String enc = "utf8";
         int length = objInfo;
         int stroffset = 1;
         if (objInfo == 0xF) {
@@ -205,7 +205,7 @@ class BPlist{
           Uint8List plistString = buffer.sublist(offset + stroffset, offset + stroffset + length);
           if (isUtf16) {
             plistString = swapBytes(plistString);
-            enc = "ucs2";
+            //enc = "ucs2";
           }
           return '"${String.fromCharCodes(plistString)}"';
         }
