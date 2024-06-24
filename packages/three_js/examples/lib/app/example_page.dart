@@ -15,6 +15,7 @@ import 'package:example/instancing/webgl_gpgpu_protoplanet.dart';
 import 'package:example/instancing/webgl_instancing_dynamic.dart';
 import 'package:example/instancing/webgl_instancing_raycasting.dart';
 import 'package:example/instancing/webgl_instancing_scatter.dart';
+import 'package:example/loaders/webgl_loader_collada.dart';
 import 'package:example/loaders/webgl_loader_fbx_nurbs.dart';
 import 'package:example/loaders/webgl_loader_gcode.dart';
 import 'package:example/loaders/webgl_loader_glb.dart';
@@ -183,6 +184,9 @@ class _MyAppState extends State<ExamplePage> {
     else if (fileName == "webgl_loader_texture_basis") {
       page = WebglLoaderTextureBasis(fileName: fileName);
     } 
+    else if(fileName == "webgl_loader_collada"){
+      page = WebglLoaderCollada(fileName: fileName);
+    }
     else if(fileName == "webgl_loader_ply"){
       page = WebglLoaderPly(fileName: fileName);
     }

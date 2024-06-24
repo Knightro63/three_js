@@ -53,7 +53,7 @@ class USDAParser {
 				final Map<String, dynamic> meta = {};
 				stack.add(meta);
 
-				string = line.split( '(' )[ 0 ].trim() ?? string;
+				string = line.split( '(' )[ 0 ].trim();
 
 				target[string] = meta;
 				target = meta;

@@ -746,13 +746,11 @@ class WebGLRenderer {
 
           if (material is GroupMaterial) {
             final groups = geometry.groups;
-
             if (groups.isNotEmpty) {
               for (int i = 0, l = groups.length; i < l; i++) {
                 Map<String, dynamic> group = groups[i];
                 if(group["materialIndex"] < material.children.length){
                   final groupMaterial = material.children[group["materialIndex"]];
-
                   if (groupMaterial.visible) {
                     currentRenderList!.push(object, geometry, groupMaterial, groupOrder, _vector3.z, group);
                   }
@@ -760,11 +758,11 @@ class WebGLRenderer {
               }
             } 
             else {
-              //for (final element in material) {
+              for (final mat in material.children) {
                 if (material.visible) {
-                  currentRenderList!.push(object, geometry, material, groupOrder, _vector3.z, null);
+                  currentRenderList!.push(object, geometry, mat, groupOrder, _vector3.z, null);
                 }
-              //}
+              }
             }
           } else if (material != null && material.visible) {
             currentRenderList!.push(object, geometry, material, groupOrder, _vector3.z, null);

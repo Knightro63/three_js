@@ -102,14 +102,14 @@ class WebGLRenderList {
     return renderItem;
   }
 
-  void push(Object3D object, BufferGeometry geometry, material, int groupOrder, double z, Map<String, dynamic>? group) {
+  void push(Object3D object, BufferGeometry geometry, Material material, int groupOrder, double z, Map<String, dynamic>? group) {
     final renderItem = getNextRenderItem(object, geometry, material, groupOrder, z, group);
 
     if (material.transmission > 0.0) {
       transmissive.add(renderItem);
     } 
     else {
-      if (material.transparent == true) {
+      if (material.transparent) {
         transparent.add(renderItem);
       } 
       else {

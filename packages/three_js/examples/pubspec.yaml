@@ -54,6 +54,10 @@ flutter:
     - assets/models/vox/
     - assets/models/usdz/
     - assets/models/xyz/
+    - assets/models/collada/
+    - assets/models/collada/stormtrooper/
+    - assets/models/collada/elf/
+    - assets/models/gltf/test/
     - assets/models/gltf/
     - assets/models/gltf/test/
     - assets/models/gltf/flutter/

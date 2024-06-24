@@ -124,6 +124,7 @@ class FileLoader extends Loader {
     return ThreeFile(type??'bytes',bytes,location);
   }
 
+  @override
   Future<ThreeFile?> unknown(dynamic url) async{
     if(url is File){
       return fromFile(url);

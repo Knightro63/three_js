@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:typed_data';
 import 'dart:io';
-import 'dart:convert';
+import 'dart:convert' as convert;
 import 'package:three_js_core/textures/index.dart';
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
@@ -86,8 +86,6 @@ class DataTextureLoader extends Loader {
   late final FileLoader _loader;
 
   /// [manager] — The [loadingManager] for the loader to use. Default is [DefaultLoadingManager].
-  /// 
-  /// Creates a new [FontLoader].
   DataTextureLoader([super.manager]){
     _loader = FileLoader(manager);
   }
@@ -147,8 +145,45 @@ class DataTextureLoader extends Loader {
     return _parse(tf.data);
   }
 
+  /// If the type of format is unknown load it here.
+  @override
+  Future<Texture?> unknown(dynamic url) async{
+    if(url is File){
+      return fromFile(url);
+    }
+    else if(url is Blob){
+      return fromBlob(url);
+    }
+    else if(url is Uri){
+      return fromNetwork(url);
+    }
+    else if(url is Uint8List){
+      return fromBytes(url);
+    }
+    else if(url is String){
+      RegExp dataUriRegex = RegExp(r"^data:(.*?)(;base64)?,(.*)$");
+      if(dataUriRegex.hasMatch(url)){
+        RegExpMatch? dataUriRegexResult = dataUriRegex.firstMatch(url);
+        String? data = dataUriRegexResult!.group(3)!;
+
+        return fromBytes(convert.base64.decode(data));
+      }
+      else if(url.contains('http://') || url.contains('https://')){  
+        return fromNetwork(Uri.parse(url));
+      }
+      else if(url.contains('assets') || path.contains('assets')){
+        return fromAsset(url);
+      }
+      else{
+        return fromPath(url);
+      }
+    }
+
+    return null;
+  }
+
   DataTexture? _parse(Uint8List bytes){
-    final Map<String,dynamic> texData = json.decode(String.fromCharCodes(bytes));
+    final Map<String,dynamic> texData = convert.json.decode(String.fromCharCodes(bytes));
     return parse(texData);
   }
 

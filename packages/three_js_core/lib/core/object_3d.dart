@@ -448,7 +448,7 @@ class Object3D with EventDispatcher {
       object.dispatchEvent(_addedEvent);
     } 
     else {
-      console.warning('Object3D.add: object not an instance of THREE.Object3D. $object');
+      console.warning('Object3D.add: object not an instance of Object3D. $object');
     }
 
     return this;

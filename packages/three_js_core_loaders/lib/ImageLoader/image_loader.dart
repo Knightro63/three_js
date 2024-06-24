@@ -99,6 +99,7 @@ class ImageLoader extends Loader {
     return resp;
   }
 
+  @override
   Future<ImageElement?> unknown(dynamic url) async{
     if(url is File){
       return fromFile(url);
