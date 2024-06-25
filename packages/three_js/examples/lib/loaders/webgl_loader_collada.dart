@@ -49,7 +49,7 @@ class _MyAppState extends State<WebglLoaderCollada> {
 
     final loader = three.ColladaLoader();
     loader.setPath('assets/models/collada/elf/');
-    loader.fromAsset( 'elf.dae').then(( collada ) {
+    await loader.fromAsset( 'elf.dae').then(( collada ) {
       elf = collada?.scene;
       threeJs.scene.add( elf );
     });

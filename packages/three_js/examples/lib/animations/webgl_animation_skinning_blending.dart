@@ -82,9 +82,6 @@ class _State extends State<WebglAnimationSkinningBlending> {
 
     model = gltf!.scene;
 
-    three.console.info(" load model success " );
-    three.console.info(model);
-
     threeJs.scene.add(model);
 
     model.traverse((object) {

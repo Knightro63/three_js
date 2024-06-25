@@ -41,6 +41,8 @@ class _MyAppState extends State<WebglLoaderColladaKinematics> {
   }
 
   three.Object3D? dae;
+  Map<String, dynamic>? kinematics;
+  final tweenParameters = {};
   
   Future<void> setup() async {
     threeJs.camera = three.PerspectiveCamera( 45, threeJs.width / threeJs.height, 1, 2000 );
@@ -55,7 +57,7 @@ class _MyAppState extends State<WebglLoaderColladaKinematics> {
 
     // Add the COLLADA
 		final loader = three.ColladaLoader();
-		loader.fromAsset( 'assets/models/collada/abb_irb52_7_120.dae').then(( collada ) {
+		await loader.fromAsset( 'assets/models/collada/abb_irb52_7_120.dae').then(( collada ) {
       dae = collada?.scene;
 
       dae?.traverse(( child ) {
@@ -70,7 +72,7 @@ class _MyAppState extends State<WebglLoaderColladaKinematics> {
       dae?.scale.z = 10.0;
       dae?.updateMatrix();
 
-      //kinematics = collada.kinematics;
+      kinematics = collada?.kinematics;
 		});
 
     threeJs.scene.add( dae );
@@ -97,38 +99,34 @@ class _MyAppState extends State<WebglLoaderColladaKinematics> {
   }
 
   void setupTween() {
-    // final duration = three.MathUtils.randInt( 1000, 5000 );
-    // final target = {};
+    if(kinematics != null){
+      //final duration = math.Random().nextInt(4000)+1000;//three.MathUtils.randInt( 1000, 5000 );
+      final target = {};
 
-    // for ( final prop in kinematics.joints ) {
-    //   if ( kinematics.joints.hasOwnProperty( prop ) ) {
+      for ( final prop in kinematics!['joints'].keys) {
+        if (!kinematics!['joints'][ prop ]['static']) {
+          final joint = kinematics!['joints'][ prop ];
+          final old = tweenParameters[ prop ];
+          final position = old ?? joint['zeroPosition'];
 
-    //     if ( ! kinematics.joints[ prop ].static ) {
-    //       final joint = kinematics.joints[ prop ];
-    //       final old = tweenParameters[ prop ];
-    //       final position = old ? old : joint.zeroPosition;
+          tweenParameters[ prop ] = position;
+          target[prop] = math.Random().nextInt(joint['limits']['max'].toInt())+joint['limits']['min'].toInt();//three.MathUtils.randInt( joint.limits.min, joint.limits.max );
+        }
+      }
 
-    //       tweenParameters[ prop ] = position;
-    //       target[ prop ] = three.MathUtils.randInt( joint.limits.min, joint.limits.max );
-    //     }
-    //   }
-    // }
+      // kinematicsTween = TWEEN.Tween( tweenParameters ).to( target, duration ).easing( TWEEN.Easing.Quadratic.Out );
+      
+      // kinematicsTween.onUpdate(( object ) {
+      //   for ( final prop in kinematics!['joints'] ) {
+      //     if (!kinematics!['joints'][ prop ]['static'] ) {
+      //       kinematics!['setJointValue']( prop, object[ prop ] );
+      //     }
+      //   }
+      // } );
 
-    // kinematicsTween = TWEEN.Tween( tweenParameters ).to( target, duration ).easing( TWEEN.Easing.Quadratic.Out );
-    
-    // kinematicsTween.onUpdate(( object ) {
-    //   for ( final prop in kinematics.joints ) {
-    //     if ( kinematics.joints.hasOwnProperty( prop ) ) {
-    //       if ( ! kinematics.joints[ prop ].static ) {
-    //         kinematics.setJointValue( prop, object[ prop ] );
+      // kinematicsTween.start();
 
-    //       }
-    //     }
-    //   }
-    // } );
-
-    // kinematicsTween.start();
-
-    // setTimeout( setupTween, duration );
+      // setTimeout( setupTween, duration );
+    }
   }
 }

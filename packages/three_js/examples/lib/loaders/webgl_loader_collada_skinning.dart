@@ -53,7 +53,7 @@ class _MyAppState extends State<WebglLoaderColladaSkinning> {
 
     final loader = three.ColladaLoader();
     loader.setPath('assets/models/collada/stormtrooper/');
-    loader.fromAsset( 'stormtrooper.dae').then(( collada ) {
+    await loader.fromAsset( 'stormtrooper.dae').then(( collada ) {
 
       final avatar = collada!.scene!;
       final animations = collada.animations!;
@@ -62,6 +62,10 @@ class _MyAppState extends State<WebglLoaderColladaSkinning> {
       mixer?.clipAction( animations[0] )?.play();
 
       threeJs.scene.add( avatar );
+
+      final skeleton = SkeletonHelper(avatar);
+      skeleton.visible = true;
+      threeJs.scene.add(skeleton);
     } );
 
     //

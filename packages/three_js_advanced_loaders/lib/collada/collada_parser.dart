@@ -44,7 +44,7 @@ class ColladaParser{
     'visualScenes': {},
     'kinematicsModels': {},
     'physicsModels': {},
-    'kinematicsScenes': {}
+    'kinematicsScenes': <String,dynamic>{}
   };
 
   String text;
@@ -127,7 +127,7 @@ class ColladaParser{
 
   // library
 
-  void parseLibrary(XmlElement xml, String libraryName,String nodeName, parser ) {
+  void parseLibrary(XmlElement xml, String libraryName, String nodeName, parser ) {
     final library = xml.getElement(libraryName);
 
     if ( library != null ) {
@@ -241,7 +241,8 @@ class ColladaParser{
 
       if ( keyframe.value[ property ] == null ) {
         keyframe.value[ property ] = null; // mark as missing
-      } else {
+      } 
+      else {
         empty = false;
       }
     }
@@ -251,7 +252,8 @@ class ColladaParser{
         keyframe = keyframes[ i ];
         keyframe.value[ property ] = defaultValue;
       }
-    } else {
+    } 
+    else {
       createMissingKeyframes( keyframes, property );
     }
   }
@@ -813,9 +815,10 @@ class ColladaParser{
       final id = instanceMaterials[ keys[ i ] ];
 
       if ( id == null ) {
-        console.warning( 'ColladaLoader: Material with key %s not found. Apply fallback material. $keys[ i ]');
+        console.warning( 'ColladaLoader: Material with key ${keys[ i ]} not found. Apply fallback material.');
         materials.add( fallbackMaterial );
-      } else {
+      } 
+      else {
         materials.add( await getMaterial( id ) );
       }
     }
@@ -825,8 +828,9 @@ class ColladaParser{
 
   Future<List<Object3D>> buildObjects(Map<String,dynamic> geometries, instanceMaterials ) async{
     final List<Object3D> objects = [];
-
+    
     for ( final type in geometries.keys ) {
+      
       final Map<String,dynamic> geometry = geometries[ type ];
       final List<Material> materials = await resolveMaterialBinding( geometry['materialKeys'], instanceMaterials );
       // handle case if no materials are defined
@@ -846,7 +850,7 @@ class ColladaParser{
           final material = materials[ i ];
 
           if ( material is MeshPhongMaterial || material is MeshLambertMaterial) {
-            final lineMaterial =LineBasicMaterial();
+            final lineMaterial = LineBasicMaterial();
             lineMaterial.color.setFrom( material.color );
             lineMaterial.opacity = material.opacity;
             lineMaterial.transparent = material.transparent;
@@ -856,7 +860,6 @@ class ColladaParser{
       }
 
       // regard skinning
-
       final skinning = ( geometry['data'].attributes['skinIndex'] != null );
       final Material? material = ( materials.length == 1 ) ? materials[ 0 ] : GroupMaterial(materials);
 
@@ -873,7 +876,8 @@ class ColladaParser{
         case 'polylist':
           if ( skinning ) {
             object = SkinnedMesh( geometry['data'], material );
-          } else {
+          } 
+          else {
             object = Mesh( geometry['data'], material );
           }
           break;
@@ -1149,7 +1153,7 @@ class ColladaParser{
           data['sources'][ id ] = parseSource( child );
           break;
         case 'vertices':
-          data['sources'][ id ] = data['sources'][ parseId( child.getElement('input' )!.getAttribute( 'source' )! ) ];
+          //data['sources'][ id ] = data['sources'][ parseId( child.getElement('input' )!.getAttribute( 'source' )! ) ];
           data['vertices'] = parseGeometryVertices( child );
           break;
         case 'polygons':
@@ -1402,7 +1406,7 @@ class ColladaParser{
     if ( uv['array'].isNotEmpty ) geometry.setAttributeFromString( 'uv',Float32BufferAttribute.fromList( uv['array'], uv['stride'] ) );
     if ( uv1['array'].isNotEmpty ) geometry.setAttributeFromString( 'uv1',Float32BufferAttribute.fromList( uv1['array'], uv1['stride'] ) );
 
-    // if ( skinIndex['array'].isNotEmpty ) geometry.setAttributeFromString( 'skinIndex',Float32BufferAttribute.fromList( skinIndex['array'], skinIndex['stride'] ) );
+    if ( skinIndex['array'].isNotEmpty ) geometry.setAttributeFromString( 'skinIndex',Float32BufferAttribute.fromList( skinIndex['array'], skinIndex['stride'] ) );
     if ( skinWeight['array'].isNotEmpty ) geometry.setAttributeFromString( 'skinWeight',Float32BufferAttribute.fromList( skinWeight['array'], skinWeight['stride'] ) );
 
     build['data'] = geometry;
@@ -1425,7 +1429,6 @@ class ColladaParser{
     // first, we group all primitives by their type
 
     final groupedPrimitives = groupPrimitives( primitives );
-
     for ( final type in groupedPrimitives.keys ) {
       final primitiveType = groupedPrimitives[ type ];
       checkUVCoordinates( primitiveType );
@@ -1546,7 +1549,7 @@ class ColladaParser{
   }
 
   void parseKinematicsScene(XmlElement xml ) {
-    final data = {
+    final Map<String, dynamic> data = {
       'bindJointAxis': []
     };
 
@@ -1567,8 +1570,7 @@ class ColladaParser{
 
     final children = data['children'];
 
-    for (int i = 0; i < children.length; i ++ ) {
-      final child = children[ i ];
+    for (final child in children) {
       group.add( await getNode( child['id'] ) );
     }
 
@@ -1582,21 +1584,24 @@ class ColladaParser{
 
   Future<AnimationObject> getVisualScene( id ) async{
     final data = library['visualScenes']![ id ];
-    if ( data['build'] != null ) return data['build'];
+    if ( data?['build'] != null ) return data['build'];
     data['build'] = await buildVisualScene( data );
 
     return data['build'];
   }
 
   getKinematicsScene( id ) {
-    return getBuild( library['kinematicsScenes']![ id ], buildKinematicsScene );
+    final Map<String, dynamic> data = library['kinematicsScenes']![ id ];
+    if ( data['build'] != null ) return data['build'];
+    data['build'] = buildKinematicsScene( data );
+
+    return data['build'];
   }
 
-  buildTransformList( node ) {
+  buildTransformList(XmlElement node ) {
     final transforms = [];
-    final xml = collada.xpath( '[@id="${node['id']}"]' );
-
-    for (final child in xml) {
+    final elements = collada.xpath( '//node[@id="${node.getAttribute('id')}"]' );
+    for (final child in elements) {
       var array, vector;
       switch ( child.parentElement!.name.local ) {
         case 'matrix':
@@ -1641,17 +1646,16 @@ class ColladaParser{
     final kinematicsModelId = library['kinematicsModels']?.keys;
     final kinematicsSceneId = library['kinematicsScenes']?.keys;
     final visualSceneId = library['visualScenes']?.keys;
-    return;
     if ( kinematicsModelId == null || kinematicsModelId.isEmpty || kinematicsSceneId == null || kinematicsSceneId.isEmpty) return;
 
     final kinematicsModel = getKinematicsModel( kinematicsModelId.toList()[0] );
     final kinematicsScene = getKinematicsScene( kinematicsSceneId.toList()[0] );
-    final visualScene = await getVisualScene( visualSceneId );
+    final visualScene = await getVisualScene( visualSceneId!.toList()[0] );
 
     final bindJointAxis = kinematicsScene['bindJointAxis'];
     final jointMap = {};
 
-    connect( jointIndex, visualElement ) {
+    connect( jointIndex, XmlElement visualElement ) {
       final visualElementName = visualElement.getAttribute( 'name' );
       final joint = kinematicsModel['joints'][ jointIndex ];
 
@@ -1669,18 +1673,19 @@ class ColladaParser{
 
     for (int i = 0, l = bindJointAxis.length; i < l; i ++ ) {
       final axis = bindJointAxis[ i ];
-      final targetElement = collada.xpath( '[@sid="${axis.target}"]' ).toList();
-
+      List<XmlNode> targetElement = collada.xpath( '//translate[@sid="${axis['target']}"]' ).toList();
+      targetElement += collada.xpath( '//rotate[@sid="${axis['target']}"]' ).toList();
+      targetElement += collada.xpath( '//matrix[@sid="${axis['target']}"]' ).toList();
+      targetElement += collada.xpath( '//scale[@sid="${axis['target']}"]' ).toList();
       if ( targetElement.isNotEmpty) {
         final parentVisualElement = targetElement[0].parentElement;
-        connect( axis['jointIndex'], parentVisualElement );
+        connect( axis['jointIndex'], parentVisualElement! );
       }
     }
 
-    final m0 =Matrix4();
-
+    final m0 = Matrix4();
     kinematics = {
-      'joints': kinematicsModel && kinematicsModel['joints'],
+      'joints': kinematicsModel['joints'],
 
       'getJointValue': ( jointIndex ) {
         final jointData = jointMap[ jointIndex ];
@@ -1699,7 +1704,7 @@ class ColladaParser{
           final joint = jointData.joint;
 
           if ( value > joint.limits.max || value < joint.limits.min ) {
-            console.warning( 'ColladaLoader: Joint $jointIndex value $value outside of limits (min: ' + joint.limits.min + ', max: ' + joint.limits.max + ').' );
+            console.warning( 'ColladaLoader: Joint $jointIndex value $value outside of limits (min: ${joint['limits']['min']}, max: ${joint['limits']['max']}).' );
           } 
           else if ( joint.static ) {
             console.warning( 'ColladaLoader: Joint $jointIndex is static.' );
@@ -1781,9 +1786,7 @@ class ColladaParser{
 
   void prepareNodes(XmlElement xml ) {
     final elements = xml.findAllElements( 'node' );
-
     // ensure all node elements have id attributes
-
     for (final element in elements) {
       if ( element.getAttribute( 'id' ) == null) {
         element.setAttribute( 'id', generateId() );
@@ -1838,11 +1841,10 @@ class ColladaParser{
 
     for (final child in xml.descendantElements) {
       var array;
-
       switch ( child.name.local ) {
         case 'node':
           data['nodes'].add( child.getAttribute( 'id' ) );
-          parseNode( child );
+          //parseNode( child );
           break;
         case 'instance_camera':
           data['instanceCameras'].add( parseId( child.getAttribute( 'url' )! ) );
@@ -1889,7 +1891,7 @@ class ColladaParser{
     }
 
     if ( hasNode( data['id'] ) ) {
-      console.warning( 'ColladaLoader: There is already a node with ID %s. Exclude current node from further processing. ${data['id']}');
+      console.warning( 'ColladaLoader: There is already a node with ID ${data['id']}. Exclude current node from further processing.');
     } 
     else {
       library['nodes']![ data['id'] ] = data;
@@ -1905,8 +1907,7 @@ class ColladaParser{
         Matrix4? boneInverse;
         // retrieve the boneInverse from the controller data
 
-        for (int i = 0; i < joints.length; i ++ ) {
-          final joint = joints[ i ];
+        for (final joint in joints) {
           if ( joint['name'] == object.name ) {
             boneInverse = joint['boneInverse'];
             break;
@@ -1923,18 +1924,12 @@ class ColladaParser{
     final List<Map<String, dynamic>> boneData = [];
     final sortedBoneData = [];
 
-    var i, j, data;
-
     // a skeleton can have multiple root bones. collada expresses this
     // situtation with multiple "skeleton" tags per controller instance
 
-    for ( i = 0; i < skeletons.length; i ++ ) {
-      final skeleton = skeletons[ i ];
-
-      var root;
-
+    for (final skeleton in skeletons) {
       if ( hasNode( skeleton ) ) {
-        root = await getNode( skeleton );
+        final root = await getNode( skeleton );
         buildBoneHierarchy( root, joints, boneData );
       } 
       else if ( hasVisualScene( skeleton ) ) {
@@ -1956,11 +1951,11 @@ class ColladaParser{
 
     // sort bone data (the order is defined in the corresponding controller)
 
-    for ( i = 0; i < joints.length; i ++ ) {
-      for ( j = 0; j < boneData.length; j ++ ) {
-        data = boneData[ j ];
-        if ( data['bone'].name == joints[ i ]['name'] ) {
-          sortedBoneData[ i ] = data;
+    for (final joint in joints) {
+      for (int j = 0; j < boneData.length; j ++ ) {
+        final data = boneData[ j ];
+        if ( data['bone'].name == joint['name'] ) {
+          sortedBoneData.add(data);
           data['processed'] = true;
           break;
         }
@@ -1969,9 +1964,8 @@ class ColladaParser{
 
     // add unprocessed bone data at the end of the list
 
-    for ( i = 0; i < boneData.length; i ++ ) {
-      data = boneData[ i ];
-
+    for (int i = 0; i < boneData.length; i ++ ) {
+      final data = boneData[ i ];
       if ( data['processed'] == false ) {
         sortedBoneData.add( data );
         data['processed'] = true;
@@ -1983,8 +1977,8 @@ class ColladaParser{
     final List<Bone> bones = [];
     final List<Matrix4> boneInverses = [];
 
-    for ( i = 0; i < sortedBoneData.length; i ++ ) {
-      data = sortedBoneData[ i ];
+    for (int i = 0; i < sortedBoneData.length; i ++ ) {
+      final data = sortedBoneData[ i ];
       bones.add( data['bone'] );
       boneInverses.add( data['boneInverse'] );
     }
@@ -2006,8 +2000,8 @@ class ColladaParser{
 
     // nodes
 
-    for (int i = 0, l = nodes.length; i < l; i ++ ) {
-      objects.add(await getBuild( library['nodes']![ nodes[ i ] ], buildNode ));
+    for (final node in nodes) {
+      objects.add(await getBuild( library['nodes']![ node ], buildNode ));
     }
 
     // instance cameras
@@ -2058,10 +2052,6 @@ class ColladaParser{
 
     for (int i = 0, l = instanceGeometries.length; i < l; i ++ ) {
       final instance = instanceGeometries[ i ];
-
-      // a single geometry instance in collada can lead to multiple object3Ds.
-      // this is the case when primitives are combined like triangles and lines
-
       final geometries = await getGeometry( instance['id'] );
       final newObjects = await buildObjects( geometries, instance['materials'] );
 
@@ -2080,8 +2070,8 @@ class ColladaParser{
 
     if ( nodes.length == 0 && objects.length == 1 ) {
       object = objects[ 0 ];
-    } else {
-
+    } 
+    else {
       object = ( type == 'JOINT' ) ?Bone() :Group();
       for (int i = 0; i < objects.length; i ++ ) {
         object.add( objects[ i ] );
@@ -2104,11 +2094,9 @@ class ColladaParser{
     prepareNodes(xml);
 
     final elements = xml.findAllElements('node' );
-
     for (final element in elements) {
       data['children'].add( parseNode( element) );
     }
-
     library['visualScenes']![ xml.getAttribute( 'id' )! ] = data;
   }
 
@@ -2326,7 +2314,7 @@ class ColladaParser{
     key.value[ property ] = ( ( key.time - prev.time ) * ( next.value[ property ] - prev.value[ property ] ) / ( next.time - prev.time ) ) + prev.value[ property ];
   }
 
-  getBuild(data, builder ) {
+  getBuild(Map<String, dynamic> data, builder ) {
     if ( data['build'] != null ) return data['build'];
     data['build'] = builder( data );
 
@@ -2605,12 +2593,13 @@ class ColladaParser{
       // the order of the skin data matches the order of vertices
 
       for (int j = 0; j < BONE_LIMIT; j ++ ) {
-        final d = vertexSkinData.length > j?vertexSkinData[ j ]:null;
+        final d = vertexSkinData.length > j ? vertexSkinData[ j ]:null;
 
         if ( d != null ) {
           build['indices']['array'].add( d['index'] );
           build['weights']['array'].add( d['weight'] );
-        } else {
+        } 
+        else {
           build['indices']['array'].add( 0 );
           build['weights']['array'].add( 0 );
         }
@@ -2631,7 +2620,7 @@ class ColladaParser{
     for (int i = 0, l = jointSource['array'].length; i < l; i ++ ) {
       final name = jointSource['array'][ i ];
       final boneInverse = Matrix4().copyFromArray( inverseSource['array'], (i * inverseSource['stride']).toInt() ).transpose();
-      build['joints'].add( { name: name, boneInverse: boneInverse } );
+      build['joints'].add( { 'name': name, 'boneInverse': boneInverse } );
     }
 
     return build;
