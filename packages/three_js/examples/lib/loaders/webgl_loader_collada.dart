@@ -51,17 +51,6 @@ class _MyAppState extends State<WebglLoaderCollada> {
     loader.setPath('assets/models/collada/elf/');
     loader.fromAsset( 'elf.dae').then(( collada ) {
       elf = collada?.scene;
-      print((elf?.children[0].material as three.GroupMaterial).children[0]);
-      elf?.children.forEach((element) {
-        if(element.material is three.GroupMaterial){
-          (element.material as three.GroupMaterial).children.forEach((mat){
-            mat.flatShading = true;
-          });
-        }
-        else{
-          element.material?.color = three.Color.fromHex32(0x0000ff);
-        }
-      });
       threeJs.scene.add( elf );
     });
 

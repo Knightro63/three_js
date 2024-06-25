@@ -4,6 +4,6 @@ import 'app/example_app.dart';
 
 void main() {
   Cache.enabled = false;
-  Console.isVerbose = true;
+  Console.isVerbose = false;
   runApp(const ExampleApp());
 }

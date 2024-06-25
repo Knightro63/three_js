@@ -25,6 +25,8 @@ final filesJson = [
   "webgl_sprites",
   "webgl_points_sprites",
   "webgl_loader_collada",
+  "webgl_loader_collada_skinning",
+  "webgl_loader_collada_kinematics",
   "webgl_loader_ply",
   "webgl_loader_stl",
   "webgl_loader_vox",

@@ -40,7 +40,9 @@ class Console {
   }
   /// Prints to console
   void warning(Object? message){
-    _logger.w(message.toString());
+    if(isVerbose){
+      _logger.w(message.toString());
+    }
   }
   /// Prints to console if [isVerbose] is true
   void info(Object? message){
