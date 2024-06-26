@@ -24,7 +24,8 @@ class Settings{
     this.toneMapping = NoToneMapping,
     this.shadowMapType = PCFShadowMap,
     this.toneMappingExposure = 1.0,
-    this.logarithmicDepthBuffer = false
+    this.logarithmicDepthBuffer = false,
+    this.stencil = true
   }){
     this.renderOptions = renderOptions ?? {
       "format": RGBAFormat,
@@ -38,6 +39,7 @@ class Settings{
   bool enableShadowMap;
   bool autoClear;
   bool alpha;
+  bool stencil;
   bool autoClearDepth;
   bool autoClearStencil;
   bool localClippingEnabled;
@@ -193,6 +195,7 @@ class ThreeJS{
         "width": width,
         "height": height,
         "gl": gl,
+        "stencil": settings.stencil,
         "antialias": true,
         "alpha": settings.alpha,
         "clearColor": settings.clearColor,

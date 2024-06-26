@@ -522,18 +522,15 @@ mixin WebGLUniformsHelper {
   void setValueV2i(RenderingContext gl, Vector v, [WebGLTextures? textures]) {
     final cache = this.cache;
     if (arraysEqual(cache, v)) return;
-    Int32List iv = Int32List.fromList([v.x.toInt(),v.y.toInt()]);
+    List<int> iv = [v.x.toInt(),v.y.toInt()];
     gl.uniform2iv(addr, iv);
     copyArray(cache, v.copyIntoArray());
   }
 
   void setValueV3i(RenderingContext gl, v, [WebGLTextures? textures]) {
     final cache = this.cache;
-
     if (arraysEqual(cache, v)) return;
-
     gl.uniform3iv(addr, v);
-
     copyArray(cache, v);
   }
 

@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:three_js_advanced_loaders/usdz/usdz_zip.dart';
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
@@ -9,7 +10,7 @@ import 'package:three_js_core_loaders/three_js_core_loaders.dart';
 
 class USDAParser {
 
-	Map<String, dynamic> parse(String text) {
+	static Map<String, dynamic> parse(String text) {
 		final Map<String, dynamic> data = {};
 		final lines = text.split( '\n' );
 
@@ -130,8 +131,6 @@ class USDZLoader extends Loader {
   }
 
 	Group _parse(Uint8List buffer) {
-		final parser = USDAParser();
-
 		bool isCrateFile(Uint8List buffer){
 			// Check if this a crate file. First 7 bytes of a crate file are "PXR-USDC".
 			final fileHeader = buffer.sublist(0, 7);
@@ -167,7 +166,7 @@ class USDZLoader extends Loader {
 					}
 
           final bytes = USDZIP.strFromU8(zip[ filename ]);
-					data[ filename ] = parser.parse(String.fromCharCodes(bytes));
+					data[ filename ] = USDAParser.parse(String.fromCharCodes(bytes));
 				}
 			}
 
@@ -213,7 +212,7 @@ class USDZLoader extends Loader {
 
 		// Parse file
 		final text = String.fromCharCodes(file);
-		final root = parser.parse( text );
+		final root = USDAParser.parse( text );
 
 		// Build scene
 
@@ -403,12 +402,18 @@ class USDZLoader extends Loader {
       if(data == null) return null;
 			if ( data.containsKey('asset inputs:file') ) {
 				final path = data[ 'asset inputs:file' ].replaceAll( RegExp('@*'), '' );
-				final loader = TextureLoader();
-				final texture = await loader.fromBytes( assets[ path ] );
+				final loader = TextureLoader(flipY:true);
+        late final Texture? texture;
+        if(kIsWeb){
+          texture = await loader.fromBlob(Blob( assets[ path ], {'type': 'image/png'}));
+        }
+        else{
+				  texture = await loader.fromBytes( assets[ path ] );
+        }
 				final Map<String,dynamic> map = {
-					'"clamp"': ClampToEdgeWrapping,
-					'"mirror"': MirroredRepeatWrapping,
-					'"repeat"': RepeatWrapping
+					'clamp': ClampToEdgeWrapping,
+					'mirror': MirroredRepeatWrapping,
+					'repeat': RepeatWrapping
 				};
 
 				if ( data.containsKey('token inputs:wrapS') ) {
@@ -604,7 +609,7 @@ class USDZLoader extends Loader {
 		Future<void> buildHierarchy(Map<String,dynamic> data, Object3D group ) async{
 			for ( final name in data.keys ) {
 				if ( name.startsWith( 'def Scope' ) ) {
-					buildHierarchy( data[ name ], group );
+					await buildHierarchy( data[ name ], group );
 				} 
         else if ( name.startsWith( 'def Xform' ) ) {
 					final mesh = await buildObject( data[ name ] );
@@ -613,7 +618,7 @@ class USDZLoader extends Loader {
 					}
 
 					group.add( mesh );
-					buildHierarchy( data[ name ], mesh );
+					await buildHierarchy( data[ name ], mesh );
 				}
 			}
 		}

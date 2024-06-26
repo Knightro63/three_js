@@ -74,10 +74,7 @@ class WeakMap<K, V> {
 
   bool has(K key) => contains(key);
 
-  V? get(K key) => _map.containsKey(key)
-      ? //
-      _map[key]
-      : null;//(_allowedInExpando(key) ? expando[key!] as V : null);
+  V? get(K key) => _map.containsKey(key)? _map[key]: null;//(_allowedInExpando(key) ? expando[key!] as V : null);
 
   void remove(K key) {
     _map.remove(key);

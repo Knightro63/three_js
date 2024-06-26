@@ -4,6 +4,7 @@
 
 import 'dart:typed_data';
 import 'package:three_js_core/three_js_core.dart';
+import 'package:three_js_exporters/saveFile/saveFile.dart';
 import 'package:three_js_math/three_js_math.dart';
 
 /// An exporter for the STL file format.
@@ -21,12 +22,7 @@ import 'package:three_js_math/three_js_math.dart';
 /// final result = exporter.parseMesh(mesh);
 /// ```
 class STLBinaryExporter{
-  late ByteData _output;
-  bool _usingParse = false;
-  int offset = 80; // skip header
-  STLBinaryExporter();
-
-  Vector3 _computeNormal(Vector3 va, Vector3 vb, Vector3 vc) {
+  static Vector3 _computeNormal(Vector3 va, Vector3 vb, Vector3 vc) {
     Vector3 cb = Vector3.copy(vc);
     Vector3 ab = Vector3.copy(vb);
 
@@ -40,18 +36,18 @@ class STLBinaryExporter{
     return cb;
   }
 
-  Uint8List parseMesh(Mesh object){
+  static Uint8List parseMesh(Mesh object, int offset, [ByteData? output]){
     BufferGeometry? geometry = object.geometry;
     final Float32BufferAttribute? vertices = geometry?.getAttribute(Attribute.position);
     final indices = geometry?.getIndex();
     if(vertices != null && indices != null){
-      if(!_usingParse){
+      if(output == null){
         int triangles = indices.length~/3;
         offset = 80; // skip header
         int bufferLength = triangles * 2 + triangles * 3 * 4 * 4 + 80 + 4;
         //final arrayBuffer = new ArrayBuffer( bufferLength );
-        _output = ByteData(bufferLength);
-        _output.setUint32( offset, triangles, Endian.little ); offset += 4;
+        output = ByteData(bufferLength);
+        output.setUint32( offset, triangles, Endian.little ); offset += 4;
       }
 
       for (int i = 0, l = indices.length; i < l; i+=3) {
@@ -64,28 +60,27 @@ class STLBinaryExporter{
 
         Vector3 toNormal = _computeNormal(vecsToNormal[0],vecsToNormal[1],vecsToNormal[2]);
 
-        _output.setFloat32( offset, toNormal.x, Endian.little ); offset += 4; // normal
-        _output.setFloat32( offset, toNormal.y, Endian.little ); offset += 4;
-        _output.setFloat32( offset, toNormal.z, Endian.little ); offset += 4;
+        output.setFloat32( offset, toNormal.x, Endian.little ); offset += 4; // normal
+        output.setFloat32( offset, toNormal.y, Endian.little ); offset += 4;
+        output.setFloat32( offset, toNormal.z, Endian.little ); offset += 4;
 
         for ( int j = 0; j < 3; j ++ ) {
-          _output.setFloat32( offset, vecsToNormal[j].x, Endian.little ); offset += 4; // vertices
-          _output.setFloat32( offset, vecsToNormal[j].y, Endian.little ); offset += 4;
-          _output.setFloat32( offset, vecsToNormal[j].z, Endian.little ); offset += 4;
+          output.setFloat32( offset, vecsToNormal[j].x, Endian.little ); offset += 4; // vertices
+          output.setFloat32( offset, vecsToNormal[j].y, Endian.little ); offset += 4;
+          output.setFloat32( offset, vecsToNormal[j].z, Endian.little ); offset += 4;
         }
 
-        _output.setUint16( offset, 0, Endian.little ); offset += 2; // attribute byte count
+        output.setUint16( offset, 0, Endian.little ); offset += 2; // attribute byte count
       }
     }
     else{
       throw("There are no verticies or indicies for this mesh.");
     }
 
-    return _output.buffer.asUint8List();
+    return output.buffer.asUint8List();
   }
 
-	Uint8List parse(Scene scene){
-    _usingParse = true;
+	static Uint8List parse(Scene scene){
     // We collect objects first, as we may need to convert from BufferGeometry to Geometry
     List<Mesh> objects = [];
     int triangles = 0;
@@ -100,18 +95,24 @@ class STLBinaryExporter{
       }
     });
 
-    offset = 80; // skip header
+    int offset = 80; // skip header
     int bufferLength = triangles * 2 + triangles * 3 * 4 * 4 + 80 + 4;
     //final arrayBuffer = new ArrayBuffer( bufferLength );
-    _output = ByteData(bufferLength);
-    _output.setUint32( offset, triangles, Endian.little ); offset += 4;
+    ByteData output = ByteData(bufferLength);
+    output.setUint32( offset, triangles, Endian.little ); offset += 4;
 
     // Traversing our collected objects
     ///objects.forEach(( mesh ){
     for(Mesh mesh in objects){
-      parseMesh(mesh);
+      parseMesh(mesh, offset, output);
     }
-    _usingParse = false;
-    return _output.buffer.asUint8List();
+    return output.buffer.asUint8List();
+  }
+
+  static void exportScene(String fileName, Scene scene, [String? path]){
+    SaveFile.saveBytes(printName: fileName, fileType: 'stl', bytes: parse(scene), path: path);
+  }
+  static void exportMesh(String fileName, Mesh mesh, [String? path]){
+    SaveFile.saveBytes(printName: fileName, fileType: 'stl', bytes: parseMesh(mesh,0), path: path);
   }
 }

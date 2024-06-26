@@ -24,6 +24,15 @@ typedef OnBeforeRender = void Function({
   Map<String, dynamic>? group
 });
 
+typedef OnAfterRender = void Function({
+  WebGLRenderer? renderer,
+  Object3D? scene,
+  Camera? camera,
+  BufferGeometry? geometry,
+  Material? material,
+  Map<String, dynamic>? group
+});
+
 int _object3DId = 0;
 
 Vector3 _v1 = Vector3.zero();
@@ -1000,16 +1009,7 @@ class Object3D with EventDispatcher {
   /// [Points] or [Sprite]. Instances of [Object3D], [Group]
   /// or [Bone] are not renderable and thus this callback is not executed
   /// for such objects.
-  void onAfterRender({
-    WebGLRenderer? renderer,
-    Object3D? scene,
-    Camera? camera,
-    BufferGeometry? geometry,
-    Material? material,
-    Map<String, dynamic>? group
-  }) {
-    // print(" Object3D.onAfterRender ${type} ${id} ");
-  }
+  OnAfterRender? onAfterRender;
 
   Matrix4? getValue(String name) {
     if (name == "bindMatrix") {

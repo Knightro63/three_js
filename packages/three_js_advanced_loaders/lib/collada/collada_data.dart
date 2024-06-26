@@ -1,5 +1,3 @@
-
-
 import 'package:three_js_core/three_js_core.dart';
 
 class ColladaData{

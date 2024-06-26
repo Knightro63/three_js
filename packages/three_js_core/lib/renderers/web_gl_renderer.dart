@@ -665,7 +665,7 @@ class WebGLRenderer {
     }
 
     if (scene is Scene) {
-      scene.onAfterRender(renderer: this, scene: scene, camera: camera);
+      scene.onAfterRender?.call(renderer: this, scene: scene, camera: camera);
     }
 
     _gl.finish();
@@ -900,7 +900,7 @@ class WebGLRenderer {
       renderBufferDirect(camera, scene, geometry, material, object, group);
     }
 
-    object.onAfterRender(renderer: this, scene: scene, camera: camera, geometry: geometry, material: material, group: group);
+    object.onAfterRender?.call(renderer: this, scene: scene, camera: camera, geometry: geometry, material: material, group: group);
   }
 
   WebGLProgram? getProgram(Material material, Object3D? scene, Object3D object) {

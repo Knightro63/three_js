@@ -117,8 +117,8 @@ class WebGLState {
     scissorParam = gl.getParameter(WebGL.SCISSOR_BOX);
     viewportParam = gl.getParameter(WebGL.VIEWPORT);
 
-    // currentScissor = new Vector4.identity().fromArray( scissorParam );
-    // currentViewport = new Vector4.identity().fromArray( viewportParam );
+    // currentScissor = Vector4.identity().copyFromArray( scissorParam );
+    // currentViewport = Vector4.identity().copyFromArray( viewportParam );
 
     currentScissor = Vector4.identity();
     currentViewport = Vector4.identity();
@@ -412,7 +412,7 @@ class WebGLState {
 
     setPolygonOffset(material.polygonOffset, material.polygonOffsetFactor, material.polygonOffsetUnits);
 
-    material.alphaToCoverage == true ? enable(WebGL.SAMPLE_ALPHA_TO_COVERAGE) : disable(WebGL.SAMPLE_ALPHA_TO_COVERAGE);
+    material.alphaToCoverage? enable(WebGL.SAMPLE_ALPHA_TO_COVERAGE) : disable(WebGL.SAMPLE_ALPHA_TO_COVERAGE);
   }
 
   //

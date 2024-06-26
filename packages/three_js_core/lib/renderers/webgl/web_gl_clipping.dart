@@ -62,7 +62,8 @@ class WebGLClipping {
       } else {
         resetGlobalState();
       }
-    } else {
+    } 
+    else {
       final nGlobal = renderingShadows ? 0 : numGlobalPlanes;
       final lGlobal = nGlobal * 4;
 

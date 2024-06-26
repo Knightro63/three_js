@@ -55,20 +55,18 @@ class _State extends State<WebglLoaderUsdz> {
     controls = three.OrbitControls( threeJs.camera, threeJs.globalKey );
     controls.minDistance = 1;
     controls.maxDistance = 8;
-    // controls.target.y = 15;
 
     final three.DataTexture rgbeLoader = await three.RGBELoader().setPath( 'assets/textures/equirectangular/' ).fromAsset('venice_sunset_1k.hdr');
-    final three.Group usdzLoader = await three.USDZLoader().setPath( 'assets/models/usdz/' ).fromAsset('saeukkang.usdz');
-
     rgbeLoader.mapping = three.EquirectangularReflectionMapping;
-
     threeJs.scene.background = rgbeLoader;
-    // threeJs.scene.backgroundBlurriness = 0.5;
     threeJs.scene.environment = rgbeLoader;
 
-    usdzLoader.position.y = 0.25;
-    usdzLoader.position.z = - 0.25;
-    threeJs.scene.add( usdzLoader );
+    threeJs.scene.add( three.AmbientLight( 0xffffff ) );
+    
+    final three.Group usdz = (await three.USDZLoader().fromAsset('assets/models/usdz/saeukkang.usdz'))!;
+    usdz.position.y = 0.25;
+    usdz.position.z = - 0.25;
+    threeJs.scene.add( usdz );
 
     threeJs.addAnimationEvent((dt){
       controls.update();

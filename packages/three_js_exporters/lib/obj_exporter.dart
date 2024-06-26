@@ -1,6 +1,7 @@
 //@author mrdoob / http://mrdoob.com/
 
 import 'package:three_js_core/three_js_core.dart';
+import 'package:three_js_exporters/saveFile/saveFile.dart';
 import 'package:three_js_math/three_js_math.dart';
 
 /// An exporter for the [OBJ](https://en.wikipedia.org/wiki/Wavefront_.obj_file) file format.
@@ -16,16 +17,12 @@ import 'package:three_js_math/three_js_math.dart';
 /// downloadFile( data );
 /// ```
 class OBJExporter{
-  String _output = '';
-  int _indexVertex = 0;
-  int _indexVertexUvs = 0;
-  int _indexNormals = 0;
+  static String parseMesh(Mesh mesh){
+    return _parseMesh(mesh,0,0,0,false);
+  }
 
-  bool _usingParse = false;
-
-  OBJExporter();
-
-  String parseMesh(Mesh mesh){
+  static String _parseMesh(Mesh mesh,int indexVertex,int indexUvs,int indexNormals,bool usingParse){
+    String output = '';
     final Vector3 vertex = Vector3();
 		final Vector3 normal = Vector3();
 		final Vector2 uv = Vector2();
@@ -46,12 +43,12 @@ class OBJExporter{
     final Float32BufferAttribute? uvs = geometry?.getAttribute(Attribute.uv);
     final indices = geometry?.getIndex();
 
-    if(!_usingParse){
-      _output = "# Flutter OBJ File: \n";
+    if(!usingParse){
+      output = "# Flutter OBJ File: \n";
     }
 
     // name of the mesh object
-    _output += 'o ${mesh.name}\n';
+    output += 'o ${mesh.name}\n';
 
     // vertices
     if(vertices != null) {
@@ -62,7 +59,7 @@ class OBJExporter{
         // transfrom the vertex to world space
         vertex.applyMatrix4( mesh.matrixWorld );
         // transform the vertex to export format
-        _output += 'v ${vertex.x} ${vertex.y} ${vertex.z}\n';
+        output += 'v ${vertex.x} ${vertex.y} ${vertex.z}\n';
       }
     }
 
@@ -73,7 +70,7 @@ class OBJExporter{
         uv.x = uvs.getX(i)!.toDouble();
         uv.y = uvs.getY(i)!.toDouble();
         // transform the uv to export format
-        _output += 'vt ${uv.x} ${uv.y}\n';
+        output += 'vt ${uv.x} ${uv.y}\n';
       }
     }
 
@@ -88,7 +85,7 @@ class OBJExporter{
         // transfrom the normal to world space
         normal.applyMatrix3( normalMatrixWorld );
         // transform the normal to export format
-        _output += 'vn ${normal.x} ${normal.y} ${normal.z}\n';
+        output += 'vn ${normal.x} ${normal.y} ${normal.z}\n';
       }
     }
 
@@ -97,33 +94,34 @@ class OBJExporter{
       for (int i = 0, l = indices.count; i < l; i += 3 ) {
         for(int m = 0; m < 3; m ++ ){
           j = indices.getX(i + m)!.toInt() + 1;
-          face[m] = '${_indexVertex + j}/${uvs != null? ( _indexVertexUvs + j ) : ''}/${_indexNormals + j}';
+          face[m] = '${indexVertex + j}/${uvs != null? ( indexUvs + j ) : ''}/${indexNormals + j}';
         }
 
         // transform the face to export format
-        _output += 'f ${face.join(' ')}\n';
+        output += 'f ${face.join(' ')}\n';
       }
     } 
     else{
       for (int i = 0, l = vertices!.length; i < l; i += 3 ) {
         for(int m = 0; m < 3; m ++ ){
           j = i + m + 1;
-          face[m] = '${_indexVertex + j}/${uvs != null? ( _indexVertexUvs + j ) : ''}/${_indexNormals + j}';
+          face[m] = '${indexVertex + j}/${uvs != null? ( indexUvs + j ) : ''}/${indexNormals + j}';
         }
         // transform the face to export format
-        _output += 'f ${face.join(' ')}\n';
+        output += 'f ${face.join(' ')}\n';
       }
     }
 
     // update index
-    _indexVertex += nbVertex;
-    _indexVertexUvs += nbVertexUvs;
-    _indexNormals += nbNormals;
+    indexVertex += nbVertex;
+    indexUvs += nbVertexUvs;
+    indexNormals += nbNormals;
 
-    return _output;
+    return output;
   }
 
-  String parseLine(Line line) {
+  static String _parseLine(Line line, int indexVertex ) {
+    String output = '';
     int nbVertex = 0;
     BufferGeometry? geometry = line.geometry;
     final type = line.type;
@@ -134,7 +132,7 @@ class OBJExporter{
     //final indices = geometry?.getIndex();
 
     // name of the line object
-    _output += 'o ${line.name}\n';
+    output += 'o ${line.name}\n';
 
     if( vertices != null) {
       for (int i = 0, l = vertices.length; i < l; i ++, nbVertex++ ) {
@@ -144,43 +142,53 @@ class OBJExporter{
         // transfrom the vertex to world space
         vertex.applyMatrix4( line.matrixWorld );
         // transform the vertex to export format
-        _output += 'v ${vertex.x} ${vertex.y} ${vertex.z}\n';
+        output += 'v ${vertex.x} ${vertex.y} ${vertex.z}\n';
       }
     }
 
     if(type == 'Line'){
-      _output += 'l ';
+      output += 'l ';
       for (int j = 1, l = vertices!.length; j <= l; j++ ) {
-        _output += '${_indexVertex + j} ';
+        output += '${indexVertex + j} ';
       }
-      _output += '\n';
+      output += '\n';
     }
 
     if ( type == 'LineSegments' ) {
       for (int j = 1, k = j + 1, l = vertices!.length; j < l; j += 2, k = j + 1 ) {
-        _output += 'l ${_indexVertex + j} ${_indexVertex + k}\n';
+        output += 'l ${indexVertex + j} ${indexVertex + k}\n';
       }
     }
 
     // update index
-    _indexVertex += nbVertex;
+    indexVertex += nbVertex;
 
-    return _output;
+    return output;
   }
 
-	String parse(Scene object){
-    _usingParse = true;
-    _output = "# Flutter OBJ File: \n";
+	static String parse(Scene object){
+    String output = '';
+    int indexVertex = 0;
+    int indexUvs = 0;
+    int indexNormals = 0;
+
+    output = "# Flutter OBJ File: \n";
 		object.traverse((child){
 			if(child is Mesh) {
-				parseMesh(child);
+				output += _parseMesh(child,indexVertex,indexUvs,indexNormals,true);
 			}
 
 			if(child is Line) {
-				parseLine(child);
+				output += _parseLine(child,indexVertex);
 			}
 		});
-    _usingParse = false;
-		return _output;
+		return output;
 	}
+
+  static void exportScene(String fileName, Scene scene, [String? path]){
+    SaveFile.saveString(printName: fileName, fileType: 'obj', data: parse(scene), path: path);
+  }
+  static void exportMesh(String fileName, Mesh mesh, [String? path]){
+    SaveFile.saveString(printName: fileName, fileType: 'obj', data: parseMesh(mesh), path: path);
+  }
 }

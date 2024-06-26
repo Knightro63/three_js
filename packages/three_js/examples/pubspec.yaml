@@ -42,7 +42,6 @@ flutter:
     - assets/lut.cube
     - assets/demo.png
     - assets/KOMO-v5.cube
-    - assets/models/dae/
     - assets/screenshots/
     - assets/models/obj/male02/
     - assets/models/json/
@@ -58,7 +57,6 @@ flutter:
     - assets/models/collada/
     - assets/models/collada/stormtrooper/
     - assets/models/collada/elf/
-    - assets/models/collada/max/
     - assets/models/gltf/test/
     - assets/models/gltf/
     - assets/models/gltf/test/

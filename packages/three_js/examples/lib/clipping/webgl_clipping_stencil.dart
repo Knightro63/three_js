@@ -24,6 +24,8 @@ class _State extends State<WebglClippingStencil> {
       onSetupComplete: (){setState(() {});},
       setup: setup,
       settings: three.Settings(
+        stencil: true,
+        enableShadowMap: true,
         localClippingEnabled: true,
         clearColor: 0x263238,
         clearAlpha: 1.0,
@@ -61,7 +63,7 @@ class _State extends State<WebglClippingStencil> {
     final group = three.Group();
     final mat0 = three.MeshBasicMaterial.fromMap({
       "side": three.BackSide,
-      "clippingPlanes": List<three.Plane>.from([plane]),
+      "clippingPlanes": [plane],
       "stencilFail": three.IncrementWrapStencilOp,
       "stencilZFail": three.IncrementWrapStencilOp,
       "stencilZPass": three.IncrementWrapStencilOp,
@@ -77,8 +79,8 @@ class _State extends State<WebglClippingStencil> {
     group.add(mesh0);
 
     final mat1 = three.MeshBasicMaterial.fromMap({
-      "side": three.BackSide,
-      "clippingPlanes": List<three.Plane>.from([plane]),
+      "side": three.FrontSide,
+      "clippingPlanes": [plane],
       "stencilFail": three.DecrementWrapStencilOp,
       "stencilZFail": three.DecrementWrapStencilOp,
       "stencilZPass": three.DecrementWrapStencilOp,
@@ -124,11 +126,11 @@ class _State extends State<WebglClippingStencil> {
       three.Plane(three.Vector3(0, 0, -1), 0)
     ];
 
-    // planeHelpers = planes.map((p) => PlaneHelper(p, 2, 0xffffff)).toList();
-    // for (final ph in planeHelpers) {
-    //   ph.visible = true;
-    //   threeJs.scene.add(ph);
-    // }
+    planeHelpers = planes.map((p) => PlaneHelper(p, 2, 0xffffff)).toList();
+    for (final ph in planeHelpers) {
+      ph.visible = false;
+      threeJs.scene.add(ph);
+    }
 
     final geometry = TorusKnotGeometry(0.4, 0.15, 220, 60);
     object = three.Group();
@@ -138,19 +140,17 @@ class _State extends State<WebglClippingStencil> {
     planeObjects = [];
     final planeGeom = three.PlaneGeometry(4, 4);
 
-    for (int i = 0; i < 1; i++) {
+    for (int i = 0; i < 3; i++) {
       final poGroup = three.Group();
       final plane = planes[i];
       final stencilGroup = createPlaneStencilGroup(geometry, plane, i + 1);
-
-      //List<three.Plane> _planes = planes.where((p) => p != plane).toList();
 
       // plane is clipped by the other clipping planes
       final planeMat = three.MeshStandardMaterial.fromMap({
         "color": 0xE91E63,
         "metalness": 0.1,
         "roughness": 0.75,
-        "clippingPlanes": planes,
+        "clippingPlanes": planes.where((p) => p != plane).toList(),
         "stencilWrite": true,
         "stencilRef": 0,
         "stencilFunc": three.NotEqualStencilFunc,
@@ -160,6 +160,16 @@ class _State extends State<WebglClippingStencil> {
       });
 
       final po = three.Mesh(planeGeom, planeMat);
+      po.onAfterRender = ({
+        three.WebGLRenderer? renderer,
+        three.Object3D? scene,
+        three.Camera? camera,
+        three.BufferGeometry? geometry,
+        three.Material? material,
+        Map<String, dynamic>? group
+      }) {
+        renderer?.clearStencil();
+      };
       po.renderOrder = i + 1;
 
       object.add(stencilGroup);

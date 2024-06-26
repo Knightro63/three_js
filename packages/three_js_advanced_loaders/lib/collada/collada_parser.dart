@@ -122,7 +122,6 @@ class ColladaParser{
 			library: library,
 			scene: scene
     );
-
 	}
 
   // library

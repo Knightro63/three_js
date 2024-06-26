@@ -321,7 +321,7 @@ class __FBXTreeParser {
       // Binary Format
 
       final array = Uint8List(content);
-      return createObjectURL(Blob([array], {type: type}));
+      return createObjectURL(Blob([array], {'type': type}));
     }
   }
 
