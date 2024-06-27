@@ -78,8 +78,8 @@ class _State extends State<WebglPostprocessingSobel> {
 
     // color to grayscale conversion
 
-    final effectGrayScale = ShaderPass.fromJson( luminosityShader );
-    composer.addPass( effectGrayScale );
+    // final effectGrayScale = ShaderPass.fromJson( luminosityShader );
+    // composer.addPass( effectGrayScale );
 
     // you might want to use a gaussian blur filter before
     // the next pass to improve the result of the Sobel operator

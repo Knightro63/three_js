@@ -13,6 +13,7 @@ import 'package:example/geometry/webgl_points_sprites.dart';
 import 'package:example/geometry/webgl_sprites.dart';
 import 'package:example/instancing/webgl_gpgpu_protoplanet.dart';
 import 'package:example/instancing/webgl_instancing_dynamic.dart';
+import 'package:example/instancing/webgl_instancing_morph.dart';
 import 'package:example/instancing/webgl_instancing_raycasting.dart';
 import 'package:example/instancing/webgl_instancing_scatter.dart';
 import 'package:example/loaders/webgl_loader_collada.dart';
@@ -21,6 +22,7 @@ import 'package:example/loaders/webgl_loader_collada_skinning.dart';
 import 'package:example/loaders/webgl_loader_fbx_nurbs.dart';
 import 'package:example/loaders/webgl_loader_gcode.dart';
 import 'package:example/loaders/webgl_loader_glb.dart';
+import 'package:example/loaders/webgl_loader_md2.dart';
 import 'package:example/loaders/webgl_loader_ply.dart';
 import 'package:example/loaders/webgl_loader_scn.dart';
 import 'package:example/loaders/webgl_loader_stl.dart';
@@ -170,6 +172,9 @@ class _MyAppState extends State<ExamplePage> {
       page = WebglInstancingRaycast(fileName: fileName);
     } else if(fileName == "webgl_instancing_dynamic"){
       page = WebglInstancingDynamic(fileName: fileName);
+    }
+    else if(fileName == "webgl_instancing_morph"){
+      page = WebglInstancingMorph(fileName: fileName);
     } 
     else if(fileName == "webgl_interactive_voxelpainter"){
       page = WebglInteractiveVoxelpainter(fileName: fileName);
@@ -218,6 +223,9 @@ class _MyAppState extends State<ExamplePage> {
     } 
     else if (fileName == "webgl_loader_glb") {
       page = WebglLoaderGlb(fileName: fileName);
+    }
+    else if(fileName == 'webgl_loader_md2'){
+      page = WebglLoaderMd2(fileName: fileName);
     }
     else if (fileName == "webgl_loader_obj") {
       page = WebglLoaderObj(fileName: fileName);

@@ -58,7 +58,6 @@ Find the example for this API [here](https://github.com/Knightro63/three_js/tree
 ## Know Issues
 
 **MacOS**
- - Morphtargets do not work at this time
  - Sobel postprocessing does not function correctly
  - BackSide with shadows showing white screen
  - Small memory leak when opening and closing multiple projects
@@ -71,13 +70,11 @@ Find the example for this API [here](https://github.com/Knightro63/three_js/tree
  - Protoplanets does not function correctly
 
 **Android**
- - Morphtargets do not work at this time
  - Sobel postprocessing does not function correctly
  - BackSide with shadows showing white screen
  - Small memory leak when opening and closing multiple projects
 
 **Windows**
- - Morphtargets do not work at this time
  - Sobel postprocessing does not function correctly
  - BackSide with shadows showing white screen
  - Small memory leak when opening and closing multiple projects

@@ -57,6 +57,10 @@ flutter:
     - assets/models/collada/
     - assets/models/collada/stormtrooper/
     - assets/models/collada/elf/
+    - assets/models/md2/ogro/
+    - assets/models/md2/ogro/skins/
+    - assets/models/md2/ratamahatta/
+    - assets/models/md2/ratamahatta/skins/
     - assets/models/gltf/test/
     - assets/models/gltf/
     - assets/models/gltf/test/

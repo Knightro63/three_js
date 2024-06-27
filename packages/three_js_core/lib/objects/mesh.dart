@@ -66,8 +66,8 @@ class Mesh extends Object3D {
   Mesh copy(Object3D source, [bool? recursive]) {
     super.copy(source, false);
     if (source is Mesh) {
-      if (source.morphTargetInfluences != null) {
-        morphTargetInfluences = source.morphTargetInfluences!.sublist(0);
+      if (source.morphTargetInfluences.isNotEmpty) {
+        morphTargetInfluences = source.morphTargetInfluences.sublist(0);
       }
       if (source.morphTargetDictionary != null) {
         morphTargetDictionary = json.decode(json.encode(source.morphTargetDictionary));
@@ -97,7 +97,7 @@ class Mesh extends Object3D {
         for (int m = 0, ml = morphAttribute.length; m < ml; m++) {
           String name = morphAttribute[m].name ?? m.toString();
 
-          morphTargetInfluences!.add(0.0);
+          morphTargetInfluences.add(0.0);
           morphTargetDictionary![name] = m;
         }
       }
@@ -341,7 +341,7 @@ Intersection? checkBufferGeometryIntersection(
 
   final morphInfluences = object.morphTargetInfluences;
 
-  if (morphPosition != null && morphInfluences != null) {
+  if (morphPosition != null && morphInfluences.isNotEmpty) {
     _morphA.setValues(0, 0, 0);
     _morphB.setValues(0, 0, 0);
     _morphC.setValues(0, 0, 0);

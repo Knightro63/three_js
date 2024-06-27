@@ -310,7 +310,7 @@ Function updateMorphTargets = (Mesh mesh, Map<String, dynamic> meshDef) {
 
   if (meshDef["weights"] != null) {
     for (int i = 0, il = meshDef["weights"].length; i < il; i++) {
-      mesh.morphTargetInfluences?[i] = meshDef["weights"][i].toDouble();
+      mesh.morphTargetInfluences[i] = meshDef["weights"][i].toDouble();
     }
   }
 
@@ -318,7 +318,7 @@ Function updateMorphTargets = (Mesh mesh, Map<String, dynamic> meshDef) {
   if (meshDef["extras"] != null && meshDef["extras"]["targetNames"] is List) {
     final targetNames = meshDef["extras"]["targetNames"];
 
-    if (mesh.morphTargetInfluences?.length == targetNames.length) {
+    if (mesh.morphTargetInfluences.length == targetNames.length) {
       mesh.morphTargetDictionary = {};
 
       for (int i = 0, il = targetNames.length; i < il; i++) {

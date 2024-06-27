@@ -10,7 +10,7 @@ class RenderPass extends Pass {
   Material? overrideMaterial;
   final Color _oldClearColor = Color(1, 1, 1);
 
-  RenderPass(Object3D scene, Camera camera, [this.overrideMaterial, this.clearColor,this.clearAlpha = 0]): super() {
+  RenderPass(Object3D scene, Camera camera, [this.overrideMaterial, this.clearColor, this.clearAlpha = 0]): super() {
     this.scene = scene;
     this.camera = camera;
 

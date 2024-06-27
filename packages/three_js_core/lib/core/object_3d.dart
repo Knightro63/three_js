@@ -107,7 +107,7 @@ class Object3D with EventDispatcher {
   // how to handle material is a single material or List<Material>
   Material? material;
 
-  List<double>? morphTargetInfluences;
+  List<double> morphTargetInfluences = [];
   Map<String,dynamic>? morphTargetDictionary;
 
   // InstancedMesh

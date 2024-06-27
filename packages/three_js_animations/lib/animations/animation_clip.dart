@@ -33,8 +33,8 @@ class AnimationClip {
   /// Note: Instead of instantiating an AnimationClip directly with the
   /// constructor, you can use one of its static methods to create
   /// AnimationClips: from JSON ([parse]), from morph target
-  /// sequences ([CreateFromMorphTargetSequence], 
-  /// [CreateClipsFromMorphTargetSequences]) or from animation hierarchies
+  /// sequences ([createFromMorphTargetSequence], 
+  /// [createClipsFromMorphTargetSequences]) or from animation hierarchies
   /// ([parseAnimation]) - if your model doesn't already
   /// hold AnimationClips in its geometry's animations array.
   AnimationClip(this.name,[this.duration = -1, List<KeyframeTrack>? tracks, this.blendMode = NormalAnimationBlendMode]) {
@@ -73,7 +73,7 @@ class AnimationClip {
 
     return this;
   }
-  
+
   /// Performs minimal validation on each track in the clip. Returns true if all
 	/// tracks are valid.
   bool validate() {
@@ -182,7 +182,7 @@ class AnimationClip {
         values.add(values[0]);
       }
 
-      tracks.add(NumberKeyframeTrack('.morphTargetInfluences[${morphTargetSequence[i].name}]',times,values,null).scale(1.0 / fps));
+      tracks.add(NumberKeyframeTrack('.morphTargetInfluences[${morphTargetSequence[i].name}]',times,values).scale(1.0 / fps));
     }
 
     return AnimationClip(name, -1, tracks);
@@ -208,7 +208,7 @@ class AnimationClip {
   /// 
 	//// Note: The fps parameter is required, but the animation speed can be
 	/// overridden in an `AnimationAction` via [animationAction.setDuration].
-  static List<AnimationClip> createClipsFromMorphTargetSequences(List<MorphTarget> morphTargets, int fps, bool noLoop) {
+  static List<AnimationClip> createClipsFromMorphTargetSequences(List<MorphTarget> morphTargets, int fps, [bool noLoop = false]) {
     final Map<String,List<MorphTarget>> animationToMorphTargets = {};
 
     // tested with https://regex101.com/ on trick sequences
@@ -217,12 +217,10 @@ class AnimationClip {
 
     // sort morph target names into animation groups based
     // patterns like Walk_001, Walk_002, Run_001, Run_002
-    for (int i = 0, il = morphTargets.length; i < il; i++) {
-      final morphTarget = morphTargets[i];
+    for (final morphTarget in morphTargets) {
       final parts = pattern.allMatches(morphTarget.name);
-
-      if(parts.length > 1){
-        final name = parts.toList()[1].toString();
+      if(parts.isNotEmpty){
+        final name = parts.first.group(1)!;
 
         List<MorphTarget>? animationMorphTargets = animationToMorphTargets[name];
 

@@ -119,7 +119,7 @@ class Points extends Object3D {
           for (int m = 0, ml = morphAttribute.length; m < ml; m++) {
             final name = morphAttribute[m].name ?? m.toString();
 
-            morphTargetInfluences!.add(0);
+            morphTargetInfluences.add(0);
             morphTargetDictionary![name] = m;
           }
         }

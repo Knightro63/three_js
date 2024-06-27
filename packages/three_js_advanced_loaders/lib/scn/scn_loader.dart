@@ -10,7 +10,7 @@ class SCNLoader extends Loader {
   /// [manager] — The [loadingManager] for the loader to use. Default is [DefaultLoadingManager].
   /// 
   /// Creates a new [FontLoader].
-  SCNLoader({LoadingManager? manager}):super(manager){
+  SCNLoader([LoadingManager? manager]):super(manager){
     _loader = FileLoader(manager);
   }
 

@@ -1,7 +1,5 @@
-import '../core/index.dart';
-import '../materials/index.dart';
+import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
-import './mesh.dart';
 
 final _instanceLocalMatrix = Matrix4.identity();
 final _instanceWorldMatrix = Matrix4.identity();
@@ -17,12 +15,13 @@ final _mesh = Mesh(BufferGeometry(), Material());
 /// of [name] will help you to reduce the number of draw calls and thus
 /// improve the overall rendering performance in your application.
 class InstancedMesh extends Mesh {
+  DataTexture? morphTexture;
   BoundingSphere? boundingSphere;
 
   /// [geometry] - an instance of [BufferGeometry].
   ///
   /// [material] - an instance of [Material]. Default is a
-  /// new [MeshBasicMaterial].
+  /// [MeshBasicMaterial].
   /// 
   /// [count] - the number of instances.
   /// 
@@ -129,6 +128,25 @@ class InstancedMesh extends Mesh {
     matrix.copyIntoArray(instanceMatrix!.array.toDartList(), index * 16);
   }
 
+	void setMorphAt(int index, Object3D object ) {
+		final objectInfluences = object.morphTargetInfluences;
+		final len = objectInfluences.length + 1; // morphBaseInfluence + all influences
+
+		morphTexture ??= DataTexture( Float32Array(len * count!), len, count, RedFormat, FloatType );
+		final Float32Array array = morphTexture!.source.data.data;
+
+		double morphInfluencesSum = 0;
+		for (int i = 0; i < objectInfluences.length; i ++ ) {
+			morphInfluencesSum += objectInfluences[ i ];
+		}
+
+		final morphBaseInfluence = geometry!.morphTargetsRelative ? 1.0 : 1 - morphInfluencesSum;
+		final dataIndex = len * index;
+
+		array[dataIndex] = morphBaseInfluence;
+		array.set(objectInfluences, dataIndex + 1);
+	}
+
   @override
   void updateMorphTargets() {}
 
@@ -137,6 +155,8 @@ class InstancedMesh extends Mesh {
   @override
   void dispose() {
     dispatchEvent(Event(type: "dispose"));
+		morphTexture?.dispose();
+		morphTexture = null;
   }
 
 	void computeBoundingSphere() {

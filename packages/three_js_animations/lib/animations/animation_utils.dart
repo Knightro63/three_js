@@ -70,7 +70,7 @@ class AnimationUtils {
   /// Sorts the array previously returned by [getKeyframeOrder].
   static List<num> sortedArray(List<num> values, int stride, List<int> order) {
     final nValues = values.length;
-    final result = List<num>.filled(nValues, 0);
+    final result = List<num>.filled(nValues, 0,growable: true);
 
     for (int i = 0, dstOffset = 0; dstOffset != nValues; ++i) {
       int srcOffset = order[i] * stride;

@@ -18,7 +18,7 @@ class AnimationMixer with EventDispatcher {
   num time = 0.0;
   num timeScale = 1.0;
 
-  late Object3D root;
+  Object3D root;
   int _accuIndex = 0;
 
   late List<AnimationAction> _actions;
@@ -416,7 +416,7 @@ class AnimationMixer with EventDispatcher {
     }
 
     if (actionsForClip != null) {
-      final existingAction = actionsForClip?.actionByRoot[rootUuid];
+      final existingAction = actionsForClip?['actionByRoot'][rootUuid];
 
       if (existingAction != null && existingAction.blendMode == blendMode) {
         return existingAction;
@@ -424,7 +424,7 @@ class AnimationMixer with EventDispatcher {
 
       // we know the clip, so we don't have to parse all
       // the bindings again but can just copy
-      prototypeAction = actionsForClip.knownActions[0];
+      prototypeAction = actionsForClip['knownActions'][0];
 
       // also, take the clip from the prototype action
       clipObject ??= prototypeAction?.clip;

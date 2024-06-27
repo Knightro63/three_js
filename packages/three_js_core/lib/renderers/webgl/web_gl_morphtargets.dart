@@ -53,7 +53,6 @@ class WebGLMorphtargets {
       final morphTargetsCount = (morphAttribute != null) ? morphAttribute.length : 0;
 
       Map? entry = morphTextures.get(geometry);
-
       if (entry == null || (entry["count"] != morphTargetsCount)) {
         if (entry != null) entry["texture"].dispose();
 
@@ -152,7 +151,7 @@ class WebGLMorphtargets {
 
       double morphInfluencesSum = 0;
 
-      for (int i = 0; i < objectInfluences!.length; i++) {
+      for (int i = 0; i < objectInfluences.length; i++) {
         morphInfluencesSum += objectInfluences[i];
       }
 
@@ -167,7 +166,7 @@ class WebGLMorphtargets {
       // When object doesn't have morph target influences defined, we treat it as a 0-length array
       // This is important to make sure we set up morphTargetBaseInfluence / morphTargetInfluences
 
-      final length = objectInfluences == null ? 0 : objectInfluences.length;
+      final length = objectInfluences.length;
 
       List<List<num>>? influences = influencesList[geometry.id];
 
@@ -186,7 +185,7 @@ class WebGLMorphtargets {
       for (int i = 0; i < length; i++) {
         final influence = influences[i];
         influence[0] = i;
-        influence[1] = objectInfluences![i];
+        influence[1] = objectInfluences[i];
       }
 
       influences.sort(absNumericalSort);

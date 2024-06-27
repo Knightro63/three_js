@@ -48,7 +48,6 @@ class _State extends State<WebglMorphtargetsHorse> {
 
     const radius = 600;
     double theta = 0;
-    int prevTime = DateTime.now().millisecondsSinceEpoch;
 
     threeJs.camera = three.PerspectiveCamera(50, threeJs.width / threeJs.height, 1, 10000);
     threeJs.camera.position.y = 300;
@@ -74,7 +73,6 @@ class _State extends State<WebglMorphtargetsHorse> {
     threeJs.scene.add(mesh);
 
     mixer = three.AnimationMixer(mesh);
-
     mixer.clipAction(gltf.animations![0])?.setDuration(1).play();
 
     threeJs.addAnimationEvent((dt){
@@ -86,9 +84,7 @@ class _State extends State<WebglMorphtargetsHorse> {
       threeJs.camera.lookAt(three.Vector3(0, 150, 0));
 
       if (mixer != null) {
-        final time = DateTime.now().millisecondsSinceEpoch;
-        mixer.update((time - prevTime) * 0.001);
-        prevTime = time;
+        mixer.update(dt);
       }
     });
   }
