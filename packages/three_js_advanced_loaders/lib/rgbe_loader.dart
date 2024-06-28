@@ -154,7 +154,7 @@ class RGBELoader extends DataTextureLoader {
 
     const newLine = '\n';
 
-    fgets(Uint8List buffer, [lineLimit, consume]) {
+    String? fgets(Uint8List buffer, [int? lineLimit,bool consume = false]) {
       const chunkSize = 128;
 
       lineLimit = lineLimit ?? 1024;
@@ -182,7 +182,7 @@ class RGBELoader extends DataTextureLoader {
 						else if (byteCode > 0x7ff && byteCode <= 0xffff) byteLen += 2;
 						if (byteCode >= 0xDC00 && byteCode <= 0xDFFF) i--; //trail surrogate
 					}*/
-        if (false != consume) byteArrayPos += len + i + 1;
+        if (!consume) byteArrayPos += len + i + 1;
         return s + chunk.substring(0, i);
       }
 
@@ -227,7 +227,7 @@ class RGBELoader extends DataTextureLoader {
 
       RegExpMatch? match;
 
-      String? line = fgets(buffer, null, null);
+      String? line = fgets(buffer);
 
       if (byteArrayPos >= buffer.lengthInBytes || line == null) {
         return rgbeError(rgbeReadError, 'no header found');
@@ -256,32 +256,26 @@ class RGBELoader extends DataTextureLoader {
         if (line.isNotEmpty && '#' == line[0]) {
           header["comments"] += 'line\n';
           continue; // comment line
-
         }
 
         if (gammaRe.hasMatch(line)) {
           match = gammaRe.firstMatch(line);
-
           header["gamma"] = double.parse(match![1]!);
         }
 
         if (exposureRe.hasMatch(line)) {
           match = exposureRe.firstMatch(line);
-
           header["exposure"] = double.parse(match![1]!);
         }
 
         if (formatRe.hasMatch(line)) {
           match = formatRe.firstMatch(line);
-
           header["valid"] |= rgbeVALIDFORMAT;
           header["format"] = match?[1]; //'32-bit_rle_rgbe';
-
         }
 
         if (dimensionsRe.hasMatch(line)) {
           match = dimensionsRe.firstMatch(line);
-
           header["valid"] |= rgbeVALIDDIMENSIONS;
           header["height"] = int.parse(match![1]!);
           header["width"] = int.parse(match[2]!);

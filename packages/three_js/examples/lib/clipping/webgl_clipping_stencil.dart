@@ -175,7 +175,7 @@ class _State extends State<WebglClippingStencil> {
       object.add(stencilGroup);
       poGroup.add(po);
       planeObjects.add(po);
-      threeJs.scene.add(poGroup);
+      //threeJs.scene.add(poGroup);
     }
 
     final material = three.MeshStandardMaterial.fromMap({

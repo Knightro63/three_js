@@ -104,7 +104,6 @@ class _State extends State<WebglInstancingMorph> {
     threeJs.scene.add( mesh );
     mixer = three.AnimationMixer( glb.scene );
     mixer.clipAction( glb.animations![ 0 ] )!.setDuration(1).play();
-    
 
     threeJs.addAnimationEvent((dt){
       final time = threeJs.clock.getElapsedTime();

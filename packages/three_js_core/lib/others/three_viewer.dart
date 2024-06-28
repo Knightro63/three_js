@@ -179,6 +179,9 @@ class ThreeJS{
       renderer!.render(scene, camera);
     }
     else{
+      renderer!.clear();
+      renderer!.setRenderTarget(renderTarget);
+      renderer!.setViewport(0,0,width,height);
       postProcessor?.call(clock.getDelta());
     }
     

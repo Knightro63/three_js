@@ -659,7 +659,6 @@ class WebGLRenderer {
     if (_currentRenderTarget != null) {
       // resolve multisample renderbuffers to a single-sample texture if necessary
       textures.updateMultisampleRenderTarget(_currentRenderTarget!);
-
       // Generate mipmap if we're using any kind of mipmap filtering
       textures.updateRenderTargetMipmap(_currentRenderTarget!);
     }
@@ -727,9 +726,9 @@ class WebGLRenderer {
       else if (object is Mesh || object is Line || object is Points) {
         if (object is SkinnedMesh) {
           // update skeleton only once in a frame
-          if (object.skeleton!.frame != info.render["frame"]) {
-            object.skeleton!.update();
-            object.skeleton!.frame = info.render["frame"]!;
+          if (object.skeleton?.frame != info.render["frame"]) {
+            object.skeleton?.update();
+            object.skeleton?.frame = info.render["frame"]!;
           }
         }
 
@@ -955,10 +954,7 @@ class WebGLRenderer {
       parameters.uniforms = programCache.getUniforms(material);
 
       material.onBuild(parameters, this);
-
-      if (material.onBeforeCompile != null) {
-        material.onBeforeCompile!(parameters, this);
-      }
+      material.onBeforeCompile?.call(parameters, this);
 
       program = programCache.acquireProgram(parameters, programCacheKey);
       programs[programCacheKey] = program;
@@ -1572,7 +1568,7 @@ class WebGLRenderer {
     final unpackSkipRows = _gl.getParameter(WebGL.UNPACK_SKIP_ROWS);
     final unpackSkipImages = _gl.getParameter(WebGL.UNPACK_SKIP_IMAGES);
     
-    final image = srcTexture.isCompressedTexture ? srcTexture.mipmaps[0] : srcTexture.image;
+    final image = srcTexture is CompressedTexture ? srcTexture.mipmaps[0] : srcTexture.image;
 
     _gl.pixelStorei(WebGL.UNPACK_ROW_LENGTH, image.width);
     _gl.pixelStorei(WebGL.UNPACK_IMAGE_HEIGHT, image.height);
@@ -1584,7 +1580,7 @@ class WebGLRenderer {
       _gl.texSubImage3D(glTarget, level, position.x.toInt(), position.y.toInt(), position.z.toInt(), width.toInt(), height.toInt(), depth.toInt(), glFormat, glType, image.data);
     } 
     else {
-      if (srcTexture.isCompressedTexture) {
+      if (srcTexture is CompressedTexture) {
         console.warning('WebGLRenderer.copyTextureToTexture3D: untested support for compressed srcTexture.');
         //_gl.compressedTexSubImage3D(glTarget, level, position.x, position.y, position.z, width, height, depth, glFormat, image.data);
       } 

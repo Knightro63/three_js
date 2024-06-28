@@ -20,7 +20,7 @@ class _State extends State<WebglAnimationMultiple> {
   void initState() {
     threeJs = three.ThreeJS(
       settings: three.Settings(
-        useSourceTexture: true
+        useSourceTexture: true,
       ),
       onSetupComplete: (){setState(() {});},
       setup: setup
@@ -180,7 +180,6 @@ class _State extends State<WebglAnimationMultiple> {
             mixers.add(mixer);
             numSuccess++;
           }
-          
           threeJs.scene.add(clonedScene);
 
           if (u["position"] != null) {
@@ -251,6 +250,7 @@ class _State extends State<WebglAnimationMultiple> {
       model["scene"] = scene;
 
       gltf.scene.traverse((object) {
+        object.frustumCulled = true;
         if (object is three.Mesh) {
           object.castShadow = true;
         }

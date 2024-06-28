@@ -158,7 +158,7 @@ class LoopSubdivision {
    * @param {Number} maxTriangles - If geometry contains more than this many triangles, subdivision will not continue
    * @param {Number} weight - How much to weigh favoring heavy corners vs favoring Loop's formula
    */
-  static modify(BufferGeometry bufferGeometry, [int iterations = 1, LoopParameters? params]) {
+  static BufferGeometry modify(BufferGeometry bufferGeometry, [int iterations = 1, LoopParameters? params]) {
     params ??= LoopParameters();
     ///// Parameters
     params.weight = math.max(0, (math.min(1, params.weight)));
@@ -206,11 +206,11 @@ class LoopSubdivision {
     /////   Split Hypotenuse
     ////////////////////
 
-    /**
-     * Applies one iteration of split subdivision. Splits all triangles at edges shared by coplanar triangles.
-     * Starts by splitting at longest shared edge, followed by splitting from that center edge point to the
-     * center of any other shared edges.
-     */
+    ///
+    /// Applies one iteration of split subdivision. Splits all triangles at edges shared by coplanar triangles.
+    /// Starts by splitting at longest shared edge, followed by splitting from that center edge point to the
+    /// center of any other shared edges.
+    ///
     static edgeSplit(geometry) {
 
         ///// Geometries

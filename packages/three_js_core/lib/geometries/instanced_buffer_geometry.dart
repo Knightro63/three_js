@@ -5,7 +5,7 @@ import '../core/object_3d.dart';
 class InstancedBufferGeometry extends BufferGeometry {
   InstancedBufferGeometry() : super() {
     type = 'InstancedBufferGeometry';
-    instanceCount = double.infinity.toInt();
+    instanceCount = double.maxFinite.toInt();
   }
 
   /// Copies the given [name] to this instance.

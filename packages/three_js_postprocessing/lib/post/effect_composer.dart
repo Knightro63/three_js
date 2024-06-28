@@ -106,7 +106,7 @@ class EffectComposer {
     // deltaTime value is in seconds
 
     deltaTime ??= clock.getDelta();
-    //final currentRenderTarget = renderer.getRenderTarget();
+    final currentRenderTarget = renderer.getRenderTarget();
 
     bool maskActive = false;
 
@@ -126,29 +126,26 @@ class EffectComposer {
           final context = renderer.getContext();
           final stencil = renderer.state.buffers["stencil"];
 
-          //context.stencilFunc( context.NOTEQUAL, 1, 0xffffffff );
+          context.stencilFunc( context.NOTEQUAL, 1, 0xffffffff );
           stencil.setFunc(context.NOTEQUAL, 1, 0xffffffff);
 
           copyPass.render(renderer, writeBuffer, readBuffer, deltaTime: deltaTime);
 
-          //context.stencilFunc( context.EQUAL, 1, 0xffffffff );
+          context.stencilFunc( context.EQUAL, 1, 0xffffffff );
           stencil.setFunc(context.EQUAL, 1, 0xffffffff);
         }
 
         swapBuffers();
       }
 
-      //if (pass != null) {
-        if (pass is MaskPass) {
-          maskActive = true;
-        } 
-        else if (pass is ClearMaskPass) {
-          maskActive = false;
-        }
-      //}
+      if (pass is MaskPass) {
+        maskActive = true;
+      } 
+      else if (pass is ClearMaskPass) {
+        maskActive = false;
+      }
     }
-
-    // renderer.setRenderTarget(currentRenderTarget);
+    renderer.setRenderTarget(currentRenderTarget);
   }
 
   void reset(WebGLRenderTarget? renderTarget) {

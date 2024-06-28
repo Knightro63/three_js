@@ -71,7 +71,8 @@ class _State extends State<WebglLightsSpotlight> {
       final texture = (await loader.fromAsset( filename ))!;
       texture.minFilter = three.LinearFilter;
       texture.magFilter = three.LinearFilter;
-      //texture.colorSpace = three.SRGBColorSpace;
+      texture.encoding = three.LinearEncoding;
+      texture.colorSpace = three.SRGBColorSpace;
 
       textures[ filename ] = texture;
     }
@@ -95,8 +96,6 @@ class _State extends State<WebglLightsSpotlight> {
     final lightHelper = SpotLightHelper( spotLight );
     threeJs.scene.add( lightHelper );
 
-    //
-
     final geometry = three.PlaneGeometry( 200, 200 );
     final material = three.MeshLambertMaterial.fromMap( { 'color': 0xbcbcbc } );
 
@@ -105,8 +104,6 @@ class _State extends State<WebglLightsSpotlight> {
     mesh.rotation.x = - math.pi / 2;
     mesh.receiveShadow = true;
     threeJs.scene.add( mesh );
-
-    //
 
     final plyGeometry = await three.PLYLoader().fromAsset( 'assets/models/ply/binary/Lucy100k.ply');
     plyGeometry?.scale( 0.0024, 0.0024, 0.0024 );
@@ -127,10 +124,8 @@ class _State extends State<WebglLightsSpotlight> {
 
     threeJs.addAnimationEvent((dt){
       final time = DateTime.now().millisecondsSinceEpoch / 3000;
-
       spotLight.position.x = math.cos( time ) * 2.5;
       spotLight.position.z = math.sin( time ) * 2.5;
-
       lightHelper.update();
     });
   }

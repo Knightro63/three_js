@@ -212,6 +212,7 @@ const P3Primaries = 'p3';
 const GLSL1 = '100';
 const GLSL3 = '300 es';
 const SRGBColorSpace = 'srgb';
+const LinearSRGBColorSpace = 'srgb-linear';
 
 const MAX_SAFE_INTEGER = 9999999999;
 

@@ -38,6 +38,7 @@ flutter:
     # - assets/helvetiker_bold.typeface.json
     - assets/pingfang.ttf
     - assets/kenpixel.ttf
+    - assets/helvetiker_bold.typeface.json
     - assets/winter.jpg
     - assets/lut.cube
     - assets/demo.png
@@ -82,3 +83,4 @@ flutter:
     - assets/textures/planets/
     - assets/textures/decal/
     - assets/textures/cube/Park2/
+    - assets/textures/cube/pisa/

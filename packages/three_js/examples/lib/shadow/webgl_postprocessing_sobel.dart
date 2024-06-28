@@ -21,7 +21,7 @@ class _State extends State<WebglPostprocessingSobel> {
       onSetupComplete: (){setState(() {});},
       setup: setup,
       settings: three.Settings(
-        useSourceTexture: true
+        useSourceTexture: true,
       )
     );
     super.initState();
@@ -75,11 +75,6 @@ class _State extends State<WebglPostprocessingSobel> {
     composer = EffectComposer( threeJs.renderer!, threeJs.renderTarget );
     final renderPass = RenderPass( threeJs.scene, threeJs.camera );
     composer.addPass( renderPass );
-
-    // color to grayscale conversion
-
-    // final effectGrayScale = ShaderPass.fromJson( luminosityShader );
-    // composer.addPass( effectGrayScale );
 
     // you might want to use a gaussian blur filter before
     // the next pass to improve the result of the Sobel operator

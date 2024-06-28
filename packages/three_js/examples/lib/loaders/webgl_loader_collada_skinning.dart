@@ -19,6 +19,7 @@ class _MyAppState extends State<WebglLoaderColladaSkinning> {
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
       setup: setup,
+      settings: three.Settings()
     );
     super.initState();
   }
@@ -54,7 +55,6 @@ class _MyAppState extends State<WebglLoaderColladaSkinning> {
     final loader = three.ColladaLoader();
     loader.setPath('assets/models/collada/stormtrooper/');
     await loader.fromAsset( 'stormtrooper.dae').then(( collada ) {
-
       final avatar = collada!.scene!;
       final animations = collada.animations!;
 

@@ -86,7 +86,7 @@ class _State extends State<WebglModifierSubdivision> {
 
     texture?.wrapS = three.RepeatWrapping;
     texture?.wrapT = three.RepeatWrapping;
-    //texture.colorSpace = THREE.SRGBColorSpace;
+    texture?.colorSpace = three.SRGBColorSpace;
 
     meshNormal = three.Mesh( three.BufferGeometry(), three.MeshBasicMaterial() );
     meshSmooth = three.Mesh( three.BufferGeometry(), three.MeshBasicMaterial() );

@@ -74,7 +74,6 @@ class WebGLCubeRenderTarget extends WebGLRenderTarget {
     };
 
     final geometry = BoxGeometry(5, 5, 5);
-
     final material = ShaderMaterial.fromMap({
       "name": 'CubemapFromEquirect',
       "uniforms": cloneUniforms(shader["uniforms"] as Map<String, dynamic>),

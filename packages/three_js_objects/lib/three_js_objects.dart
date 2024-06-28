@@ -8,3 +8,4 @@ export 'gpu_computation_renderer.dart';
 export 'lens_flare.dart';
 export 'csm/index.dart';
 export 'water/index.dart';
+export 'lights/light_probe_generator.dart';

@@ -13,14 +13,14 @@ class LightProbeHelper extends Mesh {
   /// [lightProbe] -- the light probe.
   /// 
   /// [size] -- size of the helper sphere
-  LightProbeHelper.create(super.geometry, super.material){
+  LightProbeHelper.create(super.geometry, super.material, this.lightProbe, this.size){
     type = 'LightProbeHelper';
 		onBeforeRender.call();
   }
 
 	factory LightProbeHelper(LightProbe lightProbe, double size){
 		final material = ShaderMaterial.fromMap( {
-			'type': 'LightProbeHelperMaterial',
+			//'type': 'LightProbeHelperMaterial',
 			'uniforms': {
 				'sh': { 'value': lightProbe.sh?.coefficients }, // by reference
 				'intensity': { 'value': lightProbe.intensity }
@@ -76,10 +76,7 @@ class LightProbeHelper extends Mesh {
 		});
 
 		final geometry = SphereGeometry( 1, 32, 16 );
-    final lph = LightProbeHelper.create(geometry, material);
-
-		lightProbe = lightProbe;
-		size = size;
+    final lph = LightProbeHelper.create(geometry, material,lightProbe,size);
 
     return lph;
 	}

@@ -22,3 +22,4 @@ export 'vertex_tangents_helper.dart';
 export 'enviroments/index.dart';
 export 'utils/skeleton_utils.dart';
 export 'utils/mesh_surface_sampler.dart';
+export 'utils/camera_utils.dart';

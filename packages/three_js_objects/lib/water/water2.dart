@@ -127,7 +127,7 @@ class Water extends Mesh {
       reflector.matrixWorld.setFrom(matrixWorld );
       refractor.matrixWorld.setFrom(matrixWorld );
 
-      reflector.onBeforeRender!(renderer:renderer, scene:scene, camera:camera);
+      reflector.onBeforeRender!(renderer:renderer, scene:scene, camera:camera, renderTarget: renderTarget);
       refractor.onBeforeRender!(renderer:renderer, scene:scene, camera:camera);
 
       visible = true;

@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'package:three_js_math/buffer/index.dart';
 import 'package:xml/xpath.dart';
 import 'package:three_js_animations/three_js_animations.dart';
 import 'package:three_js_core_loaders/three_js_core_loaders.dart';
@@ -18,11 +19,11 @@ class ColladaKeyFrame{
 class ColladaParser{
   LoadingManager? manager;
 
-  final position =Vector3();
-  final scale =Vector3();
-  final quaternion =Quaternion();
-  final matrix =Matrix4();
-  final vector =Vector3();
+  final position = Vector3();
+  final scale = Vector3();
+  final quaternion = Quaternion();
+  final matrix = Matrix4.identity();
+  final vector = Vector3();
 
   int count = 0;
 
@@ -1212,7 +1213,7 @@ class ColladaParser{
       final length = index + sourceStride;
 
       for ( ; index < length; index ++ ) {
-        array.add( sourceArray[ index ].toDouble() );
+        array.add(sourceArray[ index ]);
       }
 
       if ( isColor ) {
@@ -1281,7 +1282,7 @@ class ColladaParser{
     final Map<String,dynamic> uv1 = { 'array': <double>[], 'stride': 0 };
     final Map<String,dynamic> color = { 'array': <double>[], 'stride': 0 };
 
-    final Map<String,dynamic> skinIndex = { 'array': <double>[], 'stride': 4 };
+    final Map<String,dynamic> skinIndex = { 'array': <int>[], 'stride': 4 };
     final Map<String,dynamic> skinWeight = { 'array': <double>[], 'stride': 4 };
 
     final geometry = BufferGeometry();
@@ -1405,7 +1406,7 @@ class ColladaParser{
     if ( uv['array'].isNotEmpty ) geometry.setAttributeFromString( 'uv',Float32BufferAttribute.fromList( uv['array'], uv['stride'] ) );
     if ( uv1['array'].isNotEmpty ) geometry.setAttributeFromString( 'uv1',Float32BufferAttribute.fromList( uv1['array'], uv1['stride'] ) );
 
-    if ( skinIndex['array'].isNotEmpty ) geometry.setAttributeFromString( 'skinIndex',Float32BufferAttribute.fromList( skinIndex['array'], skinIndex['stride'] ) );
+    if ( skinIndex['array'].isNotEmpty ) geometry.setAttributeFromString( 'skinIndex',Uint16BufferAttribute.fromList( skinIndex['array'], skinIndex['stride'] ) );
     if ( skinWeight['array'].isNotEmpty ) geometry.setAttributeFromString( 'skinWeight',Float32BufferAttribute.fromList( skinWeight['array'], skinWeight['stride'] ) );
 
     build['data'] = geometry;
@@ -1605,7 +1606,7 @@ class ColladaParser{
       switch ( child.parentElement!.name.local ) {
         case 'matrix':
           array = parseFloats( child.innerText );
-          final matrix =Matrix4().copyFromArray( array ).transpose();
+          final matrix = Matrix4.identity().copyFromArray( array ).transpose();
           transforms.add( {
             'sid': child.getAttribute( 'sid' ),
             'type': child.parentElement!.name.local,
@@ -1682,7 +1683,7 @@ class ColladaParser{
       }
     }
 
-    final m0 = Matrix4();
+    final m0 = Matrix4.identity();
     kinematics = {
       'joints': kinematicsModel['joints'],
 
@@ -1828,7 +1829,7 @@ class ColladaParser{
       'type': xml.getAttribute( 'type' ),
       'id': xml.getAttribute( 'id' ),
       'sid': xml.getAttribute( 'sid' ),
-      'matrix':Matrix4(),
+      'matrix':Matrix4.identity(),
       'nodes': [],
       'instanceCameras': [],
       'instanceControllers': [],
@@ -1913,7 +1914,7 @@ class ColladaParser{
           }
         }
 
-        boneInverse ??= Matrix4();
+        boneInverse ??= Matrix4.identity();
         boneData.add({'bone': object, 'boneInverse': boneInverse, 'processed': false } );
       }
     });
@@ -2545,11 +2546,11 @@ class ColladaParser{
     final Map<String,dynamic> build = {
       'joints': [], // this must be an array to preserve the joint order
       'indices': {
-        'array': [],
+        'array': <int>[],
         'stride': BONE_LIMIT
       },
       'weights': {
-        'array': [],
+        'array': <double>[],
         'stride': BONE_LIMIT
       }
     };
@@ -2574,11 +2575,11 @@ class ColladaParser{
       final vertexSkinData = [];
 
       for (int j = 0; j < jointCount; j ++ ) {
-        final skinIndex = v[ stride + jointOffset ];
+        final int skinIndex = v[ stride + jointOffset ];
         final weightId = v[ stride + weightOffset ];
         final skinWeight = weights[ weightId ];
 
-        vertexSkinData.add( { 'index': skinIndex, 'weight': skinWeight } );
+        vertexSkinData.add({'index': skinIndex, 'weight': skinWeight});
 
         stride += 2;
       }
@@ -2595,12 +2596,12 @@ class ColladaParser{
         final d = vertexSkinData.length > j ? vertexSkinData[ j ]:null;
 
         if ( d != null ) {
-          build['indices']['array'].add( d['index'] );
-          build['weights']['array'].add( d['weight'] );
+          build['indices']['array'].add( d['index']);
+          build['weights']['array'].add( d['weight']);
         } 
         else {
           build['indices']['array'].add( 0 );
-          build['weights']['array'].add( 0 );
+          build['weights']['array'].add( 0.0 );
         }
       }
     }
@@ -2608,17 +2609,17 @@ class ColladaParser{
     // setup bind matrix
 
     if ( data['bindShapeMatrix'] != null) {
-      build['bindMatrix'] = Matrix4().copyFromArray( data['bindShapeMatrix'] ).transpose();
+      build['bindMatrix'] = Matrix4.identity().copyFromArray( data['bindShapeMatrix'] ).transpose();
     } 
     else {
-      build['bindMatrix'] = Matrix4().identity();
+      build['bindMatrix'] = Matrix4.identity();
     }
 
     // process bones and inverse bind matrix data
 
     for (int i = 0, l = jointSource['array'].length; i < l; i ++ ) {
       final name = jointSource['array'][ i ];
-      final boneInverse = Matrix4().copyFromArray( inverseSource['array'], (i * inverseSource['stride']).toInt() ).transpose();
+      final boneInverse = Matrix4.identity().copyFromArray( inverseSource['array'], (i * inverseSource['stride']).toInt() ).transpose();
       build['joints'].add( { 'name': name, 'boneInverse': boneInverse } );
     }
 
@@ -2737,8 +2738,7 @@ class ColladaParser{
     switch (data['type']) {
 
       case 'matrix':
-        data['obj'] =Matrix4();
-        data['obj'].copyFromArray( array ).transpose();
+        data['obj'] =Matrix4.identity().copyFromArray( array ).transpose();
         break;
       case 'translate':
         data['obj'] =Vector3();

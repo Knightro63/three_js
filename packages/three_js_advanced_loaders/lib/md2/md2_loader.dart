@@ -336,8 +336,8 @@ class MD2Loader extends Loader {
 
 		// animation
 
-		final List<Float32BufferAttribute> morphPositions = [];
-		final List<Float32BufferAttribute> morphNormals = [];
+		final List<BufferAttribute> morphPositions = [];
+		final List<BufferAttribute> morphNormals = [];
 
 		for (int i = 0, l = frames.length; i < l; i ++ ) {
 			final frame = frames[ i ];
@@ -379,6 +379,6 @@ class MD2Loader extends Loader {
 		geometry.morphAttributes['normal'] = morphNormals;
 		geometry.morphTargetsRelative = false;
   
-		return MD2LoaderData(geometry, AnimationClip.createClipsFromMorphTargetSequences( frames, 10 ));
+		return MD2LoaderData(geometry, AnimationClip.createClipsFromMorphTargetSequences( frames, 10, true ));
 	}
 }

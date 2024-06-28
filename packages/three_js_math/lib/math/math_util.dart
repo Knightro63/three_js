@@ -151,6 +151,58 @@ class MathUtils{
     bits += m & 1;
     return bits;
   }
+
+  static fromHalfFloat(num value) {
+    final val = value.toInt();
+    final m = val >> 10;
+    final uint32View = Uint32List( 4 );
+    final mantissaTable = Uint32List( 2048 );
+    final exponentTable = Uint32List( 64 );
+    final offsetTable = Uint32List( 64 );
+
+    for (int i = 1; i < 1024; ++ i ) {
+      int m = i << 13; // zero pad mantissa bits
+      int e = 0; // zero exponent
+
+      // normalized
+      while ( ( m & 0x00800000 ) == 0 ) {
+        m <<= 1;
+        e -= 0x00800000; // decrement exponent
+      }
+
+      m &= ~ 0x00800000; // clear leading 1 bit
+      e += 0x38800000; // adjust bias
+
+      mantissaTable[ i ] = m | e;
+    }
+
+    for (int i = 1024; i < 2048; ++ i ) {
+      mantissaTable[ i ] = 0x38000000 + ( ( i - 1024 ) << 13 );
+    }
+
+    for (int i = 1; i < 31; ++ i ) {
+      exponentTable[ i ] = i << 23;
+    }
+
+    exponentTable[ 31 ] = 0x47800000;
+    exponentTable[ 32 ] = 0x80000000;
+
+    for (int i = 33; i < 63; ++ i ) {
+      exponentTable[ i ] = 0x80000000 + ( ( i - 32 ) << 23 );
+    }
+
+    exponentTable[ 63 ] = 0xc7800000;
+
+    for (int i = 1; i < 64; ++ i ) {
+      if ( i != 32 ) {
+        offsetTable[ i ] = 1024;
+      }
+    }
+
+    uint32View[ 0 ] = mantissaTable[offsetTable[ m ] + ( val & 0x3ff ) ] + exponentTable[ m ];
+    return uint32View.buffer.asFloat32List();
+  }
+
   // static void listSetter<T>(List<T> list, int idx, dynamic value) {
   //   if (list.length > idx) {
   //     list[idx] = value;

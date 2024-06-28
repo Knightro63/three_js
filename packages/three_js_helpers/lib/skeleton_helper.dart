@@ -27,7 +27,6 @@ class SkeletonHelper extends LineSegments {
   /// of [Object3D] can be used if it represents a hierarchy of [Bone]s (via [Object3D.children]).
   factory SkeletonHelper(Object3D object) {
     final bones = getBoneList(object);
-
     final geometry = BufferGeometry();
 
     List<double> vertices = [];

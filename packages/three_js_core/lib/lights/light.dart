@@ -58,7 +58,7 @@ class Light extends Object3D {
 
     Light source1 = source as Light;
 
-    color!.setFrom(source1.color!);
+    color?.setFrom(source1.color!);
     intensity = source1.intensity;
 
     return this;

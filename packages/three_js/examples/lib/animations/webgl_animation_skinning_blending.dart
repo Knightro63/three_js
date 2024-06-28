@@ -88,7 +88,6 @@ class _State extends State<WebglAnimationSkinningBlending> {
       if (object is three.Mesh) object.castShadow = true;
     });
 
-
     final skeleton = SkeletonHelper(model);
     skeleton.visible = true;
     threeJs.scene.add(skeleton);

@@ -640,17 +640,17 @@ class WebGLState {
     gl.activeTexture(WebGL.TEXTURE0);
 
     if (isWebGL2 == true) {
+      gl.bindFramebuffer(WebGL.FRAMEBUFFER, null);
       gl.bindFramebuffer(WebGL.DRAW_FRAMEBUFFER, null); // Equivalent to gl.FRAMEBUFFER
       gl.bindFramebuffer(WebGL.READ_FRAMEBUFFER, null);
-      gl.bindFramebuffer(WebGL.FRAMEBUFFER, null);
     } else {
       gl.bindFramebuffer(WebGL.FRAMEBUFFER, null);
     }
 
     gl.useProgram(null);
     gl.lineWidth(1);
-    gl.scissor(0, 0, 0, 0);
-    gl.viewport(0, 0, 0, 0);
+    gl.scissor(0, 0, gl.width, gl.height);
+    gl.viewport(0, 0, gl.width, gl.height);
 
     // reset internals
 
@@ -683,6 +683,9 @@ class WebGLState {
 
     currentPolygonOffsetFactor = null;
     currentPolygonOffsetUnits = null;
+
+		currentScissor.setValues( 0, 0, gl.width.toDouble(), gl.height.toDouble() );
+		currentViewport.setValues( 0, 0, gl.width.toDouble(), gl.height.toDouble() );
 
     colorBuffer.reset();
     depthBuffer.reset();

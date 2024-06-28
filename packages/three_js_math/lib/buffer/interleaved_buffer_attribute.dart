@@ -204,7 +204,7 @@ class InterleavedBufferAttribute extends BufferAttribute {
   @override
   Map<String, Object> toJson([InterleavedBuffer? data]) {
     if (data == null) {
-      print('InterleavedBufferAttribute.toJson(): Serializing an interlaved buffer attribute will deinterleave buffer data!.');
+      //print('InterleavedBufferAttribute.toJson(): Serializing an interlaved buffer attribute will deinterleave buffer data!.');
 
       List<double> array = [];
 

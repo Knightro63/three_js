@@ -1,7 +1,5 @@
 import 'dart:typed_data';
-
 import 'index.dart';
-import 'package:flutter_angle/flutter_angle.dart';
 import '../vector/index.dart';
 import '../rotation/index.dart';
 import 'dart:math' as math;

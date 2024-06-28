@@ -526,10 +526,10 @@ class WebGLTextures {
     state.bindTexture(textureType, textureProperties["__webglTexture"]);
 
     if (source.version != source.currentVersion || forceUpload) {
-      _gl.pixelStorei(WebGL.UNPACK_FLIP_Y_WEBGL, texture.flipY ? 1 : 0);
-      _gl.pixelStorei(WebGL.UNPACK_PREMULTIPLY_ALPHA_WEBGL, texture.premultiplyAlpha ? 1 : 0);
       _gl.pixelStorei(WebGL.UNPACK_ALIGNMENT, texture.unpackAlignment);
       if (kIsWeb) {
+        _gl.pixelStorei(WebGL.UNPACK_FLIP_Y_WEBGL, texture.flipY ? 1 : 0);
+        _gl.pixelStorei(WebGL.UNPACK_PREMULTIPLY_ALPHA_WEBGL, texture.premultiplyAlpha ? 1 : 0);
         _gl.pixelStorei(WebGL.UNPACK_COLORSPACE_CONVERSION_WEBGL, WebGL.NONE);
       }
 
@@ -633,6 +633,7 @@ class WebGLTextures {
           texture.generateMipmaps = false;
         } 
         else {
+
           if (useTexStorage) {
             if (allocateMemory) {
               state.texStorage2D(WebGL.TEXTURE_2D, levels, glInternalFormat, image.width.toInt(), image.height.toInt());
@@ -769,10 +770,10 @@ class WebGLTextures {
     state.bindTexture(WebGL.TEXTURE_CUBE_MAP, textureProperties['__webglTexture']);
 
     if (source.version != source.currentVersion || forceUpload) {
-      _gl.pixelStorei(WebGL.UNPACK_FLIP_Y_WEBGL, texture.flipY ? 1 : 0);
-      _gl.pixelStorei(WebGL.UNPACK_PREMULTIPLY_ALPHA_WEBGL, texture.premultiplyAlpha ? 1 : 0);
-      _gl.pixelStorei(WebGL.UNPACK_ALIGNMENT, texture.unpackAlignment);
+        _gl.pixelStorei(WebGL.UNPACK_ALIGNMENT, texture.unpackAlignment);
       if (kIsWeb) {
+        _gl.pixelStorei(WebGL.UNPACK_FLIP_Y_WEBGL, texture.flipY ? 1 : 0);
+        _gl.pixelStorei(WebGL.UNPACK_PREMULTIPLY_ALPHA_WEBGL, texture.premultiplyAlpha ? 1 : 0);
         _gl.pixelStorei(WebGL.UNPACK_COLORSPACE_CONVERSION_WEBGL, WebGL.NONE);
       }
 
@@ -924,7 +925,7 @@ class WebGLTextures {
   // Render targets
 
   // Setup storage for target texture and bind it to correct framebuffer
-  void setupFrameBufferTexture(framebuffer, RenderTarget renderTarget, Texture texture, attachment, textureTarget) {
+  void setupFrameBufferTexture(framebuffer, RenderTarget renderTarget, Texture texture, attachment, textureTarget) {;
     final glFormat = utils.convert(texture.format);
     final glType = utils.convert(texture.type);
     final glInternalFormat = getInternalFormat(texture.internalFormat, glFormat, glType, texture.encoding);
@@ -938,8 +939,6 @@ class WebGLTextures {
     }
 
     state.bindFramebuffer(WebGL.FRAMEBUFFER, framebuffer);
-    // gl.framebufferTexture2D(gl.FRAMEBUFFER, attachment, textureTarget,
-    //     properties.get(texture)["__webglTexture"], 0);
 
     if (useMultisampledRenderToTexture(renderTarget)) {
       multisampledRenderToTextureExtension.framebufferTexture2DMultisampleEXT(WebGL.FRAMEBUFFER, attachment,
@@ -1122,6 +1121,7 @@ class WebGLTextures {
 
   // Set up GL resources for the render target
   void setupRenderTarget(RenderTarget renderTarget) {
+
     final texture = renderTarget.texture;
 
     final renderTargetProperties = properties.get(renderTarget);
@@ -1143,7 +1143,6 @@ class WebGLTextures {
 
     if (isCube) {
       renderTargetProperties["__webglFramebuffer"] = [];
-
       for (int i = 0; i < 6; i++) {
         renderTargetProperties["__webglFramebuffer"].add(gl.createFramebuffer());
       }
@@ -1357,10 +1356,11 @@ class WebGLTextures {
 
     state.activeTexture(WebGL.TEXTURE0 + slot);
     state.bindTexture(textureType, textureProperties["__webglTexture"]);
-
-    gl.pixelStorei(WebGL.UNPACK_FLIP_Y_WEBGL, texture.flipY ? 1 : 0);
     gl.pixelStorei(WebGL.UNPACK_PREMULTIPLY_ALPHA_WEBGL, texture.premultiplyAlpha ? 1 : 0);
-    gl.pixelStorei(WebGL.UNPACK_ALIGNMENT, texture.unpackAlignment);
+    if(kIsWeb){
+      gl.pixelStorei(WebGL.UNPACK_FLIP_Y_WEBGL, texture.flipY ? 1 : 0);
+      gl.pixelStorei(WebGL.UNPACK_ALIGNMENT, texture.unpackAlignment);
+    }
   }
 
   verifyColorSpace(Texture texture, image) {

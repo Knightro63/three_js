@@ -16,6 +16,7 @@ import 'package:example/instancing/webgl_instancing_dynamic.dart';
 import 'package:example/instancing/webgl_instancing_morph.dart';
 import 'package:example/instancing/webgl_instancing_raycasting.dart';
 import 'package:example/instancing/webgl_instancing_scatter.dart';
+import 'package:example/lights/webgl_lightprobe_cube_camera.dart';
 import 'package:example/loaders/webgl_loader_collada.dart';
 import 'package:example/loaders/webgl_loader_collada_kinematics.dart';
 import 'package:example/loaders/webgl_loader_collada_skinning.dart';
@@ -29,12 +30,17 @@ import 'package:example/loaders/webgl_loader_stl.dart';
 import 'package:example/loaders/webgl_loader_usdz.dart';
 import 'package:example/loaders/webgl_loader_vox.dart';
 import 'package:example/loaders/webgl_loader_xyz.dart';
+import 'package:example/material/webgl_materials_modified.dart';
+import 'package:example/morphtargets/webgl_modifier_subdivision.dart';
+import 'package:example/others/webgl_buffergeometry_instancing_billboards.dart';
+import 'package:example/others/webgl_custom_attributes_lines.dart';
 import 'package:example/others/webgl_interactive_voxelpainter.dart';
 import 'package:example/others/webgl_lod.dart';
+import 'package:example/others/webgl_portal.dart';
 import 'package:example/volume/webgl_ubo_arrays.dart';
 import 'package:example/shadow/webgl_lensflars.dart';
-import 'package:example/shadow/webgl_lights_rectarealight.dart';
-import 'package:example/shadow/webgl_lights_spotlight.dart';
+import 'package:example/lights/webgl_lights_rectarealight.dart';
+import 'package:example/lights/webgl_lights_spotlight.dart';
 import 'package:example/shadow/webgl_postprocessing_sobel.dart';
 import 'package:example/shadow/webgl_shader_lava.dart';
 import 'package:example/shadow/webgl_shadowmap_csm.dart';
@@ -136,6 +142,9 @@ class _MyAppState extends State<ExamplePage> {
     }
     else if(fileName == 'webgl_lights_spotlight'){
       page = WebglLightsSpotlight(fileName: fileName);
+    }
+    else if(fileName == 'webgl_lightprobe_cube_camera'){
+      page = WebglLightprobeCubeCamera(fileName: fileName);
     }
     else if (fileName == "webgl_geometry_text") {
       page = WebglGeometryText(fileName: fileName);
@@ -270,9 +279,19 @@ class _MyAppState extends State<ExamplePage> {
     else if(fileName == "webgl_buffergeometry_custom_attributes_particles"){
       page = WebglBuffergeometryCustomAttributesParticles(fileName: fileName);
     }
+    else if(fileName == 'webgl_buffergeometry_instancing_billboards'){
+      page = WebglBuffergeometryInstancingBillboards(fileName: fileName);
+    }
+    else if(fileName == 'webgl_custom_attributes_lines'){
+      page = WebglCustomAttributesLines(fileName: fileName);
+    }
     else if (fileName == "webgl_materials") {
       page = WebglMaterials(fileName: fileName);
-    } else if (fileName == "webgl_animation_skinning_blending") {
+    } 
+    else if(fileName == 'webgl_materials_modified'){
+      page = WebglMaterialsModified(fileName: fileName);
+    }
+    else if (fileName == "webgl_animation_skinning_blending") {
       page = WebglAnimationSkinningBlending(fileName: fileName);
     } else if (fileName == "webgl_animation_skinning_additive_blending") {
       page = WebglAnimationSkinningAdditiveBlending(fileName: fileName);
@@ -310,9 +329,12 @@ class _MyAppState extends State<ExamplePage> {
     else if (fileName == "webgl_helpers") {
       page = WebglHelpers(fileName: fileName);
     }
-    // else if(fileName == 'webgl_modifier_subdivision'){
-    //   page = WebglModifierSubdivision(fileName: fileName);
-    // }
+    else if (fileName == "webgl_portal") {
+      page = WebglPortal(fileName: fileName);
+    }
+    else if(fileName == 'webgl_modifier_subdivision'){
+      page = WebglModifierSubdivision(fileName: fileName);
+    }
     else if (fileName == "webgl_morphtargets") {
       page = WebglMorphtargets(fileName: fileName);
     } else if (fileName == "webgl_morphtargets_sphere") {

@@ -307,7 +307,6 @@ Future<BufferGeometry> addMorphTargets(BufferGeometry geometry, targets, GLTFPar
 ///
 Function updateMorphTargets = (Mesh mesh, Map<String, dynamic> meshDef) {
   mesh.updateMorphTargets();
-  print(meshDef);
   if (meshDef["weights"] != null) {
     for (int i = 0, il = meshDef["weights"].length; i < il; i++) {
       mesh.morphTargetInfluences[i] = meshDef["weights"][i].toDouble();
@@ -482,8 +481,7 @@ Function computeBounds = (BufferGeometry geometry, Map<String, dynamic> primitiv
 /// @param {GLTFParser} parser
 /// @return {Promise<BufferGeometry>}
 ///
-Function addPrimitiveAttributes =
-    (BufferGeometry geometry, Map<String, dynamic> primitiveDef, GLTFParser parser) async {
+Function addPrimitiveAttributes = (BufferGeometry geometry, Map<String, dynamic> primitiveDef, GLTFParser parser) async {
   final attributes = primitiveDef["attributes"];
 
   List pending = [];

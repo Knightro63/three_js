@@ -6,6 +6,8 @@ import '../math/math_util.dart';
 
 enum ColorSpace{linear,srgb}
 
+final Color _color = Color();
+
 class Color{
   late final Float32List storage;
 
@@ -259,6 +261,51 @@ class Color{
 
 		return "rgb(${( temp.red * 255 )},${( temp.green * 255 )},${( temp.blue * 255 )})";
   }
+
+	Color getHSL(Color target, [ColorSpace colorSpace = ColorSpace.linear] ) {
+		ColorManagement.fromWorkingColorSpace( _color..setFrom( this ), colorSpace );
+
+		final r = _color.red, g = _color.green, b = _color.blue;
+		final max = math.max( r, math.max(g, b) );
+		final min = math.min( r, math.min(g, b ));
+
+		double hue = 0;
+    double saturation;
+		final lightness = ( min + max ) / 2.0;
+
+		if ( min == max ) {
+			hue = 0;
+			saturation = 0;
+		} 
+    else {
+			final delta = max - min;
+			saturation = lightness <= 0.5 ? delta / ( max + min ) : delta / ( 2 - max - min );
+
+      if(max == red){
+        hue = ( g - b ) / delta + ( g < b ? 6 : 0 );
+      }
+      else if(max == green){
+        hue = ( b - r ) / delta + 2;
+      } 
+      else if(max == blue){
+        hue = ( r - g ) / delta + 4;
+      }
+
+			hue /= 6;
+		}
+
+		target.red = hue;
+		target.green = saturation;
+		target.blue = lightness;
+
+		return target;
+	}
+
+	Color offsetHSL(double h, double s, double l ) {
+    final Color temp = Color();
+		getHSL( temp );
+		return setHSL( temp.red + h, temp.green + s, temp.blue + l );
+	}
 
   List<num> toNumArray(List<num> array, [int offset = 0]) {
     array[offset] = storage[0];

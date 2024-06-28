@@ -124,7 +124,8 @@ class _State extends State<WebglLoaderMd2> {
     character.scale = 0.03;
 
     await character.loadParts( config ).then((r){
-      character.setAnimation( character.meshBody!.animations[ 0 ]);
+      character.setAnimation( character.meshBody!.animations[ 12 ]);
+      print(character.meshBody!.animations[ 1 ].name);
       character.setPlaybackRate( 1.0 );
       character.setWeapon( 3 );
     });

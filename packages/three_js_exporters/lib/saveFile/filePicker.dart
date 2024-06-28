@@ -1,25 +1,26 @@
 import 'dart:async';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/services.dart';
+import 'package:three_js_core/three_js_core.dart';
 
 class GetFilePicker{
   static Future<FilePickerResult?> pickFiles(List<String> extensions) async {
     try {
-      FilePickerResult? _paths = (await FilePicker.platform.pickFiles(
+      FilePickerResult? paths = (await FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowMultiple: false,
-        onFileLoading: (FilePickerStatus status) => print(status),
+        onFileLoading: (FilePickerStatus status) => console.info(status),
         allowedExtensions: extensions,
         allowCompression: false,
         withData: true
       ));
-      return _paths;
+      return paths;
     } 
     on PlatformException catch (e) {
-      print('Unsupported operation Pick:' + e.toString());
+      console.error('Unsupported operation Pick: $e');
     } 
     catch (e) {
-      print('Pick: '+e.toString());
+      console.error('Pick: $e');
     }
     return null;
   }
@@ -31,10 +32,10 @@ class GetFilePicker{
       });
     } 
     on PlatformException catch (e) {
-      print('Unsupported operation Clear:' + e.toString());
+      console.error('Unsupported operation Clear: $e');
     } 
     catch (e) {
-      print('Clear: '+e.toString());
+      console.error('Clear: $e');
     } 
     return false;
   }
@@ -43,16 +44,16 @@ class GetFilePicker{
     String? path = '';
     try {
       path = await FilePicker.platform.saveFile(
-        fileName: fileName+'.'+fileType,
+        fileName: '$fileName.$fileType',
         type: FileType.custom,
         allowedExtensions: [fileType]
       );
     } 
     on PlatformException catch (e) {
-      print('Unsupported operation Select:' + e.toString());
+      console.error('Unsupported operation Select: $e');
     } 
     catch (e) {
-      print('Select: '+e.toString());
+      console.error('Select: $e');
     }
     return path;
   }
@@ -64,10 +65,10 @@ class GetFilePicker{
       });
     } 
     on PlatformException catch (e) {
-      print('Unsupported operation Select:' + e.toString());
+      console.error('Unsupported operation Select: $e');
     } 
     catch (e) {
-      print('Select: '+e.toString());
+      console.error('Select: $e');
     }
     return '';
   }

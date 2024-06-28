@@ -92,10 +92,10 @@ class _State extends State<WebglMorphtargetsSphere> {
       final step = dt * speed;
       mesh.rotation.y += step;
 
-      mesh.morphTargetInfluences![1] = mesh.morphTargetInfluences![1] + step * sign;
+      mesh.morphTargetInfluences[1] = mesh.morphTargetInfluences[1] + step * sign;
 
-      if (mesh.morphTargetInfluences![1] <= 0 ||
-          mesh.morphTargetInfluences![1] >= 1) {
+      if (mesh.morphTargetInfluences[1] <= 0 ||
+          mesh.morphTargetInfluences[1] >= 1) {
         sign *= -1;
       }
     });

@@ -55,7 +55,6 @@ class _State extends State<WebglLoaderFbxNurbs> {
     // model
     final loader = three.FBXLoader(width: threeJs.width.toInt(), height: threeJs.height.toInt());
     await loader.fromAsset( 'assets/models/fbx/nurbs.fbx').then(( object ) {
-      print(object?.geometry?.attributes['position']);
       threeJs.scene.add( object );
     } );
 
