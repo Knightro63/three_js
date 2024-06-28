@@ -23,7 +23,7 @@ class MD2LoadData{
 class MD2Character {
 	double scale = 1;
 	int animationFPS = 6;
-	Group root = Group();
+	Object3D root = Object3D();
 	MorphAnimMesh? meshBody;
 	MorphAnimMesh? meshWeapon;
 

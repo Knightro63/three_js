@@ -128,7 +128,6 @@ class WebGLBackground {
         );
 
         planeMesh!.geometry?.deleteAttributeFromString('normal');
-
         objects.update(planeMesh!);
       }
 

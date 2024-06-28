@@ -307,7 +307,7 @@ Future<BufferGeometry> addMorphTargets(BufferGeometry geometry, targets, GLTFPar
 ///
 Function updateMorphTargets = (Mesh mesh, Map<String, dynamic> meshDef) {
   mesh.updateMorphTargets();
-
+  print(meshDef);
   if (meshDef["weights"] != null) {
     for (int i = 0, il = meshDef["weights"].length; i < il; i++) {
       mesh.morphTargetInfluences[i] = meshDef["weights"][i].toDouble();

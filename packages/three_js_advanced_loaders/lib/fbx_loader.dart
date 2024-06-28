@@ -1756,8 +1756,8 @@ class _GeometryParser {
 
     parentGeo.morphTargetsRelative = true;
 
-    parentGeo.morphAttributes.position = [];
-    // parentGeo.morphAttributes.normal = []; // not implemented
+    parentGeo.morphAttributes['position'] = [];
+    parentGeo.morphAttributes['normal'] = []; // not implemented
 
     final scope = this;
     morphTargets.forEach((morphTarget) {
@@ -1806,7 +1806,7 @@ class _GeometryParser {
 
     positionAttribute.applyMatrix4(preTransform);
 
-    parentGeo.morphAttributes.position.push(positionAttribute);
+    parentGeo.morphAttributes['position'].add(positionAttribute);
   }
 
   // Parse normal from _FBXTree.Objects.Geometry.LayerElementNormal if it exists

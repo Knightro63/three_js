@@ -3,7 +3,6 @@ library three_webgl;
 import 'dart:typed_data';
 import 'dart:math' as math;
 
-import 'package:flutter_angle/flutter_angle.dart';
 import 'package:flutter/foundation.dart';
 import 'package:three_js_math/three_js_math.dart';
 import '../../objects/index.dart';

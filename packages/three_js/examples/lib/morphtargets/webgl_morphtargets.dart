@@ -73,8 +73,8 @@ class _State extends State<WebglMorphtargets> {
       final v0 = (math.sin(t) + 1.0) / 2.0;
       final v1 = (math.sin(t + 0.3) + 1.0) / 2.0;
 
-      mesh.morphTargetInfluences![0] = v0;
-      mesh.morphTargetInfluences![1] = v1;
+      mesh.morphTargetInfluences[0] = v0;
+      mesh.morphTargetInfluences[1] = v1;
     });
   }
 

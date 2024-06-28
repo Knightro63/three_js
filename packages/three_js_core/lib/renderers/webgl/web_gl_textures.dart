@@ -553,8 +553,6 @@ class WebGLTextures {
       final levels = getMipLevels(texture, image, supportsMips);
 
       if (texture is DepthTexture) {
-        // populate depth texture with dummy data
-
         glInternalFormat = WebGL.DEPTH_COMPONENT;
 
         if (isWebGL2) {
@@ -614,7 +612,6 @@ class WebGLTextures {
         }
       } 
       else if (texture is DataTexture) {
-        
         // use manually created mipmaps if available
         // if there are no manual mipmaps
         // set 0 level mipmap and then use GL to generate other mipmap levels

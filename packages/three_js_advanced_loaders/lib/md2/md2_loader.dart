@@ -300,7 +300,7 @@ class MD2Loader extends Loader {
 				frame['normals']?.add(Vector3(n[ 0 ], n[ 2 ], n[ 1 ])); // convert to Y-up
 			}
 
-			frames.add(MorphTarget(frame));
+			frames.add(MorphTarget.fromJson(frame));
 		}
 
 		// static
@@ -378,7 +378,7 @@ class MD2Loader extends Loader {
 		geometry.morphAttributes['position'] = morphPositions;
 		geometry.morphAttributes['normal'] = morphNormals;
 		geometry.morphTargetsRelative = false;
-
+  
 		return MD2LoaderData(geometry, AnimationClip.createClipsFromMorphTargetSequences( frames, 10 ));
 	}
 }
