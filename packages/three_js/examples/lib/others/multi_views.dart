@@ -90,10 +90,18 @@ class MultiViews1 extends StatefulWidget {
   createState() => _multi_views1_State();
 }
 class _multi_views1_State extends State<MultiViews1> {
+  List<int> data = List.filled(60, 0, growable: true);
+  late Timer timer;
   late three.ThreeJS threeJs;
 
   @override
   void initState() {
+    timer = Timer.periodic(const Duration(seconds: 1), (t){
+      setState(() {
+        data.removeAt(0);
+        data.add(threeJs.clock.fps);
+      });
+    });
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
       setup: setup,
@@ -107,6 +115,7 @@ class _multi_views1_State extends State<MultiViews1> {
   }
   @override
   void dispose() {
+    timer.cancel();
     threeJs.dispose();
     super.dispose();
   }
@@ -155,10 +164,18 @@ class MultiViews2 extends StatefulWidget {
   createState() => _multi_views2_State();
 }
 class _multi_views2_State extends State<MultiViews2> {
+  List<int> data = List.filled(60, 0, growable: true);
+  late Timer timer;
   late three.ThreeJS threeJs;
 
   @override
   void initState() {
+    timer = Timer.periodic(const Duration(seconds: 1), (t){
+      setState(() {
+        data.removeAt(0);
+        data.add(threeJs.clock.fps);
+      });
+    });
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
       setup: setup,
@@ -172,6 +189,7 @@ class _multi_views2_State extends State<MultiViews2> {
   }
   @override
   void dispose() {
+    timer.cancel();
     threeJs.dispose();
     super.dispose();
   }

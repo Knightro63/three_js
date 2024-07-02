@@ -1,7 +1,8 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:three_js_core/others/index.dart';
 import 'package:three_js_core/three_js_core.dart' as core;
 import 'package:three_js_math/three_js_math.dart';
@@ -54,7 +55,7 @@ class Settings{
 }
 
 /// threeJs utility class. If you want to learn how to connect cannon.js with js, please look at the examples/threejs_* instead.
-class ThreeJS{
+class ThreeJS {
   void Function() onSetupComplete;
   ThreeJS({
     Settings? settings,
@@ -92,7 +93,8 @@ class ThreeJS{
 
   late core.Scene scene;
   late core.Camera camera;
-  
+  Ticker? ticker;
+
   late double width;
   late double height;
   Size? screenSize;
@@ -102,6 +104,7 @@ class ThreeJS{
   WebGLTexture? sourceTexture;
   bool pause = false;
   bool mounted = false;
+  bool updating = false;
 
   void Function()? rendererUpdate;
   void Function(Size newSize)? windowResizeUpdate;
@@ -120,6 +123,7 @@ class ThreeJS{
   void dispose(){
     if(disposed) return;
     disposed = true;
+    ticker?.dispose();
     renderer?.dispose();
     renderTarget?.dispose();
     falseRenderTarget?.dispose();
@@ -145,21 +149,20 @@ class ThreeJS{
    initPlatformState();
   }
   
-  void animate() {
-    if (!mounted || disposed) {
+  void animate(Duration duration) {
+    if (!mounted || disposed || updating) {
       return;
     }
+    updating = true;
     render();
     if(settings.animate){
-      Future.delayed(const Duration(milliseconds: 1000~/60), () {
-        if(!pause){
-          for(int i = 0; i < events.length;i++){
-            events[i].call(clock.getDelta());
-          }
+      if(!pause){
+        for(int i = 0; i < events.length;i++){
+          events[i].call(clock.getDelta());
         }
-        animate();
-      });
+      }
     }
+    updating = false;
   }
   Future<void> render() async{
     if(sourceTexture == null){
@@ -259,7 +262,8 @@ class ThreeJS{
     initRenderer();
     await setup?.call();
     mounted = true;
-    animate();
+    ticker = Ticker(animate);
+    ticker?.start();
     onSetupComplete();
   }
 
@@ -289,36 +293,32 @@ class ThreeJS{
   Widget build() {
     return  Builder(builder: (BuildContext context) {
       initSize(context);
-      return Stack(
-        children:[
-          Container(
-            width: screenSize!.width,
-            height: screenSize!.height,
-            color: Theme.of(context).canvasColor,
-            child: core.Peripherals(
-              key: globalKey,
-              builder: (BuildContext context) {
-                return Container(
-                  width: width,
-                  height: height,
-                  color: Theme.of(context).canvasColor,
-                  child: Builder(builder: (BuildContext context) {
-                    if (kIsWeb) {
-                      return texture != null? HtmlElementView(viewType:texture!.textureId.toString()):Container();
-                    } 
-                    else {
-                      return texture != null?
-                        Transform.scale(
-                          scaleY: sourceTexture != null || Platform.isAndroid?1:-1,
-                          child:Texture(textureId: texture!.textureId)
-                        ):Container();
-                    }
-                  })
-                );
-              }
-            ),
-          ),
-        ]
+      return Container(
+        width: screenSize!.width,
+        height: screenSize!.height,
+        color: Theme.of(context).canvasColor,
+        child: core.Peripherals(
+          key: globalKey,
+          builder: (BuildContext context) {
+            return Container(
+              width: width,
+              height: height,
+              color: Theme.of(context).canvasColor,
+              child: Builder(builder: (BuildContext context) {
+                if (kIsWeb) {
+                  return texture != null? HtmlElementView(viewType:texture!.textureId.toString()):Container();
+                } 
+                else {
+                  return texture != null?
+                    Transform.scale(
+                      scaleY: sourceTexture != null || Platform.isAndroid?1:-1,
+                      child:Texture(textureId: texture!.textureId)
+                    ):Container();
+                }
+              })
+            );
+          }
+        ),
       );
     });
   }

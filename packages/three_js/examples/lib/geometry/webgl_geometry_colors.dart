@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 import 'dart:typed_data';
-
+import 'package:example/src/statistics.dart';
 import 'package:flutter/material.dart';
 
 import 'package:three_js/three_js.dart' as three;
@@ -16,10 +16,18 @@ class WebglGeometryColors extends StatefulWidget {
 }
 
 class _MyAppState extends State<WebglGeometryColors> {
+  List<int> data = List.filled(60, 0, growable: true);
+  late Timer timer;
   late three.ThreeJS threeJs;
 
   @override
   void initState() {
+    timer = Timer.periodic(const Duration(seconds: 1), (t){
+      setState(() {
+        data.removeAt(0);
+        data.add(threeJs.clock.fps);
+      });
+    });
     threeJs = three.ThreeJS(
       
       onSetupComplete: (){setState(() {});},
@@ -30,6 +38,7 @@ class _MyAppState extends State<WebglGeometryColors> {
   @override
   void dispose() {
     controls.dispose();
+    timer.cancel();
     threeJs.dispose();
     super.dispose();
   }
@@ -37,8 +46,12 @@ class _MyAppState extends State<WebglGeometryColors> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
-      body: threeJs.build()
+      body: Stack(
+        children: [
+          threeJs.build(),
+          Statistics(data: data)
+        ],
+      ) 
     );
   }
 

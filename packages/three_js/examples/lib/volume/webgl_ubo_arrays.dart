@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
+import 'package:example/src/statistics.dart';
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
 
@@ -12,14 +13,25 @@ class WebglUboArrays extends StatefulWidget {
 }
 
 class _State extends State<WebglUboArrays> {
+  List<int> data = List.filled(60, 0, growable: true);
+  late Timer timer;
   late three.ThreeJS threeJs;
   late three.OrbitControls controls;
 
   @override
   void initState() {
+    timer = Timer.periodic(const Duration(seconds: 1), (t){
+      setState(() {
+        data.removeAt(0);
+        data.add(threeJs.clock.fps);
+      });
+    });
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
       setup: setup,
+      settings: three.Settings(
+        useSourceTexture: true
+      ),
       windowResizeUpdate: (newSize){
 				threeJs.camera.aspect = threeJs.width / threeJs.height;
 				threeJs.camera.updateProjectionMatrix();
@@ -30,6 +42,7 @@ class _State extends State<WebglUboArrays> {
   @override
   void dispose() {
     controls.dispose();
+    timer.cancel();
     threeJs.dispose();
     three.loading.clear();
     super.dispose();
@@ -38,8 +51,12 @@ class _State extends State<WebglUboArrays> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
-      body: threeJs.build()
+      body: Stack(
+        children: [
+          threeJs.build(),
+          Statistics(data: data)
+        ],
+      ) 
     );
   }
 
@@ -166,22 +183,22 @@ class _State extends State<WebglUboArrays> {
     ''';
 
     final material = three.RawShaderMaterial.fromMap( {
+      'glslVersion':three.GLSL3,
       'uniforms': {
         'modelMatrix': { 'value': null },
         'normalMatrix': { 'value': null }
       },
-      // 'uniformsGroups': [ cameraUniformsGroup, lightingUniformsGroup ],
+      'uniformsGroups': [ cameraUniformsGroup, lightingUniformsGroup ],
       'name': 'Box',
       'defines': {
         'POINTLIGHTS_MAX': pointLightsMax
       },
       'vertexShader': vertexShader,
       'fragmentShader': fragmentShader,
-      'glslVersion': three.GLSL3
     } );
 
     final plane = three.Mesh( three.PlaneGeometry( 100, 100 ), material.clone() );
-    //plane.material.uniformsGroups = [ cameraUniformsGroup, lightingUniformsGroup ];
+    (plane.material as three.RawShaderMaterial?)?.uniformsGroups = [ cameraUniformsGroup, lightingUniformsGroup ];
     plane.material?.uniforms['modelMatrix']['value'] = plane.matrixWorld;
     plane.material?.uniforms['normalMatrix']['value'] = plane.normalMatrix;
     plane.rotation.x = - math.pi / 2;
@@ -197,7 +214,7 @@ class _State extends State<WebglUboArrays> {
         for (int k = 0; k < gridSize['z']!; k ++ ) {
           final mesh = three.Mesh( geometry, material.clone() );
           mesh.name = 'Sphere';
-          //mesh.material?.uniformsGroups = [ cameraUniformsGroup, lightingUniformsGroup ];
+          (mesh.material as three.RawShaderMaterial?)?.uniformsGroups = [ cameraUniformsGroup, lightingUniformsGroup ];
           mesh.material?.uniforms['modelMatrix']['value'] = mesh.matrixWorld;
           mesh.material?.uniforms['normalMatrix']['value'] = mesh.normalMatrix;
           threeJs.scene.add( mesh );

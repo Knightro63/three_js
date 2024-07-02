@@ -1,5 +1,6 @@
 import 'dart:math' as math;
-
+import 'package:example/src/statistics.dart';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
 import 'package:three_js_geometry/three_js_geometry.dart';
@@ -13,10 +14,18 @@ class MiscControlsOrbit extends StatefulWidget {
 }
 
 class _MyAppState extends State<MiscControlsOrbit> {
+  List<int> data = List.filled(60, 0, growable: true);
+  late Timer timer;
   late three.ThreeJS threeJs;
 
   @override
   void initState() {
+    timer = Timer.periodic(const Duration(seconds: 1), (t){
+      setState(() {
+        data.removeAt(0);
+        data.add(threeJs.clock.fps);
+      });
+    });
     threeJs = three.ThreeJS(
       
       onSetupComplete: (){setState(() {});},
@@ -35,6 +44,7 @@ class _MyAppState extends State<MiscControlsOrbit> {
   @override
   void dispose() {
     controls.dispose();
+    timer.cancel();
     threeJs.dispose();
     super.dispose();
   }
@@ -42,8 +52,12 @@ class _MyAppState extends State<MiscControlsOrbit> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
-      body: threeJs.build()
+      body: Stack(
+        children: [
+          threeJs.build(),
+          Statistics(data: data)
+        ],
+      ) 
     );
   }
 

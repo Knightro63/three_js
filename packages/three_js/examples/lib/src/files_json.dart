@@ -63,7 +63,7 @@ const List<String> filesJson = [
   "webgl_animation_skinning_additive_blending",
   "webgl_animation_skinning_morph",
   "webgl_geometry_colors",
-  //"webgl_simple_gi",
+  "webgl_simple_gi",
   "webgl_lensflares",
   "webgl_lights_rectarealight",
   "webgl_postprocessing_sobel",

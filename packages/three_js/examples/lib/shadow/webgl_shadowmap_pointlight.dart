@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
+import 'package:example/src/statistics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
@@ -13,12 +14,20 @@ class WebglShadowmapPointlight extends StatefulWidget {
 }
 
 class _State extends State<WebglShadowmapPointlight> {
+  List<int> data = List.filled(60, 0, growable: true);
+  late Timer timer;
   late three.ThreeJS threeJs;
   GlobalKey key = GlobalKey();
   bool createdPng = false;
 
   @override
   void initState() {
+    timer = Timer.periodic(const Duration(seconds: 1), (t){
+      setState(() {
+        data.removeAt(0);
+        data.add(threeJs.clock.fps);
+      });
+    });
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
       setup: setup,
@@ -33,6 +42,7 @@ class _State extends State<WebglShadowmapPointlight> {
   }
   @override
   void dispose() {
+    timer.cancel();
     threeJs.dispose();
     three.loading.clear();
     super.dispose();
@@ -41,10 +51,10 @@ class _State extends State<WebglShadowmapPointlight> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
       body: Stack(
         children: [
           threeJs.build(),
+          Statistics(data: data)
         ],
       )
     );

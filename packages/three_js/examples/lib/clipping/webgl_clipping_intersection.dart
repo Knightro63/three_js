@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
-
+import 'package:example/src/statistics.dart';
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
 import 'package:three_js_helpers/three_js_helpers.dart';
@@ -14,10 +14,18 @@ class WebglClippingIntersection extends StatefulWidget {
 }
 
 class _State extends State<WebglClippingIntersection> {
+  List<int> data = List.filled(60, 0, growable: true);
+  late Timer timer;
   late three.ThreeJS threeJs;
 
   @override
   void initState() {
+    timer = Timer.periodic(const Duration(seconds: 1), (t){
+      setState(() {
+        data.removeAt(0);
+        data.add(threeJs.clock.fps);
+      });
+    });
     threeJs = three.ThreeJS(
       
       onSetupComplete: (){setState(() {});},
@@ -31,6 +39,7 @@ class _State extends State<WebglClippingIntersection> {
   @override
   void dispose() {
     controls.dispose();
+    timer.cancel();
     threeJs.dispose();
     super.dispose();
   }
@@ -38,8 +47,12 @@ class _State extends State<WebglClippingIntersection> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
-      body: threeJs.build()
+      body: Stack(
+        children: [
+          threeJs.build(),
+          Statistics(data: data)
+        ],
+      ) 
     );
   }
 

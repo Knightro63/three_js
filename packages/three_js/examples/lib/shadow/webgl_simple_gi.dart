@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 import 'dart:typed_data';
+import 'package:example/src/statistics.dart';
 import 'package:flutter/material.dart';
 
 import 'package:three_js/three_js.dart' as three;
@@ -15,10 +16,18 @@ class WebglSimpleGi extends StatefulWidget {
 }
 
 class _State extends State<WebglSimpleGi> {
+  List<int> data = List.filled(60, 0, growable: true);
+  late Timer timer;
   late three.ThreeJS threeJs;
 
   @override
   void initState() {
+    timer = Timer.periodic(const Duration(seconds: 1), (t){
+      setState(() {
+        data.removeAt(0);
+        data.add(threeJs.clock.fps);
+      });
+    });
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
       setup: setup,
@@ -28,6 +37,7 @@ class _State extends State<WebglSimpleGi> {
   @override
   void dispose() {
     controls.dispose();
+    timer.cancel();
     threeJs.dispose();
     three.loading.clear();
     super.dispose();
@@ -36,8 +46,12 @@ class _State extends State<WebglSimpleGi> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
-      body: threeJs.build()
+      body: Stack(
+        children: [
+          threeJs.build(),
+          Statistics(data: data)
+        ],
+      ) 
     );
   }
 
@@ -46,10 +60,7 @@ class _State extends State<WebglSimpleGi> {
   Future<void> setup() async {
     threeJs.camera = three.PerspectiveCamera( 70, threeJs.width/threeJs.height, 0.1, 100 );
     threeJs.camera.position.z = 4;
-
     threeJs.scene = three.Scene();
-
-    // torus knot
 
     final torusGeometry = TorusKnotGeometry( 0.75, 0.3, 128, 32, 1 );
     final material =three.MeshBasicMaterial.fromMap( { 'vertexColors': true } );
@@ -58,20 +69,7 @@ class _State extends State<WebglSimpleGi> {
     threeJs.scene.add( torusKnot );
 
     // room
-    three.BufferGeometry;
-    final materials = three.GroupMaterial();
-
-    final boxGeometry = three.BoxGeometry( 3, 3, 3 );
-
-    for (int i = 0; i < 1; i ++ ) {
-      materials.add(three.MeshBasicMaterial.fromMap({ 
-        'color': (math.Random().nextDouble() * 0xffffff).toInt(), 
-        'side': three.BackSide 
-      }));
-    }
-
-    final box = three.Mesh( boxGeometry, materials);
-    threeJs.scene.add( box );
+    createBox();
     simpleGI(threeJs.renderer!, threeJs.scene );
 
     controls = three.OrbitControls( threeJs.camera, threeJs.globalKey );
@@ -85,6 +83,41 @@ class _State extends State<WebglSimpleGi> {
     });
   }
 
+  void createBox(){
+    const size = 1.5;
+    final planeGeo = three.PlaneGeometry( size*2,size*2 );
+    // walls
+    final planeTop = three.Mesh( planeGeo, three.MeshBasicMaterial.fromMap( { 'color': (math.Random().nextDouble() * 0xffffff).toInt()} ) );
+    planeTop.position.y = size;
+    planeTop.rotateX( math.pi / 2 );
+    threeJs.scene.add( planeTop );
+
+    final planeBottom = three.Mesh( planeGeo, three.MeshBasicMaterial.fromMap( { 'color': (math.Random().nextDouble() * 0xffffff).toInt() } ) );
+    planeBottom.rotateX( - math.pi / 2 );
+    planeBottom.position.y = -size;
+    threeJs.scene.add( planeBottom );
+
+    final planeFront = three.Mesh( planeGeo, three.MeshBasicMaterial.fromMap( { 'color': (math.Random().nextDouble() * 0xffffff).toInt() } ) );
+    planeFront.position.z = size;
+    planeFront.rotateY( math.pi );
+    threeJs.scene.add( planeFront );
+
+    final planeBack = three.Mesh( planeGeo, three.MeshBasicMaterial.fromMap( { 'color': (math.Random().nextDouble() * 0xffffff).toInt() } ) );
+    planeBack.position.z = - size;
+    //planeBack.rotateY( math.pi );
+    threeJs.scene.add( planeBack );
+
+    final planeRight = three.Mesh( planeGeo, three.MeshBasicMaterial.fromMap( { 'color': (math.Random().nextDouble() * 0xffffff).toInt() } ) );
+    planeRight.position.x = size;
+    planeRight.rotateY( - math.pi / 2 );
+    threeJs.scene.add( planeRight );
+
+    final planeLeft = three.Mesh( planeGeo, three.MeshBasicMaterial.fromMap( { 'color': (math.Random().nextDouble() * 0xffffff).toInt() } ) );
+    planeLeft.position.x = - size;
+    planeLeft.rotateY( math.pi / 2 );
+    threeJs.scene.add( planeLeft );
+  }
+
   void Function([double?])? compute;
 
   void simpleGI(three.WebGLRenderer renderer, three.Scene scene) {
@@ -96,10 +129,9 @@ class _State extends State<WebglSimpleGi> {
     scene.updateMatrixWorld( true );
 
     three.Object3D clone = scene.clone();
-    //clone.matrixWorldAutoUpdate = false;
+    clone.autoUpdate = false;
 
     final rt =three.WebGLRenderTarget( SIZE, SIZE );
-
     final normalMatrix = three.Matrix3.identity();
 
     final position = three.Vector3();
@@ -112,10 +144,9 @@ class _State extends State<WebglSimpleGi> {
     final three.Uint8Array buffer = three.Uint8Array( SIZE2 * 4 );
 
     void compute([double? dt]) {
-
       if ( bounces == 3 ) return;
 
-      final object = scene.children[ 0 ]; // torusKnot
+      final object = scene.children[0];
       final geometry = object.geometry;
 
       final attributes = geometry?.attributes;
@@ -133,9 +164,7 @@ class _State extends State<WebglSimpleGi> {
       final totalVertex = positions.length / 3;
 
       for (int i = 0; i < 32; i ++ ) {
-
         if ( currentVertex >= totalVertex ) break;
-
         position.fromNativeArray( positions, currentVertex * 3 );
         position.applyMatrix4( object.matrixWorld );
 
@@ -147,8 +176,7 @@ class _State extends State<WebglSimpleGi> {
 
         renderer.setRenderTarget( rt );
         renderer.render( clone, camera );
-
-        renderer.readRenderTargetPixels( rt, 0, 0, SIZE, SIZE, buffer );
+        renderer.readRenderTargetPixels(rt, 0, 0, SIZE, SIZE, buffer);
 
         color[ 0 ] = 0;
         color[ 1 ] = 0;
@@ -165,7 +193,6 @@ class _State extends State<WebglSimpleGi> {
         colors[ currentVertex * 3 + 2 ] = color[ 2 ] / ( SIZE2 * 255 );
 
         currentVertex ++;
-
       }
 
       attributes['color'].updateRange['offset'] = startVertex * 3;
@@ -173,10 +200,8 @@ class _State extends State<WebglSimpleGi> {
       attributes['color'].needsUpdate = true;
 
       if ( currentVertex >= totalVertex ) {
-
         clone = scene.clone();
-        //clone.matrixWorldAutoUpdate = false;
-
+        clone.autoUpdate = false;
         bounces ++;
         currentVertex = 0;
       }

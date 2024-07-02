@@ -486,12 +486,10 @@ class WebGLRenderer {
     final rangeCount = geometry.drawRange["count"]! * rangeFactor;
 
     final groupStart = group != null ? group["start"] * rangeFactor : 0;
-    final groupCount = group != null ? group["count"] * rangeFactor : double.maxFinite.toInt();
+    final int groupCount = group != null ? group["count"] * rangeFactor : double.maxFinite.toInt();
 
     final drawStart = math.max<int>(rangeStart, groupStart);
-
     final drawEnd = math.min<int>(math.min(dataCount, rangeStart + rangeCount), groupStart + groupCount) - 1;
-
     final drawCount = math.max(0, drawEnd - drawStart + 1);
 
     if (drawCount == 0) return;
@@ -563,11 +561,11 @@ class WebGLRenderer {
 
       if (material != null) {
         if (material is GroupMaterial) {
-          for (int i = 0; i < material.children.length; i++) {
-            final material2 = material.children[i];
+          for (final material2 in material.children) {
             getProgram(material2, scene, object);
           }
-        } else {
+        } 
+        else {
           getProgram(material, scene, object);
         }
       }
@@ -753,7 +751,7 @@ class WebGLRenderer {
           if (material is GroupMaterial) {
             final groups = geometry.groups;
             if (groups.isNotEmpty) {
-              for (int i = 0, l = groups.length; i < l; i++) {
+              for (int i = 0; i < groups.length; i++) {
                 Map<String, dynamic> group = groups[i];
                 if(group["materialIndex"] < material.children.length){
                   final groupMaterial = material.children[group["materialIndex"]];
@@ -770,7 +768,8 @@ class WebGLRenderer {
                 }
               }
             }
-          } else if (material != null && material.visible) {
+          } 
+          else if (material != null && material.visible) {
             currentRenderList!.push(object, geometry, material, groupOrder, _vector3.z, null);
           }
         }

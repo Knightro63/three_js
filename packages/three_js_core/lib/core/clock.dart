@@ -69,6 +69,8 @@ class Clock {
 
     return diff;
   }
+
+  int get fps => (getDelta()*60*60).toInt();
 }
 
 int now() {

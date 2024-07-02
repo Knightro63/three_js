@@ -1,9 +1,7 @@
 import 'dart:convert';
-import 'package:three_js_core/others/index.dart';
-import '../renderers/shaders/index.dart';
+import 'package:three_js_core/three_js_core.dart';
 import '../renderers/shaders/shader_chunk/default_fragment.glsl.dart';
 import '../renderers/shaders/shader_chunk/default_vertex.glsl.dart';
-import './material.dart';
 
 /// A material rendered with custom shaders. A shader is a small program
 /// written in
@@ -72,6 +70,7 @@ import './material.dart';
 ///   </li>
 /// </ul>
 class ShaderMaterial extends Material {
+  List<UniformsGroup> uniformsGroups = [];
 
   /// [parameters] - (optional) an object with one or more
   /// properties defining the material's appearance. Any property of the
@@ -97,7 +96,8 @@ class ShaderMaterial extends Material {
       if (parameters['attributes'] != null) {
         console.warning('ShaderMaterial: attributes should now be defined in BufferGeometry instead.');
       }
-
+      uniformsGroups = parameters['uniformsGroups'] ?? [];
+      parameters.remove('uniformsGroups');
       setValuesFromString(parameters);
     }
   }
@@ -106,6 +106,7 @@ class ShaderMaterial extends Material {
     type = 'ShaderMaterial';
     defines = {};
     uniforms = {};
+    uniformsGroups = [];
 
     vertexShader = defaultVertex;
     fragmentShader = defaultFragment;
