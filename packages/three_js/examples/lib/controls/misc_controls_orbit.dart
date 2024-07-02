@@ -5,8 +5,8 @@ import 'package:three_js/three_js.dart' as three;
 import 'package:three_js_geometry/three_js_geometry.dart';
 
 class MiscControlsOrbit extends StatefulWidget {
-  final String fileName;
-  const MiscControlsOrbit({super.key, required this.fileName});
+  
+  const MiscControlsOrbit({super.key});
 
   @override
   _MyAppState createState() => _MyAppState();
@@ -42,9 +42,7 @@ class _MyAppState extends State<MiscControlsOrbit> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.fileName),
-      ),
+
       body: threeJs.build()
     );
   }

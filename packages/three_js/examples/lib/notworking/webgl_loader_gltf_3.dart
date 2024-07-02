@@ -8,7 +8,7 @@ import 'package:three_js_helpers/three_js_helpers.dart';
 
 class webgl_loader_gltf_3 extends StatefulWidget {
   String fileName;
-  webgl_loader_gltf_3({Key? key, required this.fileName}) : super(key: key);
+  webgl_loader_gltf_3({Key? key}) : super(key: key);
 
   @override
   _MyAppState createState() => _MyAppState();
@@ -96,9 +96,7 @@ class _MyAppState extends State<webgl_loader_gltf_3> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.fileName),
-      ),
+
       body: Builder(
         builder: (BuildContext context) {
           initSize(context);

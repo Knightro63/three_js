@@ -6,8 +6,8 @@ import 'package:flutter_angle/flutter_angle.dart';
 import 'package:three_js/three_js.dart' as three;
 
 class MultiViews extends StatefulWidget {
-  final String fileName;
-  const MultiViews({super.key, required this.fileName});
+  
+  const MultiViews({super.key});
 
   @override
   createState() => _MyAppState();
@@ -52,9 +52,7 @@ class _MyAppState extends State<MultiViews> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.fileName),
-      ),
+
       body: FutureBuilder<bool>(
         future: init(),
         builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {

@@ -4,8 +4,8 @@ import 'package:three_js/three_js.dart' as three;
 import 'package:three_js_transform_controls/three_js_transform_controls.dart';
 
 class MiscControlsArcball extends StatefulWidget {
-  final String fileName;
-  const MiscControlsArcball({super.key, required this.fileName});
+  
+  const MiscControlsArcball({super.key});
 
   @override
   _MyAppState createState() => _MyAppState();
@@ -32,9 +32,7 @@ class _MyAppState extends State<MiscControlsArcball> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.fileName),
-      ),
+
       body: threeJs.build()
     );
   }

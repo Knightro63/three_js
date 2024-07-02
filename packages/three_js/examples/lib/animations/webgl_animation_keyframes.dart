@@ -5,8 +5,8 @@ import 'package:three_js/three_js.dart' as three;
 import 'package:three_js_helpers/three_js_helpers.dart';
 
 class WebglAnimationKeyframes extends StatefulWidget {
-  final String fileName;
-  const WebglAnimationKeyframes({super.key, required this.fileName});
+  
+  const WebglAnimationKeyframes({super.key});
 
   @override
   createState() => webgl_animation_keyframesState();
@@ -33,9 +33,7 @@ class webgl_animation_keyframesState extends State<WebglAnimationKeyframes> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.fileName),
-      ),
+
       body: threeJs.build()
     );
   }

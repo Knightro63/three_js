@@ -6,8 +6,8 @@ import 'package:three_js/three_js.dart' as three;
 import 'package:three_js_postprocessing/post/index.dart';
 
 class MiscControlsFly extends StatefulWidget {
-  final String fileName;
-  const MiscControlsFly({super.key, required this.fileName});
+  
+  const MiscControlsFly({super.key});
 
   @override
   createState() => _State();
@@ -35,9 +35,7 @@ class _State extends State<MiscControlsFly> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.fileName),
-      ),
+
       body: threeJs.build()
     );
   }
@@ -111,14 +109,11 @@ class _State extends State<MiscControlsFly> {
 
     // stars
     final starsGeometry = [ three.BufferGeometry(), three.BufferGeometry() ];
-
     final List<double> vertices1 = [];
     final List<double> vertices2 = [];
-
     final vertex = three.Vector3();
 
     for(int i = 0; i < 250; i ++ ) {
-
       vertex.x = math.Random().nextDouble() * 2 - 1;
       vertex.y = math.Random().nextDouble() * 2 - 1;
       vertex.z = math.Random().nextDouble() * 2 - 1;
@@ -128,14 +123,11 @@ class _State extends State<MiscControlsFly> {
     }
 
     for (int i = 0; i < 1500; i ++ ) {
-
       vertex.x = math.Random().nextDouble() * 2 - 1;
       vertex.y = math.Random().nextDouble() * 2 - 1;
       vertex.z = math.Random().nextDouble() * 2 - 1;
       vertex.scale( radius );
-
       vertices2.addAll([vertex.x, vertex.y, vertex.z]);
-
     }
 
     starsGeometry[ 0 ].setAttributeFromString( 'position', three.Float32BufferAttribute.fromList(vertices1 , 3 ) );
@@ -166,9 +158,7 @@ class _State extends State<MiscControlsFly> {
     }
 
     controls = three.FlyControls(threeJs.camera, threeJs.globalKey);
-
     controls.movementSpeed = 1000;
-    //controls.domElement = renderer.domElement;
     controls.rollSpeed = math.pi / 24;
     controls.autoForward = false;
     controls.dragToLook = false;
@@ -208,8 +198,7 @@ class _State extends State<MiscControlsFly> {
       }
 
       controls.movementSpeed = 0.033 * d;
-      controls.update(delta);//
-
+      controls.update(delta);
       composer.render( delta );
     });
   }

@@ -25,12 +25,13 @@ class Source {
         if(temp is NativeArray){
           temp.dispose();
         }
+        else if(temp is ImageElement){
+          temp.dispose();
+        }
       }
     }
     else if(data is ImageElement){
-      if(data.data is NativeArray){
-        (data.data as NativeArray).dispose();
-      }
+      (data as ImageElement).dispose();
     }
     else if(data is NativeArray){
       (data as NativeArray).dispose();

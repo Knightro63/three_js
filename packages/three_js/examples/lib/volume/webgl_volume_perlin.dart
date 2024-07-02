@@ -5,8 +5,8 @@ import 'package:three_js/three_js.dart' as three;
 import 'package:three_js_objects/three_js_objects.dart';
 
 class WebglVolumePerlin extends StatefulWidget {
-  final String fileName;
-  const WebglVolumePerlin({super.key, required this.fileName});
+  
+  const WebglVolumePerlin({super.key});
 
   @override
   createState() => _State();
@@ -38,9 +38,7 @@ class _State extends State<WebglVolumePerlin> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.fileName),
-      ),
+
       body: threeJs.build()
     );
   }

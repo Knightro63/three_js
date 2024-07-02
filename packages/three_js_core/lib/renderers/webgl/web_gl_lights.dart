@@ -82,9 +82,6 @@ class ShadowUniformsCache {
           "shadowCameraFar": 1000
         };
         break;
-
-      // TODO (abelnation): set RectAreaLight shadow uniforms
-
     }
 
     lights[light.id] = uniforms;

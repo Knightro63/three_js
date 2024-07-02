@@ -9,8 +9,8 @@ import 'package:three_js_helpers/three_js_helpers.dart';
 import 'package:three_js_objects/three_js_objects.dart';
 
 class WebglInstancingScatter extends StatefulWidget {
-  final String fileName;
-  const WebglInstancingScatter({super.key, required this.fileName});
+  
+  const WebglInstancingScatter({super.key});
 
   @override
   createState() => _State();
@@ -39,9 +39,7 @@ class _State extends State<WebglInstancingScatter> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.fileName),
-      ),
+
       body: threeJs.build()
     );
   }

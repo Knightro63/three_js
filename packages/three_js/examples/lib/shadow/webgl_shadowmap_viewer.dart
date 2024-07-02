@@ -6,8 +6,8 @@ import 'package:three_js_helpers/three_js_helpers.dart';
 import 'package:three_js_geometry/three_js_geometry.dart';
 
 class WebglShadowmapViewer extends StatefulWidget {
-  final String fileName;
-  const WebglShadowmapViewer({super.key, required this.fileName});
+  
+  const WebglShadowmapViewer({super.key});
 
   @override
   _MyAppState createState() => _MyAppState();
@@ -43,9 +43,7 @@ class _MyAppState extends State<WebglShadowmapViewer> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.fileName),
-      ),
+
       body: threeJs.build()
     );
   }

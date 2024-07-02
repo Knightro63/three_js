@@ -12,8 +12,8 @@ enum Method {
 }
 
 class WebglInstancingPerformance extends StatefulWidget {
-  final String fileName;
-  const WebglInstancingPerformance({super.key, required this.fileName});
+  
+  const WebglInstancingPerformance({super.key});
 
   @override
   _MyAppState createState() => _MyAppState();
@@ -49,9 +49,7 @@ class _MyAppState extends State<WebglInstancingPerformance> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.fileName),
-      ),
+
       body: threeJs.build()
     );
   }

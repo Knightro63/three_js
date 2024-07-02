@@ -138,6 +138,8 @@ class WebGLState {
       gl.texImage2D(target + i, 0, WebGL.RGBA, 1, 1, 0, WebGL.RGBA, WebGL.UNSIGNED_BYTE, data);
     }
 
+    data.dispose();
+
     return texture;
   }
 

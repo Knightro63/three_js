@@ -366,14 +366,21 @@ class WebGLRenderer {
     objects.dispose();
     bindingStates.dispose();
     programCache.dispose();
+    background.dispose();
 
     textures.dispose();
     geometries.dispose();
+    shadowMap.dispose();
     //materials.renderer.dispose();
     
     if (_transmissionRenderTarget != null) {
       _transmissionRenderTarget!.dispose();
       _transmissionRenderTarget = null;
+    }
+
+    currentRenderList?.dispose();
+    for(final stack in renderListStack){
+      stack.dispose();
     }
   }
 
@@ -997,8 +1004,6 @@ class WebGLRenderer {
       uniforms["spotShadowMatrix"]["value"] = lights.state.spotShadowMatrix;
       uniforms["pointShadowMap"]["value"] = lights.state.pointShadowMap;
       uniforms["pointShadowMatrix"]["value"] = lights.state.pointShadowMatrix;
-
-      // TODO (abelnation): add area lights shadow info to uniforms
     }
 
     final progUniforms = program!.getUniforms();

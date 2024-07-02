@@ -66,6 +66,17 @@ class WebGLShadowMap {
     scope = this;
   }
 
+  void dispose(){
+    fullScreenMesh.dispose();
+    fullScreenTri.dispose();
+
+    _depthMaterial.dispose();
+    _distanceMaterial.dispose();
+
+    shadowMaterialVertical.dispose();
+    shadowMaterialHorizontal.dispose();
+  }
+
   void render(List<Light> lights, Object3D scene, Camera camera) {
     if (scope.enabled == false) return;
     if (scope.autoUpdate == false && scope.needsUpdate == false) return;

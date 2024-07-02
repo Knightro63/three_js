@@ -5,8 +5,8 @@ import 'package:three_js/three_js.dart' as three;
 import 'package:three_js_helpers/three_js_helpers.dart';
 
 class WebglCamera extends StatefulWidget {
-  final String fileName;
-  const WebglCamera({super.key, required this.fileName});
+  
+  const WebglCamera({super.key});
 
   @override
   _MyAppState createState() => _MyAppState();
@@ -57,9 +57,7 @@ class _MyAppState extends State<WebglCamera> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.fileName),
-      ),
+
       body: threeJs.build()
     );
   }

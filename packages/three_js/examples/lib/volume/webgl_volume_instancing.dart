@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
 
 class WebglVolumeInstancing extends StatefulWidget {
-  final String fileName;
-  const WebglVolumeInstancing({super.key, required this.fileName});
+  
+  const WebglVolumeInstancing({super.key});
 
   @override
   createState() => _State();
@@ -33,9 +33,7 @@ class _State extends State<WebglVolumeInstancing> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.fileName),
-      ),
+
       body: threeJs.build()
     );
   }

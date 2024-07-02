@@ -232,8 +232,8 @@ class ThreeJS{
       renderer!.setRenderTarget(renderTarget);
       sourceTexture = renderer!.getRenderTargetGLTexture(renderTarget!);
 
-      falseMesh = core.Mesh(core.PlaneGeometry(0, 0), null);
-      falseRenderTarget = core.WebGLRenderTarget(0, 0, core.WebGLRenderTargetOptions({}));
+      falseMesh = core.Mesh(core.PlaneGeometry(0,0), null);
+      falseRenderTarget = core.WebGLRenderTarget(1,1, core.WebGLRenderTargetOptions({}));
       falseCamera = core.Camera();
       renderer!.setRenderTarget(falseRenderTarget);
     }
@@ -267,7 +267,7 @@ class ThreeJS{
     width = screenSize!.width;
     height = screenSize!.height;
     if(texture == null){
-      await FlutterAngle.initOpenGL(true);
+      await FlutterAngle.initOpenGL(false);
       
       texture = await FlutterAngle.createTexture(      
         AngleOptions(

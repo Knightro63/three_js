@@ -7,8 +7,8 @@ import 'package:three_js_helpers/three_js_helpers.dart';
 import 'package:three_js_transform_controls/three_js_transform_controls.dart';
 
 class MiscControlsTransform extends StatefulWidget {
-  final String fileName;
-  const MiscControlsTransform({super.key, required this.fileName});
+  
+  const MiscControlsTransform({super.key});
 
   @override
   _MyAppState createState() => _MyAppState();
@@ -46,9 +46,7 @@ class _MyAppState extends State<MiscControlsTransform> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.fileName),
-      ),
+
       body: threeJs.build()
     );
   }

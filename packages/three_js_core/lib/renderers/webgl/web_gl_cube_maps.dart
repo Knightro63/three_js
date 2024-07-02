@@ -62,6 +62,9 @@ class WebGLCubeMaps {
   }
 
   void dispose() {
+    for(final key in cubemaps.keys){
+      cubemaps[key].dispose();
+    }
     cubemaps.clear();
   }
 }

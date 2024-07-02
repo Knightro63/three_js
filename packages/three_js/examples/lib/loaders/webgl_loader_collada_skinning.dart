@@ -4,8 +4,8 @@ import 'package:three_js/three_js.dart' as three;
 import 'package:three_js_helpers/three_js_helpers.dart';
 
 class WebglLoaderColladaSkinning extends StatefulWidget {
-  final String fileName;
-  const WebglLoaderColladaSkinning({super.key, required this.fileName});
+  
+  const WebglLoaderColladaSkinning({super.key});
 
   @override
   _MyAppState createState() => _MyAppState();
@@ -34,9 +34,7 @@ class _MyAppState extends State<WebglLoaderColladaSkinning> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.fileName),
-      ),
+
       body: threeJs.build()
     );
   }

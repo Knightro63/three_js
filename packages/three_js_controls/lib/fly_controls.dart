@@ -229,7 +229,7 @@ class FlyControls{
 		// if ( this.domElement != document ) {
 			return _ContainerDimensions(
 				size: Size(domElement.clientWidth, domElement.clientHeight),
-				offset: Offset(domElement.offsetLeft, domElement.offsetTop)
+				offset: const Offset(0, 0)
       );
 		// }
     // else {

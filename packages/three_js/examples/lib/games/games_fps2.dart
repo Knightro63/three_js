@@ -19,12 +19,7 @@ class SphereData{
 }
 
 class FPSGame2 extends StatefulWidget {
-  const FPSGame2({
-    super.key,
-    required this.fileName
-  });
-
-  final String fileName;
+  const FPSGame2({super.key,});
 
   @override
   _FPSGame2PageState createState() => _FPSGame2PageState();
@@ -58,9 +53,7 @@ class _FPSGame2PageState extends State<FPSGame2> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.fileName),
-      ),
+
       body: threeJs.build()
     );
   }

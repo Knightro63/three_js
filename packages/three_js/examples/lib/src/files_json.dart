@@ -1,4 +1,4 @@
-final filesJson = [
+const List<String> filesJson = [
   "webgl_camera",
   "webgl_camera_array",
   "webgl_shadow_contact",

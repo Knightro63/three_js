@@ -49,7 +49,7 @@ class WebGLIndexedBufferRenderer extends BaseWebGLBufferRenderer {
 
     // 	if ( extension == null ) {
 
-    // 		print( 'three.WebGLIndexedBufferRenderer: using three.InstancedBufferGeometry but hardware does not support extension ANGLE_instanced_arrays.' );
+    // 		print( 'WebGLIndexedBufferRenderer: using InstancedBufferGeometry but hardware does not support extension ANGLE_instanced_arrays.' );
     // 		return;
 
     // 	}

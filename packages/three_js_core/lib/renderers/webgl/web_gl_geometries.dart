@@ -128,7 +128,7 @@ class WebGLGeometries {
     wireframeAttributes.add(key: geometry, value: attribute);
   }
 
-  getWireframeAttribute(BufferGeometry geometry) {
+  BufferAttribute<NativeArray<num>>? getWireframeAttribute(BufferGeometry geometry) {
     final currentAttribute = wireframeAttributes.get(geometry);
 
     if (currentAttribute != null) {
@@ -146,5 +146,12 @@ class WebGLGeometries {
     return wireframeAttributes.get(geometry);
   }
 
-  void dispose() {}
+  void dispose() {
+    for(final key in wireframeAttributes.keys){
+      (wireframeAttributes[key] as BufferAttribute).dispose();
+    }
+
+    wireframeAttributes.clear();
+    attributes.dispose();
+  }
 }

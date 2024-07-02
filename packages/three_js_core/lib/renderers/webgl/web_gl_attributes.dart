@@ -101,6 +101,11 @@ class WebGLAttributes {
     final len = buffers.keys.toList();
     for(int i = 0; i < len.length;i++){
       if(len[i] is BufferAttribute){
+        (len[i] as BufferAttribute).dispose();
+        remove(len[i]);
+      }
+      else if(len[i] is NativeArray){
+        (len[i] as NativeArray).dispose();
         remove(len[i]);
       }
     }

@@ -5,8 +5,8 @@ import 'package:three_js/three_js.dart' as three;
 import 'package:three_js_helpers/three_js_helpers.dart';
 
 class WebglMaterials extends StatefulWidget {
-  final String fileName;
-  const WebglMaterials({super.key, required this.fileName});
+  
+  const WebglMaterials({super.key});
 
   @override
   _MyAppState createState() => _MyAppState();
@@ -34,9 +34,7 @@ class _MyAppState extends State<WebglMaterials> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.fileName),
-      ),
+
       body: threeJs.build()
     );
   }

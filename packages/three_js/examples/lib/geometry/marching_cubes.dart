@@ -34,11 +34,7 @@ class EffectController{
 }
 
 class Marching extends StatefulWidget {
-  final String fileName;
-  const Marching({
-    super.key,
-    required this.fileName
-  });
+  const Marching({super.key});
 
   @override
   _MarchingState createState() => _MarchingState();
@@ -69,9 +65,7 @@ class _MarchingState extends State<Marching> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.fileName),
-      ),
+
       body: threeJs.build()
     );
   }

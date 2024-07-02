@@ -58,24 +58,20 @@ Find the example for this API [here](https://github.com/Knightro63/three_js/tree
 ## Know Issues
 
 **MacOS**
- - Sobel postprocessing does not function correctly
  - BackSide with shadows showing white screen
  - Small memory leak when opening and closing multiple projects
 
 **iOS**
- - Sobel postprocessing does not function correctly
  - Small memory leak when opening and closing multiple projects
  - Buffer Validation issues
  - BackSide with shadows showing white screen
  - Protoplanets does not function correctly
 
 **Android**
- - Sobel postprocessing does not function correctly
  - BackSide with shadows showing white screen
  - Small memory leak when opening and closing multiple projects
 
 **Windows**
- - Sobel postprocessing does not function correctly
  - BackSide with shadows showing white screen
  - Small memory leak when opening and closing multiple projects
 

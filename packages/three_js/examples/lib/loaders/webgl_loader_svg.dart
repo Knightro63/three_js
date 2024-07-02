@@ -8,8 +8,8 @@ import 'package:three_js_geometry/three_js_geometry.dart';
 import 'package:three_js_svg/three_js_svg.dart';
 
 class WebglLoaderSvg extends StatefulWidget {
-  final String fileName;
-  const WebglLoaderSvg({super.key, required this.fileName});
+  
+  const WebglLoaderSvg({super.key});
 
   @override
   _MyAppState createState() => _MyAppState();
@@ -37,9 +37,7 @@ class _MyAppState extends State<WebglLoaderSvg> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.fileName),
-      ),
+
       body: threeJs.build()
     );
   }

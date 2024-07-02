@@ -6,8 +6,8 @@ import 'package:three_js/three_js.dart' as three;
 import 'package:three_js_geometry/three_js_geometry.dart';
 
 class WebglGeometries extends StatefulWidget {
-  final String fileName;
-  const WebglGeometries({super.key, required this.fileName});
+  
+  const WebglGeometries({super.key});
 
   @override
   createState() => _State();
@@ -38,9 +38,7 @@ class _State extends State<WebglGeometries> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.fileName),
-      ),
+
       body: threeJs.build()
     );
   }

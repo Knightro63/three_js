@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
 
 class WebglLoaderGltfTest extends StatefulWidget {
-  final String fileName;
-  const WebglLoaderGltfTest({super.key, required this.fileName});
+  
+  const WebglLoaderGltfTest({super.key});
 
   @override
   _MyAppState createState() => _MyAppState();
@@ -40,9 +40,7 @@ class _MyAppState extends State<WebglLoaderGltfTest> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.fileName),
-      ),
+
       body: threeJs.build()
     );
   }

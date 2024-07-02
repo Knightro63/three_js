@@ -83,6 +83,9 @@ class WebGLCubeUVMaps {
   }
 
   void dispose() {
+    for(final key in cubeUVmaps.keys){
+      cubeUVmaps[key].dispose();
+    }
     cubeUVmaps.clear();
 
     //if (pmremGenerator != null) {

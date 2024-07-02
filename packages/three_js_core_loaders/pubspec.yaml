@@ -15,7 +15,7 @@ dependencies:
   three_js_math:
     path: ../three_js_math
   image: ^4.2.0
-  http: ^0.13.4
+  http: ^1.2.1
   universal_html: ^2.0.8
 
 dev_dependencies:

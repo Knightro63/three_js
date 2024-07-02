@@ -9,7 +9,13 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_web_plugins:
+    sdk: flutter
+    
   cupertino_icons: ^1.0.6
+  css:
+    git:
+      url: https://github.com/Knightro63/css.git
   three_js:
     path: ../../three_js
   three_js_helpers:
@@ -35,7 +41,6 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    # - assets/helvetiker_bold.typeface.json
     - assets/pingfang.ttf
     - assets/kenpixel.ttf
     - assets/helvetiker_bold.typeface.json

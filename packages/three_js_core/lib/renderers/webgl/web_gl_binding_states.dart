@@ -450,7 +450,9 @@ class WebGLBindingStates {
       }
       programMap.clear();
     }
+    
     bindingStates.clear();
+    attributes.dispose();
   }
 
   void releaseStatesOfGeometry(BufferGeometry geometry) {

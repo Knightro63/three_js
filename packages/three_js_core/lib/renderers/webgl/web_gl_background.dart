@@ -179,4 +179,14 @@ class WebGLBackground {
     clearAlpha = alpha;
     setClear(clearColor, clearAlpha);
   }
+
+  void dispose(){
+    planeMesh?.dispose();
+    boxMesh?.dispose();
+    objects.dispose();
+
+    if(currentBackground is Texture){
+      currentBackground.dispose();
+    }
+  }
 }
