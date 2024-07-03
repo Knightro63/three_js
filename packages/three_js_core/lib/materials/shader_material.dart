@@ -169,7 +169,7 @@ class ShaderMaterial extends Material {
 
   @override
   ShaderMaterial clone() {
-    return ShaderMaterial({}).copy(this);
+    return ShaderMaterial().copy(this);
   }
 
   // toJson( meta ) {

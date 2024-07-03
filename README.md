@@ -17,13 +17,13 @@ This is a dart conversion of three.js and three_dart, originally created by [@mr
 ## Requirements
 
 **MacOS**
- - Minimum os Deployment Target: 10.13
+ - Minimum os Deployment Target: 10.14
  - Xcode 13 or newer
  - Swift 5
  - Metal supported
 
 **iOS**
- - Minimum os Deployment Target: 11.0
+ - Minimum os Deployment Target: 12.0
  - Xcode 13 or newer
  - Swift 5
  - Metal supported
@@ -58,22 +58,18 @@ Find the example for this API [here](https://github.com/Knightro63/three_js/tree
 ## Know Issues
 
 **MacOS**
- - BackSide with shadows showing white screen
- - Small memory leak when opening and closing multiple projects
+ - GroupMaterials do not work
 
 **iOS**
- - Small memory leak when opening and closing multiple projects
  - Buffer Validation issues
- - BackSide with shadows showing white screen
  - Protoplanets does not function correctly
+ - GroupMaterials do not work
 
 **Android**
- - BackSide with shadows showing white screen
- - Small memory leak when opening and closing multiple projects
+ - GroupMaterials do not work
 
 **Windows**
- - BackSide with shadows showing white screen
- - Small memory leak when opening and closing multiple projects
+ - GroupMaterials do not work
 
 **Web**
  - Lens Flare not working correctly

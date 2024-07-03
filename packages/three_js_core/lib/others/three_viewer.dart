@@ -153,18 +153,19 @@ class ThreeJS {
     if (!mounted || disposed || updating) {
       return;
     }
+    double dt = clock.getDelta();
     updating = true;
-    render();
+    render(dt);
     if(settings.animate){
       if(!pause){
         for(int i = 0; i < events.length;i++){
-          events[i].call(clock.getDelta());
+          events[i].call(dt);
         }
       }
     }
     updating = false;
   }
-  Future<void> render() async{
+  Future<void> render([double? dt]) async{
     if(sourceTexture == null){
       FlutterAngle.activateTexture(texture!);
     }
@@ -185,7 +186,7 @@ class ThreeJS {
       renderer!.clear();
       renderer!.setRenderTarget(renderTarget);
       renderer!.setViewport(0,0,width,height);
-      postProcessor?.call(clock.getDelta());
+      postProcessor?.call(dt);
     }
     
     if(sourceTexture != null){
@@ -236,12 +237,13 @@ class ThreeJS {
       sourceTexture = renderer!.getRenderTargetGLTexture(renderTarget!);
 
       falseMesh = core.Mesh(core.PlaneGeometry(0,0), null);
-      falseRenderTarget = core.WebGLRenderTarget(1,1, core.WebGLRenderTargetOptions({}));
+      falseRenderTarget = core.WebGLRenderTarget(0,0, core.WebGLRenderTargetOptions({}));
       falseCamera = core.Camera();
       renderer!.setRenderTarget(falseRenderTarget);
     }
   }
   void onWindowResize(BuildContext context){
+    double dt = clock.getDelta();
     final mqd = MediaQuery.of(context);
     if(_size == null && screenSize != mqd.size){
       screenSize = mqd.size;
@@ -252,9 +254,9 @@ class ThreeJS {
         renderer!.setSize(screenSize!.width, screenSize!.height);
       }
       else{
-        postProcessor?.call(clock.getDelta());
+        postProcessor?.call(dt);
       }
-      render();
+      render(dt);
     }
   }
 
@@ -271,7 +273,7 @@ class ThreeJS {
     width = screenSize!.width;
     height = screenSize!.height;
     if(texture == null){
-      await FlutterAngle.initOpenGL(false);
+      await FlutterAngle.initOpenGL(true);
       
       texture = await FlutterAngle.createTexture(      
         AngleOptions(

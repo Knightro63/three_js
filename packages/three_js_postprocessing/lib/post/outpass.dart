@@ -47,7 +47,6 @@ class OutputPass extends Pass {
   dynamic _toneMapping;
   dynamic _outputColorSpace;
 	OutputPass():super(){
-		//
 		const Map<String, dynamic> shader = outputShader;
 
 		uniforms = UniformsUtils.clone(shader['uniforms']);

@@ -28,6 +28,8 @@ dependencies:
     path: ../three_js_simple_loaders
   three_js_text:
     path: ../three_js_text
+  three_js_modifers:
+    path: ../three_js_modifers
 
 dev_dependencies:
   flutter_test:

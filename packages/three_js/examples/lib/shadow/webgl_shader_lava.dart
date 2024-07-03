@@ -158,7 +158,6 @@ class _State extends State<WebglShaderLava> {
 
     final renderModel = RenderPass( threeJs.scene, threeJs.camera );
     final effectBloom = BloomPass( 1.25 );
-
     final composer = EffectComposer( threeJs.renderer! );
 
     composer.addPass( renderModel );
@@ -171,7 +170,6 @@ class _State extends State<WebglShaderLava> {
 
     controls = three.OrbitControls( threeJs.camera, threeJs.globalKey);
 
-
     threeJs.addAnimationEvent((dt){
       controls.update();
       uniforms[ 'time' ]!['value'] += 0.3 * dt;
@@ -180,7 +178,7 @@ class _State extends State<WebglShaderLava> {
       mesh.rotation.x += 0.05 * dt;
 
       threeJs.renderer?.clear();
-      composer.render( 0.01 );
+      composer.render(null,dt);
     });
 
   }

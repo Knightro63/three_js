@@ -71,7 +71,7 @@ class _State extends State<WebglModifierSubdivision> {
     'maxTriangles': 25000,
     'flatShading': false,
     'textured': true,
-    'wireframe': false
+    'wireframe': false,
   };
 
   Future<void> setup() async {

@@ -101,7 +101,9 @@ class _State extends State<WebglPostprocessingSobel> {
     controls = three.OrbitControls( threeJs.camera, threeJs.globalKey );
     controls.enableZoom = false;
 
-    threeJs.postProcessor = composer.render;
+    threeJs.postProcessor = ([double? dt]){
+      composer.render(threeJs.renderer?.getRenderTarget(),dt);
+    };
 
     threeJs.addAnimationEvent((dt){
       controls.update();

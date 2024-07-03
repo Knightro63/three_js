@@ -6,16 +6,14 @@ class Clock {
   late int oldTime;
   late double elapsedTime;
   late bool running;
+  int fps = 0;
 
   //// [autoStart] — (optional) whether to automatically start the clock when
   /// [getDelta]() is called for the first time. Default is `true`.
-  Clock([bool? autoStart]) {
-    this.autoStart = (autoStart != null) ? autoStart : true;
-
+  Clock([this.autoStart = true]) {
     startTime = 0;
     oldTime = 0;
     elapsedTime = 0;
-
     running = false;
   }
 
@@ -28,6 +26,7 @@ class Clock {
     oldTime = startTime;
     elapsedTime = 0;
     running = true;
+    fps = 0;
   }
 
   /// Stops clock and sets [page:Clock.oldTime oldTime] to the current time.
@@ -35,6 +34,7 @@ class Clock {
     getElapsedTime();
     running = false;
     autoStart = false;
+    fps = 0;
   }
 
   /// Get the seconds passed since the clock started and sets [oldTime] to
@@ -64,13 +64,12 @@ class Clock {
       final newTime = now();
       diff = (newTime - oldTime) / 1000;
       oldTime = newTime;
+      fps = (diff*3600).toInt();
       elapsedTime += diff;
     }
 
     return diff;
   }
-
-  int get fps => (getDelta()*60*60).toInt();
 }
 
 int now() {

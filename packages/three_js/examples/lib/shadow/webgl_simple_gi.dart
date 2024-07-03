@@ -131,7 +131,7 @@ class _State extends State<WebglSimpleGi> {
     three.Object3D clone = scene.clone();
     clone.autoUpdate = false;
 
-    final rt =three.WebGLRenderTarget( SIZE, SIZE );
+    final rt = three.WebGLRenderTarget( SIZE, SIZE );
     final normalMatrix = three.Matrix3.identity();
 
     final position = three.Vector3();
@@ -202,12 +202,13 @@ class _State extends State<WebglSimpleGi> {
       if ( currentVertex >= totalVertex ) {
         clone = scene.clone();
         clone.autoUpdate = false;
-        bounces ++;
+        bounces++;
         currentVertex = 0;
       }
     }
 
     this.compute = compute;
+    compute();
   }
 }
 

@@ -78,6 +78,13 @@ class Color{
         (blue * 255).toInt() << 0;
   }
 
+	Color lerpColors(Color color1,Color color2,double alpha ) {
+		red = color1.red + ( color2.red - color1.red ) * alpha;
+		green = color1.green + ( color2.green - color1.green ) * alpha;
+		blue = color1.blue + ( color2.blue - color1.blue ) * alpha;
+		return this;
+	}
+
   Color fromNativeArray(NativeArray<num> list,[int offset = 0]) {
     storage[0] = list[offset].toDouble();
     storage[1] = list[offset+1].toDouble();

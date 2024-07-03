@@ -19,11 +19,12 @@ class RawShaderMaterial extends ShaderMaterial {
   @override
   RawShaderMaterial copy(Material source) {
     super.copy(source);
+    type = 'RawShaderMaterial';
     return this;
   }
 
   @override
   RawShaderMaterial clone() {
-    return RawShaderMaterial({}).copy(this);
+    return RawShaderMaterial().copy(this);
   }
 }

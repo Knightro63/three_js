@@ -178,7 +178,7 @@ class LoopSubdivision {
     for (int i = 0; i < iterations; i++) {
       int currentTriangles = modifiedGeometry.attributes['position'].count ~/ 3;
       if (currentTriangles < params.maxTriangles) {
-        BufferGeometry subdividedGeometry;
+        late final BufferGeometry subdividedGeometry;
 
         // Subdivide
         if (params.flatOnly) {

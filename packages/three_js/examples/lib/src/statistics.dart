@@ -10,6 +10,9 @@ class Statistics extends StatefulWidget {
 }
 
 class _State extends State<Statistics> {
+  int smallest = 256;
+  int largest = 0;
+
   @override
   void initState() {
     super.initState();
@@ -30,6 +33,12 @@ class _State extends State<Statistics> {
 
     for(final h in widget.data){
       final r = h>120?120:h;
+      if(r > largest){
+        largest = r;
+      }
+      if(r != 0 && r < smallest){
+        smallest = r;
+      }
       bars.add(
         Container(
           width: 2,
@@ -69,7 +78,7 @@ class _State extends State<Statistics> {
             ),
             alignment: Alignment.center,
             child: Text(
-              "FPS: ${widget.data.last}"
+              "FPS: ${widget.data.last}(${smallest == 256?'':smallest} - $largest)"
             ),
           ),
           pointBars()
