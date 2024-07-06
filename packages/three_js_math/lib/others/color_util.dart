@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 import 'package:flutter_angle/flutter_angle.dart';
 import 'package:three_js_math/matrix/matrix3.dart';
+import 'package:three_js_math/three_js_math.dart';
 import 'dart:math' as math;
 import '../math/math_util.dart';
 
@@ -84,7 +85,14 @@ class Color{
 		blue = color1.blue + ( color2.blue - color1.blue ) * alpha;
 		return this;
 	}
-
+  Color fromBuffer(BufferAttribute attribute, int index) {
+    storage[0] = attribute.getX(index)!.toDouble();
+    storage[1] = attribute.getY(index)!.toDouble();
+    storage[2] = attribute.getZ(index)!.toDouble();
+    storage[3] = (attribute.getW(index) ?? 0).toDouble();
+    
+    return this;
+  }
   Color fromNativeArray(NativeArray<num> list,[int offset = 0]) {
     storage[0] = list[offset].toDouble();
     storage[1] = list[offset+1].toDouble();

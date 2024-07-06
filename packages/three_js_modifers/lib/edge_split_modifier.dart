@@ -1,5 +1,6 @@
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
+import './buffergeometry_utils.dart';
 import 'dart:math' as math;
 
 final _A = Vector3.zero();

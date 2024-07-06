@@ -32,7 +32,9 @@ dependencies:
     path: ../../three_js_tjs_loader
   three_js_postprocessing:
     path: ../../three_js_postprocessing
-
+  three_js_modifers:
+    path: ../../three_js_modifers
+    
 dev_dependencies:
   flutter_test:
     sdk: flutter

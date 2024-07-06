@@ -4,7 +4,7 @@ import 'package:example/src/statistics.dart';
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
 import 'package:three_js_geometry/three_js_geometry.dart';
-import 'package:three_js_postprocessing/three_js_postprocessing.dart';
+import 'package:three_js_modifers/three_js_modifers.dart';
 
 class WebglModifierSubdivision extends StatefulWidget {
   

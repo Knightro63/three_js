@@ -3,8 +3,8 @@ import 'dart:math' as math;
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 
-class BuffergeometryUtils{
-  static mergeVertices(BufferGeometry geometry, [double tolerance = 1e-4] ) {
+class BufferGeometryUtils{
+  static BufferGeometry mergeVertices(BufferGeometry geometry, [double tolerance = 1e-4] ) {
     tolerance = math.max( tolerance, MathUtils.epsilon );
 
     // Generate an index buffer if the geometry doesn't have one, or optimize it
@@ -32,18 +32,18 @@ class BuffergeometryUtils{
       final attr = geometry.attributes[ name ];
 
       tmpAttributes[ name ] = Float32BufferAttribute(
-        attr.array.finalructor( attr.count * attr.itemSize ),
+        Float32Array( attr.count * attr.itemSize ),
         attr.itemSize,
         attr.normalized
       );
 
       final morphAttr = geometry.morphAttributes[ name ];
       if ( morphAttr != null) {
-        tmpMorphAttributes[ name ] = Float32BufferAttribute(
-          morphAttr.array.finalructor( morphAttr.count * morphAttr.itemSize ),
-          morphAttr.itemSize,
-          morphAttr.normalized
-        );
+        // tmpMorphAttributes[ name ] = Float32BufferAttribute(
+        //   Float32Array( morphAttr.count * morphAttr.itemSize ),
+        //   morphAttr.itemSize,
+        //   morphAttr.normalized
+        // );
       }
     }
 
@@ -53,7 +53,7 @@ class BuffergeometryUtils{
     final hashMultiplier = math.pow( 10, exponent );
     final hashAdditive = halfTolerance * hashMultiplier;
     for (int i = 0; i < vertexCount; i ++ ) {
-      final index = indices != null? indices.getX( i ) : i;
+      final int index = indices != null? indices.getX( i )!.toInt() : i;
 
       // Generate a hash for the vertex attributes at the current index 'i'
       String hash = '';
@@ -61,10 +61,9 @@ class BuffergeometryUtils{
         final name = attributeNames[ j ];
         final attribute = geometry.getAttributeFromString( name );
         final itemSize = attribute.itemSize;
-
         for (int k = 0; k < itemSize; k ++ ) {
           // double tilde truncates the decimal value
-          hash += '${ ~ ~ ( attribute[ getters[ k ] ]( index ) * hashMultiplier + hashAdditive ) },';
+          hash += '${( attribute.getFrom(getters[ k ], index )! * hashMultiplier + hashAdditive ).floor() },';
         }
       }
 
@@ -72,8 +71,8 @@ class BuffergeometryUtils{
       // used by another index
       if (hashToIndex.containsKey(hash)) {
         newIndices.add( hashToIndex[ hash ] );
-      } else {
-
+      } 
+      else {
         // copy data to the index in the temporary attributes
         for (int j = 0, l = attributeNames.length; j < l; j ++ ) {
           final name = attributeNames[ j ];
@@ -87,11 +86,11 @@ class BuffergeometryUtils{
 
             final getterFunc = getters[ k ];
             final setterFunc = setters[ k ];
-            newarray[ setterFunc ]( nextIndex, attribute[ getterFunc ]( index ) );
+            newarray.setFrom( setterFunc, nextIndex, attribute.getFrom(getterFunc, index ) );
 
             if ( morphAttr != null) {
               for (int m = 0, ml = morphAttr.length; m < ml; m ++ ) {
-                newMorphArrays[ m ][ setterFunc ]( nextIndex, morphAttr[ m ][ getterFunc ]( index ) );
+                newMorphArrays[ m ][ setterFunc ]( nextIndex, morphAttr[ m ].getFrom(getterFunc, index ) );
               }
             }
           }
@@ -109,8 +108,8 @@ class BuffergeometryUtils{
 
       final tmpAttribute = tmpAttributes[ name ];
 
-      result.setAttributeFromString( name, Float32BufferAttribute(
-        tmpAttribute.array.slice( 0, nextIndex * tmpAttribute.itemSize ),
+      result.setAttributeFromString( name, Float32BufferAttribute.fromList(
+        tmpAttribute.array.sublist( 0, nextIndex * tmpAttribute.itemSize ),
         tmpAttribute.itemSize,
         tmpAttribute.normalized,
       ) );
@@ -120,8 +119,8 @@ class BuffergeometryUtils{
       for (int j = 0; j < tmpMorphAttributes[ name ].length; j ++ ) {
         final tmpMorphAttribute = tmpMorphAttributes[ name ][ j ];
 
-        result.morphAttributes[ name ]![ j ] = Float32BufferAttribute(
-          tmpMorphAttribute.array.slice( 0, nextIndex * tmpMorphAttribute.itemSize ),
+        result.morphAttributes[ name ]![ j ] = Float32BufferAttribute.fromList(
+          tmpMorphAttribute.array.sublist( 0, nextIndex * tmpMorphAttribute.itemSize ),
           tmpMorphAttribute.itemSize,
           tmpMorphAttribute.normalized,
         );

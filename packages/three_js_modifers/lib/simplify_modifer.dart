@@ -1,5 +1,6 @@
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
+import './buffergeometry_utils.dart';
 import 'dart:math' as math;
 
 final _cb = Vector3.zero();
@@ -17,7 +18,7 @@ class SimplifyModifier {
 		// this modifier can only process indexed and non-indexed geomtries with at least a position attribute
 
 		for ( final name in attributes.keys) {
-			if ( name != 'position' && name != 'uv' && name != 'normal' && name != 'tangent' && name != 'color' ) geometry.deleteAttribute( name );
+			if ( name != 'position' && name != 'uv' && name != 'normal' && name != 'tangent' && name != 'color' ) geometry.deleteAttributeFromString( name );
 		}
 
 		geometry = BufferGeometryUtils.mergeVertices( geometry );
@@ -31,11 +32,11 @@ class SimplifyModifier {
 
 		// add vertices
 
-		final positionAttribute = geometry.getAttributeFromString( 'position' );
-		final uvAttribute = geometry.getAttributeFromString( 'uv' );
-		final normalAttribute = geometry.getAttributeFromString( 'normal' );
-		final tangentAttribute = geometry.getAttributeFromString( 'tangent' );
-		final colorAttribute = geometry.getAttributeFromString( 'color' );
+		final BufferAttribute positionAttribute = geometry.getAttributeFromString( 'position' );
+		final BufferAttribute? uvAttribute = geometry.getAttributeFromString( 'uv' );
+		final BufferAttribute? normalAttribute = geometry.getAttributeFromString( 'normal' );
+		final BufferAttribute? tangentAttribute = geometry.getAttributeFromString( 'tangent' );
+		final BufferAttribute? colorAttribute = geometry.getAttributeFromString( 'color' );
 
 		Vector4? t;
 		Vector3? v2;
@@ -45,20 +46,20 @@ class SimplifyModifier {
 		for (int i = 0; i < positionAttribute.count; i ++ ) {
 
 			final v = Vector3.zero().fromBuffer( positionAttribute, i );
-			if ( uvAttribute ) {
+			if ( uvAttribute != null) {
 				v2 = Vector3.zero().fromBuffer( uvAttribute, i );
 			}
 
-			if ( normalAttribute ) {
+			if ( normalAttribute != null) {
 				nor = Vector3.zero().fromBuffer( normalAttribute, i );
 			}
 
-			if ( tangentAttribute ) {
+			if ( tangentAttribute != null) {
 				t = Vector4.zero().fromBuffer( tangentAttribute, i );
 			}
 
-			if ( colorAttribute ) {
-				col = Color().fromNativeArray( colorAttribute, i );
+			if ( colorAttribute != null) {
+				col = Color().fromBuffer( colorAttribute, i );
 
 			}
 

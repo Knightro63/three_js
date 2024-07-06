@@ -100,13 +100,12 @@ class _State extends State<WebglMorphtargetsSphere> {
     const speed = 0.5;
 
     threeJs.addAnimationEvent((dt){
-      final step = dt * speed;
+      const step = 1/60 * speed;
       mesh.rotation.y += step;
 
       mesh.morphTargetInfluences[1] = mesh.morphTargetInfluences[1] + step * sign;
 
-      if (mesh.morphTargetInfluences[1] <= 0 ||
-          mesh.morphTargetInfluences[1] >= 1) {
+      if (mesh.morphTargetInfluences[1] <= 0 || mesh.morphTargetInfluences[1] >= 1) {
         sign *= -1;
       }
     });

@@ -526,10 +526,11 @@ class WebGLTextures {
     state.bindTexture(textureType, textureProperties["__webglTexture"]);
 
     if (source.version != source.currentVersion || forceUpload) {
-      _gl.pixelStorei(WebGL.UNPACK_FLIP_Y_WEBGL, texture.flipY ? 1 : 0);
-      _gl.pixelStorei(WebGL.UNPACK_PREMULTIPLY_ALPHA_WEBGL, texture.premultiplyAlpha ? 1 : 0);
+
       _gl.pixelStorei(WebGL.UNPACK_ALIGNMENT, texture.unpackAlignment);
       if (kIsWeb) {
+        _gl.pixelStorei(WebGL.UNPACK_FLIP_Y_WEBGL, texture.flipY ? 1 : 0);
+        _gl.pixelStorei(WebGL.UNPACK_PREMULTIPLY_ALPHA_WEBGL, texture.premultiplyAlpha ? 1 : 0);
         _gl.pixelStorei(WebGL.UNPACK_COLORSPACE_CONVERSION_WEBGL, WebGL.NONE);
       }
 
@@ -770,10 +771,10 @@ class WebGLTextures {
     state.bindTexture(WebGL.TEXTURE_CUBE_MAP, textureProperties['__webglTexture']);
 
     if (source.version != source.currentVersion || forceUpload) {
+      _gl.pixelStorei(WebGL.UNPACK_ALIGNMENT, texture.unpackAlignment);
+      if (kIsWeb) {
         _gl.pixelStorei(WebGL.UNPACK_FLIP_Y_WEBGL, texture.flipY ? 1 : 0);
         _gl.pixelStorei(WebGL.UNPACK_PREMULTIPLY_ALPHA_WEBGL, texture.premultiplyAlpha ? 1 : 0);
-        _gl.pixelStorei(WebGL.UNPACK_ALIGNMENT, texture.unpackAlignment);
-      if (kIsWeb) {
         _gl.pixelStorei(WebGL.UNPACK_COLORSPACE_CONVERSION_WEBGL, WebGL.NONE);
       }
 
@@ -1356,8 +1357,10 @@ class WebGLTextures {
 
     state.activeTexture(WebGL.TEXTURE0 + slot);
     state.bindTexture(textureType, textureProperties["__webglTexture"]);
-    gl.pixelStorei(WebGL.UNPACK_FLIP_Y_WEBGL, texture.flipY ? 1 : 0);
-    gl.pixelStorei(WebGL.UNPACK_PREMULTIPLY_ALPHA_WEBGL, texture.premultiplyAlpha ? 1 : 0);
+    if(kIsWeb){
+      gl.pixelStorei(WebGL.UNPACK_FLIP_Y_WEBGL, texture.flipY ? 1 : 0);
+      gl.pixelStorei(WebGL.UNPACK_PREMULTIPLY_ALPHA_WEBGL, texture.premultiplyAlpha ? 1 : 0);
+    }
     gl.pixelStorei(WebGL.UNPACK_ALIGNMENT, texture.unpackAlignment);
   }
 

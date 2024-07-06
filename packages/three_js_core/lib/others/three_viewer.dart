@@ -124,13 +124,13 @@ class ThreeJS {
     if(disposed) return;
     disposed = true;
     ticker?.dispose();
-    renderer?.dispose();
-    renderTarget?.dispose();
-    falseRenderTarget?.dispose();
     if(texture != null){
       FlutterAngle.deleteTexture(texture!);
     }
-    scene.dispose();
+    renderer?.dispose();
+    renderTarget?.dispose();
+    falseRenderTarget?.dispose();
+    //scene.dispose();
     for(final event in disposeEvents){
       event.call();
     }
@@ -153,8 +153,8 @@ class ThreeJS {
     if (!mounted || disposed || updating) {
       return;
     }
-    double dt = clock.getDelta();
     updating = true;
+    double dt = clock.getDelta();
     render(dt);
     if(settings.animate){
       if(!pause){

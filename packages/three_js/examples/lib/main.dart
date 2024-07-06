@@ -32,7 +32,8 @@ import 'package:example/loaders/webgl_loader_usdz.dart';
 import 'package:example/loaders/webgl_loader_vox.dart';
 import 'package:example/loaders/webgl_loader_xyz.dart';
 import 'package:example/material/webgl_materials_modified.dart';
-import 'package:example/morphtargets/webgl_modifier_subdivision.dart';
+import 'package:example/modifers/webgl_modifier_simplifier.dart';
+import 'package:example/modifers/webgl_modifier_subdivision.dart';
 import 'package:example/others/webgl_buffergeometry_instancing_billboards.dart';
 import 'package:example/others/webgl_custom_attributes_lines.dart';
 import 'package:example/others/webgl_interactive_voxelpainter.dart';
@@ -368,6 +369,9 @@ class MyAppState extends State<MyApp> {
               },
               '/webgl_modifier_subdivision':(BuildContext context) {
                 return const WebglModifierSubdivision();
+              },
+              '/webgl_modifier_simplifier':(BuildContext context) {
+                return const WebglModifierSimplifier();
               },
               '/webgl_morphtargets':(BuildContext context) {
                 return const WebglMorphtargets();

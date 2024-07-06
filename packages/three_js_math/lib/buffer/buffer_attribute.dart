@@ -58,6 +58,35 @@ abstract class BufferAttribute<TData extends NativeArray> extends BaseBufferAttr
     if (value == true) version++;
   }
 
+  num? getFrom(String key, int index){
+    switch (key) {
+      case "getX":
+        return getX(index);
+      case "getY":
+        return getY(index);
+      case "getZ":
+        return getZ(index);
+      default:
+      throw('missing $key');
+    }
+  }
+
+  void setFrom(String key, int index, num number){
+    switch (key) {
+      case "setX":
+        setX(index,number);
+        break;
+      case "setY":
+        setY(index,number);
+        break;
+      case "setZ":
+        setZ(index,number);
+        break;
+      default:
+      throw('missing $key');
+    }
+  }
+
   BufferAttribute setUsage(int value) {
     usage = value;
     return this;
