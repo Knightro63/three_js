@@ -10,10 +10,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  vector_math: ^2.1.4
   uuid: ^4.4.0
-  flutter_angle:
-    path: ../../../flutter_angle
+  flutter_angle: ^0.0.1
 
 dev_dependencies:
   flutter_test:

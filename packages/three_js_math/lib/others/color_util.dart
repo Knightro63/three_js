@@ -1,9 +1,6 @@
 import 'dart:typed_data';
-import 'package:flutter_angle/flutter_angle.dart';
-import 'package:three_js_math/matrix/matrix3.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'dart:math' as math;
-import '../math/math_util.dart';
 
 enum ColorSpace{linear,srgb}
 
