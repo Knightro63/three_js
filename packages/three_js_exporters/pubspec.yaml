@@ -15,8 +15,7 @@ dependencies:
   universal_html: ^2.2.4
   three_js_core:
     path: ../three_js_core
-  three_js_math:
-    path: ../three_js_math
+  three_js_math: ^0.0.1
 
 dev_dependencies:
   flutter_test:

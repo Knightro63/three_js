@@ -10,8 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  three_js_math:
-    path: ../three_js_math
+  three_js_math: ^0.0.1
   three_js_advanced_loaders:
     path: ../three_js_advanced_loaders
   three_js_animations:
