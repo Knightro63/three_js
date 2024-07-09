@@ -7,7 +7,7 @@
 A type of three_js api that allows users to create geometries to add to their projects.
 
 <picture>
-  <img alt="Gif of dash." src="https://github.com/Knightro63/three_js/blob/main/packages/three_js_geometry/assets/example.gif?raw=true">
+  <img alt="Gif of dash." src="https://raw.githubusercontent.com/Knightro63/three_js/master/packages/three_js_geometry/assets/example.gif">
 </picture>
 
 This is a dart conversion of three.js and three_dart, originally created by [@mrdoob](https://github.com/mrdoob) and has a coverted dart fork by [@wasabia](https://github.com/wasabia).

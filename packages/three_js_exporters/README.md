@@ -14,7 +14,7 @@ To get started add this to your pubspec.yaml file along with the other portions 
 
 ```dart
     void init() {
-        String? contents = OBJExporter().parseMesh(mesh);
+        String? contents = OBJExporter.parseMesh(mesh);
     }
 ```
 

@@ -12,20 +12,6 @@ dependencies:
   cupertino_icons: ^1.0.6
   three_js:
     path: ../../three_js
-  three_js_helpers:
-    path: ../../three_js_helpers
-  three_js_geometry:
-    path: ../../three_js_geometry
-  three_js_transform_controls:
-    path: ../../three_js_transform_controls
-  three_js_svg:
-    path: ../../three_js_svg
-  three_js_objects:
-    path: ../../three_js_objects
-  three_js_tjs_loader:
-    path: ../../three_js_tjs_loader
-  three_js_postprocessing:
-    path: ../../three_js_postprocessing
 
 dev_dependencies:
   flutter_test:

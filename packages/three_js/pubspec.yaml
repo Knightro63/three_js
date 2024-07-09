@@ -1,5 +1,5 @@
 name: three_js
-description: "Flutter package converted from threejs and three_dart to allow users to view, edit and control 3D models."
+description: "Flutter package converted from threejs and three_dart to allow users to view, edit, and control 3D models."
 version: 0.0.1
 homepage: https://github.com/Knightro63/three_js/tree/main/packages/three_js
 
@@ -11,24 +11,14 @@ dependencies:
   flutter:
     sdk: flutter
   three_js_math: ^0.0.1
-  three_js_advanced_loaders:
-    path: ../three_js_advanced_loaders
-  three_js_animations:
-    path: ../three_js_animations
-  three_js_controls:
-    path: ../three_js_controls
-  three_js_core:
-    path: ../three_js_core
-  three_js_core_loaders:
-    path: ../three_js_core_loaders
-  three_js_curves:
-    path: ../three_js_curves
-  three_js_simple_loaders:
-    path: ../three_js_simple_loaders
-  three_js_text:
-    path: ../three_js_text
-  three_js_modifers:
-    path: ../three_js_modifers
+  three_js_advanced_loaders: ^0.0.1
+  three_js_animations: ^0.0.1
+  three_js_controls: ^0.0.1
+  three_js_core: ^0.0.1
+  three_js_core_loaders: ^0.0.1
+  three_js_curves: ^0.0.1
+  three_js_simple_loaders: ^0.0.1
+  three_js_text: ^0.0.1
 
 dev_dependencies:
   flutter_test:

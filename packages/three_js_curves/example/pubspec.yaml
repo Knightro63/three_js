@@ -10,14 +10,12 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.6
-  three_js_core:
-    path: ../../three_js_core
-  three_js_math:
-    path: ../../three_js_math
+  three_js_core: ^0.0.1
+  three_js_math: ^0.0.1
   three_js_text:
     path: ../../three_js_text
   three_js_curves:
-    path: ../../three_js_curves
+    path: ../
 
 dev_dependencies:
   flutter_test:

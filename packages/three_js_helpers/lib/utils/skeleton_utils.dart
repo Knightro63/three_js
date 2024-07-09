@@ -289,7 +289,7 @@ class SkeletonUtils {
 
     final List<String> nameKeys = options.names.keys.toList();
     final List<String> nameValues = options.names.values.toList() as List<String>;
-    final List<Bone> sourceBones = source is Object3D ? (source.skeleton?.bones ?? []) : getBones(source),
+    final List<Bone> sourceBones = source.skeleton?.bones ?? [],//source is Object3D ? (source.skeleton?.bones ?? []) : getBones(source),
       bones = target is Object3D ? (target.skeleton?.bones ?? []) : getBones(target);
     Map<String,dynamic> offsets = {};
 

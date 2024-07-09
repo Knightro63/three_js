@@ -1,5 +1,5 @@
 name: three_js_animations
-description: "Flutter animations package converted from threejs and three_dart package."
+description: "Flutter three_js_animations package converted from threejs and three_dart package created for three_js."
 version: 0.0.1
 homepage: https://github.com/Knightro63/three_js/tree/main/packages/three_js_animations
 
@@ -10,8 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  three_js_core:
-    path: ../three_js_core
+  three_js_core: ^0.0.1
   three_js_math: ^0.0.1
 
 dev_dependencies:

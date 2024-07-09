@@ -1,5 +1,5 @@
 name: three_js_tjs_loader
-description: "Flutter threejs json loader package converted from threejs and three_dart package."
+description: "Flutter three_js_json_loader package is converted from threejs and three_dart package used in three_js to view threejs json files."
 version: 0.0.1
 homepage: https://github.com/Knightro63/three_js/tree/main/packages/three_js_tjs_loader
 
@@ -10,17 +10,12 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  three_js_core:
-    path: ../three_js_core
-  three_js_core_loaders:
-    path: ../three_js_core_loaders
-  three_js_curves:
-    path: ../three_js_curves
+  three_js_core: ^0.0.1
+  three_js_core_loaders: ^0.0.1
+  three_js_curves: ^0.0.1
   three_js_math: ^0.0.1
-  three_js_geometry:
-    path: ../three_js_geometry
-  three_js_animations:
-    path: ../three_js_animations
+  three_js_geometry: ^0.0.1
+  three_js_animations: ^0.0.1
 
 dev_dependencies:
   flutter_test:

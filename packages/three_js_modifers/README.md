@@ -1,14 +1,10 @@
 # three_js_modifers
 
-[![Pub Version](https://img.shields.io/pub/v/three_js_objects)](https://pub.dev/packages/three_js_modifers)
+[![Pub Version](https://img.shields.io/pub/v/three_js_modifers)](https://pub.dev/packages/three_js_modifers)
 [![analysis](https://github.com/Knightro63/three_js/actions/workflows/flutter.yml/badge.svg)](https://github.com/Knightro63/three_js/actions/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-purple.svg)](https://opensource.org/licenses/MIT)
 
-A type of three_js api that allows users to add complex objects to their projects.
-
-<picture>
-  <img alt="Picture of metaballs." src="https://github.com/Knightro63/three_js/blob/main/packages/three_js_modifers/assets/example.gif?raw=true">
-</picture>
+A type of three_js api that allows users to modify complex objects in their projects.
 
 This is a dart conversion of three.js and three_dart, originally created by [@mrdoob](https://github.com/mrdoob) and has a coverted dart fork by [@wasabia](https://github.com/wasabia).
 
