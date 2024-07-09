@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:example/audio/timing.dart';
 import 'package:example/controls/misc_controls_fly.dart';
 import 'package:example/controls/misc_controls_pointerlock.dart';
 import 'package:example/controls/misc_controls_transform.dart';
@@ -159,6 +160,9 @@ class MyAppState extends State<MyApp> {
                   callback: callback,
                   prevLocation: pageLocation,
                 );
+              },
+              '/timing':(BuildContext context) {
+                return const AudioTiming();
               },
               '/webgl_camera_array':(BuildContext context) {
                 return const WebglCameraArray();

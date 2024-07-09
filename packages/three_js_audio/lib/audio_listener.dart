@@ -4,10 +4,10 @@ import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'audio_context.dart';
 
-final _position = /*@__PURE__*/ Vector3.zero();
-final _quaternion = /*@__PURE__*/ Quaternion.identity();
-final _scale = /*@__PURE__*/ Vector3.zero();
-final _orientation = /*@__PURE__*/ Vector3.zero();
+final _position = Vector3.zero();
+final _quaternion = Quaternion.identity();
+final _scale = Vector3.zero();
+final _orientation = Vector3.zero();
 
 class AudioListener extends Object3D {
   final Clock _clock = Clock();

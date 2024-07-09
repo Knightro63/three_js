@@ -26,6 +26,8 @@ dependencies:
   three_js_tjs_loader: ^0.0.1
   three_js_postprocessing: ^0.0.1
   three_js_modifers: ^0.0.1
+  three_js_audio:
+    path: ../packages/three_js_audio
 
 dev_dependencies:
   flutter_test:
@@ -83,3 +85,4 @@ flutter:
     - assets/textures/decal/
     - assets/textures/cube/Park2/
     - assets/textures/cube/pisa/
+    - assets/sounds/

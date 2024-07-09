@@ -1,4 +1,5 @@
 const List<String> filesJson = [
+  'timing',
   "webgl_camera",
   "webgl_camera_array",
   "webgl_shadow_contact",

@@ -30,7 +30,7 @@ class ImageLoader extends Loader {
       return cached;
     }
     
-    final http.Response? response = kIsWeb? null:await http.get(Uri.parse(url));
+    final http.Response? response = kIsWeb? null:await http.get(uri);
     final bytes = kIsWeb? null:response!.bodyBytes;
     final resp = await processImage(bytes,url,flipY);
 

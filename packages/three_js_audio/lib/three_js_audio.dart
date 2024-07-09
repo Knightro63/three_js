@@ -1,7 +1,6 @@
 library three_js_audio;
 
-/// A Calculator.
-class Calculator {
-  /// Returns [value] plus 1.
-  int addOne(int value) => value + 1;
-}
+export 'audio.dart';
+export 'package:audioplayers/audioplayers.dart';
+export './bgm.dart';
+export 'audio_loader.dart';

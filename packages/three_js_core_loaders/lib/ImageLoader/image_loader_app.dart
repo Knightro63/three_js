@@ -16,6 +16,10 @@ class ImageLoaderLoader {
       if (url is Blob) {
         bytes = url.data;
       } 
+      else if (url is Uri) {
+        final http.Response response = await http.get(url);
+        bytes = response.bodyBytes;
+      } 
       else if (url.startsWith("http")) {
         final http.Response response = await http.get(Uri.parse(url));
         bytes = response.bodyBytes;
