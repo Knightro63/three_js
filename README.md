@@ -9,7 +9,7 @@ A 3D rendering engine for dart (based on [three.js](https://github.com/mrdoob/th
 ## Features
 
 <picture>
-  <img alt="Gif of dash playing a game." src="https://github.com/Knightro63/three_js/master/assets/flutter_game.gif">
+  <img alt="Gif of dash playing a game." src="https://raw.githubusercontent.com/Knightro63/three_js/master/assets/flutter_game.gif">
 </picture>
 
 This is a dart conversion of three.js and three_dart, originally created by [@mrdoob](https://github.com/mrdoob) and has a coverted dart fork by [@wasabia](https://github.com/wasabia).
@@ -53,7 +53,7 @@ This project is a simple 3D rendering engine for flutter to view, edit, or manip
 
 ## Example
 
-Find the example for this API [here](https://github.com/Knightro63/three_js/tree/main/packages/three_js/example/), for a preview go [here].
+Find the example for this API [here](https://github.com/Knightro63/three_js/tree/main/packages/three_js/example/), for more examples you can click [here](https://github.com/Knightro63/three_js/tree/main/examples/), and for a preview go [here](https://knightro63.github.io/three_js/).
 
 ## Know Issues
 
@@ -62,8 +62,8 @@ Find the example for this API [here](https://github.com/Knightro63/three_js/tree
 
 **iOS**
  - Buffer Validation issues
- - Protoplanets does not function correctly
  - GroupMaterials do not work
+ - Protoplanets does not function correctly
 
 **Android**
  - GroupMaterials do not work
@@ -73,7 +73,6 @@ Find the example for this API [here](https://github.com/Knightro63/three_js/tree
 
 **Web**
  - Lens Flare not working correctly
- - Multi Views works someof the times
 
 ## Contributing
 

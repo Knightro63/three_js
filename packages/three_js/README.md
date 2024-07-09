@@ -53,7 +53,7 @@ This project is a simple 3D rendering engine for flutter to view, edit, or manip
 
 ## Example
 
-Find the example for this API [here](https://github.com/Knightro63/three_js/tree/main/packages/three_js/example/), for more examples you can click [here](https://github.com/Knightro63/three_js/tree/main/examples/) for a preview go [here]().
+Find the example for this API [here](https://github.com/Knightro63/three_js/tree/main/packages/three_js/example/), for more examples you can click [here](https://github.com/Knightro63/three_js/tree/main/examples/), and for a preview go [here](https://knightro63.github.io/three_js/).
 
 ## Know Issues
 
