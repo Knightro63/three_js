@@ -130,7 +130,7 @@ class ThreeJS {
     renderer?.dispose();
     renderTarget?.dispose();
     falseRenderTarget?.dispose();
-    //scene.dispose();
+    scene.dispose();
     for(final event in disposeEvents){
       event.call();
     }

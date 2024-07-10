@@ -8,19 +8,40 @@ import 'package:three_js_core/three_js_core.dart';
 /// You can use as a helper to very simply play a sound or a background music.
 /// Alternatively you can create your own instances and control them yourself.
 class Audio extends Object3D{
-  bool autoplay = false;
-  bool loop = false;
-  bool hasPlaybackControl = true;
-  bool isPlaying = false;
+  bool autoplay;
+  bool loop;
+  bool hasPlaybackControl;
+  bool _isPlaying = false;
+
   AudioPlayer? source;
   Uint8List? _buffer;
 
   int loopEnd = 0;
   int loopStart = 0;
-  double? duration;
-  double playbackRate = 1;
+  //double? duration;
+  double playbackRate;
+
+  late double _volume;
+  late double _balance;
 
   Timer? _delay;
+  bool get isPlaying => _isPlaying;
+
+  Audio({
+    double balance = 0.0,
+    double volume = 1.0,
+    this.playbackRate = 1.0,
+    this.hasPlaybackControl = true,
+    this.autoplay = false,
+    this.loop = false
+  }){
+    _balance = balance;
+    _volume = volume;
+
+    if(autoplay){
+      _play();
+    }
+  }
 
   void setBuffer(Uint8List buffer){
     _buffer = buffer;
@@ -28,14 +49,14 @@ class Audio extends Object3D{
 
   @override
   void dispose(){
-    super.dispose();
     _delay?.cancel();
     source?.dispose();
+    super.dispose();
   }
 
   /// Plays a single run of the given [file], with a given [volume].
   Future<void> play([int delay = 0]) async{
-		if (isPlaying) {
+		if (_isPlaying) {
 			console.warning( 'Audio: Audio is already playing.' );
 			return;
 		}
@@ -45,7 +66,7 @@ class Audio extends Object3D{
 			return;
 		}
 
-    isPlaying = true;
+    _isPlaying = true;
 
     if(source == null){
       if(delay != 0){
@@ -71,12 +92,12 @@ class Audio extends Object3D{
     await src.setPlaybackRate(playbackRate);
     await src.play(
       BytesSource(_buffer!),
-      volume: 1.0,
+      volume: _volume,
       mode: PlayerMode.lowLatency,
       position: Duration(milliseconds: loopStart),
-      balance: 0.0
+      balance: _balance
     ).whenComplete((){
-      isPlaying = false;
+      _isPlaying = false;
     });
     
     source = src;
@@ -91,15 +112,15 @@ class Audio extends Object3D{
 
     _delay?.cancel();
     _delay = null;
-    isPlaying = false;
+    _isPlaying = false;
     await source?.stop();
   }
 
   /// Resumes the currently played (but resumed) background music.
   Future<void> resume() async {
-    isPlaying = true;
+    _isPlaying = true;
     await source?.resume().whenComplete((){
-      isPlaying = false;
+      _isPlaying = false;
     });
   }
 
@@ -111,8 +132,8 @@ class Audio extends Object3D{
 			return;
 		}
 
-		if(isPlaying) {
-      isPlaying = false;
+		if(_isPlaying) {
+      _isPlaying = false;
       await source?.pause();
     }
 
@@ -130,7 +151,7 @@ class Audio extends Object3D{
 			return;
 		}
 
-		if (isPlaying) {
+		if (_isPlaying) {
       playbackRate = value;
 			await source?.setPlaybackRate(value);
 		}
@@ -153,7 +174,7 @@ class Audio extends Object3D{
 
 		loop = value;
 
-		if (isPlaying ) {
+		if (_isPlaying ) {
 			await source?.setReleaseMode(loop?ReleaseMode.loop:ReleaseMode.stop);
 		}
 	}
@@ -166,11 +187,21 @@ class Audio extends Object3D{
 		loopEnd = value;
 	}
 
+	double? getBalance() {
+		return source?.balance;
+	}
+
+	Future<void> setBalance(double value ) async{
+    _balance = value;
+		await source?.setBalance(value);
+	}
+
 	double? getVolume() {
 		return source?.volume;
 	}
 
 	Future<void> setVolume(double value ) async{
+    _volume = value;
 		await source?.setVolume(value);
 	}
 }

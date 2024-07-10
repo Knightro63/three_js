@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'package:example/audio/orientation.dart';
+import 'package:example/audio/sandbox.dart';
 import 'package:example/audio/timing.dart';
 import 'package:example/controls/misc_controls_fly.dart';
 import 'package:example/controls/misc_controls_pointerlock.dart';
@@ -163,6 +165,12 @@ class MyAppState extends State<MyApp> {
               },
               '/timing':(BuildContext context) {
                 return const AudioTiming();
+              },
+              '/orientation':(BuildContext context) {
+                return const AudioOrientation();
+              },
+              '/sandbox':(BuildContext context) {
+                return const AudioSandbox();
               },
               '/webgl_camera_array':(BuildContext context) {
                 return const WebglCameraArray();
