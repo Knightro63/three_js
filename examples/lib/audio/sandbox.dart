@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:example/src/statistics.dart';
 import 'package:three_js/three_js.dart' as three;
@@ -18,6 +19,7 @@ class _State extends State<AudioSandbox> {
   List<int> data = List.filled(60, 0, growable: true);
   late Timer timer;
   late three.ThreeJS threeJs;
+  bool showHelpers = true;
 
   @override
   void initState() {
@@ -61,7 +63,7 @@ class _State extends State<AudioSandbox> {
     threeJs.camera.position.setValues( 0, 25, 0 );
 
     threeJs.scene = three.Scene();
-    threeJs.scene.fog = three.FogExp2( 0x000000, 0.0025 );
+    //threeJs.scene.fog = three.FogExp2( 0x000000, 0.0025 );
 
     final light = three.DirectionalLight( 0xffffff, 3 );
     light.position.setValues( 0, 0.5, 1 ).normalize();
@@ -77,29 +79,45 @@ class _State extends State<AudioSandbox> {
 
     final mesh1 = three.Mesh( sphere, material1 );
     mesh1.position.setValues( - 250, 30, 0 );
+    mesh1.rotation.y = math.pi/6;
     threeJs.scene.add( mesh1 );
 
-    final AudioLoader loader = AudioLoader();
+    final sound1 = PositionalAudio(
+      path: 'sounds/358232_j_s_song.mp3',
+      listner: threeJs.camera,
+      refDistance: 20,
+      maxDistance: 250
+    );
 
-    final sound1 = PositionalAudio( threeJs.camera );
-    final songElement = await loader.fromAsset('assets/sounds/358232_j_s_song.mp3');//document.getElementById( 'song' );
-    sound1.setBuffer( songElement! );
-    sound1.refDistance = 20;
     sound1.play();
     mesh1.add( sound1 );
+
+    if(showHelpers){
+      final sound1helper = PositionalAudioHelper( sound1, 300 );
+      sound1.add( sound1helper );
+    }
 
     //
 
     final mesh2 = three.Mesh( sphere, material2 );
     mesh2.position.setValues( 250, 30, 0 );
+    mesh2.rotation.y = -math.pi/6;
     threeJs.scene.add( mesh2 );
 
-    final sound2 = PositionalAudio( threeJs.camera  );
-    final skullbeatzElement = await loader.fromAsset('assets/sounds/376737_Skullbeatz___Bad_Cat_Maste.mp3');//document.getElementById( 'skullbeatz' );
-    sound2.setBuffer( skullbeatzElement! );
-    sound2.refDistance = 20;
+    final sound2 = PositionalAudio(
+      path: 'sounds/376737_Skullbeatz___Bad_Cat_Maste.mp3',
+      listner: threeJs.camera,
+      refDistance: 20,
+      maxDistance: 250
+    );
+
     sound2.play();
     mesh2.add( sound2 );
+
+    if(showHelpers){
+      final sound2helper = PositionalAudioHelper( sound2, 300 );
+      sound2.add( sound2helper );
+    }
 
     //
 
@@ -107,12 +125,22 @@ class _State extends State<AudioSandbox> {
     mesh3.position.setValues( 0, 30, - 250 );
     threeJs.scene.add( mesh3 );
 
-    final sound3 = PositionalAudio( threeJs.camera  );
-    final oscillator = await loader.fromAsset('assets/sounds/Project_Utopia.mp3');//listener.context.createOscillator();
-    sound3.setBuffer( oscillator! );
-    sound3.refDistance = 20;
-    sound3.setVolume( 0.5 );
+    final sound3 = PositionalAudio(
+      path: 'sounds/Project_Utopia.mp3',
+      listner: threeJs.camera,
+      refDistance: 20,
+      maxDistance: 250
+    );
+    //final oscillator = await loader.fromAsset('assets/sounds/Project_Utopia.mp3');
+    sound3.loop = true;
+    //sound3.setBuffer( oscillator! );
+    sound3.play();
     mesh3.add( sound3 );
+
+    if(showHelpers){
+      final sound3helper = PositionalAudioHelper( sound3, 300 );
+      sound3.add( sound3helper );
+    }
 
     // global ambient audio
 
@@ -133,12 +161,16 @@ class _State extends State<AudioSandbox> {
     controls = three.FirstPersonControls( camera: threeJs.camera, listenableKey: threeJs.globalKey );
 
     controls.movementSpeed = 70;
-    controls.lookSpeed = 0.005;
+    controls.lookSpeed = 0.05;
+    controls.lookVertical = false;
+    controls.constrainVertical = false;
     controls.lookType = three.LookType.position;
+    controls.verticalMax = 0;
+
+    //controls = three.OrbitControls( threeJs.camera, threeJs.globalKey);
 
     threeJs.addAnimationEvent((dt){
       controls.update(dt);
-      sound1.update();
     });
   }
 }

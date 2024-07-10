@@ -88,12 +88,6 @@ class _State extends State<AudioTiming> {
     directionalLight.shadow?.mapSize.x = 1024;
     directionalLight.shadow?.mapSize.y = 1024;
 
-    // audio
-
-    final audioLoader = AudioLoader();
-    //final listener = AudioListener();
-    //threeJs.camera.add( listener );
-
     // floor
 
     final floorGeometry = three.PlaneGeometry( 10, 10 );
@@ -114,25 +108,21 @@ class _State extends State<AudioTiming> {
     final ballMaterial = three.MeshLambertMaterial.fromMap( { 'color': 0xcccccc } );
 
     // create objects when audio buffer is loaded
+    for (int i = 0; i < count; i ++ ) {
+      final s = i / count * math.pi * 2;
+      final ball = three.Mesh( ballGeometry, ballMaterial );
+      ball.castShadow = true;
+      ball.userData['down'] = false;
 
-    await audioLoader.fromAsset( 'assets/sounds/ping_pong.mp3').then(( buffer ) {
-      for (int i = 0; i < count; i ++ ) {
-        final s = i / count * math.pi * 2;
-        final ball = three.Mesh( ballGeometry, ballMaterial );
-        ball.castShadow = true;
-        ball.userData['down'] = false;
+      ball.position.x = radius * math.cos( s );
+      ball.position.z = radius * math.sin( s );
 
-        ball.position.x = radius * math.cos( s );
-        ball.position.z = radius * math.sin( s );
+      final audio = Audio(path: 'sounds/ping_pong.mp3');
+      ball.add( audio );
 
-        final audio = Audio();
-        audio.setBuffer( buffer!);
-        ball.add( audio );
-
-        threeJs.scene.add( ball );
-        objects.add( ball );
-      }
-    });
+      threeJs.scene.add( ball );
+      objects.add( ball );
+    }
 
     controls = three.OrbitControls(threeJs.camera, threeJs.globalKey );
     controls.minDistance = 1;

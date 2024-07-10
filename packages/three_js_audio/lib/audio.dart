@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:typed_data';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:three_js_core/three_js_core.dart';
 
@@ -14,7 +13,7 @@ class Audio extends Object3D{
   bool _isPlaying = false;
 
   AudioPlayer? source;
-  Uint8List? _buffer;
+  //Uint8List? _buffer;
 
   int loopEnd = 0;
   int loopStart = 0;
@@ -27,7 +26,10 @@ class Audio extends Object3D{
   Timer? _delay;
   bool get isPlaying => _isPlaying;
 
+  String path;
+
   Audio({
+    required this.path,
     double balance = 0.0,
     double volume = 1.0,
     this.playbackRate = 1.0,
@@ -39,13 +41,13 @@ class Audio extends Object3D{
     _volume = volume;
 
     if(autoplay){
-      _play();
+      play();
     }
   }
 
-  void setBuffer(Uint8List buffer){
-    _buffer = buffer;
-  }
+  // void setBuffer(Uint8List buffer){
+  //   _buffer = buffer;
+  // }
 
   @override
   void dispose(){
@@ -88,17 +90,18 @@ class Audio extends Object3D{
   /// Plays a single run of the given [file], with a given [volume].
   Future<void> _play() async{
     final src = AudioPlayer();
-    await src.setReleaseMode(loop?ReleaseMode.loop:ReleaseMode.stop);
-    await src.setPlaybackRate(playbackRate);
+    src.onPlayerComplete.listen((event) {
+      _isPlaying = false;
+    });
+    //await src.setReleaseMode(loop?ReleaseMode.loop:ReleaseMode.stop);
+    //await src.setPlaybackRate(playbackRate);
     await src.play(
-      BytesSource(_buffer!),
+      AssetSource(path),
       volume: _volume,
       mode: PlayerMode.lowLatency,
       position: Duration(milliseconds: loopStart),
       balance: _balance
-    ).whenComplete((){
-      _isPlaying = false;
-    });
+    );
     
     source = src;
   }
@@ -119,9 +122,7 @@ class Audio extends Object3D{
   /// Resumes the currently played (but resumed) background music.
   Future<void> resume() async {
     _isPlaying = true;
-    await source?.resume().whenComplete((){
-      _isPlaying = false;
-    });
+    await source?.resume();
   }
 
   /// Pauses the background music without unloading or resetting the audio

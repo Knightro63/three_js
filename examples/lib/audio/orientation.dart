@@ -63,15 +63,9 @@ class _State extends State<AudioOrientation> {
     threeJs.camera = three.PerspectiveCamera( 45, threeJs.width / threeJs.height, 0.1, 100 );
     threeJs.camera.position.setValues( 3, 2, 3 );
 
-    final reflectionCube = three.CubeTextureLoader();
-    reflectionCube.setPath( 'assets/textures/cube/SwedishRoyalCastle/' );
-    reflectionCube.fromAssetList( [ 'px.jpg', 'nx.jpg', 'py.jpg', 'ny.jpg', 'pz.jpg', 'nz.jpg' ] );
-
     threeJs.scene = three.Scene();
     threeJs.scene.background = three.Color.fromHex32( 0xa0a0a0 );
     threeJs.scene.fog = three.Fog( 0xa0a0a0, 2, 20 );
-
-    //
 
     final hemiLight = three.HemisphereLight( 0xffffff, 0x8d8d8d, 3 );
     hemiLight.position.setValues( 0, 20, 0 );
@@ -88,33 +82,25 @@ class _State extends State<AudioOrientation> {
     dirLight.shadow?.camera?.far = 20;
     threeJs.scene.add( dirLight );
 
-    // threeJs.scene.add( CameraHelper( dirLight.shadow!.camera! ) );
-
-    //
-
     final mesh = three.Mesh( three.PlaneGeometry( 50, 50 ), three.MeshPhongMaterial.fromMap( { 'color': 0xcbcbcb, 'depthWrite': false } ) );
     mesh.rotation.x = - math.pi / 2;
     mesh.receiveShadow = true;
     threeJs.scene.add( mesh );
 
-    // final grid = GridHelper( 50, 50, 0xc1c1c1, 0xc1c1c1 );
-    // threeJs.scene.add( grid );
-
-    //
-
-    // final listener = three.AudioListener();
-    // threeJs.camera.add( listener );
-
-    final audioLoader = await AudioLoader().fromAsset('assets/sounds/376737_Skullbeatz___Bad_Cat_Maste.ogg');//document.getElementById( 'music' );
-
-    final positionalAudio = PositionalAudio(threeJs.camera);
-    positionalAudio.setBuffer( audioLoader! );
-    positionalAudio.refDistance = 1;
-    positionalAudio.setDirectionalCone( 180, 230, 0.1 );
+    final positionalAudio = PositionalAudio(
+      path: 'sounds/376737_Skullbeatz___Bad_Cat_Maste.mp3',
+      listner: threeJs.camera,
+      refDistance: 0.75,
+      coneInnerAngle: 90,
+      coneOuterAngle: 180,
+      coneOuterGain: 0.1,
+      maxDistance: 2
+    );
+    positionalAudio.play();
 
     final helper = PositionalAudioHelper( positionalAudio, 0.1 );
     positionalAudio.add( helper );
-
+    
     //
 
     final gltfLoader = three.GLTFLoader();
@@ -126,7 +112,6 @@ class _State extends State<AudioOrientation> {
 
       boomBox.traverse( ( object ) {
         if ( object is three.Mesh ) {
-          //object.material?.envMap = reflectionCube;
           object.geometry?.rotateY( - math.pi );
           object.castShadow = true;
         }
