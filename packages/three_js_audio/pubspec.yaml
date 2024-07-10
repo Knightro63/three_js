@@ -13,7 +13,7 @@ dependencies:
   audioplayers: ^6.0.0
   three_js_core: ^0.0.1
   three_js_math: ^0.0.1
-  three_js_core_loaders: ^0.0.1
+  three_js_core_loaders: ^0.0.2
 
 dev_dependencies:
   flutter_test:

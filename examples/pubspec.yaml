@@ -21,13 +21,12 @@ dependencies:
   three_js_helpers: ^0.0.1
   three_js_geometry: ^0.0.1
   three_js_transform_controls: ^0.0.1
-  three_js_svg: ^0.0.1
+  three_js_svg: ^0.0.2
   three_js_objects: ^0.0.1
-  three_js_tjs_loader: ^0.0.1
+  three_js_tjs_loader: ^0.0.2
   three_js_postprocessing: ^0.0.1
   three_js_modifers: ^0.0.1
-  three_js_audio:
-    path: ../packages/three_js_audio
+  three_js_audio: ^0.0.1
 
 dev_dependencies:
   flutter_test:

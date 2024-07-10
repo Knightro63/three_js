@@ -1,6 +1,6 @@
 name: three_js_core_loaders
 description: "Flutter three_js_core_loaders package converted from threejs and three_dart package created for three_js."
-version: 0.0.1
+version: 0.0.2
 homepage: https://github.com/Knightro63/three_js/tree/main/packages/three_js_core_loaders
 
 environment:

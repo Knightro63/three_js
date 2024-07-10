@@ -1,6 +1,6 @@
 name: three_js_objects
 description: "Flutter three_js_objects package converted from threejs and three_dart package created for three_js adds extra types of objects to the scene."
-version: 0.0.1
+version: 0.0.2
 homepage: https://github.com/Knightro63/three_js/tree/main/packages/three_js_objects
 
 environment:
@@ -11,7 +11,7 @@ dependencies:
   flutter:
     sdk: flutter
   three_js_core: ^0.0.1
-  three_js_core_loaders: ^0.0.1
+  three_js_core_loaders: ^0.0.2
   three_js_math: ^0.0.1
   three_js_helpers: ^0.0.1
 
