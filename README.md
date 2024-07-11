@@ -8,9 +8,7 @@ A 3D rendering engine for dart (based on [three.js](https://github.com/mrdoob/th
 
 ## Features
 
-<picture>
-  <img alt="Gif of dash playing a game." src="https://raw.githubusercontent.com/Knightro63/three_js/master/assets/flutter_game.gif">
-</picture>
+![Gif of dash playing a game.](https://raw.githubusercontent.com/Knightro63/three_js/master/assets/flutter_game.gif)
 
 This is a dart conversion of three.js and three_dart, originally created by [@mrdoob](https://github.com/mrdoob) and has a coverted dart fork by [@wasabia](https://github.com/wasabia).
 
