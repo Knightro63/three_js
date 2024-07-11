@@ -6,10 +6,7 @@
 
 A type of three_js model loader that allows users to add three.js json files to thier projects.
 
-<picture>
-  <img alt="Gif suzanne modle rotating." src="https://raw.githubusercontent.com/Knightro63/three_js/master/packages/three_js_tjs_loader/assets/example.gif">
-</picture>
-
+![Gif suzanne modle rotating.](https://raw.githubusercontent.com/Knightro63/three_js/master/packages/three_js_tjs_loader/assets/example.gif)
 
 This is a dart conversion of three.js and three_dart, originally created by [@mrdoob](https://github.com/mrdoob) and has a coverted dart fork by [@wasabia](https://github.com/wasabia).
 

@@ -6,9 +6,7 @@
 
 A type of three_js camera controller that allows users to add either orbit, fly, fps, point, trackball, map, or drag controller to thier projects.
 
-<picture>
-  <img alt="Gif of orbit controls." src="https://raw.githubusercontent.com/Knightro63/three_js/master/packages/three_js_controls/assets/example.gif">
-</picture>
+![Gif of orbit controls.](https://raw.githubusercontent.com/Knightro63/three_js/master/packages/three_js_controls/assets/example.gif)
 
 This is a dart conversion of three.js and three_dart, originally created by [@mrdoob](https://github.com/mrdoob) and has a coverted dart fork by [@wasabia](https://github.com/wasabia).
 

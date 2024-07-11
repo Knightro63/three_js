@@ -6,9 +6,7 @@
 
 A type of three_js api that allows users to add visual text to their projects.
 
-<picture>
-  <img alt="Picture of a text." src="https://raw.githubusercontent.com/Knightro63/three_js/master/packages/three_js_text/assets/example.png">
-</picture>
+![Picture of a text.](https://raw.githubusercontent.com/Knightro63/three_js/master/packages/three_js_text/assets/example.png)
 
 This is a dart conversion of three.js and three_dart, originally created by [@mrdoob](https://github.com/mrdoob) and has a coverted dart fork by [@wasabia](https://github.com/wasabia).
 

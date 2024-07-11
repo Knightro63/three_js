@@ -6,9 +6,7 @@
 
 A type of three_js model loader that allows users to add stl, obj, or lut files to thier projects.
 
-<picture>
-  <img alt="Picture of a obj loaded model with mtl." src="https://raw.githubusercontent.com/Knightro63/three_js/master/packages/three_js_simple_loaders/assets/example.jpg">
-</picture>
+![Picture of a obj loaded model with mtl.](ttps://raw.githubusercontent.com/Knightro63/three_js/master/packages/three_js_simple_loaders/assets/example.jpg)
 
 This is a dart conversion of three.js and three_dart, originally created by [@mrdoob](https://github.com/mrdoob) and has a coverted dart fork by [@wasabia](https://github.com/wasabia).
 

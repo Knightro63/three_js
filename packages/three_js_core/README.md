@@ -6,9 +6,7 @@
 
 This is the core of the three_js api that allows users to view, edit and manipulate their 3D objects in their projects.
 
-<picture>
-  <img alt="Gif of dash playing a game." src="https://raw.githubusercontent.com/Knightro63/three_js/master/packages/three_js_core/assets/example.gif">
-</picture>
+![Gif of geometries rotating.](https://raw.githubusercontent.com/Knightro63/three_js/master/packages/three_js_core/assets/example.gif)
 
 This is a dart conversion of three.js and three_dart, originally created by [@mrdoob](https://github.com/mrdoob) and has a coverted dart fork by [@wasabia](https://github.com/wasabia).
 
