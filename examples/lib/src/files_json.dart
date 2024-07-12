@@ -86,6 +86,7 @@ const List<String> filesJson = [
   "misc_controls_map",
   "misc_controls_pointerlock",
   'misc_controls_fly',
+  'misc_controls_device_orientation',
   "multi_views",
   'games_fps',
   'flutter_game',

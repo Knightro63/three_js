@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:example/audio/orientation.dart';
 import 'package:example/audio/sandbox.dart';
 import 'package:example/audio/timing.dart';
+import 'package:example/controls/misc_controls_device_orientation.dart';
 import 'package:example/controls/misc_controls_fly.dart';
 import 'package:example/controls/misc_controls_pointerlock.dart';
 import 'package:example/controls/misc_controls_transform.dart';
@@ -414,6 +415,9 @@ class MyAppState extends State<MyApp> {
               },
               '/misc_controls_transform':(BuildContext context) {
                 return const MiscControlsTransform();
+              },
+              '/misc_controls_device_orientation':(BuildContext context){
+                return const MiscControlsDeviceOrientation();
               },
               '/multi_views':(BuildContext context) {
                 return const MultiViews();
