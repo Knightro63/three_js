@@ -7,7 +7,7 @@ final _cb = Vector3.zero();
 final _ab = Vector3.zero();
 
 class SimplifyModifier {
-	BufferGeometry modify(BufferGeometry bufferGeometry, int count) {
+	static BufferGeometry modify(BufferGeometry bufferGeometry, int count) {
 		BufferGeometry geometry = bufferGeometry.clone();
 
 		// currently morphAttributes are not supported
@@ -28,7 +28,7 @@ class SimplifyModifier {
 		//
 
 		final List<Vertex> vertices = [];
-		final faces = [];
+		final List<Triangle> faces = [];
 
 		// add vertices
 
@@ -95,23 +95,20 @@ class SimplifyModifier {
 		// compute all edge collapse costs
 
 		for (int i = 0, il = vertices.length; i < il; i ++ ) {
-			computeEdgeCostAtVertex( vertices[ i ] );
+			_computeEdgeCostAtVertex(vertices[ i ]);
 		}
-
-		Vertex? nextVertex;
 
 		int z = count;
 
-		while (z != 0) {
-			nextVertex = minimumCostEdge( vertices );
+		while (z-- != 0) {
+			final nextVertex = _minimumCostEdge( vertices );
 
-			if (nextVertex != null) {
+			if (nextVertex == null) {
 				console.info( 'SimplifyModifier: No next vertex' );
 				break;
 			}
 
-			collapse( vertices, faces, nextVertex, nextVertex?.collapseNeighbor );
-      z--;
+			_collapse( vertices, faces, nextVertex, nextVertex.collapseNeighbor );
 		}
 
 		//
@@ -154,7 +151,7 @@ class SimplifyModifier {
 
 		for (int i = 0; i < faces.length; i ++ ) {
 			final face = faces[ i ];
-			indx.addAll([ face.v1.id, face.v2.id, face.v3.id ]);
+			indx.addAll([ face.v1!.id, face.v2!.id, face.v3!.id ]);
 		}
 
 		simplifiedGeometry.setAttributeFromString( 'position', Float32BufferAttribute.fromList( position, 3 ) );
@@ -167,203 +164,195 @@ class SimplifyModifier {
 
 		return simplifiedGeometry;
 	}
+
+  static void _addIfUnique(List array, object ) {
+    if (!array.contains( object )) array.add( object );
+  }
+
+  static void _removeFromArray(List? array, object ) {
+    if (array != null && array.contains(object) ) array.remove(object);
+  }
+
+  static double _computeEdgeCollapseCost(Vertex u, Vertex v ) {
+    // if we collapse edge uv by moving u to v then how
+    // much different will the model change, i.e. the "error".
+
+    final edgelength = v.position.distanceTo( u.position );
+    double curvature = 0;
+    final sideFaces = [];
+
+    // find the "sides" triangles that are on the edge uv
+    for (int i = 0, il = u.faces.length; i < il; i ++ ) {
+      final face = u.faces[ i ];
+      if ( face.hasVertex( v ) ) {
+        sideFaces.add( face );
+      }
+    }
+
+    // use the triangle facing most away from the sides
+    // to determine our curvature term
+    for (int i = 0, il = u.faces.length; i < il; i ++ ) {
+      double minCurvature = 1;
+      final face = u.faces[ i ];
+
+      for (int j = 0; j < sideFaces.length; j ++ ) {
+        final sideFace = sideFaces[ j ];
+        // use dot product of face normals.
+        final double dotProd = face.normal.dot( sideFace.normal );
+        minCurvature = math.min( minCurvature, ( 1.001 - dotProd ) / 2 );
+      }
+
+      curvature = math.max( curvature, minCurvature );
+    }
+
+    if ( sideFaces.length < 2 ) {
+      // we add some arbitrary cost for borders,
+      // borders += 10;
+      curvature = 1;
+    }
+
+    final amt = edgelength * curvature;
+
+    return amt;
+  }
+
+  static void _computeEdgeCostAtVertex(Vertex v ) {
+    // compute the edge collapse cost for all edges that start
+    // from vertex v.  Since we are only interested in reducing
+    // the object by selecting the min cost edge at each step, we
+    // only cache the cost of the least cost edge at this vertex
+    // (in member variable collapse) as well as the value of the
+    // cost (in member variable collapseCost).
+
+    if ( v.neighbors.isEmpty ) {
+      // collapse if no neighbors.
+      v.collapseNeighbor = null;
+      v.collapseCost = - 0.01;
+      return;
+    }
+
+    v.collapseCost = 100000;
+    v.collapseNeighbor = null;
+
+    // search all neighboring edges for "least cost" edge
+    for (int i = 0; i < v.neighbors.length; i ++ ) {
+      final tempV = v.neighbors[ i ];
+      final collapseCost = _computeEdgeCollapseCost( v,  tempV);
+
+      if (v.collapseNeighbor == null) {
+        v.collapseNeighbor = v.neighbors[ i ];
+        v.collapseCost = collapseCost;
+        v.minCost = collapseCost;
+        v.totalCost = 0;
+        v.costCount = 0;
+      }
+
+      v.costCount ++;
+      v.totalCost += collapseCost;
+
+      if ( collapseCost < v.minCost ) {
+        v.collapseNeighbor = v.neighbors[ i ];
+        v.minCost = collapseCost;
+      }
+    }
+
+    // we average the cost of collapsing at this vertex
+    v.collapseCost = v.totalCost / v.costCount;
+    // v.collapseCost = v.minCost;
+  }
+
+  static void _removeVertex(Vertex? v, List<Vertex> vertices ) {
+    assert(v?.faces != null && v!.faces.isEmpty );
+
+    while ( v!.neighbors.isNotEmpty ) {
+      final n = v.neighbors.removeLast();
+      _removeFromArray( n.neighbors, v );
+    }
+
+    _removeFromArray( vertices, v );
+  }
+
+  static void _removeFace(Triangle f, List<Triangle> faces ) {
+    _removeFromArray( faces, f );
+    if ( f.v1 != null) _removeFromArray( f.v1?.faces, f );
+    if ( f.v2 != null) _removeFromArray( f.v2?.faces, f );
+    if ( f.v3 != null) _removeFromArray( f.v3?.faces, f );
+
+    final vs = [ f.v1, f.v2, f.v3 ];
+
+    for (int i = 0; i < 3; i ++ ) {
+
+      final v1 = vs[ i ];
+      final v2 = vs[ ( i + 1 ) % 3 ];
+
+      if (v1 == null || v2 == null) continue;
+
+      v1.removeIfNonNeighbor( v2 );
+      v2.removeIfNonNeighbor( v1 );
+    }
+  }
+
+  static void _collapse(List<Vertex> vertices, List<Triangle> faces, Vertex? u, Vertex? v ) {
+    // Collapse the edge uv by moving vertex u onto v
+
+    if (v == null) {
+      // u is a vertex all by itself so just delete it..
+      _removeVertex( u, vertices );
+      return;
+    }
+
+    if ( v.uv != null) {
+      u?.uv?.setFrom( v.uv! );
+    }
+
+    if ( v.normal != null) {
+      v.normal!.add( u!.normal! ).normalize();
+    }
+
+    if ( v.tangent != null) {
+      v.tangent!.add( u!.tangent! ).normalize();
+    }
+
+    final tmpVertices = [];
+
+    for (int i = 0; i < (u?.neighbors.length ?? 0); i ++ ) {
+      tmpVertices.add( u!.neighbors[ i ] );
+    }
+
+    // delete triangles on edge uv:
+    for (int i = (u?.faces.length ?? 0) - 1; i >= 0; i -- ) {
+      if (u!.faces[ i ].hasVertex( v ) ) {
+        _removeFace( u.faces[ i ], faces );
+      }
+    }
+
+    // update remaining triangles to have v instead of u
+    for (int i = (u?.faces.length ?? 0) - 1; i >= 0; i -- ) {
+      u!.faces[ i ].replaceVertex( u, v );
+    }
+
+
+    _removeVertex( u, vertices );
+
+    // recompute the edge collapse costs in neighborhood
+    for (int i = 0; i < tmpVertices.length; i ++ ) {
+      _computeEdgeCostAtVertex( tmpVertices[ i ] );
+    }
+  }
+
+  static Vertex? _minimumCostEdge(List<Vertex> vertices ) {
+    Vertex least = vertices[0];
+
+    for (int i = 0; i < vertices.length; i ++ ) {
+      if ( vertices[ i ].collapseCost < least.collapseCost ) {
+        least = vertices[ i ];
+      }
+    }
+
+    return least;
+  }
 }
 
-void addIfUnique(List array, object ) {
-	if (!array.contains( object )) array.add( object );
-}
-
-void removeFromArray(List array, object ) {
-	final k = array.indexOf( object );
-	if ( k > - 1 ) array.removeAt(k);
-}
-
-double computeEdgeCollapseCost(Vertex u, Vertex v ) {
-	// if we collapse edge uv by moving u to v then how
-	// much different will the model change, i.e. the "error".
-
-	final edgelength = v.position.distanceTo( u.position );
-	double curvature = 0;
-	final sideFaces = [];
-
-	// find the "sides" triangles that are on the edge uv
-	for (int i = 0, il = u.faces.length; i < il; i ++ ) {
-		final face = u.faces[ i ];
-		if ( face.hasVertex( v ) ) {
-			sideFaces.add( face );
-		}
-	}
-
-	// use the triangle facing most away from the sides
-	// to determine our curvature term
-	for (int i = 0, il = u.faces.length; i < il; i ++ ) {
-		double minCurvature = 1;
-		final face = u.faces[ i ];
-
-		for (int j = 0; j < sideFaces.length; j ++ ) {
-			final sideFace = sideFaces[ j ];
-			// use dot product of face normals.
-			final double dotProd = face.normal.dot( sideFace.normal );
-			minCurvature = math.min( minCurvature, ( 1.001 - dotProd ) / 2 );
-		}
-
-		curvature = math.max( curvature, minCurvature );
-	}
-
-	// crude approach in attempt to preserve borders
-	// though it seems not to be totally correct
-	const borders = 0;
-
-	if ( sideFaces.length < 2 ) {
-		// we add some arbitrary cost for borders,
-		// borders += 10;
-		curvature = 1;
-	}
-
-	final amt = edgelength * curvature + borders;
-
-	return amt;
-}
-
-void computeEdgeCostAtVertex(Vertex v ) {
-	// compute the edge collapse cost for all edges that start
-	// from vertex v.  Since we are only interested in reducing
-	// the object by selecting the min cost edge at each step, we
-	// only cache the cost of the least cost edge at this vertex
-	// (in member variable collapse) as well as the value of the
-	// cost (in member variable collapseCost).
-
-	if ( v.neighbors.isEmpty ) {
-		// collapse if no neighbors.
-		v.collapseNeighbor = null;
-		v.collapseCost = - 0.01;
-		return;
-	}
-
-	v.collapseCost = 100000;
-	v.collapseNeighbor = null;
-
-	// search all neighboring edges for "least cost" edge
-	for (int i = 0; i < v.neighbors.length; i ++ ) {
-
-		final collapseCost = computeEdgeCollapseCost( v, v.neighbors[ i ] );
-
-		if (v.collapseNeighbor == null) {
-
-			v.collapseNeighbor = v.neighbors[ i ];
-			v.collapseCost = collapseCost;
-			v.minCost = collapseCost;
-			v.totalCost = 0;
-			v.costCount = 0;
-
-		}
-
-		v.costCount ++;
-		v.totalCost += collapseCost;
-
-		if ( collapseCost < v.minCost ) {
-			v.collapseNeighbor = v.neighbors[ i ];
-			v.minCost = collapseCost;
-		}
-	}
-
-	// we average the cost of collapsing at this vertex
-	v.collapseCost = v.totalCost / v.costCount;
-	// v.collapseCost = v.minCost;
-}
-
-void removeVertex(Vertex? v, vertices ) {
-	assert(v?.faces != null && v!.faces.isEmpty );
-
-	while ( v!.neighbors.isNotEmpty ) {
-		final n = v.neighbors.removeLast();
-		removeFromArray( n.neighbors, v );
-	}
-
-	removeFromArray( vertices, v );
-}
-
-void removeFace(Triangle f, faces ) {
-	removeFromArray( faces, f );
-	if ( f.v1 != null) removeFromArray( f.v1!.faces, f );
-	if ( f.v2 != null) removeFromArray( f.v2!.faces, f );
-	if ( f.v3 != null) removeFromArray( f.v3!.faces, f );
-
-	final vs = [ f.v1, f.v2, f.v3 ];
-
-	for (int i = 0; i < 3; i ++ ) {
-
-		final v1 = vs[ i ];
-		final v2 = vs[ ( i + 1 ) % 3 ];
-
-		if (v1 == null || v2 == null) continue;
-
-		v1.removeIfNonNeighbor( v2 );
-		v2.removeIfNonNeighbor( v1 );
-
-	}
-
-}
-
-void collapse( vertices, faces, Vertex? u, Vertex? v ) {
-	// Collapse the edge uv by moving vertex u onto v
-
-	if (v == null) {
-		// u is a vertex all by itself so just delete it..
-		removeVertex( u, vertices );
-		return;
-	}
-
-	if ( v.uv != null) {
-		u?.uv?.setFrom( v.uv! );
-	}
-
-	if ( v.normal != null) {
-		v.normal!.add( u!.normal! ).normalize();
-	}
-
-	if ( v.tangent != null) {
-		v.tangent!.add( u!.tangent! ).normalize();
-	}
-
-	final tmpVertices = [];
-
-	for (int i = 0; i < (u?.neighbors.length ?? 0); i ++ ) {
-		tmpVertices.add( u!.neighbors[ i ] );
-	}
-
-	// delete triangles on edge uv:
-	for (int i = (u?.faces.length ?? 0) - 1; i >= 0; i -- ) {
-		if ( u!.faces[ i ] && u.faces[ i ].hasVertex( v ) ) {
-			removeFace( u.faces[ i ], faces );
-		}
-	}
-
-	// update remaining triangles to have v instead of u
-	for (int i = (u?.faces.length ?? 0) - 1; i >= 0; i -- ) {
-		u!.faces[ i ].replaceVertex( u, v );
-	}
-
-
-	removeVertex( u, vertices );
-
-	// recompute the edge collapse costs in neighborhood
-	for (int i = 0; i < tmpVertices.length; i ++ ) {
-		computeEdgeCostAtVertex( tmpVertices[ i ] );
-	}
-}
-
-Vertex? minimumCostEdge(List<Vertex> vertices ) {
-	Vertex least = vertices[0];
-
-	for (int i = 0; i < vertices.length; i ++ ) {
-		if ( vertices[ i ].collapseCost < least.collapseCost ) {
-			least = vertices[ i ];
-		}
-	}
-
-	return least;
-}
 
 // we use a triangle class to represent structure of face slightly differently
 
@@ -421,17 +410,17 @@ class Triangle {
       v3 = newv;
     }
 
-		removeFromArray( oldv.faces, this );
+		SimplifyModifier._removeFromArray( oldv.faces, this );
 		newv.faces.add( this );
 
 
-		oldv.removeIfNonNeighbor(v1 );
+		oldv.removeIfNonNeighbor(v1! );
 		v1?.removeIfNonNeighbor( oldv );
 
-		oldv.removeIfNonNeighbor(v2 );
+		oldv.removeIfNonNeighbor(v2! );
 		v2?.removeIfNonNeighbor( oldv );
 
-		oldv.removeIfNonNeighbor( v3 );
+		oldv.removeIfNonNeighbor( v3! );
 	  v3?.removeIfNonNeighbor( oldv );
 
 		v1?.addUniqueNeighbor( v2 );
@@ -449,15 +438,15 @@ class Triangle {
 
 class Vertex {
   Color? color;
-  Vector3 position;
+  final Vector3 position;
   Vector3? normal;
   Vector4? tangent;
   Vector3? uv;
 
   int id = -1;
   double collapseCost = 0;
-  List faces = [];
-  List<Vertex> neighbors = [];
+  final List<Triangle> faces = [];
+  final List<Vertex> neighbors = [];
   Vertex? collapseNeighbor;
 
   double minCost = 0;
@@ -467,10 +456,10 @@ class Vertex {
 	Vertex( this.position, this.uv, this.normal, this.tangent, this.color );
 
 	void addUniqueNeighbor(Vertex? vertex ) {
-		addIfUnique(neighbors, vertex );
+		SimplifyModifier._addIfUnique(neighbors, vertex );
 	}
 
-	void removeIfNonNeighbor( n ) {
+	void removeIfNonNeighbor(Vertex n ) {
 		final neighbors = this.neighbors;
 		final faces = this.faces;
 
@@ -484,4 +473,12 @@ class Vertex {
 
 		neighbors.removeAt(offset);
 	}
+
+  @override
+  bool operator ==(Object other){
+    return (other is Vertex) && 
+    other.position.x == position.x && 
+    other.position.y == position.y &&
+    other.position.z == position.z;
+  }
 }

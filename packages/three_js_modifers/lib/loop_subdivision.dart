@@ -68,8 +68,6 @@
 /////////////////////////////////////////////////////////////////////////////////////
 
 import "package:three_js_core/three_js_core.dart";
-import "package:three_js_math/buffer/buffer_attribute.dart";
-import "package:three_js_math/buffer/index.dart";
 import "package:three_js_math/three_js_math.dart";
 import 'dart:math' as math;
 
@@ -499,13 +497,11 @@ class LoopSubdivision {
     params ??= LoopParameters();
     const newTriangles = 4;
     final arrayLength = (vertexCount * attribute.itemSize) * newTriangles;
-    final List<double> floatArray = List.filled(arrayLength, 0.0);//attribute.array.constructor(arrayLength);
-    final len = floatArray.length > arrayLength?arrayLength:floatArray.length;
-    for (int i = 0; i < len; i++) {
-      floatArray[i] = attribute.array[i].toDouble();
-    }
+    final List<double> floatArray = List.filled(arrayLength, 0.0);
+
     int index = 0;
     int step = attribute.itemSize;
+
     for (int i = 0; i < vertexCount; i += 3) {
       // Original Vertices
       _vector0.fromBuffer(attribute, i + 0);
@@ -536,7 +532,7 @@ class LoopSubdivision {
     ////////////////////
 
     /** Applies one iteration of Loop (smooth) subdivision (1 triangle split into 4 triangles) */
-    static smooth(geometry, [LoopParameters? params]) {
+    static smooth(BufferGeometry geometry, [LoopParameters? params]) {
       params ??= LoopParameters();
 
       ///// Geometries
@@ -615,10 +611,7 @@ class LoopSubdivision {
         List<double> subdivideAttribute(String attributeName, BufferAttribute existingAttribute, BufferAttribute flattenedAttribute) {
           final arrayLength = (flat.attributes['position'].count * flattenedAttribute.itemSize);
           final List<double> floatArray = List.filled(arrayLength, 0.0);//attribute.array.constructor(arrayLength);
-          final len = floatArray.length > arrayLength?arrayLength:floatArray.length;
-          for (int i = 0; i < len; i++) {
-            floatArray[i] = existingAttribute.array[i].toDouble();
-          }
+
           // Process Triangles
           int index = 0;
           for (int i = 0; i < flat.attributes['position'].count; i += 3) {
@@ -700,7 +693,7 @@ class LoopSubdivision {
                       _vertex[v].add(_average);
                     }
                   } 
-                  else if (opposites && opposites.length == 2) {
+                  else if (opposites !=  null && opposites.length == 2) {
                     final k = opposites.length;
                     const beta = 0.125; /* 1/8 */
                     final startWeight = 1.0 - (beta * k);
@@ -720,13 +713,7 @@ class LoopSubdivision {
               index += (flattenedAttribute.itemSize * 3);
           }
 
-          final List<double> toSend = [];
-
-          for(int i = 0; i < floatArray.length; i++){
-            toSend.add(floatArray[i].toDouble());
-          }
-
-          return toSend;
+          return floatArray;
         }
 
         ///// Build Geometry, Set Attributes
@@ -746,8 +733,8 @@ class LoopSubdivision {
           final morphAttribute = morphAttributes[attributeName];
 
           // Process Array of Float32BufferAttributes
-          for (int i = 0, l = morphAttribute.length; i < l; i++) {
-            if (morphAttribute[i].count != vertexCount) continue;
+          for (int i = 0, l = (morphAttribute?.length ?? 0); i < l; i++) {
+            if (morphAttribute![i].count != vertexCount) continue;
             final existingAttribute = morphAttribute[i];
             final flattenedAttribute = LoopSubdivision.flatAttribute(morphAttribute[i], morphAttribute[i].count, params);
 
@@ -779,7 +766,7 @@ bool fuzzy(num a,num b, [double tolerance = 0.00001]) {
 /** Generates hash strong from Number */
 String hashFromNumber(num num, [int? shift]) {
   shift ??= _positionShift;
-  int roundedNumber = round(num.toInt() * shift);
+  int roundedNumber = round(num * shift);
   if (roundedNumber == 0) roundedNumber = 0; /* prevent -0 (signed 0 can effect math.atan2(), etc.) */
   return '$roundedNumber';
 }
@@ -794,8 +781,8 @@ double lerp(double x, double y, double t) {
   return (1 - t) * x + t * y;
 }
 
-int round(int x) {
-  return (x + ((x > 0) ? 0.5 : -0.5).toInt()) << 0;
+int round(num x) {
+  return (x + ((x > 0) ? 0.5 : -0.5)).toInt() << 0;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////

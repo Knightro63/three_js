@@ -30,7 +30,6 @@ class BufferGeometryUtils{
     for (int i = 0, l = attributeNames.length; i < l; i ++ ) {
       final name = attributeNames[ i ];
       final attr = geometry.attributes[ name ];
-
       tmpAttributes[ name ] = Float32BufferAttribute(
         Float32Array( attr.count * attr.itemSize ),
         attr.itemSize,
@@ -49,7 +48,7 @@ class BufferGeometryUtils{
 
     // convert the error tolerance to an amount of decimal places to truncate to
     final halfTolerance = tolerance * 0.5;
-    final exponent = math.log( 1 / tolerance );
+    final exponent = math.log( 1 / tolerance )/math.ln10;
     final hashMultiplier = math.pow( 10, exponent );
     final hashAdditive = halfTolerance * hashMultiplier;
     for (int i = 0; i < vertexCount; i ++ ) {
@@ -63,7 +62,7 @@ class BufferGeometryUtils{
         final itemSize = attribute.itemSize;
         for (int k = 0; k < itemSize; k ++ ) {
           // double tilde truncates the decimal value
-          hash += '${( attribute.getFrom(getters[ k ], index )! * hashMultiplier + hashAdditive ).floor() },';
+          hash += '${( attribute.getFrom(getters[ k ], index )! * hashMultiplier + hashAdditive).truncate() },';
         }
       }
 
