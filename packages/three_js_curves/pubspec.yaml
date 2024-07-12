@@ -1,6 +1,6 @@
 name: three_js_curves
 description: "Flutter three_js_curves package converted from threejs and three_dart package to create curves for three_js."
-version: 0.0.1
+version: 0.0.2
 homepage: https://github.com/Knightro63/three_js/tree/main/packages/three_js_curves
 
 environment:
@@ -10,7 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  three_js_math: ^0.0.1
+  three_js_math: ^0.0.2
 
 dev_dependencies:
   flutter_test:
