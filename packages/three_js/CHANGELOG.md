@@ -6,3 +6,7 @@
 
 * Added audio package.
 * Updated loaders.
+
+## 0.0.3
+
+* Updated to newest version of three_js packages.

@@ -74,7 +74,7 @@ const List<String> filesJson = [
   //"webgl_geometry_csg",
   "webgl_helpers",
   'webgl_portal',
-  //"webgl_modifier_subdivision",
+  "webgl_modifier_subdivision",
   "webgl_modifier_simplifier",
   "webgl_morphtargets",
   "webgl_morphtargets_sphere",

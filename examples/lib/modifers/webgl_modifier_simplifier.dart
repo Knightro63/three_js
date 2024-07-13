@@ -77,13 +77,11 @@ class _State extends State<WebglModifierSimplifier> {
       mesh.rotation.y = math.pi / 2;
       threeJs.scene.add( mesh );
 
-      final modifier = SimplifyModifier();
-
       final simplified = mesh.clone();
       simplified.material = simplified.material?.clone();
       simplified.material?.flatShading = true;
-      final count = 12;//( simplified.geometry?.attributes['position'].count * 0.25 ).floor();
-      simplified.geometry = modifier.modify( simplified.geometry!, count );
+      final count = ( simplified.geometry?.attributes['position'].count * 0.25 ).floor();
+      simplified.geometry = SimplifyModifier.modify( simplified.geometry!, count );
 
       simplified.position.x = 3;
       simplified.rotation.y = - math.pi / 2;
