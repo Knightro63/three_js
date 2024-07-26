@@ -464,7 +464,7 @@ class MaterialCreator {
     loader.setCrossOrigin(crossOrigin);
 
     // final texture = loader.load( url, onLoad, onProgress, onError );
-    final texture = await loader.fromAsset(url);
+    final texture = await loader.unknown(url);
 
     if (mapping != null) texture?.mapping = mapping;
 

@@ -236,9 +236,7 @@ class AnimationClip {
 
     // for ( String name in animationToMorphTargets ) {
     animationToMorphTargets.forEach((name, value) {
-      if(animationToMorphTargets[name] != null){
-        clips.add(AnimationClip.createFromMorphTargetSequence(name, animationToMorphTargets[name]!, fps, noLoop));
-      }
+      clips.add(AnimationClip.createFromMorphTargetSequence(name, value, fps, noLoop));
     });
 
     return clips;

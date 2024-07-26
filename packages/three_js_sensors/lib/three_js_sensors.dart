@@ -1,4 +1,5 @@
 library three_js_sensors;
 
-export 'src_web/sensors_web.dart';
+export 'sensors_platform.dart'
+  if (dart.library.js)'src_web/sensors_web.dart';
 export 'shared.dart';

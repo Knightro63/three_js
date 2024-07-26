@@ -131,8 +131,8 @@ class ShaderMaterial extends Material {
     // use these default values in WebGL. This avoids errors when buffer data is missing.
     defaultAttributeValues = {
       'color': [1, 1, 1],
-      'uv': [0, 0],
-      'uv2': [0, 0]
+      'uv': [0.0, 0.0],
+      'uv2': [0.0, 0.0]
     };
 
     index0AttributeName = null;

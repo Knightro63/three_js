@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/widgets.dart' hide Matrix4;
-import 'package:motion_sensors/motion_sensors.dart';
+import 'package:three_js_sensors/three_js_sensors.dart';
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 
@@ -8,6 +8,7 @@ class DeviceOrientationControls{
   Camera object;
 	double eps = 0.000001;
 	bool enabled = true;
+  ThreeJsSensors motionSensors = ThreeJsSensors();
 
   late GlobalKey<PeripheralsState> listenableKey;
 	AbsoluteOrientationEvent _deviceOrientation = AbsoluteOrientationEvent(0,0,0);
@@ -37,8 +38,7 @@ class DeviceOrientationControls{
 	}
 
 	void connect(){
-    motionSensors.setSensorUpdateInterval(MotionSensors.TYPE_ABSOLUTE_ORIENTATION, 20);
-    motionSensors.screenOrientation.listen(
+    motionSensors.screenOrientation().listen(
       (ScreenOrientationEvent event) {
         if(event.angle != null){
           screenOrientation = event.angle!;
@@ -50,7 +50,7 @@ class DeviceOrientationControls{
       },
       cancelOnError: true,
     );
-    motionSensors.absoluteOrientation.listen(
+    motionSensors.absoluteOrientation(samplingPeriod: SensorInterval.gameInterval).listen(
       (AbsoluteOrientationEvent event) {
         onDeviceOrientationChangeEvent(event);
       },

@@ -69,9 +69,9 @@ class _State extends State<WebglLoaderMd2> {
 
     // LIGHTS
 
-    threeJs.scene.add( three.AmbientLight( 0x666666 ) );
+    threeJs.scene.add( three.AmbientLight( 0x666666,1 ) );
 
-    final light1 = three.SpotLight( 0xffffff, 3 );
+    final light1 = three.SpotLight( 0xffffff, 0.8 );
     light1.position.setValues( 2, 5, 10 );
     light1.angle = 0.5;
     light1.penumbra = 0.5;
@@ -81,7 +81,7 @@ class _State extends State<WebglLoaderMd2> {
     light1.shadow?.mapSize.height = 1024;
     threeJs.scene.add( light1 );
 
-    final light2 = three.SpotLight( 0xffffff, 3 );
+    final light2 = three.SpotLight( 0xffffff, 0.8 );
     light2.position.setValues( - 1, 3.5, 3.5 );
     light2.angle = 0.5;
     light2.penumbra = 0.5;
@@ -94,15 +94,24 @@ class _State extends State<WebglLoaderMd2> {
     //  GROUND
 
     final gt = await three.TextureLoader().fromAsset( 'assets/textures/terrain/grasslight-big.jpg' );
+    final nm = await three.TextureLoader().fromAsset( 'assets/textures/terrain/grasslight-big-nm.jpg' );
     final gg = three.PlaneGeometry( 20, 20 );
-    final gm = three.MeshPhongMaterial.fromMap( { 'color': 0xffffff, 'map': gt } );
+    final gm = three.MeshPhongMaterial.fromMap({ 
+      'color': 0xffffff, 
+      'map': gt,
+      'normalMap': nm,
+    });
 
     final ground = three.Mesh( gg, gm );
     ground.rotation.x = - math.pi / 2;
     ground.material?.map?.repeat.setValues( 8, 8 );
+
     ground.material?.map?.wrapS = three.RepeatWrapping;
     ground.material?.map?.wrapT = three.RepeatWrapping;
     ground.material?.map?.colorSpace = three.SRGBColorSpace;
+    ground.material?.normalMap?.wrapS = three.RepeatWrapping;
+    ground.material?.normalMap?.wrapT = three.RepeatWrapping;
+    ground.material?.normalMap?.colorSpace = three.SRGBColorSpace;
     ground.receiveShadow = true;
 
     threeJs.scene.add( ground );

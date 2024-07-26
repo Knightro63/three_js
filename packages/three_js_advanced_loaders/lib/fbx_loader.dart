@@ -689,7 +689,7 @@ class __FBXTreeParser {
         "indices": [],
         "weights": [],
         "transformLink":
-            Matrix4.identity().copyFromArray(boneNode["TransformLink"]["a"]),
+            Matrix4.identity().copyFromUnknown(boneNode["TransformLink"]["a"]),
         // transform: Matrix4().fromArray( boneNode.Transform.a ),
         // linkMode: boneNode.Mode,
       };
@@ -1172,7 +1172,7 @@ class __FBXTreeParser {
               sceneGraph.add(model.target);
             } 
             else {
-              model.lookAt(Vector3.zero().copyFromArray(pos));
+              model.lookAt(Vector3.zero().copyFromUnknown(pos));
             }
           }
         }
@@ -1221,11 +1221,11 @@ class __FBXTreeParser {
             //poseNodes.forEach((poseNode) {
             for(dynamic poseNode in poseNodes){
               bindMatrices[poseNode["Node"]] =
-                  Matrix4.identity().copyFromArray(poseNode["Matrix"]["a"]);
+                  Matrix4.identity().copyFromUnknown(poseNode["Matrix"]["a"]);
             }
           } else {
             bindMatrices[poseNodes["Node"]] =
-                Matrix4.identity().copyFromArray(poseNodes["Matrix"]["a"]);
+                Matrix4.identity().copyFromUnknown(poseNodes["Matrix"]["a"]);
           }
         }
       }
@@ -1921,7 +1921,7 @@ class _GeometryParser {
     final pointsValues = geoNode['Points']['a'];
 
     for (int i = 0, l = pointsValues.length; i < l; i += 4) {
-      controlPoints.add(Vector4.zero().copyFromArray(pointsValues, i));
+      controlPoints.add(Vector4.zero().copyFromUnknown(pointsValues, i));
     }
 
     int? startKnot, endKnot;
@@ -3411,21 +3411,21 @@ Matrix4 _generateTransform(Map transformData) {
   }
 
   if (transformData["scale"] != null){
-    lScalingM.scaleByVector(tempVec.copyFromArray(transformData["scale"]));
+    lScalingM.scaleByVector(tempVec.copyFromUnknown(transformData["scale"]));
   }
 
   // Pivots and offsets
   if (transformData["scalingOffset"] != null){
-    lScalingOffsetM.setPositionFromVector3(tempVec.copyFromArray(transformData["scalingOffset"]));
+    lScalingOffsetM.setPositionFromVector3(tempVec.copyFromUnknown(transformData["scalingOffset"]));
   }
   if (transformData["scalingPivot"] != null){
-    lScalingPivotM.setPositionFromVector3(tempVec.copyFromArray(transformData["scalingPivot"]));
+    lScalingPivotM.setPositionFromVector3(tempVec.copyFromUnknown(transformData["scalingPivot"]));
   }
   if (transformData["rotationOffset"] != null){
-    lRotationOffsetM.setPositionFromVector3(tempVec.copyFromArray(transformData["rotationOffset"]));
+    lRotationOffsetM.setPositionFromVector3(tempVec.copyFromUnknown(transformData["rotationOffset"]));
   }
   if (transformData["rotationPivot"] != null){
-    lRotationPivotM.setPositionFromVector3(tempVec.copyFromArray(transformData["rotationPivot"]));
+    lRotationPivotM.setPositionFromVector3(tempVec.copyFromUnknown(transformData["rotationPivot"]));
   }
   // parent transform
   if (transformData["parentMatrixWorld"] != null) {
