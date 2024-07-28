@@ -1,6 +1,6 @@
 name: three_js_controls
 description: "Flutter controls package converted from threejs and three_dart package."
-version: 0.0.4
+version: 0.0.5
 homepage: https://github.com/Knightro63/three_js/tree/main/packages/three_js_controls
 
 environment:
@@ -15,8 +15,7 @@ dependencies:
   three_js_math: ^0.0.2
   three_js_geometry: ^0.0.2
   three_js_curves: ^0.0.2
-  three_js_sensors:
-    path: ../three_js_sensors
+  simple_sensor: ^0.1.7
 
 dev_dependencies:
   flutter_test:

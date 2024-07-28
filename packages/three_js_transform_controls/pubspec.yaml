@@ -1,6 +1,6 @@
 name: three_js_transform_controls
 description: "Flutter transform controls package converted from threejs and three_dart package."
-version: 0.0.2
+version: 0.0.3
 homepage: https://github.com/Knightro63/three_js/tree/main/packages/three_js_transform_controls
 
 environment:

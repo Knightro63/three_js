@@ -194,13 +194,13 @@ class _UIPageState extends State<UIScreen> {
           control.setScaleSnap( 0.25 );
           break;
         case 'w':
-          control.setMode( 'translate' );
+          control.setMode(GizmoType.translate);
           break;
         case 'e':
-          control.setMode( 'rotate' );
+          control.setMode(GizmoType.rotate);
           break;
         case 'r':
-          control.setMode( 'scale' );
+          control.setMode(GizmoType.scale);
           break;
         case 'c':
           if(holdingControl){
@@ -760,7 +760,7 @@ class _UIPageState extends State<UIScreen> {
 
                                   });
                                 },
-                                child: Icon(Icons.arrow_back_ios_new_rounded,size:10),
+                                child: const Icon(Icons.arrow_back_ios_new_rounded,size:10),
                               ),
                               EnterTextFormField(
                                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
@@ -800,7 +800,7 @@ class _UIPageState extends State<UIScreen> {
                                     intersected!.geometry = smoothGeometry;
                                   });
                                 },
-                                child: Icon(Icons.arrow_forward_ios_rounded,size:10),
+                                child: const Icon(Icons.arrow_forward_ios_rounded,size:10),
                               )
                             ],
                           )
@@ -1407,13 +1407,13 @@ class _UIPageState extends State<UIScreen> {
                       InkWell(
                         onTap: (){
                           setState(() {
-                            control.setMode( 'translate' );
+                            control.setMode(GizmoType.translate);
                           });
                         },
                         child:Container(
                           width: 35,
                           height: 35,
-                          color: threeJs.mounted && control.enabled && control.mode == 'translate'? CSS.darkTheme.secondaryHeaderColor.withAlpha(200):CSS.darkTheme.cardColor.withAlpha(200),
+                          color: threeJs.mounted && control.enabled && control.mode == GizmoType.translate? CSS.darkTheme.secondaryHeaderColor.withAlpha(200):CSS.darkTheme.cardColor.withAlpha(200),
                           alignment: Alignment.center,
                           child: const Icon(
                             Icons.control_camera,
@@ -1424,14 +1424,14 @@ class _UIPageState extends State<UIScreen> {
                       InkWell(
                         onTap: (){
                           setState(() {
-                            control.setMode( 'rotate' );
+                            control.setMode(GizmoType.rotate);
                           });
                         },
                         child:Container(
                           width: 35,
                           height: 35,
                           margin: const EdgeInsets.only(top: 2),
-                          color: threeJs.mounted && control.enabled && control.mode == 'rotate'? CSS.darkTheme.secondaryHeaderColor.withAlpha(200):CSS.darkTheme.cardColor.withAlpha(200),
+                          color: threeJs.mounted && control.enabled && control.mode == GizmoType.rotate? CSS.darkTheme.secondaryHeaderColor.withAlpha(200):CSS.darkTheme.cardColor.withAlpha(200),
                           alignment: Alignment.center,
                           child: const Icon(
                             Icons.cached,
@@ -1442,14 +1442,14 @@ class _UIPageState extends State<UIScreen> {
                       InkWell(
                         onTap: (){
                           setState(() {
-                            control.setMode( 'scale' );
+                            control.setMode(GizmoType.scale);
                           });
                         },
                         child: Container(
                           width: 35,
                           height: 35,
                           margin: const EdgeInsets.only(top: 2),
-                          color: threeJs.mounted && control.enabled && control.mode == 'scale'? CSS.darkTheme.secondaryHeaderColor.withAlpha(200):CSS.darkTheme.cardColor.withAlpha(200),
+                          color: threeJs.mounted && control.enabled && control.mode == GizmoType.scale? CSS.darkTheme.secondaryHeaderColor.withAlpha(200):CSS.darkTheme.cardColor.withAlpha(200),
                           alignment: Alignment.center,
                           child: const Icon(
                             Icons.aspect_ratio,

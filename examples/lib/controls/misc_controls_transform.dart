@@ -136,13 +136,13 @@ class _MyAppState extends State<MiscControlsTransform> {
           control.setScaleSnap( 0.25 );
           break;
         case 'w':
-          control.setMode( 'translate' );
+          control.setMode(GizmoType.translate );
           break;
         case 'e':
-          control.setMode( 'rotate' );
+          control.setMode(GizmoType.rotate);
           break;
         case 'r':
-          control.setMode( 'scale' );
+          control.setMode(GizmoType.scale);
           break;
         case 'c':
           final position = threeJs.camera.position.clone();
