@@ -77,7 +77,7 @@ class FBXLoader extends Loader {
   /// [manager] — The [loadingManager] for the loader to use. Default is [DefaultLoadingManager].
   /// 
   /// Creates a new [FontLoader].
-  FBXLoader({LoadingManager? manager, required int width, required int height}):super(manager){
+  FBXLoader({LoadingManager? manager, int width = 1, int height = 1}):super(manager){
     innerHeight = height;
     innerWidth = width;
     _loader = FileLoader(manager);
@@ -151,8 +151,6 @@ class FBXLoader extends Loader {
       _fbxTree = _TextParser().parse(fbxText);
     }
 
-    // console.log( _fbxTree );
-
     TextureLoader textureLoader = TextureLoader(manager: manager)
         .setPath((resourcePath == '' || resourcePath == null) ? path : '')
         .setCrossOrigin(crossOrigin);
@@ -180,7 +178,6 @@ class __FBXTreeParser {
   Future<AnimationObject> parse() async {
     connections = parseConnections();
     final images = parseImages();
-
     final textures = await parseTextures(images);
     final materials = parseMaterials(textures);
     final deformers = parseDeformers();
@@ -330,7 +327,6 @@ class __FBXTreeParser {
   // to images in _FBXTree.Objects.Video
   Future<Map<int,Texture>> parseTextures(images) async {
     final Map<int,Texture> textureMap = {};
-
     if (_fbxTree.objects?["Texture"] != null) {
       final textureNodes = _fbxTree.objects!["Texture"];
       for (final nodeID in textureNodes.keys) {
@@ -347,7 +343,6 @@ class __FBXTreeParser {
     final Texture texture = await loadTexture(textureNode, images);
 
     texture.id = textureNode["id"];
-
     texture.name = textureNode["attrName"];
 
     final wrapModeU = textureNode["WrapModeU"];
@@ -364,7 +359,6 @@ class __FBXTreeParser {
 
     if (textureNode["Scaling"] != null) {
       final values = textureNode["Scaling"].value;
-
       texture.repeat.x = values[0];
       texture.repeat.y = values[1];
     }
@@ -377,13 +371,14 @@ class __FBXTreeParser {
     String fileName = '';
 
     final currentPath = textureLoader.path;
-
     final children = connections[textureNode["id"]]["children"];
 
     if (children != null && children.length > 0 && images[children[0]["ID"]] != null) {
       fileName = images[children[0]["ID"]];
       if (fileName.indexOf('blob:') == 0 || fileName.indexOf('data:') == 0) {
         textureLoader.setPath('');
+      }else{
+        fileName = fileName.split('/').last;
       }
     }
 
@@ -401,7 +396,7 @@ class __FBXTreeParser {
       } 
       else {
         loader.setPath(textureLoader.path);
-        texture = (await loader.fromPath(fileName)) as Texture;
+        texture = (await loader.unknown(fileName)) as Texture;
       }
     } 
     else if (extension == 'psd') {
@@ -409,7 +404,7 @@ class __FBXTreeParser {
       texture = Texture();
     } 
     else {
-      texture = (await textureLoader.fromPath(fileName)) as Texture;
+      texture = (await textureLoader.unknown(fileName)) as Texture;
     }
 
     textureLoader.setPath(currentPath);
@@ -417,8 +412,8 @@ class __FBXTreeParser {
   }
 
   // Parse nodes in _FBXTree.Objects.Material
-  Map parseMaterials(textureMap) {
-    final Map<dynamic,dynamic> materialMap = {};
+  Map<int?,Material> parseMaterials(textureMap) {
+    final Map<int?,Material> materialMap = {};
 
     if (_fbxTree.objects?["Material"] != null) {
       final materialNodes = _fbxTree.objects!["Material"];
@@ -503,11 +498,11 @@ class __FBXTreeParser {
     }
 
     if (materialNode["EmissiveFactor"] != null) {
-      parameters["emissiveIntensity"] =double.parse(materialNode["EmissiveFactor"]["value"]);
+      parameters["emissiveIntensity"] = double.parse(materialNode["EmissiveFactor"]["value"].toString());
     }
 
     if (materialNode["Opacity"] != null) {
-      parameters["opacity"] =double.parse(materialNode["Opacity"]["value"].toString());
+      parameters["opacity"] = double.parse(materialNode["Opacity"]["value"].toString());
     }
 
     if (parameters["opacity"] != null && parameters["opacity"] < 1.0) {
@@ -515,11 +510,11 @@ class __FBXTreeParser {
     }
 
     if (materialNode["ReflectionFactor"] != null) {
-      parameters["reflectivity"] = materialNode["ReflectionFactor"]["value"];
+      parameters["reflectivity"] = double.parse(materialNode["ReflectionFactor"]["value"].toString());
     }
 
     if (materialNode["Shininess"] != null) {
-      parameters["shininess"] = materialNode["Shininess"]["value"];
+      parameters["shininess"] = double.parse(materialNode["Shininess"]["value"].toString());
     }
 
     if (materialNode["Specular"] != null) {
@@ -735,7 +730,7 @@ class __FBXTreeParser {
   }
 
   // create the main Group() to be returned by the loader
-  void parseScene(deformers, Map geometryMap, Map materialMap) {
+  void parseScene(deformers, Map<int?,BufferGeometry> geometryMap, Map<int?,Material> materialMap) {
     sceneGraph = AnimationObject();
 
     Map modelMap = parseModels(deformers["skeletons"], geometryMap, materialMap);
@@ -789,7 +784,7 @@ class __FBXTreeParser {
   }
 
   // parse nodes in _FBXTree.Objects.Model
-  Map parseModels(skeletons, geometryMap, materialMap) {
+  Map parseModels(skeletons, Map<int?,BufferGeometry> geometryMap, Map<int?,Material> materialMap) {
     final modelMap = {};
     final modelNodes = _fbxTree.objects?["Model"] ?? {};
 
@@ -912,8 +907,7 @@ class __FBXTreeParser {
       num width = innerWidth;
       num height = innerHeight;
 
-      if (cameraAttribute['AspectWidth'] != null &&
-          cameraAttribute['AspectHeight'] != null) {
+      if (cameraAttribute['AspectWidth'] != null && cameraAttribute['AspectHeight'] != null) {
         width = cameraAttribute['AspectWidth']['value'];
         height = cameraAttribute['AspectHeight']['value'];
       }
@@ -1048,7 +1042,7 @@ class __FBXTreeParser {
     return model;
   }
 
-  Mesh createMesh(relationships, Map geometryMap, materialMap) {
+  Mesh createMesh(relationships, Map<int?,BufferGeometry> geometryMap, Map<int?,Material> materialMap) {
     late Mesh model;
     BufferGeometry? geometry;
     Material? material;
@@ -1253,8 +1247,8 @@ class __FBXTreeParser {
 // parse Geometry data from _FBXTree and return map of BufferGeometries
 class _GeometryParser {
   // Parse nodes in _FBXTree.Objects.Geometry
-  Map parse(deformers) {
-    final geometryMap = {};
+  Map<int?,BufferGeometry> parse(deformers) {
+    final Map<int?,BufferGeometry> geometryMap = {};
     if (_fbxTree.objects?["Geometry"] != null) {
       final geoNodes = _fbxTree.objects!["Geometry"];
       
@@ -1262,7 +1256,7 @@ class _GeometryParser {
         final relationships = connections[_parseInt(nodeID)];
         final geo = parseGeometry(relationships, geoNodes[nodeID], deformers);
 
-        geometryMap[_parseInt(nodeID)] = geo;
+        geometryMap[_parseInt(nodeID)] = geo!;
       }
     }
 
@@ -1382,7 +1376,6 @@ class _GeometryParser {
     }
 
     buffers.uvs.asMap().forEach((i, uvBuffer) {
-      // subsequent uv buffers are called 'uv1', 'uv2', ...
       String name = 'uv${(i + 1)}';
 
       // the first uv buffer is just called 'uv'
@@ -1527,8 +1520,7 @@ class _GeometryParser {
       facePositionIndexes.addAll([vertexIndex * 3, vertexIndex * 3 + 1, vertexIndex * 3 + 2]);
 
       if (geoInfo["color"] != null) {
-        final data = _getData(
-            polygonVertexIndex, polygonIndex, vertexIndex, geoInfo["color"]);
+        final data = _getData(polygonVertexIndex, polygonIndex, vertexIndex, geoInfo["color"]);
 
         faceColors.addAll([data[0], data[1], data[2]]);
       }
@@ -1600,13 +1592,11 @@ class _GeometryParser {
       if (geoInfo["uv"] != null) {
         geoInfo["uv"].asMap().forEach((i, uv) {
           final data = _getData(polygonVertexIndex, polygonIndex, vertexIndex, uv);
-
           if (faceUVs.length == i) {
             faceUVs.add([]);
           }
 
-          faceUVs[i].add(data[0]);
-          faceUVs[i].add(data[1]);
+          faceUVs[i].addAll([data[0],data[1]]);
         });
       }
 
@@ -1614,16 +1604,17 @@ class _GeometryParser {
 
       if (endOfFace) {
         scope.genFace(
-            buffers,
-            geoInfo,
-            facePositionIndexes,
-            materialIndex,
-            faceNormals,
-            faceColors,
-            faceUVs,
-            faceWeights,
-            faceWeightIndices,
-            faceLength);
+          buffers,
+          geoInfo,
+          facePositionIndexes,
+          materialIndex,
+          faceNormals,
+          faceColors,
+          faceUVs,
+          faceWeights,
+          faceWeightIndices,
+          faceLength
+        );
 
         polygonIndex++;
         faceLength = 0;
@@ -1733,19 +1724,23 @@ class _GeometryParser {
         buffers.normal.add(faceNormals[i * 3 + 1]);
         buffers.normal.add(faceNormals[i * 3 + 2]);
       }
-
+      
       if (geoInfo["uv"] != null) {
-        geoInfo["uv"].asMap().forEach((j, uv) {
-          if (buffers.uvs.length == j) buffers.uvs.add([]);
+        final map = (geoInfo["uv"] as List).asMap();
 
-          buffers.uvs[j].add(faceUVs[j][0]);
-          buffers.uvs[j].add(faceUVs[j][1]);
-
-          buffers.uvs[j].add(faceUVs[j][(i - 1) * 2]);
-          buffers.uvs[j].add(faceUVs[j][(i - 1) * 2 + 1]);
-
-          buffers.uvs[j].add(faceUVs[j][i * 2]);
-          buffers.uvs[j].add(faceUVs[j][i * 2 + 1]);
+        map.forEach((j, uv) {
+          if ( buffers.uvs.length == j ){ 
+            buffers.uvs.add([]);
+          }
+          
+          buffers.uvs[j].addAll([
+            faceUVs[j][0],
+            faceUVs[j][1],
+            faceUVs[j][(i - 1) * 2],
+            faceUVs[j][(i - 1) * 2 + 1],
+            faceUVs[j][i * 2],
+            faceUVs[j][i * 2 + 1]
+          ]);
         });
       }
     }
@@ -2125,10 +2120,11 @@ class _AnimationParser {
                 layerCurveNodes.add(node);
               }
 
-              if (layerCurveNodes[i] != null){
+              if (i < layerCurveNodes.length && layerCurveNodes[i] != null){
                 layerCurveNodes[i][curveNode["attr"]] = curveNode;
               }
-            } else if (curveNode.curves.morph != null) {
+            } 
+            else if (curveNode['curves']?['morph'] != null) {
               if (layerCurveNodes[i] == null) {
                 final deformerID =
                     connections[child["ID"]].parents.filter((parent) {
@@ -2238,8 +2234,7 @@ class _AnimationParser {
       //if (rotationTrack != null) 
         tracks.add(rotationTrack);
     }
-
-    if (rawTracks["S"] != null && rawTracks["S"]["curves"].keys.isNotEmpty()) {
+    if (rawTracks["S"]?["curves"]?.keys != null && rawTracks["S"]["curves"].keys.isNotEmpty) {
       final scaleTrack = _generateVectorTrack(rawTracks["modelName"],
           rawTracks["S"]["curves"], initialScale, 'scale');
       if (scaleTrack != null) tracks.add(scaleTrack);
@@ -2465,8 +2460,8 @@ class _AnimationParser {
           nextValue += step;
         }
 
-        curve["times"] = _inject(curve["times"], i, interpolatedTimes);
-        curve["values"] = _inject(curve["values"], i, interpolatedValues);
+        curve["times"] = _inject(List<double>.from(curve["times"]), i, List<double>.from(interpolatedTimes));
+        curve["values"] = _inject(List<double>.from(curve["values"]), i, List<double>.from(interpolatedValues));
       }
     }
   }
@@ -3322,7 +3317,7 @@ num _convertFBXTimeToSeconds(int time) {
 final dataArray = [];
 
 // extracts the data from the correct position in the FBX array based on indexing type
-_getData(int polygonVertexIndex, int polygonIndex,int vertexIndex, infoObject) {
+_getData(int polygonVertexIndex, int polygonIndex, int vertexIndex, infoObject) {
   int index = 0;
 
   switch (infoObject["mappingType"]) {
@@ -3382,7 +3377,7 @@ Matrix4 _generateTransform(Map transformData) {
   }
   if (transformData["preRotation"] != null) {
     List<double> array = List<double>.from(transformData["preRotation"]
-        .map((e) => e.toRad())
+        .map((e) => (e as double).toRad())
         .toList());
     array.add(RotationOrders
         .values[transformData["eulerOrder"]].index
@@ -3392,17 +3387,17 @@ Matrix4 _generateTransform(Map transformData) {
 
   if (transformData["rotation"] != null) {
     List<double> array = List<double>.from(transformData["rotation"]
-        .map((e) => e.toRad())
+        .map((e) => (e as double).toRad())
         .toList());
     array.add(RotationOrders
-        .values[transformData["eulerOrder"]].index
+        .fromString(transformData["eulerOrder"]).index
         .toDouble());
     lRotationM.makeRotationFromEuler(tempEuler.fromArray(array));
   }
 
   if (transformData["postRotation"] != null) {
     List<double> array = List<double>.from(
-        transformData["postRotation"].map((e) => e.ToRad()).toList());
+        transformData["postRotation"].map((e) => (e as double).toRad()).toList());
     array.add(RotationOrders
         .values[transformData["eulerOrder"]].index
         .toDouble());
@@ -3553,20 +3548,24 @@ _slice(a, b, int from, num to) {
     if (a.length == j) {
       a.add(b[i]);
     }
+    else{
+      a[j] = b[i];
+    }
   }
 
   return a;
 }
 
 // _inject array a2 into array a1 at index
-_inject(a1, int index, a2) {
-  return a1.slice(0, index).concat(a2).concat(a1._slice(index));
+List<double> _inject(List<double> a1, int index, List<double> a2) {
+  return a1.sublist(0, index)
+    ..addAll(a2)
+    ..addAll(a1.sublist(index));
 }
 
 int? _parseInt( v) {
   return int.tryParse(v.toString());
 }
-
 
 class _NodeAttr{
   _NodeAttr({

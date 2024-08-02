@@ -57,7 +57,7 @@ class TGALoader extends DataTextureLoader {
   @override
   Future<DataTexture?> fromAsset(String asset, {String? package}) async{
     _init();
-    ThreeFile? tf = await _loader.fromAsset(asset,package: package);
+    ThreeFile? tf = await _loader.fromAsset(asset, package: package);
     return tf == null?null:_parse(tf.data);
   }
   
@@ -251,13 +251,14 @@ class TGALoader extends DataTextureLoader {
 
 		}
 
-		Uint8List tgaGetImageData8bits(Uint8List imageData, int yStart, int yStep, int yEnd, int xStart,int xStep, int xEnd, image, palettes ) {
+		Uint8List tgaGetImageData8bits(Uint8List imageData, int yStart, int yStep, int yEnd, int xStart,int xStep, int xEnd, Uint8List image, Uint8List palettes ) {
 			final colormap = palettes;
-			int color, i = 0, x, y;
+			int color, i = 0;
 			final width = header['width'] as int;
 
-			for ( y = yStart; y != yEnd; y += yStep ) {
-				for ( x = xStart; x == xEnd; x += xStep, i ++ ) {
+			//for ( y = yStart; y != yEnd; y += yStep ) {
+      for (int y = yEnd+1; y < yStart+1; y += yStep.abs() ) {
+				for (int x = xStart; x == xEnd; x += xStep, i ++ ) {
 					color = image[ i ];
 					imageData[ ( x + width * y ) * 4 + 3 ] = 255;
 					imageData[ ( x + width * y ) * 4 + 2 ] = colormap[ ( color * 3 ) + 0 ];
@@ -269,12 +270,13 @@ class TGALoader extends DataTextureLoader {
 			return imageData;
 		}
 
-		Uint8List tgaGetImageData16bits(Uint8List imageData, int yStart, int yStep, int yEnd, int xStart,int xStep, int xEnd, image ) {
-			int color, i = 0, x, y;
+		Uint8List tgaGetImageData16bits(Uint8List imageData, int yStart, int yStep, int yEnd, int xStart,int xStep, int xEnd, Uint8List image ) {
+			int color, i = 0;
 			final width = header['width'] as int;
 
-			for ( y = yStart; y != yEnd; y += yStep ) {
-				for ( x = xStart; x != xEnd; x += xStep, i += 2 ) {
+			//for ( y = yStart; y != yEnd; y += yStep ) {
+      for (int y = yEnd+1; y < yStart+1; y += yStep.abs() ) {
+				for (int x = xStart; x != xEnd; x += xStep, i += 2 ) {
 					color = image[ i + 0 ] + ( image[ i + 1 ] << 8 );
 					imageData[ ( x + width * y ) * 4 + 0 ] = ( color & 0x7C00 ) >> 7;
 					imageData[ ( x + width * y ) * 4 + 1 ] = ( color & 0x03E0 ) >> 2;
@@ -286,12 +288,12 @@ class TGALoader extends DataTextureLoader {
 			return imageData;
 		}
 
-		Uint8List tgaGetImageData24bits( imageData, int yStart, int yStep, int yEnd, int xStart,int xStep, int xEnd, image ) {
-			int i = 0, x, y;
+		Uint8List tgaGetImageData24bits(Uint8List imageData, int yStart, int yStep, int yEnd, int xStart,int xStep, int xEnd, Uint8List image ) {
+			int i = 0;
 			final width = header['width'] as int;
-
-			for ( y = yStart; y != yEnd; y += yStep ) {
-				for ( x = xStart; x != xEnd; x += xStep, i += 3 ) {
+			//for (int y = yStart; y != yEnd; y += yStep ) {
+			for (int y = yEnd+1; y < yStart+1; y += yStep.abs() ) {
+				for (int x = xStart; x != xEnd; x += xStep, i += 3 ) {
 					imageData[ ( x + width * y ) * 4 + 3 ] = 255;
 					imageData[ ( x + width * y ) * 4 + 2 ] = image[ i + 0 ];
 					imageData[ ( x + width * y ) * 4 + 1 ] = image[ i + 1 ];
@@ -302,12 +304,13 @@ class TGALoader extends DataTextureLoader {
 			return imageData;
 		}
 
-		Uint8List tgaGetImageData32bits(Uint8List imageData, int yStart, int yStep, int yEnd, int xStart,int xStep, int xEnd, image ) {
-			int i = 0, x, y;
+		Uint8List tgaGetImageData32bits(Uint8List imageData, int yStart, int yStep, int yEnd, int xStart,int xStep, int xEnd, Uint8List image ) {
+			int i = 0;
 			final width = header['width'] as int;
 
-			for ( y = yStart; y != yEnd; y += yStep ) {
-				for ( x = xStart; x != xEnd; x += xStep, i += 4 ) {
+			// for ( y = yStart; y != yEnd; y += yStep ) {
+      for (int y = yEnd+1; y < yStart+1; y += yStep.abs() ) {
+				for (int x = xStart; x != xEnd; x += xStep, i += 4 ) {
 					imageData[ ( x + width * y ) * 4 + 2 ] = image[ i + 0 ];
 					imageData[ ( x + width * y ) * 4 + 1 ] = image[ i + 1 ];
 					imageData[ ( x + width * y ) * 4 + 0 ] = image[ i + 2 ];
@@ -318,12 +321,13 @@ class TGALoader extends DataTextureLoader {
 			return imageData;
 		}
 
-		Uint8List tgaGetImageDataGrey8bits(Uint8List imageData, int yStart, int yStep, int yEnd, int xStart,int xStep, int xEnd, image ) {
-			int color, i = 0, x, y;
+		Uint8List tgaGetImageDataGrey8bits(Uint8List imageData, int yStart, int yStep, int yEnd, int xStart,int xStep, int xEnd, Uint8List image ) {
+			int color, i = 0;
 			final width = header['width'] as int;
 
-			for ( y = yStart; y != yEnd; y += yStep ) {
-				for ( x = xStart; x != xEnd; x += xStep, i ++ ) {
+			//for ( y = yStart; y != yEnd; y += yStep ) {
+      for (int y = yEnd+1; y < yStart+1; y += yStep.abs() ) {
+				for (int x = xStart; x != xEnd; x += xStep, i ++ ) {
 					color = image[ i ];
 					imageData[ ( x + width * y ) * 4 + 0 ] = color;
 					imageData[ ( x + width * y ) * 4 + 1 ] = color;
@@ -335,12 +339,13 @@ class TGALoader extends DataTextureLoader {
 			return imageData;
 		}
 
-		Uint8List tgaGetImageDataGrey16bits(Uint8List imageData, int yStart, int yStep, int yEnd, int xStart,int xStep, int xEnd, image ) {
-			int i = 0, x, y;
+		Uint8List tgaGetImageDataGrey16bits(Uint8List imageData, int yStart, int yStep, int yEnd, int xStart,int xStep, int xEnd, Uint8List image ) {
+			int i = 0;
 			final width = header['width'] as int;
 
-			for ( y = yStart; y != yEnd; y += yStep ) {
-				for ( x = xStart; x != xEnd; x += xStep, i += 2 ) {
+			//for ( y = yStart; y != yEnd; y += yStep ) {
+      for (int y = yEnd+1; y < yStart+1; y += yStep.abs() ) {
+				for (int x = xStart; x != xEnd; x += xStep, i += 2 ) {
 					imageData[ ( x + width * y ) * 4 + 0 ] = image[ i + 0 ];
 					imageData[ ( x + width * y ) * 4 + 1 ] = image[ i + 0 ];
 					imageData[ ( x + width * y ) * 4 + 2 ] = image[ i + 0 ];
@@ -351,7 +356,7 @@ class TGALoader extends DataTextureLoader {
 			return imageData;
 		}
 
-		Uint8List getTgaRGBA(Uint8List data, width, height, image, palette ) {
+		Uint8List getTgaRGBA(Uint8List data, int width, int height, Uint8List image, Uint8List? palette ) {
 			int xStart,
 				yStart,
 				xStep,
@@ -417,7 +422,7 @@ class TGALoader extends DataTextureLoader {
       else {
 				switch ( header['pixel_size'] ) {
 					case 8:
-						tgaGetImageData8bits( data, yStart, yStep, yEnd, xStart, xStep, xEnd, image, palette );
+						tgaGetImageData8bits( data, yStart, yStep, yEnd, xStart, xStep, xEnd, image, palette! );
 						break;
 					case 16:
 						tgaGetImageData16bits( data, yStart, yStep, yEnd, xStart, xStep, xEnd, image );
@@ -433,9 +438,6 @@ class TGALoader extends DataTextureLoader {
 				}
 			}
 
-			// Load image data according to specific method
-			// let func = 'tgaGetImageData' + (useGrey ? 'Grey' : '') + (header.pixel_size) + 'bits';
-			// func(data, yStart, yStep, yEnd, xStart, xStep, xEnd, width, image, palette );
 			return data;
 		}
 
@@ -448,7 +450,6 @@ class TGALoader extends DataTextureLoader {
 		}
 
 		offset += (header['id_length'] as int);
-
 		switch ( header['image_type'] ) {
 			case TGA_TYPE_RLE_INDEXED:
 				useRle = true;
@@ -471,19 +472,20 @@ class TGALoader extends DataTextureLoader {
 				break;
 		}
 
-		final imageData = Uint8List( (header['width'] as int) * (header['height'] as int) * 4 );
+		final Uint8List imageData = Uint8List( (header['width'] as int) * (header['height'] as int) * 4 );
 		final result = tgaParse( useRle, usePal, header, offset, content );
-		getTgaRGBA( imageData, header['width'], header['height'], result['pixel_data'], result['palettes'] );
+		getTgaRGBA( imageData, header['width'] as int, header['height'] as int, result['pixel_data'], result['palettes'] );
 
     final dt = DataTexture(
       Uint8Array.fromList(imageData),
       header['width'] as int,
-      header['height'] as int
+      header['height'] as int,
     );
 
     dt.flipY = true;
     dt.generateMipmaps = true;
     dt.minFilter = LinearMipmapLinearFilter;
+    dt.needsUpdate = true;
 
     return dt;
 	}

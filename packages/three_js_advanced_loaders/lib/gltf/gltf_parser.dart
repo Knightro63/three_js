@@ -1111,13 +1111,20 @@ class GLTFParser {
 
     if (cameraDef["type"] == 'perspective') {
       camera = PerspectiveCamera(
-          (params["yfov"] as double).toDeg(),
-          params["aspectRatio"] ?? 1,
-          params["znear"] ?? 1,
-          params["zfar"] ?? 2e6);
+        (params["yfov"].toDouble() as double).toDeg(),
+        params["aspectRatio"]?.toDouble() ?? 1.0,
+        params["znear"]?.toDouble() ?? 1.0,
+        params["zfar"]?.toDouble() ?? 2e6*1.0
+      );
     } else if (cameraDef["type"] == 'orthographic') {
-      camera = OrthographicCamera(-params["xmag"], params["xmag"],
-          params["ymag"], -params["ymag"], params["znear"], params["zfar"]);
+      camera = OrthographicCamera(
+        params["xmag"] == null?-1.0:-params["xmag"]?.toDouble(), 
+        params["xmag"]?.toDouble(),
+        params["ymag"]?.toDouble(), 
+        params["ymag"] == null?-1.0:-params["ymag"]?.toDouble(), 
+        params["znear"]?.toDouble(), 
+        params["zfar"]?.toDouble()
+      );
     }
 
     if (cameraDef["name"] != null){

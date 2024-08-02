@@ -74,8 +74,7 @@ class _MyAppState extends State<WebglMaterials> {
     final texture = three.DataTexture(generateTexture().data, 256, 256);
     texture.needsUpdate = true;
 
-    materials.add(
-        three.MeshLambertMaterial.fromMap({"map": texture, "transparent": true}));
+    materials.add(three.MeshLambertMaterial.fromMap({"map": texture, "transparent": true}));
     materials.add(three.MeshLambertMaterial.fromMap({"color": 0xdddddd}));
     materials.add(three.MeshPhongMaterial.fromMap({
       "color": 0xdddddd,

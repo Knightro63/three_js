@@ -575,12 +575,13 @@ class Material with EventDispatcher {
       }
     } else if(key == 'glslVersion'){
       glslVersion = newValue;
-    }
-    else if(key == ''){
+    }else if(key == ''){
 
+    }else if (key == 'emissiveIntensity') {
+      emissiveIntensity = newValue;
     }
     else {
-      throw ("Material.setValues key: $key newValue: $newValue is not support");
+      console.error("Material.setValues key: $key newValue: $newValue is not support");
     }
   }
 

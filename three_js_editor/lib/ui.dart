@@ -10,6 +10,7 @@ import 'package:three_js_editor/src/navigation/right_click.dart';
 import 'package:three_js_editor/src/styles/savedWidgets.dart';
 
 import 'package:three_js/three_js.dart' as three;
+import 'package:three_js_editor/ui/camera_control.dart';
 import 'package:three_js_helpers/three_js_helpers.dart';
 import 'package:three_js_geometry/three_js_geometry.dart';
 import 'package:three_js_transform_controls/three_js_transform_controls.dart';
@@ -21,6 +22,7 @@ import 'src/database/filePicker.dart';
 import 'src/styles/globals.dart';
 
 enum ShadingType{wireframe,solid,material}
+enum EditType{point,edge,face}
 class GridInfo{
   int divisions = 10;
   double size = 10;
@@ -33,7 +35,11 @@ class IntersectsInfo{
   List<three.Intersection> intersects = [];
   List<int> oInt = [];
 }
-
+class EditInfo{
+  bool active = false;
+  EditType type = EditType.point;
+  three.Object3D? object;
+}
 class UIScreen extends StatefulWidget {
   const UIScreen({Key? key}):super(key: key);
   @override
@@ -41,6 +47,8 @@ class UIScreen extends StatefulWidget {
 }
 
 class _UIPageState extends State<UIScreen> {
+  int avoid = 6;
+  EditInfo editInfo = EditInfo();
   bool resetNav = false;
   late three.ThreeJS threeJs;
 
@@ -87,6 +95,7 @@ class _UIPageState extends State<UIScreen> {
   ShadingType shading = ShadingType.solid;
   MarchingCubes? effect;
   three.Group mp = three.Group();
+  three.Group editObject = three.Group();
   three.TTFFont? font;
   double time = 0;
 
@@ -173,6 +182,7 @@ class _UIPageState extends State<UIScreen> {
     creteHelpers();
     threeJs.scene.add( control );
     threeJs.scene.add(helper);
+    threeJs.scene.add(editObject);
 
     threeJs.domElement.addEventListener(
       three.PeripheralType.resize, 
@@ -228,9 +238,18 @@ class _UIPageState extends State<UIScreen> {
             rightClick.openMenu('',Offset(mousePosition.x,mousePosition.y),[RightClickOptions.delete]);
           }
           break;
-        // case 'tab':
-        //   intersected?.material?.wireframe = intersected?.material?.wireframe != null? !intersected!.material!.wireframe:false;
-        //   break;
+        case 'tab':
+          if(intersected != null){
+            editModes([intersected!]);
+            editInfo.active = true;
+          }
+          else if(editInfo.active){
+            for(int i = 0; i < editObject.children.length; i++){
+              editObject.children[i].dispose();
+            }
+            editInfo.active = false;
+          }
+          break;
         case 'y':
           break;
         case 'z':
@@ -256,8 +275,8 @@ class _UIPageState extends State<UIScreen> {
     });
     threeJs.domElement.addEventListener(three.PeripheralType.pointerdown, (details){
       mousePosition = three.Vector2(details.clientX, details.clientY);
-      if(threeJs.scene.children.length > 5 && !control.dragging){
-        checkIntersection(threeJs.scene.children.sublist(5));
+      if(threeJs.scene.children.length > avoid && !control.dragging){
+        checkIntersection(threeJs.scene.children.sublist(avoid));
       }
     });
   }
@@ -282,34 +301,25 @@ class _UIPageState extends State<UIScreen> {
       ..computeLineDistances()
       ..scale.setValues(1,1,1)
     );
+    // final cc = CameraControl(
+    //   size: 150,
+    //   margin: const EdgeInsets.only(left: 35, bottom: 35),
+    //   screenSize: Size(120, 120), 
+    //   listenableKey: threeJs.globalKey,
+    //   rotationCamera: threeJs.camera
+    // );
 
-  //   final scene = three.Scene();
-  //   final camera = three.OrthographicCamera();
-  //   camera.position.z = 10;
-  //   final box = three.Mesh(three.BoxGeometry(),three.MeshPhongMaterial())
-  //     ..quaternion = threeJs.camera.quaternion;
-
-  //   scene.add(box);
-
-  //   final control = TransformControls(threeJs.camera, threeJs.globalKey);
-  //   control.
-  //   control.addEventListener('change', (event) {
-  //     threeJs.render();
-  //   });
-
-  //   control.addEventListener( 'dragging-changed', (event) {
-  //     orbit.enabled = ! event.value;
-  //   });
-  //   scene.add( control );
-  //   control.attach( box );
-  //   threeJs.renderer?.autoClear = false;
-  //   threeJs.postProcessor = ([double? dt]){
-  //     threeJs.renderer!.setViewport(0,0,threeJs.width,threeJs.height);
-  //     threeJs.renderer!.clear();
-  //     threeJs.renderer!.render( threeJs.scene, threeJs.camera );
-  //     threeJs.renderer!.clearDepth();
-  //     threeJs.renderer!.render( scene, camera);
-  //   };
+    // threeJs.addAnimationEvent((dt){
+    //   cc.update();
+    // });
+    // threeJs.renderer?.autoClear = false;
+    // threeJs.postProcessor = ([double? dt]){
+    //   threeJs.renderer!.setViewport(0,0,threeJs.width,threeJs.height);
+    //   threeJs.renderer!.clear();
+    //   threeJs.renderer!.render( threeJs.scene, threeJs.camera );
+    //   threeJs.renderer!.clearDepth();
+    //   threeJs.renderer!.render( cc.scene, cc.camera);
+    // };
   }
 
   three.Vector2 convertPosition(three.Vector2 location){
@@ -328,11 +338,11 @@ class _UIPageState extends State<UIScreen> {
       case LSICallbacks.clear:
         setState(() {
           resetNav = !resetNav;
-          if(threeJs.scene.children.length > 5){
-            for(int i = 4; i < threeJs.scene.children.length;i++){
+          if(threeJs.scene.children.length > avoid){
+            for(int i = avoid; i < threeJs.scene.children.length;i++){
               threeJs.scene.children[i].dispose();
             }
-            threeJs.scene.children.length = 5;
+            threeJs.scene.children.length = avoid;
           }
         });
         break;
@@ -352,26 +362,44 @@ class _UIPageState extends State<UIScreen> {
         materialWireframe(o.children,wireframe);
       }
     }
+
+      // final verts = o.geometry?.getAttributeFromString('position');
+      // final ind = o.geometry?.getIndex();
+
+      // for(int i = 0; i < (ind?.length ?? 0);i++){
+      //   final dotGeometry = three.BufferGeometry();
+      //   final List<double> vertices = [verts[ind!.getX(i)],verts[ind.getY(i)],verts[ind.getZ(i)]];
+      //   dotGeometry.setAttributeFromString('position', three.Float32BufferAttribute.fromList(vertices, 3));
+      //   final dotMaterial = three.PointsMaterial.fromMap( { 'size': 1, 'sizeAttenuation': false } );
+      //   final dot = three.Points( dotGeometry, dotMaterial );
+
+      //   editObject.add(dot);
+      // }
   }
-  // void editMode(three.Object3D obj){
-  //   editModes(List<three.Object3D> obj){
-  //     for(final o in obj){
-  //       if(o is! BoundingBoxHelper){
-  //         o.material?.wireframe = wireframe;
-  //         materialWireframe(o.children,wireframe);
-  //       }
-  //     }
-  //   }
-  //   List<three.Object3D> e = [];
-  //   if(obj is three.BufferGeometry || obj is three.Mesh){
-  //     e.add();
-  //     editModes(obj.children);
-  //   }
-  // }
+
+  void editModes(List<three.Object3D> obj){
+    for(final o in obj){
+      if(o is! BoundingBoxHelper){
+        o.material?.wireframe = true;
+        o.material?.colorWrite = true;
+        editModes(o.children);
+        if(editInfo.type == EditType.point){
+          three.Points particles = three.Points(o.geometry!.clone(), three.PointsMaterial.fromMap({"color": 0xffff00, "size": 4,'sizeAttenuation': false}));
+          editObject.add(particles);
+        }
+        // else if(editInfo.type == EditType.edge){
+        //   three.Points particles = three.Points(o.geometry!.clone(), three.Edge.fromMap({"color": 0xffff00, "size": 4,'sizeAttenuation': false}));
+        //   editObject.add(particles);
+        // }
+      }
+    }
+  }
+
   IntersectsInfo getIntersections(List<three.Object3D> objects){
     IntersectsInfo ii = IntersectsInfo([], []);
     int i = 0;
     for(final o in objects){
+      print(o.material?.color);
       if(o is three.Group || o is three.AnimationObject || o.runtimeType == three.Object3D){
         final inter = getIntersections(o.children);
         ii.intersects.addAll(inter.intersects);
@@ -408,7 +436,6 @@ class _UIPageState extends State<UIScreen> {
   void checkIntersection(List<three.Object3D> objects) {
     IntersectsInfo ii = getIntersections(objects);
     raycaster.setFromCamera(convertPosition(mousePosition), threeJs.camera);
-
     if (ii.intersects.isNotEmpty ) {
       if(intersected != objects[ii.oInt[0]]) {
         if(intersected != null){
@@ -831,7 +858,7 @@ class _UIPageState extends State<UIScreen> {
       ) 
     ];
 
-    for(int i = 5; i < threeJs.scene.children.length; i++){
+    for(int i = avoid; i < threeJs.scene.children.length; i++){
       final child = threeJs.scene.children[i];
       widgets.add(
         InkWell(
@@ -1058,7 +1085,7 @@ class _UIPageState extends State<UIScreen> {
                                   final three.BoundingBox box = three.BoundingBox();
                                   box.setFromObject(object!);
                                   BoundingBoxHelper h = BoundingBoxHelper(box)..visible = false;
-                                  object.scale = three.Vector3(0.01,0.01,0.01);
+                                  object.scale = three.Vector3(1,1,1);
                                   object.name = value.files[i].name;
                                   threeJs.scene.add(object.add(h));
                                 }
@@ -1502,7 +1529,7 @@ class _UIPageState extends State<UIScreen> {
                     children: [
                       InkWell(
                         onTap: (){
-                          materialWireframe(threeJs.scene.children.sublist(5), true);
+                          materialWireframe(threeJs.scene.children.sublist(avoid), true);
                           setState(() {
                             shading = ShadingType.wireframe;
                           });
@@ -1526,7 +1553,7 @@ class _UIPageState extends State<UIScreen> {
                       ),
                       InkWell(
                         onTap: (){
-                          materialWireframe(threeJs.scene.children.sublist(5), false);
+                          materialWireframe(threeJs.scene.children.sublist(avoid), false);
                           setState(() {
                             shading = ShadingType.solid;
                           });
@@ -1636,7 +1663,7 @@ class DecimalTextInputFormatter extends TextInputFormatter {
     TextSelection newSelection = newValue.selection;
     String truncated = newValue.text;
 
-    if (decimalRange != null) {
+    //if (decimalRange != null) {
       String value = newValue.text;
 
       if (value.contains(".") &&
@@ -1657,7 +1684,7 @@ class DecimalTextInputFormatter extends TextInputFormatter {
         selection: newSelection,
         composing: TextRange.empty,
       );
-    }
-    return newValue;
+    //}
+    //return newValue;
   }
 }

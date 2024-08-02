@@ -26,7 +26,6 @@ dependencies:
   three_js_tjs_loader: ^0.0.3
   three_js_postprocessing: ^0.0.2
   three_js_modifers: ^0.0.2
-  three_js_audio: ^0.0.2
 
 dev_dependencies:
   flutter_test:
