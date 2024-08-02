@@ -190,7 +190,6 @@ class _UIPageState extends State<UIScreen> {
     );
     threeJs.domElement.addEventListener(three.PeripheralType.keydown,(event) {
       event as LogicalKeyboardKey;
-      //print(event.keyLabel.toLowerCase());
       switch (event.keyLabel.toLowerCase()) {
         case 'meta left':
           holdingControl = true;
@@ -354,29 +353,36 @@ class _UIPageState extends State<UIScreen> {
       default:
     }
   }
-  void materialWireframe(List<three.Object3D> objects, bool wireframe){
+  void materialReset(List<three.Object3D> objects){
     for(final o in objects){
       if(o is! BoundingBoxHelper){
-        o.material?.wireframe = wireframe;
+        o.material?.vertexColors = false;
         o.material?.colorWrite = true;
-        materialWireframe(o.children,wireframe);
+        o.material?.wireframe = false;
+        materialReset(o.children);
       }
     }
-
-      // final verts = o.geometry?.getAttributeFromString('position');
-      // final ind = o.geometry?.getIndex();
-
-      // for(int i = 0; i < (ind?.length ?? 0);i++){
-      //   final dotGeometry = three.BufferGeometry();
-      //   final List<double> vertices = [verts[ind!.getX(i)],verts[ind.getY(i)],verts[ind.getZ(i)]];
-      //   dotGeometry.setAttributeFromString('position', three.Float32BufferAttribute.fromList(vertices, 3));
-      //   final dotMaterial = three.PointsMaterial.fromMap( { 'size': 1, 'sizeAttenuation': false } );
-      //   final dot = three.Points( dotGeometry, dotMaterial );
-
-      //   editObject.add(dot);
-      // }
   }
-
+  void materialWireframe(List<three.Object3D> objects){
+    for(final o in objects){
+      if(o is! BoundingBoxHelper){
+        o.material?.wireframe = true;
+        o.material?.vertexColors = false;
+        o.material?.colorWrite = true;
+        materialWireframe(o.children);
+      }
+    }
+  }
+  void materialVertexMode(List<three.Object3D> objects){
+    for(final o in objects){
+      if(o is! BoundingBoxHelper){
+        o.material?.wireframe = false;
+        o.material?.vertexColors = true;
+        o.material?.colorWrite = true;
+        materialVertexMode(o.children);
+      }
+    }
+  }
   void editModes(List<three.Object3D> obj){
     for(final o in obj){
       if(o is! BoundingBoxHelper){
@@ -387,10 +393,6 @@ class _UIPageState extends State<UIScreen> {
           three.Points particles = three.Points(o.geometry!.clone(), three.PointsMaterial.fromMap({"color": 0xffff00, "size": 4,'sizeAttenuation': false}));
           editObject.add(particles);
         }
-        // else if(editInfo.type == EditType.edge){
-        //   three.Points particles = three.Points(o.geometry!.clone(), three.Edge.fromMap({"color": 0xffff00, "size": 4,'sizeAttenuation': false}));
-        //   editObject.add(particles);
-        // }
       }
     }
   }
@@ -399,7 +401,6 @@ class _UIPageState extends State<UIScreen> {
     IntersectsInfo ii = IntersectsInfo([], []);
     int i = 0;
     for(final o in objects){
-      print(o.material?.color);
       if(o is three.Group || o is three.AnimationObject || o.runtimeType == three.Object3D){
         final inter = getIntersections(o.children);
         ii.intersects.addAll(inter.intersects);
@@ -1085,7 +1086,7 @@ class _UIPageState extends State<UIScreen> {
                                   final three.BoundingBox box = three.BoundingBox();
                                   box.setFromObject(object!);
                                   BoundingBoxHelper h = BoundingBoxHelper(box)..visible = false;
-                                  object.scale = three.Vector3(1,1,1);
+                                  object.scale = three.Vector3(0.01,0.01,0.01);
                                   object.name = value.files[i].name;
                                   threeJs.scene.add(object.add(h));
                                 }
@@ -1529,7 +1530,7 @@ class _UIPageState extends State<UIScreen> {
                     children: [
                       InkWell(
                         onTap: (){
-                          materialWireframe(threeJs.scene.children.sublist(avoid), true);
+                          materialWireframe(threeJs.scene.children.sublist(avoid));
                           setState(() {
                             shading = ShadingType.wireframe;
                           });
@@ -1553,7 +1554,7 @@ class _UIPageState extends State<UIScreen> {
                       ),
                       InkWell(
                         onTap: (){
-                          materialWireframe(threeJs.scene.children.sublist(avoid), false);
+                          materialReset(threeJs.scene.children.sublist(avoid));
                           setState(() {
                             shading = ShadingType.solid;
                           });
@@ -1574,14 +1575,17 @@ class _UIPageState extends State<UIScreen> {
                       ),
                       InkWell(
                         onTap: (){
-
+                          materialVertexMode(threeJs.scene.children.sublist(avoid));
+                          setState(() {
+                            shading = ShadingType.material;
+                          });
                         },
                         child:Container(
                           margin: const EdgeInsets.fromLTRB(0,0,2,0),
                           width: 25,
                           height: 25,
                           decoration: BoxDecoration(
-                            color: CSS.darkTheme.cardColor,
+                            color: shading == ShadingType.material?CSS.darkTheme.secondaryHeaderColor:CSS.darkTheme.cardColor,
                           ),
                           alignment: Alignment.center,
                           child: const Icon(

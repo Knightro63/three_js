@@ -123,13 +123,9 @@ class _MyAppState extends State<WebglLoaderFbx> {
     //final normalTexture = await textureLoader.loadAsync("assets/models/fbx/model_tex_u1_v1_normal.jpg", null);
 
     // model
-    final loader = three.FBXLoader(width: threeJs.width.toInt(), height: threeJs.height.toInt());
+    final loader = three.FBXLoader();
     final object = await loader.fromAsset( 'assets/models/fbx/SambaDancing.fbx');
     mixer = three.AnimationMixer(object!);
-    for(final child in object.children){//object.children.forEach((element) {
-      child.geometry?.computeVertexNormals();
-      //child.material?.flatShading = true;
-    }
 
     final action = mixer!.clipAction( object.animations[ 1 ] );
     action!.play();

@@ -1,202 +1,197 @@
+import 'dart:typed_data';
+import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
+import 'utils/hash_utils.dart';
+import 'utils/geometry_utils.dart';
+import 'utils/compute_disjoint_edges.dart';
 
-final _vec2 = Vector2.zero();
-final _vec3 = Vector3.zero();
-final _vec4 = Vector4.zero();
-final _hashes = [ '', '', '' ];
+Vector2 _vec2 = Vector2.zero();
+Vector3 _vec3 = Vector3.zero();
+Vector4 _vec4 = Vector4.zero();
+List<String> _hashes = ['', '', ''];
 
 class HalfEdgeMap {
+  // result data
+  Int32List? data;
+  Map<int, List<int>>? disjointConnections;
+  Map<int, List<int>>? unmatchedDisjointEdges;
+  int unmatchedEdges = -1;
+  int matchedEdges = -1;
 
-	HalfEdgeMap(geometry) {
-		// result data
-		this.data = null;
-		this.disjointConnections = null;
-		this.unmatchedDisjointEdges = null;
-		this.unmatchedEdges = - 1;
-		this.matchedEdges = - 1;
+  // options
+  bool useDrawRange = true;
+  bool useAllAttributes = false;
+  bool matchDisjointEdges = false;
+  double degenerateEpsilon = 1e-8;
 
-		// options
-		this.useDrawRange = true;
-		this.useAllAttributes = false;
-		this.matchDisjointEdges = false;
-		this.degenerateEpsilon = 1e-8;
+  HalfEdgeMap([BufferGeometry? geometry]) {
+    if (geometry != null) {
+      updateFrom(geometry);
+    }
+  }
 
-		if ( geometry ) {
-			updateFrom( geometry );
-		}
-	}
+  int getSiblingTriangleIndex(int triIndex, int edgeIndex) {
+    int otherIndex = data![triIndex * 3 + edgeIndex];
+    return otherIndex == -1 ? -1 : (otherIndex ~/ 3);
+  }
 
-	int getSiblingTriangleIndex( triIndex, edgeIndex ) {
-		final otherIndex = this.data[ triIndex * 3 + edgeIndex ];
-		return otherIndex == - 1 ? - 1 : ~ ~ ( otherIndex / 3 );
-	}
+  int getSiblingEdgeIndex(int triIndex, int edgeIndex) {
+    int otherIndex = data![triIndex * 3 + edgeIndex];
+    return otherIndex == -1 ? -1 : (otherIndex % 3);
+  }
 
-	int getSiblingEdgeIndex( triIndex, edgeIndex ) {
-		final otherIndex = this.data[ triIndex * 3 + edgeIndex ];
-		return otherIndex == - 1 ? - 1 : ( otherIndex % 3 );
-	}
+  List<int> getDisjointSiblingTriangleIndices(int triIndex, int edgeIndex) {
+    int index = triIndex * 3 + edgeIndex;
+    List<int>? arr = disjointConnections?[index];
+    return arr != null ? arr.map((i) => (i ~/ 3)).toList() : [];
+  }
 
-	List<int> getDisjointSiblingTriangleIndices( triIndex, edgeIndex ) {
-		final index = triIndex * 3 + edgeIndex;
-		final arr = this.disjointConnections.get( index );
-		return arr ? arr.map( i => ~ ~ ( i / 3 ) ) : [];
-	}
+  List<int> getDisjointSiblingEdgeIndices(int triIndex, int edgeIndex) {
+    int index = triIndex * 3 + edgeIndex;
+    List<int>? arr = disjointConnections?[index];
+    return arr != null ? arr.map((i) => i % 3).toList() : [];
+  }
 
-	getDisjointSiblingEdgeIndices( triIndex, edgeIndex ) {
-		final index = triIndex * 3 + edgeIndex;
-		final arr = this.disjointConnections.get( index );
-		return arr ? arr.map( i => i % 3 ) : [];
-	}
+  bool isFullyConnected() {
+    return unmatchedEdges == 0;
+  }
 
-	isFullyConnected() {
-		return this.unmatchedEdges == 0;
-	}
+  void updateFrom(BufferGeometry geometry) {
+    bool useAllAttributes = this.useAllAttributes;
+    bool useDrawRange = this.useDrawRange;
+    bool matchDisjointEdges = this.matchDisjointEdges;
+    double degenerateEpsilon = this.degenerateEpsilon;
+    // hashFunction old location
 
-	updateFrom( geometry ) {
+    // runs on the assumption that there is a 1 : 1 match of edges
+    Map<String, int> map = {};
 
-		const { useAllAttributes, useDrawRange, matchDisjointEdges, degenerateEpsilon } = this;
-		const hashFunction = useAllAttributes ? hashAllAttributes : hashPositionAttribute;
+    // attributes
+    var attributes = geometry.attributes;
+    var attrKeys = useAllAttributes ? attributes.keys.toList() : null;
+    var indexAttr = geometry.index;
+    var posAttr = attributes['position'];
 
-		// runs on the assumption that there is a 1 : 1 match of edges
-		const map = Map();
+    // hashPositionAttribute and hashAllAttributes new location
+    String hashPositionAttribute(int i) {
+      _vec3.fromBuffer(posAttr, i);
+      return hashVertex3(_vec3);
+    }
 
-		// attributes
-		const { attributes } = geometry;
-		const attrKeys = useAllAttributes ? Object.keys( attributes ) : null;
-		const indexAttr = geometry.index;
-		const posAttr = attributes.position;
+    String hashAllAttributes(int i) {
+      String result = '';
+      for (int k = 0, l = (attrKeys?.length ?? 0); k < l; k++) {
+        final Float32BufferAttribute attr = attributes[attrKeys![k]];
+        String str = '';
+        switch (attr.itemSize) {
+          case 1:
+            str = hashNumber(attr.getX(i)!.toDouble()).toString();
+            break;
+          case 2:
+            str = hashVertex2(_vec2.fromBuffer(attr, i));
+            break;
+          case 3:
+            str = hashVertex3(_vec3.fromBuffer(attr, i));
+            break;
+          case 4:
+            str = hashVertex4(_vec4.fromBuffer(attr, i));
+            break;
+        }
 
-		// get the potential number of triangles
-		let triCount = getTriCount( geometry );
-		const maxTriCount = triCount;
+        if (result != '') {
+          result += '|';
+        }
 
-		// get the real number of triangles from the based on the draw range
-		let offset = 0;
-		if ( useDrawRange ) {
+        result += str;
+      }
 
-			offset = geometry.drawRange.start;
-			if ( geometry.drawRange.count !== Infinity ) {
+      return result;
+    }
 
-				triCount = ~ ~ ( geometry.drawRange.count / 3 );
+    // hashFunction new location
+    var hashFunction = useAllAttributes ? hashAllAttributes : hashPositionAttribute;
 
-			}
+    // get the potential number of triangles
+    int triCount = getTriCount(geometry);
+    int maxTriCount = triCount;
 
-		}
+    // get the real number of triangles from the based on the draw range
+    int offset = 0;
+    if (useDrawRange) {
+      offset = geometry.drawRange['start']!;
+      if (geometry.drawRange['count'] != double.maxFinite.toInt()) {
+        triCount = (geometry.drawRange['count']! ~/ 3);
+      }
+    }
 
-		// initialize the connectivity buffer - 1 means no connectivity
-		let data = this.data;
-		if ( ! data || data.length < 3 * maxTriCount ) {
+    // initialize the connectivity buffer - 1 means no connectivity
+    var data = this.data;
+    if (data == null || data.length < 3 * maxTriCount) {
+      data = Int32List(3 * maxTriCount);
+    }
 
-			data = Int32Array( 3 * maxTriCount );
+    data.fillRange(0, data.length, -1);
 
-		}
+    // iterate over all triangles
+    int matchedEdges = 0;
+    List<int> unmatchedSet = [];
+    for (int i = offset, l = triCount * 3 + offset; i < l; i += 3) {
+      int i3 = i;
 
-		data.fill(-1);
+      for (int e = 0; e < 3; e++) {
+        int i0 = i3 + e;
+        if (indexAttr != null) {
+          i0 = indexAttr.getX(i0)!.toInt();
+        }
 
-		// iterate over all triangles
-		let matchedEdges = 0;
-		let unmatchedSet = Set();
-		for (int i = offset, l = triCount * 3 + offset; i < l; i += 3 ) {
-			final i3 = i;
+        _hashes[e] = hashFunction(i0);
+      }
 
-			for (int e = 0; e < 3; e ++ ) {
-				int i0 = i3 + e;
-				if ( indexAttr ) {
-					i0 = indexAttr.getX( i0 );
-				}
+      for (int e = 0; e < 3; e++) {
+        int nextE = (e + 1) % 3;
+        String vh0 = _hashes[e];
+        String vh1 = _hashes[nextE];
+        String reverseHash = '${vh1}_$vh0';
 
-				_hashes[ e ] = hashFunction( i0 );
-			}
+        if (map.containsKey(reverseHash)) {
+          // create a reference between the two triangles and clear the hash
+          int index = i3 + e;
+          int otherIndex = map[reverseHash]!;
+          data[index] = otherIndex;
+          data[otherIndex] = index;
+          map.remove(reverseHash);
+          matchedEdges += 2;
+          unmatchedSet.remove(otherIndex);
+        } else {
+          // save the triangle and triangle edge index captured in one value
+          // triIndex = ~ ~ ( i0 / 3 );
+          // edgeIndex = i0 % 3;
+          String hash = '${vh0}_$vh1';
+          int index = i3 + e;
+          map[hash] = index;
+          unmatchedSet.add(index);
+        }
+      }
+    }
 
-			for (int e = 0; e < 3; e ++ ) {
-				final nextE = ( e + 1 ) % 3;
-				final vh0 = _hashes[ e ];
-				final vh1 = _hashes[ nextE ];
+    if (matchDisjointEdges) {
+      var result = computeDisjointEdges(geometry, unmatchedSet, degenerateEpsilon);
 
-				final reverseHash = '${ vh1 }_$vh0';
-				if ( map.containsKey( reverseHash ) ) {
+      unmatchedSet.clear();
+      result['fragmentMap'].forEach((key, value) {
+        value['forward'].forEach((item) => unmatchedSet.add(item['index']));
+        value['reverse'].forEach((item) => unmatchedSet.add(item['index']));
+      });
 
-					// create a reference between the two triangles and clear the hash
-					final index = i3 + e;
-					final otherIndex = map.get( reverseHash );
-					data[ index ] = otherIndex;
-					data[ otherIndex ] = index;
-					map.remove( reverseHash );
-					matchedEdges += 2;
-					unmatchedSet.remove( otherIndex );
+      unmatchedDisjointEdges = result['fragmentMap'];
+      disjointConnections = result['disjointConnectivityMap'];
+      matchedEdges = triCount * 3 - unmatchedSet.length;
+    }
 
-				} else {
+    this.matchedEdges = matchedEdges;
+    unmatchedEdges = unmatchedSet.length;
+    this.data = data;
+  }
 
-					// save the triangle and triangle edge index captured in one value
-					// triIndex = ~ ~ ( i0 / 3 );
-					// edgeIndex = i0 % 3;
-					final hash = '${vh0}_$vh1';
-					final index = i3 + e;
-					map.set( hash, index );
-					unmatchedSet.add( index );
-
-				}
-
-			}
-
-		}
-
-		if ( matchDisjointEdges ) {
-
-			const {
-				fragmentMap,
-				disjointConnectivityMap,
-			} = computeDisjointEdges( geometry, unmatchedSet, degenerateEpsilon );
-
-			unmatchedSet.clear();
-			fragmentMap.forEach( ( { forward, reverse } ) => {
-				forward.forEach( ( { index } ) => unmatchedSet.add( index ) );
-				reverse.forEach( ( { index } ) => unmatchedSet.add( index ) );
-			} );
-
-			this.unmatchedDisjointEdges = fragmentMap;
-			this.disjointConnections = disjointConnectivityMap;
-			matchedEdges = triCount * 3 - unmatchedSet.size;
-		}
-
-		this.matchedEdges = matchedEdges;
-		this.unmatchedEdges = unmatchedSet.size;
-		this.data = data;
-
-		function hashPositionAttribute(int i ) {
-			_vec3.fromBuffer( posAttr, i );
-			return hashVertex3( _vec3 );
-		}
-
-		String hashAllAttributes(int i ) {
-			String result = '';
-			for (int k = 0, l = attrKeys.length; k < l; k ++ ) {
-
-				final attr = attributes[ attrKeys[ k ] ];
-				let str;
-				switch ( attr.itemSize ) {
-					case 1:
-						str = hashNumber( attr.getX( i ) );
-						break;
-					case 2:
-						str = hashVertex2( _vec2.fromBuffer( attr, i ) );
-						break;
-					case 3:
-						str = hashVertex3( _vec3.fromBuffer( attr, i ) );
-						break;
-					case 4:
-						str = hashVertex4( _vec4.fromBuffer( attr, i ) );
-						break;
-				}
-
-				if ( result != '' ) {
-					result += '|';
-				}
-
-				result += str;
-			}
-
-			return result;
-		}
-	}
+  // hashPositionAttribute and hashAllAttributes old location
 }
