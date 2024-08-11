@@ -29,6 +29,8 @@ const List<String> filesJson = [
   "webgl_loader_texture_basis",
   "webgl_sprites",
   "webgl_points_sprites",
+  "webgl_geometry_terrain",
+  "webgl_geometry_terrain_raycast",
   "webgl_loader_collada",
   "webgl_loader_collada_skinning",
   "webgl_loader_collada_kinematics",

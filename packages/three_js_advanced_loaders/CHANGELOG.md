@@ -1,3 +1,9 @@
+## 0.0.5
+
+* Fixed bug in gltf loader.
+* Fixed bug in fbx loader.
+* Fixed bug in tga loader.
+
 ## 0.0.4
 
 * Updated to newest version of three_js_controls.

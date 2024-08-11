@@ -44,6 +44,8 @@ import 'package:example/others/webgl_interactive_voxelpainter.dart';
 import 'package:example/others/webgl_lod.dart';
 import 'package:example/others/webgl_portal.dart';
 import 'package:example/src/files_json.dart';
+import 'package:example/terrain/webgl_geometry_terrain.dart';
+import 'package:example/terrain/webgl_geometry_terrain_raycast.dart';
 import 'package:example/volume/webgl_ubo_arrays.dart';
 import 'package:example/shadow/webgl_lensflars.dart';
 import 'package:example/lights/webgl_lights_rectarealight.dart';
@@ -244,6 +246,12 @@ class MyAppState extends State<MyApp> {
               },
               '/webgl_shadowmap_pointlight':(BuildContext context) {
                 return const WebglShadowmapPointlight();
+              },
+              '/webgl_geometry_terrain':(BuildContext context) {
+                return const WebglGeometryTerrain();
+              },
+              '/webgl_geometry_terrain_raycast':(BuildContext context) {
+                return const WebglGeometryTerrainRaycast();
               },
               '/webgl_loader_texture_basis':(BuildContext context) {
                 return const WebglLoaderTextureBasis();
