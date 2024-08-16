@@ -2,6 +2,7 @@ const List<String> filesJson = [
   'timing',
   'orientation',
   'sandbox',
+  'boxselection',
   "webgl_camera",
   "webgl_camera_array",
   "webgl_shadow_contact",

@@ -38,6 +38,7 @@ import 'package:example/loaders/webgl_loader_xyz.dart';
 import 'package:example/material/webgl_materials_modified.dart';
 import 'package:example/modifers/webgl_modifier_simplifier.dart';
 import 'package:example/modifers/webgl_modifier_subdivision.dart';
+import 'package:example/others/boxselection.dart';
 import 'package:example/others/webgl_buffergeometry_instancing_billboards.dart';
 import 'package:example/others/webgl_custom_attributes_lines.dart';
 import 'package:example/others/webgl_interactive_voxelpainter.dart';
@@ -174,6 +175,9 @@ class MyAppState extends State<MyApp> {
               },
               '/sandbox':(BuildContext context) {
                 return const AudioSandbox();
+              },
+              '/boxselection':(BuildContext context) {
+                return const BoxSelection();
               },
               '/webgl_camera_array':(BuildContext context) {
                 return const WebglCameraArray();
