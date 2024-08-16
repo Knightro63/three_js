@@ -1,0 +1,38 @@
+name: example
+description: "A new Flutter project."
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.5.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  flutter_colorpicker: ^1.1.0
+  image: ^4.2.0
+  three_js: ^0.0.5
+  three_js_geometry: ^0.0.2
+  three_js_terrain:
+    path: ../
+
+  css:
+    git:
+      url: https://github.com/Knightro63/css.git
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+# The following section is specific to Flutter packages.
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/grass1.jpg
+    - assets/sand1.jpg
+    - assets/sky1.jpg
+    - assets/snow1.jpg
+    - assets/stone1.jpg
+    - assets/heightmap.png

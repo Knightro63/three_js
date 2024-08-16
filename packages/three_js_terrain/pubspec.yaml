@@ -1,0 +1,22 @@
+name: three_js_terrain
+description: "A new Flutter package project."
+version: 0.0.1
+homepage: https://github.com/Knightro63/three_js/tree/main/packages/three_js_terrain
+
+environment:
+  sdk: ^3.5.0
+  flutter: ">=1.17.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  image: ^4.2.0
+  three_js_core: ^0.0.2
+  three_js_math: ^0.0.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:

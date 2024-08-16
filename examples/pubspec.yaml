@@ -13,6 +13,7 @@ dependencies:
     sdk: flutter
     
   cupertino_icons: ^1.0.6
+  flutter_colorpicker: ^1.1.0
   css:
     git:
       url: https://github.com/Knightro63/css.git

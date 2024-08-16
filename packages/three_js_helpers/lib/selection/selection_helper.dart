@@ -1,31 +1,39 @@
-import 'package:three_js/three_js.dart';
-import 'package:three_js_math/three_js_math.dart';
 import 'package:three_js_core/three_js_core.dart';
-import 'dart:math' as math;
+import 'package:three_js_math/three_js_math.dart';
 import 'package:flutter/widgets.dart' hide Matrix4;
-import 'package:three_js_core/three_js_core.dart';
-import 'package:three_js_math/three_js_math.dart';
 import 'package:flutter/material.dart' hide Matrix4;
 
-class SelectionHelper {
-	Vector3 startPoint = Vector3.zero();
-  Vector3 startBoxPos = Vector3.zero();
-  Vector3 endPoint = Vector3.zero();
+class SelectionHelperOptions{
+  SelectionHelperOptions({
+    this.color = 0x0000ff,
+    this.opacity = 0.25,
+    this.button = 0
+  });
 
-  Object3D scene;
+  int color;
+  int button;
+  double opacity;
+}
+
+class SelectionHelper {
+  Vector2 ratio = Vector2(0.95,0.7);
+	Vector3 _startPoint = Vector3.zero();
+  Vector3 _endPoint = Vector3.zero();
+
   Camera camera;
-  final _raycaster = Raycaster();
   final _pointer = Vector2.zero();
   late Mesh selectionBox;
-  final _distance = 5.0;
 
-	bool isDown = false;
+	bool _isDown = false;
 	bool enabled = true;
+
+  late SelectionHelperOptions options;
 
   late GlobalKey<PeripheralsState> listenableKey;
   PeripheralsState get _domElement => listenableKey.currentState!;
 
-	SelectionHelper(this.listenableKey, this.camera, this.scene) {
+	SelectionHelper(this.listenableKey, this.camera, [SelectionHelperOptions? options]) {
+    this.options = options ?? SelectionHelperOptions();
 		_domElement.addEventListener( PeripheralType.pointerdown, onPointerDown );
 		_domElement.addEventListener( PeripheralType.pointermove, onPointerMove );
 		_domElement.addEventListener( PeripheralType.pointerup, onPointerUp );
@@ -33,52 +41,49 @@ class SelectionHelper {
     selectionBox = Mesh(
       PlaneGeometry(),
       MeshStandardMaterial.fromMap({
-        'color': 0x0000ff,
+        'color': this.options.color,
         'transparent': true,
-        'opacity': 0.25,
+        'opacity': this.options.opacity,
         'side': DoubleSide
       })
     )..name = 'selector';
 	}
 
   void onPointerDown( event ) {
+    if (enabled == false || event.button != options.button) return;
     updatePointer(event);
-    if (enabled == false ) return;
-    _raycaster.setFromCamera(_pointer, camera);
-    _raycaster.ray.at(_distance, selectionBox.position);
-    scene.add(
+    camera.add(
       selectionBox
         ..scale.setFrom(Vector3.zero())
-        ..lookAt(camera.position)
+        ..position.z = -1
+        ..position.x = _pointer.x
+        ..position.y = _pointer.y
     );
-    isDown = true;
+    _isDown = true;
 
-    startBoxPos.setFrom(selectionBox.position);
-    startPoint.setFrom(selectionBox.position);
-    endPoint.setFrom(Vector3.zero());
+    _startPoint.setFrom(selectionBox.position);
+    _startPoint.z = 0;
+    _endPoint.setFrom(Vector3.zero());
   }
   void updatePointer(event) {
     final box = listenableKey.currentContext?.findRenderObject() as RenderBox;
     final size = box.size;
-    final local = box.globalToLocal(const Offset(0, 0));
-
-    _pointer.x = (event.clientX - local.dx) / size.width * 2 - 1;
-    _pointer.y = -(event.clientY - local.dy) / size.height * 2 + 1;
+    //final local = box.globalToLocal(const Offset(0, 0));
+    _pointer.x = ((event.clientX) / size.width * 2 - 1)*ratio.x;
+    _pointer.y = (-(event.clientY) / size.height * 2 + 1)*ratio.y;
   }
 
   void onPointerMove( event ) {
+    if (!enabled || !_isDown) return;
     updatePointer(event);
-    if (enabled == false ) return;
-    if (isDown ) {
-      _raycaster.setFromCamera(_pointer, camera);
-      _raycaster.ray.at(_distance, endPoint);
-      onSelectMove(event);
-    }
+    _endPoint.setFrom(_pointer);
+    _endPoint.z = 0;
+    onSelectMove(event);
   }
 
   void onPointerUp (event) {
-    if (enabled == false ) return;
-    isDown = false;
+    if (!enabled || !_isDown) return;
+    _isDown = false;
     onSelectOver();
   }
 
@@ -89,14 +94,15 @@ class SelectionHelper {
 	}
 
 	void onSelectMove( event ) {
-    Vector3 scale = endPoint.clone().sub(startPoint);
+    Vector3 scale = _endPoint.clone().sub(_startPoint);
     selectionBox.position.setFrom(
-      startBoxPos.clone().add(scale.clone().scale(.5)..z = 0)
+      _startPoint.clone().add(scale.clone().scale(0.5))
     );
     selectionBox.scale.setFrom(scale);
+    selectionBox.position.z = -1;
 	}
 
 	void onSelectOver() {
-		scene.remove(selectionBox);
+		camera.remove(selectionBox);
 	}
 }

@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
-import 'package:example/others/selection_box.dart';
-import 'package:example/others/selection_helper.dart';
+import 'package:three_js_helpers/three_js_helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:example/src/statistics.dart';
 import 'package:three_js/three_js.dart' as three;
@@ -17,7 +16,6 @@ class _State extends State<BoxSelection> {
   List<int> data = List.filled(60, 0, growable: true);
   late Timer timer;
   late three.ThreeJS threeJs;
-  late three.OrbitControls controls;
 
   @override
   void initState() {
@@ -43,7 +41,6 @@ class _State extends State<BoxSelection> {
     timer.cancel();
     threeJs.dispose();
     three.loading.clear();
-    controls.dispose();
     super.dispose();
   }
 
@@ -66,10 +63,10 @@ class _State extends State<BoxSelection> {
 
     threeJs.scene = three.Scene();
     threeJs.scene.background = three.Color.fromHex32( 0xf0f0f0 );
-
+    threeJs.scene.add(threeJs.camera);
     threeJs.scene.add( three.AmbientLight( 0xaaaaaa ) );
 
-    final light = three.SpotLight( 0xffffff, 0.9);
+    final light = three.SpotLight( 0xffffff, 0.7);
     light.position.setValues( 0, 25, 50 );
     light.angle = math.pi / 5;
 
@@ -103,64 +100,56 @@ class _State extends State<BoxSelection> {
       //object.receiveShadow = true;
 
       threeJs.scene.add( object );
-
-      final selectionBox = SelectionBox(threeJs.camera, threeJs.scene );
-      final helper = SelectionHelper(threeJs.globalKey, threeJs.camera, threeJs.scene);
-
-      controls = three.OrbitControls(threeJs.camera,threeJs.globalKey);
-      controls.enableZoom = false;
-      controls.enablePan = false;
-      
-      threeJs.addAnimationEvent((dt){
-        controls.update();
-      });
-
-			threeJs.domElement.addEventListener(three.PeripheralType.pointerdown, ( event ) {
-				for (final item in selectionBox.collection ) {
-					item.material?.emissive?.setFromHex32( 0x000000 );
-				}
-
-				selectionBox.startPoint.setValues(
-					( event.clientX / threeJs.width ) * 2 - 1,
-					- ( event.clientY / threeJs.height ) * 2 + 1,
-					0.5 );
-			});
-
-			threeJs.domElement.addEventListener(three.PeripheralType.pointermove, ( event ) {
-				if ( helper.isDown ) {
-					for ( int i = 0; i < selectionBox.collection.length; i ++ ) {
-            if(selectionBox.collection[ i ].name != 'selector'){
-						  selectionBox.collection[ i ].material?.emissive?.setFromHex32( 0x000000 );
-            }
-					}
-
-					selectionBox.endPoint.setValues(
-						( event.clientX / threeJs.width ) * 2 - 1,
-						- ( event.clientY / threeJs.height ) * 2 + 1,
-						0.5 );
-
-					final allSelected = selectionBox.select();
-
-					for (int i = 0; i < allSelected.length; i ++ ) {
-            if(selectionBox.collection[ i ].name != 'selector'){
-						  allSelected[ i ].material?.emissive?.setFromHex32( 0xffffff );
-            }
-					}
-				}
-			});
-
-			threeJs.domElement.addEventListener(three.PeripheralType.pointerup, ( event ) {
-				selectionBox.endPoint.setValues(
-					( event.clientX / threeJs.width ) * 2 - 1,
-					- ( event.clientY /threeJs.height ) * 2 + 1,
-					0.5 );
-
-				final allSelected = selectionBox.select();
-
-				for (int i = 0; i < allSelected.length; i ++ ) {
-					allSelected[ i ].material?.emissive?.setFromHex32( 0xffffff );
-				}
-			});
     }
+
+    final selectionBox = SelectionBox(threeJs.camera, threeJs.scene);
+    final helper = SelectionHelper(threeJs.globalKey, threeJs.camera);
+
+    threeJs.domElement.addEventListener(three.PeripheralType.pointerdown, ( event ) {
+      for (final item in selectionBox.collection ) {
+        item.material?.emissive?.setFromHex32( 0x000000 );
+      }
+
+      selectionBox.startPoint.setValues(
+        ( event.clientX / threeJs.width ) * 2 - 1,
+        - ( event.clientY / threeJs.height ) * 2 + 1,
+        0.5 );
+    });
+
+    threeJs.domElement.addEventListener(three.PeripheralType.pointermove, ( event ) {
+      if ( helper.isDown ) {
+        for ( int i = 0; i < selectionBox.collection.length; i ++ ) {
+          if(selectionBox.collection[ i ].name != 'selector'){
+            selectionBox.collection[ i ].material?.emissive?.setFromHex32( 0x000000 );
+          }
+        }
+
+        selectionBox.endPoint.setValues(
+          ( event.clientX / threeJs.width ) * 2 - 1,
+          - ( event.clientY / threeJs.height ) * 2 + 1,
+          0.5 );
+
+        final allSelected = selectionBox.select();
+
+        for (int i = 0; i < allSelected.length; i ++ ) {
+          if(selectionBox.collection[ i ].name != 'selector'){
+            allSelected[ i ].material?.emissive?.setFromHex32( 0xffffff );
+          }
+        }
+      }
+    });
+
+    threeJs.domElement.addEventListener(three.PeripheralType.pointerup, ( event ) {
+      selectionBox.endPoint.setValues(
+        ( event.clientX / threeJs.width ) * 2 - 1,
+        - ( event.clientY /threeJs.height ) * 2 + 1,
+        0.5 );
+
+      final allSelected = selectionBox.select();
+
+      for (int i = 0; i < allSelected.length; i ++ ) {
+        allSelected[ i ].material?.emissive?.setFromHex32( 0xffffff );
+      }
+    });
   }
 }

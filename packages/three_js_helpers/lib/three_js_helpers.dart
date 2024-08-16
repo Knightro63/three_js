@@ -23,3 +23,6 @@ export 'enviroments/index.dart';
 export 'utils/skeleton_utils.dart';
 export 'utils/mesh_surface_sampler.dart';
 export 'utils/camera_utils.dart';
+
+export 'selection/selection_box.dart';
+export 'selection/selection_helper.dart';
