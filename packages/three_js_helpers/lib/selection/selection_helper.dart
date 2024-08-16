@@ -24,6 +24,7 @@ class SelectionHelper {
   final _pointer = Vector2.zero();
   late Mesh selectionBox;
 
+  bool get isClicked => _isDown;
 	bool _isDown = false;
 	bool enabled = true;
 

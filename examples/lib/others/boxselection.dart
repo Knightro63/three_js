@@ -117,7 +117,7 @@ class _State extends State<BoxSelection> {
     });
 
     threeJs.domElement.addEventListener(three.PeripheralType.pointermove, ( event ) {
-      if ( helper.isDown ) {
+      if ( helper.isClicked ) {
         for ( int i = 0; i < selectionBox.collection.length; i ++ ) {
           if(selectionBox.collection[ i ].name != 'selector'){
             selectionBox.collection[ i ].material?.emissive?.setFromHex32( 0x000000 );

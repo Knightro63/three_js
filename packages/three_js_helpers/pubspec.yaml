@@ -1,6 +1,6 @@
 name: three_js_helpers
 description: "Flutter three_js_helpers package converted from threejs and three_dart package created for three_js to help with camera and scene assets."
-version: 0.0.2
+version: 0.0.3
 homepage: https://github.com/Knightro63/three_js/tree/main/packages/three_js_helpers
 
 environment:
