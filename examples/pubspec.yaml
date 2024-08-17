@@ -28,6 +28,7 @@ dependencies:
   three_js_postprocessing: ^0.0.2
   three_js_modifers: ^0.0.2
   three_js_terrain: ^0.0.1
+  three_js_exporters: ^0.0.2
 
 dev_dependencies:
   flutter_test:
@@ -85,4 +86,5 @@ flutter:
     - assets/textures/decal/
     - assets/textures/cube/Park2/
     - assets/textures/cube/pisa/
+    - assets/textures/three_terrain/
     - assets/sounds/

@@ -1,4 +1,6 @@
 import 'dart:typed_data';
+import 'package:three_js_exporters/three_js_exporters.dart';
+
 import '../src/change_image.dart';
 import '../src/gui.dart';
 import 'package:flutter/material.dart';
@@ -57,10 +59,21 @@ class _State extends State<TerrainPage> {
           if(heightMapImage != null)Positioned(
             top: 20,
             left: 20,
-            child: Image.memory(
-              heightMapImage!,
-              width: 120,
-              fit: BoxFit.fitHeight,
+            child: InkWell(
+              onTap: (){
+                if(heightMapImage != null){
+                  SaveFile.saveBytes(
+                    printName: 'heightMapImage', 
+                    fileType: 'bmp', 
+                    bytes: heightMapImage!
+                  );
+                }
+              },
+              child: Image.memory(
+                heightMapImage!,
+                width: 120,
+                fit: BoxFit.fitHeight,
+              )
             )
           ),
           if(heightMapImage != null)Positioned(
@@ -172,7 +185,7 @@ class _State extends State<TerrainPage> {
     ..addFunction('Regenerate').onFinishChange((){regenerate(blend);});
   }
   Future<void> setupWorld() async{
-    three.TextureLoader().fromAsset('assets/sky1.jpg').then((t1) {
+    three.TextureLoader().fromAsset('assets/textures/three_terrain/sky1.jpg').then((t1) {
       t1?.minFilter = three.LinearFilter; // Texture is not a power-of-two size; use smoother interpolation.
       skyDome = three.Mesh(
         three.SphereGeometry(8192, 16, 16, 0, math.pi*2, 0, math.pi*0.5),
@@ -329,7 +342,7 @@ class _State extends State<TerrainPage> {
   };
 
   Future<void> getHeightMapFromImage() async{
-    final ByteData fileData = await rootBundle.load('assets/heightmap.png');
+    final ByteData fileData = await rootBundle.load('assets/textures/three_terrain/heightmap.png');
     final bytes = fileData.buffer.asUint8List();
     img.Image? image = img.decodeImage(bytes);
     heightmap = image!.getBytes();
@@ -342,7 +355,7 @@ class _State extends State<TerrainPage> {
     //     analyticsValues = document.getElementsByClassName('value');
 
     three.TextureLoader loader = three.TextureLoader();
-    final t1 = await loader.fromAsset('assets/sand1.jpg');
+    final t1 = await loader.fromAsset('assets/textures/three_terrain/sand1.jpg');
     t1?.wrapS = t1.wrapT = three.RepeatWrapping;
     sand = three.Mesh(
       three.PlaneGeometry(16384+1024, 16384+1024, 64, 64),
@@ -352,9 +365,9 @@ class _State extends State<TerrainPage> {
     sand.rotation.x = -0.5 * math.pi;
     threeJs.scene.add(sand);
 
-    final t2 = await loader.fromAsset('assets/grass1.jpg');
-    final t3 = await loader.fromAsset('assets/stone1.jpg');
-    final t4 = await loader.fromAsset('assets/snow1.jpg');
+    final t2 = await loader.fromAsset('assets/textures/three_terrain/grass1.jpg');
+    final t3 = await loader.fromAsset('assets/textures/three_terrain/stone1.jpg');
+    final t4 = await loader.fromAsset('assets/textures/three_terrain/snow1.jpg');
 
     blend = terrain.Terrain.generateBlendedMaterial([
       terrain.TerrainTextures(texture: t1!),
