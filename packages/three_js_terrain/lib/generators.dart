@@ -17,38 +17,38 @@ class Passes{
 }
 
 extension Generators on Terrain{
-  /**
-   * A utility for generating heightmap functions by additive composition.
-   *
-   * @param {Float32Array} g
-   *   The geometry's z-positions to modify with heightmap data.
-   * @param {Object} [options]
-   *   A map of settings that control how the terrain is constructed and
-   *   displayed. Valid values are the same as those for the `options` parameter
-   *   of {@link THREE.Terrain}().
-   * @param {Object[]} passes
-   *   Determines which heightmap functions to compose to create a new one.
-   *   Consists of an array of objects with the following properties:
-   *   - `method`: Contains something that will be passed around as an
-   *     `options.heightmap` (a heightmap-generating function or a heightmap image)
-   *   - `amplitude`: A multiplier for the heightmap of the pass. Applied before
-   *     the result of the pass is added to the result of previous passes.
-   *   - `frequency`: For terrain generation methods that support it (Perlin,
-   *     Simplex, and Worley) the octave of randomness. This basically controls
-   *     how big features of the terrain will be (higher frequencies result in
-   *     smaller features). Often running multiple generation functions with
-   *     different frequencies and amplitudes results in nice detail.
-   */
+  ///
+  /// A utility for generating heightmap functions by additive composition.
+  ///
+  /// [Float32List] g
+  ///   The geometry's z-positions to modify with heightmap data.
+  /// [TerrainOptions] [options]
+  ///   A map of settings that control how the terrain is constructed and
+  ///   displayed. Valid values are the same as those for the `options` parameter
+  ///   of {@link THREE.Terrain}().
+  /// [Passes] passes
+  ///   Determines which heightmap functions to compose to create a new one.
+  ///   Consists of an array of objects with the following properties:
+  ///   - `method`: Contains something that will be passed around as an
+  ///     `options.heightmap` (a heightmap-generating function or a heightmap image)
+  ///   - `amplitude`: A multiplier for the heightmap of the pass. Applied before
+  ///     the result of the pass is added to the result of previous passes.
+  ///   - `frequency`: For terrain generation methods that support it (Perlin,
+  ///     Simplex, and Worley) the octave of randomness. This basically controls
+  ///     how big features of the terrain will be (higher frequencies result in
+  ///     smaller features). Often running multiple generation functions with
+  ///     different frequencies and amplitudes results in nice detail.
+  ///
   static void multiPass(Float32List g, TerrainOptions options, List<Passes> passes) {
     TerrainOptions clonedOptions = TerrainOptions();
-    for (var opt in options.keys) {
+    for (final opt in options.keys) {
       if (options.containsKey(opt)) {
         clonedOptions[opt] = options[opt];
       }
     }
-    var range = options.maxHeight! - options.minHeight!;
+    final range = options.maxHeight! - options.minHeight!;
     for (int i = 0, l = passes.length; i < l; i++) {
-        var amp = passes[i].amplitude == null ? 1 : passes[i].amplitude!,
+        final amp = passes[i].amplitude == null ? 1 : passes[i].amplitude!,
             move = 0.5 * (range - range * amp);
         clonedOptions.maxHeight = options.maxHeight! - move;
         clonedOptions.minHeight = options.minHeight! + move;
@@ -57,54 +57,54 @@ extension Generators on Terrain{
     }
   }
 
-  /**
-   * Generate random terrain using a curve.
-   *
-   * @param {Float32Array} g
-   *   The geometry's z-positions to modify with heightmap data.
-   * @param {Object} options
-   *   A map of settings that control how the terrain is constructed and
-   *   displayed. Valid values are the same as those for the `options` parameter
-   *   of {@link THREE.Terrain}().
-   * @param {Function} curve
-   *   A function that takes an x- and y-coordinate and returns a z-coordinate.
-   *   For example, `function(x, y) { return math.sin(x*y*math.pi*100); }`
-   *   generates sine noise, and `function() { return math.Random().nextDouble(); }` sets the
-   *   vertex elevations entirely randomly. The function's parameters (the x- and
-   *   y-coordinates) are given as percentages of a phase (i.e. how far across
-   *   the terrain in the relevant direction they are).
-   */
-  static void curve(Float32List g, TerrainOptions options, [curve]) {
-      var range = (options.maxHeight! - options.minHeight!) * 0.5,
+  ///
+  /// Generate random terrain using a curve.
+  ///
+  /// [Float32List] g
+  ///   The geometry's z-positions to modify with heightmap data.
+  /// [TerrainOptions] options
+  ///   A map of settings that control how the terrain is constructed and
+  ///   displayed. Valid values are the same as those for the `options` parameter
+  ///   of {@link THREE.Terrain}().
+  /// [double Function(double,double)?] curve
+  ///   A function that takes an x- and y-coordinate and returns a z-coordinate.
+  ///   For example, `function(x, y) { return math.sin(x*y*math.pi*100); }`
+  ///   generates sine noise, and `function() { return math.Random().nextDouble(); }` sets the
+  ///   vertex elevations entirely randomly. The function's parameters (the x- and
+  ///   y-coordinates) are given as percentages of a phase (i.e. how far across
+  ///   the terrain in the relevant direction they are).
+  ///
+  static void curve(Float32List g, TerrainOptions options, double Function(double,double) curve) {
+      final range = (options.maxHeight! - options.minHeight!) * 0.5,
           scalar = options.frequency / (math.min(options.xSegments, options.ySegments) + 1);
-    for (var i = 0, xl = options.xSegments + 1, yl = options.ySegments + 1; i < xl; i++) {
-      for (var j = 0; j < yl; j++) {
+    for (int i = 0, xl = options.xSegments + 1, yl = options.ySegments + 1; i < xl; i++) {
+      for (int j = 0; j < yl; j++) {
         g[j * xl + i] += curve(i * scalar, j * scalar) * range;
       }
     }
   }
 
-  /**
-   * Generate random terrain using the Cosine waves.
-   *
-   * Parameters are the same as those for {@link static DiamondSquare}.
-   */
+  ///
+  /// Generate random terrain using the Cosine waves.
+  ///
+  /// Parameters are the same as those for {@link static DiamondSquare}.
+  ///
   static void cosine(Float32List g, TerrainOptions options) {
-    var amplitude = (options.maxHeight! - options.minHeight!) * 0.5,
+    final amplitude = (options.maxHeight! - options.minHeight!) * 0.5,
         frequencyScalar = options.frequency * math.pi / (math.min(options.xSegments, options.ySegments) + 1),
         phase = math.Random().nextDouble() * math.pi * 2;
-    for (var i = 0, xl = options.xSegments + 1; i < xl; i++) {
-      for (var j = 0, yl = options.ySegments + 1; j < yl; j++) {
+    for (int i = 0, xl = options.xSegments + 1; i < xl; i++) {
+      for (int j = 0, yl = options.ySegments + 1; j < yl; j++) {
         g[j * xl + i] += amplitude * (math.cos(i * frequencyScalar + phase) + math.cos(j * frequencyScalar + phase));
       }
     }
   }
 
-  /**
-   * Generate random terrain using layers of Cosine waves.
-   *
-   * Parameters are the same as those for {@link static DiamondSquare}.
-   */
+  ///
+  /// Generate random terrain using layers of Cosine waves.
+  ///
+  /// Parameters are the same as those for {@link static DiamondSquare}.
+  ///
   static void cosineLayers(Float32List g, TerrainOptions options) {
     multiPass(g, options, [
       Passes( method: cosine,                   frequency:  2.5 ),
@@ -114,31 +114,31 @@ extension Generators on Terrain{
     ]);
   }
 
-  /**
-   * Generate random terrain using the Diamond-Square method.
-   *
-   * Based on https://github.com/srchea/Terrain-Generation/blob/master/js/classes/TerrainGeneration.js
-   *
-   * @param {Float32Array} g
-   *   The geometry's z-positions to modify with heightmap data.
-   * @param {Object} options
-   *   A map of settings that control how the terrain is constructed and
-   *   displayed. Valid values are the same as those for the `options` parameter
-   *   of {@link THREE.Terrain}().
-   */
+  ///
+  /// Generate random terrain using the Diamond-Square method.
+  ///
+  /// Based on https://github.com/srchea/Terrain-Generation/blob/master/js/classes/TerrainGeneration.js
+  ///
+  /// [Float32List] g
+  ///   The geometry's z-positions to modify with heightmap data.
+  /// [TerrainOptions] options
+  ///   A map of settings that control how the terrain is constructed and
+  ///   displayed. Valid values are the same as those for the `options` parameter
+  ///  of {@link THREE.Terrain}().
+  ///
   static void diamondSquare(Float32List g, TerrainOptions options) {
     // Set the segment length to the smallest power of 2 that is greater than
     // the number of vertices in either dimension of the plane
     int segments = MathUtils.ceilPowerOfTwo<int>(math.max(options.xSegments, options.ySegments) + 1).toInt();
 
     // Initialize heightmap
-    var size = segments + 1,
-        heightmap = [],
-        smoothing = (options.maxHeight! - options.minHeight!),
-        i,
-        j,
-        xl = options.xSegments + 1,
-        yl = options.ySegments + 1;
+    final List<Float64Array> heightmap = [];
+    double smoothing = (options.maxHeight! - options.minHeight!);
+    int i,
+      size = segments + 1,
+      j,
+      xl = options.xSegments + 1,
+      yl = options.ySegments + 1;
 
       for (i = 0; i <= segments; i++) {
         heightmap.add(new Float64Array(segments+1));
@@ -146,11 +146,11 @@ extension Generators on Terrain{
 
       // Generate heightmap
       for (int l = segments; l >= 2; l ~/= 2) {
-        var half = (l*0.5).round(),
+        int half = (l*0.5).round(),
             whole = l.round(),
             x,
-            y,
-            avg,
+            y;
+        double avg,
             d;
         smoothing /= 2;
           // square
@@ -193,29 +193,29 @@ extension Generators on Terrain{
     // static SmoothConservative(g, options);
   }
 
-  /**
-   * Generate random terrain using the Fault method.
-   *
-   * Based on http://www.lighthouse3d.com/opengl/terrain/index.php3?fault
-   * Repeatedly draw random lines that cross the terrain. Raise the terrain on
-   * one side of the line and lower it on the other.
-   *
-   * Parameters are the same as those for {@link static DiamondSquare}.
-   */
+  ///
+  /// Generate random terrain using the Fault method.
+  ///
+  /// Based on http://www.lighthouse3d.com/opengl/terrain/index.php3?fault
+  /// Repeatedly draw random lines that cross the terrain. Raise the terrain on
+  /// one side of the line and lower it on the other.
+  ///
+  /// Parameters are the same as those for {@link static DiamondSquare}.
+  ///
   static void fault(Float32List g, TerrainOptions options) {
-    var d = math.sqrt(options.xSegments*options.xSegments + options.ySegments*options.ySegments),
+    final d = math.sqrt(options.xSegments*options.xSegments + options.ySegments*options.ySegments),
         iterations = d * options.frequency,
         range = (options.maxHeight! - options.minHeight!) * 0.5,
         displacement = range / iterations,
         smoothDistance = math.min(options.xSize / options.xSegments, options.ySize / options.ySegments) * options.frequency;
-    for (var k = 0; k < iterations; k++) {
-      var v = math.Random().nextDouble(),
+    for (int k = 0; k < iterations; k++) {
+      final v = math.Random().nextDouble(),
           a = math.sin(v * math.pi * 2),
           b = math.cos(v * math.pi * 2),
           c = math.Random().nextDouble() * d - d*0.5;
-      for (var i = 0, xl = options.xSegments + 1; i < xl; i++) {
-        for (var j = 0, yl = options.ySegments + 1; j < yl; j++) {
-          var distance = a*i + b*j - c;
+      for (int i = 0, xl = options.xSegments + 1; i < xl; i++) {
+        for (int j = 0, yl = options.ySegments + 1; j < yl; j++) {
+          final distance = a*i + b*j - c;
           if (distance > smoothDistance) {
             g[j * xl + i] += displacement;
           }
@@ -231,38 +231,38 @@ extension Generators on Terrain{
     // static Smooth(g, options);
   }
 
-  /**
-   * Generate random terrain using the Hill method.
-   *
-   * The basic approach is to repeatedly pick random points on or near the
-   * terrain and raise a small hill around those points. Those small hills
-   * eventually accumulate into large hills with distinct features.
-   *
-   * @param {Float32Array} g
-   *   The geometry's z-positions to modify with heightmap data.
-   * @param {Object} options
-   *   A map of settings that control how the terrain is constructed and
-   *   displayed. Valid values are the same as those for the `options` parameter
-   *   of {@link THREE.Terrain}().
-   * @param {Function} [feature=static Influences.Hill]
-   *   A function describing the feature to raise at the randomly chosen points.
-   *   Typically this is a hill shape so that the accumulated features result in
-   *   something resembling mountains, but it could be any function that accepts
-   *   one parameter representing the distance from the feature's origin
-   *   expressed as a number between -1 and 1 inclusive. Optionally it can accept
-   *   a second and third parameter, which are the x- and y- distances from the
-   *   feature's origin, respectively. It should return a number between -1 and 1
-   *   representing the height of the feature at the given coordinate.
-   *   `static Influences` contains some useful functions for this
-   *   purpose.
-   * @param {Function} [shape]
-   *   A function that takes an object with `x` and `y` properties consisting of
-   *   uniform random variables from 0 to 1, and returns a number from 0 to 1,
-   *   typically by transforming it over a distribution. The result affects where
-   *   small hills are raised thereby affecting the overall shape of the terrain.
-   */
-  static void hill(Float32List g, TerrainOptions options, [InfluenceType? feature, Function? shape]) {
-      var frequency = options.frequency * 2,
+  ///
+  /// Generate random terrain using the Hill method.
+  ///
+  /// The basic approach is to repeatedly pick random points on or near the
+  /// terrain and raise a small hill around those points. Those small hills
+  /// eventually accumulate into large hills with distinct features.
+  ///
+  /// [Float32List] g
+  ///   The geometry's z-positions to modify with heightmap data.
+  /// [TerrainOptions] options
+  ///   A map of settings that control how the terrain is constructed and
+  ///   displayed. Valid values are the same as those for the `options` parameter
+  ///   of {@link THREE.Terrain}().
+  /// [InfluenceType] feature = InfluenceType.hill
+  ///   A function describing the feature to raise at the randomly chosen points.
+  ///   Typically this is a hill shape so that the accumulated features result in
+  ///   something resembling mountains, but it could be any function that accepts
+  ///   one parameter representing the distance from the feature's origin
+  ///   expressed as a number between -1 and 1 inclusive. Optionally it can accept
+  ///   a second and third parameter, which are the x- and y- distances from the
+  ///   feature's origin, respectively. It should return a number between -1 and 1
+  ///   representing the height of the feature at the given coordinate.
+  ///   `static Influences` contains some useful functions for this
+  ///   purpose.
+  /// [Function] shape
+  ///   A function that takes an object with `x` and `y` properties consisting of
+  ///   uniform random variables from 0 to 1, and returns a number from 0 to 1,
+  ///   typically by transforming it over a distribution. The result affects where
+  ///   small hills are raised thereby affecting the overall shape of the terrain.
+  ///
+  static void hill(Float32List g, TerrainOptions options, [InfluenceType feature = InfluenceType.hill, Function? shape]) {
+      double frequency = options.frequency * 2,
           numFeatures = frequency * frequency * 10,
           heightRange = options.maxHeight! - options.minHeight!,
           minHeight = heightRange / (frequency * frequency),
@@ -270,13 +270,13 @@ extension Generators on Terrain{
           smallerSideLength = math.min(options.xSize, options.ySize),
           minRadius = smallerSideLength / (frequency * frequency),
           maxRadius = smallerSideLength / frequency;
-      feature = feature ?? InfluenceType.hill;
+      feature = feature ;
 
       Vector2 coords = Vector2.zero();
-      for (var i = 0; i < numFeatures; i++) {
-          var radius = math.Random().nextDouble() * (maxRadius - minRadius) + minRadius,
+      for (int i = 0; i < numFeatures; i++) {
+          final radius = math.Random().nextDouble() * (maxRadius - minRadius) + minRadius,
               height = math.Random().nextDouble() * (maxHeight - minHeight) + minHeight;
-          // var min = 0 - radius,
+          // double min = 0 - radius,
           //     maxX = options.xSize + radius,
           //     maxY = options.ySize + radius;
           coords.x = math.Random().nextDouble();
@@ -297,41 +297,41 @@ extension Generators on Terrain{
       }
   }
 
-  /**
-   * Generate random terrain using the Hill method, centered on the terrain.
-   *
-   * The only difference between this and the Hill method is that the locations
-   * of the points to place small hills are not uniformly randomly distributed
-   * but instead are more likely to occur close to the center of the terrain.
-   *
-   * @param {Float32Array} g
-   *   The geometry's z-positions to modify with heightmap data.
-   * @param {Object} options
-   *   A map of settings that control how the terrain is constructed and
-   *   displayed. Valid values are the same as those for the `options` parameter
-   *   of {@link THREE.Terrain}().
-   * @param {Function} [feature=static Influences.Hill]
-   *   A function describing the feature. The function should accept one
-   *   parameter representing the distance from the feature's origin expressed as
-   *   a number between -1 and 1 inclusive. Optionally it can accept a second and
-   *   third parameter, which are the x- and y- distances from the feature's
-   *   origin, respectively. It should return a number between -1 and 1
-   *   representing the height of the feature at the given coordinate.
-   *   `static Influences` contains some useful functions for this
-   *   purpose.
-   */
-  static void hillIsland(Float32List g, TerrainOptions options, [InfluenceType? feature]) {
-    hill(g, options, feature, (coords) {
-      var theta = math.Random().nextDouble() * math.pi * 2;
+  ///
+  /// Generate random terrain using the Hill method, centered on the terrain.
+  ///
+  /// The only difference between this and the Hill method is that the locations
+  /// of the points to place small hills are not uniformly randomly distributed
+  /// but instead are more likely to occur close to the center of the terrain.
+  ///
+  /// [Float32List] g
+  ///   The geometry's z-positions to modify with heightmap data.
+  /// [TerrainOptions] options
+  ///   A map of settings that control how the terrain is constructed and
+  ///   displayed. Valid values are the same as those for the `options` parameter
+  ///   of {@link THREE.Terrain}().
+  /// [InfluenceType] feature = InfluenceType.hill
+  ///   A function describing the feature. The function should accept one
+  ///   parameter representing the distance from the feature's origin expressed as
+  ///   a number between -1 and 1 inclusive. Optionally it can accept a second and
+  ///   third parameter, which are the x- and y- distances from the feature's
+  ///   origin, respectively. It should return a number between -1 and 1
+  ///   representing the height of the feature at the given coordinate.
+  ///   `static Influences` contains some useful functions for this
+  ///   purpose.
+  ///
+  static void hillIsland(Float32List g, TerrainOptions options, [InfluenceType feature = InfluenceType.hill]) {
+    hill(g, options, feature, (Vector2 coords) {
+      final theta = math.Random().nextDouble() * math.pi * 2;
       coords.x = 0.5 + math.cos(theta) * coords.x * 0.4;
       coords.y = 0.5 + math.sin(theta) * coords.y * 0.4;
     });
   }
 
 
-  /**
-   * Deposit a particle at a vertex.
-   */
+  ///
+  /// Deposit a particle at a vertex.
+  ///
   static void deposit(Float32List g, int i, int j, int xl, double displacement) {
     int currentKey = j * xl + i;
     // Pick a random neighbor.
@@ -347,7 +347,7 @@ extension Generators on Terrain{
             case 6: i--; j++; break;
             case 7: i--; j--; break;
         }
-        var neighborKey = j * xl + i;
+        final neighborKey = j * xl + i;
         // If the neighbor is lower, move the particle to that neighbor and re-evaluate.
         if (g.get(neighborKey) != null) {
           if (g.get(neighborKey) < g.get(currentKey)) {
@@ -364,32 +364,33 @@ extension Generators on Terrain{
     g[g.getK(currentKey)] += displacement;
   }
 
-  /**
-   * Generate random terrain using the Particle Deposition method.
-   *
-   * Based on http://www.lighthouse3d.com/opengl/terrain/index.php?particle
-   * Repeatedly deposit particles on terrain vertices. Pick a random neighbor
-   * of that vertex. If the neighbor is lower, roll the particle to the
-   * neighbor. When the particle stops, displace the vertex upwards.
-   *
-   * The shape of the outcome is highly dependent on options.frequency
-   * because that affects how many particles will be dropped. Values around
-   * 0.25 generally result in archipelagos whereas the default of 2.5
-   * generally results in one large mountainous island.
-   *
-   * Parameters are the same as those for {@link static DiamondSquare}.
-   */
+  ///
+  /// Generate random terrain using the Particle Deposition method.
+  ///
+  /// Based on http://www.lighthouse3d.com/opengl/terrain/index.php?particle
+  /// Repeatedly deposit particles on terrain vertices. Pick a random neighbor
+  /// of that vertex. If the neighbor is lower, roll the particle to the
+  /// neighbor. When the particle stops, displace the vertex upwards.
+  ///
+  /// The shape of the outcome is highly dependent on options.frequency
+  /// because that affects how many particles will be dropped. Values around
+  /// 0.25 generally result in archipelagos whereas the default of 2.5
+  /// generally results in one large mountainous island.
+  ///
+  /// Parameters are the same as those for {@link static DiamondSquare}.
+  ///
   static void particles(Float32List g, TerrainOptions options) {
-    var iterations = math.sqrt(options.xSegments*options.xSegments + options.ySegments*options.ySegments) * options.frequency * 300,
-        xl = options.xSegments + 1,
-        displacement = (options.maxHeight! - options.minHeight!) / iterations * 1000,
-        i = (math.Random().nextDouble() * options.xSegments).floor(),
-        j = (math.Random().nextDouble() * options.ySegments).floor(),
-        xDeviation = math.Random().nextDouble() * 0.2 - 0.1,
-        yDeviation = math.Random().nextDouble() * 0.2 - 0.1;
-    for (var k = 0; k < iterations; k++) {
+    final iterations = math.sqrt(options.xSegments*options.xSegments + options.ySegments*options.ySegments) * options.frequency * 300;
+    double displacement = (options.maxHeight! - options.minHeight!) / iterations * 1000,
+      xDeviation = math.Random().nextDouble() * 0.2 - 0.1,
+      yDeviation = math.Random().nextDouble() * 0.2 - 0.1;
+    int i = (math.Random().nextDouble() * options.xSegments).floor(),
+      j = (math.Random().nextDouble() * options.ySegments).floor(),
+      xl = options.xSegments + 1;
+
+    for (int k = 0; k < iterations; k++) {
       deposit(g, i, j, xl, displacement);
-      var d = math.Random().nextDouble() * math.pi * 2;
+      final d = math.Random().nextDouble() * math.pi * 2;
       if (k % 1000 == 0) {
         xDeviation = math.Random().nextDouble() * 0.2 - 0.1;
         yDeviation = math.Random().nextDouble() * 0.2 - 0.1;
@@ -403,27 +404,27 @@ extension Generators on Terrain{
   }
 
 
-  /**
-   * Generate random terrain using the Perlin Noise method.
-   *
-   * Parameters are the same as those for {@link static DiamondSquare}.
-   */
+  ///
+  /// Generate random terrain using the Perlin Noise method.
+  ///
+  /// Parameters are the same as those for {@link static DiamondSquare}.
+  ///
   static void perlin(Float32List g, TerrainOptions options) {
     Noise.seed(math.Random().nextDouble());
-    var range = (options.maxHeight! - options.minHeight!) * 0.5,
+    final range = (options.maxHeight! - options.minHeight!) * 0.5,
         divisor = (math.min(options.xSegments, options.ySegments) + 1) / options.frequency;
-    for (var i = 0, xl = options.xSegments + 1; i < xl; i++) {
-      for (var j = 0, yl = options.ySegments + 1; j < yl; j++) {
+    for (int i = 0, xl = options.xSegments + 1; i < xl; i++) {
+      for (int j = 0, yl = options.ySegments + 1; j < yl; j++) {
         g[j * xl + i] += Noise.perlin(i / divisor, j / divisor) * range;
       }
     }
   }
 
-  /**
-   * Generate random terrain using the Perlin and Diamond-Square methods composed.
-   *
-   * Parameters are the same as those for {@link static DiamondSquare}.
-   */
+  ///
+  /// Generate random terrain using the Perlin and Diamond-Square methods composed.
+  ///
+  /// Parameters are the same as those for {@link static DiamondSquare}.
+  ///
   static void perlinDiamond(Float32List g, TerrainOptions options) {
     multiPass(g, options, [
       Passes( method: perlin ),
@@ -432,11 +433,11 @@ extension Generators on Terrain{
     ]);
   }
 
-  /**
-   * Generate random terrain using layers of Perlin noise.
-   *
-   * Parameters are the same as those for {@link static DiamondSquare}.
-   */
+  ///
+  /// Generate random terrain using layers of Perlin noise.
+  ///
+  /// Parameters are the same as those for {@link static DiamondSquare}.
+  ///
   static void perlinLayers(g, options) {
     multiPass(g, options, [
       Passes( method: perlin,                  frequency:  1.25 ),
@@ -446,30 +447,30 @@ extension Generators on Terrain{
     ]);
   }
 
-  /**
-   * Generate random terrain using the Simplex Noise method.
-   *
-   * Parameters are the same as those for {@link static DiamondSquare}.
-   *
-   * See https://github.com/mrdoob/three.js/blob/master/examples/webgl_terrain_dynamic.html
-   * for an interesting comparison where the generation happens in GLSL.
-   */
+  ///
+  /// Generate random terrain using the Simplex Noise method.
+  ///
+  /// Parameters are the same as those for {@link static DiamondSquare}.
+  ///
+  /// See https://github.com/mrdoob/three.js/blob/master/examples/webgl_terrain_dynamic.html
+  ///  for an interesting comparison where the generation happens in GLSL.
+  ///
   static void simplex(Float32List g, TerrainOptions options) {
     Noise.seed(math.Random().nextDouble());
-    var range = (options.maxHeight! - options.minHeight!) * 0.5,
+    final range = (options.maxHeight! - options.minHeight!) * 0.5,
           divisor = (math.min(options.xSegments, options.ySegments) + 1) * 2 / options.frequency;
-    for (var i = 0, xl = options.xSegments + 1; i < xl; i++) {
-      for (var j = 0, yl = options.ySegments + 1; j < yl; j++) {
+    for (int i = 0, xl = options.xSegments + 1; i < xl; i++) {
+      for (int j = 0, yl = options.ySegments + 1; j < yl; j++) {
         g[j * xl + i] += Noise.simplex(i / divisor, j / divisor) * range;
       }
     }
   }
 
-  /**
-   * Generate random terrain using layers of Simplex noise.
-   *
-   * Parameters are the same as those for {@link static DiamondSquare}.
-   */
+  ///
+  /// Generate random terrain using layers of Simplex noise.
+  ///
+  /// Parameters are the same as those for {@link static DiamondSquare}.
+  ///
   static simplexLayers(Float32List g, TerrainOptions options) {
     multiPass(g, options, [
       Passes( method: simplex,                    frequency:  1.25),
@@ -480,17 +481,17 @@ extension Generators on Terrain{
     ]);
   }
 
-  /**
-   * Generate a heightmap using white noise.
-   *
-   * @param {THREE.Vector3[]} g The terrain vertices.
-   * @param {Object} options Settings
-   * @param {Number} scale The resolution of the resulting heightmap.
-   * @param {Number} segments The width of the target heightmap.
-   * @param {Number} range The altitude of the noise.
-   * @param {Number[]} data The target heightmap.
-   */
-  static void whiteNoise(Float32List g, TerrainOptions options, double scale, int segments, range, Float64List data) {
+  ///
+  /// Generate a heightmap using white noise.
+  ///
+  /// [List<Vector3>] g The terrain vertices.
+  /// [TerrainOptions] options Settings
+  /// [double] scale The resolution of the resulting heightmap.
+  /// [int] segments The width of the target heightmap.
+  /// [double] range The altitude of the noise.
+  /// [Float64List] data The target heightmap.
+  ///
+  static void whiteNoise(Float32List g, TerrainOptions options, double scale, int segments, double range, Float64List data) {
     if (scale > segments) return;
     int i = 0,
         j = 0,
@@ -509,7 +510,7 @@ extension Generators on Terrain{
         // jscs:disable disallowSpacesInsideBrackets
         /* c b *
         * l t */
-        var t = data.get(k),
+        final t = data.get(k),
             l = data.get( j      * xl + (i-inc)) ?? t, // left
             b = data.get((j-inc) * xl +  i     ) ?? t, // bottom
             c = data.get((j-inc) * xl + (i-inc)) ?? t; // corner
@@ -521,7 +522,7 @@ extension Generators on Terrain{
             if (x == lastX && y == lastY) continue;
             int z = y * xl + x;
             if (z < 0) continue;
-            var px = ((x-lastX) / inc),
+            final px = ((x-lastX) / inc),
                 py = ((y-lastY) / inc),
                 r1 = px * b + (1-px) * c,
                 r2 = px * t + (1-px) * l;
@@ -539,22 +540,22 @@ extension Generators on Terrain{
     for (i = 0; i < xl; i++) {
       for (j = 0; j < yl; j++) {
         // http://stackoverflow.com/q/23708306/843621
-        var kg = j * xl + i,
+        final kg = j * xl + i,
             kd = j * segments + i;
         g[kg] += data[kd];
       }
     }
   }
 
-  /**
-   * Generate random terrain using value noise.
-   *
-   * The basic approach of value noise is to generate white noise at a
-   * smaller octave than the target and then interpolate to get a higher-
-   * resolution result. This is then repeated at different resolutions.
-   *
-   * Parameters are the same as those for {@link static DiamondSquare}.
-   */
+  ///
+  /// Generate random terrain using value noise.
+  ///
+  /// The basic approach of value noise is to generate white noise at a
+  /// smaller octave than the target and then interpolate to get a higher-
+  /// resolution result. This is then repeated at different resolutions.
+  ///
+  /// Parameters are the same as those for {@link static DiamondSquare}.
+  ///
   static void value(Float32List g, TerrainOptions options) {
     // Set the segment length to the smallest power of 2 that is greater
     // than the number of vertices in either dimension of the plane
@@ -563,10 +564,10 @@ extension Generators on Terrain{
     // Store the array of white noise outside of the WhiteNoise function to
     // avoid allocating a bunch of unnecessary arrays; we can just
     // overwrite old data each time WhiteNoise() is called.
-    var data = new Float64List((segments+1)*(segments+1));
+    final data = new Float64List((segments+1)*(segments+1));
 
     // Layer white noise at different resolutions.
-    var range = options.maxHeight! - options.minHeight!;
+    final range = options.maxHeight! - options.minHeight!;
     for (int i = 2; i < 7; i++) {
       whiteNoise(g, options, math.pow(2.0, i).toDouble(), segments, range * math.pow(2, 2.4-i*1.2), data);
     }
@@ -580,17 +581,17 @@ extension Generators on Terrain{
     ));
   }
 
-  /**
-   * Generate random terrain using Weierstrass functions.
-   *
-   * Weierstrass functions are known for being continuous but not differentiable
-   * anywhere. This produces some nice shapes that look terrain-like, but can
-   * look repetitive from above.
-   *
-   * Parameters are the same as those for {@link static DiamondSquare}.
-   */
+  ///
+  /// Generate random terrain using Weierstrass functions.
+  ///
+  /// Weierstrass functions are known for being continuous but not differentiable
+  /// anywhere. This produces some nice shapes that look terrain-like, but can
+  /// look repetitive from above.
+  ///
+  /// Parameters are the same as those for {@link static DiamondSquare}.
+  ///
   static void weierstrass(Float32List g, TerrainOptions options) {
-    var range = (options.maxHeight! - options.minHeight!) * 0.5,
+    double range = (options.maxHeight! - options.minHeight!) * 0.5,
         dir1 = math.Random().nextDouble() < 0.5 ? 1 : -1,
         dir2 = math.Random().nextDouble() < 0.5 ? 1 : -1,
         r11  =  0.5   + math.Random().nextDouble() * 1.0,

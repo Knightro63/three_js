@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:css/css.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
 enum GuiWidgetType{dropdown,checkbox,color,function,slider}
 
@@ -154,10 +155,12 @@ class GuiWidget{
       ),
     );
   }
-  Widget _color(){
-    int r = (0xff0000 & value?[name]) >> 16;
-    int g = (0x00ff00 & value?[name]) >> 8;
-    int b = (0x0000ff & value?[name]) >> 0;
+  Widget _color([BuildContext? context]){
+    final r = (0xff0000 & value?[name]) >> 16;
+    final g = (0x00ff00 & value?[name]) >> 8;
+    final b = (0x0000ff & value?[name]) >> 0;
+    final color = Color.fromARGB(255, r, g, b);
+    
     return  Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -166,7 +169,7 @@ class GuiWidget{
             Container(
               width: 3,
               height: 35,
-              color: Color.fromARGB(255, r, g, b),
+              color: color,
               margin: const EdgeInsets.only(right: 5),
             ),
             Text(name),
@@ -174,22 +177,64 @@ class GuiWidget{
         ),
         InkWell(
           onTap: (){
-            _onChanged?.call(value?[name]);
-            _onFinished?.call();
-            update();
+            if(context == null) throw('To change color context is required in the render function.');
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: const Text('Pick a color!'),
+                  content: SizedBox(
+                    width: 250,
+                    height: 260,
+                    child: ColorPicker(
+                      pickerColor: color,
+                      onColorChanged: (color) {
+                        final red = color.red;
+                        final green = color.green;
+                        final blue = color.blue;
+                        value?[name] = red << 16 ^green << 8 ^blue << 0;
+                        update();
+                      },
+                      colorPickerWidth: 250,
+                      pickerAreaHeightPercent: 0.7,
+                      portraitOnly: true,
+                      enableAlpha: false,
+                      labelTypes: const [],
+                      pickerAreaBorderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  actions: <Widget>[
+                    ElevatedButton(
+                      child: const Text('Got it'),
+                      onPressed: () {
+                        _onChanged?.call(value?[name]);
+                        _onFinished?.call();
+                        update();
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ],
+                );
+              }).then((value) {
+              _onChanged?.call(this.value?[name]);
+              _onFinished?.call();
+              update();
+            });
           },
           child: Container(
             margin: const EdgeInsets.only(right: 10),
             width: 125,
             height: 25,
-            color: Color.fromARGB(255, r, g, b),
+            color: color,
+            alignment: Alignment.center,
+            child: Text('0x${color.value.toRadixString(16)}'),
           )
         )
       ]
     );
   }
 
-  Widget render(){
+  Widget render([BuildContext? context]){
     switch (type) {
       case GuiWidgetType.dropdown:
         return _createDD();
@@ -198,7 +243,7 @@ class GuiWidget{
       case GuiWidgetType.slider:
         return _slider();
       case GuiWidgetType.color:
-        return _color();
+        return _color(context);
       default:
         return _createFunction();
     }
@@ -252,11 +297,11 @@ class Folder{
     return _widgets.last;
   }
 
-  List<Widget> render(){
+  List<Widget> render([BuildContext? context]){
     List<Widget> w = [];
 
     for(final wids in widgets){
-      w.add(wids.render());
+      w.add(wids.render(context));
     }
 
     return w;
@@ -275,7 +320,7 @@ class Gui{
     return _folders.last;
   }
 
-  Widget render(){
+  Widget render([BuildContext? context]){
     List<Widget> widgets = [];
     bool first = true;
     for(final f in _folders){
@@ -318,7 +363,7 @@ class Gui{
                 )
               ),
               if(f.isOpen) Column(
-                  children: f.render(),
+                children: f.render(context),
               )
             ]
           )
@@ -437,6 +482,3 @@ class _SavedWidgets{
     );
   }
 }
-
-
-

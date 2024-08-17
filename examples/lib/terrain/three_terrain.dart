@@ -1,8 +1,6 @@
 import 'dart:typed_data';
-
-import 'package:css/css.dart';
-import 'package:example/change_image.dart';
-import 'package:example/gui.dart';
+import '../src/change_image.dart';
+import '../src/gui.dart';
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
 import 'package:three_js_geometry/three_js_geometry.dart';
@@ -15,29 +13,12 @@ import 'dart:math' as math;
 import 'dart:async';
 import 'package:three_js_terrain/three_js_terrain.dart' as terrain;
 
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: CSS.darkTheme,
-      home: const TerrainPage(),
-    );
-  }
-}
-
 class TerrainPage extends StatefulWidget {
   const TerrainPage({super.key});
   @override
-  State<TerrainPage> createState() => _TerrainPageState();
-}
+  createState() => _State();}
 
-class _TerrainPageState extends State<TerrainPage> {
+class _State extends State<TerrainPage> {
   late three.ThreeJS threeJs;
   late three.OrbitControls orbit;
   late three.FirstPersonControls controls;

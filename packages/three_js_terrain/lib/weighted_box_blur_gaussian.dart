@@ -1,24 +1,26 @@
 import 'dart:typed_data';
-import 'dart:math' as math;  
+import 'dart:math' as math;
 
-/**
- * Perform Gaussian smoothing on terrain vertices.
- *
- * @param {Float32Array} g
- *   The geometry's z-positions to modify with heightmap data.
- * @param {Object} options
- *   A map of settings that control how the terrain is constructed and
- *   displayed. Valid values are the same as those for the `options` parameter
- *   of {@link THREE.Terrain}().
- * @param {Number} [s=1]
- *   The standard deviation of the Gaussian kernel to use. Higher values result
- *   in smoothing across more cells of the src matrix.
- * @param {Number} [n=3]
- *   The number of box blurs to use in the approximation. Larger values result
- *   in slower but more accurate smoothing.
- */
+import 'package:three_js_terrain/core.dart';  
+
+///
+/// Perform Gaussian smoothing on terrain vertices.
+///
+/// [Float32List] g
+///   The geometry's z-positions to modify with heightmap data.
+/// [TerrainOptions] options
+///   A map of settings that control how the terrain is constructed and
+///   displayed. Valid values are the same as those for the `options` parameter
+///   of {@link THREE.Terrain}().
+///  [double] s
+///   The standard deviation of the Gaussian kernel to use. Higher values result
+///   in smoothing across more cells of the src matrix.
+///   [int] n
+///   The number of box blurs to use in the approximation. Larger values result
+///   in slower but more accurate smoothing.
+///
 class GaussianBoxBlur{
-  GaussianBoxBlur(g, options, s, n) {
+  GaussianBoxBlur(Float32List g, TerrainOptions options, double s,int n) {
     gaussianBoxBlur(
       g,
       options.xSegments+1,
@@ -28,38 +30,38 @@ class GaussianBoxBlur{
     );
   }
 
-  /**
-   * Approximate a Gaussian blur by performing several weighted box blurs.
-   *
-   * After this function runs, `tcl` will contain the blurred source channel.
-   * This operation also modifies `scl`.
-   *
-   * Lightly modified from http://blog.ivank.net/fastest-gaussian-blur.html
-   * under the MIT license: http://opensource.org/licenses/MIT
-   *
-   * Other than style cleanup, the main significant change is that the original
-   * version was used for manipulating RGBA channels in an image, so it assumed
-   * that input and output were integers [0, 255]. This version does not make
-   * such assumptions about the input or output values.
-   *
-   * @param Number[] scl
-   *   The source channel.
-   * @param Number w
-   *   The image width.
-   * @param Number h
-   *   The image height.
-   * @param Number [r=1]
-   *   The standard deviation (how much to blur).
-   * @param Number [n=3]
-   *   The number of box blurs to use in the approximation.
-   * @param Number[] [tcl]
-   *   The target channel. Should be different than the source channel. If not
-   *   passed, one is created. This is also the return value.
-   *
-   * @return Number[]
-   *   An array representing the blurred channel.
-   */
-  Float32List gaussianBoxBlur(scl, int w, int h, [double r = 1, int n = 3, Float32List? tcl]) {
+  ///
+  /// Approximate a Gaussian blur by performing several weighted box blurs.
+  ///
+  /// After this function runs, `tcl` will contain the blurred source channel.
+  /// This operation also modifies `scl`.
+  ///
+  /// Lightly modified from http://blog.ivank.net/fastest-gaussian-blur.html
+  /// under the MIT license: http://opensource.org/licenses/MIT
+  ///
+  /// Other than style cleanup, the main significant change is that the original
+  /// version was used for manipulating RGBA channels in an image, so it assumed
+  /// that input and output were integers [0, 255]. This version does not make
+  /// such assumptions about the input or output values.
+  ///
+  /// [Float32List] scl
+  ///   The source channel.
+  /// [int] w
+  ///   The image width.
+  /// [int] h
+  ///   The image height.
+  /// [double] r = 1
+  ///   The standard deviation (how much to blur).
+  /// [int] n = 3
+  ///   The number of box blurs to use in the approximation.
+  /// [Float32List] tcl
+  ///   The target channel. Should be different than the source channel. If not
+  ///   passed, one is created. This is also the return value.
+  ///
+  /// return [Float32List]
+  ///   An array representing the blurred channel.
+  ///
+  Float32List gaussianBoxBlur(Float32List scl, int w, int h, [double r = 1, int n = 3, Float32List? tcl]) {
       tcl ??= Float32List(scl.length);
       final boxes = boxesForGauss(r, n);
       for (int i = 0; i < n; i++) {
@@ -68,17 +70,17 @@ class GaussianBoxBlur{
       return tcl;
   }
 
-  /**
-   * Calculate the size of boxes needed to approximate a Gaussian blur.
-   *
-   * The appropriate box sizes depend on the number of box blur passes required.
-   *
-   * @param Number sigma
-   *   The standard deviation (how much to blur).
-   * @param Number n
-   *   The number of boxes (also the number of box blurs you want to perform
-   *   using those boxes).
-   */
+  ///
+  /// Calculate the size of boxes needed to approximate a Gaussian blur.
+  ///
+  /// The appropriate box sizes depend on the number of box blur passes required.
+  ///
+  /// [num] sigma
+  ///   The standard deviation (how much to blur).
+  /// [int] n
+  ///   The number of boxes (also the number of box blurs you want to perform
+  ///   using those boxes).
+  ///
   Int16List boxesForGauss(num sigma, int n) {
       // Calculate how far out we need to go to capture the bulk of the distribution.
       final wIdeal = math.sqrt(12*sigma*sigma/n + 1); // Ideal averaging filter width
@@ -88,7 +90,7 @@ class GaussianBoxBlur{
 
       final mIdeal = (12*sigma*sigma - n*wl*wl - 4*n*wl - 3*n)/(-4*wl - 4);
       final m = (mIdeal).round();
-      // var sigmaActual = Math.sqrt( (m*wl*wl + (n-m)*wu*wu - n)/12 );
+      // final sigmaActual = Math.sqrt( (m*wl*wl + (n-m)*wu*wu - n)/12 );
 
       final sizes = Int16List(n);
       for (int i = 0; i < n; i++) { 
@@ -97,11 +99,11 @@ class GaussianBoxBlur{
       return sizes;
   }
 
-  /**
-   * Perform a 2D box blur by doing a 1D box blur in two directions.
-   *
-   * Uses the same parameters as gaussblur().
-   */
+  ///
+  /// Perform a 2D box blur by doing a 1D box blur in two directions.
+  ///
+  /// Uses the same parameters as gaussblur().
+  ///
   void boxBlur(scl, Float32List tcl,int w,int h,double r) {
       for (int i = 0, l = scl.length; i < l; i++) { 
         tcl[i] = scl[i]; 
@@ -110,17 +112,17 @@ class GaussianBoxBlur{
       boxBlurV(scl, tcl, w, h, r);
   }
 
-  /**
-   * Perform a horizontal box blur.
-   *
-   * Uses the same parameters as gaussblur().
-   */
+  ///
+  /// Perform a horizontal box blur.
+  ///
+  /// Uses the same parameters as gaussblur().
+  ///
   void boxBlurH(scl, Float32List tcl, int w, int h, double r) {
     double iarr = 1 / (r+r+1); // averaging adjustment parameter
     for (int i = 0; i < h; i++) {
-      var ti = i * w, // current target index
-          li = ti, // current left side of the examined range
-          ri = ti + r, // current right side of the examined range
+      int ti = i * w, // current target index
+          li = ti; // current left side of the examined range
+      double ri = ti + r, // current right side of the examined range
           fv = scl[ti], // first value in the row
           lv = scl[ti + w - 1], // last value in the row
           val = (r+1) * fv, // target value, accumulated over examined points
@@ -136,17 +138,17 @@ class GaussianBoxBlur{
     }
   }
 
-  /**
-   * Perform a vertical box blur.
-   *
-   * Uses the same parameters as gaussblur().
-   */
+  ///
+  /// Perform a vertical box blur.
+  ///
+  /// Uses the same parameters as gaussblur().
+  ///
   void boxBlurV(scl, Float32List tcl, int w, int h, double r) {
     double iarr = 1 / (r+r+1); // averaging adjustment parameter
     for (int i = 0; i < w; i++) {
-      var ti = i, // current target index
-          li = ti, // current top of the examined range
-          ri = ti+r*w, // current bottom of the examined range
+      int ti = i, // current target index
+          li = ti; // current top of the examined range
+      double ri = ti+r*w, // current bottom of the examined range
           fv = scl[ti], // first value in the column
           lv = scl[ti + w*(h-1)], // last value in the column
           val = (r+1) * fv, // target value, accumulated over examined points

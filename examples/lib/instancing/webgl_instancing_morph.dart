@@ -130,7 +130,6 @@ class _State extends State<WebglInstancingMorph> {
       }
 
       mesh!.morphTexture!.needsUpdate = true;
-      
     });
   }
 }

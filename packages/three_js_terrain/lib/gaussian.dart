@@ -4,47 +4,48 @@ import 'dart:math' as math;
 
 class Gaussian{
 
-  /**
-   * Perform Gaussian smoothing on terrain vertices.
-   *
-   * @param {THREE.Vector3[]} g
-   *   The vertex array for plane geometry to modify with heightmap data. This
-   *   method sets the `z` property of each vertex.
-   * @param {Object} options
-   *   A map of settings that control how the terrain is constructed and
-   *   displayed. Valid values are the same as those for the `options` parameter
-   *   of {@link THREE.Terrain}().
-   * @param {Number} [s=1]
-   *   The standard deviation of the Gaussian kernel to use. Higher values result
-   *   in smoothing across more cells of the src matrix.
-   * @param {Number} [kernelSize=7]
-   *   The size of the Gaussian kernel to use. Larger kernels result in slower
-   *   but more accurate smoothing.
-   */
-  Gaussian(Float32List g, TerrainOptions options, [double? s, int? kernelSize]) {
+  ///
+  /// Perform Gaussian smoothing on terrain vertices.
+  ///
+  /// [List<Vector3>] g
+  ///   The vertex array for plane geometry to modify with heightmap data. This
+  ///   method sets the `z` property of each vertex.
+  /// [TerrainOptions] options
+  ///   A map of settings that control how the terrain is constructed and
+  ///   displayed. Valid values are the same as those for the `options` parameter
+  ///    of {@link THREE.Terrain}().
+  /// [double] s = 1
+  ///   The standard deviation of the Gaussian kernel to use. Higher values result
+  ///   in smoothing across more cells of the src matrix.
+  /// [int] kernelSize = 7
+  ///   The size of the Gaussian kernel to use. Larger kernels result in slower
+  ///   but more accurate smoothing.
+  ///
+  Gaussian(Float32List g, TerrainOptions options, [double s = 1, int kernelSize = 7]) {
     Terrain.fromArray2D(g, gaussian(Terrain.toArray2D(g, options), s, kernelSize));
   }
-  /**
-   * Convolve an array with a kernel.
-   *
-   * @param {Number[][]} src
-   *   The source array to convolve. A nonzero-sized rectangular array of numbers.
-   * @param {Number[][]} kernel
-   *   The kernel array with which to convolve `src`.  A nonzero-sized
-   *   rectangular array of numbers smaller than `src`.
-   * @param {Number[][]} [tgt]
-   *   The target array into which the result of the convolution should be put.
-   *   If not passed, a new array will be created. This is also the array that
-   *   this function returns. It must be at least as large as `src`.
-   *
-   * @return {Number[][]}
-   *   An array containing the result of the convolution.
-   */
-  List<Float64List> convolve(List<Float64List> src, List<Float64List> kernel, [List<Float64List>? tgt]) {
+
+  ///
+  /// Convolve an array with a kernel.
+  ///
+  /// [List<Float32List>] src
+  ///   The source array to convolve. A nonzero-sized rectangular array of numbers.
+  /// [List<Float32List>] kernel
+  ///   The kernel array with which to convolve `src`.  A nonzero-sized
+  ///   rectangular array of numbers smaller than `src`.
+  /// [List<Float32List>?] [tgt]
+  ///   The target array into which the result of the convolution should be put.
+  ///   If not passed, a new array will be created. This is also the array that
+  ///   this function returns. It must be at least as large as `src`.
+  ///
+  /// return [List<Float32List>]
+  ///   An array containing the result of the convolution.
+  ///
+  List<Float32List> convolve(List<Float32List> src, List<Float32List> kernel, [List<Float32List>? tgt]) {
     // src and kernel must be nonzero rectangular number arrays.
     if (src.isEmpty || kernel.isEmpty) return src;
     // Initialize tracking variables.
-    var i = 0, // current src x-position
+    int i = 0, // current src x-position
         j = 0, // current src y-position
         a = 0, // current kernel x-position
         b = 0, // current kernel y-position
@@ -53,7 +54,7 @@ class Gaussian{
         m = kernel.length, // kernel width
         n = kernel[0].length; // kernel length
     // If a target isn't passed, initialize it to an array the same size as src.
-    tgt ??= List.filled(w, new Float64List(l));
+    tgt ??= List.filled(w, new Float32List(l));
     // The kernel is a rectangle smaller than the source. Hold it over the
     // source so that its top-left value sits over the target position. Then,
     // for each value in the kernel, multiply it by the value in the source
@@ -89,23 +90,23 @@ class Gaussian{
     return tgt;
   }
 
-  /**
-   * Returns the value at X of a Gaussian distribution with standard deviation S.
-   */
+  ///
+  /// Returns the value at X of a Gaussian distribution with standard deviation S.
+  ///
   double gauss(double x, double s) {
     // 2.5066282746310005 is sqrt(2*pi)
     return math.exp(-0.5 * x*x / (s*s)) / (s * 2.5066282746310005);
   }
 
-  /**
-   * Generate a Gaussian kernel.
-   *
-   * Returns a kernel of size N approximating a 1D Gaussian distribution with
-   * standard deviation S.
-   */
-  Float64List gaussianKernel1D(double s, int? n) {
+  ///
+  /// Generate a Gaussian kernel.
+  ///
+  /// Returns a kernel of size N approximating a 1D Gaussian distribution with
+  /// standard deviation S.
+  ///
+  Float32List gaussianKernel1D(double s, int? n) {
     n ??= 7;
-    final kernel = Float64List(n);
+    final kernel = Float32List(n);
     int halfN = (n * 0.5).floor();
     double odd = n % 2;
     int i = 0;
@@ -120,30 +121,28 @@ class Gaussian{
     return kernel;
   }
 
-  /**
-   * Perform Gaussian smoothing.
-   *
-   * @param {Number[][]} src
-   *   The source array to convolve. A nonzero-sized rectangular array of numbers.
-   * @param {Number} [s=1]
-   *   The standard deviation of the Gaussian kernel to use. Higher values result
-   *   in smoothing across more cells of the src matrix.
-   * @param {Number} [kernelSize=7]
-   *   The size of the Gaussian kernel to use. Larger kernels result in slower
-   *   but more accurate smoothing.
-   *
-   * @return {Number[][]}
-   *   An array containing the result of smoothing the src.
-   */
-  List<Float64List> gaussian(src, [double? s, int? kernelSize]) {
-    s ??= 1;
-    kernelSize ??= 7;
+  ///
+  /// Perform Gaussian smoothing.
+  ///
+  ///  [List<Float32List>] src
+  ///   The source array to convolve. A nonzero-sized rectangular array of numbers.
+  /// [double] s = 1
+  ///   The standard deviation of the Gaussian kernel to use. Higher values result
+  ///   in smoothing across more cells of the src matrix.
+  /// [int] kernelSize = 7
+  ///   The size of the Gaussian kernel to use. Larger kernels result in slower
+  ///   but more accurate smoothing.
+  ///
+  /// return [List<Float32List>]
+  ///   An array containing the result of smoothing the src.
+  ///
+  List<Float32List> gaussian(List<Float32List> src, [double s= 1, int kernelSize = 7]) {
     final kernel = gaussianKernel1D(s, kernelSize);
     int l = kernelSize;
-    List<Float64List> kernelH = [kernel];
-    List<Float64List> kernelV = [];
+    List<Float32List> kernelH = [kernel];
+    List<Float32List> kernelV = [];
     for (int i = 0; i < l; i++) {
-      kernelV.add(Float64List.fromList([kernel[i]]));
+      kernelV.add(Float32List.fromList([kernel[i]]));
     }
     return convolve(convolve(src, kernelH), kernelV);
   }

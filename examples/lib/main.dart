@@ -45,6 +45,7 @@ import 'package:example/others/webgl_interactive_voxelpainter.dart';
 import 'package:example/others/webgl_lod.dart';
 import 'package:example/others/webgl_portal.dart';
 import 'package:example/src/files_json.dart';
+import 'package:example/terrain/three_terrain.dart';
 import 'package:example/terrain/webgl_geometry_terrain.dart';
 import 'package:example/terrain/webgl_geometry_terrain_raycast.dart';
 import 'package:example/volume/webgl_ubo_arrays.dart';
@@ -256,6 +257,9 @@ class MyAppState extends State<MyApp> {
               },
               '/webgl_geometry_terrain_raycast':(BuildContext context) {
                 return const WebglGeometryTerrainRaycast();
+              },
+              '/three_terrain':(BuildContext context) {
+                return const TerrainPage();
               },
               '/webgl_loader_texture_basis':(BuildContext context) {
                 return const WebglLoaderTextureBasis();

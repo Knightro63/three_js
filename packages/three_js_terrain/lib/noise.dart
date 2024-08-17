@@ -75,8 +75,6 @@ class Noise{
     }
   }
 
-  
-
   // Skewing and unskewing factors for 2 and 3 dimensions
   static double F2 = 0.5*(math.sqrt(3)-1),
       G2 = (3-math.sqrt(3))/6,
