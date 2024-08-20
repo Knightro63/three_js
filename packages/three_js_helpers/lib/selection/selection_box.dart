@@ -161,7 +161,7 @@ class SelectionBox {
 					_center.applyMatrix4( object.matrixWorld );
 
 					if ( frustum.containsPoint( _center ) ) {
-						instances[ object.uuid ].push( instanceId );
+						instances[ object.uuid ].add( instanceId );
 					}
 				}
 			} 

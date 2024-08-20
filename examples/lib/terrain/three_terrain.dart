@@ -31,11 +31,7 @@ class _State extends State<TerrainPage> {
   
   @override
   void initState() {
-    gui = Gui((){
-      setState(() {
-        
-      });
-    });
+    gui = Gui((){setState(() {});});
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
       setup: setup,

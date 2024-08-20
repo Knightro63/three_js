@@ -27,6 +27,7 @@ class SelectionHelper {
   bool get isClicked => _isDown;
 	bool _isDown = false;
 	bool enabled = true;
+  double cameraDist = -1;
 
   late SelectionHelperOptions options;
 
@@ -56,7 +57,7 @@ class SelectionHelper {
     camera.add(
       selectionBox
         ..scale.setFrom(Vector3.zero())
-        ..position.z = -1
+        ..position.z = cameraDist
         ..position.x = _pointer.x
         ..position.y = _pointer.y
     );
@@ -100,7 +101,7 @@ class SelectionHelper {
       _startPoint.clone().add(scale.clone().scale(0.5))
     );
     selectionBox.scale.setFrom(scale);
-    selectionBox.position.z = -1;
+    selectionBox.position.z = cameraDist;
 	}
 
 	void onSelectOver() {
