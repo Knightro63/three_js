@@ -30,10 +30,19 @@ dependencies:
   three_js_terrain: ^0.0.1
   three_js_exporters: ^0.0.2
 
+  permission_handler: ^11.3.1
+  camera: ^0.11.0+2
+  camera_macos: ^0.0.8
+  camera_windows: ^0.2.5
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.0
+
+dependency_overrides:
+  permission_handler_apple:
+    path: ../../../GitHub/permission_handler_apple/
 
 flutter:
   uses-material-design: true

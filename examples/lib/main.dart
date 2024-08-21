@@ -38,6 +38,7 @@ import 'package:example/loaders/webgl_loader_xyz.dart';
 import 'package:example/material/webgl_materials_modified.dart';
 import 'package:example/modifers/webgl_modifier_simplifier.dart';
 import 'package:example/modifers/webgl_modifier_subdivision.dart';
+import 'package:example/material/webgl_materials_video_webcam.dart';
 import 'package:example/others/boxselection.dart';
 import 'package:example/others/webgl_buffergeometry_instancing_billboards.dart';
 import 'package:example/others/webgl_custom_attributes_lines.dart';
@@ -434,6 +435,9 @@ class MyAppState extends State<MyApp> {
               },
               '/misc_controls_device_orientation':(BuildContext context){
                 return const MiscControlsDeviceOrientation();
+              },
+              '/webgl_materials_video_webcam':(BuildContext context){
+                return const WebglMaterialsVideoWebcam();
               },
               '/multi_views':(BuildContext context) {
                 return const MultiViews();
