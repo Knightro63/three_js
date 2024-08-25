@@ -74,7 +74,7 @@ class _State extends State<WebglAnimationSkinningAdditiveBlending> {
   late three.OrbitControls controls;
   late three.Object3D model;
 
-  final crossFadeControls = [];
+  final List<GuiWidget> crossFadeControls = [];
 
   String currentBaseAction = 'idle';
   final allActions = [];
@@ -90,7 +90,6 @@ class _State extends State<WebglAnimationSkinningAdditiveBlending> {
     'headShake': <String,dynamic>{ 'weight': 0.0  }
   };
   Map<String,dynamic> panelSettings = {};
-  int numAnimations = 0;
 
   Future<void> setup() async {
     threeJs.camera = three.PerspectiveCamera(45, threeJs.width / threeJs.height, 1, 100);
@@ -142,22 +141,22 @@ class _State extends State<WebglAnimationSkinningAdditiveBlending> {
 
     final animations = gltf.animations!;
     mixer = three.AnimationMixer(model);
+    final numAnimations = animations.length;
 
     for (int i = 0; i != numAnimations; ++ i ) {
       three.AnimationClip clip = animations[ i ];
       final name = clip.name;
 
-      if ( baseActions[ name ] ) {
+      if ( baseActions[ name ] != null) {
 
         final action = mixer.clipAction( clip );
         activateAction( action! );
-        baseActions[ name ].action = action;
+        baseActions[ name ]['action'] = action;
         allActions.add( action );
 
-      } else if ( additiveActions[ name ] ) {
-
+      } 
+      else if ( additiveActions[ name ] != null) {
         // Make the clip additive and remove the reference frame
-
         three.AnimationUtils().makeClipAdditive( clip );
 
         if ( clip.name.endsWith( '_pose' ) ) {
@@ -166,7 +165,7 @@ class _State extends State<WebglAnimationSkinningAdditiveBlending> {
 
         final action = mixer.clipAction( clip );
         activateAction( action! );
-        additiveActions[ name ].action = action;
+        additiveActions[ name ]['action'] = action;
         allActions.add( action );
       }
     }
@@ -179,7 +178,7 @@ class _State extends State<WebglAnimationSkinningAdditiveBlending> {
         final action = allActions[ i ];
         final clip = action.getClip();
         final settings = baseActions[ clip.name ] ?? additiveActions[ clip.name ];
-        settings.weight = action.getEffectiveWeight();
+        settings['weight'] = action.getEffectiveWeight();
       }
       mixer.update(dt);
     });
@@ -216,36 +215,34 @@ class _State extends State<WebglAnimationSkinningAdditiveBlending> {
 
     for (final name in additiveActions.keys ) {
       final settings = additiveActions[ name ];
-
       panelSettings[name] = settings!['weight'];
       folder2.addSlider( panelSettings, name, 0.0, 1.0 )..step(0.01 )..onChange(( weight ) {
         setWeight( settings['action'], weight );
         settings['weight'] = weight;
-      } );
-
+      });
     }
 
-    folder3.addSlider( panelSettings, 'modify time scale', 0.0, 1.5)..step(0.01 )..onChange( (x){return modifyTimeScale(x);} );
+    folder3.addSlider(panelSettings, 'modify time scale', 0.0, 1.5)..step(0.01 )..onChange( (x){return modifyTimeScale(x);} );
 
     folder1.open();
     folder2.open();
     folder3.open();
 
-    // crossFadeControls.forEach((GuiWidget control ) {
-    //   control.setInactive = () {
-    //     control.domElement.classList.add( 'control-inactive' );
-    //   };
+    crossFadeControls.forEach((GuiWidget control ) {
+      control.setInactive = () {
+        //control.domElement.classList.add( 'control-inactive' );
+      };
 
-    //   control.setActive = () {
-    //     control.domElement.classList.remove( 'control-inactive' );
-    //   };
+      control.setActive = () {
+        //control.domElement.classList.remove( 'control-inactive' );
+      };
 
-    //   final settings = baseActions[ control.property ];
+      final settings = baseActions[ control.property ];
 
-    //   if ( ! settings || ! settings.weight ) {
-    //     control.setInactive();
-    //   }
-    // } );
+      if (settings == null || settings['weight'] == null) {
+        control.setInactive?.call();
+      }
+    } );
   }
 
   void activateAction(three.AnimationAction action ) {
@@ -259,39 +256,42 @@ class _State extends State<WebglAnimationSkinningAdditiveBlending> {
     mixer.timeScale = speed;
   }
 
-  void prepareCrossFade( startAction, endAction, duration ) {
+  void prepareCrossFade(three.AnimationAction? startAction, three.AnimationAction? endAction, double duration ) {
 
     // If the current action is 'idle', execute the crossfade immediately;
     // else wait until the current action has finished its current loop
 
-    if ( currentBaseAction == 'idle' || ! startAction || ! endAction ) {
+    if ( currentBaseAction == 'idle' || startAction == null || endAction == null) {
       executeCrossFade( startAction, endAction, duration );
-    } else {
+    } 
+    else {
       synchronizeCrossFade( startAction, endAction, duration );
     }
 
     // Update control colors
 
-    if ( endAction ) {
+    if ( endAction != null) {
       final clip = endAction.getClip();
       currentBaseAction = clip.name;
-    } else {
+    } 
+    else {
       currentBaseAction = 'None';
     }
 
-    crossFadeControls.forEach(( control ) {
+    crossFadeControls.forEach((GuiWidget control ) {
       final name = control.property;
 
       if ( name == currentBaseAction ) {
-        control.setActive();
+        control.setActive?.call();
       } else {
-        control.setInactive();
+        control.setInactive?.call();
       }
     } );
   }
 
-  void synchronizeCrossFade(three.AnimationAction startAction,three.AnimationAction  endAction, double duration ) {
-    onLoopFinished( event ) {
+  void synchronizeCrossFade(three.AnimationAction startAction, three.AnimationAction endAction, double duration ) {
+    void onLoopFinished( event ) {
+      print(event);
       if ( event.action == startAction ) {
         mixer.removeEventListener( 'loop', onLoopFinished );
         executeCrossFade( startAction, endAction, duration );
@@ -325,9 +325,9 @@ class _State extends State<WebglAnimationSkinningAdditiveBlending> {
   // This function is needed, since animationAction.crossFadeTo() disables its start action and sets
   // the start action's timeScale to ((start animation's duration) / (end animation's duration))
 
-  void setWeight(three.AnimationAction action,double weight ) {
+  void setWeight(three.AnimationAction action, double weight) {
     action.enabled = true;
-    action.setEffectiveTimeScale( 1 );
+    action.setEffectiveTimeScale( 1.0 );
     action.setEffectiveWeight( weight );
   }
 }

@@ -29,6 +29,7 @@ dependencies:
   three_js_modifers: ^0.0.2
   three_js_terrain: ^0.0.1
   three_js_exporters: ^0.0.2
+  three_js_line: ^0.0.1
 
   permission_handler: ^11.3.1
   camera: ^0.11.0+2
@@ -42,7 +43,9 @@ dev_dependencies:
 
 dependency_overrides:
   permission_handler_apple:
-    path: ../../../GitHub/permission_handler_apple/
+    git:
+      url: https://github.com/alex-melnyk/flutter-permission-handler.git 
+      path: permission_handler_apple
 
 flutter:
   uses-material-design: true

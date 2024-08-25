@@ -126,7 +126,7 @@ class Raycaster {
   /// through the back of a face will not be detected. To raycast against both
   /// faces of an object, you'll want to set the [material]'s
   /// [side] property to `DoubleSide`.
-  List<Intersection> intersectObject(Object3D object, bool recursive, [List<Intersection>? intersects]) {
+  List<Intersection> intersectObject(Object3D object, [bool recursive = false, List<Intersection>? intersects]) {
     final ints = intersects ?? [];
     intersectObject4(object, this, ints, recursive);
     ints.sort(ascSort);

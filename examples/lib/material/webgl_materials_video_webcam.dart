@@ -21,7 +21,7 @@ class _State extends State<WebglMaterialsVideoWebcam> {
   InsertCamera camera = InsertCamera();
   bool loading = true;
   late three.ThreeJS threeJs;
-  three.VideoTexture? texture;
+  three.CanvasTexture? texture;
 
   @override
   void initState() {
@@ -38,7 +38,7 @@ class _State extends State<WebglMaterialsVideoWebcam> {
       await camera.startLiveFeed((InputImage i){
         if(i.bytes != null){
           image.set(i.bytes!);
-          texture?.updateVideo();
+          texture?.needsUpdate = true;//updateVideo();
         }
       });
     });
@@ -85,7 +85,7 @@ class _State extends State<WebglMaterialsVideoWebcam> {
     threeJs.camera.position.z = 0.01;
 
     threeJs.scene = three.Scene();
-    texture = three.VideoTexture(three.ImageElement(
+    texture = three.CanvasTexture(three.ImageElement(
       width: imageSize.width.toInt(),
       height: imageSize.height.toInt(),
       data: image

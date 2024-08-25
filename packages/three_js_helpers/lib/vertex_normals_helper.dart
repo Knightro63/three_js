@@ -24,7 +24,7 @@ final _normalMatrix = Matrix3.identity();
 /// ```
 class VertexNormalsHelper extends LineSegments {
   late Object3D object;
-  late int size;
+  late double size;
 
   VertexNormalsHelper.create(super.geometry, super.material);
 
@@ -33,7 +33,7 @@ class VertexNormalsHelper extends LineSegments {
   /// [size] -- (optional) length of the arrows. Default is *1*.
   /// 
   /// [color] -- (optional) hex color of the arrows. Default is *0xff0000*.
-  factory VertexNormalsHelper(Object3D object, [int size = 1, int color = 0xff0000]) {
+  factory VertexNormalsHelper(Object3D object, [double size = 1, int color = 0xff0000]) {
     final geometry = BufferGeometry();
 
     final nNormals = object.geometry?.attributes["normal"].count;

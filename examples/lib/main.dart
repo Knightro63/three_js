@@ -22,6 +22,9 @@ import 'package:example/instancing/webgl_instancing_morph.dart';
 import 'package:example/instancing/webgl_instancing_raycasting.dart';
 import 'package:example/instancing/webgl_instancing_scatter.dart';
 import 'package:example/lights/webgl_lightprobe_cube_camera.dart';
+import 'package:example/line/webgl_lines_fat.dart';
+import 'package:example/line/webgl_lines_fat_raycasting.dart';
+import 'package:example/line/webgl_lines_fat_wireframe.dart';
 import 'package:example/loaders/webgl_loader_collada.dart';
 import 'package:example/loaders/webgl_loader_collada_kinematics.dart';
 import 'package:example/loaders/webgl_loader_collada_skinning.dart';
@@ -45,6 +48,7 @@ import 'package:example/others/webgl_custom_attributes_lines.dart';
 import 'package:example/others/webgl_interactive_voxelpainter.dart';
 import 'package:example/others/webgl_lod.dart';
 import 'package:example/others/webgl_portal.dart';
+import 'package:example/rollercoster/webxr_vr_rollercoaster.dart';
 import 'package:example/src/files_json.dart';
 import 'package:example/terrain/three_terrain.dart';
 import 'package:example/terrain/webgl_geometry_terrain.dart';
@@ -216,6 +220,15 @@ class MyAppState extends State<MyApp> {
               },
               '/webgl_geometry_extrude_splines':(BuildContext context) {
                 return const WebglGeometryExtrudeSplines();
+              },
+              '/webgl_lines_fat':(BuildContext context) {
+                return const WebglLinesFat();
+              },
+              '/webgl_lines_fat_wireframe':(BuildContext context) {
+                return const WebglLinesFatWireframe();
+              },
+              '/webgl_lines_fat_raycasting':(BuildContext context) {
+                return const WebglLinesFatRaycasting();
               },
               '/webgl_decals':(BuildContext context) {
                 return const WebglDecals();
@@ -469,6 +482,9 @@ class MyAppState extends State<MyApp> {
               '/webgl_ubo_arrays':(BuildContext context) {
                 return const WebglUboArrays();
               },
+              '/webxr_vr_rollercoaster':(BuildContext context) {
+                return const WebXRVRRollercoaster();
+              }
             }
           ),
         )

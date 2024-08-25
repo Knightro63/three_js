@@ -1,0 +1,20 @@
+name: three_js_line
+description: "Flutter three_js_line package converted from threejs to increase the thickness of line geometry."
+version: 0.0.1
+homepage: https://github.com/Knightro63/three_js/tree/main/packages/three_js_helpers
+
+environment:
+  sdk: ^3.5.0
+  flutter: ">=1.17.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  three_js_core: ^0.0.2
+  three_js_math: ^0.0.2
+  three_js_geometry: ^0.0.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0

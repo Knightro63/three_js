@@ -15,6 +15,9 @@ const List<String> filesJson = [
   "webgl_geometry_extrude_shapes",
   "webgl_geometry_dynamic",
   "webgl_geometry_extrude_splines",
+  'webgl_lines_fat',
+  'webgl_lines_fat_wireframe',
+  'webgl_lines_fat_raycasting',
   "webgl_decals",
   //"webgl_nodes_points",
   "webgl_materials_browser",
@@ -102,5 +105,6 @@ const List<String> filesJson = [
   'webgl_volume_perlin',
   'webgl_volume_cloud',
   'webgl_volume_instancing',
-  //'webgl_ubo_arrays'
+  //'webgl_ubo_arrays',
+  'webxr_vr_rollercoaster',
 ];

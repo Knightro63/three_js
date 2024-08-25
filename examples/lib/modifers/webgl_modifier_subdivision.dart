@@ -86,10 +86,10 @@ class _State extends State<WebglModifierSubdivision> {
     controls.target.setValues( 0, 0, 0 );
     controls.update();
 
-    threeJs.scene.add( three.HemisphereLight( 0xffffff, 0x737373, 3 ) );
+    threeJs.scene.add( three.HemisphereLight( 0xffffff, 0x737373, 0.3 ) );
 
-    final frontLight = three.DirectionalLight( 0xffffff, 1.5 );
-    final backLight = three.DirectionalLight( 0xffffff, 1.5 );
+    final frontLight = three.DirectionalLight( 0xffffff, 0.5 );
+    final backLight = three.DirectionalLight( 0xffffff, 0.5 );
     frontLight.position.setValues( 0, 1, 1 );
     backLight.position.setValues( 0, 1, - 1 );
     threeJs.scene.addAll( [frontLight, backLight] );

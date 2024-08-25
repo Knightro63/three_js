@@ -2,16 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:css/css.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
-enum GuiWidgetType{dropdown,checkbox,color,function,slider}
+enum GuiWidgetType{dropdown,checkbox,color,function,slider,button}
 
 class GuiWidget{
   GuiWidget(this.name,this.type,this.update,[this.value,this.items]);
+
+  void Function()? setActive;
+  void Function()? setInactive;
 
   void Function() update;
   Map<String,dynamic>? value;
   GuiWidgetType type;
   dynamic items;
   String name;
+  String get property => name;
 
   double _step = 1;
 
@@ -133,6 +137,39 @@ class GuiWidget{
       ]
     );
   }
+  Widget _createButton(){
+    return InkWell(
+      onTap: (){
+        value?[name] = !value?[name];
+        _onFinished?.call();
+        _onChanged?.call(value?[name]);
+        update();
+      },
+      child: SizedBox(
+        width: 240,
+        child: Row(
+          children: [
+            Container(
+              width: 3,
+              height: 35,
+              color: Colors.purple,
+              margin: const EdgeInsets.only(right: 5),
+            ),
+            Container(
+              width: 220,
+              height: 30,
+              decoration: BoxDecoration(
+                color: value?[name]?Colors.purple:CSS.darkTheme.canvasColor,
+                borderRadius: BorderRadius.circular(15)
+              ),
+              alignment: Alignment.center,
+              child: Text(name),
+            )
+          ]
+        )
+      ),
+    );
+  }
   Widget _createFunction(){
     return InkWell(
       onTap: (){
@@ -244,6 +281,8 @@ class GuiWidget{
         return _slider();
       case GuiWidgetType.color:
         return _color(context);
+      case GuiWidgetType.button:
+        return _createButton();
       default:
         return _createFunction();
     }
@@ -294,6 +333,10 @@ class Folder{
   }
   GuiWidget addFunction(String name){
     _widgets.add(GuiWidget(name, GuiWidgetType.function, update));
+    return _widgets.last;
+  }
+  GuiWidget addButton(Map<String,dynamic> value, String name){
+    _widgets.add(GuiWidget(name, GuiWidgetType.button, update, value));
     return _widgets.last;
   }
 
