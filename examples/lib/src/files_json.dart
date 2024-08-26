@@ -78,7 +78,7 @@ const List<String> filesJson = [
   "webgl_lights_rectarealight",
   "webgl_postprocessing_sobel",
   "webgl_water",
-  //"webgl_geometry_csg",
+  "webgl_geometry_csg",
   "webgl_helpers",
   'webgl_portal',
   "webgl_modifier_subdivision",

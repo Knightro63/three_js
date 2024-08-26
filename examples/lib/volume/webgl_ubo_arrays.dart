@@ -5,9 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
 
 class WebglUboArrays extends StatefulWidget {
-  
   const WebglUboArrays({super.key});
-
   @override
   createState() => _State();
 }
