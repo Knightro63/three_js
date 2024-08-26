@@ -198,7 +198,7 @@ class _State extends State<WebglLinesFatRaycasting> {
 
       raycaster.setFromCamera( pointer, threeJs.camera );
 
-      final intersects = raycaster.intersectObject( obj );
+      final intersects = raycaster.intersectObject( obj, false );
 
       if ( intersects.length > 0 ) {
 

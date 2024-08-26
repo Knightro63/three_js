@@ -23,7 +23,7 @@ final _v2 = Vector3.zero();
 /// ```
 class VertexTangentsHelper extends LineSegments {
   late Object3D object;
-  late int size;
+  late double size;
 
   VertexTangentsHelper.create(super.geometry, super.material);
 
@@ -32,7 +32,7 @@ class VertexTangentsHelper extends LineSegments {
   /// [size] -- (optional) length of the arrows. Default is *1*.
   /// 
   /// [color] -- (optional) hex color of the arrows. Default is *0x00ffff*.
-  factory VertexTangentsHelper(Object3D object, [int size = 1, int color = 0x00ffff]) {
+  factory VertexTangentsHelper(Object3D object, [double size = 1, int color = 0x00ffff]) {
     final nTangents = object.geometry?.attributes["tangent"].count;
     final geometry = BufferGeometry();
 
