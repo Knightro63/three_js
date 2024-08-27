@@ -1,5 +1,5 @@
-import 'package:example/notworking/csg/csg.dart';
-import 'package:three_js/three_js.dart';
+import 'csg.dart';
+import 'package:three_js_core/three_js_core.dart';
 
 enum BooleanType{
   union,subtract,intersect;

@@ -68,7 +68,7 @@ class _State extends State<WebglGeometryCSG> {
 
   late three.OrbitControls controls;
   late three.Mesh  wireframe;
-  three.Mesh? result;
+  three.Mesh result = three.Mesh();
 
   final Map<String,dynamic> params = {
     'operation': 'subtract',
@@ -94,7 +94,7 @@ class _State extends State<WebglGeometryCSG> {
     threeJs.scene.add( directionalLight );
 
     baseBrush = three.Mesh(
-      IcosahedronGeometry( 2, 0 ),
+      IcosahedronGeometry( 2, 3 ),
       three.MeshStandardMaterial.fromMap( {
         //'color': 0xff0000,
         'flatShading': true,
@@ -110,7 +110,7 @@ class _State extends State<WebglGeometryCSG> {
     //threeJs.scene.add(baseBrush);
 
     brush = three.Mesh(
-      CylinderGeometry( 1, 1, 5, 8 ),
+      CylinderGeometry( 1, 1, 5, 45 ),
       three.MeshStandardMaterial.fromMap( {
         'color': 0x80cbc4,
         'polygonOffset': true,
@@ -121,27 +121,7 @@ class _State extends State<WebglGeometryCSG> {
         'transparent': true
       }),
     );
-    brush.rotateX(math.pi/2);
-    brush.rotateY(math.pi/2);
-    brush.rotateZ(math.pi/2);
-    brush.updateMatrix();
-    threeJs.scene.add(brush);
-
-    // add shadow plane
-    final plane = three.Mesh(
-      three.PlaneGeometry(),
-      three.ShadowMaterial.fromMap( {
-        'color': 0xd81b60,
-        'transparent': true,
-        'opacity': 0.075,
-        'side': three.DoubleSide,
-      }),
-    );
-    plane.position.y = - 3;
-    plane.rotation.x = - math.pi / 2;
-    plane.scale.setScalar( 10 );
-    plane.receiveShadow = true;
-    threeJs.scene.add( plane );
+    //threeJs.scene.add(brush);
 
     core = three.Mesh( 
       IcosahedronGeometry( 0.15, 1 ),
@@ -169,7 +149,7 @@ class _State extends State<WebglGeometryCSG> {
     controls.minDistance = 5;
     controls.maxDistance = 75;
 
-    result = updateCSG();
+    updateCSG();
     threeJs.scene.add( result );
     
     createGui();
@@ -179,8 +159,11 @@ class _State extends State<WebglGeometryCSG> {
     });
   }
 
-	three.Mesh? updateCSG() {
-    return Evaluator.evaluate( baseBrush, brush, BooleanType.fromString(params['operation']), result);
+	void updateCSG() {
+    result.dispose();
+    threeJs.scene.remove(result);
+    result = Evaluator.evaluate( baseBrush, brush, BooleanType.fromString(params['operation']))!;
+    threeJs.scene.add(result);
   }
 
   void createGui(){
@@ -193,22 +176,22 @@ class _State extends State<WebglGeometryCSG> {
   void animate() {
     final t = DateTime.now().millisecondsSinceEpoch + 9000;
 
-    // baseBrush.rotation.x = t * 0.0001;
-    // baseBrush.rotation.y = t * 0.00025;
-    // baseBrush.rotation.z = t * 0.0005;
-    // baseBrush.updateMatrixWorld();
+    baseBrush.rotation.x = t * 0.0001;
+    baseBrush.rotation.y = t * 0.00025;
+    baseBrush.rotation.z = t * 0.0005;
+    baseBrush.updateMatrixWorld();
 
-    // brush.rotation.x = t * - 0.0002;
-    // brush.rotation.y = t * - 0.0005;
-    // brush.rotation.z = t * - 0.001;
+    brush.rotation.x = t * - 0.0002;
+    brush.rotation.y = t * - 0.0005;
+    brush.rotation.z = t * - 0.001;
 
-    // final s = 0.5 + 0.5 * ( 1 + math.sin( t * 0.001 ) );
-    // brush.scale.setValues( s, 1, s );
-    // brush.updateMatrixWorld();
+    final s = 0.5 + 0.5 * ( 1 + math.sin( t * 0.001 ) );
+    brush.scale.setValues( s, 1, s );
+    brush.updateMatrixWorld();
 
-    wireframe.geometry = result?.geometry;
+    wireframe.geometry = result.geometry;
     wireframe.visible = params['wireframe'];
 
-    //updateCSG();
+    updateCSG();
   }
 }

@@ -36,7 +36,7 @@ TypedData convertToSharedArrayBuffer(TypedData array) {
   }
 }
 
-getIndexArray(int vertexCount, [Type BufferConstructor = ArrayBuffer]) {
+TypedData getIndexArray(int vertexCount) {//, [TypedData BufferConstructor]
   if (vertexCount > 65535) {
     return Uint32List(vertexCount);
   } else {

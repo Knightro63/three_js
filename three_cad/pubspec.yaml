@@ -1,0 +1,29 @@
+name: three_cad
+description: "A new Flutter project."
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.5.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  three_js: ^0.0.5
+  three_js_helpers: ^0.0.3
+  three_js_line: ^0.0.1
+  three_js_exporters: ^0.0.2
+  three_js_geometry: ^0.0.2
+  three_js_transform_controls: ^0.0.3
+  css:
+    git:
+      url: https://github.com/Knightro63/css.git
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true

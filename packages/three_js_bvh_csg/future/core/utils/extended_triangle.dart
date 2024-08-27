@@ -123,7 +123,8 @@ class ExtendedTriangle extends Triangle {
   final edge1 = Line3();
   final edge2 = Line3();
   final tempPoint = Vector3();
-  intersectsTriangle(tri, plane, targetEdge){
+
+  int intersectsTriangle(tri, plane, targetEdge){
       // find the edge that intersects the other triangle plane
       final points = tri.points;
       int count = 0;
@@ -182,7 +183,7 @@ class ExtendedTriangle extends Triangle {
 
     // TODO: If the triangles are coplanar and intersecting the target is nonsensical. It should at least
     // be a line contained by both triangles if not a different special case somehow represented in the return result.
-    return function intersectsTriangle( other, [target, suppressLog = false] ) {
+    bool intersectsTriangle( other, {Line3? target, bool suppressLog = false}) {
 
       if (needsUpdate ) {
         update();
@@ -249,8 +250,8 @@ class ExtendedTriangle extends Triangle {
             console.warning( 'ExtendedTriangle.intersectsTriangle: Triangles are coplanar which does not support an output edge. Setting edge to 0, 0, 0.' );
           }
 
-          target.start.set( 0, 0, 0 );
-          target.end.set( 0, 0, 0 );
+          target.start.setValues( 0, 0, 0 );
+          target.end.setValues( 0, 0, 0 );
         }
 
         return true;

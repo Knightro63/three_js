@@ -38,12 +38,12 @@ class Plane {
     // Classify each point as well as the entire polygon into one of the above
     // four classes.
     int polygonType = 0;
-    List<int> types = List.filled(polygon.vertices.length, 0);
+    List<int> types = [];
     for (int i = 0; i < polygon.vertices.length; i++) {
       double t = normal.dot(polygon.vertices[i].position) - w;
       final type = (t < -1e-4) ? back_ : (t > 1e-4) ? front_ : coplanar_;
       polygonType |= type;
-      types[i] = type;
+      types.add(type);
     }
 
     // Put the polygon in the correct list, splitting it when necessary.

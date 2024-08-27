@@ -60,7 +60,7 @@ class BufferGeometry with EventDispatcher {
   BufferAttribute? index;
 
   late List<MorphTarget> morphTargets;
-  late BufferGeometry directGeometry;
+  BufferGeometry? directGeometry;
 
   bool disposed = false;
   bool elementsNeedUpdate = false;
@@ -1035,6 +1035,17 @@ class BufferGeometry with EventDispatcher {
         (morphAttributes[temp] as BaseBufferAttribute?)?.dispose();
       }
     }
+
+    if(userData.isNotEmpty){
+      for(final temp in userData.keys){
+        if(userData[temp] is BaseBufferAttribute){
+          userData[temp].dispose();
+        }
+      }
+    }
+
+    index?.dispose();
+    directGeometry?.dispose();
   }
 }
 

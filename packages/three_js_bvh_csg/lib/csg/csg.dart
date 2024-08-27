@@ -1,6 +1,7 @@
 import 'dart:typed_data';
-import 'package:example/notworking/csg/nbuf.dart';
-import 'package:three_js/three_js.dart';
+import 'nbuf.dart';
+import 'package:three_js_core/three_js_core.dart';
+import 'package:three_js_math/three_js_math.dart';
 import 'vertex.dart';
 import 'polygon.dart';
 import 'node.dart';

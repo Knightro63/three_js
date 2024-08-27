@@ -42,7 +42,8 @@ import 'package:example/material/webgl_materials_modified.dart';
 import 'package:example/modifers/webgl_modifier_simplifier.dart';
 import 'package:example/modifers/webgl_modifier_subdivision.dart';
 import 'package:example/material/webgl_materials_video_webcam.dart';
-import 'package:example/notworking/webgl_geometry_csg.dart';
+import 'package:example/others/webgl_geometry_csg.dart';
+import 'package:example/others/webgl_geometry_csg2.dart';
 import 'package:example/others/boxselection.dart';
 import 'package:example/others/webgl_buffergeometry_instancing_billboards.dart';
 import 'package:example/others/webgl_custom_attributes_lines.dart';
@@ -407,6 +408,9 @@ class MyAppState extends State<MyApp> {
               },
               '/webgl_geometry_csg':(BuildContext context) {
                 return const WebglGeometryCSG();
+              },
+              '/webgl_geometry_csg2':(BuildContext context) {
+                return const WebglGeometryCSG2();
               },
               '/webgl_helpers':(BuildContext context) {
                 return const WebglHelpers();
