@@ -1,4 +1,4 @@
-// # class Polygon
+import 'vertex.dart';import 'plane.dart';
 
 // Represents a convex polygon. The vertices used to initialize a polygon must
 // be coplanar and form a convex loop. They do not have to be `Vertex`
@@ -8,9 +8,6 @@
 // Each convex polygon has a `shared` property, which is shared between all
 // polygons that are clones of each other or were split from the same polygon.
 // This can be used to define per-polygon properties (such as surface color).
-
-import 'vertex.dart';import 'plane.dart';
-
 class Polygon {
   late Plane plane;
   List<Vertex> vertices;

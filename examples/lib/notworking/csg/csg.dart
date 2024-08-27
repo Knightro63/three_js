@@ -1,19 +1,16 @@
-
-// ## License
-// 
-// Copyright (c) 2011 Evan Wallace (http://madebyevan.com/), under the MIT license.
-// THREE.js rework by thrax
-
-// # class CSG
-// Holds a binary space partition tree representing a 3D solid. Two solids can
-// be combined using the `union()`, `subtract()`, and `intersect()` methods.
-
 import 'dart:typed_data';
 import 'package:three_js/three_js.dart';
 import 'vertex.dart';
 import 'polygon.dart';
 import 'node.dart';
 
+// ## License
+// 
+// Copyright (c) 2011 Evan Wallace (http://madebyevan.com/), under the MIT license.
+// THREE.js rework by thrax
+
+// Holds a binary space partition tree representing a 3D solid. Two solids can
+// be combined using the `union()`, `subtract()`, and `intersect()` methods.
 class CSG {
   List<Polygon> polygons = [];
 
@@ -151,7 +148,7 @@ class CSG {
       final p = csg.polygons[i];
       for (int j = 0; j < p.vertices.length; j++) {
         final v = p.vertices[j];
-        //v.position.setFrom(ttvv0.setFrom(v.position).applyMatrix4(mesh.matrix));
+        v.position.setFrom(ttvv0.setFrom(v.position).applyMatrix4(mesh.matrix));
         v.normal.setFrom(ttvv0.setFrom(v.normal).applyMatrix3(tmpm3));
       }
     }
@@ -180,6 +177,73 @@ class CSG {
       (nb.array[nb.top++] = v.y);
     };
     return nb;
+  }
+
+  static void insert(CSG csg, Mesh mesh){
+    final ps = csg.polygons;
+
+    int triCount = 0;
+    ps.forEach((p){triCount += (p.vertices.length - 2);});
+
+    final vertices = nbuf3(triCount * 3 * 3);
+    final normals = nbuf3(triCount * 3 * 3);
+    final uvs = nbuf2(triCount * 2 * 3);
+    NBuf? colors;
+    Map<int,List<double>> grps = {};
+
+    ps.forEach((p){
+      final pvs = p.vertices;
+      final pvlen = pvs.length;
+
+      if (p.shared != null) {
+        if (grps[p.shared!] == null) grps[p.shared!] = [];
+      }
+      if (pvlen > 0 && pvs[0].color != null) {
+        colors ??= nbuf3(triCount * 3 * 3);
+      }
+      for (int j = 3; j <= pvlen; j++) {
+        if(p.shared != null){
+          grps[p.shared]!.addAll([vertices.top / 3, (vertices.top / 3) + 1, (vertices.top / 3) + 2]);
+        }
+        vertices.write?.call(pvs[0].position);
+        vertices.write?.call(pvs[j - 2].position);
+        vertices.write?.call(pvs[j - 1].position);
+        normals.write?.call(pvs[0].normal);
+        normals.write?.call(pvs[j - 2].normal);
+        normals.write?.call(pvs[j - 1].normal);
+        uvs.write?.call(pvs[0].uv);
+        uvs.write?.call(pvs[j - 2].uv);
+        uvs.write?.call(pvs[j - 1].uv);
+        if(colors != null)colors?.write?.call(pvs[0].color ?? pvs[j - 2].color ?? pvs[j - 1].color!);
+      }
+    });
+
+    (mesh.geometry?.attributes['position'].array as Float32Array).set(vertices.array);
+    (mesh.geometry?.attributes['normal'].array as Float32Array).set(normals.array);
+    (mesh.geometry?.attributes['uv'].array as Float32Array).set(uvs.array);
+
+    if(colors != null)(mesh.geometry?.attributes['uv'].array as Float32Array).set(colors!.array);
+    if (grps.isNotEmpty) {
+      List<double> index = [];
+      int gbase = 0;
+      for (int gi = 0; gi < grps.length; gi++) {
+        mesh.geometry?.addGroup(gbase, grps[gi]!.length, gi);
+        gbase += grps[gi]!.length;
+        index.addAll(grps[gi]!);
+      }
+      mesh.geometry?.setIndex(index);
+    }
+
+    // final inv = Matrix4().setFrom(toMatrix).invert();
+    // geom.applyMatrix4(inv);
+    mesh.geometry?.computeBoundingSphere();
+    mesh.geometry?.computeBoundingBox();
+
+    // final m = Mesh(geom, toMaterial);
+    // m.matrix.setFrom(toMatrix);
+    // m.matrix.decompose(m.position, m.quaternion, m.scale);
+    // m.rotation.setFromQuaternion(m.quaternion);
+    // m.updateMatrixWorld();
   }
 
   static Mesh toMesh(CSG csg, Matrix4 toMatrix, [Material? toMaterial]) {

@@ -19,7 +19,7 @@ class Evaluator {
   static Mesh? evaluate(Mesh objectA, Mesh objectB, BooleanType type, [Mesh? result]){
     final csgA = CSG.fromMesh(objectA);
     final csgB = CSG.fromMesh(objectB);
-
+    
     late final CSG res;
 
     switch (type) {
@@ -34,6 +34,7 @@ class Evaluator {
         break;
       default:
     }
+    
     final mesh = CSG.toMesh(res, objectA.matrix, objectA.material);
     if(result != null){
       result.copy(mesh);

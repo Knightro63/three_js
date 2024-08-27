@@ -1,4 +1,4 @@
-// # class Vertex
+import 'package:three_js/three_js.dart';
 
 // Represents a vertex of a polygon. Use your own vertex class instead of this
 // one to provide additional features like texture coordinates and vertex
@@ -7,9 +7,6 @@
 // defined by `CSG.Vertex`. This class provides `normal` so convenience
 // functions like `CSG.sphere()` can return a smooth vertex normal, but `normal`
 // is not used anywhere else.
-
-import 'package:three_js/three_js.dart';
-
 class Vertex {
   late Vector3 position;
   late Vector3 normal;

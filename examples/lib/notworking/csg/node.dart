@@ -7,7 +7,6 @@ import 'plane.dart';
 // polygons) are added directly to that node and the other polygons are added to
 // the front and/or back subtrees. This is not a leafy BSP tree since there is
 // no distinction between internal and leaf nodes.
-
 class Node {
   Plane? plane;
   Node? front;
@@ -50,8 +49,7 @@ class Node {
     if (plane == null){
       return polygons.sublist(0);
     }
-    List<Polygon> front = []
-      , back = [];
+    List<Polygon> front = [], back = [];
     for (int i = 0; i < polygons.length; i++) {
       plane?.splitPolygon(polygons[i], front, back, front, back);
     }

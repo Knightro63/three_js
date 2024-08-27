@@ -2,7 +2,6 @@ import 'package:three_js_math/three_js_math.dart';
 import 'vertex.dart';
 import 'polygon.dart';
 
-// # class Plane
 // Represents a plane in 3D space.
 class Plane {
   Vector3 normal;
@@ -19,15 +18,18 @@ class Plane {
     w = -w;
   }
 
-  static Plane fromPoints(a, b, c) {
-    Vector3 tv0 = Vector3();
-    Vector3 tv1 = Vector3();
-    final n = tv0.setFrom(b).sub(a).cross(tv1.setFrom(c).sub(a)).normalize();
+  static Plane fromPoints(Vector3 a, Vector3 b, Vector3 c) {
+    final n = Vector3().setFrom(b).sub(a).cross(Vector3().setFrom(c).sub(a)).normalize();
     return Plane(n.clone(),n.dot(a));
   }
 
-
-  void splitPolygon(Polygon polygon,List<Polygon> coplanarFront, List<Polygon> coplanarBack, List<Polygon> front, List<Polygon> back) {
+  void splitPolygon(
+    Polygon polygon,
+    List<Polygon> coplanarFront, 
+    List<Polygon> coplanarBack, 
+    List<Polygon> front, 
+    List<Polygon> back
+  ) {
     const coplanar_ = 0;
     const front_ = 1;
     const back_ = 2;
@@ -39,7 +41,7 @@ class Plane {
     List<int> types = List.filled(polygon.vertices.length, 0);
     for (int i = 0; i < polygon.vertices.length; i++) {
       double t = normal.dot(polygon.vertices[i].position) - w;
-      final type = (t < -1e-3) ? back_ : (t > 1e-3) ? front_ : coplanar_;
+      final type = (t < -1e-5) ? back_ : (t > 1e-5) ? front_ : coplanar_;
       polygonType |= type;
       types[i] = type;
     }
@@ -56,14 +58,11 @@ class Plane {
       back.add(polygon);
       break;
     case spanning_:
-      List<Vertex> f = []
-        , b = [];
+      final List<Vertex> f = [], b = [];
       for (int i = 0; i < polygon.vertices.length; i++) {
         int j = (i + 1) % polygon.vertices.length;
-        int ti = types[i]
-          , tj = types[j];
-        Vertex vi = polygon.vertices[i]
-          , vj = polygon.vertices[j];
+        int ti = types[i], tj = types[j];
+        final Vertex vi = polygon.vertices[i], vj = polygon.vertices[j];
         if (ti != back_){
           f.add(vi);
         }
