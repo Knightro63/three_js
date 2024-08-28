@@ -65,6 +65,7 @@ class _State extends State<WebglLinesFat> {
   late three.OrbitControls controls;
   late LineMaterial matLine;
   late Line2 line;
+  late three.PerspectiveCamera camera2;
 
   Future<void> setup() async {
     threeJs.scene = three.Scene();
@@ -72,8 +73,8 @@ class _State extends State<WebglLinesFat> {
     threeJs.camera = three.PerspectiveCamera( 40, threeJs.width / threeJs.height, 1, 1000 );
     threeJs.camera.position.setValues( - 40, 0, 60 );
 
-    // camera2 = three.PerspectiveCamera( 40, 1, 1, 1000 );
-    // camera2.position.copy( threeJs.camera.position );
+    camera2 = three.PerspectiveCamera( 40, 1, 1, 1000 );
+    camera2.position.setFrom( threeJs.camera.position );
 
     controls = three.OrbitControls( threeJs.camera, threeJs.globalKey );
     controls.enableDamping = true;
@@ -114,6 +115,7 @@ class _State extends State<WebglLinesFat> {
     } );
     matLine.alphaToCoverage = true;
     matLine.dashed = false;
+    matLine.worldUnits = true;
     line = Line2( geometry, matLine );
     line.computeLineDistances();
     line.scale.setValues( 1, 1, 1 );
@@ -134,6 +136,24 @@ class _State extends State<WebglLinesFat> {
     threeJs.scene.add( line1 );
 
     initGui();
+
+    threeJs.rendererUpdate = ([double? dt]){
+      //threeJs.renderer?.setClearColor(three.Color.fromHex32(0x222222), 1 );
+    };
+
+    threeJs.postProcessor = ([double? dt]){
+      threeJs.renderer!.render(threeJs.scene,threeJs.camera );
+
+      threeJs.renderer?.setScissorTest( true );
+      threeJs.renderer?.setScissor( 20, 20, threeJs.width/4, threeJs.height/4 );
+      threeJs.renderer?.setViewport( 20, 20, threeJs.width/4, threeJs.height/4 );
+
+      camera2.position.setFrom( threeJs.camera.position );
+      camera2.quaternion.setFrom( threeJs.camera.quaternion );
+      //matLine.resolution.setValues( threeJs.width/4, threeJs.height/4 ); // resolution of the inset viewport
+      threeJs.renderer?.render( threeJs.scene, camera2 );
+      threeJs.renderer?.setScissorTest( false );
+    };
   }
 
   late three.Line line1;
@@ -143,7 +163,7 @@ class _State extends State<WebglLinesFat> {
   void initGui() {
     final Map<String,dynamic> param = {
       'line type': 'LineGeometry',
-      'world units': false,
+      'world units': true,
       'width': 5.0,
       'alphaToCoverage': true,
       'dashed': false,

@@ -323,25 +323,21 @@ class _UIPageState extends State<UIScreen> {
       ..computeLineDistances()
       ..scale.setValues(1,1,1)
     );
-    // final cc = CameraControl(
-    //   size: 150,
-    //   margin: const EdgeInsets.only(left: 35, bottom: 35),
-    //   screenSize: Size(120, 120), 
-    //   listenableKey: threeJs.globalKey,
-    //   rotationCamera: threeJs.camera
-    // );
+    final cc = CameraControl(
+      size: 1.8,
+      offsetType: OffsetType.topRight,
+      offset: three.Vector2(10, 45),
+      screenSize: const Size(120, 120), 
+      listenableKey: threeJs.globalKey,
+      rotationCamera: threeJs.camera,
+      threeJs: threeJs
+    );
 
-    // threeJs.addAnimationEvent((dt){
-    //   cc.update();
-    // });
-    // threeJs.renderer?.autoClear = false;
-    // threeJs.postProcessor = ([double? dt]){
-    //   threeJs.renderer!.setViewport(0,0,threeJs.width,threeJs.height);
-    //   threeJs.renderer!.clear();
-    //   threeJs.renderer!.render( threeJs.scene, threeJs.camera );
-    //   threeJs.renderer!.clearDepth();
-    //   threeJs.renderer!.render( cc.scene, cc.camera);
-    // };
+    threeJs.renderer?.autoClear = false;
+    threeJs.postProcessor = ([double? dt]){
+      threeJs.renderer!.render( threeJs.scene, threeJs.camera );
+      cc.postProcessor();
+    };
   }
 
   three.Vector2 convertPosition(three.Vector2 location){
@@ -976,7 +972,7 @@ class _UIPageState extends State<UIScreen> {
                                 ),
                                 //border: Border.all(color: CSS.darkTheme.secondaryHeaderColor)
                               ),
-                              child: Text('Apply'),
+                              child: const Text('Apply'),
                             ),
                           ),
                         ],
@@ -992,6 +988,8 @@ class _UIPageState extends State<UIScreen> {
     );
   }
   Widget sceneCollection(){
+    booleanSelector = booleanSelector.sublist(0,1);
+
     List<Widget> widgets = [
       Container(
         margin: const EdgeInsets.fromLTRB(5, 0, 5, 0),
@@ -1008,7 +1006,6 @@ class _UIPageState extends State<UIScreen> {
 
     for(int i = avoid; i < threeJs.scene.children.length; i++){
       final child = threeJs.scene.children[i];
-      booleanSelector = booleanSelector.sublist(0,1);
       booleanSelector.add(DropdownMenuItem(
         value: '${child.name}|${child.id}',
         child: Text(
@@ -1060,7 +1057,6 @@ class _UIPageState extends State<UIScreen> {
     deviceWidth = MediaQuery.of(context).size.width;
     double safePadding = MediaQuery.of(context).padding.top;
     deviceHeight = MediaQuery.of(context).size.height-safePadding-25;
-
     return MaterialApp(
       theme: CSS.darkTheme,
       debugShowCheckedModeBanner: false,
@@ -1645,7 +1641,7 @@ class _UIPageState extends State<UIScreen> {
                 ),
                 Positioned(
                   right: 10,
-                  top: 120,
+                  top: 160,
                   child: Column(
                     children: [
                       InkWell(

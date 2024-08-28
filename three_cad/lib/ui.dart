@@ -4,6 +4,7 @@ import 'package:css/css.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:three_cad/src/cad/camera_control.dart';
 import 'package:three_cad/src/navigation/globals.dart';
 
 import 'package:three_js/three_js.dart' as three;
@@ -12,6 +13,8 @@ import 'package:three_js_exporters/three_js_exporters.dart';
 import 'package:three_js_geometry/three_js_geometry.dart';
 import 'package:three_js_transform_controls/three_js_transform_controls.dart';
 
+import 'src/navigation/gui.dart';
+import 'src/cad/origin.dart';
 import 'src/navigation/navigation.dart';
 
 class IntersectsInfo{
@@ -20,7 +23,7 @@ class IntersectsInfo{
   List<int> oInt = [];
 }
 
-enum Actions{sketch,extrude,revolve,sweep,}
+enum Actions{none,sketch,extrude,revolve,sweep,}
 
 class UIScreen extends StatefulWidget {
   const UIScreen({Key? key}):super(key: key);
@@ -29,7 +32,9 @@ class UIScreen extends StatefulWidget {
 }
 
 class _UIPageState extends State<UIScreen> {
-  
+  LsiThemes theme = LsiThemes.dark;
+
+  late Gui gui;
   int avoid = 6;
   bool resetNav = false;
   late three.ThreeJS threeJs;
@@ -49,9 +54,15 @@ class _UIPageState extends State<UIScreen> {
   three.Vector3 resetCamPos = three.Vector3(0,5, 0);
   bool holdingControl = false;
   three.Group mp = three.Group();
+  Actions action = Actions.none;
+
+  late Origin origin;
+  List<three.Object3D> sketches = [];
+  List<three.Object3D> bodies = [];
 
   @override
   void initState(){
+    gui = Gui((){setState(() {});});
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
       setup: setup,
@@ -96,8 +107,8 @@ class _UIPageState extends State<UIScreen> {
     const frustumSize = 5.0;
     final aspect = threeJs.width / threeJs.height;
     cameraPersp = three.PerspectiveCamera( 50, aspect, 0.1, 100 );
-    cameraOrtho = three.OrthographicCamera( - frustumSize * aspect, frustumSize * aspect, frustumSize, - frustumSize, 0.1, 100 );
-    threeJs.camera = cameraPersp;
+    cameraOrtho = three.OrthographicCamera( - frustumSize * aspect, frustumSize * aspect, frustumSize, - frustumSize, 0.001, 10000 );
+    threeJs.camera = cameraOrtho;
 
     threeJs.camera.position.setFrom(resetCamPos);
 
@@ -105,10 +116,10 @@ class _UIPageState extends State<UIScreen> {
     threeJs.scene.background = three.Color.fromHex32(CSS.darkTheme.canvasColor.value);
     //threeJs.scene.fog = three.Fog(CSS.darkTheme.canvasColor.value, 10,50);
 
-    GridHelper grid1 = GridHelper( 500, 500, Colors.grey[900]!.value, Colors.grey[900]!.value);
-    GridHelper grid2 = GridHelper( 500, 100, Colors.grey[900]!.value, Colors.grey[900]!.value);
+    GridHelper grid1 = GridHelper( 20, 20, Colors.grey[900]!.value, Colors.grey[900]!.value);
+    // GridHelper grid2 = GridHelper( 500, 100, Colors.grey[900]!.value, Colors.grey[900]!.value);
     threeJs.scene.add( grid1 );
-    threeJs.scene.add( grid2 );
+    // threeJs.scene.add( grid2 );
 
     final ambientLight = three.AmbientLight( 0xffffff, 0 );
     threeJs.scene.add( ambientLight );
@@ -128,6 +139,9 @@ class _UIPageState extends State<UIScreen> {
     creteHelpers();
     threeJs.scene.add( control );
     threeJs.scene.add(helper);
+
+    origin = Origin(threeJs.camera, threeJs.globalKey);
+    threeJs.scene.add(origin.childred);
 
     threeJs.domElement.addEventListener(
       three.PeripheralType.resize, 
@@ -209,15 +223,37 @@ class _UIPageState extends State<UIScreen> {
       }
     });
     threeJs.domElement.addEventListener(three.PeripheralType.pointerdown, (details){
-      mousePosition = three.Vector2(details.clientX, details.clientY);
-      if(threeJs.scene.children.length > avoid && !control.dragging){
-        checkIntersection(threeJs.scene.children.sublist(avoid));
+      // mousePosition = three.Vector2(details.clientX, details.clientY);
+      // if(threeJs.scene.children.length > avoid && !control.dragging){
+      //   checkIntersection(threeJs.scene.children.sublist(avoid));
+      // }
+      if(action == Actions.sketch && origin.planeType != PlaneType.none){
+        if(origin.planeType != PlaneType.xy){
+          threeJs.camera.position.setValues(0,5,0);
+          threeJs.camera.lookAt(three.Vector3(0, 0, 0));
+          threeJs.camera.updateMatrix();
+          orbit.enableRotate = false;
+        } 
+        else if(origin.planeType != PlaneType.xz){
+          threeJs.camera.position.setValues(0,0,5);
+          threeJs.camera.lookAt(three.Vector3(0, 0, math.pi));
+          threeJs.camera.updateMatrix();
+          orbit.enableRotate = false;
+        }
+        else{
+          threeJs.camera.position.setValues(5,0,0);
+          threeJs.camera.lookAt(three.Vector3(math.pi, 0, 0));
+          threeJs.camera.updateMatrix();
+          orbit.enableRotate = false;
+        }
       }
     });
+
+    initGui();
   }
 
   void creteHelpers(){
-    List<double> vertices = [500,0,0,-500,0,0,0,0,500,0,0,-500];
+    List<double> vertices = [10,0,0,-10,0,0,0,0,10,0,0,-10];
     List<double> colors = [1,0,0,1,0,0,0,0,1,0,0,1];
     final geometry = three.BufferGeometry();
     geometry.setAttributeFromString('position',three.Float32BufferAttribute.fromList(vertices, 3, false));
@@ -236,6 +272,22 @@ class _UIPageState extends State<UIScreen> {
       ..computeLineDistances()
       ..scale.setValues(1,1,1)
     );
+
+    final cc = CameraControl(
+      size: 1.8,
+      offsetType: OffsetType.topRight,
+      offset: three.Vector2(10, 45),
+      screenSize: const Size(120, 120), 
+      listenableKey: threeJs.globalKey,
+      rotationCamera: threeJs.camera,
+      threeJs: threeJs
+    );
+
+    threeJs.renderer?.autoClear = false;
+    threeJs.postProcessor = ([double? dt]){
+      threeJs.renderer!.render( threeJs.scene, threeJs.camera );
+      cc.postProcessor();
+    };
   }
 
   three.Vector2 convertPosition(three.Vector2 location){
@@ -312,6 +364,34 @@ class _UIPageState extends State<UIScreen> {
     });
   }
 
+  void initGui() {
+    final folder = gui.addFolder('Origin');
+    update(){setState(() {});}
+    int i = 0;
+    for(final o in origin.childred.children){
+      late final IconData icon;
+      if(i == 0){
+        icon = Icons.adjust;
+      }
+      else if(i < 4){
+        icon = Icons.line_axis;
+      }
+      else{
+        icon = Icons.copy;
+      }
+      folder.add(o.name, icon, update, o.userData['selected'], o.visible)
+        ..onSelected((b){
+          o.userData['selected'] = b;
+          origin.selectPlane(b?o.name:null);
+        })
+        ..onVisibilityChange((b){o.visible = b;});
+      i++;
+    }
+
+    gui.addFolder('Bodies');
+    gui.addFolder('Sketches');
+  }
+
   @override
   Widget build(BuildContext context) {
     double deviceWidth = MediaQuery.of(context).size.width;
@@ -321,342 +401,388 @@ class _UIPageState extends State<UIScreen> {
     return MaterialApp(
       theme: CSS.darkTheme,
       debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        appBar: PreferredSize(
-          preferredSize: Size(deviceWidth,50), 
-          child:Navigation(
-            height: 25,
-            callback: callBacks,
-            reset: resetNav,
-            navData: [
-                NavItems(
-                  name: 'File',
-                  subItems:[ 
+      home: SafeArea(
+        child:Theme(
+          data: CSS.changeTheme(theme),
+          child:Scaffold(
+            appBar: PreferredSize(
+              preferredSize: Size(deviceWidth,50), 
+              child:Navigation(
+                height: 25,
+                callback: callBacks,
+                reset: resetNav,
+                navData: [
                     NavItems(
-                      name: 'New',
-                      icon: Icons.new_label_outlined,
-                      function: (data){
-                        callBacks(call: LSICallbacks.clear);
-                      }
-                    ),
-                    NavItems(
-                      name: 'Open',
-                      icon: Icons.folder_open,
-                      function: (data){
-                        setState(() {
-                          callBacks(call: LSICallbacks.clear);
-                          GetFilePicker.pickFiles(['tce']).then((value)async{
-                            if(value != null){
-                              for(int i = 0; i < value.files.length;i++){
+                      name: 'File',
+                      subItems:[ 
+                        NavItems(
+                          name: 'New',
+                          icon: Icons.new_label_outlined,
+                          function: (data){
+                            callBacks(call: LSICallbacks.clear);
+                          }
+                        ),
+                        NavItems(
+                          name: 'Open',
+                          icon: Icons.folder_open,
+                          function: (data){
+                            setState(() {
+                              callBacks(call: LSICallbacks.clear);
+                              GetFilePicker.pickFiles(['tce']).then((value)async{
+                                if(value != null){
+                                  for(int i = 0; i < value.files.length;i++){
 
-                              }
-                            }
-                          });
-                        });
-                      }
-                    ),
-                    NavItems(
-                      name: 'Save',
-                      icon: Icons.save,
-                      function: (data){
-                        callBacks(call: LSICallbacks.updatedNav);
-                        setState(() {
-
-                        });
-                      }
-                    ),
-                    NavItems(
-                      name: 'Save As',
-                      icon: Icons.save_outlined,
-                      function: (data){
-                        setState(() {
-                          callBacks(call: LSICallbacks.updatedNav);
-                          if(!kIsWeb){
-                            GetFilePicker.saveFile('untilted', 'tce').then((path){
-                              setState(() {
-
+                                  }
+                                }
                               });
                             });
                           }
-                          else if(kIsWeb){
+                        ),
+                        NavItems(
+                          name: 'Save',
+                          icon: Icons.save,
+                          function: (data){
+                            callBacks(call: LSICallbacks.updatedNav);
+                            setState(() {
+
+                            });
+                          }
+                        ),
+                        NavItems(
+                          name: 'Save As',
+                          icon: Icons.save_outlined,
+                          function: (data){
+                            setState(() {
+                              callBacks(call: LSICallbacks.updatedNav);
+                              if(!kIsWeb){
+                                GetFilePicker.saveFile('untilted', 'tce').then((path){
+                                  setState(() {
+
+                                  });
+                                });
+                              }
+                              else if(kIsWeb){
+                              }
+                            });
+                          }
+                        ),
+                        NavItems(
+                          name: 'Import',
+                          icon: Icons.file_download_outlined,
+                          subItems: [
+                            NavItems(
+                              name: 'obj',
+                              icon: Icons.view_in_ar_rounded,
+                              function: (data) async{
+                                callBacks(call: LSICallbacks.updatedNav);
+                                final manager = three.LoadingManager();
+                                three.MaterialCreator? materials;
+                                final objs = await GetFilePicker.pickFiles(['obj']);
+                                final mtls = await GetFilePicker.pickFiles(['mtl']);
+                                if(mtls != null){
+                                  for(int i = 0; i < mtls.files.length;i++){
+                                    final mtlLoader = three.MTLLoader(manager);
+                                    final last = mtls.files[i].path!.split('/').last;
+                                    mtlLoader.setPath(mtls.files[i].path!.replaceAll(last,''));
+                                    materials = await mtlLoader.fromPath(last);
+                                    await materials?.preload();
+                                  }
+                                }
+                                if(objs != null){
+                                  for(int i = 0; i < objs.files.length;i++){
+                                    final loader = three.OBJLoader();
+                                    loader.setMaterials(materials);
+                                    final object = await loader.fromPath(objs.files[i].path!);
+                                    final three.BoundingBox box = three.BoundingBox();
+                                    box.setFromObject(object!);
+                                    object.scale = three.Vector3(0.01,0.01,0.01);        
+                                    BoundingBoxHelper h = BoundingBoxHelper(box)..visible = false;
+                                    object.name = objs.files[i].name.split('.').first;
+                                    threeJs.scene.add(object.add(h));
+                                  }
+                                }
+                                setState(() {});
+                              },
+                            ),
+                            NavItems(
+                              name: 'stl',
+                              icon: Icons.view_in_ar_rounded,
+                              function: (data){
+                                callBacks(call: LSICallbacks.updatedNav);
+                                GetFilePicker.pickFiles(['stl']).then((value)async{
+                                  if(value != null){
+                                    for(int i = 0; i < value.files.length;i++){
+                                      final object = await three.STLLoader().fromPath(value.files[i].path!);
+                                      final three.BoundingBox box = three.BoundingBox();
+                                      box.setFromObject(object!);
+                                      BoundingBoxHelper h = BoundingBoxHelper(box)..visible = false;
+                                      object.name = value.files[i].name.split('.').first;
+                                      threeJs.scene.add(object.add(h));
+                                    }
+                                  }
+                                  setState(() {});
+                                });
+                              },
+                            ),
+                            NavItems(
+                              name: 'ply',
+                              icon: Icons.view_in_ar_rounded,
+                              function: (data){
+                                callBacks(call: LSICallbacks.updatedNav);
+                                GetFilePicker.pickFiles(['ply']).then((value)async{
+                                  if(value != null){
+                                    for(int i = 0; i < value.files.length;i++){
+                                      final buffer = await three.PLYLoader().fromPath(value.files[i].path!);
+                                      final object = three.Mesh(buffer,three.MeshPhongMaterial());
+                                      final three.BoundingBox box = three.BoundingBox();
+                                      box.setFromObject(object);
+                                      object.scale = three.Vector3(0.01,0.01,0.01);
+                                      BoundingBoxHelper h = BoundingBoxHelper(box)..visible = false;
+                                      object.name = value.files[i].name.split('.').first;
+                                      threeJs.scene.add(object.add(h));
+                                    }
+                                  }
+                                  setState(() {});
+                                });
+                              },
+                            ),
+                          ]
+                        ),
+                        NavItems(
+                          name: 'Export',
+                          icon: Icons.file_upload_outlined,
+                          subItems: [
+                            NavItems(
+                              name: 'stl',
+                              icon: Icons.file_copy_outlined,
+                              function: (data){
+                                callBacks(call: LSICallbacks.updatedNav);
+                                GetFilePicker.saveFile('untilted', 'json').then((path){
+
+                                });
+                              }
+                            ),
+                            NavItems(
+                              name: 'obj',
+                              icon: Icons.file_copy_outlined,
+                              function: (data){
+                                callBacks(call: LSICallbacks.updatedNav);
+                                GetFilePicker.saveFile('untilted', 'json').then((path){
+
+                                });
+                              }
+                            ),
+                            NavItems(
+                              name: 'ply',
+                              icon: Icons.file_copy_outlined,
+                              function: (data){
+                                callBacks(call: LSICallbacks.updatedNav);
+                                GetFilePicker.saveFile('untilted', 'json').then((path){
+
+                                });
+                              }
+                            )
+                          ]
+                        ),
+                        NavItems(
+                          name: 'Quit',
+                          icon: Icons.exit_to_app,
+                          function: (data){
+                            callBacks(call: LSICallbacks.updatedNav);
+                            SystemNavigator.pop();
+                          }
+                        ),
+                      ]
+                    ),
+                    NavItems(
+                      name: 'View',
+                      subItems:[
+                        NavItems(
+                          name: 'Reset Camera',
+                          icon: Icons.camera_indoor_outlined,
+                          function: (e){
+                            callBacks(call: LSICallbacks.updatedNav);
+                            threeJs.camera.position.setFrom(resetCamPos);
+                          }
+                        ),
+                        NavItems(
+                          name: 'Front',
+                          icon: Icons.camera_indoor_outlined,
+                          function: (e){
+                            callBacks(call: LSICallbacks.updatedNav);
+                            threeJs.camera.position.setValues(0,5,0);
+                            threeJs.camera.lookAt(three.Vector3(0, 0, 0));
+                            threeJs.camera.updateMatrix();
+                          }
+                        ),
+                        NavItems(
+                          name: 'Back',
+                          icon: Icons.camera_indoor_outlined,
+                          function: (e){
+                            callBacks(call: LSICallbacks.updatedNav);
+                            threeJs.camera.position.setValues(0,-5,0);
+                            threeJs.camera.lookAt(three.Vector3(0, math.pi, 0));
+                            threeJs.camera.updateMatrix();
+                          }
+                        ),
+                        NavItems(
+                          name: 'Top',
+                          icon: Icons.camera_indoor_outlined,
+                          function: (e){
+                            callBacks(call: LSICallbacks.updatedNav);
+                            threeJs.camera.position.setValues(0,0,5);
+                            threeJs.camera.lookAt(three.Vector3(math.pi, 0, 0));
+                            threeJs.camera.updateMatrix();
+                          }
+                        ),
+                        NavItems(
+                          name: 'Bottom',
+                          icon: Icons.camera_indoor_outlined,
+                          function: (e){
+                            callBacks(call: LSICallbacks.updatedNav);
+                            threeJs.camera.position.setValues(0,0,-5);
+                            threeJs.camera.lookAt(three.Vector3(math.pi, 0, 0));
+                            threeJs.camera.updateMatrix();
+                          }
+                        ),
+                      NavItems(
+                          name: 'Right',
+                          icon: Icons.camera_indoor_outlined,
+                          function: (e){
+                            callBacks(call: LSICallbacks.updatedNav);
+                            threeJs.camera.position.setValues(5,0,0);
+                            threeJs.camera.lookAt(three.Vector3(0, 0, math.pi));
+                            threeJs.camera.updateMatrix();
+                          }
+                        ),
+                        NavItems(
+                          name: 'Left',
+                          icon: Icons.camera_indoor_outlined,
+                          function: (e){
+                            callBacks(call: LSICallbacks.updatedNav);
+                            threeJs.camera.position.setValues(-5,0,0);
+                            threeJs.camera.lookAt(three.Vector3(0, 0, math.pi));
+                            threeJs.camera.updateMatrix();
+                          }
+                        ),
+                      ]
+                    ),
+                    NavItems(
+                      name: 'Add',
+                      subItems:[ 
+                        NavItems(
+                          name: 'Mesh',
+                          icon: Icons.share,
+                          subItems: [
+                            NavItems(
+                              name: 'Cube',
+                              icon: Icons.view_in_ar_rounded,
+                              function: (data){
+                                callBacks(call: LSICallbacks.updatedNav);
+                                final object = three.Mesh(three.BoxGeometry(),three.MeshStandardMaterial.fromMap({'flatShading': true}));
+                                final three.BoundingBox box = three.BoundingBox();
+                                box.setFromObject(object);     
+                                BoundingBoxHelper h = BoundingBoxHelper(box)..visible = false;
+                                object.receiveShadow = true;
+                                object.name = 'Cube';
+                                threeJs.scene.add(object.add(h));
+                              },
+                            ),
+                            NavItems(
+                              name: 'Sphere',
+                              icon: Icons.view_in_ar_rounded,
+                              function: (data){
+                                callBacks(call: LSICallbacks.updatedNav);
+                                final object = three.Mesh(three.SphereGeometry(),three.MeshStandardMaterial.fromMap({'flatShading': true}));
+                                final three.BoundingBox box = three.BoundingBox();
+                                box.setFromObject(object);     
+                                BoundingBoxHelper h = BoundingBoxHelper(box)..visible = false;
+                                object.name = 'Sphere';
+                                threeJs.scene.add(object.add(h));
+                              },
+                            ),
+                            NavItems(
+                              name: 'Cylinder',
+                              icon: Icons.view_in_ar_rounded,
+                              function: (data){
+                                callBacks(call: LSICallbacks.updatedNav);
+                                final object = three.Mesh(CylinderGeometry(),three.MeshStandardMaterial.fromMap({'flatShading': true}));
+                                final three.BoundingBox box = three.BoundingBox();
+                                box.setFromObject(object);     
+                                BoundingBoxHelper h = BoundingBoxHelper(box)..visible = false;
+                                object.name = 'Cylinder';
+                                threeJs.scene.add(object.add(h));
+                              },
+                            ),
+                            NavItems(
+                              name: 'Torus',
+                              icon: Icons.view_in_ar_rounded,
+                              function: (data){
+                                callBacks(call: LSICallbacks.updatedNav);
+                                final object = three.Mesh(TorusGeometry(),three.MeshStandardMaterial.fromMap({'flatShading': true}));
+                                final three.BoundingBox box = three.BoundingBox();
+                                box.setFromObject(object);     
+                                BoundingBoxHelper h = BoundingBoxHelper(box)..visible = false;
+                                object.name = 'Torus';
+                                threeJs.scene.add(object.add(h));
+                              },
+                            ),
+                          ]
+                        ),   
+                      ]
+                    ),
+                  ]
+                ),
+            ),
+            body: Column(
+              children: [
+                Row(
+                  children: [
+                    InkWell(
+                      onTap: (){
+                        setState(() {
+                          if(action == Actions.sketch){
+                            action = Actions.none;
+                            orbit.enableRotate = true;
+                          }
+                          else{
+                            action = Actions.sketch;
                           }
                         });
-                      }
-                    ),
-                    NavItems(
-                      name: 'Import',
-                      icon: Icons.file_download_outlined,
-                      subItems: [
-                        NavItems(
-                          name: 'obj',
-                          icon: Icons.view_in_ar_rounded,
-                          function: (data) async{
-                            callBacks(call: LSICallbacks.updatedNav);
-                            final manager = three.LoadingManager();
-                            three.MaterialCreator? materials;
-                            final objs = await GetFilePicker.pickFiles(['obj']);
-                            final mtls = await GetFilePicker.pickFiles(['mtl']);
-                            if(mtls != null){
-                              for(int i = 0; i < mtls.files.length;i++){
-                                final mtlLoader = three.MTLLoader(manager);
-                                final last = mtls.files[i].path!.split('/').last;
-                                mtlLoader.setPath(mtls.files[i].path!.replaceAll(last,''));
-                                materials = await mtlLoader.fromPath(last);
-                                await materials?.preload();
-                              }
-                            }
-                            if(objs != null){
-                              for(int i = 0; i < objs.files.length;i++){
-                                final loader = three.OBJLoader();
-                                loader.setMaterials(materials);
-                                final object = await loader.fromPath(objs.files[i].path!);
-                                final three.BoundingBox box = three.BoundingBox();
-                                box.setFromObject(object!);
-                                object.scale = three.Vector3(0.01,0.01,0.01);        
-                                BoundingBoxHelper h = BoundingBoxHelper(box)..visible = false;
-                                object.name = objs.files[i].name.split('.').first;
-                                threeJs.scene.add(object.add(h));
-                              }
-                            }
-                            setState(() {});
-                          },
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.all(5),
+                        width: 45,
+                        height: 45,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: (action == Actions.sketch?lightBlue:Theme.of(context).primaryColorLight))
                         ),
-                        NavItems(
-                          name: 'stl',
-                          icon: Icons.view_in_ar_rounded,
-                          function: (data){
-                            callBacks(call: LSICallbacks.updatedNav);
-                            GetFilePicker.pickFiles(['stl']).then((value)async{
-                              if(value != null){
-                                for(int i = 0; i < value.files.length;i++){
-                                  final object = await three.STLLoader().fromPath(value.files[i].path!);
-                                  final three.BoundingBox box = three.BoundingBox();
-                                  box.setFromObject(object!);
-                                  BoundingBoxHelper h = BoundingBoxHelper(box)..visible = false;
-                                  object.name = value.files[i].name.split('.').first;
-                                  threeJs.scene.add(object.add(h));
-                                }
-                              }
-                              setState(() {});
-                            });
-                          },
-                        ),
-                        NavItems(
-                          name: 'ply',
-                          icon: Icons.view_in_ar_rounded,
-                          function: (data){
-                            callBacks(call: LSICallbacks.updatedNav);
-                            GetFilePicker.pickFiles(['ply']).then((value)async{
-                              if(value != null){
-                                for(int i = 0; i < value.files.length;i++){
-                                  final buffer = await three.PLYLoader().fromPath(value.files[i].path!);
-                                  final object = three.Mesh(buffer,three.MeshPhongMaterial());
-                                  final three.BoundingBox box = three.BoundingBox();
-                                  box.setFromObject(object);
-                                  object.scale = three.Vector3(0.01,0.01,0.01);
-                                  BoundingBoxHelper h = BoundingBoxHelper(box)..visible = false;
-                                  object.name = value.files[i].name.split('.').first;
-                                  threeJs.scene.add(object.add(h));
-                                }
-                              }
-                              setState(() {});
-                            });
-                          },
-                        ),
-                      ]
-                    ),
-                    NavItems(
-                      name: 'Export',
-                      icon: Icons.file_upload_outlined,
-                      subItems: [
-                        NavItems(
-                          name: 'stl',
-                          icon: Icons.file_copy_outlined,
-                          function: (data){
-                            callBacks(call: LSICallbacks.updatedNav);
-                            GetFilePicker.saveFile('untilted', 'json').then((path){
-
-                            });
-                          }
-                        ),
-                        NavItems(
-                          name: 'obj',
-                          icon: Icons.file_copy_outlined,
-                          function: (data){
-                            callBacks(call: LSICallbacks.updatedNav);
-                            GetFilePicker.saveFile('untilted', 'json').then((path){
-
-                            });
-                          }
-                        ),
-                        NavItems(
-                          name: 'ply',
-                          icon: Icons.file_copy_outlined,
-                          function: (data){
-                            callBacks(call: LSICallbacks.updatedNav);
-                            GetFilePicker.saveFile('untilted', 'json').then((path){
-
-                            });
-                          }
-                        )
-                      ]
-                    ),
-                    NavItems(
-                      name: 'Quit',
-                      icon: Icons.exit_to_app,
-                      function: (data){
-                        callBacks(call: LSICallbacks.updatedNav);
-                        SystemNavigator.pop();
-                      }
-                    ),
-                  ]
+                        alignment: Alignment.center,
+                        child: Icon(Icons.draw, color: (action == Actions.sketch?lightBlue:Theme.of(context).primaryColorLight)),
+                      ),
+                    )
+                  ],
                 ),
-                NavItems(
-                  name: 'View',
-                  subItems:[
-                    NavItems(
-                      name: 'Reset Camera',
-                      icon: Icons.camera_indoor_outlined,
-                      function: (e){
-                        callBacks(call: LSICallbacks.updatedNav);
-                        threeJs.camera.position.setFrom(resetCamPos);
-                      }
-                    ),
-                    NavItems(
-                      name: 'Front',
-                      icon: Icons.camera_indoor_outlined,
-                      function: (e){
-                        callBacks(call: LSICallbacks.updatedNav);
-                        threeJs.camera.position.setValues(0,5,0);
-                        threeJs.camera.lookAt(three.Vector3(0, 0, 0));
-                        threeJs.camera.updateMatrix();
-                      }
-                    ),
-                    NavItems(
-                      name: 'Back',
-                      icon: Icons.camera_indoor_outlined,
-                      function: (e){
-                        callBacks(call: LSICallbacks.updatedNav);
-                        threeJs.camera.position.setValues(0,-5,0);
-                        threeJs.camera.lookAt(three.Vector3(0, math.pi, 0));
-                        threeJs.camera.updateMatrix();
-                      }
-                    ),
-                    NavItems(
-                      name: 'Top',
-                      icon: Icons.camera_indoor_outlined,
-                      function: (e){
-                        callBacks(call: LSICallbacks.updatedNav);
-                        threeJs.camera.position.setValues(0,0,5);
-                        threeJs.camera.lookAt(three.Vector3(math.pi, 0, 0));
-                        threeJs.camera.updateMatrix();
-                      }
-                    ),
-                    NavItems(
-                      name: 'Bottom',
-                      icon: Icons.camera_indoor_outlined,
-                      function: (e){
-                        callBacks(call: LSICallbacks.updatedNav);
-                        threeJs.camera.position.setValues(0,0,-5);
-                        threeJs.camera.lookAt(three.Vector3(math.pi, 0, 0));
-                        threeJs.camera.updateMatrix();
-                      }
-                    ),
-                   NavItems(
-                      name: 'Right',
-                      icon: Icons.camera_indoor_outlined,
-                      function: (e){
-                        callBacks(call: LSICallbacks.updatedNav);
-                        threeJs.camera.position.setValues(5,0,0);
-                        threeJs.camera.lookAt(three.Vector3(0, 0, math.pi));
-                        threeJs.camera.updateMatrix();
-                      }
-                    ),
-                    NavItems(
-                      name: 'Left',
-                      icon: Icons.camera_indoor_outlined,
-                      function: (e){
-                        callBacks(call: LSICallbacks.updatedNav);
-                        threeJs.camera.position.setValues(-5,0,0);
-                        threeJs.camera.lookAt(three.Vector3(0, 0, math.pi));
-                        threeJs.camera.updateMatrix();
-                      }
-                    ),
+                Stack(
+                  children: [
+                    threeJs.build(),
+                    if(threeJs.mounted)Positioned(
+                      top: 5,
+                      left: 20,
+                      child: SizedBox(
+                        height: threeJs.height,
+                        width: 120,
+                        child: gui.render(context)
+                      )
+                    ) 
                   ]
-                ),
-                NavItems(
-                  name: 'Add',
-                  subItems:[ 
-                    NavItems(
-                      name: 'Mesh',
-                      icon: Icons.share,
-                      subItems: [
-                        NavItems(
-                          name: 'Cube',
-                          icon: Icons.view_in_ar_rounded,
-                          function: (data){
-                            callBacks(call: LSICallbacks.updatedNav);
-                            final object = three.Mesh(three.BoxGeometry(),three.MeshStandardMaterial.fromMap({'flatShading': true}));
-                            final three.BoundingBox box = three.BoundingBox();
-                            box.setFromObject(object);     
-                            BoundingBoxHelper h = BoundingBoxHelper(box)..visible = false;
-                            object.receiveShadow = true;
-                            object.name = 'Cube';
-                            threeJs.scene.add(object.add(h));
-                          },
-                        ),
-                        NavItems(
-                          name: 'Sphere',
-                          icon: Icons.view_in_ar_rounded,
-                          function: (data){
-                            callBacks(call: LSICallbacks.updatedNav);
-                            final object = three.Mesh(three.SphereGeometry(),three.MeshStandardMaterial.fromMap({'flatShading': true}));
-                            final three.BoundingBox box = three.BoundingBox();
-                            box.setFromObject(object);     
-                            BoundingBoxHelper h = BoundingBoxHelper(box)..visible = false;
-                            object.name = 'Sphere';
-                            threeJs.scene.add(object.add(h));
-                          },
-                        ),
-                        NavItems(
-                          name: 'Cylinder',
-                          icon: Icons.view_in_ar_rounded,
-                          function: (data){
-                            callBacks(call: LSICallbacks.updatedNav);
-                            final object = three.Mesh(CylinderGeometry(),three.MeshStandardMaterial.fromMap({'flatShading': true}));
-                            final three.BoundingBox box = three.BoundingBox();
-                            box.setFromObject(object);     
-                            BoundingBoxHelper h = BoundingBoxHelper(box)..visible = false;
-                            object.name = 'Cylinder';
-                            threeJs.scene.add(object.add(h));
-                          },
-                        ),
-                        NavItems(
-                          name: 'Torus',
-                          icon: Icons.view_in_ar_rounded,
-                          function: (data){
-                            callBacks(call: LSICallbacks.updatedNav);
-                            final object = three.Mesh(TorusGeometry(),three.MeshStandardMaterial.fromMap({'flatShading': true}));
-                            final three.BoundingBox box = three.BoundingBox();
-                            box.setFromObject(object);     
-                            BoundingBoxHelper h = BoundingBoxHelper(box)..visible = false;
-                            object.name = 'Torus';
-                            threeJs.scene.add(object.add(h));
-                          },
-                        ),
-                      ]
-                    ),   
-                  ]
-                ),
+                )
               ]
             ),
-        ),
-        body: Stack(
-          children: [
-            threeJs.build(),
-          ]
-        ),
-      ),
+          ),
+        )
+      )
     );
   }
 }
