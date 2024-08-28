@@ -12,7 +12,7 @@ dependencies:
   file_picker: ^8.0.6
   flutter_colorpicker: ^1.1.0
   three_js: ^0.0.5
-  three_js_helpers: ^0.0.2
+  three_js_helpers: ^0.0.4
   three_js_geometry: ^0.0.2
   three_js_transform_controls: ^0.0.3
   three_js_svg: ^0.0.3
@@ -20,6 +20,7 @@ dependencies:
   three_js_tjs_loader: ^0.0.3
   three_js_postprocessing: ^0.0.2
   three_js_modifers: ^0.0.2
+  three_js_bvh_csg: ^0.0.1
   css:
     git:
       url: https://github.com/Knightro63/css.git

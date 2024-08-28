@@ -6,6 +6,7 @@ import 'package:css/css.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:three_js_bvh_csg/csg/index.dart';
 import 'package:three_js_editor/src/navigation/right_click.dart';
 import 'package:three_js_editor/src/styles/savedWidgets.dart';
 
@@ -88,6 +89,7 @@ class _UIPageState extends State<UIScreen> {
 
   List<TextEditingController> modiferControllers = [
     TextEditingController(),
+    TextEditingController(),
   ];
   bool subdivisionCC = true;
 
@@ -98,9 +100,30 @@ class _UIPageState extends State<UIScreen> {
   three.Group editObject = three.Group();
   three.TTFFont? font;
   double time = 0;
+  List<DropdownMenuItem<String>> booleanItems = [];
+  List<DropdownMenuItem<String>> booleanSelector = [];
+  String selectedBoolean = BooleanType.values[0].name;
+  String selectedValue = '';
+  bool dropper = false;
 
   @override
   void initState(){
+    for (int i =0; i < BooleanType.values.length;i++) {
+      booleanItems.add(DropdownMenuItem(
+        value: BooleanType.values[i].name,
+        child: Text(
+          BooleanType.values[i].name, 
+          overflow: TextOverflow.ellipsis,
+        )
+      ));
+    }
+    booleanSelector.add(DropdownMenuItem(
+      value: '',
+      child: Text(
+        '', 
+        overflow: TextOverflow.ellipsis,
+      )
+    ));
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
       setup: setup,
@@ -747,7 +770,6 @@ class _UIPageState extends State<UIScreen> {
                       child: Column(
                         children: [
                           const Text('Subdivision'),
-  
                           InkWell(
                             onTap: (){
                               setState(() {
@@ -771,7 +793,6 @@ class _UIPageState extends State<UIScreen> {
                               child: Text(subdivisionCC?'Catmull-Clark':'Simple'),
                             ),
                           ),
-             
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -834,6 +855,132 @@ class _UIPageState extends State<UIScreen> {
                           )
                         ],
                       )
+                    ),
+                    Container(
+                      //height: MediaQuery.of(context).size.height - MediaQuery.of(context).size.height/3 - 40,
+                      margin: const EdgeInsets.fromLTRB(5,5,5,5),
+                      decoration: BoxDecoration(
+                        color: CSS.darkTheme.cardColor,
+                        borderRadius: BorderRadius.circular(5),
+                        border: Border.all(color: CSS.darkTheme.secondaryHeaderColor)
+                      ),
+                      child: Column(
+                        children: [
+                          const Text('Boolean'),
+                          Container(
+                            margin: const EdgeInsets.fromLTRB(0, 5, 0, 5),
+                            alignment: Alignment.center,
+                            width: 120,
+                            height:30,
+                            padding: const EdgeInsets.only(left:10),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).canvasColor,
+                              borderRadius: BorderRadius.all(Radius.circular(0)),
+                              border: null
+                            ),
+                            child: DropdownButtonHideUnderline(
+                              child: DropdownButton <dynamic>(
+                                dropdownColor: Theme.of(context).canvasColor,
+                                isExpanded: true,
+                                items: booleanItems,
+                                value: selectedBoolean,//ddInfo[i],
+                                isDense: true,
+                                focusColor: lightBlue,
+                                style: const TextStyle(
+                                  color: darkGrey,
+                                  fontFamily: 'Klavika',
+                                  package: 'css',
+                                  fontSize: 14
+                                ),
+                                onChanged:(value){
+                                  setState(() {
+                                    selectedBoolean = value;
+                                  });
+                                },
+                              ),
+                            ),
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text('Object: '),
+                              Container(
+                                margin: const EdgeInsets.fromLTRB(0, 5, 0, 5),
+                                alignment: Alignment.center,
+                                width: 100,
+                                height:30,
+                                padding: const EdgeInsets.only(left:10),
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).canvasColor,
+                                  borderRadius: BorderRadius.all(Radius.circular(0)),
+                                  border: null
+                                ),
+                                child: DropdownButtonHideUnderline(
+                                  child: DropdownButton <dynamic>(
+                                    dropdownColor: Theme.of(context).canvasColor,
+                                    isExpanded: true,
+                                    items: booleanSelector,
+                                    value: selectedValue,//ddInfo[i],
+                                    isDense: true,
+                                    focusColor: lightBlue,
+                                    style: const TextStyle(
+                                      color: darkGrey,
+                                      fontFamily: 'Klavika',
+                                      package: 'css',
+                                      fontSize: 14
+                                    ),
+                                    onChanged:(value){
+                                      setState(() {
+                                        selectedValue = value;
+                                        late final three.Mesh mesh;
+                                        int n = int.parse(selectedValue.split('|').last);
+                                        for(final m in threeJs.scene.children){
+                                          if(m.id == n){
+                                            mesh = m as three.Mesh;
+                                            break;
+                                          }
+                                        }
+                                        //helper.add(CSG.subtractMesh(intersected as three.Mesh, mesh));
+                                      });
+                                    },
+                                  ),
+                                ),
+                              ),
+                              InkWell(
+                                onTap: (){
+                                  setState(() {
+                                    dropper = true;
+                                  });
+                                },
+                                child: Icon(Icons.colorize,size:15,color: (!dropper?Theme.of(context).primaryColorLight :lightBlue ),),
+                              )
+                            ],
+                          ),
+                          InkWell(
+                            onTap: (){
+                              setState(() {
+                                //subdivisionCC = !subdivisionCC;
+                              });
+                            },
+                            child: Container(
+                              margin: const EdgeInsets.all(5),
+                              padding: const EdgeInsets.all(5),
+                              height: 30,
+                              width: 120,
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                color: CSS.darkTheme.canvasColor,
+                                borderRadius: const BorderRadius.only(
+                                  topLeft: Radius.circular(5),
+                                  bottomLeft: Radius.circular(5)
+                                ),
+                                //border: Border.all(color: CSS.darkTheme.secondaryHeaderColor)
+                              ),
+                              child: Text('Apply'),
+                            ),
+                          ),
+                        ],
+                      )
                     )
                   ]
                 )
@@ -861,6 +1008,14 @@ class _UIPageState extends State<UIScreen> {
 
     for(int i = avoid; i < threeJs.scene.children.length; i++){
       final child = threeJs.scene.children[i];
+      booleanSelector = booleanSelector.sublist(0,1);
+      booleanSelector.add(DropdownMenuItem(
+        value: '${child.name}|${child.id}',
+        child: Text(
+          '${child.name}|${child.id}', 
+          overflow: TextOverflow.ellipsis,
+        )
+      ));
       widgets.add(
         InkWell(
           onTap: (){

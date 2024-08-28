@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
-import 'package:example/notworking/csg/evaluator.dart';
+import 'package:three_js_bvh_csg/three_js_bvh_csg.dart';
 import 'package:example/src/gui.dart';
 import 'package:example/src/statistics.dart';
 import 'package:flutter/material.dart';

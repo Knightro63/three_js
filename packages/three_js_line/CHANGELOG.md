@@ -1,6 +1,6 @@
-## 0.0.2
+## 0.0.1+1
 
-* Fixed yaml url.
+* Fixed yaml url and readme.
 
 ## 0.0.1
 

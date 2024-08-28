@@ -203,7 +203,6 @@ class OrbitControls with EventDispatcher {
     // this._domElementKeyEvents = null;
 
     scope.domElement.addEventListener(PeripheralType.contextmenu, onContextMenu);
-
     scope.domElement.addEventListener(PeripheralType.pointerdown, onPointerDown);
     scope.domElement.addEventListener(PeripheralType.pointercancel, onPointerCancel);
     scope.domElement.addEventListener(PeripheralType.wheel, onMouseWheel);

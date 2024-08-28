@@ -11,8 +11,9 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.8
   three_js: ^0.0.5
-  three_js_helpers: ^0.0.3
+  three_js_helpers: ^0.0.4
   three_js_line: ^0.0.1
+  three_js_bvh_csg: ^0.0.1
   three_js_exporters: ^0.0.2
   three_js_geometry: ^0.0.2
   three_js_transform_controls: ^0.0.3
