@@ -56,7 +56,8 @@ class _UIPageState extends State<UIScreen> {
   three.Group mp = three.Group();
   Actions action = Actions.none;
 
-  late Origin origin;
+  late final Origin origin;
+  
   List<three.Object3D> sketches = [];
   List<three.Object3D> bodies = [];
 
@@ -104,6 +105,7 @@ class _UIPageState extends State<UIScreen> {
   }
 
   Future<void> setup() async{
+    threeJs.screenSize = Size(MediaQuery.of(context).size.width,MediaQuery.of(context).size.height-80);
     const frustumSize = 5.0;
     final aspect = threeJs.width / threeJs.height;
     cameraPersp = three.PerspectiveCamera( 50, aspect, 0.1, 100 );
@@ -114,12 +116,6 @@ class _UIPageState extends State<UIScreen> {
 
     threeJs.scene = three.Scene();
     threeJs.scene.background = three.Color.fromHex32(CSS.darkTheme.canvasColor.value);
-    //threeJs.scene.fog = three.Fog(CSS.darkTheme.canvasColor.value, 10,50);
-
-    GridHelper grid1 = GridHelper( 20, 20, Colors.grey[900]!.value, Colors.grey[900]!.value);
-    // GridHelper grid2 = GridHelper( 500, 100, Colors.grey[900]!.value, Colors.grey[900]!.value);
-    threeJs.scene.add( grid1 );
-    // threeJs.scene.add( grid2 );
 
     final ambientLight = three.AmbientLight( 0xffffff, 0 );
     threeJs.scene.add( ambientLight );
@@ -140,8 +136,9 @@ class _UIPageState extends State<UIScreen> {
     threeJs.scene.add( control );
     threeJs.scene.add(helper);
 
-    origin = Origin(threeJs.camera, threeJs.globalKey);
+    origin = Origin(threeJs.camera, threeJs.globalKey,three.Vector2(0,25));
     threeJs.scene.add(origin.childred);
+    threeJs.scene.add(origin.grid);
 
     threeJs.domElement.addEventListener(
       three.PeripheralType.resize, 
@@ -253,26 +250,6 @@ class _UIPageState extends State<UIScreen> {
   }
 
   void creteHelpers(){
-    List<double> vertices = [10,0,0,-10,0,0,0,0,10,0,0,-10];
-    List<double> colors = [1,0,0,1,0,0,0,0,1,0,0,1];
-    final geometry = three.BufferGeometry();
-    geometry.setAttributeFromString('position',three.Float32BufferAttribute.fromList(vertices, 3, false));
-    geometry.setAttributeFromString('color',three.Float32BufferAttribute.fromList(colors, 3, false));
-
-    final material = three.LineBasicMaterial.fromMap({
-      "vertexColors": true, 
-      "toneMapped": true,
-    })
-      ..depthTest = false
-      ..linewidth = 5.0
-      ..depthWrite = true;
-
-    helper.add(
-      three.LineSegments(geometry,material)
-      ..computeLineDistances()
-      ..scale.setValues(1,1,1)
-    );
-
     final cc = CameraControl(
       size: 1.8,
       offsetType: OffsetType.topRight,
@@ -397,8 +374,8 @@ class _UIPageState extends State<UIScreen> {
     double deviceWidth = MediaQuery.of(context).size.width;
     double safePadding = MediaQuery.of(context).padding.top;
     double deviceHeight = MediaQuery.of(context).size.height-safePadding-25;
-
-    return MaterialApp(
+    
+    return MaterialApp( 
       theme: CSS.darkTheme,
       debugShowCheckedModeBanner: false,
       home: SafeArea(
@@ -747,6 +724,7 @@ class _UIPageState extends State<UIScreen> {
                           }
                           else{
                             action = Actions.sketch;
+                            origin.showGrid = true;
                           }
                         });
                       },

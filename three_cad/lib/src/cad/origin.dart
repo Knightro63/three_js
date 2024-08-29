@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'package:three_js_core/three_js_core.dart';
 import 'package:flutter/material.dart' hide Color;
+import 'package:three_js_helpers/three_js_helpers.dart';
 import 'package:three_js_line/three_js_line.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'package:three_js_transform_controls/three_js_transform_controls.dart';
@@ -17,13 +18,18 @@ class Origin with EventDispatcher{
   final Pointer _pointer = Pointer(0,0,4);
   PlaneType planeType = PlaneType.none;
   Object3D? _hovered;
+  Vector2 offset = Vector2();
 
   Object3D? get selectedPlane => _hovered;
+  late final GridHelper grid;
+  bool showGrid = false;
 
   Origin(
     this.camera,
     this.listenableKey,
+    Vector2? offset
   ){
+    this.offset = offset ?? Vector2();
     childred.add(
       Mesh(         
         SphereGeometry(0.05,16,16),
@@ -116,9 +122,34 @@ class Origin with EventDispatcher{
       ..rotateY(math.pi/2)
       ..userData['selected'] = false
     );
-
-  
+    
+    createGrid();
     activate();
+  }
+
+  void createGrid(){
+    List<double> vertices = [10,0,0,-10,0,0,0,0,10,0,0,-10];
+    List<double> colors = [1,0,0,1,0,0,0,0,1,0,0,1];
+    final geometry = BufferGeometry();
+    geometry.setAttributeFromString('position',Float32BufferAttribute.fromList(vertices, 3, false));
+    geometry.setAttributeFromString('color',Float32BufferAttribute.fromList(colors, 3, false));
+
+    grid = GridHelper( 20, 20, Colors.grey[900]!.value, Colors.grey[900]!.value);
+    grid.visible = showGrid;
+  
+    final material = LineBasicMaterial.fromMap({
+      "vertexColors": true, 
+      "toneMapped": true,
+    })
+      ..depthTest = false
+      ..linewidth = 5.0
+      ..depthWrite = true;
+
+    grid.add(
+      LineSegments(geometry,material)
+      ..computeLineDistances()
+      ..scale.setValues(1,1,1)
+    );
   }
 
   void selectPlane(String? name){
@@ -149,6 +180,29 @@ class Origin with EventDispatcher{
     }
   }
 
+  void gridHover(String? name){
+    if(showGrid){
+      grid.visible = true;
+      if(name == 'xy'){
+        grid.position.setValues(0,0,0);
+        grid.lookAt(Vector3(0, math.pi, 0));
+      } 
+      else if(name == 'xz'){
+        grid.position.setValues(0,0,0);
+        grid.lookAt(Vector3(0, 0, 0));
+      }
+      else if(name == 'yz'){
+        grid.position.setValues(0,0,0);
+        grid.lookAt(Vector3(0,0, math.pi/2));
+        grid.quaternion = Quaternion().setFromAxisAngle(Vector3(0,0,1), math.pi);
+        grid.updateMatrixWorld();
+      }
+      else{
+        grid.visible = false;
+      }
+    }
+  }
+
   void onPointerDown(event) {
     getPointer(event);
     if(_pointer.button == 0){
@@ -167,7 +221,7 @@ class Origin with EventDispatcher{
   void onPointerHover(WebPointerEvent event) {
     getPointer(event);
     final iso = intersectObjectWithRay();
-    if(selectedPlane == PlaneType.none){
+    if(planeType == PlaneType.none){
       if(_hovered != null){
         _hovered?.material?.emissive = Color.fromHex32(0x000000);
         _hovered = null;
@@ -175,17 +229,16 @@ class Origin with EventDispatcher{
       if(iso?.object?.name == 'xy' || iso?.object?.name == 'xz' || iso?.object?.name == 'yz'){
         _hovered = iso!.object;
         _hovered?.material?.emissive = Color.fromHex32(0xffffff);
+        gridHover(iso.object?.name);
       }
     }
   }
   void getPointer(WebPointerEvent event) {
     final RenderBox renderBox = listenableKey.currentContext!.findRenderObject() as RenderBox;
     final size = renderBox.size;
-    double left = 0;
-    double top = 0;
 
-    final x_ = (event.clientX - left) / size.width * 2 - 1;
-    final y_ = -(event.clientY - top) / size.height* 2 + 1.06;
+    final x_ = (event.clientX + offset.x) / size.width * 2 - 1;
+    final y_ = -(event.clientY + offset.y) / size.height* 2 + 1.06;
     final button = event.button;
 
     _pointer.x  = x_;
