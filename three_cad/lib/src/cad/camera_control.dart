@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 import 'package:three_js_core/three_js_core.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Material;
 import 'package:three_js_math/three_js_math.dart';
 import 'package:three_js_transform_controls/three_js_transform_controls.dart';
 
@@ -44,14 +44,24 @@ class CameraControl with EventDispatcher{
     this.offset = offset ?? Vector2();
     _calculatePosition();
     scene = Scene();
-    camera = OrthographicCamera( - 1,1,1,-1, 0.1, 2000 );
-    camera.position.z = 10;
+
+    double f = 1;
+
+    camera = OrthographicCamera( - f,f,f,-f, 0.1, 50 );//PerspectiveCamera( 60, 1, 0.1, 1000 );//
+    camera.quaternion = rotationCamera.quaternion;
 
     _controls = TransformControlsGizmo.setupGizmo(TransformControlsGizmo.gizmoInfo(GizmoType.view,ContorlsMode.gizmo));
-    _controls.quaternion = rotationCamera.quaternion;
-    _controls.position.setValues( 0.0, 0.0, 0.0 );
-    _controls.scale.setValues( size, size, size );
+    //_controls.position.setValues( 0.0, 0.0, 0.0 );
+    _controls.scale.setValues( size*f,size*f,size*f );
+    
     scene.add(_controls);
+    scene.onAfterRender = ({Camera? camera, BufferGeometry? geometry, Map<String, dynamic>? group, Material? material, WebGLRenderer? renderer, Object3D? scene}){
+      final pLocal = Vector3( 0, 0, -2 );
+      final pWorld = pLocal.applyMatrix4( this.camera.matrixWorld );
+      pWorld.sub(this.camera.position ).normalize();
+      _controls.position.setFrom(pWorld);
+    };
+
     activate();
   }
 
@@ -61,20 +71,20 @@ class CameraControl with EventDispatcher{
       _scissorPos.y = offset.y;
     }
     else if(offsetType == OffsetType.bottomRight){
-      _scissorPos.x = threeJs.width-(offset.x+screenSize.width*1.3);
+      _scissorPos.x = threeJs.width-(offset.x+screenSize.width);
       _scissorPos.y = offset.y;
     }
     else if(offsetType == OffsetType.topLeft){
       _scissorPos.x = offset.x;
-      _scissorPos.y = threeJs.height-(offset.y+screenSize.height*1.1);
+      _scissorPos.y = threeJs.height-(offset.y+screenSize.height);
     }
     else if(offsetType == OffsetType.topRight){
-      _scissorPos.x = threeJs.width-(offset.x+screenSize.width*1.3);
-      _scissorPos.y = threeJs.height-(offset.y+screenSize.height*1.1);
+      _scissorPos.x = threeJs.width-(offset.x+screenSize.width);
+      _scissorPos.y = threeJs.height-(offset.y+screenSize.height);
     }
     else if(offsetType == OffsetType.center){
-      _scissorPos.x = (threeJs.width/2-(screenSize.width*1.3)/2);//offset.x+
-      _scissorPos.y = (threeJs.height/2-(screenSize.height*1.1)/2);//offset.y+
+      _scissorPos.x = (threeJs.width/2-(screenSize.width)/2);//offset.x+
+      _scissorPos.y = (threeJs.height/2-(screenSize.height)/2);//offset.y+
     }
   }
   void _calculatePointerPosition(Size size){
@@ -102,18 +112,12 @@ class CameraControl with EventDispatcher{
   }
   void postProcessor(){
     threeJs.renderer?.setScissorTest( true );
-    threeJs.renderer?.setScissor( _scissorPos.x, _scissorPos.y, screenSize.width*1.3, screenSize.height*1.1 );
-    threeJs.renderer?.setViewport( _scissorPos.x, _scissorPos.y, screenSize.width*1.3, screenSize.height*1.1 );
+    threeJs.renderer?.setScissor( _scissorPos.x, _scissorPos.y, screenSize.width, screenSize.height );
+    threeJs.renderer?.setViewport( _scissorPos.x, _scissorPos.y, screenSize.width, screenSize.height );
     threeJs.renderer!.render(scene, camera);
     threeJs.renderer?.setScissorTest( false );
   }
 
-  void updatePointer(event) {
-
-  }
-  void update(){
-    
-  }
   void onPointerDown(event) {
     final i = intersectObjectWithRay(event);
     if(i?.object?.name != null){
@@ -134,15 +138,6 @@ class CameraControl with EventDispatcher{
       }
     }
   }
-  void onPointerCancel(event) {
-
-  }
-  void onPointerMove(event) {
-
-  }
-  void pointerHover(Pointer pointer) {
-
-  }
   Pointer? getPointer(WebPointerEvent event) {
     if(event.button == 0){
       final RenderBox renderBox = listenableKey.currentContext!.findRenderObject() as RenderBox;
@@ -153,7 +148,7 @@ class CameraControl with EventDispatcher{
       }
 
       final x_ = (event.clientX - _pointerPos!.x) / screenSize.width * 2 - 1;
-      final y_ = -(event.clientY - _pointerPos!.y) / screenSize.height* 2 + 1.06;
+      final y_ = -(event.clientY - _pointerPos!.y+2) / screenSize.height * 2 + 1;
       final button = event.button;
       return Pointer(x_, y_, button);
     }
@@ -168,27 +163,17 @@ class CameraControl with EventDispatcher{
         return all[0];
       }
     }
-    
     return null;
   }
 
   /// Adds the event listeners of the controls.
   void activate() {
-    _domElement.addEventListener(PeripheralType.pointermove, onPointerMove);
     _domElement.addEventListener(PeripheralType.pointerdown, onPointerDown);
-    _domElement.addEventListener(PeripheralType.pointerup, onPointerCancel);
-    //_domElement.addEventListener(PeripheralType.pointerleave, onPointerCancel);
-    threeJs.addAnimationEvent((dt){
-      update();
-    });
   }
 
   /// Removes the event listeners of the controls.
   void deactivate() {
-    _domElement.removeEventListener(PeripheralType.pointermove, onPointerMove);
     _domElement.removeEventListener(PeripheralType.pointerdown, onPointerDown);
-    _domElement.removeEventListener(PeripheralType.pointerup, onPointerCancel);
-    //_domElement.removeEventListener(PeripheralType.pointerleave, onPointerCancel);
   }
 
   void dispose(){

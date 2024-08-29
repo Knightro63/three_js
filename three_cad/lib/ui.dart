@@ -4,7 +4,6 @@ import 'package:css/css.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:three_cad/src/cad/camera_control.dart';
 import 'package:three_cad/src/navigation/globals.dart';
 
 import 'package:three_js/three_js.dart' as three;
@@ -12,6 +11,7 @@ import 'package:three_js_helpers/three_js_helpers.dart';
 import 'package:three_js_exporters/three_js_exporters.dart';
 import 'package:three_js_geometry/three_js_geometry.dart';
 import 'package:three_js_transform_controls/three_js_transform_controls.dart';
+import 'src/cad/camera_control.dart';
 
 import 'src/navigation/gui.dart';
 import 'src/cad/origin.dart';
@@ -58,8 +58,8 @@ class _UIPageState extends State<UIScreen> {
 
   late final Origin origin;
   
-  List<three.Object3D> sketches = [];
-  List<three.Object3D> bodies = [];
+  three.Group sketches = three.Group();
+  three.Group bodies = three.Group();
 
   @override
   void initState(){
@@ -109,7 +109,7 @@ class _UIPageState extends State<UIScreen> {
     const frustumSize = 5.0;
     final aspect = threeJs.width / threeJs.height;
     cameraPersp = three.PerspectiveCamera( 50, aspect, 0.1, 100 );
-    cameraOrtho = three.OrthographicCamera( - frustumSize * aspect, frustumSize * aspect, frustumSize, - frustumSize, 0.001, 10000 );
+    cameraOrtho = three.OrthographicCamera( - frustumSize * aspect, frustumSize * aspect, frustumSize, - frustumSize, 0.1, 10000 );
     threeJs.camera = cameraOrtho;
 
     threeJs.camera.position.setFrom(resetCamPos);
@@ -224,36 +224,42 @@ class _UIPageState extends State<UIScreen> {
       // if(threeJs.scene.children.length > avoid && !control.dragging){
       //   checkIntersection(threeJs.scene.children.sublist(avoid));
       // }
-      if(action == Actions.sketch && origin.planeType != PlaneType.none){
-        if(origin.planeType != PlaneType.xy){
-          threeJs.camera.position.setValues(0,5,0);
-          threeJs.camera.lookAt(three.Vector3(0, 0, 0));
-          threeJs.camera.updateMatrix();
-          orbit.enableRotate = false;
-        } 
-        else if(origin.planeType != PlaneType.xz){
-          threeJs.camera.position.setValues(0,0,5);
-          threeJs.camera.lookAt(three.Vector3(0, 0, math.pi));
-          threeJs.camera.updateMatrix();
-          orbit.enableRotate = false;
-        }
-        else{
-          threeJs.camera.position.setValues(5,0,0);
-          threeJs.camera.lookAt(three.Vector3(math.pi, 0, 0));
-          threeJs.camera.updateMatrix();
-          orbit.enableRotate = false;
-        }
-      }
+      planeSelected();
+    });
+
+    threeJs.addAnimationEvent((dt){
+      origin.update();
+      orbit.update();
     });
 
     initGui();
+  }
+
+  void planeSelected(){
+    if(action == Actions.sketch && origin.planeType != OriginTypes.none){
+      if(origin.planeType == OriginTypes.xy){
+        threeJs.camera.position.setValues(0,0,5);
+      } 
+      else if(origin.planeType == OriginTypes.xz){
+        threeJs.camera.position.setValues(0,5,0);
+      }
+      else{
+        threeJs.camera.position.setValues(5,0,0);
+      }
+      orbit.target.setFrom(origin.grid.position);
+      orbit.enableRotate = false;
+      origin.lockGrid = true;
+      origin.gridHover(origin.planeType.name);
+      origin.clearHighlight(origin.selectedPlane);
+      origin.childred.visible = false;
+    }
   }
 
   void creteHelpers(){
     final cc = CameraControl(
       size: 1.8,
       offsetType: OffsetType.topRight,
-      offset: three.Vector2(10, 45),
+      offset: three.Vector2(10, 10),
       screenSize: const Size(120, 120), 
       listenableKey: threeJs.globalKey,
       rotationCamera: threeJs.camera,
@@ -342,7 +348,7 @@ class _UIPageState extends State<UIScreen> {
   }
 
   void initGui() {
-    final folder = gui.addFolder('Origin');
+    final folder = gui.addFolder('Origin')..onVisibilityChange = (b){origin.childred.visible = b;};
     update(){setState(() {});}
     int i = 0;
     for(final o in origin.childred.children){
@@ -365,8 +371,8 @@ class _UIPageState extends State<UIScreen> {
       i++;
     }
 
-    gui.addFolder('Bodies');
-    gui.addFolder('Sketches');
+    final bFolder = gui.addFolder('Bodies')..onVisibilityChange = (b){bodies.visible = b;};
+    final sFolder = gui.addFolder('Sketches')..onVisibilityChange = (b){sketches.visible = b;};
   }
 
   @override
@@ -579,7 +585,8 @@ class _UIPageState extends State<UIScreen> {
                           icon: Icons.camera_indoor_outlined,
                           function: (e){
                             callBacks(call: LSICallbacks.updatedNav);
-                            threeJs.camera.position.setFrom(resetCamPos);
+                            threeJs.camera.position.setValues(0,5,0);
+                            orbit.target.setFrom(origin.childred.children[0].position);
                           }
                         ),
                         NavItems(
@@ -587,9 +594,8 @@ class _UIPageState extends State<UIScreen> {
                           icon: Icons.camera_indoor_outlined,
                           function: (e){
                             callBacks(call: LSICallbacks.updatedNav);
-                            threeJs.camera.position.setValues(0,5,0);
-                            threeJs.camera.lookAt(three.Vector3(0, 0, 0));
-                            threeJs.camera.updateMatrix();
+                            threeJs.camera.position.setValues(0,0,5);
+                            orbit.target.setFrom(origin.childred.children[6].position);
                           }
                         ),
                         NavItems(
@@ -597,9 +603,8 @@ class _UIPageState extends State<UIScreen> {
                           icon: Icons.camera_indoor_outlined,
                           function: (e){
                             callBacks(call: LSICallbacks.updatedNav);
-                            threeJs.camera.position.setValues(0,-5,0);
-                            threeJs.camera.lookAt(three.Vector3(0, math.pi, 0));
-                            threeJs.camera.updateMatrix();
+                            threeJs.camera.position.setValues(0,0,-5);
+                            orbit.target.setFrom(origin.childred.children[6].position);
                           }
                         ),
                         NavItems(
@@ -607,9 +612,8 @@ class _UIPageState extends State<UIScreen> {
                           icon: Icons.camera_indoor_outlined,
                           function: (e){
                             callBacks(call: LSICallbacks.updatedNav);
-                            threeJs.camera.position.setValues(0,0,5);
-                            threeJs.camera.lookAt(three.Vector3(math.pi, 0, 0));
-                            threeJs.camera.updateMatrix();
+                            threeJs.camera.position.setValues(0,5,0);
+                            orbit.target.setFrom(origin.childred.children[4].position);
                           }
                         ),
                         NavItems(
@@ -617,9 +621,8 @@ class _UIPageState extends State<UIScreen> {
                           icon: Icons.camera_indoor_outlined,
                           function: (e){
                             callBacks(call: LSICallbacks.updatedNav);
-                            threeJs.camera.position.setValues(0,0,-5);
-                            threeJs.camera.lookAt(three.Vector3(math.pi, 0, 0));
-                            threeJs.camera.updateMatrix();
+                            threeJs.camera.position.setValues(0,-5,0);
+                            orbit.target.setFrom(origin.childred.children[4].position);
                           }
                         ),
                       NavItems(
@@ -628,8 +631,7 @@ class _UIPageState extends State<UIScreen> {
                           function: (e){
                             callBacks(call: LSICallbacks.updatedNav);
                             threeJs.camera.position.setValues(5,0,0);
-                            threeJs.camera.lookAt(three.Vector3(0, 0, math.pi));
-                            threeJs.camera.updateMatrix();
+                            orbit.target.setFrom(origin.childred.children[5].position);
                           }
                         ),
                         NavItems(
@@ -638,8 +640,7 @@ class _UIPageState extends State<UIScreen> {
                           function: (e){
                             callBacks(call: LSICallbacks.updatedNav);
                             threeJs.camera.position.setValues(-5,0,0);
-                            threeJs.camera.lookAt(three.Vector3(0, 0, math.pi));
-                            threeJs.camera.updateMatrix();
+                            orbit.target.setFrom(origin.childred.children[5].position);
                           }
                         ),
                       ]
@@ -721,10 +722,14 @@ class _UIPageState extends State<UIScreen> {
                           if(action == Actions.sketch){
                             action = Actions.none;
                             orbit.enableRotate = true;
+                            origin.showGrid = false;
+                            origin.lockGrid = false;
+                            origin.childred.visible = true;
                           }
                           else{
                             action = Actions.sketch;
                             origin.showGrid = true;
+                            planeSelected();
                           }
                         });
                       },
@@ -750,7 +755,7 @@ class _UIPageState extends State<UIScreen> {
                       left: 20,
                       child: SizedBox(
                         height: threeJs.height,
-                        width: 120,
+                        width: 130,
                         child: gui.render(context)
                       )
                     ) 

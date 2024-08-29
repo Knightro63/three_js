@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:css/css.dart';
+import 'package:three_js_geometry/three_js_geometry.dart';
 
 class GuiWidget{
   GuiWidget(this.name,this.icon,this.update,this.selected,this.visible);
@@ -84,6 +85,9 @@ class Folder{
   String get name => _name;
   bool get isOpen => _isOpen;
   bool _isOpen = false;
+  bool visible = true;
+
+  void Function(bool)? onVisibilityChange;
 
   List<GuiWidget> get widgets => _widgets;
   final List<GuiWidget> _widgets = [];
@@ -94,7 +98,6 @@ class Folder{
   void close(){
     _isOpen = false;
   }
-  void Function(bool)? onVisibilityChange;
 
   GuiWidget add(String name,IconData icon ,update,bool selected, bool visible){
     _widgets.add(GuiWidget(name, icon, update, selected,visible));
@@ -147,6 +150,17 @@ class Gui{
                         update();
                       },
                       child: Icon(!f.isOpen?Icons.expand_more:Icons.expand_less, size: 15,),
+                    ),
+                    if(f.onVisibilityChange != null)Padding(
+                      padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
+                      child: InkWell(
+                        onTap: (){
+                          f.visible = !f.visible;
+                          f.onVisibilityChange?.call(f.visible);
+                          update();
+                        },
+                        child: Icon(f.visible?Icons.visibility:Icons.visibility_off, size: 15,),
+                      )
                     ),
                     const Padding(
                       padding: EdgeInsets.fromLTRB(5, 0, 5, 0),
