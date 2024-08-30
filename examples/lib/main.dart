@@ -11,9 +11,12 @@ import 'package:example/games/games_fps2.dart';
 import 'package:example/geometry/marching_cubes.dart';
 import 'package:example/geometry/webgl_buffergeometry_custom_attributes_particles.dart';
 import 'package:example/geometry/webgl_decals.dart';
+import 'package:example/geometry/webgl_geometry_convex.dart';
 import 'package:example/geometry/webgl_geometry_dynamic.dart';
 import 'package:example/geometry/webgl_geometry_extrude_shapes.dart';
 import 'package:example/geometry/webgl_geometry_extrude_splines.dart';
+import 'package:example/geometry/webgl_geometry_nurbs.dart';
+import 'package:example/geometry/webgl_geometry_spline_editor.dart';
 import 'package:example/geometry/webgl_points_sprites.dart';
 import 'package:example/geometry/webgl_sprites.dart';
 import 'package:example/instancing/webgl_gpgpu_protoplanet.dart';
@@ -273,6 +276,15 @@ class MyAppState extends State<MyApp> {
               },
               '/webgl_geometry_terrain_raycast':(BuildContext context) {
                 return const WebglGeometryTerrainRaycast();
+              },
+              '/webgl_geometry_convex':(BuildContext context) {
+                return const WebglGeometryConvex();
+              },
+              '/webgl_geometry_nurbs':(BuildContext context) {
+                return const WebglGeometryNurbs();
+              },
+              '/webgl_geometry_spline_editor':(BuildContext context) {
+                return const WebglGeometrySplineEditor();
               },
               '/three_terrain':(BuildContext context) {
                 return const TerrainPage();

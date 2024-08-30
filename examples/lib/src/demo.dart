@@ -4,9 +4,7 @@ import 'package:example/src/statistics.dart';
 import 'package:three_js/three_js.dart' as three;
 
 class Demo extends StatefulWidget {
-  
   const Demo({super.key});
-
   @override
   createState() => _State();
 }

@@ -31,6 +31,7 @@ dependencies:
   three_js_exporters: ^0.0.2
   three_js_line: ^0.0.1
   three_js_bvh_csg: ^0.0.1
+  three_js_curves: ^0.0.3
 
   permission_handler: ^11.3.1
   camera: ^0.11.0+2
