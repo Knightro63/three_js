@@ -17,6 +17,8 @@ import 'package:example/geometry/webgl_geometry_extrude_shapes.dart';
 import 'package:example/geometry/webgl_geometry_extrude_splines.dart';
 import 'package:example/geometry/webgl_geometry_nurbs.dart';
 import 'package:example/geometry/webgl_geometry_spline_editor.dart';
+import 'package:example/geometry/webgl_interactive_points.dart';
+import 'package:example/geometry/webgl_interactive_raycasting_points.dart';
 import 'package:example/geometry/webgl_points_sprites.dart';
 import 'package:example/geometry/webgl_sprites.dart';
 import 'package:example/instancing/webgl_gpgpu_protoplanet.dart';
@@ -225,6 +227,12 @@ class MyAppState extends State<MyApp> {
               },
               '/webgl_geometry_extrude_splines':(BuildContext context) {
                 return const WebglGeometryExtrudeSplines();
+              },
+              '/webgl_interactive_raycasting_points':(BuildContext context) {
+                return const WebglInteractiveRaycastingPoints();
+              },
+              '/webgl_interactive_points':(BuildContext context) {
+                return const WebglInteractivePoints();
               },
               '/webgl_lines_fat':(BuildContext context) {
                 return const WebglLinesFat();

@@ -6,7 +6,49 @@ import 'package:three_js_line/three_js_line.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'package:three_js_transform_controls/three_js_transform_controls.dart';
 
-enum OriginTypes{none,xy,xz,yz,origin}
+enum OriginTypes{
+  none,xy,xz,yz,x,y,z,origin;
+
+  static OriginTypes fromString(String? name){
+    if(name == 'xy'){
+      return OriginTypes.xy;
+    } 
+    else if(name == 'xz'){
+      return OriginTypes.xz;
+    }
+    else if(name == 'yz'){
+      return OriginTypes.yz;
+    }
+    else if(name == 'x'){
+      return OriginTypes.x;
+    }
+    else if(name == 'y'){
+      return OriginTypes.y;
+    }
+    else if(name == 'z'){
+      return OriginTypes.z;
+    }
+    else if(name == 'o'){
+      return OriginTypes.origin;
+    }
+
+    return OriginTypes.none;
+  }
+
+  static bool isGrid(String? name){
+    if(name == 'xy'){
+      return true;
+    } 
+    else if(name == 'xz'){
+      return true;
+    }
+    else if(name == 'yz'){
+      return true;
+    }
+
+    return false;
+  }
+}
 
 class Origin with EventDispatcher{
   late GlobalKey<PeripheralsState> listenableKey;
@@ -25,10 +67,16 @@ class Origin with EventDispatcher{
   bool showGrid = false;
   bool lockGrid = false;
 
+  final double scale;
+  void Function(Object3D? name)? state;
+
   Origin(
     this.camera,
     this.listenableKey,
-    Vector2? offset
+    Vector2? offset,[
+      this.scale = 0.5,
+      this.state
+    ]
   ){
     this.offset = offset ?? Vector2();
     childred.add(
@@ -39,7 +87,8 @@ class Origin with EventDispatcher{
           'transparent': true,
           'opacity': 0.5
         })
-      )..name = 'o'
+      )
+      ..name = 'o'
       ..userData['selected'] = false
     );
     
@@ -147,13 +196,13 @@ class Origin with EventDispatcher{
     //   ..rotateZ(-math.pi/2)
     //   ..userData['selected'] = false
     // );
-
+    //childred.scale.setValues(scale,scale,scale);
     createGrid();
     activate();
   }
 
   void createGrid(){
-    grid = GridHelper( 20, 20, Colors.grey[900]!.value, Colors.grey[900]!.value);
+    grid = GridHelper( 20, 200, Colors.grey[900]!.value, Colors.grey[900]!.value);
     grid.visible = showGrid;
     grid.frustumCulled = false;
 
@@ -191,10 +240,12 @@ class Origin with EventDispatcher{
   void setHighlight(Object3D? object){
     object?.material?.emissive = Color.fromHex32(0xffffff);
     object?.material?.opacity = 1.0;
+    state?.call(object);
   }
   void clearHighlight(Object3D? object){
     object?.material?.emissive = Color.fromHex32(0x000000);
     object?.material?.opacity = 0.5;
+    state?.call(object);
   }
   void selectPlane(String? name){
     for(final o in childred.children){
@@ -208,19 +259,9 @@ class Origin with EventDispatcher{
         clearHighlight(o);
       }
     }
-    if(name == 'xy'){
-      planeType = OriginTypes.xy;
-    } 
-    else if(name == 'xz'){
-      planeType = OriginTypes.xz;
-    }
-    else if(name == 'yz'){
-      planeType = OriginTypes.yz;
-    }
-    else if(name == 'o'){
-      planeType = OriginTypes.origin;
-    }
-    else{
+
+    planeType = OriginTypes.fromString(name);
+    if(planeType == OriginTypes.none){
       planeType = OriginTypes.none;
       clearHighlight(_hovered);
       _hovered = null;
@@ -281,15 +322,16 @@ class Origin with EventDispatcher{
         clearHighlight(_hovered);
         _hovered = null;
       }
-      if(iso?.object?.name == 'xy' || iso?.object?.name == 'xz' || iso?.object?.name == 'yz' || iso?.object?.name == 'o'){
+      if(OriginTypes.fromString( iso?.object?.name) != OriginTypes.none){
         _hovered = iso!.object;
         setHighlight(_hovered);
       }
     }
 
-    if((iso?.object?.name == 'xy' || iso?.object?.name == 'xz' || iso?.object?.name == 'yz') && childred.visible){
+    if((OriginTypes.isGrid(iso?.object?.name)) && childred.visible){
       gridHover(iso?.object?.name);
-    }else if(!lockGrid){
+    }
+    else if(!lockGrid){
       grid.visible = false;
     }
   }
@@ -332,6 +374,6 @@ class Origin with EventDispatcher{
   }
 
   void update(){
-    childred.scale.setValues(2/camera.zoom, 2/camera.zoom, 2/camera.zoom);
+    childred.scale.setValues(scale/camera.zoom, scale/camera.zoom, scale/camera.zoom);
   }
 }

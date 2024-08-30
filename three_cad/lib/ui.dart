@@ -63,7 +63,7 @@ class _UIPageState extends State<UIScreen> {
 
   @override
   void initState(){
-    gui = Gui((){setState(() {});});
+    gui = Gui();
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
       setup: setup,
@@ -106,7 +106,7 @@ class _UIPageState extends State<UIScreen> {
 
   Future<void> setup() async{
     threeJs.screenSize = Size(MediaQuery.of(context).size.width,MediaQuery.of(context).size.height-80);
-    const frustumSize = 5.0;
+    const frustumSize = 1.0;
     final aspect = threeJs.width / threeJs.height;
     cameraPersp = three.PerspectiveCamera( 50, aspect, 0.1, 100 );
     cameraOrtho = three.OrthographicCamera( - frustumSize * aspect, frustumSize * aspect, frustumSize, - frustumSize, 0.1, 10000 );
@@ -136,7 +136,20 @@ class _UIPageState extends State<UIScreen> {
     threeJs.scene.add( control );
     threeJs.scene.add(helper);
 
-    origin = Origin(threeJs.camera, threeJs.globalKey,three.Vector2(0,25));
+    origin = Origin(
+      threeJs.camera, 
+      threeJs.globalKey,three.Vector2(0,25),
+      0.5,
+      (three.Object3D? object){
+        if(object != null){
+          gui.folders['Origin']!.widgets[object.name]!.selected = object.userData['selected'];
+          print('here');
+          setState(() {
+            
+          });
+        }
+      }
+    );
     threeJs.scene.add(origin.childred);
     threeJs.scene.add(origin.grid);
 
@@ -348,8 +361,7 @@ class _UIPageState extends State<UIScreen> {
   }
 
   void initGui() {
-    final folder = gui.addFolder('Origin')..onVisibilityChange = (b){origin.childred.visible = b;};
-    update(){setState(() {});}
+    final folder = gui.addFolder('Origin',(){setState(() {});})..onVisibilityChange = (b){origin.childred.visible = b;};
     int i = 0;
     for(final o in origin.childred.children){
       late final IconData icon;
@@ -362,7 +374,7 @@ class _UIPageState extends State<UIScreen> {
       else{
         icon = Icons.copy;
       }
-      folder.add(o.name, icon, update, o.userData['selected'], o.visible)
+      folder.add(o.name, icon, o.userData['selected'], o.visible)
         ..onSelected((b){
           o.userData['selected'] = b;
           origin.selectPlane(b?o.name:null);
@@ -371,8 +383,8 @@ class _UIPageState extends State<UIScreen> {
       i++;
     }
 
-    final bFolder = gui.addFolder('Bodies')..onVisibilityChange = (b){bodies.visible = b;};
-    final sFolder = gui.addFolder('Sketches')..onVisibilityChange = (b){sketches.visible = b;};
+    final bFolder = gui.addFolder('Bodies',(){setState(() {});})..onVisibilityChange = (b){bodies.visible = b;};
+    final sFolder = gui.addFolder('Sketches',(){setState(() {});})..onVisibilityChange = (b){sketches.visible = b;};
   }
 
   @override
@@ -382,7 +394,7 @@ class _UIPageState extends State<UIScreen> {
     double deviceHeight = MediaQuery.of(context).size.height-safePadding-25;
     
     return MaterialApp( 
-      theme: CSS.darkTheme,
+      theme: CSS.changeTheme(theme),
       debugShowCheckedModeBanner: false,
       home: SafeArea(
         child:Theme(
@@ -709,6 +721,74 @@ class _UIPageState extends State<UIScreen> {
                         ),   
                       ]
                     ),
+                    NavItems(
+                      name: 'Settings',
+                      subItems:[
+                        NavItems(
+                          name: 'Theme',
+                          icon: Icons.mode_standby,
+                          subItems: [
+                            NavItems(
+                              name: 'Dark',
+                              icon: Icons.dark_mode,
+                              function: (e){
+                                callBacks(call: LSICallbacks.updatedNav);
+                                theme = LsiThemes.dark;
+                                threeJs.scene.background = three.Color.fromHex32(CSS.darkTheme.canvasColor.value);
+                              }
+                            ),
+                            NavItems(
+                              name: 'Light',
+                              icon: Icons.light_mode,
+                              function: (e){
+                                callBacks(call: LSICallbacks.updatedNav);
+                                theme = LsiThemes.light;
+                                threeJs.scene.background = three.Color.fromHex32(CSS.lightTheme.canvasColor.value);
+                              }
+                            ),
+                            NavItems(
+                              name: 'Pink',
+                              icon: Icons.light_mode,
+                              function: (e){
+                                callBacks(call: LSICallbacks.updatedNav);
+                                setState(() {
+                                  theme = LsiThemes.pink;
+                                  threeJs.scene.background = three.Color.fromHex32(CSS.pinkTheme.canvasColor.value);
+                                });
+                                callBacks(call: LSICallbacks.updatedNav);
+                              }
+                            ),
+                            NavItems(
+                              name: 'Mint',
+                              icon: Icons.light_mode,
+                              function: (e){
+                                callBacks(call: LSICallbacks.updatedNav);
+                                theme = LsiThemes.mint;
+                                threeJs.scene.background = three.Color.fromHex32(CSS.mintTheme.canvasColor.value);
+                              }
+                            ),
+                            NavItems(
+                              name: 'Haloween',
+                              icon: Icons.dark_mode,
+                              function: (e){
+                                callBacks(call: LSICallbacks.updatedNav);
+                                theme = LsiThemes.halloween;
+                                threeJs.scene.background = three.Color.fromHex32(CSS.hallowTheme.canvasColor.value);
+                              }
+                            ),
+                            NavItems(
+                              name: 'Limbitless',
+                              icon: Icons.light_mode,
+                              function: (e){
+                                callBacks(call: LSICallbacks.updatedNav);
+                                theme = LsiThemes.limbitless;
+                                threeJs.scene.background = three.Color.fromHex32(CSS.lsiTheme.canvasColor.value);
+                              }
+                            ),
+                          ],
+                        ),
+                      ]
+                    ),
                   ]
                 ),
             ),
@@ -756,7 +836,7 @@ class _UIPageState extends State<UIScreen> {
                       child: SizedBox(
                         height: threeJs.height,
                         width: 130,
-                        child: gui.render(context)
+                        child: gui
                       )
                     ) 
                   ]

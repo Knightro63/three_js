@@ -17,7 +17,9 @@ const List<String> filesJson = [
   "webgl_geometry_extrude_splines",
   "webgl_geometry_convex",
   'webgl_geometry_nurbs',
-  //'webgl_geometry_spline_editor'
+  'webgl_geometry_spline_editor',
+  'webgl_interactive_points',
+  'webgl_interactive_raycasting_points',
   'webgl_lines_fat',
   'webgl_lines_fat_wireframe',
   'webgl_lines_fat_raycasting',

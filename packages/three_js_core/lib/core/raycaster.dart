@@ -38,9 +38,9 @@ class Raycaster {
 
     params = {
       "Mesh": {},
-      "Line": {"threshold": 1},
+      "Line": {"threshold": 1.0},
       "LOD": {},
-      "Points": {"threshold": 1},
+      "Points": {"threshold": 1.0},
       "Sprite": {}
     };
   }

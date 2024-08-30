@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:css/css.dart';
-import 'package:three_js_geometry/three_js_geometry.dart';
-
 class GuiWidget{
   GuiWidget(this.name,this.icon,this.update,this.selected,this.visible);
 
@@ -60,7 +58,7 @@ class GuiWidget{
               child: Padding(
                 padding: const EdgeInsets.only(right: 5),
                 child: Icon(visible?Icons.visibility:Icons.visibility_off, size: 15,)
-              
+
               ),
             )
           ]
@@ -73,11 +71,99 @@ class GuiWidget{
     return _visible(context);
   }
 }
+// class GuiWidget extends StatefulWidget{
+//   final String name;
+//   final IconData icon;
+//   bool selected;
+//   final bool visible;
+
+//   GuiWidget(this.name,this.icon,this.selected,this.visible);
+
+//   void Function(bool)? onFinished;
+//   Function(bool)? onChanged;
+
+//   void onVisibilityChange(Function(bool)? function){
+//     onChanged = function;
+//   }
+//   void onSelected(Function(bool)? function){
+//     onFinished = function;
+//   }
+
+
+//   @override
+//   _GuiWidgetState createState() => _GuiWidgetState();
+// }
+
+// class _GuiWidgetState extends State<GuiWidget>{
+//   Map<String,dynamic>? value;
+//   bool visible = false;
+
+//   @override
+//   void initState(){
+//     super.initState();
+//     visible = widget.visible;
+//   }
+
+//   Widget _visible(BuildContext context){
+//     return Container(
+//       height: 20,
+//       margin: const EdgeInsets.only(left: 20,top: 2,bottom: 2),
+//       color: Theme.of(context).cardColor,
+//       child: InkWell(
+//         onTap: (){
+//           widget.selected = !widget.selected;
+//           widget.onFinished?.call(widget.selected);
+//           setState(() {
+            
+//           });
+//         },
+//         child: Row(
+//           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//           children: [
+//             Row(
+//               children: [
+//                 Container(
+//                   width: 3,
+//                   height: 25,
+//                   color: widget.selected?lightBlue:Colors.grey,
+//                   margin: const EdgeInsets.only(right: 5),
+//                 ),
+//                 Container(
+//                   margin: const EdgeInsets.only(right: 5),
+//                   child: Icon(widget.icon, size: 15,),
+//                 ),
+//                 Text(widget.name.toUpperCase()),
+//               ]
+//             ),
+//             InkWell(
+//               onTap: (){
+//                 visible = !visible;
+//                 widget.onChanged?.call(visible);
+//                 setState(() {
+                  
+//                 });
+//               },
+//               child: Padding(
+//                 padding: const EdgeInsets.only(right: 5),
+//                 child: Icon(visible?Icons.visibility:Icons.visibility_off, size: 15,)
+              
+//               ),
+//             )
+//           ]
+//         )
+//       )
+//     );
+//   }
+
+//   @override
+//   Widget build(BuildContext context){
+//     return _visible(context);
+//   }
+// }
 
 class Folder{
   void Function() update;
-
-  Folder(String name, this.update){
+  Folder(String name,this.update){
     _name = name;
   }
 
@@ -89,8 +175,7 @@ class Folder{
 
   void Function(bool)? onVisibilityChange;
 
-  List<GuiWidget> get widgets => _widgets;
-  final List<GuiWidget> _widgets = [];
+  final Map<String,GuiWidget> widgets = {};
 
   void open(){
     _isOpen = true;
@@ -99,35 +184,41 @@ class Folder{
     _isOpen = false;
   }
 
-  GuiWidget add(String name,IconData icon ,update,bool selected, bool visible){
-    _widgets.add(GuiWidget(name, icon, update, selected,visible));
-    return _widgets.last;
+  GuiWidget add(String name,IconData icon,bool selected, bool visible){
+    widgets[name] = GuiWidget(name, icon, update,selected, visible);
+    return widgets[name]!;
   }
 
   List<Widget> render(BuildContext context){
     List<Widget> w = [];
-    for(final wids in widgets){
-      w.add(wids.render(context));
+    for(final key in widgets.keys){
+      w.add(widgets[key]!.render(context));
     }
     return w;
   }
 }
+class Gui extends StatefulWidget{
+  final Map<String,Folder> folders = {};
 
-class Gui{
-  void Function() update;
-  final List<Folder> _folders = [];
-  List<Folder> get folders => _folders;
+  Gui({
+    super.key
+  });
 
-  Gui(this.update);
-
-  Folder addFolder(String name){
-    _folders.add(Folder(name,update));
-    return _folders.last;
+  Folder addFolder(String name,update){
+    folders[name] = Folder(name,update);
+    return folders[name]!;
   }
 
-  Widget render(BuildContext context){
+  @override
+  _GuiState createState() => _GuiState();
+}
+
+class _GuiState extends State<Gui>{
+  @override
+  Widget build(BuildContext context){
     List<Widget> widgets = [];
-    for(final f in _folders){
+    for(final key in widget.folders.keys){
+      final f = widget.folders[key]!;
       widgets.add(
         Container(
           margin: const EdgeInsets.only(bottom: 2),
@@ -147,7 +238,9 @@ class Gui{
                         }else{
                           f.close();
                         }
-                        update();
+                        setState(() {
+                          
+                        });
                       },
                       child: Icon(!f.isOpen?Icons.expand_more:Icons.expand_less, size: 15,),
                     ),
@@ -157,7 +250,9 @@ class Gui{
                         onTap: (){
                           f.visible = !f.visible;
                           f.onVisibilityChange?.call(f.visible);
-                          update();
+                          setState(() {
+                            
+                          });
                         },
                         child: Icon(f.visible?Icons.visibility:Icons.visibility_off, size: 15,),
                       )

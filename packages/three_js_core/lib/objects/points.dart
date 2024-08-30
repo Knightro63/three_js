@@ -47,7 +47,7 @@ class Points extends Object3D {
   void raycast(Raycaster raycaster, List<Intersection> intersects) {
     final geometry = this.geometry!;
     final matrixWorld = this.matrixWorld;
-    final threshold = raycaster.params["Points"].threshold;
+    final threshold = raycaster.params["Points"]['threshold'];
     final drawRange = geometry.drawRange;
 
     // Checking boundingSphere distance to ray

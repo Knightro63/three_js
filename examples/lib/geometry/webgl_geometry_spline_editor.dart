@@ -50,7 +50,16 @@ class _State extends State<WebglGeometrySplineEditor> {
       body: Stack(
         children: [
           threeJs.build(),
-          Statistics(data: data)
+          Statistics(data: data),
+          if(threeJs.mounted)Positioned(
+            top: 20,
+            right: 20,
+            child: SizedBox(
+              height: threeJs.height,
+              width: 240,
+              child: gui.render()
+            )
+          )
         ],
       ) 
     );
@@ -59,7 +68,7 @@ class _State extends State<WebglGeometrySplineEditor> {
   late final TransformControls transformControl;
   final List<three.Object3D> splineHelperObjects = [];
   int splinePointsLength = 4;
-  final List<three.Vector3> positions = [];
+  final List<three.Vector3> positions = [three.Vector3(),three.Vector3(),three.Vector3(),three.Vector3()];
   final point = three.Vector3();
 
   final raycaster = three.Raycaster();
@@ -71,7 +80,7 @@ class _State extends State<WebglGeometrySplineEditor> {
 
   final ARC_SEGMENTS = 200;
 
-  final Map<String,three.CatmullRomCurve3> splines = {};
+  final Map<String,CRC3> splines = {};
   late final Map<String,dynamic> params;
 
   Future<void> setup() async {
@@ -80,8 +89,6 @@ class _State extends State<WebglGeometrySplineEditor> {
       'tension': 0.5,
       'centripetal': true,
       'chordal': true,
-      'addPoint': addPoint,
-      'removePoint': removePoint,
     };
     threeJs.scene = three.Scene();
     threeJs.scene.background = three.Color.fromHex32( 0xf0f0f0 );
@@ -90,7 +97,7 @@ class _State extends State<WebglGeometrySplineEditor> {
     threeJs.camera.position.setValues( 0, 250, 1000 );
     threeJs.scene.add( threeJs.camera );
 
-    threeJs.scene.add( three.AmbientLight( 0xf0f0f0, 0.3 ) );
+    threeJs.scene.add( three.AmbientLight( 0xf0f0f0, 0.7 ) );
     final light = three.SpotLight( 0xffffff, 0.45 );
     light.position.setValues( 0, 1500, 200 );
     light.angle = math.pi * 0.2;
@@ -112,39 +119,38 @@ class _State extends State<WebglGeometrySplineEditor> {
     helper.material?.transparent = true;
     threeJs.scene.add( helper );
 
-    
     final folder = gui.addFolder('GUI');
-    folder.addButton( params, 'uniform' ).onFinishChange( render );
+    folder.addButton( params, 'uniform' ).onChange( render );
     folder.addSlider( params, 'tension', 0, 1 )..step( 0.01 )..onChange(( value ) {
-      splines['uniform']?.tension = value;
+      splines['uniform']?.curve.tension = value;
       updateSplineOutline();
-      render();
+      render(null);
     } );
-    folder.addButton( params, 'centripetal' ).onFinishChange( render );
-    folder.addButton( params, 'chordal' ).onFinishChange( render );
-    folder.addButton( params, 'addPoint' );
-    folder.addButton( params, 'removePoint' );
+    folder.addButton( params, 'centripetal' ).onChange( render );
+    folder.addButton( params, 'chordal' ).onChange( render );
+    folder.addFunction('addPoint' ).onFinishChange(addPoint);
+    folder.addFunction('removePoint' ).onFinishChange(removePoint);
     folder.open();
 
     // Controls
     controls = three.OrbitControls( threeJs.camera, threeJs.globalKey );
-    controls.damping = 0.2;
-    controls.addEventListener( 'change', render );
+    //controls.damping = 0.2;
+    // controls.addEventListener( 'change', render );
 
     transformControl = TransformControls( threeJs.camera, threeJs.globalKey );
-    transformControl.addEventListener( 'change', render );
+    //transformControl.addEventListener( 'change', render );
     transformControl.addEventListener( 'dragging-changed', ( event ) {
       controls.enabled = ! event.value;
     } );
     threeJs.scene.add( transformControl );
 
-    transformControl.addEventListener( 'objectChange',() {
+    transformControl.addEventListener( 'objectChange',(event) {
       updateSplineOutline();
     } );
 
     threeJs.domElement.addEventListener( three.PeripheralType.pointerdown, onPointerDown );
     threeJs.domElement.addEventListener( three.PeripheralType.pointerup, onPointerUp );
-    threeJs.domElement.addEventListener( three.PeripheralType.pointermove, onPointerMove );
+    threeJs.domElement.addEventListener( three.PeripheralType.pointerHover, onPointerMove );
 
     /*******
      * Curves
@@ -164,32 +170,33 @@ class _State extends State<WebglGeometrySplineEditor> {
     geometry.setAttributeFromString( 'position', three.Float32BufferAttribute( three.Float32Array( ARC_SEGMENTS * 3 ), 3 ) );
 
     three.CatmullRomCurve3 curve = three.CatmullRomCurve3( points:positions );
+    three.Line mesh;
     curve.curveType = 'catmullrom';
-    curve.mesh = three.Line( geometry.clone(), three.LineBasicMaterial.fromMap( {
+    mesh = three.Line( geometry.clone(), three.LineBasicMaterial.fromMap( {
       'color': 0xff0000,
       'opacity': 0.35
     } ) );
-    splines['uniform'] = curve;
+    splines['uniform'] = CRC3(curve,mesh);
 
     curve = three.CatmullRomCurve3( points: positions );
     curve.curveType = 'centripetal';
-    curve.mesh = three.Line( geometry.clone(), three.LineBasicMaterial.fromMap( {
+    mesh = three.Line( geometry.clone(), three.LineBasicMaterial.fromMap( {
       'color': 0x00ff00,
       'opacity': 0.35
     } ) );
-    splines['centripetal'] = curve;
+    splines['centripetal'] = CRC3(curve,mesh);
 
     curve = three.CatmullRomCurve3( points:positions );
     curve.curveType = 'chordal';
-    curve.mesh = three.Line( geometry.clone(), three.LineBasicMaterial.fromMap( {
+    mesh = three.Line( geometry.clone(), three.LineBasicMaterial.fromMap( {
       'color': 0x0000ff,
       'opacity': 0.35
     } ) );
-    splines['chordal'] = curve;
+    splines['chordal'] = CRC3(curve,mesh);
 
     for ( final k in splines.keys ) {
       final spline = splines[ k ];
-      threeJs.scene.add( spline.mesh );
+      threeJs.scene.add( spline!.mesh );
     }
 
     load( [ three.Vector3( 289.76843686945404, 452.51481137238443, 56.10018915737797 ),
@@ -199,7 +206,7 @@ class _State extends State<WebglGeometrySplineEditor> {
   }
 
   three.Mesh addSplineObject([three.Vector3? position ]) {
-    final material = three.MeshLambertMaterial.fromMap( { 'color': math.Random().nextDouble() * 0xffffff } );
+    final material = three.MeshLambertMaterial.fromMap( { 'color': (math.Random().nextDouble() * 0xffffff).toInt() } );
     final object = three.Mesh( geometry, material );
 
     if ( position != null) {
@@ -221,7 +228,7 @@ class _State extends State<WebglGeometrySplineEditor> {
     splinePointsLength ++;
     positions.add( addSplineObject().position );
     updateSplineOutline();
-    render();
+    render(null);
   }
 
   void removePoint() {
@@ -237,19 +244,19 @@ class _State extends State<WebglGeometrySplineEditor> {
     threeJs.scene.remove( point );
 
     updateSplineOutline();
-    render();
+    render(null);
   }
 
   void updateSplineOutline() {
     for ( final k in splines.keys) {
       final spline = splines[ k ];
 
-      final splineMesh = spline.mesh;
-      final position = splineMesh.geometry.attributes.position;
+      final splineMesh = spline!.mesh;
+      final position = splineMesh.geometry!.attributes['position'];
 
       for (int i = 0; i < ARC_SEGMENTS; i ++ ) {
         final t = i / ( ARC_SEGMENTS - 1 );
-        spline?.getPoint( t, point );
+        spline.curve.getPoint( t, point );
         position.setXYZ( i, point.x, point.y, point.z );
       }
 
@@ -272,29 +279,29 @@ class _State extends State<WebglGeometrySplineEditor> {
     updateSplineOutline();
   }
 
-  void render() {
-    splines['uniform'].mesh.visible = params['uniform'];
-    splines['centripetal'].mesh.visible = params['centripetal'];
-    splines['chordal'].mesh.visible = params['chordal'];
+  void render(d) {
+    splines['uniform']!.mesh.visible = params['uniform'];
+    splines['centripetal']!.mesh.visible = params['centripetal'];
+    splines['chordal']!.mesh.visible = params['chordal'];
     //renderer.render( scene, camera );
   }
 
-  onPointerDown(three.WebPointerEvent event ) {
+  void onPointerDown(three.WebPointerEvent event ) {
     onDownPosition.x = event.clientX;
     onDownPosition.y = event.clientY;
   }
 
-  onPointerUp(three.WebPointerEvent event ) {
+  void onPointerUp(three.WebPointerEvent event ) {
     onUpPosition.x = event.clientX;
     onUpPosition.y = event.clientY;
 
     if ( onDownPosition.distanceTo( onUpPosition ) == 0 ) {
       transformControl.detach();
-      render();
+      render(null);
     }
   }
 
-  onPointerMove(three.WebPointerEvent event ) {
+  void onPointerMove(three.WebPointerEvent event ) {
     pointer.x = ( event.clientX / threeJs.width ) * 2 - 1;
     pointer.y = - ( event.clientY / threeJs.height ) * 2 + 1;
     raycaster.setFromCamera( pointer, threeJs.camera );
@@ -308,4 +315,12 @@ class _State extends State<WebglGeometrySplineEditor> {
       }
     }
   }
+}
+
+
+class CRC3{
+  CRC3(this.curve,this.mesh);
+
+  three.CatmullRomCurve3 curve;
+  three.Line mesh;
 }
