@@ -2,8 +2,10 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'package:css/css.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Actions;
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:three_cad/src/cad/draw.dart';
 import 'package:three_cad/src/navigation/globals.dart';
 
 import 'package:three_js/three_js.dart' as three;
@@ -11,19 +13,19 @@ import 'package:three_js_helpers/three_js_helpers.dart';
 import 'package:three_js_exporters/three_js_exporters.dart';
 import 'package:three_js_geometry/three_js_geometry.dart';
 import 'package:three_js_transform_controls/three_js_transform_controls.dart';
-import 'src/cad/camera_control.dart';
+import 'src/cad/camera_control2.dart';
 
 import 'src/navigation/gui.dart';
 import 'src/cad/origin.dart';
 import 'src/navigation/navigation.dart';
+
+enum Actions{none,prepareSketec,sketch,extrude,revolve,sweep,}
 
 class IntersectsInfo{
   IntersectsInfo(this.intersects,this.oInt);
   List<three.Intersection> intersects = [];
   List<int> oInt = [];
 }
-
-enum Actions{none,sketch,extrude,revolve,sweep,}
 
 class UIScreen extends StatefulWidget {
   const UIScreen({Key? key}):super(key: key);
@@ -34,8 +36,8 @@ class UIScreen extends StatefulWidget {
 class _UIPageState extends State<UIScreen> {
   LsiThemes theme = LsiThemes.dark;
 
-  late Gui gui;
-  int avoid = 6;
+  Gui gui = Gui();
+  Draw? draw;
   bool resetNav = false;
   late three.ThreeJS threeJs;
 
@@ -63,7 +65,6 @@ class _UIPageState extends State<UIScreen> {
 
   @override
   void initState(){
-    gui = Gui();
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
       setup: setup,
@@ -87,12 +88,7 @@ class _UIPageState extends State<UIScreen> {
       case LSICallbacks.clear:
         setState(() {
           resetNav = !resetNav;
-          if(threeJs.scene.children.length > avoid){
-            for(int i = avoid; i < threeJs.scene.children.length;i++){
-              threeJs.scene.children[i].dispose();
-            }
-            threeJs.scene.children.length = avoid;
-          }
+
         });
         break;
       case LSICallbacks.updateLevel:
@@ -132,9 +128,7 @@ class _UIPageState extends State<UIScreen> {
     control.addEventListener( 'dragging-changed', (event) {
       orbit.enabled = ! event.value;
     });
-    creteHelpers();
     threeJs.scene.add( control );
-    threeJs.scene.add(helper);
 
     origin = Origin(
       threeJs.camera, 
@@ -142,16 +136,19 @@ class _UIPageState extends State<UIScreen> {
       0.5,
       (three.Object3D? object){
         if(object != null){
-          gui.folders['Origin']!.widgets[object.name]!.selected = object.userData['selected'];
-          print('here');
+          initGui();
           setState(() {
             
           });
         }
       }
     );
+    creteHelpers();
+    
     threeJs.scene.add(origin.childred);
     threeJs.scene.add(origin.grid);
+    threeJs.scene.add(bodies);
+    threeJs.scene.add(sketches);
 
     threeJs.domElement.addEventListener(
       three.PeripheralType.resize, 
@@ -249,7 +246,7 @@ class _UIPageState extends State<UIScreen> {
   }
 
   void planeSelected(){
-    if(action == Actions.sketch && origin.planeType != OriginTypes.none){
+    if(action == Actions.prepareSketec && origin.planeType != OriginTypes.none){
       if(origin.planeType == OriginTypes.xy){
         threeJs.camera.position.setValues(0,0,5);
       } 
@@ -265,6 +262,25 @@ class _UIPageState extends State<UIScreen> {
       origin.gridHover(origin.planeType.name);
       origin.clearHighlight(origin.selectedPlane);
       origin.childred.visible = false;
+      action = Actions.sketch;
+      draw = Draw(
+        threeJs.camera,
+        three.Mesh(
+          three.PlaneGeometry(10,10),
+          three.MeshBasicMaterial.fromMap({
+            'color':0xffffff, 
+            'side': three.DoubleSide, 
+            'transparent': true, 
+            'opacity': 0
+          })
+        )
+        ..name = 'SketchPlane'
+        ..position.setFrom(origin.selectedPlane!.position)
+        ..rotation.setFromRotationMatrix(origin.selectedPlane!.matrix),
+        origin.childred.children[0],
+        threeJs.globalKey
+      );
+      threeJs.scene.add(draw!.drawScene);
     }
   }
 
@@ -284,6 +300,7 @@ class _UIPageState extends State<UIScreen> {
       threeJs.renderer!.render( threeJs.scene, threeJs.camera );
       cc.postProcessor();
     };
+    threeJs.scene.add(helper);
   }
 
   three.Vector2 convertPosition(three.Vector2 location){
@@ -361,7 +378,8 @@ class _UIPageState extends State<UIScreen> {
   }
 
   void initGui() {
-    final folder = gui.addFolder('Origin',(){setState(() {});})..onVisibilityChange = (b){origin.childred.visible = b;};
+    final newGui = Gui();
+    final folder = newGui.addFolder('Origin',(){setState(() {});})..onVisibilityChange = (b){origin.childred.visible = b;};
     int i = 0;
     for(final o in origin.childred.children){
       late final IconData icon;
@@ -382,16 +400,161 @@ class _UIPageState extends State<UIScreen> {
         ..onVisibilityChange((b){o.visible = b;});
       i++;
     }
+    if(bodies.children.isNotEmpty){
+      final bFolder = newGui.addFolder('Bodies',(){setState(() {});})..onVisibilityChange = (b){bodies.visible = b;};
+      for(final o in bodies.children){
+        bFolder.add(o.name, Icons.view_in_ar_rounded, o.userData['selected'], o.visible)
+          ..onSelected((b){
+            o.userData['selected'] = b;
+            //origin.selectPlane(b?o.name:null);
+          })
+          ..onVisibilityChange((b){o.visible = b;});
+      }
+    }
+    if(sketches.children.isNotEmpty){
+      final sFolder = newGui.addFolder('Sketches',(){setState(() {});})..onVisibilityChange = (b){sketches.visible = b;};
+      for(final o in sketches.children){
+        sFolder.add(o.name, Icons.draw_outlined, o.userData['selected'], o.visible)
+          ..onSelected((b){
+            o.userData['selected'] = b;
+            //origin.selectPlane(b?o.name:null);
+          })
+          ..onVisibilityChange((b){o.visible = b;});
+      }
+    }
 
-    final bFolder = gui.addFolder('Bodies',(){setState(() {});})..onVisibilityChange = (b){bodies.visible = b;};
-    final sFolder = gui.addFolder('Sketches',(){setState(() {});})..onVisibilityChange = (b){sketches.visible = b;};
+    for(final fol in gui.folders.keys){
+      if(gui.folders[fol]!.isOpen){
+        newGui.folders[fol]!.open();
+      } 
+    }
+
+    gui = newGui;
   }
-
+  Widget actionNav(){
+    return Actions.sketch == action?sketchNav():Row(
+      children: [
+        InkWell(
+          onTap: (){
+            setState(() {
+              if(action == Actions.prepareSketec){
+                action = Actions.none;
+              }
+              else{
+                action = Actions.prepareSketec;
+                origin.showGrid = true;
+                planeSelected();
+              }
+            });
+          },
+          child: Container(
+            margin: const EdgeInsets.all(5),
+            width: 45,
+            height: 45,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: (action == Actions.prepareSketec?Theme.of(context).secondaryHeaderColor:Theme.of(context).primaryColorLight))
+            ),
+            alignment: Alignment.center,
+            child: Icon(Icons.draw, color: (action == Actions.prepareSketec?Theme.of(context).secondaryHeaderColor:Theme.of(context).primaryColorLight)),
+          ),
+        )
+      ],
+    );
+  }
+  void cancelSketch(){
+    action = Actions.none;
+    orbit.enableRotate = true;
+    origin.showGrid = false;
+    origin.lockGrid = false;
+    origin.childred.visible = true;
+    draw?.dispose();
+    draw = null;
+  }
+  Widget sketchNav(){
+    return Row(
+      children: [
+        InkWell(
+          onTap: (){
+            if(draw?.drawType != DrawType.none){
+              setState(() {
+                draw?.endSketch();
+              });
+            }
+            else{
+              setState(() {
+                draw?.startSketch(DrawType.line);
+              });
+            }
+          },
+          child: Container(
+            margin: const EdgeInsets.all(5),
+            width: 45,
+            height: 45,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: Theme.of(context).primaryColorLight)
+            ),
+            alignment: Alignment.center,
+            child: SvgPicture.asset(
+              'assets/draw/line.svg',
+              colorFilter: ColorFilter.mode(
+                draw?.drawType == DrawType.line?Theme.of(context).secondaryHeaderColor:Theme.of(context).primaryIconTheme.color!, 
+                BlendMode.srcIn
+              ),
+              semanticsLabel: 'Draw a line'
+            ),//Icon(Icons, color: Theme.of(context).primaryColorLight),
+          ),
+        ),
+        InkWell(
+          onTap: (){
+            setState(() {
+              if(draw!.drawScene.children.isNotEmpty){
+                draw?.drawScene.userData['selected'] = false;
+                sketches.add(draw?.drawScene);
+              }
+              cancelSketch();
+              initGui();
+            });
+          },
+          child: Container(
+            margin: const EdgeInsets.all(5),
+            width: 45,
+            height: 45,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: Theme.of(context).primaryColorLight)
+            ),
+            alignment: Alignment.center,
+            child: Icon(Icons.check, color: Theme.of(context).primaryColorLight),
+          ),
+        ),
+        InkWell(
+          onTap: (){
+            setState(() {
+              cancelSketch();
+            });
+          },
+          child: Container(
+            margin: const EdgeInsets.all(5),
+            width: 45,
+            height: 45,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: Theme.of(context).primaryColorLight)
+            ),
+            alignment: Alignment.center,
+            child: Icon(Icons.cancel, color: Theme.of(context).primaryColorLight),
+          ),
+        )
+      ],
+    );
+  }
   @override
   Widget build(BuildContext context) {
     double deviceWidth = MediaQuery.of(context).size.width;
-    double safePadding = MediaQuery.of(context).padding.top;
-    double deviceHeight = MediaQuery.of(context).size.height-safePadding-25;
+    //double safePadding = MediaQuery.of(context).padding.top;
+    //double deviceHeight = MediaQuery.of(context).size.height-safePadding-25;
     
     return MaterialApp( 
       theme: CSS.changeTheme(theme),
@@ -675,7 +838,9 @@ class _UIPageState extends State<UIScreen> {
                                 BoundingBoxHelper h = BoundingBoxHelper(box)..visible = false;
                                 object.receiveShadow = true;
                                 object.name = 'Cube';
-                                threeJs.scene.add(object.add(h));
+                                object.userData['selected'] = false;
+                                bodies.add(object.add(h));
+                                initGui();
                               },
                             ),
                             NavItems(
@@ -683,12 +848,14 @@ class _UIPageState extends State<UIScreen> {
                               icon: Icons.view_in_ar_rounded,
                               function: (data){
                                 callBacks(call: LSICallbacks.updatedNav);
-                                final object = three.Mesh(three.SphereGeometry(),three.MeshStandardMaterial.fromMap({'flatShading': true}));
+                                final object = three.Mesh(three.SphereGeometry(1,32,32),three.MeshStandardMaterial.fromMap({'flatShading': true}));
                                 final three.BoundingBox box = three.BoundingBox();
                                 box.setFromObject(object);     
                                 BoundingBoxHelper h = BoundingBoxHelper(box)..visible = false;
                                 object.name = 'Sphere';
-                                threeJs.scene.add(object.add(h));
+                                object.userData['selected'] = false;
+                                bodies.add(object.add(h));
+                                initGui();
                               },
                             ),
                             NavItems(
@@ -701,7 +868,9 @@ class _UIPageState extends State<UIScreen> {
                                 box.setFromObject(object);     
                                 BoundingBoxHelper h = BoundingBoxHelper(box)..visible = false;
                                 object.name = 'Cylinder';
-                                threeJs.scene.add(object.add(h));
+                                object.userData['selected'] = false;
+                                bodies.add(object.add(h));
+                                initGui();
                               },
                             ),
                             NavItems(
@@ -709,12 +878,14 @@ class _UIPageState extends State<UIScreen> {
                               icon: Icons.view_in_ar_rounded,
                               function: (data){
                                 callBacks(call: LSICallbacks.updatedNav);
-                                final object = three.Mesh(TorusGeometry(),three.MeshStandardMaterial.fromMap({'flatShading': true}));
+                                final object = three.Mesh(TorusGeometry(1,0.4,32,16),three.MeshStandardMaterial.fromMap({'flatShading': true}));
                                 final three.BoundingBox box = three.BoundingBox();
                                 box.setFromObject(object);     
                                 BoundingBoxHelper h = BoundingBoxHelper(box)..visible = false;
                                 object.name = 'Torus';
-                                threeJs.scene.add(object.add(h));
+                                object.userData['selected'] = false;
+                                bodies.add(object.add(h));
+                                initGui();
                               },
                             ),
                           ]
@@ -794,39 +965,7 @@ class _UIPageState extends State<UIScreen> {
             ),
             body: Column(
               children: [
-                Row(
-                  children: [
-                    InkWell(
-                      onTap: (){
-                        setState(() {
-                          if(action == Actions.sketch){
-                            action = Actions.none;
-                            orbit.enableRotate = true;
-                            origin.showGrid = false;
-                            origin.lockGrid = false;
-                            origin.childred.visible = true;
-                          }
-                          else{
-                            action = Actions.sketch;
-                            origin.showGrid = true;
-                            planeSelected();
-                          }
-                        });
-                      },
-                      child: Container(
-                        margin: const EdgeInsets.all(5),
-                        width: 45,
-                        height: 45,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: (action == Actions.sketch?lightBlue:Theme.of(context).primaryColorLight))
-                        ),
-                        alignment: Alignment.center,
-                        child: Icon(Icons.draw, color: (action == Actions.sketch?lightBlue:Theme.of(context).primaryColorLight)),
-                      ),
-                    )
-                  ],
-                ),
+                actionNav(),
                 Stack(
                   children: [
                     threeJs.build(),

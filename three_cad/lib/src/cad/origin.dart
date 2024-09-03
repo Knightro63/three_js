@@ -1,9 +1,7 @@
 import 'dart:math' as math;
-import 'package:three_js_core/three_js_core.dart';
+import 'package:three_js/three_js.dart';
 import 'package:flutter/material.dart' hide Color;
 import 'package:three_js_helpers/three_js_helpers.dart';
-import 'package:three_js_line/three_js_line.dart';
-import 'package:three_js_math/three_js_math.dart';
 import 'package:three_js_transform_controls/three_js_transform_controls.dart';
 
 enum OriginTypes{
@@ -238,11 +236,13 @@ class Origin with EventDispatcher{
     );
   }
   void setHighlight(Object3D? object){
+    object?.userData['selected'] = true;
     object?.material?.emissive = Color.fromHex32(0xffffff);
     object?.material?.opacity = 1.0;
     state?.call(object);
   }
   void clearHighlight(Object3D? object){
+    object?.userData['selected'] = false;
     object?.material?.emissive = Color.fromHex32(0x000000);
     object?.material?.opacity = 0.5;
     state?.call(object);
@@ -250,12 +250,10 @@ class Origin with EventDispatcher{
   void selectPlane(String? name){
     for(final o in childred.children){
       if(o.name == name){
-        o.userData['selected'] = true;
         _hovered = o;
         setHighlight(_hovered);
       }
       else{
-        o.userData['selected'] = false;
         clearHighlight(o);
       }
     }
@@ -273,7 +271,7 @@ class Origin with EventDispatcher{
       grid.visible = true;
       if(name == 'xy'){
         grid.position.setValues(0,0,0);
-        grid.lookAt(Vector3(0, math.pi, 0));
+        grid.lookAt(Vector3(0, 1, 0));
 
         grid.children[0].material?.color = Color.fromHex32(0xff0000);
         grid.children[1].material?.color = Color.fromHex32(0x00ff00);
@@ -350,7 +348,7 @@ class Origin with EventDispatcher{
   Intersection? intersectObjectWithRay() {
     _raycaster.setFromCamera(Vector2(_pointer.x, _pointer.y), camera);
     final all = _raycaster.intersectObjects(childred.children, true);
-    if(all.isNotEmpty){
+    if(all.isNotEmpty && childred.visible && all[0].object?.visible == true){
       return all[0];
     }
 
