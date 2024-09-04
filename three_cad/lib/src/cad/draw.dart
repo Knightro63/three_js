@@ -3,6 +3,39 @@ import 'package:three_js/three_js.dart';
 
 enum DrawType{none,line,arc,circle,boxCenter,boxCorner}
 
+class Sketch{
+  Sketch(Object3D plane){
+    meshPlane = Mesh(
+      PlaneGeometry(10,10),
+      MeshBasicMaterial.fromMap({
+        'color':0xffffff, 
+        'side': DoubleSide, 
+        'transparent': true, 
+        'opacity': 0
+      })
+    )
+    ..name = 'SketchPlane'
+    ..position.setFrom(plane.position)
+    ..rotation.setFromRotationMatrix(plane.matrix);
+  }
+  late Mesh meshPlane;
+  Group points = Group();
+  List<Object3D> toDispose = [];
+
+  void dispose(){
+    meshPlane.dispose();
+    points.dispose();
+    minorDispose();
+  }
+
+  void minorDispose(){
+    for(final t in toDispose){
+      t.dispose();
+    }
+    toDispose = [];
+  }
+}
+
 class Draw with EventDispatcher{
   Group drawScene = Group();
   Camera camera;
@@ -10,7 +43,7 @@ class Draw with EventDispatcher{
   PeripheralsState get domElement => listenableKey.currentState!;
   DrawType _drawType = DrawType.none;
   DrawType get drawType => _drawType;
-  Object3D plane;
+
   late Object3D origin;
   List<Object3D> _hovered = [];
   final _pointer = Vector2.zero();
@@ -20,15 +53,25 @@ class Draw with EventDispatcher{
   bool _clicking = false;
   bool _newLine = false;
   bool _newLineDidStart = false;
-  
-  Draw(this.camera, this.plane, Object3D origin, this.listenableKey){
-    this.origin = origin.clone();
-    drawScene.add(plane);
-    drawScene.add(this.origin);
-    _setupOrigin();
 
+  Sketch? sketch;
+  
+  Draw(
+    this.camera, 
+    this.origin, 
+    this.listenableKey
+  ){
+    drawScene.add(origin);
     domElement.addEventListener(PeripheralType.pointerdown, onPointerDown);
     domElement.addEventListener(PeripheralType.pointerHover, onPointerMove);
+    hide();
+  }
+
+  void hide(){
+    drawScene.visible = false;
+  }
+  void show(){
+    drawScene.visible = true;
   }
 
   void _setupOrigin(){
@@ -39,20 +82,8 @@ class Draw with EventDispatcher{
   }
 
   void dispose(){
-    if(_drawType != DrawType.none){
-      endSketch();
-    }
-
-    drawScene.children.first.dispose();
-    drawScene.children.removeAt(0);
-    drawScene.children.first.dispose();
-    drawScene.children.removeAt(1);
     domElement.removeEventListener(PeripheralType.pointerdown, onPointerDown);
     domElement.removeEventListener(PeripheralType.pointerHover, onPointerMove);
-
-    drawScene.onAfterRender = ({Camera? camera, BufferGeometry? geometry, Map<String, dynamic>? group, Material? material, WebGLRenderer? renderer, Object3D? scene}){
-      drawScene.scale.setValues(2/camera!.zoom, 2/camera.zoom, 2/camera.zoom);
-    };
   }
 
   void updatePointer(event) {
@@ -71,23 +102,21 @@ class Draw with EventDispatcher{
     _drawType = DrawType.none;
     _newLine = false;
     _newLineDidStart = false;
-
-    drawScene.children.last.dispose();
-    drawScene.children.removeLast();
+    sketch?.toDispose.add(sketch!.points.children.last);
+    sketch!.points.remove(sketch!.points.children.last);
   }
 
   void setHighlight(Object3D? object){
     if(object?.name == 'o'){
-      drawScene.children[1].visible = true;
+      origin.visible = true;
     }
     else if(object != null){
-      //object?.material?.emissive = Color.fromHex32(0xffffff);
       object.material?.opacity = 1.0;
       _hovered.add(object);
     }
   }
   void clearHighlight(){
-    drawScene.children[1].visible = false;
+    origin.visible = false;
     for(final o in _hovered){
       o.material?.opacity = 0.5;
     }
@@ -95,60 +124,65 @@ class Draw with EventDispatcher{
   }
 
   void onPointerMove(event) {
-    updatePointer(event);
-    _raycaster.setFromCamera(_pointer, camera);
-    _intersections = _raycaster.intersectObjects(drawScene.children,false);
-    if(_intersections.length > 1 && 
-      _intersections[1].object?.name != 'SketchPlane' && 
-      _newLine
-    ){
-      setHighlight(_intersections[1].object);
-    }
-    else if(_intersections.isNotEmpty && _intersections[0].object?.name == 'o'){
-      drawScene.children[1].visible = true;
-    }
-    else{
-      clearHighlight();
-    }
+    if(sketch != null){
+      updatePointer(event);
+      _raycaster.setFromCamera(_pointer, camera);
+      _intersections = _raycaster.intersectObjects([sketch!.meshPlane,origin]+sketch!.points.children,false);
+      
+      if(_intersections.length > 1 && 
+        _intersections[1].object?.name != 'SketchPlane' && 
+        _newLine
+      ){
+        setHighlight(_intersections[1].object);
+      }
+      else if(_intersections.isNotEmpty && _intersections[0].object?.name == 'o'){
+        origin.visible = true;
+      }
+      else{
+        clearHighlight();
+      }
 
-    if(_clicking && _newLine){
-      if(_intersections.isNotEmpty && drawScene.children.last.name != 'SketchPlane' && drawScene.children.last.name != 'o'){
-        final intersect = _intersections[ 0 ];
-        drawScene.children.last.position
-        .setFrom(intersect.point!);
+      if(_clicking && _newLine && sketch!.points.children.isNotEmpty){
+        if(_intersections.isNotEmpty){
+          final intersect = _intersections[ 0 ];
+          sketch!.points.children.last.position.setFrom(intersect.point!);
+        }
       }
     }
   }
   void onPointerDown(event) {
-    if(event.button == 0){
-      _clicking = true;
-      updatePointer(event);
-      _raycaster.setFromCamera(_pointer, camera);
-      _intersections = _raycaster.intersectObject(drawScene.children[0],false);
+    if(sketch != null){
+      if(event.button == 0){
+        _clicking = true;
+        updatePointer(event);
+        _raycaster.setFromCamera(_pointer, camera);
+        _intersections = _raycaster.intersectObjects([sketch!.meshPlane,origin]+sketch!.points.children,false);
 
-      Vector3? point;
-      if(_intersections.isNotEmpty){
-        // for(final i in _intersections){
-        //   if(i.object?.name == 'o'){
-        //     point = (origin.position);
-        //   }
-        //   else if(i.object?.name != 'SketchPlane'){
-        //     point = (i.object!.position);
-        //   }
-        // }
+        Vector3? point;
+        if(_intersections.isNotEmpty){
+          for(final i in _intersections){
+            if(i.object?.name == 'o'){
+              point = (origin.position);
+              break;
+            }
+            else if(i.object?.name != 'SketchPlane'){
+              point = (i.object!.position);
+            }
+          }
+          
+          point ??= _intersections[0].point!;
 
-        point ??= (_intersections[0].point!);
-
-        switch (drawType) {
-          case DrawType.line:
-            drawLine(point);
-            break;
-          default:
+          switch (drawType) {
+            case DrawType.line:
+              drawLine(point);
+              break;
+            default:
+          }
         }
       }
-    }
-    else{
-      _clicking = false;
+      else{
+        _clicking = false;
+      }
     }
   }
   void drawLine(Vector3 mousePosition){
@@ -158,32 +192,52 @@ class Draw with EventDispatcher{
       _newLineDidStart = true;
     }
     else{
+      sketch!.points.children.last.position.setFrom(mousePosition);
       addPoint(mousePosition);
     }
   }
   void addPoint(Vector3 mousePosition){
-    drawScene.add(Mesh(
-      SphereGeometry(0.01,4,4),
-      MeshBasicMaterial.fromMap({
-        'color': 0xffff00,
-        'transparent': true,
-        'opacity': 0.5
-      })
-    )
-    ..position.x = mousePosition.x
-    ..position.y = mousePosition.y
-    ..position.z = mousePosition.z
+    sketch?.points.add(
+      Mesh(
+        SphereGeometry(0.01,4,4),
+        MeshBasicMaterial.fromMap({
+          'color': 0xffff00,
+          'transparent': true,
+          'opacity': 0.5
+        })
+      )
+      ..position.x = mousePosition.x
+      ..position.y = mousePosition.y
+      ..position.z = mousePosition.z
     );
+  }
+
+  void start(Sketch sketch){
+    show();
+    _setupOrigin();
+    this.sketch = sketch;
+
+    drawScene.add(sketch.meshPlane);
+    drawScene.add(sketch.points);
   }
   void finish(){
     _clicking = false;
-    drawScene.clear();
+    if(_drawType != DrawType.none){
+      endSketch();
+    }
+    
+    origin.material?.emissive = Color.fromHex32(0x000000);
+    origin.material?.opacity = 0.5;
+    origin.scale.scale(4);
+    origin.visible = true;
+
+    drawScene.remove(sketch!.meshPlane);
+    drawScene.remove(sketch!.points);
+
+    sketch = null;
+    hide();
   }
   void cancel(){
-    _clicking = false;
-    for(final object in drawScene.children){
-      object.dispose();
-    }
-    drawScene.clear();
+    finish();
   }
 }

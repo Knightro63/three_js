@@ -85,6 +85,8 @@ class Origin with EventDispatcher{
           'transparent': true,
           'opacity': 0.5
         })
+        ..depthWrite = true
+        ..depthTest = false
       )
       ..name = 'o'
       ..userData['selected'] = false
@@ -93,9 +95,13 @@ class Origin with EventDispatcher{
     childred.add(
       Mesh(
         BoxGeometry(0.025,0.45,0.025),
-        LineBasicMaterial.fromMap( {
-          'color': 0xff0000
+        MeshPhongMaterial.fromMap( {
+          'color': 0xff0000,
+          'transparent': true,
+          'opacity': 0.5
         })
+        ..depthWrite = true
+        ..depthTest = false
       )
       ..position.x = 0.325
       ..rotateZ(math.pi/2)
@@ -105,9 +111,13 @@ class Origin with EventDispatcher{
     childred.add(
       Mesh(
         BoxGeometry(0.025,0.45,0.025),
-        LineBasicMaterial.fromMap( {
-          'color': 0x00ff00
+        MeshPhongMaterial.fromMap( {
+          'color': 0x00ff00,          
+          'transparent': true,
+          'opacity': 0.5
         })
+        ..depthWrite = true
+        ..depthTest = false
       )
       ..position.y = 0.325
       ..name = 'y'
@@ -116,9 +126,13 @@ class Origin with EventDispatcher{
     childred.add(
       Mesh(
         BoxGeometry(0.025,0.45,0.025),
-        LineBasicMaterial.fromMap( {
-          'color': 0x0000ff
+        MeshPhongMaterial.fromMap( {
+          'color': 0x0000ff,
+          'transparent': true,
+          'opacity': 0.5
         })
+        ..depthWrite = true
+        ..depthTest = false
       )
       ..position.z = 0.325
       ..rotateX(math.pi/2)
@@ -135,6 +149,8 @@ class Origin with EventDispatcher{
           'transparent': true,
           'opacity': 0.5
         })
+        ..depthWrite = true
+        ..depthTest = false
       )
       ..position.y = 0.3
       ..position.x = 0.3
@@ -150,6 +166,8 @@ class Origin with EventDispatcher{
           'transparent': true,
           'opacity': 0.5
         })
+        ..depthWrite = true
+        ..depthTest = false
       )
       ..position.z = 0.3
       ..position.x = 0.3
@@ -166,6 +184,8 @@ class Origin with EventDispatcher{
           'transparent': true,
           'opacity': 0.5
         })
+        ..depthWrite = true
+        ..depthTest = false
       )
       ..position.z = 0.3
       ..position.y = 0.3
@@ -348,7 +368,7 @@ class Origin with EventDispatcher{
   Intersection? intersectObjectWithRay() {
     _raycaster.setFromCamera(Vector2(_pointer.x, _pointer.y), camera);
     final all = _raycaster.intersectObjects(childred.children, true);
-    if(all.isNotEmpty && childred.visible && all[0].object?.visible == true){
+    if(all.isNotEmpty){//} && childred.visible && all[0].object?.visible == true){
       return all[0];
     }
 

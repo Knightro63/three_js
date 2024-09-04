@@ -13,11 +13,11 @@ import 'package:three_js_helpers/three_js_helpers.dart';
 import 'package:three_js_exporters/three_js_exporters.dart';
 import 'package:three_js_geometry/three_js_geometry.dart';
 import 'package:three_js_transform_controls/three_js_transform_controls.dart';
-import 'src/cad/camera_control2.dart';
+import '../src/cad/view_helper2.dart';
 
-import 'src/navigation/gui.dart';
-import 'src/cad/origin.dart';
-import 'src/navigation/navigation.dart';
+import '../src/navigation/gui.dart';
+import '../src/cad/origin.dart';
+import '../src/navigation/navigation.dart';
 
 enum Actions{none,prepareSketec,sketch,extrude,revolve,sweep,}
 
@@ -37,7 +37,7 @@ class _UIPageState extends State<UIScreen> {
   LsiThemes theme = LsiThemes.dark;
 
   Gui gui = Gui();
-  Draw? draw;
+  late Draw draw;
   bool resetNav = false;
   late three.ThreeJS threeJs;
 
@@ -51,7 +51,6 @@ class _UIPageState extends State<UIScreen> {
   late three.OrbitControls orbit;
   late three.PerspectiveCamera cameraPersp;
   late three.OrthographicCamera cameraOrtho;
-  three.Group helper = three.Group();
 
   three.Vector3 resetCamPos = three.Vector3(0,5, 0);
   bool holdingControl = false;
@@ -59,9 +58,12 @@ class _UIPageState extends State<UIScreen> {
   Actions action = Actions.none;
 
   late final Origin origin;
+  List<Sketch> _sketches = [];
+  int? selectedSketch;
   
   three.Group sketches = three.Group();
   three.Group bodies = three.Group();
+  late final ViewHelper viewHelper;
 
   @override
   void initState(){
@@ -76,6 +78,7 @@ class _UIPageState extends State<UIScreen> {
     control.dispose();
     orbit.dispose();
     threeJs.dispose();
+    draw.dispose();
     super.dispose();
   }
   void callBacks({required LSICallbacks call}){
@@ -105,7 +108,7 @@ class _UIPageState extends State<UIScreen> {
     const frustumSize = 1.0;
     final aspect = threeJs.width / threeJs.height;
     cameraPersp = three.PerspectiveCamera( 50, aspect, 0.1, 100 );
-    cameraOrtho = three.OrthographicCamera( - frustumSize * aspect, frustumSize * aspect, frustumSize, - frustumSize, 0.1, 10000 );
+    cameraOrtho = three.OrthographicCamera( - frustumSize * aspect, frustumSize * aspect, frustumSize, - frustumSize, -1, 10000 );
     threeJs.camera = cameraOrtho;
 
     threeJs.camera.position.setFrom(resetCamPos);
@@ -121,7 +124,6 @@ class _UIPageState extends State<UIScreen> {
     threeJs.scene.add( light );
 
     orbit = three.OrbitControls(threeJs.camera, threeJs.globalKey);
-    orbit.update();
 
     control = TransformControls(threeJs.camera, threeJs.globalKey);
 
@@ -143,13 +145,12 @@ class _UIPageState extends State<UIScreen> {
         }
       }
     );
-    creteHelpers();
-    
+
     threeJs.scene.add(origin.childred);
     threeJs.scene.add(origin.grid);
     threeJs.scene.add(bodies);
     threeJs.scene.add(sketches);
-
+    creteHelpers();
     threeJs.domElement.addEventListener(
       three.PeripheralType.resize, 
       threeJs.onWindowResize
@@ -230,17 +231,24 @@ class _UIPageState extends State<UIScreen> {
       }
     });
     threeJs.domElement.addEventListener(three.PeripheralType.pointerdown, (details){
-      // mousePosition = three.Vector2(details.clientX, details.clientY);
-      // if(threeJs.scene.children.length > avoid && !control.dragging){
-      //   checkIntersection(threeJs.scene.children.sublist(avoid));
-      // }
       planeSelected();
     });
 
     threeJs.addAnimationEvent((dt){
       origin.update();
       orbit.update();
+      if ( viewHelper.animating ) {
+        viewHelper.update( dt );
+        orbit.target.setFrom(origin.childred.children[0].position);
+      }
     });
+
+    draw = Draw(
+      threeJs.camera,
+      origin.childred.children[0].clone(),
+      threeJs.globalKey
+    );
+    threeJs.scene.add(draw.drawScene);
 
     initGui();
   }
@@ -256,51 +264,37 @@ class _UIPageState extends State<UIScreen> {
       else{
         threeJs.camera.position.setValues(5,0,0);
       }
+
       orbit.target.setFrom(origin.grid.position);
       orbit.enableRotate = false;
       origin.lockGrid = true;
       origin.gridHover(origin.planeType.name);
       origin.clearHighlight(origin.selectedPlane);
       origin.childred.visible = false;
+
+      selectedSketch = _sketches.length;
+      _sketches.add(Sketch(origin.selectedPlane!));
+      draw.start(_sketches.last);
       action = Actions.sketch;
-      draw = Draw(
-        threeJs.camera,
-        three.Mesh(
-          three.PlaneGeometry(10,10),
-          three.MeshBasicMaterial.fromMap({
-            'color':0xffffff, 
-            'side': three.DoubleSide, 
-            'transparent': true, 
-            'opacity': 0
-          })
-        )
-        ..name = 'SketchPlane'
-        ..position.setFrom(origin.selectedPlane!.position)
-        ..rotation.setFromRotationMatrix(origin.selectedPlane!.matrix),
-        origin.childred.children[0],
-        threeJs.globalKey
-      );
-      threeJs.scene.add(draw!.drawScene);
     }
   }
 
   void creteHelpers(){
-    final cc = CameraControl(
-      size: 1.8,
+    viewHelper = ViewHelper(
+      //size: 1.8,
       offsetType: OffsetType.topRight,
       offset: three.Vector2(10, 10),
       screenSize: const Size(120, 120), 
       listenableKey: threeJs.globalKey,
-      rotationCamera: threeJs.camera,
-      threeJs: threeJs
+      camera: threeJs.camera,
+      //threeJs: threeJs
     );
 
     threeJs.renderer?.autoClear = false;
     threeJs.postProcessor = ([double? dt]){
-      threeJs.renderer!.render( threeJs.scene, threeJs.camera );
-      cc.postProcessor();
+      threeJs.renderer?.render( threeJs.scene, threeJs.camera );
+      viewHelper.render(threeJs.renderer!);
     };
-    threeJs.scene.add(helper);
   }
 
   three.Vector2 convertPosition(three.Vector2 location){
@@ -462,28 +456,47 @@ class _UIPageState extends State<UIScreen> {
       ],
     );
   }
-  void cancelSketch(){
+  void cancelSketch(bool cancel){
+    draw.cancel();
+
+    int s = selectedSketch ?? _sketches.length-1;
+    if(cancel){
+      _sketches[s].dispose();
+      _sketches.removeAt(s);
+    }
+    else{
+      if(_sketches[s].points.children.isNotEmpty){
+        _sketches[s].points.userData['selected'] = false;
+        _sketches[s].points.name = 'Sketch ${s+1}';
+        _sketches[s].minorDispose();
+        sketches.add(_sketches[s].points);
+      }
+      else{
+        _sketches[s].dispose();
+        _sketches.removeAt(s);
+      }
+    }
+
     action = Actions.none;
     orbit.enableRotate = true;
     origin.showGrid = false;
     origin.lockGrid = false;
     origin.childred.visible = true;
-    draw?.dispose();
-    draw = null;
+    initGui();
   }
   Widget sketchNav(){
     return Row(
       children: [
         InkWell(
           onTap: (){
-            if(draw?.drawType != DrawType.none){
+            if(draw.drawType != DrawType.none){
               setState(() {
-                draw?.endSketch();
+                draw.endSketch();
               });
             }
             else{
               setState(() {
-                draw?.startSketch(DrawType.line);
+                draw.startSketch(DrawType.line);
               });
             }
           },
@@ -499,7 +512,7 @@ class _UIPageState extends State<UIScreen> {
             child: SvgPicture.asset(
               'assets/draw/line.svg',
               colorFilter: ColorFilter.mode(
-                draw?.drawType == DrawType.line?Theme.of(context).secondaryHeaderColor:Theme.of(context).primaryIconTheme.color!, 
+                draw.drawType == DrawType.line?Theme.of(context).secondaryHeaderColor:Theme.of(context).primaryIconTheme.color!, 
                 BlendMode.srcIn
               ),
               semanticsLabel: 'Draw a line'
@@ -509,11 +522,7 @@ class _UIPageState extends State<UIScreen> {
         InkWell(
           onTap: (){
             setState(() {
-              if(draw!.drawScene.children.isNotEmpty){
-                draw?.drawScene.userData['selected'] = false;
-                sketches.add(draw?.drawScene);
-              }
-              cancelSketch();
+              cancelSketch(false);
               initGui();
             });
           },
@@ -532,7 +541,7 @@ class _UIPageState extends State<UIScreen> {
         InkWell(
           onTap: (){
             setState(() {
-              cancelSketch();
+              cancelSketch(true);
             });
           },
           child: Container(
@@ -553,8 +562,6 @@ class _UIPageState extends State<UIScreen> {
   @override
   Widget build(BuildContext context) {
     double deviceWidth = MediaQuery.of(context).size.width;
-    //double safePadding = MediaQuery.of(context).padding.top;
-    //double deviceHeight = MediaQuery.of(context).size.height-safePadding-25;
     
     return MaterialApp( 
       theme: CSS.changeTheme(theme),
@@ -800,7 +807,7 @@ class _UIPageState extends State<UIScreen> {
                             orbit.target.setFrom(origin.childred.children[4].position);
                           }
                         ),
-                      NavItems(
+                        NavItems(
                           name: 'Right',
                           icon: Icons.camera_indoor_outlined,
                           function: (e){
@@ -816,6 +823,22 @@ class _UIPageState extends State<UIScreen> {
                             callBacks(call: LSICallbacks.updatedNav);
                             threeJs.camera.position.setValues(-5,0,0);
                             orbit.target.setFrom(origin.childred.children[5].position);
+                          }
+                        ),
+                        NavItems(
+                          name: 'Rotate Left',
+                          icon: Icons.rotate_left_outlined,
+                          function: (e){
+                            callBacks(call: LSICallbacks.updatedNav);
+                            orbit.rotateLeft(math.pi * 0.5);
+                          }
+                        ),
+                        NavItems(
+                          name: 'Rotate Right',
+                          icon: Icons.rotate_right_outlined,
+                          function: (e){
+                            callBacks(call: LSICallbacks.updatedNav);
+                            orbit.rotateLeft(-math.pi * 0.5);
                           }
                         ),
                       ]
@@ -976,6 +999,52 @@ class _UIPageState extends State<UIScreen> {
                         height: threeJs.height,
                         width: 130,
                         child: gui
+                      )
+                    ),
+                    if(threeJs.mounted)Positioned(
+                      top: 0,
+                      right: 20,
+                      child: Transform.rotate(
+                        angle: math.pi-math.pi/4,
+                        child: InkWell(
+                          onTap: (){
+                            orbit.rotateLeft(-math.pi * 0.5);
+                          },
+                          child: Icon(
+                            Icons.switch_access_shortcut,
+                            size: 40,
+                            color: (Theme.of(context).brightness == Brightness.dark?Theme.of(context).primaryColorLight:Theme.of(context).primaryColorDark).withAlpha(200),)
+                        )
+                      )
+                    ),
+                    if(threeJs.mounted)Positioned(
+                      top: 0,
+                      right: 80,
+                      child: Transform.rotate(
+                        angle: math.pi/4,
+                        child: Transform.flip(
+                          flipY: true,
+                          child: InkWell(
+                            onTap: (){
+                              orbit.rotateLeft(math.pi * 0.5);
+                            },
+                            child: Icon(
+                              Icons.switch_access_shortcut,
+                              size: 40,
+                              color: (Theme.of(context).brightness == Brightness.dark?Theme.of(context).primaryColorLight:Theme.of(context).primaryColorDark).withAlpha(200),)
+                          )
+                        )
+                      )
+                    ),
+                    if(threeJs.mounted)Positioned(
+                      top: 80,
+                      right: 20,
+                      child: InkWell(
+                        onTap: (){
+                          threeJs.camera.position.setValues(0,5,0);
+                          orbit.target.setFrom(origin.childred.children[0].position);
+                        },
+                        child: Icon(Icons.home,color: (Theme.of(context).brightness == Brightness.dark?Theme.of(context).primaryColorLight:Theme.of(context).primaryColorDark).withAlpha(200),)
                       )
                     ) 
                   ]
