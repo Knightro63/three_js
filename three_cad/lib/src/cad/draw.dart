@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart' hide Material;
 import 'package:three_js/three_js.dart';
+import 'package:three_js_line/three_js_line.dart';
 
 enum DrawType{none,line,arc,circle,boxCenter,boxCorner}
 
@@ -17,14 +18,24 @@ class Sketch{
     ..name = 'SketchPlane'
     ..position.setFrom(plane.position)
     ..rotation.setFromRotationMatrix(plane.matrix);
+
+    // final Float32BufferAttribute att = meshPlane.geometry!.getAttributeFromString('position');
+    // Vector3 a = Vector3().fromBuffer(att, 0);
+    // Vector3 b = Vector3().fromBuffer(att, 3);
+    // Vector3 c = Vector3().fromBuffer(att, 6);
+    // this.plane = Plane().setFromCoplanarPoints(a, b, c);
   }
+
+  // late Plane plane;
   late Mesh meshPlane;
-  Group points = Group();
+  Group render = Group();
+  List<Object3D> points = [];
+  List<Object3D> line = [];
   List<Object3D> toDispose = [];
 
   void dispose(){
     meshPlane.dispose();
-    points.dispose();
+    render.dispose();
     minorDispose();
   }
 
@@ -102,8 +113,12 @@ class Draw with EventDispatcher{
     _drawType = DrawType.none;
     _newLine = false;
     _newLineDidStart = false;
-    sketch?.toDispose.add(sketch!.points.children.last);
-    sketch!.points.remove(sketch!.points.children.last);
+    sketch?.toDispose.add(sketch!.points.last);
+    sketch?.toDispose.add(sketch!.line.last);
+    sketch?.render.remove(sketch!.points.last);
+    sketch?.render.remove(sketch!.line.last);
+    sketch?.points.remove(sketch!.points.last);
+    sketch?.line.remove(sketch!.line.last);
   }
 
   void setHighlight(Object3D? object){
@@ -123,11 +138,19 @@ class Draw with EventDispatcher{
     _hovered = [];
   }
 
-  void onPointerMove(event) {
+  void _getIntersections(WebPointerEvent event){
+    updatePointer(event);
+    _raycaster.setFromCamera(_pointer, camera);
+    _intersections = [];
+    _intersections = _raycaster.intersectObjects(sketch!.points,false);
+    if(_intersections.isEmpty){
+      _intersections = _raycaster.intersectObjects([sketch!.meshPlane,origin],false);
+    }
+  }
+
+  void onPointerMove(WebPointerEvent event) {
     if(sketch != null){
-      updatePointer(event);
-      _raycaster.setFromCamera(_pointer, camera);
-      _intersections = _raycaster.intersectObjects([sketch!.meshPlane,origin]+sketch!.points.children,false);
+      _getIntersections(event);
       
       if(_intersections.length > 1 && 
         _intersections[1].object?.name != 'SketchPlane' && 
@@ -135,41 +158,51 @@ class Draw with EventDispatcher{
       ){
         setHighlight(_intersections[1].object);
       }
-      else if(_intersections.isNotEmpty && _intersections[0].object?.name == 'o'){
+      else if(_intersections.isNotEmpty && 
+        _intersections[0].object?.name == 'o'
+      ){
         origin.visible = true;
       }
       else{
         clearHighlight();
       }
 
-      if(_clicking && _newLine && sketch!.points.children.isNotEmpty){
+      if(_clicking && _newLine && sketch!.points.isNotEmpty){
         if(_intersections.isNotEmpty){
-          final intersect = _intersections[ 0 ];
-          sketch!.points.children.last.position.setFrom(intersect.point!);
+          final intersect = _intersections[0];
+          sketch!.points.last.position.setFrom(intersect.point!);
+          _updateLine(intersect.point!);
         }
       }
     }
   }
-  void onPointerDown(event) {
+  void _updateLine(Vector3 point){
+    switch (drawType) {
+      case DrawType.line:
+        final n = sketch!.points.length-1;
+        final v = sketch!.points[n-1].position.clone();
+        sketch!.line.last.geometry?.setFromPoints([v, point.clone()]);
+        break;
+      default:
+    }
+  }
+  void onPointerDown(WebPointerEvent event) {
     if(sketch != null){
       if(event.button == 0){
         _clicking = true;
-        updatePointer(event);
-        _raycaster.setFromCamera(_pointer, camera);
-        _intersections = _raycaster.intersectObjects([sketch!.meshPlane,origin]+sketch!.points.children,false);
 
         Vector3? point;
         if(_intersections.isNotEmpty){
           for(final i in _intersections){
             if(i.object?.name == 'o'){
-              point = (origin.position);
+              point = origin.position;
               break;
             }
-            else if(i.object?.name != 'SketchPlane'){
-              point = (i.object!.position);
+            if(i.object?.name != 'SketchPlane'){
+              point = i.object?.position;
             }
           }
-          
+
           point ??= _intersections[0].point!;
 
           switch (drawType) {
@@ -188,11 +221,14 @@ class Draw with EventDispatcher{
   void drawLine(Vector3 mousePosition){
     if(_newLine && !_newLineDidStart){
       addPoint(mousePosition);
+      addLine(mousePosition);
       addPoint(mousePosition);
       _newLineDidStart = true;
     }
     else{
-      sketch!.points.children.last.position.setFrom(mousePosition);
+      sketch!.points.last.position.setFrom(mousePosition);
+      _updateLine(mousePosition);
+      addLine(mousePosition);
       addPoint(mousePosition);
     }
   }
@@ -206,19 +242,54 @@ class Draw with EventDispatcher{
           'opacity': 0.5
         })
       )
+      ..name = 'point'
       ..position.x = mousePosition.x
       ..position.y = mousePosition.y
       ..position.z = mousePosition.z
     );
-  }
 
+    sketch?.render.add(sketch?.points.last);
+  }
+  void addLine(Vector3 mousePosition){
+    final geometry = BufferGeometry();
+    geometry.setAttributeFromString(
+      'position',
+      Float32BufferAttribute.fromList(mousePosition.clone().storage+mousePosition.clone().storage,3)
+    );
+    final matLine = LineBasicMaterial.fromMap( {
+      'color': 0xffff00,
+    });
+
+    sketch?.line.add(
+      Line( geometry, matLine )
+    );
+
+    sketch?.render.add(sketch?.line.last);
+  }
+  void addFatLine(Vector3 mousePosition){
+    final geometry = LineGeometry();
+    geometry.setPositions(Float32Array.fromList(mousePosition.storage+mousePosition.scale(5).storage));
+    final matLine = LineMaterial.fromMap( {
+      'color': 0xffffff,
+      'linewidth': 0.05, // in world units with size attenuation, pixels otherwise
+    });
+
+    sketch?.line.add(
+      Line2( geometry, matLine )
+      ..position.x = mousePosition.x
+      ..position.y = mousePosition.y
+      ..position.z = mousePosition.z
+    );
+
+    sketch?.render.add(sketch?.line.last);
+  }
   void start(Sketch sketch){
     show();
     _setupOrigin();
     this.sketch = sketch;
 
     drawScene.add(sketch.meshPlane);
-    drawScene.add(sketch.points);
+    drawScene.add(sketch.render);
   }
   void finish(){
     _clicking = false;
@@ -232,7 +303,7 @@ class Draw with EventDispatcher{
     origin.visible = true;
 
     drawScene.remove(sketch!.meshPlane);
-    drawScene.remove(sketch!.points);
+    drawScene.remove(sketch!.render);
 
     sketch = null;
     hide();

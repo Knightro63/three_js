@@ -366,9 +366,7 @@ class _UIPageState extends State<UIScreen> {
     }
 
     didClick = false;
-    setState(() {
-
-    });
+    setState(() {});
   }
 
   void initGui() {
@@ -465,11 +463,11 @@ class _UIPageState extends State<UIScreen> {
       _sketches.removeAt(s);
     }
     else{
-      if(_sketches[s].points.children.isNotEmpty){
-        _sketches[s].points.userData['selected'] = false;
-        _sketches[s].points.name = 'Sketch ${s+1}';
+      if(_sketches[s].render.children.isNotEmpty){
+        _sketches[s].render.userData['selected'] = false;
+        _sketches[s].render.name = 'Sketch ${s+1}';
         _sketches[s].minorDispose();
-        sketches.add(_sketches[s].points);
+        sketches.add(_sketches[s].render);
       }
       else{
         _sketches[s].dispose();
