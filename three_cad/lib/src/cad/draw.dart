@@ -125,10 +125,12 @@ class Draw with EventDispatcher{
     if(object?.name == 'o'){
       origin.visible = true;
     }
-    else if(object != null){
+
+    if(object != null){
       object.material?.opacity = 1.0;
       _hovered.add(object);
     }
+    
   }
   void clearHighlight(){
     origin.visible = false;
@@ -138,38 +140,37 @@ class Draw with EventDispatcher{
     _hovered = [];
   }
 
-  void _getIntersections(WebPointerEvent event){
+  List<Intersection> _getAllIntersections(WebPointerEvent event){
     updatePointer(event);
     _raycaster.setFromCamera(_pointer, camera);
-    _intersections = [];
-    _intersections = _raycaster.intersectObjects(sketch!.points,false);
-    if(_intersections.isEmpty){
-      _intersections = _raycaster.intersectObjects([sketch!.meshPlane,origin],false);
-    }
+    return _raycaster.intersectObjects([sketch!.meshPlane,origin]+sketch!.points,false);
   }
-
+  List<Intersection> _getIntersections(){
+    _raycaster.setFromCamera(_pointer, camera);
+    return _raycaster.intersectObject(sketch!.meshPlane,false);
+  }
   void onPointerMove(WebPointerEvent event) {
     if(sketch != null){
-      _getIntersections(event);
+      final intersections = _getAllIntersections(event);
       
-      if(_intersections.length > 1 && 
-        _intersections[1].object?.name != 'SketchPlane' && 
+      if(intersections.length > 1 && 
+        intersections[1].object?.name != 'SketchPlane' && 
         _newLine
       ){
-        setHighlight(_intersections[1].object);
+        setHighlight(intersections[1].object);
       }
-      else if(_intersections.isNotEmpty && 
-        _intersections[0].object?.name == 'o'
+      else if(intersections.isNotEmpty && 
+        intersections[0].object?.name == 'o'
       ){
-        origin.visible = true;
+        setHighlight(intersections[0].object);
       }
       else{
         clearHighlight();
       }
 
       if(_clicking && _newLine && sketch!.points.isNotEmpty){
-        if(_intersections.isNotEmpty){
-          final intersect = _intersections[0];
+        if(intersections.isNotEmpty){
+          final intersect = intersections[0];
           sketch!.points.last.position.setFrom(intersect.point!);
           _updateLine(intersect.point!);
         }
@@ -182,6 +183,7 @@ class Draw with EventDispatcher{
         final n = sketch!.points.length-1;
         final v = sketch!.points[n-1].position.clone();
         sketch!.line.last.geometry?.setFromPoints([v, point.clone()]);
+        //(sketch!.line.last as Line2).computeLineDistances();
         break;
       default:
     }
@@ -190,20 +192,21 @@ class Draw with EventDispatcher{
     if(sketch != null){
       if(event.button == 0){
         _clicking = true;
-
+        final intersections = _getIntersections();
         Vector3? point;
-        if(_intersections.isNotEmpty){
-          for(final i in _intersections){
-            if(i.object?.name == 'o'){
+        if(intersections.isNotEmpty){
+          for(final i in _hovered){
+            if(i.name == 'o'){
               point = origin.position;
               break;
             }
-            if(i.object?.name != 'SketchPlane'){
-              point = i.object?.position;
+            if(i.name == 'point'){
+              point = i.position;
+              break;
             }
           }
 
-          point ??= _intersections[0].point!;
+          point ??= intersections[0].point!;
 
           switch (drawType) {
             case DrawType.line:
@@ -237,7 +240,7 @@ class Draw with EventDispatcher{
       Mesh(
         SphereGeometry(0.01,4,4),
         MeshBasicMaterial.fromMap({
-          'color': 0xffff00,
+          'color': 0x06A7E2,
           'transparent': true,
           'opacity': 0.5
         })
@@ -250,35 +253,40 @@ class Draw with EventDispatcher{
 
     sketch?.render.add(sketch?.points.last);
   }
-  void addLine(Vector3 mousePosition){
+  void addLine(Vector3 mousePosition,[bool construction = false]){
     final geometry = BufferGeometry();
     geometry.setAttributeFromString(
       'position',
-      Float32BufferAttribute.fromList(mousePosition.clone().storage+mousePosition.clone().storage,3)
+      Float32BufferAttribute.fromList(mousePosition.storage+mousePosition.storage,3)
     );
     final matLine = LineBasicMaterial.fromMap( {
-      'color': 0xffff00,
-    });
+      'color': construction?0xffff00:0x06A7E2,
+    })
+    ..scale = 2
+    ..dashSize = 0.0001
+    ..gapSize = 0.0001;
 
     sketch?.line.add(
       Line( geometry, matLine )
+      ..computeLineDistances()
+      ..userData['construction'] = construction
     );
 
     sketch?.render.add(sketch?.line.last);
   }
-  void addFatLine(Vector3 mousePosition){
+  void addFatLine(Vector3 mousePosition,[bool construction = false]){
     final geometry = LineGeometry();
-    geometry.setPositions(Float32Array.fromList(mousePosition.storage+mousePosition.scale(5).storage));
+    geometry.setPositions(Float32Array.fromList(mousePosition.storage+mousePosition.storage));
     final matLine = LineMaterial.fromMap( {
-      'color': 0xffffff,
-      'linewidth': 0.05, // in world units with size attenuation, pixels otherwise
-    });
+      'color': 0x06A7E2,
+      'linewidth': 5, // in world units with size attenuation, pixels otherwise
+    })
+    ..worldUnits = true;
 
     sketch?.line.add(
       Line2( geometry, matLine )
-      ..position.x = mousePosition.x
-      ..position.y = mousePosition.y
-      ..position.z = mousePosition.z
+      ..userData['construction'] = construction
+      ..computeLineDistances()
     );
 
     sketch?.render.add(sketch?.line.last);
