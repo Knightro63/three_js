@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:example/src/statistics.dart';
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
+import 'package:three_js_helpers/three_js_helpers.dart';
 
 class WebglMorphtargetsFace extends StatefulWidget {
   
@@ -63,13 +64,13 @@ class _State extends State<WebglMorphtargetsFace> {
     threeJs.camera.position.setValues( - 1.8, 0.8, 3 );
     threeJs.scene = three.Scene();
 
-    // final ktx2Loader = KTXLoader()
+    // final ktx2Loader = three.KTXLoader()
     //   .setTranscoderPath( 'jsm/libs/basis/' )
     //   .detectSupport( renderer );
 
     three.GLTFLoader()
-      //.setKTX2Loader( ktx2Loader )
-      //.setMeshoptDecoder( MeshoptDecoder )
+      // .setKTX2Loader( ktx2Loader )
+      // .setMeshoptDecoder( MeshoptDecoder )
       .fromAsset( 'assets/models/gltf/facecap.glb').then(( gltf ){
         final mesh = gltf!.scene.children[ 0 ];
         threeJs.scene.add( mesh );
@@ -77,11 +78,11 @@ class _State extends State<WebglMorphtargetsFace> {
         mixer?.clipAction(gltf.animations![ 0 ])!.play();
       });
 
-    // final environment = RoomEnvironment();
-    // final pmremGenerator = three.PMREMGenerator(threeJs.renderer!);
+    final environment = RoomEnvironment();
+    final pmremGenerator = three.PMREMGenerator(threeJs.renderer!);
 
     threeJs.scene.background = three.Color.fromHex32( 0x666666 );
-    //threeJs.scene.environment = pmremGenerator.fromScene( environment ).texture;
+    threeJs.scene.environment = pmremGenerator.fromScene( environment ).texture;
 
     controls = three.OrbitControls( threeJs.camera, threeJs.globalKey );
     controls.enableDamping = true;

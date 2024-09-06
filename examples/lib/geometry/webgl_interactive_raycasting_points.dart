@@ -57,8 +57,12 @@ class _State extends State<WebglInteractiveRaycastingPoints> {
   final length = 160;
   final rotateY = three.Matrix4().makeRotationY( 0.005 );
 
-  final spheres = [];
+  final List<three.Object3D> spheres = [];
   late List<three.Points> pointclouds;
+
+  three.Intersection? intersection;
+  int spheresIndex = 0;
+  double toggle = 0;
 
   Future<void> setup() async {
     threeJs.scene = three.Scene();
@@ -85,8 +89,6 @@ class _State extends State<WebglInteractiveRaycastingPoints> {
 
     pointclouds = [ pcBuffer, pcIndexed, pcIndexedOffset ];
 
-    //
-
     final sphereGeometry = three.SphereGeometry( 0.1, 32, 32 );
     final sphereMaterial = three.MeshBasicMaterial.fromMap( { 'color': 0xff0000 } );
 
@@ -97,7 +99,11 @@ class _State extends State<WebglInteractiveRaycastingPoints> {
     }
 
     raycaster.params['Points']['threshold'] = threshold;
-    threeJs.domElement.addEventListener(three.PeripheralType.pointermove, onPointerMove );
+    threeJs.domElement.addEventListener(three.PeripheralType.pointerHover, onPointerMove );
+
+    threeJs.addAnimationEvent((dt){
+      render(dt);
+    });
   }
 
 	three.BufferGeometry generatePointCloudGeometry(three.Color color, int width, int length ) {
@@ -187,5 +193,32 @@ class _State extends State<WebglInteractiveRaycastingPoints> {
   void onPointerMove(three.WebPointerEvent event ) {
     pointer.x = ( event.clientX / threeJs.width ) * 2 - 1;
     pointer.y = - ( event.clientY / threeJs.height ) * 2 + 1;
+  }
+
+  void render(double dt){
+    threeJs.camera.position.applyMatrix4( rotateY );
+    threeJs.camera.lookAt( threeJs.scene.position );
+    threeJs.camera.updateMatrixWorld();
+
+    raycaster.setFromCamera( pointer, threeJs.camera );
+
+    final intersections = raycaster.intersectObjects( pointclouds, false );
+    intersection = intersections.isNotEmpty ? intersections[ 0 ] : null;
+
+    if ( toggle > 0.02 && intersection != null ) {
+      spheres[ spheresIndex ].position.setFrom( intersection!.point! );
+      spheres[ spheresIndex ].scale.setValues( 1, 1, 1 );
+      spheresIndex = ( spheresIndex + 1 ) % spheres.length;
+
+      toggle = 0;
+    }
+
+    for (int i = 0; i < spheres.length; i ++ ) {
+      final sphere = spheres[ i ];
+      sphere.scale.scale( 0.98 );
+      sphere.scale.clampScalar( 0.01, 1 );
+    }
+
+    toggle += dt;
   }
 }

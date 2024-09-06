@@ -1,107 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:css/css.dart';
-class GuiWidget{
-  GuiWidget(this.name,this.icon,this.update,this.selected,this.visible);
 
-  Map<String,dynamic>? value;
-  bool selected;
-  bool visible;
-  String name;
-  IconData icon;
-  String get property => name;
-  void Function() update;
-  void Function(bool)? _onFinished;
-  Function(bool)? _onChanged;
+// class GuiWidget{
+//   GuiWidget(this.name,this.icon,this.update,this.selected,this.visible);
 
-  void onVisibilityChange(Function(bool)? function){
-    _onChanged = function;
-  }
-  void onSelected(Function(bool)? function){
-    _onFinished = function;
-  }
-
-  Widget _visible(BuildContext context){
-    return Container(
-      height: 20,
-      margin: const EdgeInsets.only(left: 20,top: 2,bottom: 2),
-      color: Theme.of(context).cardColor,
-      child: InkWell(
-        onTap: (){
-          selected = !selected;
-          _onFinished?.call(selected);
-          update();
-        },
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              children: [
-                Container(
-                  width: 3,
-                  height: 25,
-                  color: selected?lightBlue:Colors.grey,
-                  margin: const EdgeInsets.only(right: 5),
-                ),
-                Container(
-                  margin: const EdgeInsets.only(right: 5),
-                  child: Icon(icon, size: 15,),
-                ),
-                Text(name.toUpperCase()),
-              ]
-            ),
-            InkWell(
-              onTap: (){
-                visible = !visible;
-                _onChanged?.call(visible);
-                update();
-              },
-              child: Padding(
-                padding: const EdgeInsets.only(right: 5),
-                child: Icon(visible?Icons.visibility:Icons.visibility_off, size: 15,)
-
-              ),
-            )
-          ]
-        )
-      )
-    );
-  }
-
-  Widget render(BuildContext context){
-    return _visible(context);
-  }
-}
-// class GuiWidget extends StatefulWidget{
-//   final String name;
-//   final IconData icon;
+//   Map<String,dynamic>? value;
 //   bool selected;
-//   final bool visible;
-
-//   GuiWidget(this.name,this.icon,this.selected,this.visible);
-
-//   void Function(bool)? onFinished;
-//   Function(bool)? onChanged;
+//   bool visible;
+//   String name;
+//   IconData icon;
+//   String get property => name;
+//   void Function() update;
+//   void Function(bool)? _onFinished;
+//   Function(bool)? _onChanged;
 
 //   void onVisibilityChange(Function(bool)? function){
-//     onChanged = function;
+//     _onChanged = function;
 //   }
 //   void onSelected(Function(bool)? function){
-//     onFinished = function;
-//   }
-
-
-//   @override
-//   _GuiWidgetState createState() => _GuiWidgetState();
-// }
-
-// class _GuiWidgetState extends State<GuiWidget>{
-//   Map<String,dynamic>? value;
-//   bool visible = false;
-
-//   @override
-//   void initState(){
-//     super.initState();
-//     visible = widget.visible;
+//     _onFinished = function;
 //   }
 
 //   Widget _visible(BuildContext context){
@@ -110,12 +27,13 @@ class GuiWidget{
 //       margin: const EdgeInsets.only(left: 20,top: 2,bottom: 2),
 //       color: Theme.of(context).cardColor,
 //       child: InkWell(
+//         onDoubleTap: (){
+          
+//         },
 //         onTap: (){
-//           widget.selected = !widget.selected;
-//           widget.onFinished?.call(widget.selected);
-//           setState(() {
-            
-//           });
+//           selected = !selected;
+//           _onFinished?.call(selected);
+//           update();
 //         },
 //         child: Row(
 //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -125,28 +43,27 @@ class GuiWidget{
 //                 Container(
 //                   width: 3,
 //                   height: 25,
-//                   color: widget.selected?lightBlue:Colors.grey,
+//                   color: selected?lightBlue:Colors.grey,
 //                   margin: const EdgeInsets.only(right: 5),
 //                 ),
 //                 Container(
 //                   margin: const EdgeInsets.only(right: 5),
-//                   child: Icon(widget.icon, size: 15,),
+//                   child: Icon(icon, size: 15,),
 //                 ),
-//                 Text(widget.name.toUpperCase()),
+//                 Text(name.toUpperCase()),
 //               ]
 //             ),
 //             InkWell(
 //               onTap: (){
 //                 visible = !visible;
-//                 widget.onChanged?.call(visible);
-//                 setState(() {
-                  
-//                 });
+//                 _onChanged?.call(visible);
+//                 print('here');
+//                 update();
 //               },
 //               child: Padding(
 //                 padding: const EdgeInsets.only(right: 5),
 //                 child: Icon(visible?Icons.visibility:Icons.visibility_off, size: 15,)
-              
+
 //               ),
 //             )
 //           ]
@@ -155,11 +72,106 @@ class GuiWidget{
 //     );
 //   }
 
-//   @override
-//   Widget build(BuildContext context){
+//   Widget render(BuildContext context){
 //     return _visible(context);
 //   }
 // }
+
+class GuiWidget extends StatefulWidget{
+  final String name;
+  final IconData icon;
+  bool selected;
+  final bool visible;
+
+  GuiWidget(this.name,this.icon,this.selected,this.visible);
+
+  void Function(bool)? _onFinished;
+  void Function(bool)? _onChanged;
+  void Function(bool)? _onEdited;
+
+  void onVisibilityChange(void Function(bool)? function){
+    _onChanged = function;
+  }
+  void onSelected(void Function(bool)? function){
+    _onFinished = function;
+  }
+  void onEdit(void Function(bool)? function){
+    _onEdited = function;
+  }
+
+  @override
+  _GuiWidgetState createState() => _GuiWidgetState();
+}
+
+class _GuiWidgetState extends State<GuiWidget>{
+  Map<String,dynamic>? value;
+  bool visible = false;
+
+  @override
+  void initState(){
+    super.initState();
+    visible = widget.visible;
+  }
+
+  Widget _visible(BuildContext context){
+    return Container(
+      height: 20,
+      margin: const EdgeInsets.only(left: 20,top: 2,bottom: 2),
+      color: Theme.of(context).cardColor,
+      child: InkWell(
+        onDoubleTap: (){
+          widget.selected = !widget.selected;
+          widget._onEdited?.call(widget.selected);
+          setState(() {});
+        },
+        onTap: (){
+          widget.selected = !widget.selected;
+          widget._onFinished?.call(widget.selected);
+          setState(() {});
+        },
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 3,
+                  height: 25,
+                  color: widget.selected?lightBlue:Colors.grey,
+                  margin: const EdgeInsets.only(right: 5),
+                ),
+                Container(
+                  margin: const EdgeInsets.only(right: 5),
+                  child: Icon(widget.icon, size: 15,),
+                ),
+                Text(widget.name),
+              ]
+            ),
+            InkWell(
+              onTap: (){
+                visible = !visible;
+                widget._onChanged?.call(visible);
+                setState(() {
+                  
+                });
+              },
+              child: Padding(
+                padding: const EdgeInsets.only(right: 5),
+                child: Icon(visible?Icons.visibility:Icons.visibility_off, size: 15,)
+              
+              ),
+            )
+          ]
+        )
+      )
+    );
+  }
+
+  @override
+  Widget build(BuildContext context){
+    return _visible(context);
+  }
+}
 
 class Folder{
   void Function() update;
@@ -184,15 +196,20 @@ class Folder{
     _isOpen = false;
   }
 
-  GuiWidget add(String name,IconData icon,bool selected, bool visible){
-    widgets[name] = GuiWidget(name, icon, update,selected, visible);
+  GuiWidget add(
+    String name,
+    IconData icon,
+    bool selected, 
+    bool visible
+  ){
+    widgets[name] = GuiWidget(name, icon,selected, visible);
     return widgets[name]!;
   }
 
   List<Widget> render(BuildContext context){
     List<Widget> w = [];
     for(final key in widgets.keys){
-      w.add(widgets[key]!.render(context));
+      w.add(widgets[key]!);
     }
     return w;
   }

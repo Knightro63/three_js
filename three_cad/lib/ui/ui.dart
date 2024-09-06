@@ -5,7 +5,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Actions;
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:three_cad/src/cad/draw.dart';
+import 'package:three_cad/src/cad/draw_types.dart';
+import 'package:three_cad/src/cad/sketch.dart';
 import 'package:three_cad/src/navigation/globals.dart';
 
 import 'package:three_js/three_js.dart' as three;
@@ -59,7 +60,7 @@ class _UIPageState extends State<UIScreen> {
 
   late final Origin origin;
   List<Sketch> _sketches = [];
-  int? selectedSketch;
+  Sketch? selectedSketch;
   
   three.Group sketches = three.Group();
   three.Group bodies = three.Group();
@@ -246,7 +247,10 @@ class _UIPageState extends State<UIScreen> {
     draw = Draw(
       threeJs.camera,
       origin.childred.children[0].clone(),
-      threeJs.globalKey
+      threeJs.globalKey,
+      (){
+        setState(() {});
+      }
     );
     threeJs.scene.add(draw.drawScene);
 
@@ -264,19 +268,22 @@ class _UIPageState extends State<UIScreen> {
       else{
         threeJs.camera.position.setValues(5,0,0);
       }
-
-      orbit.target.setFrom(origin.grid.position);
-      orbit.enableRotate = false;
-      origin.lockGrid = true;
+      _sketches.add(Sketch(origin.selectedPlane!));
+      drawSetup(origin.grid.position, _sketches.last);
       origin.gridHover(origin.planeType.name);
       origin.clearHighlight(origin.selectedPlane);
-      origin.childred.visible = false;
-
-      selectedSketch = _sketches.length;
-      _sketches.add(Sketch(origin.selectedPlane!));
-      draw.start(_sketches.last);
-      action = Actions.sketch;
     }
+  }
+
+  void drawSetup(three.Vector3 position, Sketch sketch){
+    orbit.target.setFrom(position);
+    orbit.enableRotate = false;
+    origin.lockGrid = true;
+    origin.childred.visible = false;
+
+    selectedSketch = sketch;
+    draw.start(sketch);
+    action = Actions.sketch;
   }
 
   void creteHelpers(){
@@ -384,7 +391,7 @@ class _UIPageState extends State<UIScreen> {
       else{
         icon = Icons.copy;
       }
-      folder.add(o.name, icon, o.userData['selected'], o.visible)
+      folder.add(o.name.toUpperCase(), icon, o.userData['selected'], o.visible)
         ..onSelected((b){
           o.userData['selected'] = b;
           origin.selectPlane(b?o.name:null);
@@ -398,20 +405,22 @@ class _UIPageState extends State<UIScreen> {
         bFolder.add(o.name, Icons.view_in_ar_rounded, o.userData['selected'], o.visible)
           ..onSelected((b){
             o.userData['selected'] = b;
-            //origin.selectPlane(b?o.name:null);
           })
           ..onVisibilityChange((b){o.visible = b;});
       }
     }
     if(sketches.children.isNotEmpty){
       final sFolder = newGui.addFolder('Sketches',(){setState(() {});})..onVisibilityChange = (b){sketches.visible = b;};
-      for(final o in sketches.children){
-        sFolder.add(o.name, Icons.draw_outlined, o.userData['selected'], o.visible)
+      for(final o in _sketches){
+        sFolder.add(o.render.name, Icons.draw_outlined, o.render.userData['selected'] ?? false, o.render.visible)
           ..onSelected((b){
-            o.userData['selected'] = b;
-            //origin.selectPlane(b?o.name:null);
+            o.render.userData['selected'] = b;
           })
-          ..onVisibilityChange((b){o.visible = b;});
+          ..onEdit((b){
+            o.render.userData['selected'] = b;
+            drawSetup(o.meshPlane.position, o);
+          })
+          ..onVisibilityChange((b){o.render.visible = b;});
       }
     }
 
@@ -423,11 +432,27 @@ class _UIPageState extends State<UIScreen> {
 
     gui = newGui;
   }
+  
+  Widget selectionIcon(IconData icon, bool selected,void Function() onTap){
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.all(5),
+        width: 45,
+        height: 45,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: (selected?Theme.of(context).secondaryHeaderColor:Theme.of(context).primaryColorLight))
+        ),
+        alignment: Alignment.center,
+        child: Icon(icon, color: (selected?Theme.of(context).secondaryHeaderColor:Theme.of(context).primaryColorLight)),
+      ),
+    );
+  }
   Widget actionNav(){
     return Actions.sketch == action?sketchNav():Row(
       children: [
-        InkWell(
-          onTap: (){
+        selectionIcon(Icons.draw,action == Actions.prepareSketec,(){
             setState(() {
               if(action == Actions.prepareSketec){
                 action = Actions.none;
@@ -439,17 +464,32 @@ class _UIPageState extends State<UIScreen> {
               }
             });
           },
-          child: Container(
-            margin: const EdgeInsets.all(5),
-            width: 45,
-            height: 45,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: (action == Actions.prepareSketec?Theme.of(context).secondaryHeaderColor:Theme.of(context).primaryColorLight))
-            ),
-            alignment: Alignment.center,
-            child: Icon(Icons.draw, color: (action == Actions.prepareSketec?Theme.of(context).secondaryHeaderColor:Theme.of(context).primaryColorLight)),
-          ),
+        ),
+        selectionIcon(Icons.unarchive_outlined,action == Actions.extrude,(){
+            setState(() {
+              if(action == Actions.extrude){
+                action = Actions.none;
+              }
+              else{
+                action = Actions.extrude;
+                //origin.showGrid = true;
+                //planeSelected();
+              }
+            });
+          },
+        ),
+        selectionIcon(Icons.threesixty_outlined, action == Actions.extrude,(){
+            setState(() {
+              if(action == Actions.extrude){
+                action = Actions.none;
+              }
+              else{
+                action = Actions.extrude;
+                //origin.showGrid = true;
+                //planeSelected();
+              }
+            });
+          },
         )
       ],
     );
@@ -457,21 +497,20 @@ class _UIPageState extends State<UIScreen> {
   void cancelSketch(bool cancel){
     draw.cancel();
 
-    int s = selectedSketch ?? _sketches.length-1;
     if(cancel){
-      _sketches[s].dispose();
-      _sketches.removeAt(s);
+      selectedSketch?.dispose();
+      _sketches.remove(selectedSketch);
     }
     else{
-      if(_sketches[s].render.children.isNotEmpty){
-        _sketches[s].render.userData['selected'] = false;
-        _sketches[s].render.name = 'Sketch ${s+1}';
-        _sketches[s].minorDispose();
-        sketches.add(_sketches[s].render);
+      if(selectedSketch != null && selectedSketch!.render.children.isNotEmpty){
+        selectedSketch?.render.userData['selected'] = false;
+        selectedSketch?.render.name = 'Sketch ${_sketches.indexOf(selectedSketch!)}';
+        selectedSketch?.minorDispose();
+        sketches.add(selectedSketch?.render);
       }
       else{
-        _sketches[s].dispose();
-        _sketches.removeAt(s);
+        selectedSketch?.dispose();
+        _sketches.remove(selectedSketch);
       }
     }
 
@@ -485,8 +524,8 @@ class _UIPageState extends State<UIScreen> {
   Widget sketchNav(){
     return Row(
       children: [
-        InkWell(
-          onTap: (){
+        selectionIcon(Icons.timeline,draw.drawType == DrawType.line,
+          (){
             if(draw.drawType != DrawType.none){
               setState(() {
                 draw.endSketch();
@@ -498,61 +537,77 @@ class _UIPageState extends State<UIScreen> {
               });
             }
           },
-          child: Container(
-            margin: const EdgeInsets.all(5),
-            width: 45,
-            height: 45,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: Theme.of(context).primaryColorLight)
-            ),
-            alignment: Alignment.center,
-            child: SvgPicture.asset(
-              'assets/draw/line.svg',
-              colorFilter: ColorFilter.mode(
-                draw.drawType == DrawType.line?Theme.of(context).secondaryHeaderColor:Theme.of(context).primaryIconTheme.color!, 
-                BlendMode.srcIn
-              ),
-              semanticsLabel: 'Draw a line'
-            ),//Icon(Icons, color: Theme.of(context).primaryColorLight),
-          ),
         ),
-        InkWell(
-          onTap: (){
+        selectionIcon(Icons.check_box_outline_blank_sharp,draw.drawType == DrawType.box2Point,
+          (){
+            if(draw.drawType != DrawType.none){
+              setState(() {
+                draw.endSketch();
+              });
+            }
+            else{
+              setState(() {
+                draw.startSketch(DrawType.box2Point);
+              });
+            }
+          },
+        ),
+        selectionIcon(Icons.circle_outlined,draw.drawType == DrawType.circle,
+          (){
+            if(draw.drawType != DrawType.none){
+              setState(() {
+                draw.endSketch();
+              });
+            }
+            else{
+              setState(() {
+                draw.startSketch(DrawType.circle);
+              });
+            }
+          }
+        ),
+        selectionIcon(Icons.check_box_outline_blank_sharp,draw.drawType == DrawType.boxCenter,
+          (){
+            if(draw.drawType != DrawType.none){
+              setState(() {
+                draw.endSketch();
+              });
+            }
+            else{
+              setState(() {
+                draw.startSketch(DrawType.boxCenter);
+              });
+            }
+          }
+        ),
+        selectionIcon(Icons.cable_rounded,draw.drawType == DrawType.spline,
+          (){
+            if(draw.drawType != DrawType.none){
+              setState(() {
+                draw.endSketch();
+              });
+            }
+            else{
+              setState(() {
+                draw.startSketch(DrawType.spline);
+              });
+            }
+          }
+        ),
+        selectionIcon(Icons.check,false,
+          (){
             setState(() {
               cancelSketch(false);
               initGui();
             });
           },
-          child: Container(
-            margin: const EdgeInsets.all(5),
-            width: 45,
-            height: 45,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: Theme.of(context).primaryColorLight)
-            ),
-            alignment: Alignment.center,
-            child: Icon(Icons.check, color: Theme.of(context).primaryColorLight),
-          ),
         ),
-        InkWell(
-          onTap: (){
+        selectionIcon(Icons.cancel,false,
+          (){
             setState(() {
               cancelSketch(true);
             });
           },
-          child: Container(
-            margin: const EdgeInsets.all(5),
-            width: 45,
-            height: 45,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: Theme.of(context).primaryColorLight)
-            ),
-            alignment: Alignment.center,
-            child: Icon(Icons.cancel, color: Theme.of(context).primaryColorLight),
-          ),
         )
       ],
     );

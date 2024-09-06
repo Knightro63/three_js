@@ -24,7 +24,6 @@ const List<String> filesJson = [
   'webgl_lines_fat_wireframe',
   'webgl_lines_fat_raycasting',
   "webgl_decals",
-  //"webgl_nodes_points",
   "webgl_materials_browser",
   "webgl_instancing_scatter",
   "webgl_instancing_performance",
