@@ -44,6 +44,7 @@ import 'package:example/loaders/webgl_loader_usdz.dart';
 import 'package:example/loaders/webgl_loader_vox.dart';
 import 'package:example/loaders/webgl_loader_xyz.dart';
 import 'package:example/material/webgl_materials_modified.dart';
+import 'package:example/material/webgl_materials_subsurface_scattering.dart';
 import 'package:example/modifers/webgl_modifier_simplifier.dart';
 import 'package:example/modifers/webgl_modifier_subdivision.dart';
 import 'package:example/material/webgl_materials_video_webcam.dart';
@@ -56,6 +57,7 @@ import 'package:example/others/webgl_interactive_voxelpainter.dart';
 import 'package:example/others/webgl_lod.dart';
 import 'package:example/others/webgl_portal.dart';
 import 'package:example/rollercoster/webxr_vr_rollercoaster.dart';
+import 'package:example/shadow/webgl_shader.dart';
 import 'package:example/src/files_json.dart';
 import 'package:example/terrain/three_terrain.dart';
 import 'package:example/terrain/webgl_geometry_terrain.dart';
@@ -197,6 +199,9 @@ class MyAppState extends State<MyApp> {
               },
               '/webgl_materials_browser':(BuildContext context) {
                 return const WebglMaterialsBrowser();
+              },
+              '/webgl_materials_subsurface_scattering':(BuildContext context) {
+                return const WebglMaterialsSubsurfaceScattering();
               },
               '/webgl_shadow_contact':(BuildContext context) {
                 return const WebglShadowContact();
@@ -506,6 +511,9 @@ class MyAppState extends State<MyApp> {
               },
               '/webgl_volume_instancing':(BuildContext context) {
                 return const WebglVolumeInstancing();
+              },
+              '/webgl_shader':(BuildContext context) {
+                return const WebglShader();
               },
               '/webgl_ubo_arrays':(BuildContext context) {
                 return const WebglUboArrays();

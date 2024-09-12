@@ -2612,9 +2612,10 @@ class _TextParser {
 
     if (attrs.length > 1) {
       name = attrs[1].replaceFirst(RegExp(r'^(\w+)::'), '');
+    }
+    if(attrs.length > 2){
       type = attrs[2];
     }
-
     return _NodeAttr(id: id, name: name, type: type);
   }
 
