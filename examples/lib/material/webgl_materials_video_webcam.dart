@@ -23,7 +23,7 @@ class _State extends State<WebglMaterialsVideoWebcam> {
   three.ThreeJS? threeJs;
   three.CanvasTexture? texture;
   late three.Uint8Array image;
-  Size imageSize = Size(640,480);
+  Size imageSize = const Size(640,480);
 
   @override
   void initState() {
@@ -77,7 +77,7 @@ class _State extends State<WebglMaterialsVideoWebcam> {
           if(threeJs != null)Statistics(data: data),
           loading?Container():CameraSetup(
             camera: camera, 
-            size: Size(1,1)
+            size: const Size(1,1)
           ),
         ],
       ) 

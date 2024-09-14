@@ -43,6 +43,7 @@ import 'package:example/loaders/webgl_loader_stl.dart';
 import 'package:example/loaders/webgl_loader_usdz.dart';
 import 'package:example/loaders/webgl_loader_vox.dart';
 import 'package:example/loaders/webgl_loader_xyz.dart';
+import 'package:example/material/webgl2_multiple_rendertargets.dart';
 import 'package:example/material/webgl_materials_modified.dart';
 import 'package:example/material/webgl_materials_subsurface_scattering.dart';
 import 'package:example/modifers/webgl_modifier_simplifier.dart';
@@ -55,6 +56,7 @@ import 'package:example/others/webgl_buffergeometry_instancing_billboards.dart';
 import 'package:example/others/webgl_custom_attributes_lines.dart';
 import 'package:example/others/webgl_interactive_voxelpainter.dart';
 import 'package:example/others/webgl_lod.dart';
+//import 'package:example/others/webgl_node_points.dart';
 import 'package:example/others/webgl_portal.dart';
 import 'package:example/rollercoster/webxr_vr_rollercoaster.dart';
 import 'package:example/shadow/webgl_shader.dart';
@@ -515,12 +517,18 @@ class MyAppState extends State<MyApp> {
               '/webgl_shader':(BuildContext context) {
                 return const WebglShader();
               },
+              // '/webgl_nodes_points':(BuildContext context) {
+              //   return const WebglNodesPoints();
+              // },
               '/webgl_ubo_arrays':(BuildContext context) {
                 return const WebglUboArrays();
               },
               '/webxr_vr_rollercoaster':(BuildContext context) {
                 return const WebXRVRRollercoaster();
-              }
+              },
+              '/webgl2_multiple_rendertargets':(BuildContext context) {
+                return const Webgl2MultipleRendertargets();
+              },
             }
           ),
         )

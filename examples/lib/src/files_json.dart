@@ -112,6 +112,8 @@ const List<String> filesJson = [
   'webgl_volume_cloud',
   'webgl_volume_instancing',
   'webgl_shader',
-  //'webgl_ubo_arrays',
+  //'webgl_nodes_points',
+  'webgl_ubo_arrays',
   'webxr_vr_rollercoaster',
+  'webgl2_multiple_rendertargets',
 ];

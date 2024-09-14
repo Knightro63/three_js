@@ -295,32 +295,26 @@ class ThreeJS {
   Widget build() {
     return  Builder(builder: (BuildContext context) {
       initSize(context);
-      return Container(
-        width: screenSize!.width,
-        height: screenSize!.height,
-        color: Theme.of(context).canvasColor,
-        child: core.Peripherals(
-          key: globalKey,
-          builder: (BuildContext context) {
-            return Container(
-              width: width,
-              height: height,
-              color: Theme.of(context).canvasColor,
-              child: Builder(builder: (BuildContext context) {
-                if (kIsWeb) {
-                  return texture != null? HtmlElementView(viewType:texture!.textureId.toString()):Container();
-                } 
-                else {
-                  return texture != null?
-                    Transform.scale(
-                      scaleY: sourceTexture != null || Platform.isAndroid?1:-1,
-                      child:Texture(textureId: texture!.textureId)
-                    ):Container();
-                }
-              })
-            );
-          }
-        ),
+      return core.Peripherals(
+        key: globalKey,
+        builder: (BuildContext context) {
+          return Container(
+            width: width,
+            height: height,
+            child: Builder(builder: (BuildContext context) {
+              if (kIsWeb) {
+                return texture != null? HtmlElementView(viewType:texture!.textureId.toString()):Container();
+              } 
+              else {
+                return texture != null?
+                  Transform.scale(
+                    scaleY: sourceTexture != null || Platform.isAndroid?1:-1,
+                    child:Texture(textureId: texture!.textureId)
+                  ):Container();
+              }
+            })
+          );
+        }
       );
     });
   }

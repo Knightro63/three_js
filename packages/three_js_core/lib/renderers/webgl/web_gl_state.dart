@@ -211,7 +211,12 @@ class WebGLState {
 
         if (drawBuffers.length != textures.length || drawBuffers[0] != WebGL.COLOR_ATTACHMENT0) {
           for (int i = 0, il = textures.length; i < il; i++) {
-            drawBuffers[i] = WebGL.COLOR_ATTACHMENT0 + i;
+            if(drawBuffers.length <= i){
+              drawBuffers.add(WebGL.COLOR_ATTACHMENT0 + i);
+            }
+            else{
+              drawBuffers[i] = WebGL.COLOR_ATTACHMENT0 + i;
+            }
           }
 
           drawBuffers.length = textures.length;

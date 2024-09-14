@@ -153,19 +153,41 @@ class InsertCamera{
   Future startLiveFeed(void Function(InputImage image)? returnImage) async {
     _returnImage = returnImage;
     isLive = true;
-    if(kIsWeb){
+    if(kIsWeb || Platform.isIOS || Platform.isAndroid){
       _liveTimerMacos = Timer.periodic(const Duration(milliseconds: 16),(_){
         if(!_processingLiveFeed){
           _processingLiveFeed = true;
           takePicture().then((data){
             Uint8List send = data.file!;
-            if(kIsWeb){
+            Uint8List toSend;
+            //if(kIsWeb){
               imgLib.Image? img = imgLib.decodeImage(data.file!);
+              if(img != null) {
+                img = imgLib.flipVertical(img);
+              }
               imageSize = Size(img!.width.toDouble(),img.height.toDouble());
               send = img.data!.buffer.asUint8List();
-            }
+              if(img.data!.numChannels == 3){
+                int n = send.length~/3;
+                toSend = Uint8List(n*4);
+                toSend.setRange(0, send.length, send);
+                int j = 0;
+                for(int i = 0; i < send.length;i+=3){
+                  //toSend.insert(i*4-1, 254);
+                  toSend[j] = send[i];
+                  toSend[j+1] = send[i+1];
+                  toSend[j+2] = send[i+2];
+                  toSend[j+3] = 255;
+                  j+=4;
+                }
+              }else{
+                toSend = send;
+              }
+            // }else{
+            //   toSend = send;
+            // }
             InputImage i = InputImage.fromBytes(
-              bytes: send, 
+              bytes: toSend, 
               metadata: InputImageMetadata(
                 size: imageSize!,
                 rotation: InputImageRotation.rotation0deg,
@@ -179,7 +201,7 @@ class InsertCamera{
         }
       });
     }
-    else if(Platform.isMacOS){
+    else if(!kIsWeb && Platform.isMacOS){
       controllerMacos?.startImageStream((p){
         imageSize ??= Size(p.width.toDouble(), p.height.toDouble());
         InputImage i = InputImage.fromBytes(
@@ -363,7 +385,7 @@ class _CameraSetupState extends State<CameraSetup> {
           child: SizedBox(
             height: widget.size.height,
             width: widget.size.width,
-            child: Platform.isMacOS?_macosCamera():CameraPreview(controller!)
+            child: !kIsWeb && Platform.isMacOS?_macosCamera():CameraPreview(controller!)
           )
         ),
       ]
