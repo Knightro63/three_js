@@ -76,9 +76,10 @@ class _State extends State<WebglSimpleGi> {
     controls.minDistance = 1;
     controls.maxDistance = 10;
 
-    threeJs.rendererUpdate = compute;
-
     threeJs.addAnimationEvent((dt){
+      threeJs.renderer!.setRenderTarget( null );
+      threeJs.renderer!.render( threeJs.scene, threeJs.camera );
+      compute?.call();
       controls.update();
     });
   }
@@ -129,7 +130,7 @@ class _State extends State<WebglSimpleGi> {
     scene.updateMatrixWorld( true );
 
     three.Object3D clone = scene.clone();
-    clone.autoUpdate = false;
+    clone.matrixAutoUpdate = false;
 
     final rt = three.WebGLRenderTarget( SIZE, SIZE );
     final normalMatrix = three.Matrix3.identity();
@@ -159,8 +160,6 @@ class _State extends State<WebglSimpleGi> {
       }
 
       final colors = attributes['color'].array;
-
-      final startVertex = currentVertex;
       final totalVertex = positions.length / 3;
 
       for (int i = 0; i < 32; i ++ ) {
@@ -195,20 +194,15 @@ class _State extends State<WebglSimpleGi> {
         currentVertex ++;
       }
 
-      attributes['color'].updateRange['offset'] = startVertex * 3;
-      attributes['color'].updateRange['count'] = ( currentVertex - startVertex ) * 3;
-      attributes['color'].needsUpdate = true;
+      (attributes['color'] as three.Float32BufferAttribute).needsUpdate = true;
 
       if ( currentVertex >= totalVertex ) {
-        clone = scene.clone();
-        clone.autoUpdate = false;
         bounces++;
         currentVertex = 0;
       }
     }
 
     this.compute = compute;
-    compute();
   }
 }
 

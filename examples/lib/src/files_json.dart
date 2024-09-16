@@ -25,7 +25,7 @@ const List<String> filesJson = [
   'webgl_lines_fat_raycasting',
   "webgl_decals",
   "webgl_materials_browser",
-  'webgl_materials_subsurface_scattering',
+  //'webgl_materials_subsurface_scattering',
   "webgl_instancing_scatter",
   "webgl_instancing_performance",
   "webgl_instancing_raycast",
@@ -113,7 +113,7 @@ const List<String> filesJson = [
   'webgl_volume_instancing',
   'webgl_shader',
   //'webgl_nodes_points',
-  'webgl_ubo_arrays',
+  //'webgl_ubo_arrays',
   'webxr_vr_rollercoaster',
-  'webgl2_multiple_rendertargets',
+  //'webgl2_multiple_rendertargets',
 ];

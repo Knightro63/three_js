@@ -1,10 +1,11 @@
 import 'dart:async';
 import 'dart:math' as math;
+import 'package:example/src/gui.dart';
 import 'package:example/src/statistics.dart';
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
 import 'package:three_js_geometry/three_js_geometry.dart';
-import 'package:three_js_objects/three_js_objects.dart';
+import 'package:three_js_objects/noise/water.dart';
 
 class WebglWater extends StatefulWidget {
   
@@ -17,10 +18,12 @@ class WebglWater extends StatefulWidget {
 class _State extends State<WebglWater> {
   List<int> data = List.filled(60, 0, growable: true);
   late Timer timer;
+  late Gui panel;
   late three.ThreeJS threeJs;
 
   @override
   void initState() {
+    panel = Gui((){setState(() {});});
     timer = Timer.periodic(const Duration(seconds: 1), (t){
       setState(() {
         data.removeAt(0);
@@ -51,7 +54,16 @@ class _State extends State<WebglWater> {
       body: Stack(
         children: [
           threeJs.build(),
-          Statistics(data: data)
+          Statistics(data: data),
+          if(threeJs.mounted)Positioned(
+            top: 20,
+            right: 20,
+            child: SizedBox(
+              height: threeJs.height,
+              width: 240,
+              child: panel.render()
+            )
+          )
         ],
       ) 
     );
@@ -61,7 +73,7 @@ class _State extends State<WebglWater> {
 
   final Map<String,dynamic> params = {
     'color': 0xffffff,
-    'scale': 4,
+    'scale': 4.0,
     'flowX': 1.0,
     'flowY': 1.0
   };
@@ -95,7 +107,7 @@ class _State extends State<WebglWater> {
       map.wrapT = three.RepeatWrapping;
       map.anisotropy = 16;
       map.repeat.setValues( 4, 4 );
-      //map.colorSpace = three.SRGBColorSpace;
+      map.colorSpace = three.SRGBColorSpace;
       groundMaterial.map = map;
       groundMaterial.needsUpdate = true;
     });
@@ -114,7 +126,7 @@ class _State extends State<WebglWater> {
 
     water.position.y = 1;
     water.rotation.x = math.pi * - 0.5;
-    //threeJs.scene.add( water );
+    threeJs.scene.add( water );
 
     // skybox
 
@@ -138,7 +150,21 @@ class _State extends State<WebglWater> {
     directionalLight.position.setValues( - 1, 1, 1 );
     threeJs.scene.add( directionalLight );
 
-    //
+    final gui = panel.addFolder('GUI')..open();
+    gui.addColor( params, 'color' ).onChange( ( value ) {
+      water.material?.uniforms[ 'color' ]['value'].set( value );
+    } );
+    gui.addSlider( params, 'scale', 1, 10 ).onChange( ( value ) {
+      water.material?.uniforms[ 'config' ]['value'].w = value;
+    } );
+    gui.addSlider( params, 'flowX', - 1, 1 )..step( 0.01 )..onChange( ( value ) {
+      water.material?.uniforms[ 'flowDirection' ]['value'].x = value;
+      water.material?.uniforms[ 'flowDirection' ]['value'].normalize();
+    } );
+    gui.addSlider( params, 'flowY', - 1, 1 )..step( 0.01 )..onChange( ( value ) {
+      water.material?.uniforms[ 'flowDirection' ]['value'].y = value;
+      water.material?.uniforms[ 'flowDirection' ]['value'].normalize();
+    } ); 
 
     controls = three.OrbitControls( threeJs.camera, threeJs.globalKey);
     controls.minDistance = 5;

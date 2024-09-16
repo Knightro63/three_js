@@ -232,7 +232,6 @@ class _State extends State<Webgl2MultipleRendertargets> {
         'glslVersion': three.GLSL3
       } )
     ) );
-
     // Controls
 
     controls = three.OrbitControls( threeJs.camera, threeJs.globalKey );
@@ -248,7 +247,6 @@ class _State extends State<Webgl2MultipleRendertargets> {
       } );
 
       // render scene into target
-      threeJs.renderer?.setRenderTarget( renderTarget );
       threeJs.renderer?.render( threeJs.scene, threeJs.camera );
 
       // render post FX
