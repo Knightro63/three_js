@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:math' as math;
 import 'package:example/src/camera/input_image.dart';
+import 'package:flutter/foundation.dart';
 
 import '../src/camera/camera_insert.dart';
 import 'package:flutter/material.dart';
@@ -18,7 +20,7 @@ class WebglMaterialsVideoWebcam extends StatefulWidget {
 class _State extends State<WebglMaterialsVideoWebcam> {
   List<int> data = List.filled(60, 0, growable: true);
   Timer? timer;
-  InsertCamera camera = InsertCamera();
+  InsertCamera camera = InsertCamera(androidSimMac: false);
   bool loading = true;
   three.ThreeJS? threeJs;
   three.CanvasTexture? texture;
@@ -54,7 +56,6 @@ class _State extends State<WebglMaterialsVideoWebcam> {
       });
     });
 
- 
     super.initState();
   }
   @override
@@ -86,25 +87,59 @@ class _State extends State<WebglMaterialsVideoWebcam> {
 
   late three.OrbitControls controls;
 
-
   Future<void> setup() async {
     threeJs!.camera = three.PerspectiveCamera( 60, threeJs!.width / threeJs!.height, 0.1, 100 );
     threeJs!.camera.position.z = 0.01;
 
     threeJs!.scene = three.Scene();
     texture = three.CanvasTexture(three.ImageElement(
-      width: imageSize.width.toInt(),
-      height: imageSize.height.toInt(),
+      width: imageSize.width,
+      height: imageSize.height,
       data: image
     ));
     texture?.colorSpace = three.SRGBColorSpace;
-
+    
     final geometry = three.PlaneGeometry( 16, 9 );
     geometry.scale( 0.5, 0.5, 0.5 );
     geometry.rotateX(math.pi);
-    final material = three.MeshBasicMaterial.fromMap( { 'map': texture, 'side': three.DoubleSide } );
 
-    material.map = texture;
+    late final three.Material material;
+    if(!kIsWeb && !Platform.isWindows && !Platform.isAndroid){
+      final Map<String,dynamic> uniforms = {
+        'texture1': { 'value': texture },
+        'uvScale': { 'value': three.Vector2( 1.0, 1.0 ) },
+      };
+
+      const String vertexShader = '''
+        uniform vec2 uvScale;
+        varying vec2 vUv;
+
+        void main(){
+          vUv = uvScale * uv;
+          vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+          gl_Position = projectionMatrix * mvPosition;
+        }
+      ''';
+      const String fragmentShader = '''
+        varying vec2 vUv;
+        uniform sampler2D texture1;
+        void main(void){
+          vec4 textureColor = texture2D(texture1, vUv.st);
+          gl_FragColor = vec4(textureColor.b,textureColor.g,textureColor.r,1.0);
+        }
+      ''';
+
+      material = three.ShaderMaterial.fromMap( {
+        'side': three.DoubleSide,
+        'uniforms': uniforms,
+        'vertexShader': vertexShader,
+        'fragmentShader': fragmentShader
+      } );
+    }
+    else{
+      material = three.MeshBasicMaterial.fromMap( { 'map': texture, 'side': three.DoubleSide } );
+    }
+
     material.needsUpdate = true;
 
     const count = 128;

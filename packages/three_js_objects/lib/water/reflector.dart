@@ -36,16 +36,18 @@ class Reflector extends Mesh {
 
 	  renderTarget = WebGLRenderTarget( textureWidth, textureHeight, WebGLRenderTargetOptions({'samples': multisample, 'type': HalfFloatType }));
 
-		material =  ShaderMaterial.fromMap( {
+		final material =  ShaderMaterial.fromMap( {
 			'name': shader['name'] ?? 'unspecified',
 			'uniforms': UniformsUtils.clone( shader['uniforms'] ),
 			'fragmentShader': shader['fragmentShader'],
 			'vertexShader': shader['vertexShader']
 		} );
 
-		material?.uniforms[ 'tDiffuse' ]['value'] = renderTarget.texture;
-		material?.uniforms[ 'color' ]['value'] = color;
-		material?.uniforms[ 'textureMatrix' ]['value'] = textureMatrix;
+		material.uniforms[ 'tDiffuse' ]['value'] = renderTarget.texture;
+		material.uniforms[ 'color' ]['value'] = color;
+		material.uniforms[ 'textureMatrix' ]['value'] = textureMatrix;
+
+    this.material = material;
 
 		onBeforeRender = ({
       WebGLRenderer? renderer,
@@ -133,7 +135,6 @@ class Reflector extends Mesh {
 			scope.visible = false;
 
 			final currentRenderTarget = renderer?.getRenderTarget();
-
 			final currentXrEnabled = renderer?.xr.enabled;
 			final currentShadowAutoUpdate = renderer?.shadowMap.autoUpdate;
 
@@ -202,13 +203,9 @@ class Reflector extends Mesh {
       #include <logdepthbuf_pars_vertex>
 
       void main() {
-
         vUv = textureMatrix * vec4( position, 1.0 );
-
         gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
-
         #include <logdepthbuf_vertex>
-
       }''',
 
     'fragmentShader': /* glsl */'''
@@ -219,19 +216,14 @@ class Reflector extends Mesh {
       #include <logdepthbuf_pars_fragment>
 
       float blendOverlay( float base, float blend ) {
-
         return( base < 0.5 ? ( 2.0 * base * blend ) : ( 1.0 - 2.0 * ( 1.0 - base ) * ( 1.0 - blend ) ) );
-
       }
 
       vec3 blendOverlay( vec3 base, vec3 blend ) {
-
         return vec3( blendOverlay( base.r, blend.r ), blendOverlay( base.g, blend.g ), blendOverlay( base.b, blend.b ) );
-
       }
 
       void main() {
-
         #include <logdepthbuf_fragment>
 
         vec4 base = texture2DProj( tDiffuse, vUv );
@@ -239,7 +231,6 @@ class Reflector extends Mesh {
 
         #include <tonemapping_fragment>
         #include <colorspace_fragment>
-
       }'''
   };
 

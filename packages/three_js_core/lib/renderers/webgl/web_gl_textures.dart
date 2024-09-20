@@ -442,21 +442,21 @@ class WebGLTextures {
   bool initTexture(Map<String, dynamic> textureProperties, Texture texture) {
     bool forceUpload = false;
 
-    // state.unbindTexture(_gl.TEXTURE_2D);
+    state.unbindTexture(_gl.TEXTURE_2D);
 
     if (textureProperties["__webglInit"] != true) {
       textureProperties["__webglInit"] = true;
 
       texture.addEventListener('dispose', onTextureDispose);
 
-      // if (texture.isOpenGLTexture) {
-      //   final _texture = texture as OpenGLTexture;
-      //   textureProperties["__webglTexture"] = _texture.openGLTexture;
-      // } else {
-      //   textureProperties["__webglTexture"] = gl.createTexture();
-      // }
+      if (texture is OpenGLTexture) {
+        final _texture = texture;
+        textureProperties["__webglTexture"] = _texture.openGLTexture;
+      } else {
+        textureProperties["__webglTexture"] = gl.createTexture();
+      }
 
-      // info.memory["textures"] = info.memory["textures"]! + 1;
+      info.memory["textures"] = info.memory["textures"]! + 1;
     }
 
     // create Source <-> WebGLTextures mapping if necessary

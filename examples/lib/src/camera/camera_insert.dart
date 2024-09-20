@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:camera_macos/camera_macos.dart';
+import 'package:example/src/camera/nv21.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:image/image.dart' as imgLib;
@@ -21,11 +22,12 @@ class PictureInfo{
 }
 
 class InsertCamera{
-  InsertCamera([this.onSetupFinished]);
+  InsertCamera({this.onSetupFinished,this.androidSimMac = false});
 
   Function? onSetupFinished;
   bool restartStream = false;
   bool streaming = false;
+  bool androidSimMac;
 
   List<CameraDescription> _cameras = [];
   late List<CameraMacOSDevice> _camerasMacos;
@@ -109,7 +111,7 @@ class InsertCamera{
           cameraMacOSMode: CameraMacOSMode.video,
           enableAudio: false,
           resolution: PictureResolution.low,
-          pictureFormat: PictureFormat.jpg,
+          pictureFormat: PictureFormat.raw,
           orientation: CameraOrientation.orientation0deg
         );
         controllerMacos = CameraMacOSController(value!);
@@ -153,7 +155,7 @@ class InsertCamera{
   Future startLiveFeed(void Function(InputImage image)? returnImage) async {
     _returnImage = returnImage;
     isLive = true;
-    if(kIsWeb || Platform.isIOS || Platform.isAndroid){
+    if(kIsWeb || Platform.isWindows){
       _liveTimerMacos = Timer.periodic(const Duration(milliseconds: 16),(_){
         if(!_processingLiveFeed){
           _processingLiveFeed = true;
@@ -187,12 +189,13 @@ class InsertCamera{
             //   toSend = send;
             // }
             InputImage i = InputImage.fromBytes(
-              bytes: toSend, 
+              bytes: send, 
               metadata: InputImageMetadata(
                 size: imageSize!,
                 rotation: InputImageRotation.rotation0deg,
                 format: InputImageFormat.bgra8888,
                 bytesPerRow: 0,
+                totalBytes: 0
               )
             );
             _returnImage!(i);
@@ -211,6 +214,7 @@ class InsertCamera{
             rotation: InputImageRotation.rotation0deg,
             format: InputImageFormat.bgra8888,
             bytesPerRow: 0,
+            totalBytes: 0
           )
         );
         _returnImage!(i);
@@ -220,6 +224,7 @@ class InsertCamera{
       controller?.startImageStream(_processCameraImage);
     }
   }
+
   Future switchCamera(int camera) async {
     await stopFeed(camera);
     if(isLive){
@@ -237,7 +242,7 @@ class InsertCamera{
     // get camera rotation
     final camera = _cameras[cameraIndex];
     final sensorOrientation = camera.sensorOrientation;
-    var rotation = InputImageRotationValue.fromRawValue(sensorOrientation);
+    var rotation = InputImageRotation.fromRawValue(sensorOrientation);
 
     if (!kIsWeb && Platform.isAndroid) {
       var rotationCompensation =
@@ -251,7 +256,7 @@ class InsertCamera{
         rotationCompensation =
             (sensorOrientation - rotationCompensation + 360) % 360;
       }
-      rotation = InputImageRotation.values[rotationCompensation];
+      rotation = InputImageRotation.fromAngle(rotationCompensation);
       // print('rotationCompensation: $rotationCompensation');
     }
     if (rotation == null) return null;
@@ -259,29 +264,54 @@ class InsertCamera{
 
     // get image format
     final format = InputImageFormatValue.fromRawValue(image.format.raw);
-    // validate format depending on platform
-    // only supported formats:
-    // * nv21 for Android
-    // * bgra8888 for iOS
-    if (format == null ||
-        (Platform.isAndroid && format != InputImageFormat.nv21) ||
-        (Platform.isIOS && format != InputImageFormat.bgra8888)) return null;
 
-    // since format is constraint to nv21 or bgra8888, both only have one plane
-    if (image.planes.length != 1) return null;
-    final plane = image.planes.first;
+    if(format == InputImageFormat.yuv_420_888 || format == InputImageFormat.yuv420){
+      // since format is constraint to nv21 or bgra8888, both only have one plane
+      final planes = image.planes;
+      // compose InputImage using bytes
+      return InputImage.fromYUV(
+        y: planes.first.bytes,
+        u: planes[1].bytes,
+        v: planes.last.bytes,
+        metadata: InputImageMetadata(
+          size: Size(image.width.toDouble(), image.height.toDouble()),
+          rotation: rotation, // used only in Android
+          format: format!, // used only in iOS
+          bytesPerRow: planes.first.bytesPerRow, // used only in iOS
+          uvBytesPerRow: planes[1].bytesPerRow,
+          totalBytes: planes.first.bytes.length,
+          uvTotalBytes: planes[1].bytes.length
+        ),
+      );
+    }
+    else if(format == InputImageFormat.bgra8888 || format == InputImageFormat.nv21){
+      // since format is constraint to nv21 or bgra8888, both only have one plane
+      //if (image.planes.length != 1) return null;
+      final plane = image.planes.first;
+      Uint8List toSend;
+      if(format == InputImageFormat.nv21){
+        toSend = Uint8List(image.width*image.height*4);
+        NV21.convertNV21(toSend, plane.bytes, image.width, image.height, androidSimMac);
+      }
+      else{
+        toSend = plane.bytes;
+      }
+      // compose InputImage using bytes
+      return InputImage.fromBytes(
+        bytes: toSend,
+        metadata: InputImageMetadata(
+          size: Size(image.width.toDouble(), image.height.toDouble()),
+          rotation: rotation, // used only in Android
+          format: format!, // used only in iOS
+          bytesPerRow: plane.bytesPerRow, // used only in iOS
+          totalBytes: toSend.length,
+        ),
+      );
+    }
 
-    // compose InputImage using bytes
-    return InputImage.fromBytes(
-      bytes: plane.bytes,
-      metadata: InputImageMetadata(
-        size: Size(image.width.toDouble(), image.height.toDouble()),
-        rotation: rotation, // used only in Android
-        format: format, // used only in iOS
-        bytesPerRow: plane.bytesPerRow, // used only in iOS
-      ),
-    );
+    return null;
   }
+
   Future<PictureInfo> takePicture() async {
     String? error;
     Uint8List? filePath;

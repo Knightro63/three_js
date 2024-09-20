@@ -53,7 +53,12 @@ class InputImage {
   /// The image data when creating an image of type = [InputImageType.bytes].
   final InputImageMetadata? metadata;
 
-  InputImage._({this.filePath, this.bytes, required this.type, this.metadata});
+  InputImage._({
+    this.filePath, 
+    this.bytes,
+    required this.type, 
+    this.metadata
+  });
 
   /// Creates an instance of [InputImage] from path of image stored in device.
   factory InputImage.fromFilePath(String path) {
@@ -66,19 +71,22 @@ class InputImage {
   }
 
   /// Creates an instance of [InputImage] using bytes.
-  factory InputImage.fromBytes(
-      {required Uint8List bytes, required InputImageMetadata metadata}) {
-    return InputImage._(
-        bytes: bytes, type: InputImageType.bytes, metadata: metadata);
+  factory InputImage.fromBytes({required Uint8List bytes, required InputImageMetadata metadata}) {
+    return InputImage._(bytes: bytes, type: InputImageType.bytes, metadata: metadata);
+  }
+
+  /// Creates an instance of [InputImage] using bytes.
+  factory InputImage.fromYUV({required Uint8List u,required Uint8List v, required Uint8List y,required InputImageMetadata metadata}) {
+    return InputImage._(bytes: Uint8List.fromList(y+u+v), type: InputImageType.bytes, metadata: metadata);
   }
 
   /// Returns a json representation of an instance of [InputImage].
   Map<String, dynamic> toJson() => {
-        'bytes': bytes,
-        'type': type.name,
-        'path': filePath,
-        'metadata': metadata?.toJson()
-      };
+    'bytes': bytes,
+    'type': type.name,
+    'path': filePath,
+    'metadata': metadata?.toJson()
+  };
 }
 
 /// The type of [InputImage].
@@ -104,6 +112,9 @@ class InputImageMetadata {
   ///
   /// Not used on Android.
   final int bytesPerRow;
+  final int? uvBytesPerRow;
+  final int totalBytes;
+  final int? uvTotalBytes;
 
   /// Constructor to create an instance of [InputImageMetadata].
   InputImageMetadata({
@@ -111,16 +122,19 @@ class InputImageMetadata {
     required this.rotation,
     required this.format,
     required this.bytesPerRow,
+    this.uvBytesPerRow,
+    required this.totalBytes,
+    this.uvTotalBytes
   });
 
   /// Returns a json representation of an instance of [InputImageMetadata].
   Map<String, dynamic> toJson() => {
-        'width': size.width,
-        'height': size.height,
-        'rotation': rotation.rawValue,
-        'image_format': format.rawValue,
-        'bytes_per_row': bytesPerRow,
-      };
+    'width': size.width,
+    'height': size.height,
+    'rotation': rotation.rawValue,
+    'image_format': format.rawValue,
+    'bytes_per_row': bytesPerRow,
+  };
 }
 
 /// The camera rotation angle to be specified
@@ -128,10 +142,8 @@ enum InputImageRotation {
   rotation0deg,
   rotation90deg,
   rotation180deg,
-  rotation270deg
-}
+  rotation270deg;
 
-extension InputImageRotationValue on InputImageRotation {
   int get rawValue {
     switch (this) {
       case InputImageRotation.rotation0deg:
@@ -142,6 +154,19 @@ extension InputImageRotationValue on InputImageRotation {
         return 180;
       case InputImageRotation.rotation270deg:
         return 270;
+    }
+  }
+
+  static InputImageRotation fromAngle(int angle){
+    switch (angle) {
+      case 270:
+        return InputImageRotation.rotation270deg;
+      case 90:
+        return InputImageRotation.rotation90deg;
+      case 180:
+        return InputImageRotation.rotation180deg;
+      default:
+        return InputImageRotation.rotation0deg;
     }
   }
 

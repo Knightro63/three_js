@@ -34,7 +34,7 @@ dependencies:
   three_js_curves: ^0.0.3
 
   permission_handler: ^11.3.1
-  camera: ^0.11.0+2
+  camera: ^0.10.6
   camera_macos: ^0.0.8
   camera_windows: ^0.2.5
 

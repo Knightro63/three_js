@@ -4,7 +4,6 @@ import 'package:example/src/gui.dart';
 import 'package:flutter/material.dart';
 import 'package:example/src/statistics.dart';
 import 'package:three_js/three_js.dart' as three;
-import 'package:three_js_tjs_loader/buffer_geometry_loader.dart';
 
 class WebglMaterialsSubsurfaceScattering extends StatefulWidget {
   const WebglMaterialsSubsurfaceScattering({super.key});
@@ -130,7 +129,7 @@ class _State extends State<WebglMaterialsSubsurfaceScattering> {
     uniforms[ 'thicknessPower' ]['value'] = 2.0;
     uniforms[ 'thicknessScale' ]['value'] = 0.1;
 
-    final material =three.ShaderMaterial.fromMap( {
+    final material = three.ShaderMaterial.fromMap( {
       'uniforms': uniforms,
       'vertexShader': shader['vertexShader'],
       'fragmentShader': shader['fragmentShader'],

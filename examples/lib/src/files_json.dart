@@ -115,5 +115,6 @@ const List<String> filesJson = [
   //'webgl_nodes_points',
   //'webgl_ubo_arrays',
   'webxr_vr_rollercoaster',
+  //'webgl_opengl_texture',
   //'webgl2_multiple_rendertargets',
 ];

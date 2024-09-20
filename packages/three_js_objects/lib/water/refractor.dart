@@ -48,7 +48,6 @@ class Refractor extends Mesh {
 		// functions
 
 		final visible = (() {
-
 			final refractorWorldPosition = Vector3();
 			final cameraWorldPosition = Vector3();
 			final rotationMatrix = Matrix4();
@@ -57,7 +56,6 @@ class Refractor extends Mesh {
 			final normal = Vector3();
 
 			return ( camera ) {
-
 				refractorWorldPosition.setFromMatrixPosition( scope.matrixWorld );
 				cameraWorldPosition.setFromMatrixPosition( camera.matrixWorld );
 
@@ -69,41 +67,30 @@ class Refractor extends Mesh {
 				normal.applyMatrix4( rotationMatrix );
 
 				return view.dot( normal ) < 0;
-
 			};
-
 		})();
 
 		final updateRefractorPlane = (() {
-
 			final normal = Vector3();
 			final position = Vector3();
 			final quaternion = Quaternion();
 			final scale = Vector3();
 
 			return() {
-
 				scope.matrixWorld.decompose( position, quaternion, scale );
 				normal.setValues( 0, 0, 1 ).applyQuaternion( quaternion ).normalize();
 
-				// flip the normal because we want to cull everything above the plane
-
 				normal.negate();
-
 				refractorPlane.setFromNormalAndCoplanarPoint( normal, position );
-
 			};
-
 		})();
 
 		final updateVirtualCamera = (() {
-
 			final clipPlane = Plane();
 			final clipVector = Vector4();
 			final q = Vector4();
 
 			return (Camera camera ) {
-
 				virtualCamera.matrixWorld.setFrom( camera.matrixWorld );
 				virtualCamera.matrixWorldInverse.setFrom( virtualCamera.matrixWorld ).invert();
 				virtualCamera.projectionMatrix.setFrom( camera.projectionMatrix );
@@ -138,9 +125,7 @@ class Refractor extends Mesh {
 				projectionMatrix.storage[ 6 ] = clipVector.y;
 				projectionMatrix.storage[ 10 ] = clipVector.z + 1.0 - clipBias;
 				projectionMatrix.storage[ 14 ] = clipVector.w;
-
 			};
-
 		} )();
 
 		// This will update the texture matrix that is used for projective texture mapping in the shader.
@@ -168,7 +153,6 @@ class Refractor extends Mesh {
 		//
 
 		void render(WebGLRenderer renderer, Object3D scene, Camera camera ) {
-
 			scope.visible = false;
 
 			final currentRenderTarget = renderer.getRenderTarget();
@@ -249,47 +233,33 @@ class Refractor extends Mesh {
     },
 
     'vertexShader': /* glsl */'''
-
       uniform mat4 textureMatrix;
-
       varying vec4 vUv;
 
       void main() {
-
         vUv = textureMatrix * vec4( position, 1.0 );
         gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
-
       }''',
 
     'fragmentShader': /* glsl */'''
-
       uniform vec3 color;
       uniform sampler2D tDiffuse;
-
       varying vec4 vUv;
 
       float blendOverlay( float base, float blend ) {
-
         return( base < 0.5 ? ( 2.0 * base * blend ) : ( 1.0 - 2.0 * ( 1.0 - base ) * ( 1.0 - blend ) ) );
-
       }
 
       vec3 blendOverlay( vec3 base, vec3 blend ) {
-
         return vec3( blendOverlay( base.r, blend.r ), blendOverlay( base.g, blend.g ), blendOverlay( base.b, blend.b ) );
-
       }
 
       void main() {
-
         vec4 base = texture2DProj( tDiffuse, vUv );
         gl_FragColor = vec4( blendOverlay( base.rgb, color ), 1.0 );
 
         #include <tonemapping_fragment>
         #include <colorspace_fragment>
-
       }'''
-
   };
-
 }

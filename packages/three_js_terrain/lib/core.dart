@@ -1,5 +1,4 @@
-import 'dart:typed_data';
-
+import 'package:flutter/foundation.dart';
 import 'package:three_js_core/renderers/webgl/index.dart';
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
@@ -236,7 +235,7 @@ class TerrainOptions{
     this.after,
     this.easing = Easing.linear,
     this.heightmap,// = Terrain.DiamondSquare,
-    this.material = null,
+    this.material,
     this.maxHeight,
     this.minHeight,
     this.optimization = TerrainType.none,
@@ -925,9 +924,9 @@ class Terrain{
     final heightmap = Float32List(g.length);
     List<int> neighborValues = [],
       neighborKeys = [];
-    int Function(dynamic,dynamic) sortByValue = (a, b) {
+    int sortByValue(a, b) {
       return (neighborValues.get(a)??0) - (neighborValues.get(b) ?? 0);
-    };
+    }
     for (int i = 0, xl = options.xSegments + 1, yl = options.ySegments + 1; i < xl; i++) {
       for (int j = 0; j < yl; j++) {
         neighborValues.length = 0;
@@ -942,8 +941,8 @@ class Terrain{
           }
         }
         neighborKeys.sort(sortByValue);
-        final halfKey = (neighborKeys.length*0.5).floor(),
-            median;
+        final halfKey = (neighborKeys.length*0.5).floor();
+        double median;
         if (neighborKeys.length % 2 == 1) {
           median = g[neighborKeys[halfKey]];
         }
@@ -1269,11 +1268,21 @@ class Terrain{
 
         final k2 = g.getK(k);
         if (fd > r) continue;// || g.get(k) == null
-        if      (t == AdditiveBlending)    g[k2] += d; // jscs:ignore requireSpaceAfterKeywords
-        else if (t == SubtractiveBlending) g[k2] -= d;
-        else if (t == MultiplyBlending)    g[k2] *= d;
-        else if (t == NoBlending)          g[k2]  = d;
-        else if (t == NormalBlending)      g[k2]  = e(fdr, fdxr, fdyr) * g[k2] + d;
+        if (t == AdditiveBlending){
+          g[k2] += d; // jscs:ignore requireSpaceAfterKeywords
+        }
+        else if (t == SubtractiveBlending){
+          g[k2] -= d;
+        }
+        else if (t == MultiplyBlending){
+          g[k2] *= d;
+        }
+        else if (t == NoBlending){
+          g[k2]  = d;
+        }
+        else if (t == NormalBlending){
+          g[k2]  = e(fdr, fdxr, fdyr) * g[k2] + d;
+        }
         //else if (typeof t == 'function')   g[k]  = t(g[k].z, d, fdr, fdxr, fdyr);
       }
     }
@@ -1333,7 +1342,6 @@ class Terrain{
     options.scene ??= Object3D();
 
     final spreadIsNumber = options.spreadFunction == null,
-        randomHeightmap,
         spreadRange = 1 / options.smoothSpread,
         doubleSizeVariance = options.sizeVariance*2,
         vertex1 = Vector3.zero(),
@@ -1341,6 +1349,7 @@ class Terrain{
         vertex3 = Vector3.zero(),
         faceNormal = Vector3.zero(),
         up = options.mesh.up.clone().applyAxisAngle(Vector3(1, 0, 0), 0.5*math.pi);
+    final dynamic randomHeightmap;
     dynamic randomness;
     if (spreadIsNumber) {
       randomHeightmap = options.randomness;
@@ -1503,7 +1512,7 @@ class Terrain{
   static Material generateBlendedMaterial(List<TerrainTextures> textures, [Material? material]) {
     // Convert numbers to strings of floats so GLSL doesn't barf on "1" instead of "1.0"
     String glslifyNumber(num n) {
-      return n.toString();//n == (n.toInt()|0) ? '$n.0' : n.toString();
+      return n == n.toInt() && kIsWeb? '$n.0' : n.toString();
     }
 
     String declare = '',
@@ -1530,34 +1539,36 @@ class Terrain{
           // So, if levels are too close, move one of them slightly.
           if (v[1] - v[0] < 1) v[0] -= 1;
           if (v[3] - v[2] < 1) v[3] += 1;
-          // for (int j = 0; j < v.length; j++) {
-          //   v[j] = glslifyNumber(v[j]);
-          // }
         }
         // The transparency of the new texture when it is layered on top of the existing color at this texel is
         // (how far between the start-blending-in and fully-blended-in levels the current vertex is) +
         // (how far between the start-blending-out and fully-blended-out levels the current vertex is)
         // So the opacity is 1.0 minus that.
-        final blendAmount = !useLevels ? p :
-            '1.0 - smoothstep(${v[0]}, ${v[1]}, vPosition.z) + smoothstep(${v[2]}, ${v[3]}, vPosition.z)';
-        assign += '        color = mix( ' +
-            'texture2D( texture_$i' + ', MyvUv * vec2( ' + glslifyNumber(tiRepeat.x) + ', ' + glslifyNumber(tiRepeat.y) + ' ) + vec2( ' + glslifyNumber(tiOffset.x) + ', ' + glslifyNumber(tiOffset.y) + ' ) ), ' +
-            'color, ' +
-            'max(min(' + blendAmount + ', 1.0), 0.0)' +
-            ');\n';
-        }
+        final blendAmount = !useLevels ? p :'1.0 - smoothstep(${glslifyNumber(v[0])}, ${glslifyNumber(v[1])}, vPosition.z) + smoothstep(${glslifyNumber(v[2])}, ${glslifyNumber(v[3])}, vPosition.z)';
+        assign += '''        
+            color = mix(
+              texture2D( 
+                texture_$i, 
+                MyvUv * vec2( ${glslifyNumber(tiRepeat.x)}, ${glslifyNumber(tiRepeat.y)} ) + vec2( ${glslifyNumber(tiOffset.x)}, ${glslifyNumber(tiOffset.y)}) 
+              ),
+              color,
+              max( min($blendAmount, 1.0), 0.0)
+            );\n
+          ''';
       }
+    }
 
-    final fragBlend = 'float slope = acos(max(min(dot(myNormal, vec3(0.0, 0.0, 1.0)), 1.0), -1.0));\n' +
-        '    diffuseColor = vec4( diffuse, opacity );\n' +
-        '    vec4 color = texture2D( texture_0, MyvUv * vec2( ' + glslifyNumber(t0Repeat.x) + ', ' + glslifyNumber(t0Repeat.y) + ' ) + vec2( ' + glslifyNumber(t0Offset.x) + ', ' + glslifyNumber(t0Offset.y) + ' ) ); // base\n' +
-            assign +
-        '    diffuseColor = color;\n';
+    
 
-    final fragPars = declare + '\n' +
-            'varying vec2 MyvUv;\n' +
-            'varying vec3 vPosition;\n' +
-            'varying vec3 myNormal;\n';
+    final fragBlend = '''
+      float slope = acos(max(min(dot(myNormal, vec3(0.0, 0.0, 1.0)), 1.0), -1.0));
+      diffuseColor = vec4( diffuse, opacity );
+      vec4 color = texture2D( texture_0, MyvUv * vec2(${glslifyNumber(t0Repeat.x)}, ${glslifyNumber(t0Repeat.y)}) + vec2(${glslifyNumber(t0Offset.x)}, ${glslifyNumber(t0Offset.y)})); // base
+      $assign
+      diffuseColor = color;
+    ''';
+
+    final fragPars = '$declare\nvarying vec2 MyvUv;\nvarying vec3 vPosition;\nvarying vec3 myNormal;\n';
 
     final mat = material ?? MeshLambertMaterial();
     mat.onBeforeCompile = (WebGLParameters shader, WebGLRenderer renderer) {
@@ -1567,7 +1578,7 @@ class Terrain{
       shader.vertexShader = shader.vertexShader.replaceAll('#include <uv_vertex>',
           'MyvUv = uv;\nvPosition = position;\nmyNormal = normal;\n#include <uv_vertex>');
 
-      shader.fragmentShader = shader.fragmentShader.replaceAll('#include <common>', fragPars + '\n#include <common>');
+      shader.fragmentShader = shader.fragmentShader.replaceAll('#include <common>', '$fragPars\n#include <common>');
       shader.fragmentShader = shader.fragmentShader.replaceAll('#include <map_fragment>', fragBlend);
 
       // Add our custom texture uniforms

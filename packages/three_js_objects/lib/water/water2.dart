@@ -1,8 +1,80 @@
+import 'dart:async';
+
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_core_loaders/three_js_core_loaders.dart';
 import 'package:three_js_math/three_js_math.dart';
 import './reflector.dart';
 import './refractor.dart';
+
+class WaterOptions{
+  WaterOptions({
+    this.color = 0xffffff,
+    this.textureWidth = 512,
+    this.textureHeight = 512,
+    this.clipBias = 0.0,
+    Map<String,dynamic>? shader,
+    this.scale = 1,
+    this.flowSpeed = 0.03,
+    this.reflectivity = 0.02,
+    Vector2? flowDirection,
+    this.flowMap,
+    FutureOr<Texture?>? normalMap0,
+    FutureOr<Texture?>? normalMap1
+  }){
+    this.shader = shader ?? Water.waterShader;
+    this.flowDirection = flowDirection ?? Vector2( 1, 0 );
+
+    final textureLoader = TextureLoader();
+    this.normalMap0 = normalMap0 ?? textureLoader.fromAsset( 'assets/Water_1_M_Normal.jpg',package: 'three_js_objects');
+    this.normalMap1 = normalMap1 ?? textureLoader.fromAsset( 'assets/Water_2_M_Normal.jpg',package: 'three_js_objects');
+  }
+
+  WaterOptions.fromMap(Map<String,dynamic> options){
+    color = options['color'] ?? 0xFFFFFF;
+		textureWidth = options['textureWidth'] ?? 512;
+		textureHeight = options['textureHeight'] ?? 512;
+		clipBias = options['clipBias'] ?? 0.0;
+		flowDirection = options['flowDirection'] ?? Vector2( 1, 0 );
+		flowSpeed = options['flowSpeed'] ?? 0.03;
+		reflectivity = options['reflectivity'] ?? 0.02;
+		scale = options['scale'] ?? 1;
+		shader = options['shader'] ?? Water.waterShader;
+
+		final textureLoader = TextureLoader();
+
+		flowMap = options['flowMap'];
+    if(options['normalMap0'] == null){
+      textureLoader.fromAsset( 'assets/Water_1_M_Normal.jpg',package: 'three_js_objects').then((m){
+        normalMap0 = m!;
+      });
+    }
+    else{
+      normalMap0 = options['normalMap0'];
+    }
+
+    if(options['normalMap1'] == null){
+      textureLoader.fromAsset( 'assets/Water_2_M_Normal.jpg',package: 'three_js_objects').then((m){
+        normalMap1 = m!;
+      });
+    }
+    else{
+      normalMap1 = options['normalMap1'];
+    }
+  }
+
+  late int color;
+  late int textureWidth;
+  late int textureHeight;
+  late double clipBias;
+  late Vector2 flowDirection;
+  late double flowSpeed;
+  late double reflectivity;
+  late double scale;
+  late Map<String, dynamic> shader;
+  late dynamic flowMap;
+  late FutureOr<Texture?> normalMap0;
+  late FutureOr<Texture?> normalMap1;
+}
 
 /**
  * References:
@@ -19,28 +91,26 @@ class Water extends Mesh {
   final textureMatrix = Matrix4();
   final clock = Clock();
 
-	Water(super.geometry, [Map<String,dynamic>? options] ) {
+	Water(super.geometry, [WaterOptions? options]) {
 		type = 'Water';
-    options ??= {};
+    options ??= WaterOptions();
     _init(options);
   }
   
-  Future<void> _init(Map<String,dynamic> options)async{
-		final color = Color.fromHex32(options['color'] ?? 0xFFFFFF);
-		final textureWidth = options['textureWidth'] ?? 512;
-		final textureHeight = options['textureHeight'] ?? 512;
-		final clipBias = options['clipBias'] ?? 0.0;
-		final flowDirection = options['flowDirection'] ?? Vector2( 1, 0 );
-		flowSpeed = options['flowSpeed'] ?? 0.03;
-		final reflectivity = options['reflectivity'] ?? 0.02;
-		final scale = options['scale'] ?? 1;
-		final shader = options['shader'] ?? Water.waterShader;
+  Future<void> _init(WaterOptions options)async{
+		final color = Color.fromHex32(options.color);
+		final textureWidth = options.textureWidth;
+		final textureHeight = options.textureHeight;
+		final clipBias = options.clipBias;
+		final flowDirection = options.flowDirection;
+		flowSpeed = options.flowSpeed;
+		final reflectivity = options.reflectivity;
+		final scale = options.scale;
+		final shader = options.shader;
 
-		final textureLoader = TextureLoader();
-
-		final flowMap = options['flowMap'];
-		final normalMap0 = options['normalMap0'] ?? await textureLoader.fromAsset( 'assets/Water_1_M_Normal.jpg',package: 'three_js_objects');
-		final normalMap1 = options['normalMap1'] ?? await textureLoader.fromAsset( 'assets/Water_2_M_Normal.jpg',package: 'three_js_objects');
+		final flowMap = options.flowMap;
+		final normalMap0 = await options.normalMap0;
+		final normalMap1 = await options.normalMap1;
 
     halfCycle = cycle * 0.5;
 
@@ -62,6 +132,7 @@ class Water extends Mesh {
 		// material
 
 		material = ShaderMaterial.fromMap( {
+      'name': shader['name'],
 			'uniforms': UniformsUtils.merge( [
 				uniformsLib[ 'fog' ],
 				shader['uniforms']
@@ -88,10 +159,12 @@ class Water extends Mesh {
 
 		// maps
 
-		normalMap0.wrapS = normalMap0.wrapT = RepeatWrapping;
-		normalMap1.wrapS = normalMap1.wrapT = RepeatWrapping;
+		normalMap0?.wrapS = RepeatWrapping;
+		normalMap1?.wrapS = RepeatWrapping;
+		normalMap0?.wrapT = RepeatWrapping;
+		normalMap1?.wrapT = RepeatWrapping;
 
-		material?.uniforms[ 'tReflectionMap' ]['value'] = reflector.getRenderTarget().texture;
+		//material?.uniforms[ 'tReflectionMap' ]['value'] = reflector.getRenderTarget().texture;
 		material?.uniforms[ 'tRefractionMap' ]['value'] = refractor.getRenderTarget().texture;
 		material?.uniforms[ 'tNormalMap0' ]['value'] = normalMap0;
 		material?.uniforms[ 'tNormalMap1' ]['value'] = normalMap1;
@@ -201,8 +274,7 @@ class Water extends Mesh {
       }
     },
 
-    'vertexShader': /* glsl */'''
-
+    'vertexShader': '''
       #include <common>
       #include <fog_pars_vertex>
       #include <logdepthbuf_pars_vertex>
@@ -229,8 +301,7 @@ class Water extends Mesh {
 
       }''',
 
-    'fragmentShader': /* glsl */'''
-
+    'fragmentShader':'''
       #include <common>
       #include <fog_pars_fragment>
       #include <logdepthbuf_pars_fragment>
