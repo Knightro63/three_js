@@ -1,3 +1,7 @@
+## 0.0.5
+
+* Added camera position helper.
+
 ## 0.0.4
 
 * Fixed sized constraints for vertex helpers.

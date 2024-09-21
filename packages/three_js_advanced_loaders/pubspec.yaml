@@ -3,6 +3,15 @@ description: "Flutter advanced loaders package e.g.(gltf, glb and fbx) converted
 version: 0.0.5
 homepage: https://github.com/Knightro63/three_js/tree/main/packages/three_js_advanced_loaders
 
+topics:
+  - glb
+  - gltf
+  - collada
+  - usda
+  - animations
+  - flutter3d
+  - model3d
+
 environment:
   sdk: '>=3.3.2 <4.0.0'
   flutter: ">=1.17.0"

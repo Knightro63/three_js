@@ -23,7 +23,7 @@ class TerrainPage extends StatefulWidget {
 class _State extends State<TerrainPage> {
   late three.ThreeJS threeJs;
   late three.OrbitControls orbit;
-  late three.FirstPersonControls controls;
+  three.FirstPersonControls? controls;
   late three.PerspectiveCamera cameraPersp;
   late Gui gui;
   three.Material? blend;
@@ -41,7 +41,7 @@ class _State extends State<TerrainPage> {
   @override
   void dispose() {
     threeJs.dispose();
-    controls.dispose();
+    controls?.dispose();
     orbit.dispose();
     super.dispose();
   }
@@ -126,9 +126,9 @@ class _State extends State<TerrainPage> {
     final fpsCamera = three.PerspectiveCamera(60, threeJs.width / threeJs.height, 1, 10000);
     threeJs.scene.add(fpsCamera);
     controls = three.FirstPersonControls(camera: fpsCamera, listenableKey: threeJs.globalKey);
-    controls.enabled = false;
-    controls.movementSpeed = 100;
-    controls.lookSpeed = 0.075;
+    controls?.enabled = false;
+    controls?.movementSpeed = 100;
+    controls?.lookSpeed = 0.075;
   }
   void setupGui(){
     gui.addFolder('Heightmap')

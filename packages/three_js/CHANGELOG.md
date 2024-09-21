@@ -1,3 +1,7 @@
+## 0.0.6
+
+* Updated to the newest version of three_js_core.
+
 ## 0.0.5
 
 * Changed motion_sensors to simple_sensors in three_js_controls.
