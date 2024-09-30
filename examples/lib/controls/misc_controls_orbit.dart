@@ -17,6 +17,7 @@ class _MyAppState extends State<MiscControlsOrbit> {
   List<int> data = List.filled(60, 0, growable: true);
   late Timer timer;
   late three.ThreeJS threeJs;
+  bool usePerspective = true;
 
   @override
   void initState() {
@@ -69,7 +70,20 @@ class _MyAppState extends State<MiscControlsOrbit> {
     threeJs.scene.background = three.Color.fromHex32(0xcccccc);
     threeJs.scene.fog = three.FogExp2(0xcccccc, 0.002);
 
-    threeJs.camera = three.PerspectiveCamera(60, threeJs.width / threeJs.height, 1, 1000);
+    if(usePerspective){
+      threeJs.camera = three.PerspectiveCamera(60, threeJs.width / threeJs.height, 1, 1000);
+    }
+    else{
+      int frustumSize = 600;
+      double aspect = 1.0;
+      threeJs.camera = three.OrthographicCamera(
+          0.5 * frustumSize * aspect / -2,
+          0.5 * frustumSize * aspect / 2,
+          frustumSize / 2,
+          frustumSize / -2,
+          150,
+          1000);
+    }
     threeJs.camera.position.setValues(400, 200, 0);
 
     // controls
@@ -79,16 +93,13 @@ class _MyAppState extends State<MiscControlsOrbit> {
 
     //controls.addEventListener( 'change', render ); // call this only in static scenes (i.e., if there is no animation loop)
 
-    controls.enableDamping =
-        true; // an animation loop is required when either damping or auto-rotation are enabled
+    controls.enableDamping =true; // an animation loop is required when either damping or auto-rotation are enabled
     controls.dampingFactor = 0.05;
-
     controls.screenSpacePanning = false;
-
     controls.minDistance = 100;
     controls.maxDistance = 500;
 
-    controls.maxPolarAngle = math.pi / 2;
+    controls.maxPolarAngle = 0;//math.pi / 2;
 
     // world
 
