@@ -468,6 +468,8 @@ class Material with EventDispatcher {
       }
     } else if (key == "emissiveMap") {
       emissiveMap = newValue;
+    } else if (key == "extensions") {
+      extensions = newValue;
     } else if (key == "flatShading") {
       flatShading = newValue;
     } else if (key == "fog") {
