@@ -1,8 +1,5 @@
-import 'package:three_js_core/geometries/plane_geometry.dart';
-import 'package:three_js_core/materials/shader_material.dart';
-import 'package:three_js_core/objects/mesh.dart';
-import 'package:three_js_math/others/color_util.dart';
-import 'package:three_js_math/others/constants.dart';
+import 'package:three_js_core/three_js_core.dart';
+import 'package:three_js_math/three_js_math.dart';
 
 class InfiniteGridHelper extends Mesh {
   InfiniteGridHelper.create(super.geometry, super.material) {
@@ -20,22 +17,23 @@ class InfiniteGridHelper extends Mesh {
   ///
   /// [axes] - Axes directions along which the grid will be constructed.
   /// By default, it is ‘xzy’.
-  factory InfiniteGridHelper(
-      [double? size1,
-        double? size2,
-        Color? color,
-        double? distance,
-        String axes = 'xzy']) {
+  factory InfiniteGridHelper({
+    double? size1,
+    double? size2,
+    Color? color,
+    double? distance,
+    RotationOrders axes = RotationOrders.xyz
+  }) {
     color = color ?? Color.fromHex32(0x444444);
     size1 = size1 ?? 10;
     size2 = size2 ?? 100;
     distance = distance ?? 8000;
 
-    String planeAxes = axes.substring(0, 2);
+    String planeAxes = axes.name.substring(0, 2);
 
     PlaneGeometry geometry = PlaneGeometry(2, 2, 1, 1);
 
-    var vertexShader = '''
+    final vertexShader = '''
     varying vec3 worldPosition;
     uniform float uDistance;
 
@@ -48,7 +46,7 @@ class InfiniteGridHelper extends Mesh {
     }
     ''';
 
-    var fragmentShader = '''
+    final fragmentShader = '''
      varying vec3 worldPosition;
      
      uniform float uSize1;
@@ -78,7 +76,7 @@ class InfiniteGridHelper extends Mesh {
         }
     ''';
 
-    var material = ShaderMaterial.fromMap({
+    final material = ShaderMaterial.fromMap({
       'side': DoubleSide,
       'uniforms': {
         'uSize1': {'value': size1},
