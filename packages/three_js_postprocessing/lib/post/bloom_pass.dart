@@ -67,7 +67,7 @@ class BloomPass extends Pass {
   }
 
   @override
-  void render(WebGLRenderer renderer, writeBuffer, readBuffer,{double? deltaTime, bool? maskActive}) {
+  void render(WebGLRenderer renderer, WebGLRenderTarget writeBuffer, WebGLRenderTarget readBuffer,{double? deltaTime, bool? maskActive}) {
     if (maskActive == true) renderer.state.buffers['stencil'].setTest(false);
 
     // Render quad with blured scene into texture (convolution pass 1)

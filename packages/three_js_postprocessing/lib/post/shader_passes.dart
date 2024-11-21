@@ -15,7 +15,7 @@ class ShaderPasses extends Pass {
   late int resx;
   late int resy;
 
-  ShaderPasses(Map shader, String? textureID) : super() {
+  ShaderPasses(Map shader, [String? textureID]) : super() {
     this.textureID = (textureID != null) ? textureID : 'tDiffuse';
 
     uniforms = UniformsUtils.clone(shader["uniforms"]);
@@ -38,7 +38,7 @@ class ShaderPasses extends Pass {
   }
 
   @override
-  void render(renderer, writeBuffer, readBuffer,{double? deltaTime, bool? maskActive}) {
+  void render(WebGLRenderer renderer, WebGLRenderTarget writeBuffer, WebGLRenderTarget readBuffer,{double? deltaTime, bool? maskActive}) {
     renderer.getClearColor(oldClearColor);
     oldClearAlpha = renderer.getClearAlpha();
     oldAutoClear = renderer.autoClear;
@@ -102,7 +102,7 @@ class ShaderPasses extends Pass {
     }
   }
 
-  void renderPass(renderer, passMaterial, renderTarget, clearColor, clearAlpha, bool clear) {
+  void renderPass(WebGLRenderer renderer, Material passMaterial, [WebGLRenderTarget? renderTarget, Color? clearColor, double? clearAlpha, bool clear = false]) {
     // setup pass state
     renderer.autoClear = false;
 
@@ -126,6 +126,6 @@ class ShaderPasses extends Pass {
     // restore original state
     renderer.autoClear = oldAutoClear;
     renderer.setClearColor(oldClearColor);
-    renderer.setClearAlpha(oldClearAlpha);
+    renderer.setClearAlpha(oldClearAlpha.toDouble());
   }
 }

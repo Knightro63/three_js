@@ -102,7 +102,7 @@ class EffectComposer {
     return true;
   }
 
-  void render(RenderTarget? currentRenderTarget, [double? deltaTime]) {
+  void render([RenderTarget? currentRenderTarget, double? deltaTime]) {
     // deltaTime value is in seconds
     deltaTime ??= clock.getDelta();
     bool maskActive = false;
@@ -145,7 +145,7 @@ class EffectComposer {
     if(currentRenderTarget != null) renderer.setRenderTarget(currentRenderTarget);
   }
 
-  void reset(WebGLRenderTarget? renderTarget) {
+  void reset([WebGLRenderTarget? renderTarget]) {
     if (renderTarget == null) {
       final size = renderer.getSize(Vector2());
       _pixelRatio = renderer.getPixelRatio();

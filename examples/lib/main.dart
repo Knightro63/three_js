@@ -47,6 +47,8 @@ import 'package:example/material/webgl_materials_modified.dart';
 import 'package:example/material/webgl_materials_subsurface_scattering.dart';
 import 'package:example/modifers/webgl_modifier_simplifier.dart';
 import 'package:example/modifers/webgl_modifier_subdivision.dart';
+import 'package:example/postprocessing/webgl_postprocessing_unreal_bloom.dart';
+import 'package:example/postprocessing/webgl_postprocessing_unreal_bloom_selective.dart';
 import 'package:example/texture/webgl_materials_video_webcam.dart';
 import 'package:example/others/webgl_geometry_csg.dart';
 import 'package:example/others/webgl_geometry_csg2.dart';
@@ -66,7 +68,7 @@ import 'package:example/terrain/webgl_geometry_terrain_raycast.dart';
 import 'package:example/shadow/webgl_lensflars.dart';
 import 'package:example/lights/webgl_lights_rectarealight.dart';
 import 'package:example/lights/webgl_lights_spotlight.dart';
-import 'package:example/shadow/webgl_postprocessing_sobel.dart';
+import 'package:example/postprocessing/webgl_postprocessing_sobel.dart';
 import 'package:example/shadow/webgl_shader_lava.dart';
 import 'package:example/shadow/webgl_shadowmap_csm.dart';
 import 'package:example/texture/webgl_shadowmap_pointlight.dart';
@@ -520,6 +522,12 @@ class MyAppState extends State<MyApp> {
               },
               '/webgl_opengl_texture':(BuildContext context) {
                 return const WebglOpenglTexture();
+              },
+              '/webgl_postprocessing_unreal_bloom':(BuildContext context) {
+                return const WebglPostprocessingUnrealBloom();
+              },
+              '/webgl_postprocessing_unreal_bloom_selective':(BuildContext context) {
+                return const WebglPostprocessingUnrealBloomSelective();
               },
             }
           ),

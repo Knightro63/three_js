@@ -48,7 +48,7 @@ class AfterimagePass extends Pass {
     copyFsQuad = FullScreenQuad(material);
   }
 
-  void render(renderer, writeBuffer, readBuffer,{double? deltaTime, bool? maskActive}) {
+  void render(WebGLRenderer renderer, WebGLRenderTarget writeBuffer, WebGLRenderTarget readBuffer,{double? deltaTime, bool? maskActive}) {
     uniforms['tOld']["value"] = textureOld.texture;
     uniforms['tNew']["value"] = readBuffer.texture;
 

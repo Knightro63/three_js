@@ -9,10 +9,8 @@ class TexturePass extends Pass {
   // ShaderMaterial material;
   // dynamic fsQuad;
 
-  TexturePass(map, opacity) : super() {
+  TexturePass(this.map, [double? opacity]) : super() {
     final shader = copyShader;
-
-    map = map;
     this.opacity = (opacity != null) ? opacity : 1.0;
 
     uniforms = UniformsUtils.clone(shader["uniforms"]);
@@ -31,7 +29,7 @@ class TexturePass extends Pass {
   }
 
   @override
-  void render(renderer, writeBuffer, readBuffer,{double? deltaTime, bool? maskActive}) {
+  void render(WebGLRenderer renderer, WebGLRenderTarget writeBuffer, WebGLRenderTarget readBuffer,{double? deltaTime, bool? maskActive}) {
     final oldAutoClear = renderer.autoClear;
     renderer.autoClear = false;
 

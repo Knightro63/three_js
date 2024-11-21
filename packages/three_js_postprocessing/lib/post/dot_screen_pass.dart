@@ -4,7 +4,7 @@ import 'package:three_js_postprocessing/shaders/dot_screen_shader.dart';
 import "pass.dart";
 
 class DotScreenPass extends Pass {
-  DotScreenPass(Vector2? center, num? angle, num? scale) : super() {
+  DotScreenPass([Vector2? center, num? angle, num? scale]) : super() {
     final shader = dotScreenShader;
 
     uniforms = UniformsUtils.clone(shader["uniforms"]);
@@ -23,7 +23,7 @@ class DotScreenPass extends Pass {
   }
 
   @override
-  void render(renderer, writeBuffer, readBuffer,{double? deltaTime, bool? maskActive}) {
+  void render(WebGLRenderer renderer, WebGLRenderTarget writeBuffer, WebGLRenderTarget readBuffer,{double? deltaTime, bool? maskActive}) {
     uniforms['tDiffuse']["value"] = readBuffer.texture;
     uniforms['tSize']["value"].set(readBuffer.width, readBuffer.height);
 

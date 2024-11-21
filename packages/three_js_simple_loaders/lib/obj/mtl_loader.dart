@@ -398,10 +398,11 @@ class MaterialCreator {
         case 'tr':
           n = double.parse(value);
 
-          if (options != null && options?["invertTrProperty"]){
-            n = 1 - n;
+          if (options != null) {
+            if ((options!.containsKey("invertTrProperty")) && options!["invertTrProperty"]) {
+              n = 1 - n;
+            }
           }
-
           if (n > 0) {
             params["opacity"] = 1 - n;
             params["transparent"] = true;

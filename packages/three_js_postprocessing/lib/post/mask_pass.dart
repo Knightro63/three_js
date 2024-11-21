@@ -5,7 +5,7 @@ import "pass.dart";
 class MaskPass extends Pass {
   bool inverse = false;
 
-  MaskPass(scene, camera) : super() {
+  MaskPass(Scene scene,Camera camera) : super() {
     this.scene = scene;
     this.camera = camera;
 
@@ -14,7 +14,7 @@ class MaskPass extends Pass {
   }
 
   @override
-  void render(WebGLRenderer renderer, writeBuffer, readBuffer,{double? deltaTime, bool? maskActive}) {
+  void render(WebGLRenderer renderer, WebGLRenderTarget writeBuffer, WebGLRenderTarget readBuffer,{double? deltaTime, bool? maskActive}) {
     final context = renderer.getContext();
     final state = renderer.state;
 

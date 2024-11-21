@@ -117,4 +117,6 @@ const List<String> filesJson = [
   'webxr_vr_rollercoaster',
   //'webgl_opengl_texture',
   //'webgl2_multiple_rendertargets',
+  'webgl_postprocessing_unreal_bloom',
+  //'webgl_postprocessing_unreal_bloom_selective',
 ];

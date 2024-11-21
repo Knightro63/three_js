@@ -27,7 +27,7 @@ class SSAARenderPass extends Pass {
 
   WebGLRenderTarget? sampleRenderTarget;
 
-  SSAARenderPass(Scene scene, Camera camera, Color? clearColor, this.clearAlpha) : super() {
+  SSAARenderPass(Scene scene, Camera camera, [Color? clearColor, this.clearAlpha = 0]) : super() {
     this.scene = scene;
     this.camera = camera;
 
@@ -70,8 +70,7 @@ class SSAARenderPass extends Pass {
   }
 
   @override
-  void render(renderer, writeBuffer, readBuffer,
-      {num? deltaTime, bool? maskActive}) {
+  void render(WebGLRenderer renderer, WebGLRenderTarget writeBuffer, WebGLRenderTarget readBuffer, {num? deltaTime, bool? maskActive}) {
     if (sampleRenderTarget == null) {
       sampleRenderTarget = WebGLRenderTarget(
           readBuffer.width,
@@ -96,7 +95,7 @@ class SSAARenderPass extends Pass {
     const roundingRange = 1 / 32;
     copyUniforms['tDiffuse']["value"] = sampleRenderTarget!.texture;
 
-    final viewOffset = {
+    final Map<String,dynamic> viewOffset = {
       "fullWidth": readBuffer.width,
       "fullHeight": readBuffer.height,
       "offsetX": 0,

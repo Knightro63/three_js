@@ -19,7 +19,7 @@ class RenderPass extends Pass {
   }
 
   @override
-  void render(renderer, writeBuffer, readBuffer, {double? deltaTime, bool? maskActive}) {
+  void render(WebGLRenderer renderer, WebGLRenderTarget writeBuffer, WebGLRenderTarget readBuffer, {double? deltaTime, bool? maskActive}) {
     final oldAutoClear = renderer.autoClear;
     renderer.autoClear = false;
 
