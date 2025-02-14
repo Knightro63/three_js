@@ -1,3 +1,7 @@
+## 0.0.6
+
+* Changed simpe_sensor to three_js_sensors.
+
 ## 0.0.5
 
 * Changed motion_sensors to simpe_sensor.

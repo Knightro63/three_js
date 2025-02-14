@@ -242,18 +242,33 @@ class ThreeJS {
       renderer!.setRenderTarget(falseRenderTarget);
     }
   }
+  
   void onWindowResize(BuildContext context){
     double dt = clock.getDelta();
     final mqd = MediaQuery.of(context);
     if(_size == null && screenSize != mqd.size){
       screenSize = mqd.size;
+      width = screenSize!.width;
+      height = screenSize!.height;
       dpr = mqd.devicePixelRatio;
+
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
+
+      if(settings.useSourceTexture && !kIsWeb){
+        renderTarget?.width = (width * dpr).toInt(); 
+        renderTarget?.height = (height * dpr).toInt();
+      }
+      else if(kIsWeb){
+        texture?.element?.width = (width * dpr).toInt();
+        texture?.element?.height = (height * dpr).toInt();
+      }
+
       windowResizeUpdate?.call(screenSize!);
       renderer!.setPixelRatio(dpr);
-      if(postProcessor == null){
-        renderer!.setSize(screenSize!.width, screenSize!.height);
-      }
-      else{
+      renderer!.setSize(width, height, true);
+
+      if(postProcessor != null){
         postProcessor?.call(dt);
       }
       render(dt);
@@ -297,22 +312,31 @@ class ThreeJS {
       initSize(context);
       return core.Peripherals(
         key: globalKey,
+        
         builder: (BuildContext context) {
           return Container(
             width: width,
             height: height,
-            child: Builder(builder: (BuildContext context) {
-              if (kIsWeb) {
-                return texture != null? HtmlElementView(viewType:texture!.textureId.toString()):Container();
-              } 
-              else {
-                return texture != null?
-                  Transform.scale(
-                    scaleY: sourceTexture != null || Platform.isAndroid?1:-1,
-                    child:Texture(textureId: texture!.textureId)
-                  ):Container();
-              }
-            })
+            child: NotificationListener<SizeChangedLayoutNotification>(
+            onNotification: (notification) {
+              onWindowResize(context);
+              return true;
+            },
+            child: SizeChangedLayoutNotifier(
+              child: Builder(builder: (BuildContext context) {
+                  if (kIsWeb) {
+                    return texture != null? HtmlElementView(viewType:texture!.textureId.toString()):Container();
+                  } 
+                  else {
+                    return texture != null?
+                      Transform.scale(
+                        scaleY: sourceTexture != null || Platform.isAndroid?1:-1,
+                        child:Texture(textureId: texture!.textureId)
+                      ):Container();
+                  }
+                })
+              )
+            )
           );
         }
       );
