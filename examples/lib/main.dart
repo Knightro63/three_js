@@ -35,6 +35,7 @@ import 'package:example/loaders/webgl_loader_collada_skinning.dart';
 import 'package:example/loaders/webgl_loader_fbx_nurbs.dart';
 import 'package:example/loaders/webgl_loader_gcode.dart';
 import 'package:example/loaders/webgl_loader_glb.dart';
+import 'package:example/loaders/webgl_loader_gltf_3.dart';
 import 'package:example/loaders/webgl_loader_md2.dart';
 import 'package:example/loaders/webgl_loader_ply.dart';
 import 'package:example/loaders/webgl_loader_scn.dart';
@@ -324,6 +325,9 @@ class MyAppState extends State<MyApp> {
               },
               '/webgl_loader_gltf':(BuildContext context) {
                 return const WebglLoaderGltf();
+              },
+              '/webgl_loader_gltf3':(BuildContext context) {
+                return const WebglLoaderGltf3();
               },
               '/webgl_loader_glb':(BuildContext context) {
                 return const WebglLoaderGlb();
