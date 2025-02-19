@@ -12,7 +12,7 @@ This is a dart conversion of three.js and three_dart, originally created by [@mr
 
 ## Usage
 
-This api allows users to add text to their three_js projet.
+This api allows users to add text to their three_js project.
 
 ## Contributing
 

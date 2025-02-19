@@ -13,7 +13,7 @@ import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
-import io.flutter.plugin.common.PluginRegistry.Registrar
+//import io.flutter.plugin.common.PluginRegistry.Registrar
 
 // translate from https://github.com/flutter/plugins/tree/master/packages/sensors
 /** TJSSensorsPlugin */
@@ -46,13 +46,13 @@ public class TJSSensorsPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
   private var absoluteOrientationStreamHandler: RotationVectorStreamHandler? = null
   private var screenOrientationStreamHandler: ScreenOrientationStreamHandler? = null
 
-  companion object {
-    @JvmStatic
-    fun registerWith(registrar: Registrar) {
-      val plugin = TJSSensorsPlugin()
-      plugin.setupEventChannels(registrar.context(), registrar.messenger())
-    }
-  }
+  // companion object {
+  //   @JvmStatic
+  //   fun registerWith(registrar: Registrar) {
+  //     val plugin = TJSSensorsPlugin()
+  //     plugin.setupEventChannels(registrar.context(), registrar.messenger())
+  //   }
+  // }
 
   override fun onAttachedToEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
     val context = binding.applicationContext
