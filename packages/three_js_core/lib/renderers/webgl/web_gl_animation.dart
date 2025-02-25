@@ -10,14 +10,14 @@ class WebGLAnimation {
 
   void onAnimationFrame(double time, int frame) {
     animationLoop(time, frame);
-    requestId = context?.requestAnimationFrame(onAnimationFrame);
+    requestId = context.requestAnimationFrame(onAnimationFrame);
   }
 
   void start() {
-    if (isAnimating) return;
+    if (isAnimating == true) return;
     if (animationLoop == null) return;
 
-    requestId = context?.requestAnimationFrame(onAnimationFrame);
+    requestId = context.requestAnimationFrame(onAnimationFrame);
     isAnimating = true;
   }
 

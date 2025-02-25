@@ -1,4 +1,4 @@
-String encodingsParsFragment = /* glsl */ """
+const String encodingsParsFragment = /* glsl */ """
 
 vec4 LinearToLinear( in vec4 value ) {
 	return value;

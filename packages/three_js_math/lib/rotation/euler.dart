@@ -225,8 +225,8 @@ class Euler {
 
         break;
 
-      default:
-        throw('THREE.Euler: .setFromRotationMatrix() encountered an unknown order: $order');
+      // default:
+      //   throw('THREE.Euler: .setFromRotationMatrix() encountered an unknown order: $order');
     }
 
     _order = order;

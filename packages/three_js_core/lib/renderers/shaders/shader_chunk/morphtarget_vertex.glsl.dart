@@ -1,4 +1,4 @@
-String morphtargetVertex = """
+const String morphtargetVertex = """
 #ifdef USE_MORPHTARGETS
 
 	// morphTargetBaseInfluence is set based on BufferGeometry.morphTargetsRelative value:
@@ -9,7 +9,9 @@ String morphtargetVertex = """
 	#ifdef MORPHTARGETS_TEXTURE
 
 		for ( int i = 0; i < MORPHTARGETS_COUNT; i ++ ) {
+
 			if ( morphTargetInfluences[ i ] != 0.0 ) transformed += getMorph( gl_VertexID, i, 0 ).xyz * morphTargetInfluences[ i ];
+
 		}
 
 	#else

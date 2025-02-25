@@ -4,6 +4,8 @@ class WebGLParameters {
   int? customVertexShaderID;
   int? customFragmentShaderID;
 
+  bool rendererExtensionParallelShaderCompile = false;
+
   String? shaderID;
   String? shaderType;
   String outputColorSpace = NoColorSpace;
@@ -93,6 +95,7 @@ class WebGLParameters {
   int? shadowMapType;
   int? toneMapping;
   bool useLegacyLights = false;
+  bool physicallyCorrectLights = false;
   bool premultipliedAlpha = false;
   bool alphaTest = false;
 
@@ -103,6 +106,15 @@ class WebGLParameters {
   int? depthPacking;
 
   String? index0AttributeName;
+
+  late bool extensionDerivatives;
+  late bool extensionFragDepth;
+  late bool extensionDrawBuffers;
+  late bool extensionShaderTextureLOD;
+
+  late bool rendererExtensionFragDepth;
+  late bool rendererExtensionDrawBuffers;
+  late bool rendererExtensionShaderTextureLod;
   String? customProgramCacheKey;
 
   bool decodeVideoTexture = false;
@@ -123,6 +135,7 @@ class WebGLParameters {
   bool dispersion = false;
 
   int morphTargetsCount = 0;
+  num? cubeUVHeight;
 
   num? envMapCubeUVHeight;
   bool instancingMorph = false;
@@ -170,11 +183,18 @@ class WebGLParameters {
 
   int morphAttributeCount = 0;
 
+  bool tangentSpaceNormalMap = false;
+  bool objectSpaceNormalMap = false;
+  bool uvsVertexOnly = false;
+  bool isWebGL2 = true;
+  int outputEncoding = 0;
+
   WebGLParameters.create();
 
   WebGLParameters({
     this.shaderID,
     this.shaderType,
+    this.shaderName = '',
     this.vertexShader = '',
     this.fragmentShader = '',
     this.defines,
@@ -191,6 +211,7 @@ class WebGLParameters {
     this.outputColorSpace = NoColorSpace,
     this.alphaToCoverage = false,
     this.map = false,
+    this.displacementMap = false,
     this.matcap = false,
     this.envMap = false,
     this.envMapMode,
@@ -335,7 +356,7 @@ class WebGLParameters {
 
     this.extensionClipCullDistance = false,
     this.extensionMultiDraw = false,
-
+    this.rendererExtensionParallelShaderCompile = false,
     this.customProgramCacheKey,
   });
 
@@ -514,6 +535,11 @@ class WebGLParameters {
     extensionMultiDraw = json['extensionMultiDraw'] ?? false;
 
     customProgramCacheKey = json['customProgramCacheKey'];
+
+    tangentSpaceNormalMap = json["tangentSpaceNormalMap"];
+    objectSpaceNormalMap = json["objectSpaceNormalMap"];
+    uvsVertexOnly = json["uvsVertexOnly"];
+    outputEncoding = json["outputEncoding"];
   }
 
   getValue(String name) {
@@ -538,6 +564,7 @@ class WebGLParameters {
       "instancingColor": instancingColor,
       "supportsVertexTextures": supportsVertexTextures,
       "outputColorSpace": outputColorSpace,
+      "outputEncoding": outputEncoding,
       "map": map,
       "matcap": matcap,
       "envMap": envMap,
@@ -571,6 +598,7 @@ class WebGLParameters {
       "vertexTangents": vertexTangents,
       "vertexColors": vertexColors,
       "vertexUvs": vertexUvs,
+      "uvsVertexOnly": uvsVertexOnly,
       "pointsUvs": pointsUvs,
       "fog": fog,
       "useFog": useFog,
@@ -596,6 +624,7 @@ class WebGLParameters {
       "shadowMapEnabled": shadowMapEnabled,
       "shadowMapType": shadowMapType,
       "toneMapping": toneMapping,
+      "physicallyCorrectLights": physicallyCorrectLights,
       "useLegacyLights": useLegacyLights,
       "premultipliedAlpha": premultipliedAlpha,
       "alphaTest": alphaTest,
@@ -604,12 +633,20 @@ class WebGLParameters {
       "useDepthPacking": useDepthPacking,
       "depthPacking": depthPacking,
       "index0AttributeName": index0AttributeName,
+      "extensionDerivatives": extensionDerivatives,
+      "extensionFragDepth": extensionFragDepth,
+      "extensionDrawBuffers": extensionDrawBuffers,
+      "extensionShaderTextureLOD": extensionShaderTextureLOD,
+      "rendererExtensionFragDepth": rendererExtensionFragDepth,
+      "rendererExtensionDrawBuffers": rendererExtensionDrawBuffers,
+      "rendererExtensionShaderTextureLod": rendererExtensionShaderTextureLod,
       "customProgramCacheKey": customProgramCacheKey,
       "uniforms": uniforms,
       "vertexAlphas": vertexAlphas,
       "decodeVideoTexture": decodeVideoTexture,
       "morphTargetsCount": morphTargetsCount,
       "opaque": opaque,
+      "cubeUVHeight": cubeUVHeight,
       "envMapCubeUVHeight": envMapCubeUVHeight,
       "morphTextureStride": morphTextureStride
     };

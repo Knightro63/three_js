@@ -1,8 +1,7 @@
 part of three_renderers;
 
 class WebGLCubeRenderTarget extends WebGLRenderTarget {
-  WebGLCubeRenderTarget([int size = 1, RenderTargetOptions? options]) : super(size, size, options) {
-    isWebGLCubeRenderTarget = true;
+  WebGLCubeRenderTarget([int size = 1, WebGLRenderTargetOptions? options]) : super(size, size, options) {
     // By convention -- likely based on the RenderMan spec from the 1990's -- cube maps are specified by WebGL (and three.js)
     // in a coordinate system in which positive-x is to the right when looking up the positive-z axis -- in other words,
     // in a left-handed coordinate system. By continuing this convention, preexisting cube maps continued to render correctly.
@@ -41,7 +40,7 @@ class WebGLCubeRenderTarget extends WebGLRenderTarget {
 
     final shader = {
       "uniforms": {
-        "tEquirect": {'value': null},
+        "tEquirect": <String,dynamic>{'value': null},
       },
       "vertexShader": """
 

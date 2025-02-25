@@ -27,7 +27,7 @@ class PointLight extends Light {
   /// 
   /// [decay] - The amount the light dims along the distance of the
   /// light. Default is `2`.
-  PointLight(super.color, [super.intensity, double? distance, double? decay]){
+  PointLight([super.color, super.intensity, double? distance, double? decay]){
     // remove default 0  for js 0 is false  but for dart 0 is not.
     // PointLightShadow.updateMatrices  far value
     this.distance = distance;

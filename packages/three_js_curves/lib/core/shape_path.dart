@@ -204,7 +204,7 @@ class ShapePath {
 
       for (int sIdx = 0, sLen = newShapes.length; sIdx < sLen; sIdx++) {
         // betterShapeHoles[ sIdx ] = [];
-        betterShapeHoles.listSetter(sIdx, []);
+        (betterShapeHoles as List).listSetter(sIdx, []);
       }
 
       for (int sIdx = 0, sLen = newShapes.length; sIdx < sLen; sIdx++) {

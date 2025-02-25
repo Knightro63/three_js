@@ -99,7 +99,7 @@ class WebGLBackground {
           boxMesh!.matrixWorld.copyPosition(camera!.matrixWorld);
         };
 
-        planeMesh!.material?.envMap = planeMesh!.material!.uniforms['envMap']['value'];
+        planeMesh?.material?.envMap = planeMesh?.material?.uniforms['envMap']['value'];
 				objects.update(boxMesh!);
 			}
 
@@ -119,7 +119,7 @@ class WebGLBackground {
 			boxMesh!.material!.uniforms['backgroundBlurriness']['value'] = scene.backgroundBlurriness;
 			boxMesh!.material!.uniforms['backgroundIntensity']['value'] = scene.backgroundIntensity;
 			boxMesh!.material!.uniforms['backgroundRotation']['value'].setFromMatrix4( _m1.makeRotationFromEuler( _e1 ) );
-			boxMesh!.material!.toneMapped = ColorManagement.getTransfer( background.colorSpace ) != SRGBTransfer;
+			boxMesh!.material!.toneMapped = ColorManagement.getTransfer( ColorSpace.fromString( background.colorSpace )) != SRGBTransfer;
 
 			if ( currentBackground != background ||
 				currentBackgroundVersion != background.version ||
@@ -209,5 +209,15 @@ class WebGLBackground {
   void setClearAlpha(double alpha) {
     clearAlpha = alpha;
     setClear(clearColor, clearAlpha);
+  }
+
+  void dispose(){
+    planeMesh?.dispose();
+    boxMesh?.dispose();
+    objects.dispose();
+
+    if(currentBackground is Texture){
+      currentBackground.dispose();
+    }
   }
 }

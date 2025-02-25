@@ -46,6 +46,9 @@ Map<String, dynamic> shaderLib = {
       uniformsLib["aomap"],
       uniformsLib["lightmap"],
       uniformsLib["emissivemap"],
+      uniformsLib["bumpmap"],
+      uniformsLib["normalmap"],
+      uniformsLib["displacementmap"],
       uniformsLib["fog"],
       uniformsLib["lights"],
       {
@@ -105,7 +108,7 @@ Map<String, dynamic> shaderLib = {
       uniformsLib["displacementmap"],
       uniformsLib["fog"],
       {
-        "matcap": {"value": null}
+        "matcap": <String,dynamic>{"value": null}
       }
     ]),
     "vertexShader": shaderChunk["meshmatcap_vert"],
@@ -156,28 +159,41 @@ Map<String, dynamic> shaderLib = {
   "background": {
     "uniforms": {
       "uvTransform": {"value": Matrix3.identity()},
-      "t2D": {"value": null},
+      "t2D": <String,dynamic>{"value": null},
+      'backgroundIntensity': { 'value': 1 }
     },
     "vertexShader": shaderChunk["background_vert"],
     "fragmentShader": shaderChunk["background_frag"]
   },
+	'backgroundCube': {
+
+		'uniforms': {
+			'envMap': <String,dynamic>{ 'value': null },
+			'flipEnvMap': { 'value': - 1 },
+			'backgroundBlurriness': { 'value': 0 },
+			'backgroundIntensity': { 'value': 1 },
+			'backgroundRotation': { 'value': /*@__PURE__*/ Matrix3.identity() }
+		},
+
+		'vertexShader': shaderChunk['backgroundCube_vert'],
+		'fragmentShader': shaderChunk['backgroundCube_frag']
+	},
   /* -------------------------------------------------------------------------
 	//	Cube map shader
 	 ------------------------------------------------------------------------- */
 
   "cube": {
-    "uniforms": mergeUniforms([
-      uniformsLib["envmap"],
-      {
-        "opacity": {"value": 1.0}
-      }
-    ]),
+		'uniforms': {
+			'tCube': <String,dynamic>{ 'value': null },
+			'tFlip': { 'value': - 1 },
+			'opacity': { 'value': 1.0 },
+		},
     "vertexShader": shaderChunk["cube_vert"],
     "fragmentShader": shaderChunk["cube_frag"]
   },
   "equirect": {
     "uniforms": {
-      "tEquirect": {"value": null},
+      "tEquirect": <String,dynamic>{"value": null},
     },
     "vertexShader": shaderChunk["equirect_vert"],
     "fragmentShader": shaderChunk["equirect_frag"]
@@ -211,28 +227,50 @@ Map<String, dynamic> shaderLib = {
     "uniforms": mergeUniforms([
       shaderLibStandard["uniforms"],
       {
-        "clearcoat": {"value": 0},
-        "clearcoatMap": {"value": null},
-        "clearcoatRoughness": {"value": 0},
-        "clearcoatRoughnessMap": {"value": null},
-        "clearcoatNormalScale": {"value": Vector2(1, 1)},
-        "clearcoatNormalMap": {"value": null},
-        "sheenColor": {"value": Color.fromHex32(0x000000)},
-        "sheenColorMap": {},
-        "sheenRoughness": {"value": 1.0},
-        "sheenRoughnessMap": {},
-        "transmission": {"value": 0},
-        "transmissionMap": {"value": null},
-        "transmissionSamplerSize": {"value": Vector2.zero()},
-        "transmissionSamplerMap": {"value": null},
-        "thickness": {"value": 0},
-        "thicknessMap": {"value": null},
-        "attenuationDistance": {"value": 0},
-        "attenuationColor": {"value": Color.fromHex32(0x000000)},
-        "specularIntensity": {"value": 1.0},
-        "specularIntensityMap": {"value": null},
-        "specularColor": {"value": Color(1, 1, 1)},
-        "specularColorMap": {"value": null}
+        'clearcoat': { 'value': 0 },
+        'clearcoatMap': <String,dynamic>{ 'value': null },
+        'clearcoatMapTransform': { 'value': /*@__PURE__*/ Matrix3.identity() },
+        'clearcoatNormalMap': <String,dynamic>{ 'value': null },
+        'clearcoatNormalMapTransform': { 'value': /*@__PURE__*/ Matrix3.identity() },
+        'clearcoatNormalScale': { 'value': /*@__PURE__*/ Vector2( 1, 1 ) },
+        'clearcoatRoughness': { 'value': 0 },
+        'clearcoatRoughnessMap': <String,dynamic>{ 'value': null },
+        'clearcoatRoughnessMapTransform': { 'value': /*@__PURE__*/ Matrix3.identity() },
+        'dispersion': { 'value': 0 },
+        'iridescence': { 'value': 0 },
+        'iridescenceMap': <String,dynamic>{ 'value': null },
+        'iridescenceMapTransform': { 'value': /*@__PURE__*/ Matrix3.identity() },
+        'iridescenceIOR': { 'value': 1.3 },
+        'iridescenceThicknessMinimum': { 'value': 100 },
+        'iridescenceThicknessMaximum': { 'value': 400 },
+        'iridescenceThicknessMap': <String,dynamic>{ 'value': null },
+        'iridescenceThicknessMapTransform': { 'value': /*@__PURE__*/ Matrix3.identity() },
+        'sheen': { 'value': 0 },
+        'sheenColor': { 'value': /*@__PURE__*/ Color( 0x000000 ) },
+        'sheenColorMap': <String,dynamic>{ 'value': null },
+        'sheenColorMapTransform': { 'value': /*@__PURE__*/ Matrix3.identity() },
+        'sheenRoughness': { 'value': 1 },
+        'sheenRoughnessMap': <String,dynamic>{ 'value': null },
+        'sheenRoughnessMapTransform': { 'value': /*@__PURE__*/ Matrix3.identity() },
+        'transmission': { 'value': 0 },
+        'transmissionMap': <String,dynamic>{ 'value': null },
+        'transmissionMapTransform': { 'value': /*@__PURE__*/ Matrix3.identity() },
+        'transmissionSamplerSize': { 'value': /*@__PURE__*/ Vector2() },
+        'transmissionSamplerMap': <String,dynamic>{ 'value': null },
+        'thickness': { 'value': 0 },
+        'thicknessMap': <String,dynamic>{ 'value': null },
+        'thicknessMapTransform': { 'value': /*@__PURE__*/ Matrix3.identity() },
+        'attenuationDistance': { 'value': 0 },
+        'attenuationColor': { 'value': /*@__PURE__*/ Color( 0x000000 ) },
+        'specularColor': { 'value': /*@__PURE__*/ Color( 1, 1, 1 ) },
+        'specularColorMap': <String,dynamic>{ 'value': null },
+        'specularColorMapTransform': { 'value': /*@__PURE__*/ Matrix3.identity() },
+        'specularIntensity': { 'value': 1 },
+        'specularIntensityMap': <String,dynamic>{ 'value': null },
+        'specularIntensityMapTransform': { 'value': /*@__PURE__*/ Matrix3.identity() },
+        'anisotropyVector': { 'value': /*@__PURE__*/ Vector2() },
+        'anisotropyMap': <String,dynamic>{ 'value': null },
+        'anisotropyMapTransform': { 'value': /*@__PURE__*/ Matrix3.identity() },
       }
     ]),
     "vertexShader": shaderChunk["meshphysical_vert"],

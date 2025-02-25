@@ -47,10 +47,10 @@ class WebGLRenderStates {
 
   WebGLRenderStates(this.extensions);
 
-  WebGLRenderState get(scene, {int renderCallDepth = 0}) {
+  WebGLRenderState get(Object3D scene, {int renderCallDepth = 0}) {
     WebGLRenderState renderState;
 
-    if (renderStates.has(scene) == false) {
+    if (!renderStates.has(scene)) {
       renderState = WebGLRenderState(extensions);
       renderStates.add(key: scene, value: [renderState]);
     } else {

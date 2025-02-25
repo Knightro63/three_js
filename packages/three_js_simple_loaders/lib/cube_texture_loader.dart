@@ -27,8 +27,9 @@ class CubeTextureLoader extends Loader {
   int loaded = 0;
 
   /// [manager] — The [loadingManager] for the loader to use. Default is [DefaultLoadingManager].
-	CubeTextureLoader([super.manager]){
+	CubeTextureLoader({LoadingManager? manager,bool flipY = false}):super(manager,flipY){
 		_loader = ImageLoader( manager );
+    _loader.flipY = flipY;
     texture.image = [];
   }
 
@@ -143,7 +144,7 @@ class CubeTextureLoader extends Loader {
   }
   @override
   Future<CubeTexture?> fromAsset(String asset, {String? package}) async{
-    final image = await _loader.fromAsset(asset,package: package);
+    final image = await _loader.fromAsset(asset, package: package);
     texture.images.add(image);
     loaded ++;
 

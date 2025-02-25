@@ -1,293 +1,208 @@
-import 'dart:math' as math;
-import 'package:three_js_core/three_js_core.dart';
+import 'dart:async';
 import 'package:audioplayers/audioplayers.dart';
-import 'audio_analyser.dart';
-import 'audio_context.dart';
-import 'audio_listener.dart';
+import 'package:three_js_core/three_js_core.dart';
 
-class Audio extends Object3D {
-  AudioListener listener;
-  late AudioContext context;
-  late GainNode gain;
+/// This utility class holds static references to some global audio objects.
+///
+/// You can use as a helper to very simply play a sound or a background music.
+/// Alternatively you can create your own instances and control them yourself.
+class Audio extends Object3D{
+  bool autoplay;
+  bool loop;
+  bool hasPlaybackControl;
+  bool _isPlaying = false;
 
-  bool autoplay = false;
-  bool loop = false;
-  bool isPlaying = false;
-  bool hasPlaybackControl = true;
-  bool _connected = false;
-
-  String sourceType = 'empty';
   AudioPlayer? source;
-  AudioBuffer? buffer;
+  //Uint8List? _buffer;
 
   int loopEnd = 0;
   int loopStart = 0;
-  offset = 0;
-  detune = 0;
-  double? duration;
-  double playbackRate = 1;
+  //double? duration;
+  double playbackRate;
 
-  _startedAt = 0;
-  double _progress = 0;
-  filters = [];
+  late double _volume;
+  late double _balance;
 
-	Audio(this.listener ):super(){
-		context = listener.context;
-		gain = context.createGain();
-		gain.connect(listener.getInput());
-	}
+  Timer? _delay;
+  bool get isPlaying => _isPlaying;
 
-	NodeType getOutput() {
-		return gain;
-	}
+  String path;
 
-	Audio setNodeSource(AudioBufferSourceNode audioNode ) {
-		hasPlaybackControl = false;
-		sourceType = 'audioNode';
-		source = audioNode;
-		connect();
-		return this;
-	}
+  Audio({
+    required this.path,
+    double balance = 0.0,
+    double volume = 1.0,
+    this.playbackRate = 1.0,
+    this.hasPlaybackControl = true,
+    this.autoplay = false,
+    this.loop = false
+  }){
+    _balance = balance;
+    _volume = volume;
 
-	Audio setMediaElementSource( mediaElement ) {
-		hasPlaybackControl = false;
-		sourceType = 'mediaNode';
-		source = context.createMediaElementSource( mediaElement );
-		connect();
+    if(autoplay){
+      play();
+    }
+  }
 
-		return this;
-	}
+  // void setBuffer(Uint8List buffer){
+  //   _buffer = buffer;
+  // }
 
-	Audio setMediaStreamSource(MediaStream mediaStream ) {
-		hasPlaybackControl = false;
-		sourceType = 'mediaStreamNode';
-		source = context.createMediaStreamSource( mediaStream );
-		connect();
+  @override
+  void dispose(){
+    _delay?.cancel();
+    source?.dispose();
+    super.dispose();
+  }
 
-		return this;
-	}
-
-	Audio setBuffer( audioBuffer ) {
-		buffer = audioBuffer;
-		sourceType = 'buffer';
-
-		if (autoplay) play();
-
-		return this;
-	}
-
-	play([delay = 0]) {
-		if (isPlaying) {
-			print( 'THREE.Audio: Audio is already playing.' );
+  /// Plays a single run of the given [file], with a given [volume].
+  Future<void> play([int delay = 0]) async{
+		if (_isPlaying) {
+			console.warning( 'Audio: Audio is already playing.' );
 			return;
 		}
 
 		if(!hasPlaybackControl){
-			print( 'THREE.Audio: this Audio has no playback control.' );
+			console.warning( 'Audio: this Audio has no playback control.' );
 			return;
 		}
 
-		_startedAt = context.currentTime + delay;
+    _isPlaying = true;
 
-		final source = context.createBufferSource();
-		source.buffer = buffer;
-		source.loop = loop;
-		source.loopStart = loopStart;
-		source.loopEnd = loopEnd;
-		source.onended = onEnded.bind( this );
-		source.start(_startedAt, _progress + offset, duration );
+    if(source == null){
+      if(delay != 0){
+        _delay = Timer(Duration(milliseconds: delay), (){
+          _play();
+          _delay?.cancel();
+          _delay = null;
+        });
+      }
+      else{
+        _play();
+      }
+    }
+    else{
+      resume();
+    }
+  }
 
-		isPlaying = true;
+  /// Plays a single run of the given [file], with a given [volume].
+  Future<void> _play() async{
+    final src = AudioPlayer();
+    src.onPlayerComplete.listen((event) {
+      _isPlaying = false;
+    });
+    //await src.setReleaseMode(loop?ReleaseMode.loop:ReleaseMode.stop);
+    //await src.setPlaybackRate(playbackRate);
+    await src.play(
+      AssetSource(path),
+      volume: _volume,
+      mode: PlayerMode.lowLatency,
+      position: Duration(milliseconds: loopStart),
+      balance: _balance
+    );
+    
+    source = src;
+  }
 
-		this.source = source;
-
-		setDetune(detune );
-		setPlaybackRate(playbackRate );
-
-		return connect();
-	}
-
-	pause() {
+  /// Stops the currently playing background music track (if any).
+  Future<void> stop() async {
 		if (!hasPlaybackControl) {
-			print( 'THREE.Audio: this Audio has no playback control.' );
+			console.warning( 'Audio: this Audio has no playback control.' );
 			return;
 		}
 
-		if(isPlaying) {
-			// update current progress
-			_progress += math.max(context.currentTime - _startedAt, 0 ) * playbackRate;
+    _delay?.cancel();
+    _delay = null;
+    _isPlaying = false;
+    await source?.stop();
+  }
 
-			if (loop) {
-				// ensure _progress does not exceed duration with looped audios
-				_progress = _progress % (duration ?? buffer.duration);
-			}
+  /// Resumes the currently played (but resumed) background music.
+  Future<void> resume() async {
+    _isPlaying = true;
+    await source?.resume();
+  }
 
-			source.stop();
-			source.onended = null;
-
-			isPlaying = false;
-		}
-
-		return this;
-	}
-
-	Audio? stop() {
+  /// Pauses the background music without unloading or resetting the audio
+  /// player.
+  Future<void> pause() async {
 		if (!hasPlaybackControl) {
-			print( 'THREE.Audio: this Audio has no playback control.' );
-			return null;
+			console.warning( 'Audio: this Audio has no playback control.' );
+			return;
 		}
 
-		_progress = 0;
+		if(_isPlaying) {
+      _isPlaying = false;
+      await source?.pause();
+    }
 
-		source.stop();
-		source.onended = null;
-		isPlaying = false;
+    _delay?.cancel();
+    _delay = null;
+  }
 
-		return this;
+	double? getPlaybackRate() {
+		return source?.playbackRate;
 	}
 
-	Audio connect() {
-		if (filters.isNotEmpty) {
-			source.connect(filters[ 0 ] );
-
-			for (int i = 1, l = filters.length; i < l; i ++ ) {
-				filters[ i - 1 ].connect(filters[ i ] );
-			}
-
-			filters[filters.length - 1 ].connect(getOutput() );
-		} 
-    else {
-			source.connect(getOutput() );
-		}
-
-		_connected = true;
-
-		return this;
-	}
-
-	Audio disconnect() {
-		if (filters.isNotEmpty ) {
-			source.disconnect(filters[ 0 ] );
-
-			for (int i = 1, l = filters.length; i < l; i ++ ) {
-				filters[ i - 1 ].disconnect(filters[ i ] );
-			}
-
-			filters[filters.length - 1 ].disconnect(getOutput() );
-		} 
-    else {
-			source.disconnect(getOutput() );
-		}
-
-		_connected = false;
-
-		return this;
-	}
-
-	getFilters() {
-		return filters;
-	}
-
-	setFilters( value ) {
-		if ( ! value ) value = [];
-		if (_connected) {
-			disconnect();
-			filters = value.slice();
-			connect();
-		} 
-    else {
-			filters = value.slice();
-		}
-
-		return this;
-	}
-
-	setDetune( value ) {
-		detune = value;
-
-		if (source.detune == null ) return; // only set detune when available
-		if (isPlaying) {
-			source.detune.setTargetAtTime(detune, context.currentTime, 0.01 );
-		}
-
-		return this;
-	}
-
-	getDetune() {
-		return detune;
-	}
-
-	getFilter() {
-		return getFilters()[ 0 ];
-	}
-
-	setFilter( filter ) {
-		return setFilters( filter ? [ filter ] : [] );
-	}
-
-	Audio? setPlaybackRate( value ) {
+	Future<void>? setPlaybackRate(double value) async{
 		if (!hasPlaybackControl) {
-			print( 'THREE.Audio: this Audio has no playback control.' );
-			return null;
+			console.warning( 'Audio: this Audio has no playback control.' );
+			return;
 		}
 
-		playbackRate = value;
-
-		if (isPlaying) {
-			source?.playbackRate.setTargetAtTime(playbackRate, context.currentTime, 0.01 );
+		if (_isPlaying) {
+      playbackRate = value;
+			await source?.setPlaybackRate(value);
 		}
-
-		return this;
-	}
-
-	getPlaybackRate() {
-		return playbackRate;
-	}
-
-	void onEnded() {
-		isPlaying = false;
 	}
 
 	bool getLoop() {
 		if (!hasPlaybackControl ) {
-			print( 'THREE.Audio: this Audio has no playback control.' );
+			console.warning( 'Audio: this Audio has no playback control.' );
 			return false;
 		}
 
-		return loop;
+		return source?.releaseMode == ReleaseMode.loop;
 	}
 
-	setLoop( value ) {
+	Future<void> setLoop( value ) async{
 		if (!hasPlaybackControl) {
-			print( 'THREE.Audio: this Audio has no playback control.' );
+			console.warning( 'Audio: this Audio has no playback control.' );
 			return;
 		}
 
 		loop = value;
 
-		if (isPlaying ) {
-			source.loop = loop;
+		if (_isPlaying ) {
+			await source?.setReleaseMode(loop?ReleaseMode.loop:ReleaseMode.stop);
 		}
-
-		return this;
 	}
 
-	Audio setLoopStart(int value ) {
+	void setLoopStart(int value ) {
 		loopStart = value;
-		return this;
 	}
 
-	Audio setLoopEnd(int value ) {
+	void setLoopEnd(int value ) {
 		loopEnd = value;
-		return this;
 	}
 
-	double getVolume() {
-		return gain.gain.value;
+	double? getBalance() {
+		return source?.balance;
 	}
 
-	Audio setVolume( value ) {
-		gain.gain.setTargetAtTime( value, context.currentTime, 0.01 );
-		return this;
+	Future<void> setBalance(double value ) async{
+    _balance = value;
+		await source?.setBalance(value);
+	}
+
+	double? getVolume() {
+		return source?.volume;
+	}
+
+	Future<void> setVolume(double value ) async{
+    _volume = value;
+		await source?.setVolume(value);
 	}
 }

@@ -3,7 +3,6 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'package:three_js/three_js.dart' as three;
 import 'package:flutter/services.dart';
-import 'package:three_js_objects/three_js_objects.dart';
 
 void main() {
   runApp(const ExampleApp());
@@ -103,10 +102,10 @@ class _FlutterGameState extends State<FlutterGame> {
 
     three.GLTFLoader loader = three.GLTFLoader(flipY: true).setPath('assets/');
 
-    var sky = await loader.fromAsset( 'sky_sphere.glb' );
+    final sky = await loader.fromAsset( 'sky_sphere.glb' );
     threeJs.scene.add(sky!.scene);
 
-    var groundGLB = await loader.fromAsset('ground.glb');
+    final groundGLB = await loader.fromAsset('ground.glb');
     final ground = groundGLB!.scene;
     ground.rotation.y = 90*(math.pi/180);
     threeJs.scene.add(ground);
@@ -212,7 +211,6 @@ class Player{
 
   late final three.Vector3 playerVelocity;
   bool playerOnFloor = false;
-  Capsule playerCollider = Capsule(three.Vector3( 0, 1, 0 ), three.Vector3( 0, 3, 0 ), 3);
 
   PlayerAction currentAction = PlayerAction.idle;
   late three.ThirdPersonControls tpsControl;

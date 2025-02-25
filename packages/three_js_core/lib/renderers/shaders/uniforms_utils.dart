@@ -1,7 +1,7 @@
 part of three_shaders;
 
-List cloneUniformsGroups( src ) {
-	final dst = [];
+List cloneUniformsGroups<T>( src ) {
+	final dst = <T>[];
 
 	for (int u = 0; u < src.length; u ++ ) {
 		dst.add( src[ u ].clone() );
@@ -13,7 +13,7 @@ Map<String, dynamic> cloneUniforms(Map<String, dynamic> src) {
   var dst = <String, dynamic>{};
 
   for (var u in src.keys) {
-    dst[u] = {};
+    dst[u] = <String,dynamic>{};
 
     for (var p in src[u].keys) {
       var property = src[u][p];
@@ -52,6 +52,20 @@ Map<String, dynamic> mergeUniforms(uniforms) {
 
   return merged;
 }
+
+String getUnlitUniformColorSpace(WebGLRenderer renderer ) {
+	final currentRenderTarget = renderer.getRenderTarget();
+
+	if ( currentRenderTarget == null ) {
+		return renderer.outputColorSpace;
+	}
+
+	if (currentRenderTarget.isXRRenderTarget) {
+		return currentRenderTarget.texture.colorSpace;
+	}
+	return ColorManagement.workingColorSpace.toString();
+}
+
 
 class UniformsUtils {
   static Map<String, dynamic> clone(Map<String, dynamic> p) {

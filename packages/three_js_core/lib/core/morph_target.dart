@@ -4,7 +4,9 @@ class MorphTarget {
   late String name;
   late List<Vector3> vertices;
   late List<Vector3> normals;
-  MorphTarget(Map<String, dynamic>? json) {
+  
+  MorphTarget(this.name,this.vertices,this.normals);
+  MorphTarget.fromJson(Map<String, dynamic>? json) {
     if (json != null) {
       if (json["name"] != null) name = json["name"];
       if (json["vertices"] != null) vertices = json["vertices"];

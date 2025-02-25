@@ -69,6 +69,17 @@ class WebGLShadowMap {
     scope = this;
   }
 
+  void dispose(){
+    fullScreenMesh.dispose();
+    fullScreenTri.dispose();
+
+    _depthMaterial.dispose();
+    _distanceMaterial.dispose();
+
+    shadowMaterialVertical.dispose();
+    shadowMaterialHorizontal.dispose();
+  }
+
   void render(List<Light> lights, Object3D scene, Camera camera) {
     if (scope.enabled == false) return;
     if (scope.autoUpdate == false && scope.needsUpdate == false) return;
@@ -129,7 +140,7 @@ class WebGLShadowMap {
 					shadow.map?.dispose();
 				}
 
-        shadow.map = WebGLRenderTarget(_shadowMapSize.x.toInt(), _shadowMapSize.y.toInt(), RenderTargetOptions(pars));
+        shadow.map = WebGLRenderTarget(_shadowMapSize.x.toInt(), _shadowMapSize.y.toInt(), WebGLRenderTargetOptions(pars));
         shadow.map!.texture.name = '${light.name}.shadowMap';
 
         //shadow.mapPass = WebGLRenderTarget(_shadowMapSize.x.toInt(), _shadowMapSize.y.toInt());

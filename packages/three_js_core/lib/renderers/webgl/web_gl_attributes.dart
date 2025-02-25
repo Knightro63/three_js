@@ -3,9 +3,11 @@ part of three_webgl;
 class WebGLAttributes {
   RenderingContext gl;
 
+  bool isWebGL2 = true;
+
   WeakMap buffers = WeakMap();
 
-  WebGLAttributes(this.gl,);
+  WebGLAttributes(this.gl);
 
   Map<String, dynamic> createBuffer(dynamic attribute, int bufferType, {String? name}) {//BufferAttribute<NativeArray<num>>
     final array = attribute.array;
@@ -29,8 +31,12 @@ class WebGLAttributes {
       console.error('WebGLAttributes: Unsupported data buffer format: Float64Array.');
     } 
     else if (attribute is Float16BufferAttribute) {
-      bytesPerElement = 2;
-      type = WebGL.HALF_FLOAT;
+      if (isWebGL2) {
+        bytesPerElement = 2;
+        type = WebGL.HALF_FLOAT;
+      } else {
+        console.error('WebGLAttributes: Usage of Float16BufferAttribute requires WebGL2.');
+      }
     } else if (attribute is Uint16BufferAttribute) {
       bytesPerElement = Uint16List.bytesPerElement;
       type = WebGL.UNSIGNED_SHORT;
@@ -63,37 +69,40 @@ class WebGLAttributes {
   }
 
   void updateBuffer(Buffer buffer, BufferAttribute attribute, int bufferType) {
+    final array = attribute.array;
     final updateRange = attribute.updateRange;
-    print(updateRange);
+    final updateRanges = attribute.updateRanges;
 
     gl.bindBuffer(bufferType, buffer);
 
     if (updateRange!["count"] == -1) {
       // Not using update ranges
       gl.bufferSubData(bufferType, 0, attribute.array);
-    }
+    } 
+    // else {
+    //   console.info(" WebGLAttributes.dart gl.bufferSubData need debug confirm.... ");
+    //   gl.bufferSubData(bufferType, updateRange["offset"]! * attribute.itemSize, attribute.array);
+    //   updateRange["count"] = -1; // reset range
+    // }
 
-		// if ( updateRange.length != 0 ) {
-		// 	for ( let i = 0, l = updateRanges.length; i < l; i ++ ) {
-		// 		const range = updateRanges[ i ];
-		// 		gl.bufferSubData( bufferType, range.start * array.BYTES_PER_ELEMENT,
-		// 			array, range.start, range.count );
-		// 	}
+		if ( updateRange.length != 0 ) {
+			for (int i = 0, l = updateRanges.length; i < l; i ++ ) {
+				final range = updateRanges[i];
+				gl.bufferSubData( 
+          bufferType, 
+          range.start * array.BYTES_PER_ELEMENT,
+					attribute.array,//.sublist(range.start,range.count), 
+        );
+			}
 
-		// 	attribute.clearUpdateRanges();
-		// }
-
-    else {
-      console.info(" WebGLAttributes.dart gl.bufferSubData need debug confirm.... ");
-      gl.bufferSubData(bufferType, updateRange["offset"]! * attribute.itemSize, attribute.array);
-      updateRange["count"] = -1; // reset range
-    }
+			attribute.clearUpdateRanges();
+		}
 
     attribute.onUploadCallback?.call();
   }
 
   dynamic get(BaseBufferAttribute attribute) {
-    if (attribute.type == "InterleavedBufferAttribute") {
+    if (attribute is InterleavedBufferAttribute) {
       return buffers.get(attribute.data);
     } 
     else {
@@ -104,18 +113,22 @@ class WebGLAttributes {
     final len = buffers.keys.toList();
     for(int i = 0; i < len.length;i++){
       if(len[i] is BufferAttribute){
+        (len[i] as BufferAttribute).dispose();
+        remove(len[i]);
+      }
+      else if(len[i] is NativeArray){
+        (len[i] as NativeArray).dispose();
         remove(len[i]);
       }
     }
     buffers.clear();
   }
   void remove(BufferAttribute attribute) {
-    if (attribute.type == "InterleavedBufferAttribute") {
+    if (attribute is InterleavedBufferAttribute) {
       final data = buffers.get(attribute.data);
 
-      if (data) {
+      if (data != null) {
         gl.deleteBuffer(data.buffer);
-
         buffers.delete(attribute.data);
       }
     } else {
@@ -130,7 +143,7 @@ class WebGLAttributes {
   }
 
   void update(attribute, bufferType, {String? name}) {
-    if (attribute.type == "GLBufferAttribute") {
+    if (attribute is GLBufferAttribute) {
       final cached = buffers.get(attribute);
       if (cached == null || cached["version"] < attribute.version) {
         buffers.add(key: attribute, value: createBuffer(attribute, bufferType, name: name));
@@ -138,7 +151,7 @@ class WebGLAttributes {
       return;
     }
 
-    if (attribute.type == "InterleavedBufferAttribute") {
+    if (attribute is InterleavedBufferAttribute) {
       attribute = attribute.data;
     }
 

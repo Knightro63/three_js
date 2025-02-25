@@ -10,7 +10,7 @@ class RenderPass extends Pass {
   Material? overrideMaterial;
   final Color _oldClearColor = Color(1, 1, 1);
 
-  RenderPass(Object3D scene, Camera camera, [this.overrideMaterial, this.clearColor,this.clearAlpha = 0]): super() {
+  RenderPass(Object3D scene, Camera camera, [this.overrideMaterial, this.clearColor, this.clearAlpha = 0]): super() {
     this.scene = scene;
     this.camera = camera;
 
@@ -19,7 +19,7 @@ class RenderPass extends Pass {
   }
 
   @override
-  void render(renderer, writeBuffer, readBuffer, {double? deltaTime, bool? maskActive}) {
+  void render(WebGLRenderer renderer, WebGLRenderTarget writeBuffer, WebGLRenderTarget readBuffer, {double? deltaTime, bool? maskActive}) {
     final oldAutoClear = renderer.autoClear;
     renderer.autoClear = false;
 

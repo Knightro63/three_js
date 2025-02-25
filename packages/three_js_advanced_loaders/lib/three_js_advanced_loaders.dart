@@ -8,3 +8,7 @@ export 'ktx_loader.dart';
 export 'textures/compressed_texture_loader.dart';
 export 'usdz/usdz_loader.dart';
 export 'scn/scn_loader.dart';
+export 'tga_loader.dart';
+export 'collada/collada_loader.dart';
+export 'collada/collada_data.dart';
+export 'md2/index.dart';

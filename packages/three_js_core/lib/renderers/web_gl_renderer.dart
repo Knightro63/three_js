@@ -7,7 +7,6 @@ class WebGLRenderer {
   bool depth = true;
   bool stencil = true;
   bool antialias = false;
-  String outputColorSpace = SRGBColorSpace;
 
   final currentClearColor = Color.fromHex32( 0x000000 );
 	double currentClearAlpha = 0;
@@ -49,7 +48,7 @@ class WebGLRenderer {
 
   List<Plane> clippingPlanes = [];
   bool localClippingEnabled = false;
-
+  String _outputColorSpace = SRGBColorSpace;
   // physically based shading
 
   int outputEncoding = LinearEncoding;
@@ -419,10 +418,12 @@ class WebGLRenderer {
     objects.dispose();
     bindingStates.dispose();
     programCache.dispose();
+    background.dispose();
 
     textures.dispose();
     geometries.dispose();
-    uniformsGroups.dispose();
+    shadowMap.dispose();
+    //materials.renderer.dispose();
 
     xr.dispose();
 
@@ -432,6 +433,11 @@ class WebGLRenderer {
     if (_transmissionRenderTarget != null) {
       _transmissionRenderTarget!.dispose();
       _transmissionRenderTarget = null;
+    }
+
+    currentRenderList?.dispose();
+    for(final stack in renderListStack){
+      stack.dispose();
     }
 
     animation.stop();
@@ -547,7 +553,7 @@ class WebGLRenderer {
     }
 
     final drawCount = drawEnd - drawStart;
-    if ( drawCount < 0 || drawCount == double.infinity ) return;
+    if ( drawCount < 0 || drawCount == double.maxFinite.toInt() ) return;
 
     bindingStates.setup(object, material, program, geometry, index);
 
@@ -561,7 +567,7 @@ class WebGLRenderer {
     }
 
     if (object is Mesh) {
-      if (material.wireframe == true) {
+      if (material.wireframe) {
         state.setLineWidth(material.wireframeLinewidth! * getTargetPixelRatio());
         renderer.setMode(WebGL.LINES);
       } 
@@ -605,7 +611,7 @@ class WebGLRenderer {
       renderer.renderInstances(drawStart, drawCount, object.count!);
     } 
     else if (geometry is InstancedBufferGeometry) {
-      final instanceCount = math.min(geometry.instanceCount!, geometry.maxInstanceCount!);
+      final instanceCount = math.min(geometry.instanceCount!, geometry.maxInstanceCount ?? 0);
       renderer.renderInstances(drawStart, drawCount, instanceCount);
     } 
     else {
@@ -801,10 +807,10 @@ class WebGLRenderer {
     }
 
     if (scene is Scene) {
-      scene.onAfterRender(renderer: this, scene: scene, camera: camera);
+      scene.onAfterRender?.call(renderer: this, scene: scene, camera: camera);
     }
 
-    // _gl.finish();
+    _gl.finish();
 
     bindingStates.resetDefaultState();
     _currentMaterialId = -1;
@@ -835,7 +841,7 @@ class WebGLRenderer {
     final visible = object.layers.test(camera.layers);
     
     if (visible) {
-      if (object is Group || object.type == "AnimationObject") {
+      if (object is Group) {
         groupOrder = object.renderOrder;
       } 
       else if (object is LOD) {
@@ -887,7 +893,7 @@ class WebGLRenderer {
               if ( geometry.boundingSphere == null ) geometry.computeBoundingSphere();
               _vector3.setFrom( geometry.boundingSphere!.center );
             }
-            _vector3..setFromMatrixPosition(object.matrixWorld)..applyMatrix4(projScreenMatrix);
+            _vector3..applyMatrix4(object.matrixWorld)..applyMatrix4(projScreenMatrix);
           }
 
           if (material is GroupMaterial) {
@@ -961,7 +967,7 @@ class WebGLRenderer {
 
 			if ( currentRenderState?.state.transmissionRenderTarget[ camera.id ] == null ) {
 
-				currentRenderState?.state.transmissionRenderTarget[ camera.id ] = WebGLRenderTarget( 1, 1, RenderTargetOptions({
+				currentRenderState?.state.transmissionRenderTarget[ camera.id ] = WebGLRenderTarget( 1, 1, WebGLRenderTargetOptions({
 					'generateMipmaps': true,
 					'type': ( extensions.has( 'EXT_color_buffer_half_float' ) || extensions.has( 'EXT_color_buffer_float' ) ) ? HalfFloatType : UnsignedByteType,
 					'minFilter': LinearMipmapLinearFilter,
@@ -973,14 +979,11 @@ class WebGLRenderer {
 
 				// debug
 
-				/*
-				const geometry = new PlaneGeometry();
-				const material = new MeshBasicMaterial( { map: _transmissionRenderTarget.texture } );
+				// final geometry = new PlaneGeometry();
+				// final material = new MeshBasicMaterial( { MaterialProperty.map: _transmissionRenderTarget?.texture } );
 
-				const mesh = new Mesh( geometry, material );
-				scene.add( mesh );
-				*/
-
+				// final mesh = new Mesh( geometry, material );
+				// scene.add( mesh );
 			}
 
 			final transmissionRenderTarget = currentRenderState?.state.transmissionRenderTarget[ camera.id ];
@@ -1106,7 +1109,7 @@ class WebGLRenderer {
       renderBufferDirect(camera, scene, geometry, material, object, group);
     }
 
-    object.onAfterRender(renderer: this, scene: scene, camera: camera, geometry: geometry, material: material, group: group);
+    object.onAfterRender?.call(renderer: this, scene: scene, camera: camera, geometry: geometry, material: material, group: group);
 
     // print("2 render renderObject type: ${object.type} name: ${object.name} ${DateTime.now().millisecondsSinceEpoch}");
   }
@@ -1592,7 +1595,7 @@ class WebGLRenderer {
 
       final webglFramebuffer = properties.get(renderTarget)["__webglFramebuffer"];
 
-      if (renderTarget.isWebGLCubeRenderTarget) {
+      if (renderTarget is WebGLCubeRenderTarget) {
         if (webglFramebuffer[ activeCubeFace ] is List) {
           framebuffer = webglFramebuffer[ activeCubeFace ][ activeMipmapLevel ];
         } 
@@ -1653,7 +1656,7 @@ class WebGLRenderer {
 
     dynamic framebuffer = properties.get(renderTarget)["__webglFramebuffer"]; //can be Map or int
 
-    if (renderTarget.isWebGLCubeRenderTarget && activeCubeFaceIndex != null) {
+    if (renderTarget is WebGLCubeRenderTarget && activeCubeFaceIndex != null) {
       framebuffer = framebuffer?[activeCubeFaceIndex];
     }
 
@@ -1834,5 +1837,12 @@ class WebGLRenderer {
   }
 
 	int get coordinateSystem => WebGLCoordinateSystem;
-	
+	String get outputColorSpace => _outputColorSpace;
+	set outputColorSpace(String colorSpace ) {
+		_outputColorSpace = colorSpace;
+
+		final gl = this.getContext();
+		gl.drawingBufferColorSpace = colorSpace == DisplayP3ColorSpace ? 'display-p3' : 'srgb';
+		gl.unpackColorSpace = ColorManagement.workingColorSpace == LinearDisplayP3ColorSpace ? 'display-p3' : 'srgb';
+	}
 }

@@ -146,6 +146,7 @@ mixin WebGLUniformsHelper {
   late int size;
 
   List<double> flatten(List array, int nBlocks, int blockSize) {
+    if(array.isEmpty) return [];
     final firstElem = array[0];
 
     if (firstElem is num || firstElem is double || firstElem is int) {

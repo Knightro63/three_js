@@ -29,7 +29,7 @@ class WebGLClipping {
 
     localClippingEnabled = enableLocalClipping;
 
-    globalState = projectPlanes(planes, camera, 0,);
+    globalState = projectPlanes(planes, camera, 0);
     numGlobalPlanes = planes.length;
 
     return enabled;

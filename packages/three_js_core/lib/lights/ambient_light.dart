@@ -18,7 +18,7 @@ class AmbientLight extends Light {
   /// strength/intensity. Default is `1`.
   /// 
   /// Creates a new [name].
-  AmbientLight(super.color, [super.intensity]){
+  AmbientLight([super.color, super.intensity]){
     type = 'AmbientLight';
   }
 

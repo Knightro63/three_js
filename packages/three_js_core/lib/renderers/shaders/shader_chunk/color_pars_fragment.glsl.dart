@@ -1,4 +1,4 @@
-String colorParsFragment = """
+const String colorParsFragment = """
 #if defined( USE_COLOR_ALPHA )
 
 	varying vec4 vColor;

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:three_js_core/others/index.dart';
 
@@ -362,6 +364,7 @@ class PMREMGenerator {
 
     final uniforms = material.uniforms;
 
+    // print(material.uniforms); 
     uniforms['envMap']["value"] = texture;
 
     final size = _cubeSize.toDouble();
@@ -547,7 +550,7 @@ class PMREMGenerator {
   }
 
   WebGLRenderTarget _createRenderTarget(int width, int height, Map<String,dynamic> params) {
-    final cubeUVRenderTarget = WebGLRenderTarget(width, height, RenderTargetOptions(params));
+    final cubeUVRenderTarget = WebGLRenderTarget(width, height, WebGLRenderTargetOptions(params));
     cubeUVRenderTarget.texture.mapping = CubeUVReflectionMapping;
     cubeUVRenderTarget.texture.name = 'PMREM.cubeUv';
     cubeUVRenderTarget.scissorTest = true;
@@ -571,7 +574,7 @@ class PMREMGenerator {
         'CUBEUV_MAX_MIP': "$lodMax.0",
       },
       "uniforms": {
-        'envMap': {"value": null},
+        'envMap': <String,dynamic>{"value": null},
         'samples': {"value": 1},
         'weights': {"value": weights},
         'latitudinal': {"value": false},
@@ -652,7 +655,7 @@ class PMREMGenerator {
   ShaderMaterial _getEquirectMaterial() {
     final shaderMaterial = ShaderMaterial.fromMap({
       "name": 'EquirectangularToCubeUV',
-      "uniforms": {'envMap': {'value': null}},
+      "uniforms": <String,dynamic>{'envMap': <String,dynamic>{'value': null}},
       "vertexShader": _getCommonVertexShader(),
       "fragmentShader": """
 
@@ -683,7 +686,7 @@ class PMREMGenerator {
     final shaderMaterial = ShaderMaterial.fromMap({
       "name": 'CubemapToCubeUV',
       "uniforms": {
-        'envMap': {},
+        'envMap': <String,dynamic>{},
         'flipEnvMap': {"value": -1}
       },
       "vertexShader": _getCommonVertexShader(),
@@ -712,8 +715,27 @@ class PMREMGenerator {
     return shaderMaterial;
   }
 
+  String _getPlatformVertexHelper() {
+    if (kIsWeb) {
+      return "";
+    }
+
+    if (Platform.isMacOS) {
+      return """
+        #define attribute in
+        #define varying out
+        #define texture2D texture
+      """;
+    }
+
+    return """
+    """;
+  }
+
   String _getCommonVertexShader() {
     return """
+
+      ${_getPlatformVertexHelper()}
 
       precision mediump float;
       precision mediump int;

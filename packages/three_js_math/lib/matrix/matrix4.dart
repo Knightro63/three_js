@@ -1,7 +1,5 @@
 import 'dart:typed_data';
-
 import 'index.dart';
-import 'package:flutter_angle/flutter_angle.dart';
 import '../vector/index.dart';
 import '../rotation/index.dart';
 import 'dart:math' as math;
@@ -967,33 +965,6 @@ class Matrix4 {
 
     return this;
   }
-
-  NativeArray copyIntoNativeArray(NativeArray array, [int offset = 0]) {
-    final te = storage;
-
-    array[offset] = te[0];
-    array[offset + 1] = te[1];
-    array[offset + 2] = te[2];
-    array[offset + 3] = te[3];
-
-    array[offset + 4] = te[4];
-    array[offset + 5] = te[5];
-    array[offset + 6] = te[6];
-    array[offset + 7] = te[7];
-
-    array[offset + 8] = te[8];
-    array[offset + 9] = te[9];
-    array[offset + 10] = te[10];
-    array[offset + 11] = te[11];
-
-    array[offset + 12] = te[12];
-    array[offset + 13] = te[13];
-    array[offset + 14] = te[14];
-    array[offset + 15] = te[15];
-
-    return array;
-  }
-
   List<num> copyIntoArray(List<num> array, [int offset = 0]) {
     final te = storage;
 

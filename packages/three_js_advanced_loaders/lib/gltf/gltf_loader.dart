@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert' as convert;
 import 'dart:typed_data';
+import 'package:three_js_advanced_loaders/ktx_loader.dart';
 import 'package:three_js_core/three_js_core.dart';
 import 'gltf_extensions.dart';
 import 'gltf_parser.dart';
@@ -40,7 +41,7 @@ class GLTFLoader extends Loader {
   late final FileLoader _loader;
   late List<Function> pluginCallbacks;
   late dynamic _dracoLoader;
-  late dynamic _ktx2Loader;
+  late KTXLoader? _ktx2Loader;
   late dynamic _ddsLoader;
   late dynamic _meshoptDecoder;
 
@@ -165,15 +166,15 @@ class GLTFLoader extends Loader {
   //   return this;
   // }
 
-  // GLTFLoader setKTX2Loader(ktx2Loader) {
-  //   _ktx2Loader = ktx2Loader;
-  //   return this;
-  // }
+  GLTFLoader setKTX2Loader(ktx2Loader) {
+    _ktx2Loader = ktx2Loader;
+    return this;
+  }
 
-  // GLTFLoader setMeshoptDecoder(meshoptDecoder) {
-  //   _meshoptDecoder = meshoptDecoder;
-  //   return this;
-  // }
+  GLTFLoader setMeshoptDecoder(meshoptDecoder) {
+    _meshoptDecoder = meshoptDecoder;
+    return this;
+  }
 
   GLTFLoader register(Function callback) {
     if (pluginCallbacks.contains(callback)) {

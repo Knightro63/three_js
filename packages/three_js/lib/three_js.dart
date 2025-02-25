@@ -1,5 +1,6 @@
 library three_js;
 
+/// Export all the packages that relies on Three_JS to work
 export 'package:three_js_math/three_js_math.dart';
 export 'package:three_js_advanced_loaders/three_js_advanced_loaders.dart';
 export 'package:three_js_animations/three_js_animations.dart';

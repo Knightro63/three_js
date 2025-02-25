@@ -60,7 +60,7 @@ class BufferGeometry with EventDispatcher {
   BufferAttribute? index;
 
   late List<MorphTarget> morphTargets;
-  late BufferGeometry directGeometry;
+  BufferGeometry? directGeometry;
 
   bool disposed = false;
   bool elementsNeedUpdate = false;
@@ -1019,17 +1019,33 @@ class BufferGeometry with EventDispatcher {
   /// Frees the GPU-related resources allocated by this instance. Call this
   /// method whenever this instance is no longer used in your app.
   void dispose() {
-    dispatchEvent(Event(type: "dispose"));
-
     if(disposed) return;
     disposed = true;
-    for(final temp in attributes.keys){
-      attributes[temp].dispose();
+
+    dispatchEvent(Event(type: "dispose"));
+
+    if(attributes.isNotEmpty){
+      for(final temp in attributes.keys){
+        (attributes[temp] as BaseBufferAttribute?)?.dispose();
+      }
     }
 
-    for(final temp in morphAttributes.keys){
-      (morphAttributes[temp] as BufferAttribute).dispose();
+    if(morphAttributes.isNotEmpty){
+      for(final temp in morphAttributes.keys){
+        (morphAttributes[temp] as BaseBufferAttribute?)?.dispose();
+      }
     }
+
+    if(userData.isNotEmpty){
+      for(final temp in userData.keys){
+        if(userData[temp] is BaseBufferAttribute){
+          userData[temp].dispose();
+        }
+      }
+    }
+
+    index?.dispose();
+    directGeometry?.dispose();
   }
 }
 

@@ -49,7 +49,7 @@ class Frustum {
     return this;
   }
 
-  Frustum setFromMatrix(Matrix4 m,[int coordinateSystem = WebGLCoordinateSystem]) {
+  Frustum setFromMatrix(Matrix4 m,[int coordinateSystem = 2000]) {
     final planes = this.planes;
     final me = m.storage;
     final me0 = me[0], me1 = me[1], me2 = me[2], me3 = me[3];
@@ -64,9 +64,9 @@ class Frustum {
     planes[4].setComponents(me3 - me2, me7 - me6, me11 - me10, me15 - me14).normalize();
     planes[5].setComponents(me3 + me2, me7 + me6, me11 + me10, me15 + me14).normalize();
 
-		if ( coordinateSystem == WebGLCoordinateSystem ) {
+		if ( coordinateSystem == 2000 ) {
 			planes[ 5 ].setComponents( me3 + me2, me7 + me6, me11 + me10, me15 + me14 ).normalize();
-		} else if ( coordinateSystem == WebGPUCoordinateSystem ) {
+		} else if ( coordinateSystem == 2000 ) {
 			planes[ 5 ].setComponents( me2, me6, me10, me14 ).normalize();
 		} else {
 			throw( 'THREE.Frustum.setFromProjectionMatrix(): Invalid coordinate system: $coordinateSystem');

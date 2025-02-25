@@ -312,7 +312,7 @@ class GPUComputationRenderer {
 			minFilter = minFilter ?? NearestFilter;
 			magFilter = magFilter ?? NearestFilter;
 
-			final renderTarget = WebGLRenderTarget( sizeXTexture, sizeYTexture, RenderTargetOptions({
+			final renderTarget = WebGLRenderTarget( sizeXTexture, sizeYTexture, WebGLRenderTargetOptions({
 				'wrapS': wrapS,
 				'wrapT': wrapT,
 				'minFilter': minFilter,

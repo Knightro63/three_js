@@ -21,6 +21,7 @@ import '../lights/index.dart';
 import 'webxr/web_xr_controller.dart';
 import 'webxr/web_xr_depth_sensing.dart';
 
+part 'web_gl_multiple_render_targets.dart';
 part 'web_gl_cube_render_target.dart';
 part 'web_gl_renderer.dart';
 part 'web_gl_render_target.dart';

@@ -1,4 +1,4 @@
-String spriteVert = """
+const String spriteVert = """
 uniform float rotation;
 uniform vec2 center;
 

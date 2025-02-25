@@ -17,7 +17,7 @@ import 'package:three_js_core/three_js_core.dart';
 /// final material = MeshBasicMaterial({ MaterialProperty.map:texture});
 /// ```
 class TextureLoader extends Loader {
-  TextureLoader({LoadingManager? manager,bool flipY = false}):super(manager,flipY);
+  TextureLoader({LoadingManager? manager, bool flipY = false}):super(manager,flipY);
 
   Texture? _textureProcess(ImageElement? imageElement, String url){
     final Texture texture = Texture();
@@ -57,7 +57,7 @@ class TextureLoader extends Loader {
     final loader = ImageLoader(manager,flipY);
     loader.setPath(path);
     final ImageElement? image = await loader.fromPath(filePath);
-    return _textureProcess(image,filePath);
+    return _textureProcess(image,path+filePath);
   }
   @override
   Future<Texture?> fromBlob(Blob blob) async{
@@ -80,6 +80,7 @@ class TextureLoader extends Loader {
   }
 
   /// If the type of format is unknown load it here.
+  @override
   Future<Texture?> unknown(dynamic url) async{
     if(url is File){
       return fromFile(url);
@@ -104,7 +105,7 @@ class TextureLoader extends Loader {
       else if(url.contains('http://') || url.contains('https://')){  
         return fromNetwork(Uri.parse(url));
       }
-      else if(url.contains('assets')){
+      else if(url.contains('assets') || path.contains('assets')){
         return fromAsset(url);
       }
       else{

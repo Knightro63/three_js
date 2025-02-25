@@ -1,19 +1,21 @@
-String transmissionFragment = """
+const String transmissionFragment = """
 #ifdef USE_TRANSMISSION
 
-  float transmissionAlpha = 1.0;
-	float transmissionFactor = transmission;
-	float thicknessFactor = thickness;
+	material.transmission = transmission;
+	material.transmissionAlpha = 1.0;
+	material.thickness = thickness;
+	material.attenuationDistance = attenuationDistance;
+	material.attenuationColor = attenuationColor;
 
 	#ifdef USE_TRANSMISSIONMAP
 
-		transmissionFactor *= texture2D( transmissionMap, vUv ).r;
+		material.transmission *= texture2D( transmissionMap, vTransmissionMapUv ).r;
 
 	#endif
 
 	#ifdef USE_THICKNESSMAP
 
-		thicknessFactor *= texture2D( thicknessMap, vUv ).g;
+		material.thickness *= texture2D( thicknessMap, vThicknessMapUv ).g;
 
 	#endif
 
@@ -21,12 +23,14 @@ String transmissionFragment = """
 	vec3 v = normalize( cameraPosition - pos );
 	vec3 n = inverseTransformDirection( normal, viewMatrix );
 
-	vec4 transmission = getIBLVolumeRefraction(
-		n, v, roughnessFactor, material.diffuseColor, material.specularColor, material.specularF90,
-		pos, modelMatrix, viewMatrix, projectionMatrix, ior, thicknessFactor,
-		attenuationColor, attenuationDistance );
+	vec4 transmitted = getIBLVolumeRefraction(
+		n, v, material.roughness, material.diffuseColor, material.specularColor, material.specularF90,
+		pos, modelMatrix, viewMatrix, projectionMatrix, material.dispersion, material.ior, material.thickness,
+		material.attenuationColor, material.attenuationDistance );
 
-	totalDiffuse = mix( totalDiffuse, transmission.rgb, transmissionFactor );
-	transmissionAlpha = transmission.a;
+	material.transmissionAlpha = mix( material.transmissionAlpha, transmitted.a, material.transmission );
+
+	totalDiffuse = mix( totalDiffuse, transmitted.rgb, material.transmission );
+
 #endif
 """;

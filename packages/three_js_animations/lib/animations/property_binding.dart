@@ -102,7 +102,7 @@ class PropertyBinding extends AnimationBinding{
   late dynamic targetObject;
   late Function(dynamic,int) getValue;
   late Function(dynamic,int) setValue;
-  late int? propertyIndex;
+  late String? propertyIndex;
 
   PropertyBinding(this.rootNode, this.path, Map<String, dynamic>? parsedPath) {
     this.parsedPath = parsedPath ?? PropertyBinding.parseTrackName(path);
@@ -404,7 +404,7 @@ class PropertyBinding extends AnimationBinding{
 
     final objectName = parsedPath["objectName"];
     final propertyName = parsedPath["propertyName"];
-    int? propertyIndex = parsedPath["propertyIndex"];
+    String? propertyIndex = parsedPath["propertyIndex"];
 
     if (targetObject == null) {
       targetObject = PropertyBinding.findNode(rootNode, parsedPath["nodeName"]) ?? rootNode;

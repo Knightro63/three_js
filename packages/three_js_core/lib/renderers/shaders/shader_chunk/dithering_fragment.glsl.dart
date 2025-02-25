@@ -1,4 +1,4 @@
-String ditheringFragment = """
+const String ditheringFragment = """
 #ifdef DITHERING
 
 	gl_FragColor.rgb = dithering( gl_FragColor.rgb );

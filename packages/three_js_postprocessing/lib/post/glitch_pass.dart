@@ -10,7 +10,7 @@ class GlitchPass extends Pass {
   num curF = 0;
   late num randX;
 
-  GlitchPass(int? dtSize) : super() {
+  GlitchPass([int? dtSize]) : super() {
     final shader = digitalGlitch;
     uniforms = UniformsUtils.clone(shader["uniforms"]);
     dtSize ??= 64;

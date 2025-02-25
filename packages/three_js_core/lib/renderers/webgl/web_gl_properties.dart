@@ -1,7 +1,7 @@
 part of three_webgl;
 
 class WebGLProperties {
-  WeakMap properties = WeakMap<dynamic, Map<String, dynamic>?>();
+  final properties = WeakMap<dynamic, Map<String, dynamic>?>();
 
   Map<String, dynamic> get(object) {
     Map<String, dynamic> map;
@@ -25,7 +25,5 @@ class WebGLProperties {
     m[key] = value;
   }
 
-  void dispose() {
-    properties = WeakMap<dynamic, Map<String, dynamic>?>();
-  }
+  void dispose() {}
 }

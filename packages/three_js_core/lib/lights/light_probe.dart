@@ -26,6 +26,7 @@ class LightProbe extends Light {
   /// [intensity] - (optional) Numeric value of the light probe's
   /// intensity. Default is `1`.
   LightProbe.create([SphericalHarmonics3? sh, double? intensity]) : super(null, intensity){
+    this.sh = sh;
     type = 'LightProbe';
   }
   

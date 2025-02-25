@@ -71,7 +71,7 @@ class WebGLShaderCache {
   _getShaderStage(String code) {
     final cache = shaderCache;
 
-    if (!cache.containsKey(code)) {
+    if (cache.containsKey(code) == false) {
       final stage = WebGLShaderStage(code);
       cache[code] = stage;
     }

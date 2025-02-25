@@ -5,7 +5,7 @@ class WebGLRenderLists {
 
   WeakMap lists = WeakMap();
 
-  WebGLRenderList get(Object3D? scene, int renderCallDepth) {
+  WebGLRenderList get(scene, renderCallDepth) {
     dynamic list;
 
     if (lists.has(scene) == false) {

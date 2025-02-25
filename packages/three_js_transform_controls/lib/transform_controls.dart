@@ -83,10 +83,10 @@ class TransformControls extends Object3D {
     }
   }
 
-  String _mode = "translate";
-  String get mode => _mode;
+  GizmoType _mode = GizmoType.translate;
+  GizmoType get mode => _mode;
 
-  set mode(String value) {
+  set mode(GizmoType value) {
     if (value != _mode) {
       _mode = value;
       _plane.mode = value;
@@ -149,10 +149,10 @@ class TransformControls extends Object3D {
     }
   }
 
-  int _size = 1;
-  int get size => _size;
+  double _size = 1;
+  double get size => _size;
 
-  set size(int value) {
+  set size(double value) {
     if (value != _size) {
       _size = value;
       _plane.size = value;
@@ -483,7 +483,7 @@ class TransformControls extends Object3D {
       }
 
       dragging = true;
-      _mouseDownEvent.mode = mode;
+      _mouseDownEvent.mode = mode.name;
       dispatchEvent(_mouseDownEvent);
     }
   }
@@ -497,11 +497,11 @@ class TransformControls extends Object3D {
     _pointer0 = pointer;
 
     final axis = this.axis;
-    final mode = this.mode;
+    final GizmoType mode = this.mode;
     final object = this.object;
     String space = this.space;
 
-    if (mode == 'scale') {
+    if (mode == GizmoType.scale) {
       space = 'local';
     } 
     else if (axis == 'E' || axis == 'XYZE' || axis == 'XYZ') {
@@ -521,7 +521,7 @@ class TransformControls extends Object3D {
 
     pointEnd.setFrom(planeIntersect.point!).sub(worldPositionStart);
 
-    if (mode == 'translate') {
+    if (mode == GizmoType.translate) {
       // Apply translate
 
       _offset.setFrom(pointEnd).sub(pointStart);
@@ -590,7 +590,7 @@ class TransformControls extends Object3D {
         }
       }
     } 
-    else if (mode == 'scale') {
+    else if (mode == GizmoType.scale) {
       if (axis.contains('XYZ')) {
         double d = pointEnd.length / pointStart.length;
 
@@ -609,21 +609,20 @@ class TransformControls extends Object3D {
 
         _tempVector2.divide(_tempVector);
 
-        if (axis.contains('X')) {
+        if (!axis.contains('X')) {
           _tempVector2.x = 1;
         }
 
-        if (axis.contains('Y')) {
+        if (!axis.contains('Y')) {
           _tempVector2.y = 1;
         }
 
-        if (axis.contains('Z')) {
+        if (!axis.contains('Z')) {
           _tempVector2.z = 1;
         }
       }
 
       // Apply scale
-
       object.scale.setFrom(_scaleStart).multiply(_tempVector2);
 
       if (scaleSnap != null) {
@@ -643,7 +642,7 @@ class TransformControls extends Object3D {
         }
       }
     } 
-    else if (mode == 'rotate') {
+    else if (mode == GizmoType.rotate) {
       _offset.setFrom(pointEnd).sub(pointStart);
 
       final rotationSpeed = 20 / worldPosition.distanceTo(
@@ -703,7 +702,7 @@ class TransformControls extends Object3D {
     if (pointer.button != 0) return;
 
     if (dragging && (axis != null)) {
-      _mouseUpEvent.mode = mode;
+      _mouseUpEvent.mode = mode.name;
       dispatchEvent(_mouseUpEvent);
     }
 
@@ -751,31 +750,31 @@ class TransformControls extends Object3D {
     return _raycaster;
   }
 
-  String getMode() {
+  GizmoType getMode() {
     return mode;
   }
 
-  void setMode(mode) {
+  void setMode(GizmoType mode) {
     this.mode = mode;
   }
 
-  void setTranslationSnap(translationSnap) {
+  void setTranslationSnap(double? translationSnap) {
     this.translationSnap = translationSnap;
   }
 
-  void setRotationSnap(rotationSnap) {
+  void setRotationSnap(double? rotationSnap) {
     this.rotationSnap = rotationSnap;
   }
 
-  void setScaleSnap(scaleSnap) {
+  void setScaleSnap(double? scaleSnap) {
     this.scaleSnap = scaleSnap;
   }
 
-  void setSize(size) {
+  void setSize(double size) {
     this.size = size;
   }
 
-  void setSpace(space) {
+  void setSpace(String space) {
     this.space = space;
   }
   @Deprecated("TransformControls: update function has no more functionality.")

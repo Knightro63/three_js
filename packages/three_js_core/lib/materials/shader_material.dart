@@ -1,9 +1,7 @@
 import 'dart:convert';
-import 'package:three_js_core/others/index.dart';
-import '../renderers/shaders/index.dart';
+import 'package:three_js_core/three_js_core.dart';
 import '../renderers/shaders/shader_chunk/default_fragment.glsl.dart';
 import '../renderers/shaders/shader_chunk/default_vertex.glsl.dart';
-import './material.dart';
 
 /// A material rendered with custom shaders. A shader is a small program
 /// written in
@@ -98,15 +96,17 @@ class ShaderMaterial extends Material {
       if (parameters['attributes'] != null) {
         console.warning('ShaderMaterial: attributes should now be defined in BufferGeometry instead.');
       }
-
+      uniformsGroups = parameters['uniformsGroups'] ?? [];
+      parameters.remove('uniformsGroups');
       setValuesFromString(parameters);
     }
   }
 
   void _init(){
     type = 'ShaderMaterial';
-    defines = {};
-    uniforms = {};
+    defines = <String,dynamic>{};
+    uniforms = <String,dynamic>{};
+    uniformsGroups = [];
 
     vertexShader = defaultVertex;
     fragmentShader = defaultFragment;
@@ -133,8 +133,8 @@ class ShaderMaterial extends Material {
     // use these default values in WebGL. This avoids errors when buffer data is missing.
     defaultAttributeValues = {
       'color': [1, 1, 1],
-      'uv': [0, 0],
-      'uv2': [0, 0]
+      'uv': [0.0, 0.0],
+      'uv2': [0.0, 0.0]
     };
 
     index0AttributeName = null;
@@ -175,20 +175,20 @@ class ShaderMaterial extends Material {
 
   @override
   ShaderMaterial clone() {
-    return ShaderMaterial({}).copy(this);
+    return ShaderMaterial().copy(this);
   }
 
   // toJson( meta ) {
 
-  //   var data = super.toJson( meta );
+  //   final data = super.toJson( meta );
 
   //   data.glslVersion = this.glslVersion;
   //   data.uniforms = {};
 
-  //   for ( var name in this.uniforms ) {
+  //   for ( final name in this.uniforms ) {
 
-  //     var uniform = this.uniforms[ name ];
-  //     var value = uniform.value;
+  //     final uniform = this.uniforms[ name ];
+  //     final value = uniform.value;
 
   //     if ( value && value.isTexture ) {
 
@@ -256,9 +256,9 @@ class ShaderMaterial extends Material {
   //   data.vertexShader = this.vertexShader;
   //   data.fragmentShader = this.fragmentShader;
 
-  //   var extensions = {};
+  //   final extensions = {};
 
-  //   for ( var key in this.extensions ) {
+  //   for ( final key in this.extensions ) {
 
   //     if ( this.extensions[ key ] === true ) extensions[ key ] = true;
 

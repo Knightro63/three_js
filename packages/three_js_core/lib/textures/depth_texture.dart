@@ -79,7 +79,7 @@ class DepthTexture extends Texture {
     flipY = false;
     generateMipmaps = false;
   }
-	
+
   @override
   DepthTexture copy(Texture source ) {
 		super.copy( source );

@@ -123,8 +123,8 @@ class _MyAppState extends State<WebglGeometryText> {
   }
 
   Future<TYPRFont> loadFont() async {
-    var loader = TYPRLoader();
-    var font = await loader.fromAsset("assets/pingfang.ttf");
+    final loader = TYPRLoader();
+    final font = await loader.fromAsset("assets/pingfang.ttf");
     loader.dispose();
 
     return font!;

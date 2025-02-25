@@ -1,4 +1,4 @@
-String normalVertex = """
+const String normalVertex = """
 #ifndef FLAT_SHADED // normal is computed with derivatives when FLAT_SHADED
 
 	vNormal = normalize( transformedNormal );

@@ -1,6 +1,4 @@
 import 'dart:typed_data';
-import 'index.dart';
-
 import '../others/constants.dart';
 import '../math/index.dart';
 import 'package:flutter_angle/flutter_angle.dart';
@@ -12,7 +10,6 @@ import 'package:flutter_angle/flutter_angle.dart';
 /// [Interleaved array basics](https://blog.tojicode.com/2011/05/interleaved-array-basics.html)
 class InterleavedBuffer {
   NativeArray array;
-  List<Ranges> updateRanges = [];
   int stride;
   late int meshPerAttribute;
   late int count;
@@ -61,14 +58,6 @@ class InterleavedBuffer {
     usage = value;
     return this;
   }
-
-	void addUpdateRange(int start,int count ) {
-		this.updateRanges.add(Ranges(start, count ));
-	}
-
-	void clearUpdateRanges() {
-		this.updateRanges.clear();
-	}
 
   /// Copies another [source] to this [source].
   InterleavedBuffer copy(InterleavedBuffer source) {

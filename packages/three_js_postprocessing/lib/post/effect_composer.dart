@@ -31,7 +31,7 @@ class EffectComposer {
         "format": RGBAFormat
       };
 
-      final size = renderer.getSize(Vector2(null, null));
+      final size = renderer.getSize(Vector2());
       _pixelRatio = renderer.getPixelRatio();
       _width = size.width.toInt();
       _height = size.height.toInt();
@@ -39,7 +39,7 @@ class EffectComposer {
       renderTarget = WebGLRenderTarget(
           (_width * _pixelRatio).toInt(),
           (_height * _pixelRatio).toInt(),
-          RenderTargetOptions(parameters));
+          WebGLRenderTargetOptions(parameters));
     } 
     else {
       _pixelRatio = 1;
@@ -102,12 +102,9 @@ class EffectComposer {
     return true;
   }
 
-  void render([double? deltaTime]) {
+  void render([RenderTarget? currentRenderTarget, double? deltaTime]) {
     // deltaTime value is in seconds
-
     deltaTime ??= clock.getDelta();
-    //final currentRenderTarget = renderer.getRenderTarget();
-
     bool maskActive = false;
 
     Pass? pass;
@@ -126,32 +123,29 @@ class EffectComposer {
           final context = renderer.getContext();
           final stencil = renderer.state.buffers["stencil"];
 
-          //context.stencilFunc( context.NOTEQUAL, 1, 0xffffffff );
+          context.stencilFunc( context.NOTEQUAL, 1, 0xffffffff );
           stencil.setFunc(context.NOTEQUAL, 1, 0xffffffff);
 
           copyPass.render(renderer, writeBuffer, readBuffer, deltaTime: deltaTime);
 
-          //context.stencilFunc( context.EQUAL, 1, 0xffffffff );
+          context.stencilFunc( context.EQUAL, 1, 0xffffffff );
           stencil.setFunc(context.EQUAL, 1, 0xffffffff);
         }
 
         swapBuffers();
       }
 
-      //if (pass != null) {
-        if (pass is MaskPass) {
-          maskActive = true;
-        } 
-        else if (pass is ClearMaskPass) {
-          maskActive = false;
-        }
-      //}
+      if (pass is MaskPass) {
+        maskActive = true;
+      } 
+      else if (pass is ClearMaskPass) {
+        maskActive = false;
+      }
     }
-
-    // renderer.setRenderTarget(currentRenderTarget);
+    if(currentRenderTarget != null) renderer.setRenderTarget(currentRenderTarget);
   }
 
-  void reset(WebGLRenderTarget? renderTarget) {
+  void reset([WebGLRenderTarget? renderTarget]) {
     if (renderTarget == null) {
       final size = renderer.getSize(Vector2());
       _pixelRatio = renderer.getPixelRatio();

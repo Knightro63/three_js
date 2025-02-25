@@ -1,4 +1,4 @@
-String fogVertex = """
+const String fogVertex = """
 #ifdef USE_FOG
 
 	vFogDepth = - mvPosition.z;

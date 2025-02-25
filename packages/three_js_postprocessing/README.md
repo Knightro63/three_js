@@ -1,4 +1,4 @@
-# three_js_text
+# three_js_postprocessing
 
 [![Pub Version](https://img.shields.io/pub/v/three_js_postprocessing)](https://pub.dev/packages/three_js_postprocessing)
 [![analysis](https://github.com/Knightro63/three_js/actions/workflows/flutter.yml/badge.svg)](https://github.com/Knightro63/three_js/actions/)
@@ -10,7 +10,7 @@ This is a dart conversion of three.js and three_dart, originally created by [@mr
 
 ## Usage
 
-This api allows users to add postprocessing procedures to their three_js projet.
+This api allows users to add postprocessing procedures to their three_js project.
 
 ## Contributing
 

@@ -165,7 +165,7 @@ class VOXLoader extends Loader {
 }
 
 class VOXMesh extends Mesh {
-  VOXMesh.create([BufferGeometry? geometry, Material? material]):super( geometry, material );
+  VOXMesh.create([super.geometry, super.material]);
 
 	factory VOXMesh(Chunk chunk){
 		final data = chunk.data;
@@ -258,7 +258,7 @@ class VOXMesh extends Mesh {
 }
 
 class VOXData3DTexture extends Data3DTexture {
-  VOXData3DTexture.create([NativeArray? data, int width = 1, int height = 1, int depth = 1]):super( data, width,height,depth){
+  VOXData3DTexture.create([super.data,super.width = 1, super.height = 1, super.depth = 1]){
 		format = RedFormat;
 		minFilter = NearestFilter;
 		magFilter = LinearFilter;

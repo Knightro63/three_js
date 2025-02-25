@@ -16,7 +16,7 @@ class WebGLCubeUVMaps {
 
       // equirect/cube map to cubeUV conversion
       if (isEquirectMap || isCubeMap) {
-        if (texture.isRenderTargetTexture && texture.needsPMREMUpdate) {
+        if (texture.isRenderTargetTexture && texture.needsPMREMUpdate == true) {
           texture.needsPMREMUpdate = false;
 
           dynamic renderTarget = cubeUVmaps.get(texture);
@@ -35,10 +35,8 @@ class WebGLCubeUVMaps {
           } else {
             final image = texture.image;
 
-            if (
-              (isEquirectMap && image != null && image.height > 0) ||
-              (isCubeMap && image != null && isCubeTextureComplete(image))
-            ) {
+            if ((isEquirectMap && image != null && image.height > 0) ||
+                (isCubeMap && image != null && isCubeTextureComplete(image))) {
               pmremGenerator ??= PMREMGenerator(renderer);
 
               final renderTarget =
@@ -85,6 +83,9 @@ class WebGLCubeUVMaps {
   }
 
   void dispose() {
+    for(final key in cubeUVmaps.keys){
+      cubeUVmaps[key].dispose();
+    }
     cubeUVmaps.clear();
 
     //if (pmremGenerator != null) {

@@ -24,6 +24,15 @@ typedef OnBeforeRender = void Function({
   Map<String, dynamic>? group
 });
 
+typedef OnAfterRender = void Function({
+  WebGLRenderer? renderer,
+  Object3D? scene,
+  Camera? camera,
+  BufferGeometry? geometry,
+  Material? material,
+  Map<String, dynamic>? group
+});
+
 int _object3DId = 0;
 
 Vector3 _v1 = Vector3.zero();
@@ -99,7 +108,7 @@ class Object3D with EventDispatcher {
   // how to handle material is a single material or List<Material>
   Material? material;
 
-  List<double>? morphTargetInfluences;
+  List<double> morphTargetInfluences = [];
   Map<String,dynamic>? morphTargetDictionary;
 
   // InstancedMesh
@@ -449,7 +458,7 @@ class Object3D with EventDispatcher {
       object.dispatchEvent(_addedEvent);
     } 
     else {
-      console.warning('Object3D.add: object not an instance of THREE.Object3D. $object');
+      console.warning('Object3D.add: object not an instance of Object3D. $object');
     }
 
     return this;
@@ -1005,16 +1014,7 @@ class Object3D with EventDispatcher {
   /// [Points] or [Sprite]. Instances of [Object3D], [Group]
   /// or [Bone] are not renderable and thus this callback is not executed
   /// for such objects.
-  void onAfterRender({
-    WebGLRenderer? renderer,
-    Object3D? scene,
-    Camera? camera,
-    BufferGeometry? geometry,
-    Material? material,
-    Map<String, dynamic>? group
-  }) {
-    // print(" Object3D.onAfterRender ${type} ${id} ");
-  }
+    OnAfterRender? onAfterRender;
 
   void onBeforeShadow({
     WebGLRenderer? renderer,
@@ -1123,6 +1123,8 @@ class Object3D with EventDispatcher {
     instanceColor?.dispose();
     instanceColor = null;
 
+    parent?.dispose();
+    
     if(background is NativeArray || background is ImageElement || background is Texture){
       background?.dispose();
       background = null;

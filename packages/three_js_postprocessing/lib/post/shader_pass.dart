@@ -35,8 +35,7 @@ class ShaderPass extends Pass {
   }
 
   @override
-  void render(renderer, writeBuffer, readBuffer,
-      {double? deltaTime, bool? maskActive}) {
+  void render(WebGLRenderer renderer, WebGLRenderTarget writeBuffer, WebGLRenderTarget readBuffer, {double? deltaTime, bool? maskActive}) {
     if (uniforms[textureID] != null) {
       uniforms[textureID]["value"] = readBuffer.texture;
     }

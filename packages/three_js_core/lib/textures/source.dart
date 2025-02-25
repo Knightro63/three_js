@@ -21,6 +21,25 @@ class Source {
     if(value) version++;
 	}
 
+  void dispose(){
+    if(data is List){
+      for(final temp in data){
+        if(temp is NativeArray){
+          temp.dispose();
+        }
+        else if(temp is ImageElement){
+          temp.dispose();
+        }
+      }
+    }
+    else if(data is ImageElement){
+      (data as ImageElement).dispose();
+    }
+    else if(data is NativeArray){
+      (data as NativeArray).dispose();
+    }
+  }
+
   /// [meta] - optional object containing metadata.
   /// 
   /// Convert the data source to three.js

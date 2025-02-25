@@ -1,8 +1,7 @@
-import 'package:three_js_math/three_js_math.dart';
-
 import '../core/index.dart';
 import '../materials/index.dart';
 import './fog.dart';
+import 'package:three_js_math/three_js_math.dart';
 
 /// Scenes allow you to set up what and where is to be rendered by three.js.
 /// 
@@ -17,10 +16,9 @@ class Scene extends Object3D {
   double environmentIntensity = 1;
   Euler environmentRotation = Euler();
 
-  Scene():super(){
+  Scene() : super(){
     autoUpdate = true; // checked by the renderer
     type = 'Scene';
-    overrideMaterial = null;
     background = null;
     environment = null;
     fog = null;

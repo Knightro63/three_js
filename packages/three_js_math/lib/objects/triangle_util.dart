@@ -13,7 +13,7 @@ extension TriangleUtil on Triangle{
     _v0.sub2(a, b);
     target.cross(_v0);
 
-    var targetLengthSq = target.length2;
+    final targetLengthSq = target.length2;
     if (targetLengthSq > 0) {
       // print(" targer: ${target.toJson()} getNormal scale: ${1 / math.sqrt( targetLengthSq )} ");
       target.scale(1 / math.sqrt(targetLengthSq));
@@ -27,13 +27,13 @@ extension TriangleUtil on Triangle{
     _v1.sub2(b, a);
     _v2.sub2(point, a);
 
-    var dot00 = _v0.dot(_v0);
-    var dot01 = _v0.dot(_v1);
-    var dot02 = _v0.dot(_v2);
-    var dot11 = _v1.dot(_v1);
-    var dot12 = _v1.dot(_v2);
+    final dot00 = _v0.dot(_v0);
+    final dot01 = _v0.dot(_v1);
+    final dot02 = _v0.dot(_v2);
+    final dot11 = _v1.dot(_v1);
+    final dot12 = _v1.dot(_v2);
 
-    var denom = (dot00 * dot11 - dot01 * dot01);
+    final denom = (dot00 * dot11 - dot01 * dot01);
 
     // collinear or singular triangle
     if (denom == 0) {
@@ -43,9 +43,9 @@ extension TriangleUtil on Triangle{
       return target;
     }
 
-    var invDenom = 1 / denom;
-    var u = (dot11 * dot02 - dot01 * dot12) * invDenom;
-    var v = (dot00 * dot12 - dot01 * dot02) * invDenom;
+    final invDenom = 1 / denom;
+    final u = (dot11 * dot02 - dot01 * dot12) * invDenom;
+    final v = (dot00 * dot12 - dot01 * dot02) * invDenom;
 
     // barycentric coordinates must always sum to 1
     target.setValues(1 - u - v, v, u);

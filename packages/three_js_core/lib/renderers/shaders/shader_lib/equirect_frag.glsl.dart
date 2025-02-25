@@ -1,4 +1,4 @@
-String equirectFrag = """
+const String equirectFrag = """
 uniform sampler2D tEquirect;
 
 varying vec3 vWorldDirection;
@@ -11,10 +11,10 @@ void main() {
 
 	vec2 sampleUV = equirectUv( direction );
 
-  gl_FragColor = texture2D( tEquirect, sampleUV );
+	gl_FragColor = texture2D( tEquirect, sampleUV );
 
 	#include <tonemapping_fragment>
-	#include <encodings_fragment>
+	#include <colorspace_fragment>
 
 }
 """;

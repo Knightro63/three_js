@@ -156,7 +156,7 @@ class WebGLMorphtargets {
     else {
       double morphInfluencesSum = 0;
 
-      for (int i = 0; i < objectInfluences!.length; i++) {
+      for (int i = 0; i < objectInfluences.length; i++) {
         morphInfluencesSum += objectInfluences[i];
       }
 

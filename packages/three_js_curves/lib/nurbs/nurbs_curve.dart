@@ -1,4 +1,4 @@
-import 'nurbs_utils.dart' as utils;
+import 'nurbs_utils.dart';
 import 'package:three_js_math/three_js_math.dart';
 import '../core/curve.dart';
 
@@ -66,7 +66,7 @@ class NURBSCurve extends Curve {
 		final u = knots[startKnot ] + t * (knots[endKnot ] - knots[startKnot ] ); // linear mapping t->u
 
 		// following results in (wx, wy, wz, w) homogeneous point
-		Vector4 hpoint = utils.calcBSplinePoint(degree,knots,controlPoints, u );
+		Vector4 hpoint = NURBSutils.calcBSplinePoint(degree,knots,controlPoints, u );
 
 		if ( hpoint.w != 1.0 ) {
 
@@ -82,7 +82,7 @@ class NURBSCurve extends Curve {
 	Vector getTangent(num t, [Vector? optionalTarget]) {
 		final tangent = optionalTarget ?? Vector3() ;
 		final u = knots[ 0 ] + t * ( knots[knots.length - 1 ] - knots[ 0 ] );
-		final ders = utils.calcNURBSDerivatives(degree, knots, controlPoints, u, 1 );
+		final ders = NURBSutils.calcNURBSDerivatives(degree, knots, controlPoints, u, 1 );
 		tangent.setFrom( ders[ 1 ] ).normalize();
 		return tangent;
 	}

@@ -30,9 +30,9 @@ class QuaternionLinearInterpolant extends Interpolant {
 
   @override
   List? interpolate(int i1, num t0, num t, num t1) {
-    var result = resultBuffer;
-    var values = sampleValues;
-    var stride = valueSize;
+    final result = resultBuffer;
+    final values = sampleValues;
+    final stride = valueSize;
 
     double v0 = t + (t0 * -1);
     double v1 = t1 + (t0 * -1);

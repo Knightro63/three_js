@@ -11,7 +11,23 @@ class RenderItem {
   double z = 0;
   Map<String, dynamic>? group;
 
-  RenderItem(Map<String, dynamic> json) {
+  void dispose(){
+    material?.dispose();
+    object?.dispose();
+    geometry?.dispose();
+  }
+  RenderItem({
+    this.id = 0,
+    this.object,
+    this.geometry,
+    this.material,
+    this.program,
+    this.groupOrder = 0,
+    this.renderOrder = 0,
+    this.z = 0,
+    this.group
+  });
+  RenderItem.fromMap(Map<String, dynamic> json) {
     if (json["id"] != null) {
       id = json["id"];
     }
@@ -57,9 +73,24 @@ class WebGLRenderList {
 
   void init() {
     renderItemsIndex = 0;
-    opaque.length = 0;
-    transmissive.length = 0;
-    transparent.length = 0;
+    opaque.clear();
+    transmissive.clear();
+    transparent.clear();
+  }
+
+  void dispose(){
+    for(final key in renderItems.keys){
+      renderItems[key]?.dispose();
+    }
+    for(final o in opaque){
+      o.dispose();
+    }
+    for(final t in transmissive){
+      t.dispose();
+    }
+    for(final t in transparent){
+      t.dispose();
+    }
   }
 
   RenderItem getNextRenderItem(
@@ -73,7 +104,7 @@ class WebGLRenderList {
     RenderItem? renderItem = renderItems[renderItemsIndex];
 
     if (renderItem == null) {
-      renderItem = RenderItem({
+      renderItem = RenderItem.fromMap({
         "id": object.id,
         "object": object,
         "geometry": geometry,
@@ -83,32 +114,34 @@ class WebGLRenderList {
         "z": z,
         "group": group
       });
-
-      renderItems[renderItemsIndex] = renderItem;
-    } else {
-      renderItem.id = object.id;
-      renderItem.object = object;
-      renderItem.geometry = geometry;
-      renderItem.material = material;
-      renderItem.groupOrder = groupOrder;
-      renderItem.renderOrder = object.renderOrder;
-      renderItem.z = z;
-      renderItem.group = group;
+    } 
+    else {
+      renderItem = RenderItem(
+        id: object.id,
+        object: object,
+        geometry: geometry,
+        material: material,
+        groupOrder: groupOrder,
+        renderOrder: object.renderOrder,
+        z: z,
+        group: group
+      );
     }
-
+    
+    renderItems[renderItemsIndex] = renderItem;
     renderItemsIndex++;
 
     return renderItem;
   }
 
-  void push(Object3D object, BufferGeometry geometry, material, int groupOrder, double z, Map<String, dynamic>? group) {
+  void push(Object3D object, BufferGeometry geometry, Material material, int groupOrder, double z, Map<String, dynamic>? group) {
     final renderItem = getNextRenderItem(object, geometry, material, groupOrder, z, group);
 
     if (material.transmission > 0.0) {
       transmissive.add(renderItem);
     } 
     else {
-      if (material.transparent == true) {
+      if (material.transparent) {
         transparent.add(renderItem);
       } 
       else {
@@ -119,14 +152,15 @@ class WebGLRenderList {
 
   void unshift(Object3D object, BufferGeometry? geometry, Material? material, int groupOrder, double z, Map<String, dynamic>? group) {
     final renderItem = getNextRenderItem(object, geometry, material, groupOrder, z, group);
-
+    
     if ((material?.transmission ?? 0) > 0.0) {
       transmissive.insert(0, renderItem);
     } 
     else {
       if (material?.transparent == true) {
         transparent.insert(0, renderItem);
-      } else {
+      } 
+      else {
         opaque.insert(0, renderItem);
       }
     }

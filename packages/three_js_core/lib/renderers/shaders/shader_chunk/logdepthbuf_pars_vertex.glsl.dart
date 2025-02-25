@@ -1,16 +1,8 @@
-String logdepthbufParsVertex = """
+const String logdepthbufParsVertex = """
 #ifdef USE_LOGDEPTHBUF
 
-	#ifdef USE_LOGDEPTHBUF_EXT
-
-		varying float vFragDepth;
-		varying float vIsPerspective;
-
-	#else
-
-		uniform float logDepthBufFC;
-
-	#endif
+	varying float vFragDepth;
+	varying float vIsPerspective;
 
 #endif
 """;

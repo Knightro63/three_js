@@ -15,4 +15,16 @@ class RawShaderMaterial extends ShaderMaterial {
   RawShaderMaterial.fromMap([Map<String, dynamic>? parameters]):super.fromMap(parameters){
     type = 'RawShaderMaterial';
   }
+
+  @override
+  RawShaderMaterial copy(Material source) {
+    super.copy(source);
+    type = 'RawShaderMaterial';
+    return this;
+  }
+
+  @override
+  RawShaderMaterial clone() {
+    return RawShaderMaterial().copy(this);
+  }
 }

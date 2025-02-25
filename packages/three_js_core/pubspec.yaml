@@ -1,6 +1,6 @@
 name: three_js_core
-description: "Flutter core package converted from threejs and three_dart package."
-version: 0.0.1
+description: "Flutter three_js_core package converted from threejs and three_dart package made for three_js."
+version: 0.0.3
 homepage: https://github.com/Knightro63/three_js/tree/main/packages/three_js_core
 
 environment:
@@ -11,11 +11,13 @@ dependencies:
   flutter:
     sdk: flutter
   logger: ^2.3.0
-  three_js_math:
-    path: ../three_js_math
+  three_js_math: ^0.0.3
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.0
 
+dependency_overrides:
+  three_js_math:
+    path: ../three_js_math

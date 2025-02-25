@@ -49,12 +49,13 @@ class WebGLProgram extends DefaultProgram with WebGLProgramExtra {
     final customVertexExtensions = generateVertexExtensions( parameters );
 
     final customDefines = generateDefines( defines );
-    final program = gl.createProgram();
+    
+    program ??= gl.createProgram();
 
     String prefixVertex, prefixFragment;
     String versionString = parameters.glslVersion != null ? '#version ${parameters.glslVersion}\n' : '';
 
-    if (parameters.isRawShaderMaterial) {
+    if (parameters is RawShaderMaterial) {
       prefixVertex = [
         '#define SHADER_TYPE ${parameters.shaderType}',
         '#define SHADER_NAME ${parameters.shaderName}',
@@ -160,7 +161,7 @@ class WebGLProgram extends DefaultProgram with WebGLProgramExtra {
         parameters.specularColorMapUv  != null? '#define SPECULAR_COLORMAP_UV ${parameters.specularColorMapUv!}': '',
         parameters.specularIntensityMapUv  != null? '#define SPECULAR_INTENSITYMAP_UV ${parameters.specularIntensityMapUv!}' : '',
 
-      parameters.transmissionMapUv  != null? '#define TRANSMISSIONMAP_UV ${parameters.transmissionMapUv!}': '',
+        parameters.transmissionMapUv  != null? '#define TRANSMISSIONMAP_UV ${parameters.transmissionMapUv!}': '',
         parameters.thicknessMapUv  != null? '#define THICKNESSMAP_UV ${parameters.thicknessMapUv!}' : '',
 
         //
@@ -205,23 +206,15 @@ class WebGLProgram extends DefaultProgram with WebGLProgramExtra {
         'uniform mat3 normalMatrix;',
         'uniform vec3 cameraPosition;',
         'uniform bool isOrthographic;',
-
         '#ifdef USE_INSTANCING',
-
         '	attribute mat4 instanceMatrix;',
-
         '#endif',
-
         '#ifdef USE_INSTANCING_COLOR',
-
         '	attribute vec3 instanceColor;',
-
         '#endif',
 
         '#ifdef USE_INSTANCING_MORPH',
-
         '	uniform sampler2D morphTexture;',
-
         '#endif',
 
         'attribute vec3 position;',
@@ -229,71 +222,44 @@ class WebGLProgram extends DefaultProgram with WebGLProgramExtra {
         'attribute vec2 uv;',
 
         '#ifdef USE_UV1',
-
         '	attribute vec2 uv1;',
-
         '#endif',
-
         '#ifdef USE_UV2',
-
         '	attribute vec2 uv2;',
-
         '#endif',
-
         '#ifdef USE_UV3',
-
         '	attribute vec2 uv3;',
-
         '#endif',
 
         '#ifdef USE_TANGENT',
-
         '	attribute vec4 tangent;',
-
         '#endif',
-
         '#if defined( USE_COLOR_ALPHA )',
-
         '	attribute vec4 color;',
-
         '#elif defined( USE_COLOR )',
-
         '	attribute vec3 color;',
-
         '#endif',
-
         '#if ( defined( USE_MORPHTARGETS ) && ! defined( MORPHTARGETS_TEXTURE ) )',
-
         '	attribute vec3 morphTarget0;',
         '	attribute vec3 morphTarget1;',
         '	attribute vec3 morphTarget2;',
         '	attribute vec3 morphTarget3;',
-
         '	#ifdef USE_MORPHNORMALS',
-
         '		attribute vec3 morphNormal0;',
         '		attribute vec3 morphNormal1;',
         '		attribute vec3 morphNormal2;',
         '		attribute vec3 morphNormal3;',
-
         '	#else',
-
         '		attribute vec3 morphTarget4;',
         '		attribute vec3 morphTarget5;',
         '		attribute vec3 morphTarget6;',
         '		attribute vec3 morphTarget7;',
-
         '	#endif',
-
         '#endif',
-
         '#ifdef USE_SKINNING',
-
         '	attribute vec4 skinIndex;',
         '	attribute vec4 skinWeight;',
-
         '#endif',
-
         '\n'
       ].where((s) => filterEmptyLine(s)).join('\n');
 
@@ -318,6 +284,7 @@ class WebGLProgram extends DefaultProgram with WebGLProgramExtra {
         envMapCubeUVSize != null? '#define CUBEUV_TEXEL_WIDTH ${envMapCubeUVSize['texelWidth']}': '',
         envMapCubeUVSize != null? '#define CUBEUV_TEXEL_HEIGHT ${envMapCubeUVSize['texelHeight']}' : '',
         envMapCubeUVSize != null? '#define CUBEUV_MAX_MIP ${envMapCubeUVSize['maxMip']}.0' : '',
+        
         parameters.lightMap ? '#define USE_LIGHTMAP' : '',
         parameters.aoMap ? '#define USE_AOMAP' : '',
         parameters.bumpMap ? '#define USE_BUMPMAP' : '',
@@ -453,36 +420,36 @@ class WebGLProgram extends DefaultProgram with WebGLProgramExtra {
     final glVertexShader = WebGLShader(gl, WebGL.VERTEX_SHADER, vertexGlsl);
     final glFragmentShader = WebGLShader(gl, WebGL.FRAGMENT_SHADER, fragmentGlsl);
 
-    gl.attachShader(program, glVertexShader.shader);
-    gl.attachShader(program, glFragmentShader.shader);
+    gl.attachShader(program!, glVertexShader.shader);
+    gl.attachShader(program!, glFragmentShader.shader);
 
     // Force a particular attribute to index 0.
 
     if (parameters.index0AttributeName != null) {
-      gl.bindAttribLocation(program, 0, parameters.index0AttributeName ?? '');
+      gl.bindAttribLocation(program!, 0, parameters.index0AttributeName ?? '');
     } else if (parameters.morphTargets == true) {
       // programs with morphTargets displace position out of attribute 0
-      gl.bindAttribLocation(program, 0, 'position');
+      gl.bindAttribLocation(program!, 0, 'position');
     }
 
-    gl.linkProgram(program);
+    gl.linkProgram(program!);
     onFirstUse = (WebGLProgram self ) {
       // check for link errors
       if (renderer.debug["checkShaderErrors"]) {
-        final programLog = gl.getProgramInfoLog(program)?.trim();
+        final programLog = gl.getProgramInfoLog(program!)?.trim();
         final vertexLog = gl.getShaderInfoLog(glVertexShader.shader)?.trim();
         final fragmentLog = gl.getShaderInfoLog(glFragmentShader.shader)?.trim();
 
         bool runnable = true;
         bool haveDiagnostics = true;
 
-        if (gl.getProgramParameter(program, WebGL.LINK_STATUS).id == 0) {
+        if (gl.getProgramParameter(program!, WebGL.LINK_STATUS).id == 0) {
           runnable = false;
 
           final vertexErrors = getShaderErrors(gl, glVertexShader, 'vertex');
           final fragmentErrors = getShaderErrors(gl, glFragmentShader, 'fragment');
 
-          console.error('WebGLProgram: shader error: ${gl.getError()} gl.VALIDATE_STATUS ${gl.getProgramParameter(program, WebGL.VALIDATE_STATUS)} gl.getProgramInfoLog $programLog  $vertexErrors $fragmentErrors ');
+          console.error('WebGLProgram: shader error: ${gl.getError()} gl.VALIDATE_STATUS ${gl.getProgramParameter(program!, WebGL.VALIDATE_STATUS)} gl.getProgramInfoLog $programLog  $vertexErrors $fragmentErrors ');
         } else if (programLog != '' && programLog != null) {
           console.error('WebGLProgram: gl.getProgramInfoLog() programLog: $programLog vertexLog: $vertexLog fragmentLog: $fragmentLog ');
         } else if (vertexLog == '' || fragmentLog == '') {
@@ -498,24 +465,18 @@ class WebGLProgram extends DefaultProgram with WebGLProgramExtra {
           };
         }
       }
-      // Clean up
-
-      // Crashes in iOS9 and iOS10. #18402
-      // gl.detachShader( program, glVertexShader );
-      // gl.detachShader( program, glFragmentShader );
 
       gl.deleteShader(glVertexShader.shader);
       gl.deleteShader(glFragmentShader.shader);
 
-      cachedUniforms = WebGLUniforms( gl, program );
-      cachedAttributes = fetchAttributeLocations( gl, program );
+      cachedUniforms = WebGLUniforms( gl, program! );
+      cachedAttributes = fetchAttributeLocations( gl, program! );
     };
   }
   // set up caching for attribute locations
 
   WebGLUniforms getUniforms() {
 		if ( cachedUniforms == null ) {
-			// Populates cachedUniforms and cachedAttributes
 			onFirstUse.call(this);
 		}
     return cachedUniforms!;
@@ -523,7 +484,6 @@ class WebGLProgram extends DefaultProgram with WebGLProgramExtra {
 
   Map<String, AttributeLocations> getAttributes() {
 		if ( cachedUniforms == null ) {
-			// Populates cachedUniforms and cachedAttributes
 			onFirstUse.call(this);
 		}
 

@@ -6,379 +6,398 @@
 
 import 'package:three_js_math/three_js_math.dart';
 
-/*
-Finds knot vector span.
+class NURBSutils{
+  /*
+  Finds knot vector span.
 
-p : degree
-u : parametric value
-U : knot vector
+  p : degree
+  u : parametric value
+  U : knot vector
 
-returns the span
-*/
-int findSpan(int p, num u, List<double> U ) {
-	final n = U.length - p - 1;
+  returns the span
+  */
+  static int findSpan(int p, num u, List<double> U ) {
+    final n = U.length - p - 1;
 
-	if ( u >= U[ n ] ) {
-		return n - 1;
-	}
+    if ( u >= U[ n ] ) {
+      return n - 1;
+    }
 
-	if ( u <= U[ p ] ) {
-		return p;
-	}
+    if ( u <= U[ p ] ) {
+      return p;
+    }
 
-	num low = p;
-	num high = n;
-	int mid = ( ( low + high ) / 2 ).floor();
+    num low = p;
+    num high = n;
+    int mid = ( ( low + high ) / 2 ).floor();
 
-	while ( u < U[ mid ] || u >= U[ mid + 1 ] ) {
-		if ( u < U[ mid ] ) {
-			high = mid;
-		} 
-    else {
-			low = mid;
-		}
-		mid = ( ( low + high ) / 2 ).floor();
-	}
+    while ( u < U[ mid ] || u >= U[ mid + 1 ] ) {
+      if ( u < U[ mid ] ) {
+        high = mid;
+      } 
+      else {
+        low = mid;
+      }
+      mid = ( ( low + high ) / 2 ).floor();
+    }
 
-	return mid;
-}
-
-
-/*
-Calculate basis functions. See The NURBS Book, page 70, algorithm A2.2
-
-span : span in which u lies
-u    : parametric point
-p    : degree
-U    : knot vector
-
-returns array[p+1] with basis functions values.
-*/
-List<double> calcBasisFunctions(int span, num u, int p, List<double> U ) {
-	final List<double> N = List.filled(p+1, 0);
-	final left = List.filled(p+1, 0.0);
-	final right = List.filled(p+1, 0.0);
-	N[0] = 1.0;
-
-	for (int j = 1; j <= p; ++ j ) {
-		left[ j ] = u - U[ span + 1 - j ];
-		right[ j ] = U[ span + j ] - u;
-
-		double saved = 0.0;
-
-		for (int r = 0; r < j; ++ r ) {
-			final rv = right[ r + 1 ];
-			final lv = left[ j - r ];
-			final temp = N[ r ] / ( rv + lv );
-			N[r] = saved + rv * temp;
-			saved = lv * temp;
-		}
-
-		N[j] = saved;
-	}
-
-	return N;
-}
-
-
-/*
-Calculate B-Spline curve points. See The NURBS Book, page 82, algorithm A3.1.
-
-p : degree of B-Spline
-U : knot vector
-P : control points (x, y, z, w)
-u : parametric point
-
-returns point for given u
-*/
-Vector4 calcBSplinePoint(int p, List<double> U, List<Vector4> P, num u ) {
-	final span = findSpan( p, u, U );
-	final N = calcBasisFunctions( span, u, p, U );
-	final C = Vector4( 0, 0, 0, 0 );
-
-	for (int j = 0; j <= p; j++) {
-		final point = P[ span - p + j ];
-		final nj = N[ j ];
-		final wNj = point.w * nj;
-		C.x += point.x * wNj;
-		C.y += point.y * wNj;
-		C.z += point.z * wNj;
-		C.w += point.w * nj;
-	}
-
-	return C;
-}
-
-
-/*
-Calculate basis functions derivatives. See The NURBS Book, page 72, algorithm A2.3.
-
-span : span in which u lies
-u    : parametric point
-p    : degree
-n    : number of derivatives to calculate
-U    : knot vector
-
-returns array[n+1][p+1] with basis functions derivatives
-*/
-List<List<double>> calcBasisFunctionDerivatives(int span, num u, int p, int n, List<double> U ) {
-
-	final List<double> zeroArr = [];
-	for ( int i = 0; i <= p; ++ i ){
-		zeroArr[ i ] = 0.0;
+    return mid;
   }
 
-	final List<List<double>> ders = [];
 
-	for ( int i = 0; i <= n; ++ i ){
-		ders[ i ] = zeroArr.sublist( 0 );
+  /*
+  Calculate basis functions. See The NURBS Book, page 70, algorithm A2.2
+
+  span : span in which u lies
+  u    : parametric point
+  p    : degree
+  U    : knot vector
+
+  returns array[p+1] with basis functions values.
+  */
+  static List<double> calcBasisFunctions(int span, num u, int p, List<double> U ) {
+    final List<double> N = List.filled(p+1, 0);
+    final left = List.filled(p+1, 0.0);
+    final right = List.filled(p+1, 0.0);
+    N[0] = 1.0;
+
+    for (int j = 1; j <= p; ++ j ) {
+      left[ j ] = u - U[ span + 1 - j ];
+      right[ j ] = U[ span + j ] - u;
+
+      double saved = 0.0;
+
+      for (int r = 0; r < j; ++ r ) {
+        final rv = right[ r + 1 ];
+        final lv = left[ j - r ];
+        final temp = N[ r ] / ( rv + lv );
+        N[r] = saved + rv * temp;
+        saved = lv * temp;
+      }
+
+      N[j] = saved;
+    }
+
+    return N;
   }
 
-	final ndu = [];
 
-	for ( int i = 0; i <= p; ++ i ){
-		ndu[ i ] = zeroArr.sublist( 0 );
+  /*
+  Calculate B-Spline curve points. See The NURBS Book, page 82, algorithm A3.1.
+
+  p : degree of B-Spline
+  U : knot vector
+  P : control points (x, y, z, w)
+  u : parametric point
+
+  returns point for given u
+  */
+  static Vector4 calcBSplinePoint(int p, List<double> U, List<Vector4> P, num u ) {
+    final span = findSpan( p, u, U );
+    final N = calcBasisFunctions( span, u, p, U );
+    final C = Vector4( 0, 0, 0, 0 );
+
+    for (int j = 0; j <= p; j++) {
+      final point = P[ span - p + j ];
+      final nj = N[ j ];
+      final wNj = point.w * nj;
+      C.x += point.x * wNj;
+      C.y += point.y * wNj;
+      C.z += point.z * wNj;
+      C.w += point.w * nj;
+    }
+
+    return C;
   }
 
-	ndu[ 0 ][ 0 ] = 1.0;
 
-	final List<double> left = zeroArr.sublist( 0 );
-	final List<double> right = zeroArr.sublist( 0 );
+  /*
+  Calculate basis functions derivatives. See The NURBS Book, page 72, algorithm A2.3.
 
-	for ( int j = 1; j <= p; ++ j ) {
-		left[ j ] = u - U[ span + 1 - j ];
-		right[ j ] = U[ span + j ] - u;
+  span : span in which u lies
+  u    : parametric point
+  p    : degree
+  n    : number of derivatives to calculate
+  U    : knot vector
 
-		double saved = 0.0;
+  returns array[n+1][p+1] with basis functions derivatives
+  */
+  static List<List<double>> calcBasisFunctionDerivatives(int span, num u, int p, int n, List<double> U ) {
 
-		for ( int r = 0; r < j; ++ r ) {
-			final rv = right[ r + 1 ];
-			final lv = left[ j - r ];
-			ndu[ j ][ r ] = rv + lv;
+    final List<double> zeroArr = [];
+    for ( int i = 0; i <= p; ++ i ){
+      zeroArr[ i ] = 0.0;
+    }
 
-			final temp = ndu[ r ][ j - 1 ] / ndu[ j ][ r ];
-			ndu[ r ][ j ] = saved + rv * temp;
-			saved = lv * temp;
-		}
+    final List<List<double>> ders = [];
 
-		ndu[ j ][ j ] = saved;
-	}
+    for ( int i = 0; i <= n; ++ i ){
+      ders[ i ] = zeroArr.sublist( 0 );
+    }
 
-	for ( int j = 0; j <= p; ++ j ) {
-		ders[ 0 ][ j ] = ndu[ j ][ p ];
-	}
+    final ndu = [];
 
-	for ( int r = 0; r <= p; ++ r ) {
-		int s1 = 0;
-		int s2 = 1;
+    for ( int i = 0; i <= p; ++ i ){
+      ndu[ i ] = zeroArr.sublist( 0 );
+    }
 
-		final a = [];
-		for ( int i = 0; i <= p; ++ i ) {
-			a[ i ] = zeroArr.sublist( 0 );
-		}
+    ndu[ 0 ][ 0 ] = 1.0;
 
-		a[ 0 ][ 0 ] = 1.0;
+    final List<double> left = zeroArr.sublist( 0 );
+    final List<double> right = zeroArr.sublist( 0 );
 
-		for ( int k = 1; k <= n; ++ k ) {
-			double d = 0.0;
-			final rk = r - k;
-			final pk = p - k;
+    for ( int j = 1; j <= p; ++ j ) {
+      left[ j ] = u - U[ span + 1 - j ];
+      right[ j ] = U[ span + j ] - u;
 
-			if ( r >= k ) {
-				a[ s2 ][ 0 ] = a[ s1 ][ 0 ] / ndu[ pk + 1 ][ rk ];
-				d = a[ s2 ][ 0 ] * ndu[ rk ][ pk ];
-			}
+      double saved = 0.0;
 
-			final j1 = ( rk >= - 1 ) ? 1 : - rk;
-			final j2 = ( r - 1 <= pk ) ? k - 1 : p - r;
+      for ( int r = 0; r < j; ++ r ) {
+        final rv = right[ r + 1 ];
+        final lv = left[ j - r ];
+        ndu[ j ][ r ] = rv + lv;
 
-			for ( int j = j1; j <= j2; ++ j ) {
-				a[ s2 ][ j ] = ( a[ s1 ][ j ] - a[ s1 ][ j - 1 ] ) / ndu[ pk + 1 ][ rk + j ];
-				d += a[ s2 ][ j ] * ndu[ rk + j ][ pk ];
-			}
+        final temp = ndu[ r ][ j - 1 ] / ndu[ j ][ r ];
+        ndu[ r ][ j ] = saved + rv * temp;
+        saved = lv * temp;
+      }
 
-			if ( r <= pk ) {
-				a[ s2 ][ k ] = - a[ s1 ][ k - 1 ] / ndu[ pk + 1 ][ r ];
-				d += a[ s2 ][ k ] * ndu[ r ][ pk ];
-			}
+      ndu[ j ][ j ] = saved;
+    }
 
-			ders[ k ][ r ] = d;
+    for ( int j = 0; j <= p; ++ j ) {
+      ders[ 0 ][ j ] = ndu[ j ][ p ];
+    }
 
-			final j = s1;
-			s1 = s2;
-			s2 = j;
-		}
-	}
+    for ( int r = 0; r <= p; ++ r ) {
+      int s1 = 0;
+      int s2 = 1;
 
-	num r = p;
+      final a = [];
+      for ( int i = 0; i <= p; ++ i ) {
+        a[ i ] = zeroArr.sublist( 0 );
+      }
 
-	for ( int k = 1; k <= n; ++ k ) {
-		for ( int j = 0; j <= p; ++ j ) {
-			ders[ k ][ j ] *= r;
-		}
-		r *= p - k;
-	}
+      a[ 0 ][ 0 ] = 1.0;
 
-	return ders;
-}
+      for ( int k = 1; k <= n; ++ k ) {
+        double d = 0.0;
+        final rk = r - k;
+        final pk = p - k;
 
+        if ( r >= k ) {
+          a[ s2 ][ 0 ] = a[ s1 ][ 0 ] / ndu[ pk + 1 ][ rk ];
+          d = a[ s2 ][ 0 ] * ndu[ rk ][ pk ];
+        }
 
-/*
-	Calculate derivatives of a B-Spline. See The NURBS Book, page 93, algorithm A3.2.
+        final j1 = ( rk >= - 1 ) ? 1 : - rk;
+        final j2 = ( r - 1 <= pk ) ? k - 1 : p - r;
 
-	p  : degree
-	U  : knot vector
-	P  : control points
-	u  : Parametric points
-	nd : number of derivatives
+        for ( int j = j1; j <= j2; ++ j ) {
+          a[ s2 ][ j ] = ( a[ s1 ][ j ] - a[ s1 ][ j - 1 ] ) / ndu[ pk + 1 ][ rk + j ];
+          d += a[ s2 ][ j ] * ndu[ rk + j ][ pk ];
+        }
 
-	returns array[d+1] with derivatives
-	*/
-List<Vector4> calcBSplineDerivatives(int p,List<double> U, List<Vector> P, u, int nd ) {
-	final du = nd < p ? nd : p;
-	final List<Vector4> ck = [];
-	int span = findSpan( p, u, U );
-	final nders = calcBasisFunctionDerivatives( span, u, p, du, U );
-	final List<Vector4> pw = [];
+        if ( r <= pk ) {
+          a[ s2 ][ k ] = - a[ s1 ][ k - 1 ] / ndu[ pk + 1 ][ r ];
+          d += a[ s2 ][ k ] * ndu[ r ][ pk ];
+        }
 
-	for ( int i = 0; i < P.length; ++ i ) {
-		final point = P[ i ].clone() as Vector4;
-		final w = point.w;
+        ders[ k ][ r ] = d;
 
-		point.x *= w;
-		point.y *= w;
-		point.z *= w;
+        final j = s1;
+        s1 = s2;
+        s2 = j;
+      }
+    }
 
-		pw[i] = point;
-	}
+    num r = p;
 
-	for ( int k = 0; k <= du; ++ k ) {
-		final Vector4 point = pw[ span - p ].clone().scale( nders[ k ][ 0 ] );
+    for ( int k = 1; k <= n; ++ k ) {
+      for ( int j = 0; j <= p; ++ j ) {
+        ders[ k ][ j ] *= r;
+      }
+      r *= p - k;
+    }
 
-		for ( int j = 1; j <= p; ++ j ) {
-			point.add( pw[ span - p + j ].clone().scale( nders[ k ][ j ] ) );
-		}
-
-		ck[ k ] = point;
-	}
-
-	for ( int k = du + 1; k <= nd + 1; ++ k ) {
-		ck[ k ] = Vector4( 0, 0, 0 );
-	}
-
-	return ck;
-}
+    return ders;
+  }
 
 
-/*
-Calculate "K over I"
+  /*
+    Calculate derivatives of a B-Spline. See The NURBS Book, page 93, algorithm A3.2.
 
-returns k!/(i!(k-i)!)
-*/
-num calcKoverI( int k, int i ) {
-	int nom = 1;
+    p  : degree
+    U  : knot vector
+    P  : control points
+    u  : Parametric points
+    nd : number of derivatives
 
-	for ( int j = 2; j <= k; ++ j ) {
-		nom *= j;
-	}
+    returns array[d+1] with derivatives
+    */
+  static List<Vector4> calcBSplineDerivatives(int p,List<double> U, List<Vector> P, u, int nd ) {
+    final du = nd < p ? nd : p;
+    final List<Vector4> ck = [];
+    int span = findSpan( p, u, U );
+    final nders = calcBasisFunctionDerivatives( span, u, p, du, U );
+    final List<Vector4> pw = [];
 
-	int denom = 1;
+    for ( int i = 0; i < P.length; ++ i ) {
+      final point = P[ i ].clone() as Vector4;
+      final w = point.w;
 
-	for ( int j = 2; j <= i; ++ j ) {
-		denom *= j;
-	}
+      point.x *= w;
+      point.y *= w;
+      point.z *= w;
 
-	for ( int j = 2; j <= k - i; ++ j ) {
-		denom *= j;
-	}
+      pw[i] = point;
+    }
 
-	return nom / denom;
-}
+    for ( int k = 0; k <= du; ++ k ) {
+      final Vector4 point = pw[ span - p ].clone().scale( nders[ k ][ 0 ] );
 
+      for ( int j = 1; j <= p; ++ j ) {
+        point.add( pw[ span - p + j ].clone().scale( nders[ k ][ j ] ) );
+      }
 
-/*
-Calculate derivatives (0-nd) of rational curve. See The NURBS Book, page 127, algorithm A4.2.
+      ck[ k ] = point;
+    }
 
-Pders : result of function calcBSplineDerivatives
+    for ( int k = du + 1; k <= nd + 1; ++ k ) {
+      ck[ k ] = Vector4( 0, 0, 0 );
+    }
 
-returns array with derivatives for rational curve.
-*/
-List<Vector3> calcRationalCurveDerivatives(List<Vector4> pDers ) {
-	final nd = pDers.length;
-	final aDers = [];
-	final wders = [];
-
-	for ( int i = 0; i < nd; ++ i ) {
-		final point = pDers[ i ];
-		aDers[ i ] = Vector3( point.x, point.y, point.z );
-		wders[ i ] = point.w;
-	}
-
-	final List<Vector3> ck = [];
-
-	for ( int k = 0; k < nd; ++ k ) {
-		final Vector3 v = aDers[ k ].clone();
-		for ( int i = 1; i <= k; ++ i ) {
-			v.sub( ck[ k - i ].clone().scale( calcKoverI( k, i ) * wders[ i ] ) );
-		}
-		ck[ k ] = v.divideScalar( wders[ 0 ] );
-	}
-
-	return ck;
-}
+    return ck;
+  }
 
 
-/*
-Calculate NURBS curve derivatives. See The NURBS Book, page 127, algorithm A4.2.
+  /*
+  Calculate "K over I"
 
-p  : degree
-U  : knot vector
-P  : control points in homogeneous space
-u  : parametric points
-nd : number of derivatives
+  returns k!/(i!(k-i)!)
+  */
+  static num calcKoverI( int k, int i ) {
+    int nom = 1;
 
-returns array with derivatives.
-*/
-List<Vector3> calcNURBSDerivatives(int p, List<double> U, List<Vector> P, num u, int nd ) {
-	final pDers = calcBSplineDerivatives( p, U, P, u, nd );
-	return calcRationalCurveDerivatives( pDers );
-}
+    for ( int j = 2; j <= k; ++ j ) {
+      nom *= j;
+    }
+
+    int denom = 1;
+
+    for ( int j = 2; j <= i; ++ j ) {
+      denom *= j;
+    }
+
+    for ( int j = 2; j <= k - i; ++ j ) {
+      denom *= j;
+    }
+
+    return nom / denom;
+  }
 
 
-/*
-Calculate rational B-Spline surface point. See The NURBS Book, page 134, algorithm A4.3.
+  /*
+  Calculate derivatives (0-nd) of rational curve. See The NURBS Book, page 127, algorithm A4.2.
 
-p1, p2 : degrees of B-Spline surface
-U1, U2 : knot vectors
-P      : control points (x, y, z, w)
-u, v   : parametric values
+  Pders : result of function calcBSplineDerivatives
 
-returns point for given (u, v)
-*/
-void calcSurfacePoint( p, q, U, V, P, u, v, target ) {
-	final uspan = findSpan( p, u, U );
-	final vspan = findSpan( q, v, V );
-	final nu = calcBasisFunctions( uspan, u, p, U );
-	final nv = calcBasisFunctions( vspan, v, q, V );
-	final temp = [];
+  returns array with derivatives for rational curve.
+  */
+  static List<Vector3> calcRationalCurveDerivatives(List<Vector4> pDers ) {
+    final nd = pDers.length;
+    final aDers = [];
+    final wders = [];
 
-	for ( int l = 0; l <= q; ++ l ) {
-		temp[ l ] = Vector4( 0, 0, 0, 0 );
-		for ( int k = 0; k <= p; ++ k ) {
-			final point = P[ uspan - p + k ][ vspan - q + l ].clone();
-			final w = point.w;
-			point.x *= w;
-			point.y *= w;
-			point.z *= w;
-			temp[ l ].add( point.multiplyScalar( nu[ k ] ) );
-		}
-	}
+    for ( int i = 0; i < nd; ++ i ) {
+      final point = pDers[ i ];
+      aDers[ i ] = Vector3( point.x, point.y, point.z );
+      wders[ i ] = point.w;
+    }
 
-	Vector4 sw = Vector4( 0, 0, 0, 0 );
-	for ( int l = 0; l <= q; ++ l ) {
-		sw.add( temp[ l ].multiplyScalar( nv[ l ] ) );
-	}
+    final List<Vector3> ck = [];
 
-	sw.divideScalar( sw.w );
-	target.set( sw.x, sw.y, sw.z );
+    for ( int k = 0; k < nd; ++ k ) {
+      final Vector3 v = aDers[ k ].clone();
+      for ( int i = 1; i <= k; ++ i ) {
+        v.sub( ck[ k - i ].clone().scale( calcKoverI( k, i ) * wders[ i ] ) );
+      }
+      ck[ k ] = v.divideScalar( wders[ 0 ] );
+    }
+
+    return ck;
+  }
+
+
+  /*
+  Calculate NURBS curve derivatives. See The NURBS Book, page 127, algorithm A4.2.
+
+  p  : degree
+  U  : knot vector
+  P  : control points in homogeneous space
+  u  : parametric points
+  nd : number of derivatives
+
+  returns array with derivatives.
+  */
+  static List<Vector3> calcNURBSDerivatives(int p, List<double> U, List<Vector> P, num u, int nd ) {
+    final pDers = calcBSplineDerivatives( p, U, P, u, nd );
+    return calcRationalCurveDerivatives( pDers );
+  }
+
+
+  /*
+  Calculate rational B-Spline surface point. See The NURBS Book, page 134, algorithm A4.3.
+
+  p1, p2 : degrees of B-Spline surface
+  U1, U2 : knot vectors
+  P      : control points (x, y, z, w)
+  u, v   : parametric values
+
+  returns point for given (u, v)
+  */
+  static void calcSurfacePoint(
+    int p, 
+    int q, 
+    List<double> U, 
+    List<double> V, 
+    List<List<Vector4>> P, 
+    double u, 
+    double v, 
+    Vector target 
+  ) {
+    final uspan = findSpan( p, u, U );
+    final vspan = findSpan( q, v, V );
+    final nu = calcBasisFunctions( uspan, u, p, U );
+    final nv = calcBasisFunctions( vspan, v, q, V );
+    final List<Vector4> temp = [];
+
+    for ( int l = 0; l <= q; ++ l ) {
+      temp.add(Vector4( 0, 0, 0, 0 ));
+      for ( int k = 0; k <= p; ++ k ) {
+        final point = P[ uspan - p + k ][ vspan - q + l ].clone();
+        final w = point.w;
+        point.x *= w;
+        point.y *= w;
+        point.z *= w;
+        temp[ l ].add( point.scale( nu[ k ] ) );
+      }
+    }
+
+    Vector4 sw = Vector4( 0, 0, 0, 0 );
+    for ( int l = 0; l <= q; ++ l ) {
+      sw.add( temp[ l ].scale( nv[ l ] ) );
+    }
+
+    sw.divideScalar( sw.w );
+    if(target is Vector4){
+      target.setValues( sw.x, sw.y, sw.z);
+    }
+    else if(target is Vector3){
+      target.setValues( sw.x, sw.y, sw.z );
+    }
+    else{
+      target.setValues( sw.x, sw.y);
+    }
+  }
 }

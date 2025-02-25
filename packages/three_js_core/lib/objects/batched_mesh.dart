@@ -329,13 +329,23 @@ class BatchedMesh extends Mesh {
 					? Uint32Array( maxIndexCount )
 					: Uint16Array( maxIndexCount );
 
-				geometry?.setIndex( BufferAttribute.fromUnknown( indexArray, 1 ) );
+        if(indexArray is Uint32Array){
+			    geometry?.setIndex( Uint32BufferAttribute( indexArray, 1 ) );
+        }
+        else if(indexArray is Uint16Array){
+          geometry?.setIndex( Uint16BufferAttribute( indexArray, 1 ) );
+        }
 			}
 
 			final idArray = maxGeometryCount > 65536
 				? Uint32Array( maxVertexCount )
 				: Uint16Array( maxVertexCount );
-			geometry?.setAttributeFromString( ID_ATTR_NAME, BufferAttribute.fromUnknown( idArray, 1 ) );
+        if(idArray is Uint32Array){
+			    geometry?.setAttributeFromString( ID_ATTR_NAME, Uint32BufferAttribute( idArray, 1 ) );
+        }
+        else if(idArray is Uint16Array){
+          geometry?.setAttributeFromString( ID_ATTR_NAME, Uint16BufferAttribute( idArray, 1 ) );
+        }
 
 			_geometryInitialized = true;
 		}
@@ -723,7 +733,7 @@ class BatchedMesh extends Mesh {
 		if ( geometryId >= geometryCount || active[ geometryId ] == false ) {
 			return this;
 		}
-		matrix.copyIntoNativeArray( matricesArray, geometryId * 16 );
+		matrix.fromNativeArray( matricesArray, geometryId * 16 );
 		matricesTexture?.needsUpdate = true;
 
 		return this;

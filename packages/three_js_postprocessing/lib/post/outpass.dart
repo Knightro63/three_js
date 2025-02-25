@@ -47,7 +47,6 @@ class OutputPass extends Pass {
   dynamic _toneMapping;
   dynamic _outputColorSpace;
 	OutputPass():super(){
-		//
 		const Map<String, dynamic> shader = outputShader;
 
 		uniforms = UniformsUtils.clone(shader['uniforms']);
@@ -68,7 +67,7 @@ class OutputPass extends Pass {
 	}
 
   @override
-	void render(WebGLRenderer renderer, writeBuffer, readBuffer, {double? deltaTime, bool? maskActive}) {
+	void render(WebGLRenderer renderer, WebGLRenderTarget writeBuffer, WebGLRenderTarget readBuffer, {double? deltaTime, bool? maskActive}) {
 
 		uniforms['tDiffuse']['value'] = readBuffer.texture;
 		uniforms['toneMappingExposure']['value'] = renderer.toneMappingExposure;

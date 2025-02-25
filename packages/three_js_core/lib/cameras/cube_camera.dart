@@ -1,4 +1,3 @@
-import '../others/console.dart';
 import '../core/index.dart';
 import 'package:three_js_math/three_js_math.dart';
 import '../renderers/index.dart';
@@ -8,7 +7,7 @@ import 'perspective_camera.dart';
 /// 
 /// ```
 /// // Create cube render target
-/// final cubeRenderTarget = WebGLCubeRenderTarget( 128, RenderTargetOptions({'generateMipmaps': true, 'minFilter': LinearMipmapLinearFilter }));
+/// final cubeRenderTarget = WebGLCubeRenderTarget( 128, WebGLRenderTargetOptions({'generateMipmaps': true, 'minFilter': LinearMipmapLinearFilter }));
 ///
 /// // Create cube camera
 /// final cubeCamera = CubeCamera( 1, 100000, cubeRenderTarget );
@@ -45,10 +44,10 @@ class CubeCamera extends Object3D {
   CubeCamera(double near, double far, this.renderTarget) {
     type = 'CubeCamera';
 
-    if (renderTarget.isWebGLCubeRenderTarget != true) {
-      console.warning('CubeCamera: The constructor now expects an instance of WebGLCubeRenderTarget as third parameter.');
-      return;
-    }
+    // if (renderTarget is WebGLCubeRenderTarget != true) {
+    //   console.warning('CubeCamera: The constructor now expects an instance of WebGLCubeRenderTarget as third parameter.');
+    //   return;
+    // }
 
     cameraPX = PerspectiveCamera(fov, aspect, near, far);
     cameraPX.layers = layers;

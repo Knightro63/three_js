@@ -99,8 +99,8 @@ class TrackballControls with EventDispatcher {
 
   void handleResize() {
     RenderBox getBox = listenableKey.currentContext?.findRenderObject() as RenderBox;
-    var size = getBox.size;
-    var local = getBox.globalToLocal(const Offset(0, 0));
+    final size = getBox.size;
+    final local = getBox.globalToLocal(const Offset(0, 0));
 
     screen['left'] = local.dx;
     screen['top'] = local.dy;

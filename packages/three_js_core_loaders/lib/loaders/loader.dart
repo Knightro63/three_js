@@ -61,6 +61,11 @@ abstract class Loader {
     throw (" load need implement ............. ");
   }
 
+  /// [url] - a dynmaic data that gets parsed by the system
+  Future unknown(url) async{
+    throw (" load need implement ............. ");
+  }
+
   //void parse(Map<String,dynamic> json, [String path = '', Function? onLoad, Function? onError]){}
 
   /// [crossOrigin] — The crossOrigin string to implement CORS for

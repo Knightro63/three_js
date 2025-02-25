@@ -56,7 +56,6 @@ mixin WebGLProgramExtra {
       default:
         console.warning( 'THREE.WebGLProgram: Unsupported color space: $colorSpace');
         return [ gamutMapping, 'LinearTransferOETF' ];
-
     }
   }
 
@@ -79,7 +78,7 @@ mixin WebGLProgramExtra {
     return 'three.WebGLShader: gl.getShaderInfoLog() $type\n$errors\n${handleSource(source, errorLine)}';
   }
 
-  String getTexelEncodingFunction(functionName, encoding) {
+  String getTexelEncodingFunction(String functionName, String encoding) {
     final components = getEncodingComponents(encoding);
     return 'vec4 $functionName( vec4 value ) { return ${components[ 0 ]}( ${components[ 1 ]}( value ) ); }';
   }
@@ -185,16 +184,19 @@ mixin WebGLProgramExtra {
   }
 
   String replaceLightNums(String string, WebGLParameters parameters) {
-    string = string.replaceAll("NUM_DIR_LIGHTS", parameters.numDirLights.toString());
-    string = string.replaceAll("NUM_SPOT_LIGHTS", parameters.numSpotLights.toString());
-    string = string.replaceAll("NUM_SPOT_LIGHT_MAPS", parameters.numSpotLights.toString());
-    string = string.replaceAll("NUM_SPOT_LIGHT_COORDS", parameters.numSpotLights.toString());
-    string = string.replaceAll("NUM_RECT_AREA_LIGHTS", parameters.numRectAreaLights.toString());
-    string = string.replaceAll("NUM_POINT_LIGHTS", parameters.numPointLights.toString());
-    string = string.replaceAll("NUM_HEMI_LIGHTS", parameters.numHemiLights.toString());
-    string = string.replaceAll("NUM_DIR_LIGHT_SHADOWS", parameters.numDirLightShadows.toString());
-    string = string.replaceAll("NUM_SPOT_LIGHT_SHADOWS", parameters.numSpotLightShadows.toString());
-    string = string.replaceAll("NUM_POINT_LIGHT_SHADOWS", parameters.numPointLightShadows.toString());
+    final numSpotLightCoords = parameters.numSpotLightShadows + parameters.numSpotLightMaps - parameters.numSpotLightShadowsWithMaps;
+
+		string = string.replaceAll("NUM_DIR_LIGHTS", parameters.numDirLights.toString() );
+		string = string.replaceAll("NUM_SPOT_LIGHTS", parameters.numSpotLights.toString() );
+		string = string.replaceAll("NUM_SPOT_LIGHT_MAPS", parameters.numSpotLightMaps.toString() );
+		string = string.replaceAll("NUM_SPOT_LIGHT_COORDS", numSpotLightCoords.toString() );
+		string = string.replaceAll("NUM_RECT_AREA_LIGHTS", parameters.numRectAreaLights.toString() );
+		string = string.replaceAll("NUM_POINT_LIGHTS", parameters.numPointLights.toString() );
+		string = string.replaceAll("NUM_HEMI_LIGHTS", parameters.numHemiLights.toString() );
+		string = string.replaceAll("NUM_DIR_LIGHT_SHADOWS", parameters.numDirLightShadows.toString() );
+		string = string.replaceAll("NUM_SPOT_LIGHT_SHADOWS_WITH_MAPS", parameters.numSpotLightShadowsWithMaps.toString() );
+		string = string.replaceAll("NUM_SPOT_LIGHT_SHADOWS", parameters.numSpotLightShadows.toString() );
+		string = string.replaceAll("NUM_POINT_LIGHT_SHADOWS", parameters.numPointLightShadows.toString() );
 
     return string;
   }
@@ -415,7 +417,6 @@ mixin WebGLProgramExtra {
     int maxMip = MathUtils.log2(imageHeight).toInt() - 2;
 
     final texelHeight = 1.0 / imageHeight;
-
     final texelWidth = 1.0 / (3 * math.max(math.pow(2, maxMip), 7 * 16));
 
     return {"texelWidth": texelWidth, "texelHeight": texelHeight, "maxMip": maxMip};

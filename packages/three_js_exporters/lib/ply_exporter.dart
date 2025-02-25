@@ -1,4 +1,5 @@
 import 'package:three_js_core/three_js_core.dart';
+import 'package:three_js_exporters/saveFile/saveFile.dart';
 import 'package:three_js_math/three_js_math.dart';
 
 /// An exporter for `PLY`.
@@ -17,89 +18,115 @@ import 'package:three_js_math/three_js_math.dart';
 /// downloadFile( data );
 /// ```
 class PLYExporter{
-  String _file = '';
-  String _ploygon = '';
-  int _faces = 0;
-  int _numVerticies = 0;
-  bool _usingParse = false;
-
-  PLYExporter();
-
-  void _init(bool hasColor){
-    _file = 'ply\n';
-    _file += 'format ascii 1.0\n';
-    _file += 'comment Created by Flutter\n';
-    _file += 'element vertex xxx\n';
-    _file += 'property float x\n';
-    _file += 'property float y\n';
-    _file += 'property float z\n';
-    _file += 'property float nx\n';
-    _file += 'property float ny\n';
-    _file += 'property float nz\n';
+  static String _init(bool hasColor){
+    String file = 'ply\n';
+    file += 'format ascii 1.0\n';
+    file += 'comment Created by Flutter\n';
+    file += 'element vertex xxx\n';
+    file += 'property float x\n';
+    file += 'property float y\n';
+    file += 'property float z\n';
+    file += 'property float nx\n';
+    file += 'property float ny\n';
+    file += 'property float nz\n';
     if(hasColor){
-      _file += 'property uchar red\n';
-      _file += 'property uchar green\n';
-      _file += 'property uchar blue\n';
+      file += 'property uchar red\n';
+      file += 'property uchar green\n';
+      file += 'property uchar blue\n';
     }
     // _file += 'property float s\n';
     // _file += 'property float t\n';
-    _file += 'element face yyy\n';
-    _file += 'property list uchar uint vertex_indices\n';
-    _file += 'end_header\n';
+    file += 'element face yyy\n';
+    file += 'property list uchar uint vertex_indices\n';
+    file += 'end_header\n';
+
+    return file;
   }
-  void _end(){
-    _file = _file.replaceAll('xxx', _numVerticies.toString());
-    _file = _file.replaceAll('yyy', _faces.toString());
-    _file += '$_ploygon\n';
+  static String _end(String start, int numVerticies, int numFaces, String polygon){
+    String file = start.replaceAll('xxx', numVerticies.toString());
+    file = file.replaceAll('yyy', numFaces.toString());
+    file += '$polygon\n';
+
+    return file;
   }
 
-  String parseMesh(Mesh mesh, [bool hasColor = false]){
-    if(!_usingParse){
+  static String parseMesh(Mesh mesh, [bool hasColor = false]){
+    return _parseMesh(mesh,hasColor,false).file;
+  }
+
+  static _PLYPM _parseMesh(Mesh mesh, bool hasColor, bool usingParse){
+    String file = '';
+    String polygon = '';
+    int numFaces = 0;
+    int numVerticies = 0;
+
+    if(!usingParse){
       _init(hasColor);
     }
-    int vertexOffset = _numVerticies;
+    int vertexOffset = numVerticies;
     BufferGeometry? geometry = mesh.geometry;
     final Float32BufferAttribute? vertices = geometry?.getAttribute(Attribute.position);
     final Float32BufferAttribute? normals = geometry?.getAttribute(Attribute.normal);
 
     if(vertices != null){
       for(int j = 0; j < vertices.length;j++){
-        _file += '${vertices.getX(j)!.toStringAsFixed(6)} ${vertices.getZ(j)!.toStringAsFixed(6)} ${vertices.getY(j)!.toStringAsFixed(6)}';
+        file += '${vertices.getX(j)!.toStringAsFixed(6)} ${vertices.getZ(j)!.toStringAsFixed(6)} ${vertices.getY(j)!.toStringAsFixed(6)}';
         if(normals != null){
-          _file += ' ${normals.getX(j)!.toStringAsFixed(6)} ${normals.getZ(j)!.toStringAsFixed(6)} ${normals.getY(j)!.toStringAsFixed(6)}';
+          file += ' ${normals.getX(j)!.toStringAsFixed(6)} ${normals.getZ(j)!.toStringAsFixed(6)} ${normals.getY(j)!.toStringAsFixed(6)}';
         }
         if(hasColor){
-          _file += ' ${mesh.material?.color.red} ${mesh.material?.color.green} ${mesh.material?.color.blue}';
+          file += ' ${mesh.material?.color.red} ${mesh.material?.color.green} ${mesh.material?.color.blue}';
         }
-        _file += '\n';
-        _numVerticies++;
+        file += '\n';
+        numVerticies++;
       }
     }
     final indices = geometry?.getIndex();
     if(indices != null){
       for(int j = 0; j < indices.length; j+=3){
-        _ploygon += '3 ${indices.getX(j)!.toInt() + vertexOffset} ${indices.getX(j+1)!.toInt() + vertexOffset} ${indices.getX(j+2)!.toInt() + vertexOffset}\n';
-        _faces++;
+        polygon += '3 ${indices.getX(j)!.toInt() + vertexOffset} ${indices.getX(j+1)!.toInt() + vertexOffset} ${indices.getX(j+2)!.toInt() + vertexOffset}\n';
+        numFaces++;
       }
     }
-    if(!_usingParse){
-      _end();
+    if(!usingParse){
+      file = _end(file,numVerticies,numFaces, polygon);
     }
-    return _file;
+    return _PLYPM(file, polygon, numVerticies, numFaces);
   }
 
-  String parse(Scene scene,[bool hasColor = false]) {
-    _usingParse = true;
-    _init(hasColor);
+  static String parse(Scene scene,[bool hasColor = false]) {
+    String file = _init(hasColor);
+    String ploygon = '';
+    int numFaces = 0;
+    int numVerticies = 0;
 
     scene.traverse((mesh){
       if(mesh is Mesh) {
-        parseMesh(mesh,hasColor);
+        final pm = _parseMesh(mesh,hasColor,true);
+        file += pm.file;
+        ploygon += pm.polygon;
+        numFaces += pm.numFaces;
+        numVerticies += pm.numVerticies;
       }
     });
 
-    _end();
-    _usingParse = false;
-    return _file;
+    file = _end(file,numVerticies,numFaces,ploygon);
+
+    return file;
   }
+
+  static void exportScene(String fileName, Scene scene, [String? path]){
+    SaveFile.saveString(printName: fileName, fileType: 'ply', data: parse(scene), path: path);
+  }
+  static void exportMesh(String fileName, Mesh mesh, [String? path]){
+    SaveFile.saveString(printName: fileName, fileType: 'ply', data: parseMesh(mesh), path: path);
+  }
+}
+
+class _PLYPM{
+  _PLYPM(this.file, this.polygon, this.numVerticies, this.numFaces);
+  int numFaces;
+  int numVerticies;
+  String polygon;
+  String file;
 }

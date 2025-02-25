@@ -242,8 +242,8 @@ class Quaternion {
         _z = c1 * c2 * s3 + s1 * s2 * c3;
         _w = c1 * c2 * c3 + s1 * s2 * s3;
         break;
-      default:
-        throw('THREE.Quaternion: .setFromEuler() encountered an unknown order: $order');
+      // default:
+      //   throw('THREE.Quaternion: .setFromEuler() encountered an unknown order: $order');
     }
 
     if (update) onChangeCallback();

@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_angle/flutter_angle.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:three_js_core/others/index.dart';
 import 'package:three_js_core/three_js_core.dart' as core;
 import 'package:three_js_math/three_js_math.dart';
@@ -25,7 +25,8 @@ class Settings{
     this.toneMapping = NoToneMapping,
     this.shadowMapType = PCFShadowMap,
     this.toneMappingExposure = 1.0,
-    this.logarithmicDepthBuffer = false
+    this.logarithmicDepthBuffer = false,
+    this.stencil = true
   }){
     this.renderOptions = renderOptions ?? {
       "format": RGBAFormat,
@@ -34,14 +35,15 @@ class Settings{
   }
 
   bool animate;
+  bool logarithmicDepthBuffer;
   bool useSourceTexture;
   bool enableShadowMap;
   bool autoClear;
   bool alpha;
+  bool stencil;
   bool autoClearDepth;
   bool autoClearStencil;
   bool localClippingEnabled;
-  bool logarithmicDepthBuffer;
   int clearColor;
   double clearAlpha;
   late Map<String,dynamic> renderOptions;
@@ -53,7 +55,7 @@ class Settings{
 }
 
 /// threeJs utility class. If you want to learn how to connect cannon.js with js, please look at the examples/threejs_* instead.
-class ThreeJS{
+class ThreeJS {
   void Function() onSetupComplete;
   ThreeJS({
     Settings? settings,
@@ -71,7 +73,7 @@ class ThreeJS{
     lateRenderer = renderer;
   }
 
-  bool _allowDeleteTexture = true;
+  //bool _allowDeleteTexture = true;
   Size? _size;
   late Settings settings;
   final GlobalKey<core.PeripheralsState> globalKey = GlobalKey<core.PeripheralsState>();
@@ -79,6 +81,11 @@ class ThreeJS{
 
   FlutterAngleTexture? texture;
   late final RenderingContext gl;
+  
+  core.WebGLRenderTarget? falseRenderTarget;
+  late final core.Camera falseCamera;
+  late final core.Mesh falseMesh;
+
   core.WebGLRenderTarget? renderTarget;
   core.WebGLRenderer? renderer;
   core.WebGLRenderer? lateRenderer;
@@ -86,7 +93,8 @@ class ThreeJS{
 
   late core.Scene scene;
   late core.Camera camera;
-  
+  Ticker? ticker;
+
   late double width;
   late double height;
   Size? screenSize;
@@ -96,6 +104,7 @@ class ThreeJS{
   WebGLTexture? sourceTexture;
   bool pause = false;
   bool mounted = false;
+  bool updating = false;
 
   void Function()? rendererUpdate;
   void Function(Size newSize)? windowResizeUpdate;
@@ -114,16 +123,17 @@ class ThreeJS{
   void dispose(){
     if(disposed) return;
     disposed = true;
-    print('dispose');
-    renderer?.dispose();
-    renderTarget?.dispose();
-    if(texture != null && _allowDeleteTexture){
+    ticker?.dispose();
+    if(texture != null){
       FlutterAngle.deleteTexture(texture!);
     }
+    renderer?.dispose();
+    renderTarget?.dispose();
+    falseRenderTarget?.dispose();
     scene.dispose();
-    disposeEvents.forEach((event){
+    for(final event in disposeEvents){
       event.call();
-    });
+    }
   }
 
   void initSize(BuildContext context){
@@ -139,36 +149,44 @@ class ThreeJS{
    initPlatformState();
   }
   
-  void animate() {
-    if (!mounted || disposed) {
+  void animate(Duration duration) {
+    if (!mounted || disposed || updating) {
       return;
     }
-    render();
+    updating = true;
+    double dt = clock.getDelta();
+    render(dt);
     if(settings.animate){
-      Future.delayed(const Duration(milliseconds: 1000~/60), () {
-        if(!pause){
-          for(int i = 0; i < events.length;i++){
-            events[i].call(clock.getDelta());
-          }
+      if(!pause){
+        for(int i = 0; i < events.length;i++){
+          events[i].call(dt);
         }
-        animate();
-      });
+      }
     }
+    updating = false;
   }
-
-  Future<void> render() async{
+  Future<void> render([double? dt]) async{
     if(sourceTexture == null){
       FlutterAngle.activateTexture(texture!);
     }
     rendererUpdate?.call(); 
     if(postProcessor == null){
+      // false target to get it to run
+      if(sourceTexture != null && !kIsWeb){
+        renderer!.setRenderTarget(falseRenderTarget);
+        renderer!.render(falseMesh,falseCamera );
+        renderer!.setRenderTarget(renderTarget);
+      }
+      
       renderer!.clear();
       renderer!.setViewport(0,0,width,height);
       renderer!.render(scene, camera);
-      gl.flush();
     }
     else{
-      postProcessor?.call(clock.getDelta());
+      renderer!.clear();
+      renderer!.setRenderTarget(renderTarget);
+      renderer!.setViewport(0,0,width,height);
+      postProcessor?.call(dt);
     }
     
     if(sourceTexture != null){
@@ -184,13 +202,14 @@ class ThreeJS{
         "width": width,
         "height": height,
         "gl": gl,
+        "stencil": settings.stencil,
         "antialias": true,
         "alpha": settings.alpha,
         "clearColor": settings.clearColor,
         "clearAlpha": settings.clearAlpha,
-        'logarithmicDepthBuffer': settings.logarithmicDepthBuffer
+        "logarithmicDepthBuffer": settings.logarithmicDepthBuffer
       };
-
+      
       renderer = lateRenderer ?? core.WebGLRenderer(options);
       renderer!.setPixelRatio(dpr);
       renderer!.setSize(width, height, false);
@@ -211,27 +230,48 @@ class ThreeJS{
       renderer!.toneMappingExposure = settings.toneMappingExposure;
     }
 
-    if(!kIsWeb){
-      final core.RenderTargetOptions pars = core.RenderTargetOptions(settings.renderOptions);
+    if(settings.useSourceTexture && !kIsWeb){
+      final core.WebGLRenderTargetOptions pars = core.WebGLRenderTargetOptions(settings.renderOptions);
       renderTarget = core.WebGLRenderTarget((width * dpr).toInt(), (height * dpr).toInt(), pars);
       renderer!.setRenderTarget(renderTarget);
       sourceTexture = renderer!.getRenderTargetGLTexture(renderTarget!);
+
+      falseMesh = core.Mesh(core.PlaneGeometry(0,0), null);
+      falseRenderTarget = core.WebGLRenderTarget(0,0, core.WebGLRenderTargetOptions({}));
+      falseCamera = core.Camera();
+      renderer!.setRenderTarget(falseRenderTarget);
     }
   }
+  
   void onWindowResize(BuildContext context){
+    double dt = clock.getDelta();
     final mqd = MediaQuery.of(context);
     if(_size == null && screenSize != mqd.size){
       screenSize = mqd.size;
+      width = screenSize!.width;
+      height = screenSize!.height;
       dpr = mqd.devicePixelRatio;
+
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
+
+      if(settings.useSourceTexture && !kIsWeb){
+        renderTarget?.width = (width * dpr).toInt(); 
+        renderTarget?.height = (height * dpr).toInt();
+      }
+      else if(kIsWeb){
+        texture?.element?.width = (width * dpr).toInt();
+        texture?.element?.height = (height * dpr).toInt();
+      }
+
       windowResizeUpdate?.call(screenSize!);
       renderer!.setPixelRatio(dpr);
-      if(postProcessor == null){
-        renderer!.setSize(screenSize!.width, screenSize!.height);
+      renderer!.setSize(width, height, true);
+
+      if(postProcessor != null){
+        postProcessor?.call(dt);
       }
-      else{
-        postProcessor?.call(clock.getDelta());
-      }
-      render();
+      render(dt);
     }
   }
 
@@ -239,7 +279,8 @@ class ThreeJS{
     initRenderer();
     await setup?.call();
     mounted = true;
-    animate();
+    ticker = Ticker(animate);
+    ticker?.start();
     onSetupComplete();
   }
 
@@ -269,36 +310,35 @@ class ThreeJS{
   Widget build() {
     return  Builder(builder: (BuildContext context) {
       initSize(context);
-      return Stack(
-        children:[
-          Container(
-            width: screenSize!.width,
-            height: screenSize!.height,
-            color: Theme.of(context).canvasColor,
-            child: core.Peripherals(
-              key: globalKey,
-              builder: (BuildContext context) {
-                return Container(
-                  width: width,
-                  height: height,
-                  color: Theme.of(context).canvasColor,
-                  child: Builder(builder: (BuildContext context) {
-                    if (kIsWeb) {
-                      return texture != null? HtmlElementView(viewType:texture!.textureId.toString()):Container();
-                    } 
-                    else {
-                      return texture != null?
+      return core.Peripherals(
+        key: globalKey,
+        
+        builder: (BuildContext context) {
+          return Container(
+            width: width,
+            height: height,
+            child: NotificationListener<SizeChangedLayoutNotification>(
+            onNotification: (notification) {
+              onWindowResize(context);
+              return true;
+            },
+            child: SizeChangedLayoutNotifier(
+              child: Builder(builder: (BuildContext context) {
+                  if (kIsWeb) {
+                    return texture != null? HtmlElementView(viewType:texture!.textureId.toString()):Container();
+                  } 
+                  else {
+                    return texture != null?
                       Transform.scale(
                         scaleY: sourceTexture != null || Platform.isAndroid?1:-1,
                         child:Texture(textureId: texture!.textureId)
                       ):Container();
-                    }
-                  })
-                );
-              }
-            ),
-          ),
-        ]
+                  }
+                })
+              )
+            )
+          );
+        }
       );
     });
   }

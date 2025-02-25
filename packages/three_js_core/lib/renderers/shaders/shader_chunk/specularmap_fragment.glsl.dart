@@ -1,9 +1,9 @@
-String specularmapFragment = """
+const String specularmapFragment = """
 float specularStrength;
 
 #ifdef USE_SPECULARMAP
 
-	vec4 texelSpecular = texture2D( specularMap, vUv );
+	vec4 texelSpecular = texture2D( specularMap, vSpecularMapUv );
 	specularStrength = texelSpecular.r;
 
 #else

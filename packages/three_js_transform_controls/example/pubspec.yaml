@@ -11,14 +11,11 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.6
   
-  three_js_core:
-    path: ../../three_js_core
+  three_js_core: ^0.0.1
   three_js_transform_controls:
     path: ../
-  three_js_math:
-    path: ../../three_js_math
-  three_js_geometry:
-    path: ../../three_js_geometry
+  three_js_math: ^0.0.1
+  three_js_geometry: ^0.0.1
 
 dev_dependencies:
   flutter_test:

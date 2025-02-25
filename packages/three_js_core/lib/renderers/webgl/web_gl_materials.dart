@@ -6,11 +6,12 @@ class WebGLMaterials {
 
   WebGLMaterials(this.renderer, this.properties);
 
-	void refreshTransformUniform(Texture map, Map uniform ) {
-		if ( map.matrixAutoUpdate == true ) {
+	void refreshTransformUniform(Texture? map, Map? uniform ) {
+    if(map == null) return;
+		if ( map.matrixAutoUpdate) {
 			map.updateMatrix();
 		}
-		uniform['value'].setFrom( map.matrix );
+		uniform?['value'].setFrom( map.matrix );
 	}
 
   void refreshFogUniforms(Map uniforms, FogBase fog) {
@@ -81,7 +82,7 @@ class WebGLMaterials {
 
     if (material.map != null) {
       uniforms["map"]["value"] = material.map;
-      refreshTransformUniform( material.map!, uniforms['mapTransform'] );
+      refreshTransformUniform( material.map, uniforms['mapTransform'] );
     }
 
     if (material.alphaMap != null) {
@@ -127,7 +128,7 @@ class WebGLMaterials {
 		final materialProperties = properties.get( material );
 
 		final envMap = materialProperties['envMap'];
-		final envMapRotation = materialProperties['envMapRotation'];
+		final envMapRotation = materialProperties['envMapRotation'] ?? Euler();
 
     if (envMap != null) {
       uniforms["envMap"]["value"] = envMap;
@@ -142,9 +143,9 @@ class WebGLMaterials {
 				_e1.z *= - 1;
 			}
 
-      uniforms['envMapRotation']['value'].setFromMatrix4( _m1.makeRotationFromEuler( _e1 ) );
+      uniforms['envMapRotation']?['value'].setFromMatrix4( _m1.makeRotationFromEuler( _e1 ) );
 
-      uniforms["flipEnvMap"]["value"] = (envMap.type == "CubeTexture" && envMap is! WebGL3DRenderTarget) ? -1 : 1;
+      uniforms["flipEnvMap"]?["value"] = (envMap.type == "CubeTexture" && envMap is! WebGL3DRenderTarget) ? -1 : 1;
       uniforms["reflectivity"]["value"] = material.reflectivity;
       uniforms["ior"]["value"] = material.ior;
       uniforms["refractionRatio"]["value"] = material.refractionRatio;
@@ -164,7 +165,6 @@ class WebGLMaterials {
       uniforms["aoMap"]["value"] = material.aoMap;
       uniforms["aoMapIntensity"]["value"] = material.aoMapIntensity;
       refreshTransformUniform( material.aoMap!, uniforms['aoMapTransform'] );
-
     }
 
     // uv repeat and offset setting priorities
@@ -231,7 +231,7 @@ class WebGLMaterials {
         uvScaleMap.updateMatrix();
       }
 
-      uniforms["uvTransform"]["value"].setFrom(uvScaleMap.matrix);
+      uniforms["uvTransform"]?["value"].setFrom(uvScaleMap.matrix);
     }
 
     // uv repeat and offset setting priorities for uv2
@@ -257,7 +257,7 @@ class WebGLMaterials {
         uv2ScaleMap.updateMatrix();
       }
 
-      uniforms["uv2Transform"]["value"].setFrom(uv2ScaleMap.matrix);
+      uniforms["uv2Transform"]?["value"].setFrom(uv2ScaleMap.matrix);
     }
   }
 
@@ -267,7 +267,7 @@ class WebGLMaterials {
 
 		if (material.map != null) {
 			uniforms['map']['value'] = material.map;
-			refreshTransformUniform( material.map!, uniforms['mapTransform'] );
+			refreshTransformUniform( material.map, uniforms['mapTransform'] );
 		}
   }
 
@@ -285,7 +285,7 @@ class WebGLMaterials {
 
     if (material.map != null) {
       uniforms["map"]["value"] = material.map;
-      refreshTransformUniform( material.map!, uniforms['uvTransform'] );
+      refreshTransformUniform( material.map, uniforms['uvTransform'] );
     }
 
     if (material.alphaMap != null) {
@@ -305,7 +305,7 @@ class WebGLMaterials {
 
     if (material.map != null) {
       uniforms["map"]["value"] = material.map;
-      refreshTransformUniform( material.map!, uniforms['mapTransform'] );
+      refreshTransformUniform( material.map, uniforms['mapTransform'] );
     }
 
     if (material.alphaMap != null) {

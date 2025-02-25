@@ -187,7 +187,7 @@ class WebGLLights {
     for (int i = 0, l = lights.length; i < l; i++) {
       final light = lights[i];
 
-      final color = light.color!;
+      final color = light.color ?? Color();
       final intensity = light.intensity;
       final distance = light.distance;
 
@@ -249,7 +249,7 @@ class WebGLLights {
         final shadow = light.shadow!;
 
 				if ( light.map != null) {
-					state.spotLightMap[ numSpotMaps ] = light.map;
+					state.spotLightMap.add(light.map);//[ numSpotMaps ] = light.map;
 					numSpotMaps ++;
 
 					// make sure the lightMatrix is up to date

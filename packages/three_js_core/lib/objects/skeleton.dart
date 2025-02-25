@@ -5,7 +5,7 @@ import './bone.dart';
 import 'dart:math' as math;
 
 final _offsetMatrix = Matrix4.identity();
-final _identityMatrix = Matrix4.identity();
+//final _identityMatrix = Matrix4.identity();
 
 /// Use an array of [bones] to create a skeleton that can be used by
 /// a [SkinnedMesh].

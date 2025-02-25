@@ -3,7 +3,6 @@ library three_webgl;
 import 'dart:typed_data';
 import 'dart:math' as math;
 
-import 'package:flutter_angle/flutter_angle.dart';
 import 'package:flutter/foundation.dart';
 import 'package:three_js_math/three_js_math.dart';
 import '../../objects/index.dart';
@@ -50,9 +49,8 @@ part 'web_gl_shadow_map.dart';
 part 'web_gl_state.dart';
 part 'web_gl_textures.dart';
 part 'web_gl_uniforms.dart';
+part 'web_gl_uniforms_groups.dart';
 part 'web_gl_uniforms_helper.dart';
 part 'web_gl_utils.dart';
 part 'web_gl_cube_uv_maps.dart';
 part 'web_gl_shader_cache.dart';
-
-part 'web_gl_uniforms_groups.dart';

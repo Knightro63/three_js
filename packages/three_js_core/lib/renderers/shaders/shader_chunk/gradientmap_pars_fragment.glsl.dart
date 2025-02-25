@@ -1,4 +1,4 @@
-String gradientmapParsFragment = """
+const String gradientmapParsFragment = """
 
 #ifdef USE_GRADIENTMAP
 
@@ -18,7 +18,8 @@ vec3 getGradientIrradiance( vec3 normal, vec3 lightDirection ) {
 
 	#else
 
-		return ( coord.x < 0.7 ) ? vec3( 0.7 ) : vec3( 1.0 );
+		vec2 fw = fwidth( coord ) * 0.5;
+		return mix( vec3( 0.7 ), vec3( 1.0 ), smoothstep( 0.7 - fw.x, 0.7 + fw.x, coord.x ) );
 
 	#endif
 

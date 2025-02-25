@@ -1,5 +1,7 @@
 part of three_js_transform_controls;
 
+enum ContorlsMode{gizmo,picker,helper}
+
 final _tempEuler = Euler(0, 0, 0);
 final _alignVector = Vector3(0, 1, 0);
 final _zeroVector = Vector3(0, 0, 0);
@@ -24,9 +26,9 @@ class TransformControlsGizmo extends Object3D {
   Object3D? object;
   bool enabled = true;
   String? axis;
-  String mode = "translate";
+  GizmoType mode = GizmoType.translate;
   String space = "world";
-  int size = 1;
+  double size = 1;
   bool dragging = false;
   bool showX = true;
   bool showY = true;
@@ -100,9 +102,9 @@ class TransformControlsGizmo extends Object3D {
     return controls.rotationAxis;
   }
 
-  final gizmo = {};
-  final picker = {};
-  final helper = {};
+  final Map<GizmoType,dynamic> gizmo = {};
+  final Map<GizmoType,dynamic> picker = {};
+  final Map<GizmoType,dynamic> helper = {};
 
   late TransformControls controls;
 
@@ -110,6 +112,37 @@ class TransformControlsGizmo extends Object3D {
     type = 'TransformControlsGizmo';
     // shared materials
 
+    // Gizmo definitions - custom hierarchy definitions for setupGizmo() function
+
+    // Gizmo creation
+    gizmo[GizmoType.translate] = setupGizmo(gizmoInfo(GizmoType.translate,ContorlsMode.gizmo));
+    gizmo[GizmoType.rotate] = setupGizmo(gizmoInfo(GizmoType.rotate,ContorlsMode.gizmo));
+    gizmo[GizmoType.scale] = setupGizmo(gizmoInfo(GizmoType.scale,ContorlsMode.gizmo));
+    picker[GizmoType.translate] = setupGizmo(gizmoInfo(GizmoType.translate,ContorlsMode.picker));
+    picker[GizmoType.rotate] = setupGizmo(gizmoInfo(GizmoType.rotate,ContorlsMode.picker));
+    picker[GizmoType.scale] = setupGizmo(gizmoInfo(GizmoType.scale,ContorlsMode.picker));
+    helper[GizmoType.translate] = setupGizmo(gizmoInfo(GizmoType.translate,ContorlsMode.helper));
+    helper[GizmoType.rotate] = setupGizmo(gizmoInfo(GizmoType.rotate,ContorlsMode.helper));
+    helper[GizmoType.scale] = setupGizmo(gizmoInfo(GizmoType.scale,ContorlsMode.helper));
+
+    add(gizmo[GizmoType.translate]);
+    add(gizmo[GizmoType.rotate]);
+    add(gizmo[GizmoType.scale]);
+    add(picker[GizmoType.translate]);
+    add(picker[GizmoType.rotate]);
+    add(picker[GizmoType.scale]);
+    add(helper[GizmoType.translate]);
+    add(helper[GizmoType.rotate]);
+    add(helper[GizmoType.scale]);
+
+    // Pickers should be hidden always
+
+    picker[GizmoType.translate].visible = false;
+    picker[GizmoType.rotate].visible = false;
+    picker[GizmoType.scale].visible = false;
+  }
+  
+  static Map<String,dynamic>? gizmoInfo(GizmoType type, ContorlsMode mode){
     final gizmoMaterial = MeshBasicMaterial.fromMap({
       "depthTest": false,
       "depthWrite": false,
@@ -127,7 +160,6 @@ class TransformControlsGizmo extends Object3D {
     });
 
     // Make unique material for each axis/color
-
     final matInvisible = gizmoMaterial.clone();
     matInvisible.opacity = 0.15;
 
@@ -169,40 +201,38 @@ class TransformControlsGizmo extends Object3D {
     matGray.color.setFromHex32(0x787878);
 
     // reusable geometry
-
+    geo.TorusGeometry circleGeometry(radius, arc) {
+      final geometry = geo.TorusGeometry(radius, 0.0075, 3, 64, arc * math.pi * 2);
+      geometry.rotateY(math.pi / 2);
+      geometry.rotateX(math.pi / 2);
+      return geometry;
+    };
+    
     final arrowGeometry = geo.CylinderGeometry(0, 0.04, 0.1, 12);
     arrowGeometry.translate(0, 0.05, 0);
 
     final scaleHandleGeometry = BoxGeometry(0.08, 0.08, 0.08);
     scaleHandleGeometry.translate(0, 0.04, 0);
 
+    final viewHandleGeometry = SphereGeometry(0.04);
+    scaleHandleGeometry.translate(0, 0.04, 0);
+
     final lineGeometry = BufferGeometry();
-    lineGeometry.setAttribute(
-        Attribute.position, Float32BufferAttribute.fromList(Float32List.fromList([0.0, 0.0, 0.0, 1.0, 0.0, 0.0]), 3));
+    lineGeometry.setAttribute(Attribute.position, Float32BufferAttribute.fromList(Float32List.fromList([0.0, 0.0, 0.0, 1.0, 0.0, 0.0]), 3));
 
     final lineGeometry2 = geo.CylinderGeometry(0.0075, 0.0075, 0.5, 3);
     lineGeometry2.translate(0, 0.25, 0);
 
-    // final circleGeometry = (radius, arc) {
-    //   final geometry = geo.TorusGeometry(radius, 0.0075, 3, 64, arc * math.pi * 2);
-    //   geometry.rotateY(math.pi / 2);
-    //   geometry.rotateX(math.pi / 2);
-    //   return geometry;
-    // };
-
     // Special geometry for transform helper. If scaled with position vector it spans from [0,0,0] to position
 
-    translateHelperGeometry() {
+    BufferGeometry translateHelperGeometry() {
       final geometry = BufferGeometry();
-
       geometry.setAttribute(Attribute.position, Float32BufferAttribute.fromList(Float32List.fromList([0.0, 0.0, 0.0, 1.0, 1.0, 1.0]), 3));
-
       return geometry;
     }
-
-    // Gizmo definitions - custom hierarchy definitions for setupGizmo() function
-
-    final gizmoTranslate = {
+    
+    if(type == GizmoType.translate && mode == ContorlsMode.gizmo)
+    return {
       "X": [
         [
           Mesh(arrowGeometry, matRed),
@@ -280,7 +310,8 @@ class TransformControlsGizmo extends Object3D {
       ]
     };
 
-    final pickerTranslate = {
+    if(type == GizmoType.translate && mode == ContorlsMode.picker)
+    return {
       "X": [
         [
           Mesh(geo.CylinderGeometry(0.2, 0, 0.6, 4), matInvisible),
@@ -341,7 +372,8 @@ class TransformControlsGizmo extends Object3D {
       ]
     };
 
-    final helperTranslate = {
+    if(type == GizmoType.translate && mode == ContorlsMode.helper)
+    return {
       "START": [
         [
           Mesh(geo.OctahedronGeometry(0.01, 2), matHelper),
@@ -398,41 +430,43 @@ class TransformControlsGizmo extends Object3D {
       ]
     };
 
-    final gizmoRotate = {
+    if(type == GizmoType.rotate && mode == ContorlsMode.gizmo)
+    return {
       "XYZE": [
         [
-          Mesh(geo.CircleGeometry(radius: 0.5, thetaLength:1), matGray),
+          Mesh(circleGeometry(0.5,1), matGray),//geo.CircleGeometry(radius: 0.5, thetaLength:1)
           null,
           [0, math.pi / 2, 0]
         ]
       ],
       "X": [
-        [Mesh(geo.CircleGeometry(radius: 0.5, thetaLength:0.5), matRed)]
+        [Mesh(circleGeometry(0.5,0.5),matRed)],//geo.CircleGeometry(radius: 0.5, thetaLength:0.5), matRed)]
       ],
       "Y": [
         [
-          Mesh(geo.CircleGeometry(radius: 0.5, thetaLength:0.5), matGreen),
+          Mesh(circleGeometry(0.5,0.5),matGreen),//Mesh(geo.CircleGeometry(radius: 0.5, thetaLength:0.5), matGreen),
           null,
           [0, 0, -math.pi / 2]
         ]
       ],
       "Z": [
         [
-          Mesh(geo.CircleGeometry(radius: 0.5, thetaLength:0.5), matBlue),
+          Mesh(circleGeometry(0.5,0.5),matBlue),//Mesh(geo.CircleGeometry(radius: 0.5, thetaLength:0.5), matBlue),
           null,
           [0, math.pi / 2, 0]
         ]
       ],
       "E": [
         [
-          Mesh(geo.CircleGeometry(radius: 0.75, thetaLength:1), matYellowTransparent),
+          Mesh(circleGeometry(0.75,1),matYellowTransparent),//Mesh(geo.CircleGeometry(radius: 0.75, thetaLength:1), matYellowTransparent),
           null,
           [0, math.pi / 2, 0]
         ]
       ]
     };
 
-    final helperRotate = {
+    if(type == GizmoType.rotate && mode == ContorlsMode.helper)
+    return {
       "AXIS": [
         [
           Line(lineGeometry, matHelper.clone()),
@@ -444,7 +478,8 @@ class TransformControlsGizmo extends Object3D {
       ]
     };
 
-    final pickerRotate = {
+    if(type == GizmoType.rotate && mode == ContorlsMode.picker)
+    return {
       "XYZE": [
         [Mesh(SphereGeometry(0.25, 10, 8), matInvisible)]
       ],
@@ -474,7 +509,8 @@ class TransformControlsGizmo extends Object3D {
       ]
     };
 
-    final gizmoScale = {
+    if(type == GizmoType.scale && mode == ContorlsMode.gizmo)
+    return {
       "X": [
         [
           Mesh(scaleHandleGeometry, matRed),
@@ -546,7 +582,8 @@ class TransformControlsGizmo extends Object3D {
       ]
     };
 
-    final pickerScale = {
+    if(type == GizmoType.scale && mode == ContorlsMode.picker)
+    return {
       "X": [
         [
           Mesh(geo.CylinderGeometry(0.2, 0, 0.6, 4), matInvisible),
@@ -610,7 +647,8 @@ class TransformControlsGizmo extends Object3D {
       ]
     };
 
-    final helperScale = {
+    if(type == GizmoType.scale && mode == ContorlsMode.helper)
+    return {
       "X": [
         [
           Line(lineGeometry, matHelper.clone()),
@@ -639,110 +677,252 @@ class TransformControlsGizmo extends Object3D {
         ]
       ]
     };
+    
+    if(type == GizmoType.view && mode == ContorlsMode.gizmo)
+    return {
+      "X": [
+        [
+          Mesh(viewHandleGeometry, matRed),
+          [0.5, 0, 0],
+          [0, 0, -math.pi / 2]
+        ],
+        [
+          Mesh(lineGeometry2, matRed),
+          [0, 0, 0],
+          [0, 0, -math.pi / 2]
+        ],
+        [
+          Mesh(viewHandleGeometry, matRed),
+          [-0.5, 0, 0],
+          [0, 0, math.pi / 2]
+        ],
+      ],
+      "Y": [
+        [
+          Mesh(viewHandleGeometry, matGreen),
+          [0, 0.5, 0]
+        ],
+        [Mesh(lineGeometry2, matGreen)],
+        [
+          Mesh(viewHandleGeometry, matGreen),
+          [0, -0.5, 0],
+          [0, 0, math.pi]
+        ],
+      ],
+      "Z": [
+        [
+          Mesh(viewHandleGeometry, matBlue),
+          [0, 0, 0.5],
+          [math.pi / 2, 0, 0]
+        ],
+        [
+          Mesh(lineGeometry2, matBlue),
+          [0, 0, 0],
+          [math.pi / 2, 0, 0]
+        ],
+        [
+          Mesh(viewHandleGeometry, matBlue),
+          [0, 0, -0.5],
+          [-math.pi / 2, 0, 0]
+        ]
+      ],
+      "XY": [
+        [
+          Mesh(BoxGeometry(0.15, 0.15, 0.01), matBlueTransparent),
+          [0.15, 0.15, 0]
+        ]
+      ],
+      "YZ": [
+        [
+          Mesh(BoxGeometry(0.15, 0.15, 0.01), matRedTransparent),
+          [0, 0.15, 0.15],
+          [0, math.pi / 2, 0]
+        ]
+      ],
+      "XZ": [
+        [
+          Mesh(BoxGeometry(0.15, 0.15, 0.01), matGreenTransparent),
+          [0.15, 0, 0.15],
+          [-math.pi / 2, 0, 0]
+        ]
+      ],
+      "XYZ": [
+        [Mesh(BoxGeometry(0.1, 0.1, 0.1), matWhiteTransparent.clone())],
+      ]
+    };
 
-    // Creates an Object3D with gizmos described in custom hierarchy definition.
+    if(type == GizmoType.view && mode == ContorlsMode.picker)
+    return {
+      "X": [
+        [
+          Mesh(geo.CylinderGeometry(0.2, 0, 0.6, 4), matInvisible),
+          [0.3, 0, 0],
+          [0, 0, -math.pi / 2]
+        ],
+        [
+          Mesh(geo.CylinderGeometry(0.2, 0, 0.6, 4), matInvisible),
+          [-0.3, 0, 0],
+          [0, 0, math.pi / 2]
+        ]
+      ],
+      "Y": [
+        [
+          Mesh(geo.CylinderGeometry(0.2, 0, 0.6, 4), matInvisible),
+          [0, 0.3, 0]
+        ],
+        [
+          Mesh(geo.CylinderGeometry(0.2, 0, 0.6, 4), matInvisible),
+          [0, -0.3, 0],
+          [0, 0, math.pi]
+        ]
+      ],
+      "Z": [
+        [
+          Mesh(geo.CylinderGeometry(0.2, 0, 0.6, 4), matInvisible),
+          [0, 0, 0.3],
+          [math.pi / 2, 0, 0]
+        ],
+        [
+          Mesh(geo.CylinderGeometry(0.2, 0, 0.6, 4), matInvisible),
+          [0, 0, -0.3],
+          [-math.pi / 2, 0, 0]
+        ]
+      ],
+      "XY": [
+        [
+          Mesh(BoxGeometry(0.2, 0.2, 0.01), matInvisible),
+          [0.15, 0.15, 0]
+        ],
+      ],
+      "YZ": [
+        [
+          Mesh(BoxGeometry(0.2, 0.2, 0.01), matInvisible),
+          [0, 0.15, 0.15],
+          [0, math.pi / 2, 0]
+        ],
+      ],
+      "XZ": [
+        [
+          Mesh(BoxGeometry(0.2, 0.2, 0.01), matInvisible),
+          [0.15, 0, 0.15],
+          [-math.pi / 2, 0, 0]
+        ],
+      ],
+      "XYZ": [
+        [
+          Mesh(BoxGeometry(0.2, 0.2, 0.2), matInvisible),
+          [0, 0, 0]
+        ],
+      ]
+    };
+    
+    if(type == GizmoType.view && mode == ContorlsMode.helper)
+    return {
+      "X": [
+        [
+          Line(lineGeometry, matHelper.clone()),
+          [-1e3, 0, 0],
+          null,
+          [1e6, 1, 1],
+          'helper'
+        ]
+      ],
+      "Y": [
+        [
+          Line(lineGeometry, matHelper.clone()),
+          [0, -1e3, 0],
+          [0, 0, math.pi / 2],
+          [1e6, 1, 1],
+          'helper'
+        ]
+      ],
+      "Z": [
+        [
+          Line(lineGeometry, matHelper.clone()),
+          [0, 0, -1e3],
+          [0, -math.pi / 2, 0],
+          [1e6, 1, 1],
+          'helper'
+        ]
+      ]
+    };
+  
+    return null;
+  }
 
-    Mesh setupGizmo(gizmoMap) {
-      final gizmo = Mesh();
+  // Creates an Object3D with gizmos described in custom hierarchy definition.
+  static Mesh setupGizmo(gizmoMap) {
+    final gizmo = Mesh();
 
-      for (final name in gizmoMap.keys) {
-        final len = gizmoMap[name].length;
+    for (final name in gizmoMap.keys) {
+      final len = gizmoMap[name].length;
 
-        for (int i = (len - 1); i >= 0; i--) {
-          final gi = gizmoMap[name][i];
+      for (int i = (len - 1); i >= 0; i--) {
+        final gi = gizmoMap[name][i];
 
-          late Object3D object;
-          if (gi.length > 0) {
-            object = gi[0].clone();
-          }
-
-          List<num>? position;
-          if (gi.length > 1) {
-            position = gi[1];
-          }
-
-          List<num>? rotation;
-          if (gi.length > 2) {
-            rotation = gi[2];
-          }
-
-          List<num>? scale;
-          if (gi.length > 3) {
-            scale = gi[3];
-          }
-
-          dynamic tag ;
-          if (gi.length > 4) {
-            tag = gi[4];
-          }
-
-          // name and tag properties are essential for picking and updating logic.
-          object.name = name;
-          object.tag = tag;
-
-          if (position != null) {
-            object.position.setValues(position[0].toDouble(), position[1].toDouble(), position[2].toDouble());
-          }
-
-          if (rotation != null) {
-            object.rotation.set(rotation[0].toDouble(), rotation[1].toDouble(), rotation[2].toDouble());
-          }
-
-          if (scale != null) {
-            object.scale.setValues(scale[0].toDouble(), scale[1].toDouble(), scale[2].toDouble());
-          }
-
-          object.updateMatrix();
-
-          final tempGeometry = object.geometry?.clone();
-          tempGeometry?.applyMatrix4(object.matrix);
-          object.geometry = tempGeometry;
-          object.renderOrder = double.maxFinite.toInt();
-
-          object.position.setValues(0.0, 0.0, 0.0);
-          object.rotation.set(0.0, 0.0, 0.0);
-          object.scale.setValues(1.0, 1.0, 1.0);
-
-          gizmo.add(object);
+        late Object3D object;
+        if (gi.length > 0) {
+          object = gi[0].clone();
         }
-      }
 
-      return gizmo;
+        List<num>? position;
+        if (gi.length > 1) {
+          position = gi[1];
+        }
+
+        List<num>? rotation;
+        if (gi.length > 2) {
+          rotation = gi[2];
+        }
+
+        List<num>? scale;
+        if (gi.length > 3) {
+          scale = gi[3];
+        }
+
+        dynamic tag ;
+        if (gi.length > 4) {
+          tag = gi[4];
+        }
+
+        // name and tag properties are essential for picking and updating logic.
+        object.name = name;
+        object.tag = tag;
+
+        if (position != null) {
+          object.position.setValues(position[0].toDouble(), position[1].toDouble(), position[2].toDouble());
+        }
+
+        if (rotation != null) {
+          object.rotation.set(rotation[0].toDouble(), rotation[1].toDouble(), rotation[2].toDouble());
+        }
+
+        if (scale != null) {
+          object.scale.setValues(scale[0].toDouble(), scale[1].toDouble(), scale[2].toDouble());
+        }
+
+        object.updateMatrix();
+
+        final tempGeometry = object.geometry?.clone();
+        tempGeometry?.applyMatrix4(object.matrix);
+        object.geometry = tempGeometry;
+        object.renderOrder = double.maxFinite.toInt();
+
+        object.position.setValues(0.0, 0.0, 0.0);
+        object.rotation.set(0.0, 0.0, 0.0);
+        object.scale.setValues(1.0, 1.0, 1.0);
+
+        gizmo.add(object);
+      }
     }
 
-    // Gizmo creation
-
-    gizmo['translate'] = setupGizmo(gizmoTranslate);
-    gizmo['rotate'] = setupGizmo(gizmoRotate);
-    gizmo['scale'] = setupGizmo(gizmoScale);
-    picker['translate'] = setupGizmo(pickerTranslate);
-    picker['rotate'] = setupGizmo(pickerRotate);
-    picker['scale'] = setupGizmo(pickerScale);
-    helper['translate'] = setupGizmo(helperTranslate);
-    helper['rotate'] = setupGizmo(helperRotate);
-    helper['scale'] = setupGizmo(helperScale);
-
-    add(gizmo['translate']);
-    add(gizmo['rotate']);
-    add(gizmo['scale']);
-    add(picker['translate']);
-    add(picker['rotate']);
-    add(picker['scale']);
-    add(helper['translate']);
-    add(helper['rotate']);
-    add(helper['scale']);
-
-    // Pickers should be hidden always
-
-    picker['translate'].visible = false;
-    picker['rotate'].visible = false;
-    picker['scale'].visible = false;
+    return gizmo;
   }
 
   // updateMatrixWorld will update transformations and appearance of individual handles
   @override
   void updateMatrixWorld([bool force = false]) {
-    final space = (mode == 'scale')
+    final space = (mode == GizmoType.scale)
         ? 'local'
         : this.space; // scale always oriented to local rotation
 
@@ -751,13 +931,13 @@ class TransformControlsGizmo extends Object3D {
 
     // Show only gizmos for current transform mode
 
-    gizmo['translate'].visible = mode == 'translate';
-    gizmo['rotate'].visible = mode == 'rotate';
-    gizmo['scale'].visible = mode == 'scale';
+    gizmo[GizmoType.translate].visible = mode == GizmoType.translate;
+    gizmo[GizmoType.rotate].visible = mode == GizmoType.rotate;
+    gizmo[GizmoType.scale].visible = mode == GizmoType.scale;
 
-    helper['translate'].visible = mode == 'translate';
-    helper['rotate'].visible = mode == 'rotate';
-    helper['scale'].visible = mode == 'scale';
+    helper[GizmoType.translate].visible = mode == GizmoType.translate;
+    helper[GizmoType.rotate].visible = mode == GizmoType.rotate;
+    helper[GizmoType.scale].visible = mode == GizmoType.scale;
 
     final List<Object3D> handles = [];
     handles.addAll(picker[mode].children);
@@ -888,7 +1068,7 @@ class TransformControlsGizmo extends Object3D {
 
       handle.quaternion.setFrom(quaternion);
 
-      if (mode == 'translate' || mode == 'scale') {
+      if (mode == GizmoType.translate || mode == GizmoType.scale) {
         // Hide translate and scale axis facing the camera
 
         const axisHideTreshold = 0.99;
@@ -960,7 +1140,7 @@ class TransformControlsGizmo extends Object3D {
             handle.visible = false;
           }
         }
-      } else if (mode == 'rotate') {
+      } else if (mode == GizmoType.rotate) {
         // Align handles to current local or world rotation
 
         _tempQuaternion2.setFrom(quaternion);

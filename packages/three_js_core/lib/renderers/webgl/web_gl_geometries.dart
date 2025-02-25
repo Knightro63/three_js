@@ -105,7 +105,7 @@ class WebGLGeometries {
         indices.addAll([a, b, b, c, c, a]);
       }
     } 
-    else {
+    else if( geometryPosition != null ){
       final array = geometryPosition.array;
       version = geometryPosition.version;
 
@@ -116,6 +116,9 @@ class WebGLGeometries {
 
         indices.addAll([a, b, b, c, c, a]);
       }
+    }
+    else{
+      return;
     }
 
     BufferAttribute attribute;
@@ -136,7 +139,7 @@ class WebGLGeometries {
     wireframeAttributes.add(key: geometry, value: attribute);
   }
 
-  getWireframeAttribute(BufferGeometry geometry) {
+  BufferAttribute<NativeArray<num>>? getWireframeAttribute(BufferGeometry geometry) {
     final currentAttribute = wireframeAttributes.get(geometry);
 
     if (currentAttribute != null) {
@@ -154,5 +157,12 @@ class WebGLGeometries {
     return wireframeAttributes.get(geometry);
   }
 
-  void dispose() {}
+  void dispose() {
+    for(final key in wireframeAttributes.keys){
+      (wireframeAttributes[key] as BufferAttribute).dispose();
+    }
+
+    wireframeAttributes.clear();
+    attributes.dispose();
+  }
 }

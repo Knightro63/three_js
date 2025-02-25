@@ -2,6 +2,7 @@
 // @author mrdoob / http://mrdoob.com/
 
 import 'package:three_js_core/three_js_core.dart';
+import 'package:three_js_exporters/saveFile/saveFile.dart';
 import 'package:three_js_math/three_js_math.dart';
 
 /// An exporter for the STL file format.
@@ -19,12 +20,7 @@ import 'package:three_js_math/three_js_math.dart';
 /// final result = exporter.parseMesh(mesh);
 /// ```
 class STLExporter{
-  String _output = '';
-  bool _usingParse = false;
-
-  STLExporter();
-
-  Vector3 _computeNormal(Vector3 va, Vector3 vb, Vector3 vc) {
+  static Vector3 _computeNormal(Vector3 va, Vector3 vb, Vector3 vc) {
     Vector3 cb = Vector3.copy(vc);
     Vector3 ab = Vector3.copy(vb);
 
@@ -38,9 +34,10 @@ class STLExporter{
     return cb;
   }
 
-  String parseMesh(Mesh object){
-    if(!_usingParse){
-      _output = 'solid exported\n';
+  static String parseMesh(Mesh object,[bool usingParse = false]){
+    String output = '';
+    if(!usingParse){
+      output = 'solid exported\n';
     }
     BufferGeometry? geometry = object.geometry;
     final Float32BufferAttribute? vertices = geometry?.getAttribute(Attribute.position);
@@ -55,29 +52,39 @@ class STLExporter{
           verts += '\t\t\tvertex ${vecsToNormal[j].x} ${vecsToNormal[j].y} ${vecsToNormal[j].z}\n';
         }
         Vector3 toNormal = _computeNormal(vecsToNormal[0],vecsToNormal[1],vecsToNormal[2]);
-        _output += '\tfacet normal ${toNormal.x} ${toNormal.y} ${toNormal.z}\n';
-        _output += '\t\touter loop\n';
-        _output += verts;
-        _output += '\t\tendloop\n';
-        _output += '\tendfacet\n';
+        output += '\tfacet normal ${toNormal.x} ${toNormal.y} ${toNormal.z}\n';
+        output += '\t\touter loop\n';
+        output += verts;
+        output += '\t\tendloop\n';
+        output += '\tendfacet\n';
       }
     }
 
-    return _output;
+    if(!usingParse){
+      output += 'endsolid exported\n';
+    }
+
+    return output;
   }
 
-  String parse(Scene scene) {
-    _usingParse = true;
-    _output = 'solid exported\n';
+  static String parse(Scene scene) {
+    String output = '';
+    output = 'solid exported\n';
 
     scene.traverse((object) {
       if(object is Mesh) {
-        parseMesh(object);
+        output += parseMesh(object,true);
       }
     });
 
-    _output += 'endsolid exported\n';
-    _usingParse = false;
-    return _output;
+    output += 'endsolid exported\n';
+    return output;
+  }
+
+  static void exportScene(String fileName, Scene scene, [String? path]){
+    SaveFile.saveString(printName: fileName, fileType: 'stl', data: parse(scene), path: path);
+  }
+  static void exportMesh(String fileName, Mesh mesh, [String? path]){
+    SaveFile.saveString(printName: fileName, fileType: 'stl', data: parseMesh(mesh), path: path);
   }
 }

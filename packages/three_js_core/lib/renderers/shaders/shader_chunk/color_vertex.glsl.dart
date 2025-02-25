@@ -1,4 +1,4 @@
-String colorVertex = """
+const String colorVertex = """
 #if defined( USE_COLOR_ALPHA )
 
 	vColor = vec4( 1.0 );

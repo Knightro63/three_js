@@ -44,7 +44,7 @@ class FileLoader extends Loader {
       return cached;
     }
     try{
-      final http.Response response = await http.get(Uri.parse(url));
+      final http.Response response = await http.get(uri);
 
       if (response.statusCode != 200) {
         manager.itemError(url);
@@ -124,6 +124,7 @@ class FileLoader extends Loader {
     return ThreeFile(type??'bytes',bytes,location);
   }
 
+  @override
   Future<ThreeFile?> unknown(dynamic url) async{
     if(url is File){
       return fromFile(url);

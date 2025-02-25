@@ -16,6 +16,10 @@ class ImageLoaderLoader {
       if (url is Blob) {
         bytes = url.data;
       } 
+      else if (url is Uri) {
+        final http.Response response = await http.get(url);
+        bytes = response.bodyBytes;
+      } 
       else if (url.startsWith("http")) {
         final http.Response response = await http.get(Uri.parse(url));
         bytes = response.bodyBytes;
@@ -60,7 +64,7 @@ void decodeIsolate(DecodeParam param) {
   // Read an image from file (webp in this case).
   // decodeImage will identify the format of the image and use the appropriate
   // decoder.
-  var image2 = imageProcess(param);
+  final image2 = imageProcess(param);
 
   param.sendPort?.send(image2);
 }

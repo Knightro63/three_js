@@ -3,6 +3,11 @@ import 'package:three_js_transform_controls/three_js_transform_controls.dart';
 import 'package:three_js_core/three_js_core.dart' as three;
 import 'package:three_js_math/three_js_math.dart' as tmath;
 
+import 'dart:math' as math;
+import 'dart:async';
+import 'package:flutter/services.dart';
+
+
 void main() {
   runApp(const MyApp());
 }
@@ -31,20 +36,24 @@ class MiscControlsArcball extends StatefulWidget {
 }
 
 class _MyAppState extends State<MiscControlsArcball> {
- late three.ThreeJS threeJs;
-
+  late three.ThreeJS threeJs;
+  late TransformControls control;
+  late ArcballControls orbit;
+  late three.PerspectiveCamera cameraPersp;
+  
   @override
   void initState() {
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
-      setup: setup
+      setup: setup,
     );
     super.initState();
   }
   @override
   void dispose() {
     threeJs.dispose();
-    controls.dispose();
+    control.dispose();
+    orbit.clearListeners();
     super.dispose();
   }
 
@@ -53,50 +62,129 @@ class _MyAppState extends State<MiscControlsArcball> {
     return threeJs.build();
   }
 
-  late ArcballControls controls;
+  Future<void> setup() async{
+    final aspect = threeJs.width / threeJs.height;
+    cameraPersp = three.PerspectiveCamera( 50, aspect, 0.1, 100 );
+    threeJs.camera = cameraPersp;
 
-  void setup() {
+    threeJs.camera.position.setValues( 5, 2.5, 5 );
 
     threeJs.scene = three.Scene();
-    threeJs.scene.background = tmath.Color.fromHex32(0xcccccc);
-    threeJs.scene.fog = three.FogExp2(0xcccccc, 0.002);
 
-    threeJs.camera = three.PerspectiveCamera(45, threeJs.width / threeJs.height, 1, 2000);
-    threeJs.camera.position.setValues(0, 0, 200);
-    threeJs.camera.lookAt(threeJs.scene.position);
+    final ambientLight = three.AmbientLight( 0xffffff,0.3 );
+    threeJs.scene.add( ambientLight );
 
-    // controls
+    final light = three.DirectionalLight( 0xffffff, 0.3 );
+    light.position = threeJs.camera.position;
+    threeJs.scene.add( light );
 
-    controls = ArcballControls(threeJs.camera, threeJs.globalKey, threeJs.scene, 1);
-    controls.addEventListener('change', (event) {
+    final geometry = three.BoxGeometry();
+    final material = three.MeshLambertMaterial.fromMap();
+
+    orbit = ArcballControls(threeJs.camera, threeJs.globalKey);
+    orbit.update();
+    orbit.addEventListener('change', (event) {
       threeJs.render();
     });
 
-    // world
+    control = TransformControls(threeJs.camera, threeJs.globalKey);
+    control.addEventListener('change', (event) {
+      threeJs.render();
+    });
 
-    final geometry = three.BoxGeometry(30, 30, 30);
-    final material =
-        three.MeshPhongMaterial.fromMap({"color": 0xffff00, "flatShading": true});
+    control.addEventListener( 'dragging-changed', (event) {
+      orbit.enabled = ! event.value;
+    });
 
-    final mesh = three.Mesh(geometry, material);
+    final mesh = three.Mesh( geometry, material );
+    threeJs.scene.add( mesh );
 
-    threeJs.scene.add(mesh);
+    control.attach( mesh );
+    threeJs.scene.add( control );
 
-    // lights
+    threeJs.domElement.addEventListener(
+      three.PeripheralType.resize, 
+      threeJs.onWindowResize
+    );
 
-    final dirLight1 = three.DirectionalLight(0xffffff);
-    dirLight1.position.setValues(1, 1, 1);
-    threeJs.scene.add(dirLight1);
+    threeJs.domElement.addEventListener(three.PeripheralType.keydown,(event) {
+      event as LogicalKeyboardKey;
+      switch (event.keyLabel.toLowerCase()) {
+        case 'q':
+          control.setSpace( control.space == 'local' ? 'world' : 'local' );
+          break;
+        case 'shift right':
+        case 'shift left':
+          control.setTranslationSnap( 1 );
+          control.setRotationSnap( tmath.MathUtils.degToRad( 15 ) );
+          control.setScaleSnap( 0.25 );
+          break;
+        case 'w':
+          control.setMode(GizmoType.translate);
+          break;
+        case 'e':
+          control.setMode(GizmoType.rotate);
+          break;
+        case 'r':
+          control.setMode(GizmoType.scale);
+          break;
+        case 'c':
+          final position = threeJs.camera.position.clone();
 
-    final dirLight2 = three.DirectionalLight(0x002288);
-    dirLight2.position.setValues(-1, -1, -1);
-    threeJs.scene.add(dirLight2);
+          threeJs.camera = cameraPersp;
+          threeJs.camera.position.setFrom( position );
 
-    final ambientLight = three.AmbientLight(0x222222);
-    threeJs.scene.add(ambientLight);
+          //orbit.object = threeJs.camera;
+          control.camera = threeJs.camera;
 
-    threeJs.addAnimationEvent((dt){
-      controls.update();
+          threeJs.camera.lookAt(orbit.target);
+          threeJs.onWindowResize(context);
+          break;
+        case 'v':
+          final randomFoV = math.Random().nextDouble() + 0.1;
+          final randomZoom = math.Random().nextDouble() + 0.1;
+
+          cameraPersp.fov = randomFoV * 160;
+
+          cameraPersp.zoom = randomZoom * 5;
+          threeJs.onWindowResize(context);
+          break;
+        case '+':
+        case '=':
+          control.setSize( control.size + 0.1 );
+          break;
+        case '-':
+        case '_':
+          control.setSize( math.max( control.size - 0.1, 0.1 ) );
+          break;
+        case 'x':
+          control.showX = ! control.showX;
+          break;
+        case 'y':
+          control.showY = ! control.showY;
+          break;
+        case 'z':
+          control.showZ = !control.showZ;
+          break;
+        case ' ':
+          control.enabled = ! control.enabled;
+          break;
+        case 'escape':
+          //control.reset();
+          break;
+      }
+    });
+
+    threeJs.domElement.addEventListener(three.PeripheralType.keyup, (event) {
+      event as LogicalKeyboardKey;
+      switch ( event.keyLabel.toLowerCase() ) {
+        case 'shift right':
+        case 'shift left':
+          control.setTranslationSnap( null );
+          control.setRotationSnap( null );
+          control.setScaleSnap( null );
+          break;
+      }
     });
   }
 }

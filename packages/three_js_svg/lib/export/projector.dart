@@ -392,7 +392,7 @@ class Projector{
             List<num>? morphInfluences = object.morphTargetInfluences;
 
             for (int t = 0; t < morphTargets.length; t ++) {
-              num influence = morphInfluences![t];
+              num influence = morphInfluences[t];
               if(influence == 0) continue;
               BufferAttribute? target = morphTargets[t];
               if (morphTargetsRelative) {

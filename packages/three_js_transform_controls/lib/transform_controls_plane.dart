@@ -1,5 +1,7 @@
 part of three_js_transform_controls;
 
+enum GizmoType{translate,rotate,scale,view}
+
 class TransformControlsPlane extends Mesh {
   bool isTransformControlsPlane = true;
 
@@ -7,9 +9,9 @@ class TransformControlsPlane extends Mesh {
   Object3D? object;
   bool enabled = true;
   String? axis;
-  String mode = "translate";
+  GizmoType mode = GizmoType.translate;
   String space = "world";
-  int size = 1;
+  double size = 1;
   bool dragging = false;
   bool showX = true;
   bool showY = true;
@@ -129,8 +131,8 @@ class TransformControlsPlane extends Mesh {
     _alignVector.setFrom(_v2);
 
     switch (mode) {
-      case 'translate':
-      case 'scale':
+      case GizmoType.translate:
+      case GizmoType.scale:
         switch (axis) {
           case 'X':
             _alignVector.setFrom(eye).cross(_v1);
@@ -161,7 +163,7 @@ class TransformControlsPlane extends Mesh {
         }
 
         break;
-      case 'rotate':
+      case GizmoType.rotate:
       default:
         // special case for rotate
         _dirVector.setValues(0, 0, 0);

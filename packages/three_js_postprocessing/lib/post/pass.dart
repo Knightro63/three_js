@@ -29,7 +29,7 @@ class Pass {
 
   void setSize(int width, int height){}
 
-  void render(WebGLRenderer renderer, writeBuffer, readBuffer,{double? deltaTime, bool? maskActive}) {
+  void render(WebGLRenderer renderer, WebGLRenderTarget writeBuffer, WebGLRenderTarget readBuffer,{double? deltaTime, bool? maskActive}) {
     throw ('THREE.Pass: .render() must be implemented in derived pass.');
   }
 }
