@@ -15,6 +15,7 @@ class WebGLRenderer {
   bool preserveDrawingBuffer = false;
   String powerPreference = "default";
   bool failIfMajorPerformanceCaveat = false;
+  bool reverseDepthBuffer = false;
 
   late WebGLRenderList? currentRenderList;
   late WebGLRenderState? currentRenderState;
@@ -84,6 +85,7 @@ class WebGLRenderer {
   int _currentMaterialId = -1;
   Camera? _currentCamera;
 
+  final _currentProjectionMatrix = Matrix4();
   final _currentViewport = Vector4.identity();
   final _currentScissor = Vector4.identity();
   bool? _currentScissorTest;
@@ -154,6 +156,10 @@ class WebGLRenderer {
   late WebGLUniformsGroups uniformsGroups;
   late WebGLShadowMap shadowMap;
 
+  late final Framebuffer _scratchFrameBuffer;
+  late final Framebuffer _srcFramebuffer;
+	late final Framebuffer _dstFramebuffer;
+
   WebGLRenderer(Map<String, dynamic>? parameters) {
     this.parameters = parameters ?? <String, dynamic>{};
 
@@ -180,12 +186,20 @@ class WebGLRenderer {
   }
 
   void initGLContext() {
+    _scratchFrameBuffer = _gl.createFramebuffer();
+    _srcFramebuffer = _gl.createFramebuffer();
+	  _dstFramebuffer = _gl.createFramebuffer();
+
     extensions = WebGLExtensions(_gl);
     extensions.init();
     utils = WebGLUtils(extensions);
 
     capabilities = WebGLCapabilities(_gl, extensions, parameters, utils);
-    state = WebGLState(_gl);
+    state = WebGLState(_gl,extensions);
+
+    if ( capabilities.reverseDepthBuffer && reverseDepthBuffer ) {
+      state.buffers['depth'].setReversed( true );
+    }
 
     info = WebGLInfo(_gl);
     properties = WebGLProperties();
@@ -250,8 +264,14 @@ class WebGLRenderer {
   }
 
   void setSize(double width, double height, [bool updateStyle = false]) {
+    if ( xr.isPresenting ) {
+      console.warning( 'WebGLRenderer: Can\'t change size while VR device is presenting.' );
+      return;
+    }
+
     _width = width;
     _height = height;
+
     setViewport(0, 0, width, height);
   }
 
@@ -262,7 +282,6 @@ class WebGLRenderer {
   void setDrawingBufferSize(double width, double height, double pixelRatio) {
     _width = width;
     _height = height;
-    _pixelRatio = pixelRatio;
     console.info("WebGLRenderer setDrawingBufferSize ");
     setViewport(0, 0, width, height);
   }
@@ -277,9 +296,6 @@ class WebGLRenderer {
 
   void setViewport(double x, double y, double width, double height) {
     _viewport.setValues(x, y, width, height);
-    _currentViewport.setFrom(_viewport);
-    _currentViewport.scale(_pixelRatio);
-    _currentViewport.round();
     state.viewport(_currentViewport);
   }
 
@@ -289,9 +305,6 @@ class WebGLRenderer {
 
   void setScissor(double x, double y, double width, double height) {
     _scissor.setValues(x, y, width, height);
-    _currentScissor.setFrom(_scissor);
-    _currentScissor.scale(_pixelRatio);
-    _currentScissor.round();
     state.scissor(_currentScissor);
   }
 
@@ -604,7 +617,21 @@ class WebGLRenderer {
         renderer.renderMultiDrawInstances( object.multiDrawStarts, object.multiDrawCounts, object.multiDrawCount, object.multiDrawInstances! );
       }
       else {
-        renderer.renderMultiDraw( object.multiDrawStarts, object.multiDrawCounts, object.multiDrawCount );
+        if ( ! extensions.get( 'WEBGL_multi_draw' ) ) {
+          final starts = object.multiDrawStarts;
+          final counts = object.multiDrawCounts;
+          final drawCount = object.multiDrawCount;
+          final bytesPerElement = index != null? attributes.get( index ).bytesPerElement : 1;
+          final uniforms = properties.get( material )['currentProgram'].getUniforms();
+          
+          for ( int i = 0; i < drawCount; i ++ ) {
+            uniforms.setValue( _gl, '_gl_DrawID', i );
+            renderer.render( starts[ i ] ~/ bytesPerElement, counts[ i ] );
+          }
+        } 
+        else {
+          renderer.renderMultiDraw( object.multiDrawStarts, object.multiDrawCounts, object.multiDrawCount );
+        }      
       }
     }
     if (object is InstancedMesh) {
@@ -643,7 +670,7 @@ class WebGLRenderer {
     }
 
   }
-  void compile(Object3D scene, Camera camera, [Object3D? targetScene]) {
+  Set compile(Object3D scene, Camera camera, [Object3D? targetScene]) {
     targetScene ??= scene;
 
     currentRenderState = renderStates.get(targetScene);
@@ -670,25 +697,33 @@ class WebGLRenderer {
         }
       });
     }
-    currentRenderState!.setupLights(physicallyCorrectLights);
+    currentRenderState!.setupLights();
+
+    final materials = Set();
 
     scene.traverse((object) {
+      if( ! ( object is Mesh || object is Points || object is Line || object is Sprite ) ) {
+        return;
+      }
+
       final material = object.material;
 
       if (material != null) {
         if (material is GroupMaterial) {
           for (int i = 0; i < material.children.length; i++) {
             final material2 = material.children[i];
-            prepareMaterial(material2, scene, object);//getProgram(material2, scene, object);
+            prepareMaterial(material2, targetScene, object);//getProgram(material2, scene, object);
+            materials.add( material2 );
           }
         } else {
-          prepareMaterial(material, scene, object);//getProgram(material, scene, object);
+          prepareMaterial(material, targetScene, object);//getProgram(material, scene, object);
+          materials.add( material );
         }
       }
     });
 
-    renderStateStack.removeLast();
-    currentRenderState = null;
+    currentRenderState = renderStateStack.removeLast();
+    return materials;
   }
 
   // Animation Loop
@@ -743,12 +778,19 @@ class WebGLRenderer {
     _frustum.setFromMatrix(projScreenMatrix);
 
     _localClippingEnabled = localClippingEnabled;
-    _clippingEnabled = clipping.init(clippingPlanes, _localClippingEnabled, camera);
+    _clippingEnabled = clipping.init(clippingPlanes, _localClippingEnabled);
 
     currentRenderList = renderLists.get(scene, renderListStack.length);
     currentRenderList!.init();
 
     renderListStack.add(currentRenderList!);
+
+    if ( xr.enabled && xr.isPresenting) {
+      final depthSensingMesh = xr.getDepthSensingMesh();
+      if ( depthSensingMesh != null ) {
+        projectObject( depthSensingMesh, camera, - double.maxFinite.toInt(), this.sortObjects );
+      }
+    }
 
     projectObject(scene, camera, 0, sortObjects);
 
@@ -810,7 +852,7 @@ class WebGLRenderer {
       scene.onAfterRender?.call(renderer: this, scene: scene, camera: camera);
     }
 
-    _gl.finish();
+    // _gl.finish();
 
     bindingStates.resetDefaultState();
     _currentMaterialId = -1;
@@ -974,7 +1016,8 @@ class WebGLRenderer {
 					'samples': 4,
 					'stencilBuffer': stencil,
 					'resolveDepthBuffer': false,
-					'resolveStencilBuffer': false
+					'resolveStencilBuffer': false,
+          'colorSpace': ColorManagement.workingColorSpace,
         }));
 
 				// debug
@@ -1092,7 +1135,14 @@ class WebGLRenderer {
     object.modelViewMatrix.multiply2(camera.matrixWorldInverse, object.matrixWorld);
     object.normalMatrix.getNormalMatrix(object.modelViewMatrix);
 
-    material.onBeforeRender?.call(this, scene, camera, geometry, object, group);
+    material.onBeforeRender?.call(
+      this, 
+      scene, 
+      camera, 
+      geometry, 
+      object, 
+      group
+    );
 
     if (material.transparent && material.side == DoubleSide && !material.forceSinglePass) {
       material.side = BackSide;
@@ -1195,7 +1245,8 @@ class WebGLRenderer {
       uniforms["directionalShadowMap"]["value"] = lights.state.directionalShadowMap;
       uniforms["directionalShadowMatrix"]["value"] = lights.state.directionalShadowMatrix;
       uniforms["spotShadowMap"]["value"] = lights.state.spotShadowMap;
-      uniforms["spotShadowMatrix"]["value"] = lights.state.spotShadowMatrix;
+      uniforms["spotLightMatrix"]["value"] = lights.state.spotLightMatrix;
+      uniforms["spotLightMap"]["value"] = lights.state.spotLightMap;
       uniforms["pointShadowMap"]["value"] = lights.state.pointShadowMap;
       uniforms["pointShadowMatrix"]["value"] = lights.state.pointShadowMatrix;
     }
@@ -1288,7 +1339,11 @@ class WebGLRenderer {
         needsProgramChange = true;
       } else if (object is! BatchedMesh && materialProperties['batching'] == true ) {
         needsProgramChange = true;
-      } else if ( object is InstancedMesh && materialProperties['instancing'] == false ) {
+      }else if ( object is BatchedMesh && materialProperties['batchingColor'] == true && object.colorsTexture == null ) {
+				needsProgramChange = true;
+			} else if ( object is BatchedMesh && materialProperties['batchingColor'] == false && object.colorsTexture != null ) {
+				needsProgramChange = true;
+			}else if ( object is InstancedMesh && materialProperties['instancing'] == false ) {
         needsProgramChange = true;
       } else if (object is! InstancedMesh && materialProperties['instancing'] == true ) {
         needsProgramChange = true;
@@ -1360,8 +1415,18 @@ class WebGLRenderer {
     if ( refreshProgram || _currentCamera != camera ) {
 
       // common camera uniforms
+      final reverseDepthBuffer = (state.buffers['depth'] as DepthBuffer).getReversed();
 
-      pUniformS?.setValue( _gl, 'projectionMatrix', camera.projectionMatrix );
+      if ( reverseDepthBuffer ) {
+        _currentProjectionMatrix.setFrom( camera.projectionMatrix );
+        toNormalizedProjectionMatrix( _currentProjectionMatrix );
+        toReversedProjectionMatrix( _currentProjectionMatrix );
+        pUniformS?.setValue( _gl, 'projectionMatrix', _currentProjectionMatrix );
+      } 
+      else {
+        pUniformS?.setValue( _gl, 'projectionMatrix', camera.projectionMatrix );
+      }
+
       pUniformS?.setValue( _gl, 'viewMatrix', camera.matrixWorldInverse );
 
       final uCamPos = pUniformS?.map['cameraPosition'];
@@ -1416,6 +1481,14 @@ class WebGLRenderer {
     if ( object is BatchedMesh ) {
       pUniformS?.setOptional( _gl, object, 'batchingTexture' );
       pUniformS?.setValue( _gl, 'batchingTexture', object.matricesTexture, textures );
+
+      pUniformS?.setOptional( _gl, object, 'batchingIdTexture' );
+      pUniformS?.setValue( _gl, 'batchingIdTexture', object.indirectTexture, textures );
+
+      pUniformS?.setOptional( _gl, object, 'batchingColorTexture' );
+      if ( object.colorsTexture != null ) {
+        pUniformS?.setValue( _gl, 'batchingColorTexture', object.colorsTexture, textures );
+      }
     }
 
     final morphAttributes = geometry?.morphAttributes;
@@ -1585,6 +1658,23 @@ class WebGLRenderer {
       else if (renderTargetProperties["__hasExternalTextures"] == true) {
         // Color and depth texture must be rebound in order for the swapchain to update.
         textures.rebindTextures(renderTarget, properties.get(renderTarget.texture)["__webglTexture"],properties.get(renderTarget.depthTexture)["__webglTexture"]);
+      }else if ( renderTarget.depthBuffer ) {
+        // check if the depth texture is already bound to the frame buffer and that it's been initialized
+        final depthTexture = renderTarget.depthTexture;
+        if ( renderTargetProperties['__boundDepthTexture'] != depthTexture ) {
+
+          // check if the depth texture is compatible
+          if (
+            depthTexture != null &&
+            properties.has( depthTexture ) &&
+            ( renderTarget.width != depthTexture.image.width || renderTarget.height != depthTexture.image.height )
+          ) {
+            throw( 'WebGLRenderTarget: Attached DepthTexture is initialized to the incorrect size.' );
+          }
+
+          // Swap the depth buffer to the currently attached one
+          textures.setupDepthRenderbuffer( renderTarget );
+        }
       }
 
       final texture = renderTarget.texture;
@@ -1625,6 +1715,12 @@ class WebGLRenderer {
       _currentScissorTest = _scissorTest;
     }
     
+    // Use a scratch frame buffer if rendering to a mip level to avoid depth buffers
+    // being bound that are different sizes.
+    if ( activeMipmapLevel != 0 ) {
+      framebuffer = _scratchFrameBuffer;
+    }
+
     final framebufferBound = state.bindFramebuffer(WebGL.FRAMEBUFFER, framebuffer);
     
     if (framebufferBound && capabilities.drawBuffers && useDefaultFramebuffer) {
@@ -1643,6 +1739,12 @@ class WebGLRenderer {
       final textureProperties = properties.get(renderTarget!.texture);
       final layer = activeCubeFace;
       _gl.framebufferTextureLayer( WebGL.FRAMEBUFFER, WebGL.COLOR_ATTACHMENT0, textureProperties["__webglTexture"], activeMipmapLevel, layer);
+    }
+    else if ( renderTarget != null && activeMipmapLevel != 0 ) {
+      // Only bind the frame buffer if we are using a scratch frame buffer to render to a mipmap.
+      // If we rebind the texture when using a multi sample buffer then an error about inconsistent samples will be thrown.
+      final textureProperties = properties.get( renderTarget.texture );
+      _gl.framebufferTexture2D( WebGL.FRAMEBUFFER, WebGL.COLOR_ATTACHMENT0, WebGL.TEXTURE_2D, textureProperties['__webglTexture'], activeMipmapLevel );
     }
 
     _currentMaterialId = -1; // reset current material to ensure correct uniform bindings
@@ -1706,103 +1808,220 @@ class WebGLRenderer {
     state.unbindTexture(WebGLTexture(WebGL.TEXTURE_2D));
   }
 
-  void copyTextureToTexture(position, Texture srcTexture, dstTexture, {int level = 0}) {
-    final width = srcTexture.image.width;
-    final height = srcTexture.image.height;
-    final glFormat = utils.convert(dstTexture.format);
-    final glType = utils.convert(dstTexture.type);
-
-    textures.setTexture2D(dstTexture, 0);
-
-    // As another texture upload may have changed pixelStorei
-    // parameters, make sure they are correct for the dstTexture
-    _gl.pixelStorei(WebGL.UNPACK_FLIP_Y_WEBGL, dstTexture.flipY ? 1 : 0);
-    _gl.pixelStorei(WebGL.UNPACK_PREMULTIPLY_ALPHA_WEBGL, dstTexture.premultiplyAlpha);
-    _gl.pixelStorei(WebGL.UNPACK_ALIGNMENT, dstTexture.unpackAlignment);
-
-    if (srcTexture is DataTexture) {
-      _gl.texSubImage2D(WebGL.TEXTURE_2D, level, position.x, position.y, width, height, glFormat, glType, srcTexture.image.data);
+  void copyTextureToTexture(Texture srcTexture, dstTexture, {srcRegion, dstPosition, int srcLevel = 0, dstLevel}) {
+			// support the previous signature with just a single dst mipmap level
+			if ( dstLevel == null ) {
+				if ( srcLevel != 0 ) {
+					// @deprecated, r171
+					//warnOnce( 'WebGLRenderer: copyTextureToTexture function signature has changed to support src and dst mipmap levels.' );
+					dstLevel = srcLevel;
+					srcLevel = 0;
+				} 
+        else {
+					dstLevel = 0;
+				}
+			}
+    
+    // gather the necessary dimensions to copy
+    int width, height, depth, minX, minY, minZ;
+    int dstX, dstY, dstZ;
+    final image = srcTexture is CompressedTexture ? srcTexture.mipmaps[ dstLevel ] : srcTexture.image;
+    if ( srcRegion != null ) {
+      width = srcRegion.max.x - srcRegion.min.x;
+      height = srcRegion.max.y - srcRegion.min.y;
+      depth = srcRegion is BoundingBox ? (srcRegion.max.z - srcRegion.min.z).toInt() : 1;
+      minX = srcRegion.min.x;
+      minY = srcRegion.min.y;
+      minZ = srcRegion is BoundingBox ? srcRegion.min.z.toInt() : 0;
     } 
     else {
-      if (srcTexture is CompressedTexture) {
-        _gl.compressedTexSubImage2D(WebGL.TEXTURE_2D, level, position.x, position.y, srcTexture.mipmaps[0].width,srcTexture.mipmaps[0].height, glFormat, srcTexture.mipmaps[0].data);
+      final levelScale = math.pow( 2, - srcLevel );
+      width = ( image.width * levelScale ).floor();
+      height = ( image.height * levelScale ).floor();
+      if ( srcTexture is DataArrayTexture ) {
+        depth = image.depth;
+      } 
+      else if ( srcTexture is Data3DTexture ) {
+        depth = ( image.depth * levelScale ).floor();
       } 
       else {
-        _gl.texSubImage2D(WebGL.TEXTURE_2D, level, position.x, position.y, 0, 0, glFormat, glType, srcTexture.image);
+        depth = 1;
+      }
+
+      minX = 0;
+      minY = 0;
+      minZ = 0;
+    }
+
+    if ( dstPosition != null ) {
+      dstX = dstPosition.x;
+      dstY = dstPosition.y;
+      dstZ = dstPosition.z;
+    } 
+    else {
+      dstX = 0;
+      dstY = 0;
+      dstZ = 0;
+    }
+
+    // Set up the destination target
+    final glFormat = utils.convert( dstTexture.format );
+    final glType = utils.convert( dstTexture.type );
+    int glTarget = 0;
+
+    if ( dstTexture is Data3DTexture ) {
+      textures.setTexture3D( dstTexture, 0 );
+      glTarget = WebGL.TEXTURE_3D;
+    } 
+    else if ( dstTexture is DataArrayTexture || dstTexture is CompressedArrayTexture ) {
+      textures.setTexture2DArray( dstTexture, 0 );
+      glTarget = WebGL.TEXTURE_2D_ARRAY;
+    } 
+    else {
+      textures.setTexture2D( dstTexture, 0 );
+      glTarget = WebGL.TEXTURE_2D;
+    }
+
+    _gl.pixelStorei( WebGL.UNPACK_FLIP_Y_WEBGL, dstTexture.flipY );
+    _gl.pixelStorei( WebGL.UNPACK_PREMULTIPLY_ALPHA_WEBGL, dstTexture.premultiplyAlpha );
+    _gl.pixelStorei( WebGL.UNPACK_ALIGNMENT, dstTexture.unpackAlignment );
+
+    // used for copying data from cpu
+    final currentUnpackRowLen = _gl.getParameter( WebGL.UNPACK_ROW_LENGTH );
+    final currentUnpackImageHeight = _gl.getParameter( WebGL.UNPACK_IMAGE_HEIGHT );
+    final currentUnpackSkipPixels = _gl.getParameter( WebGL.UNPACK_SKIP_PIXELS );
+    final currentUnpackSkipRows = _gl.getParameter( WebGL.UNPACK_SKIP_ROWS );
+    final currentUnpackSkipImages = _gl.getParameter( WebGL.UNPACK_SKIP_IMAGES );
+
+    _gl.pixelStorei( WebGL.UNPACK_ROW_LENGTH, image.width );
+    _gl.pixelStorei( WebGL.UNPACK_IMAGE_HEIGHT, image.height );
+    _gl.pixelStorei( WebGL.UNPACK_SKIP_PIXELS, minX );
+    _gl.pixelStorei( WebGL.UNPACK_SKIP_ROWS, minY );
+    _gl.pixelStorei( WebGL.UNPACK_SKIP_IMAGES, minZ );
+
+    // set up the src texture
+    final isSrc3D = srcTexture is DataArrayTexture || srcTexture is Data3DTexture;
+    final isDst3D = dstTexture is DataArrayTexture || dstTexture is Data3DTexture;
+    if ( srcTexture.isDepthTexture ) {
+
+      final srcTextureProperties = properties.get( srcTexture );
+      final dstTextureProperties = properties.get( dstTexture );
+      final srcRenderTargetProperties = properties.get( srcTextureProperties['__renderTarget'] );
+      final dstRenderTargetProperties = properties.get( dstTextureProperties['__renderTarget'] );
+      state.bindFramebuffer( WebGL.READ_FRAMEBUFFER, srcRenderTargetProperties['__webglFramebuffer'] );
+      state.bindFramebuffer( WebGL.DRAW_FRAMEBUFFER, dstRenderTargetProperties['__webglFramebuffer'] );
+
+      for (int i = 0; i < depth; i ++ ) {
+        // if the source or destination are a 3d target then a layer needs to be bound
+        if ( isSrc3D ) {
+          _gl.framebufferTextureLayer( WebGL.READ_FRAMEBUFFER, WebGL.COLOR_ATTACHMENT0, properties.get( srcTexture )['__webglTexture'], srcLevel, minZ + i );
+          _gl.framebufferTextureLayer( WebGL.DRAW_FRAMEBUFFER, WebGL.COLOR_ATTACHMENT0, properties.get( dstTexture )['__webglTexture'], dstLevel, dstZ + i );
+        }
+
+        _gl.blitFramebuffer( minX, minY, width, height, dstX, dstY, width, height, WebGL.DEPTH_BUFFER_BIT, WebGL.NEAREST );
+      }
+
+      state.bindFramebuffer( WebGL.READ_FRAMEBUFFER, null );
+      state.bindFramebuffer( WebGL.DRAW_FRAMEBUFFER, null );
+
+    } 
+    else if ( srcLevel != 0 || srcTexture.isRenderTargetTexture || properties.has( srcTexture ) ) {
+      // get the appropriate frame buffers
+      final srcTextureProperties = properties.get( srcTexture );
+      final dstTextureProperties = properties.get( dstTexture );
+
+      // bind the frame buffer targets
+      state.bindFramebuffer( WebGL.READ_FRAMEBUFFER, _srcFramebuffer );
+      state.bindFramebuffer( WebGL.DRAW_FRAMEBUFFER, _dstFramebuffer );
+
+      for (int i = 0; i < depth; i ++ ) {
+
+        // assign the correct layers and mip maps to the frame buffers
+        if ( isSrc3D ) {
+          _gl.framebufferTextureLayer( WebGL.READ_FRAMEBUFFER, WebGL.COLOR_ATTACHMENT0, srcTextureProperties['__webglTexture'], srcLevel, minZ + i );
+        } 
+        else {
+          _gl.framebufferTexture2D( WebGL.READ_FRAMEBUFFER, WebGL.COLOR_ATTACHMENT0, WebGL.TEXTURE_2D, srcTextureProperties['__webglTexture'], srcLevel );
+        }
+
+        if ( isDst3D ) {
+          _gl.framebufferTextureLayer( WebGL.DRAW_FRAMEBUFFER, WebGL.COLOR_ATTACHMENT0, dstTextureProperties['__webglTexture'], dstLevel, dstZ + i );
+        } 
+        else {
+          _gl.framebufferTexture2D( WebGL.DRAW_FRAMEBUFFER, WebGL.COLOR_ATTACHMENT0, WebGL.TEXTURE_2D, dstTextureProperties['__webglTexture'], dstLevel );
+        }
+
+        // copy the data using the fastest function that can achieve the copy
+        if ( srcLevel != 0 ) {
+          _gl.blitFramebuffer( minX, minY, width, height, dstX, dstY, width, height, WebGL.COLOR_BUFFER_BIT, WebGL.NEAREST );
+        } else if ( isDst3D ) {
+          //_gl.copyTexSubImage3D( glTarget, dstLevel, dstX, dstY, dstZ + i, minX, minY, width, height );
+        } else {
+          _gl.copyTexSubImage2D( glTarget, dstLevel, dstX, dstY, minX, minY, width, height );
+        }
+      }
+
+      // unbind read, draw buffers
+      state.bindFramebuffer( WebGL.READ_FRAMEBUFFER, null );
+      state.bindFramebuffer( WebGL.DRAW_FRAMEBUFFER, null );
+    } 
+    else {
+
+      if ( isDst3D ) {
+        // copy data into the 3d texture
+        if ( srcTexture is DataTexture || srcTexture is Data3DTexture ) {
+          _gl.texSubImage3D( glTarget, dstLevel, dstX, dstY, dstZ, width, height, depth, glFormat, glType, image.data );
+        } 
+        else if ( dstTexture is CompressedArrayTexture ) {
+          _gl.compressedTexSubImage3D( glTarget, dstLevel, dstX, dstY, dstZ, width, height, depth, glFormat, image.data );
+        } 
+        else {
+          _gl.texSubImage3D( glTarget, dstLevel, dstX, dstY, dstZ, width, height, depth, glFormat, glType, image );
+        }
+      } 
+      else {
+        // copy data into the 2d texture
+        if ( srcTexture is DataTexture ) {
+          _gl.texSubImage2D( WebGL.TEXTURE_2D, dstLevel, dstX, dstY, width, height, glFormat, glType, image.data );
+        } 
+        else if ( srcTexture.isCompressedTexture ) {
+          _gl.compressedTexSubImage2D( WebGL.TEXTURE_2D, dstLevel, dstX, dstY, image.width, image.height, glFormat, image.data );
+        } 
+        else {
+          _gl.texSubImage2D( WebGL.TEXTURE_2D, dstLevel, dstX, dstY, width, height, glFormat, glType, image );
+        }
       }
     }
 
+    // reset values
+    _gl.pixelStorei( WebGL.UNPACK_ROW_LENGTH, currentUnpackRowLen );
+    _gl.pixelStorei( WebGL.UNPACK_IMAGE_HEIGHT, currentUnpackImageHeight );
+    _gl.pixelStorei( WebGL.UNPACK_SKIP_PIXELS, currentUnpackSkipPixels );
+    _gl.pixelStorei( WebGL.UNPACK_SKIP_ROWS, currentUnpackSkipRows );
+    _gl.pixelStorei( WebGL.UNPACK_SKIP_IMAGES, currentUnpackSkipImages );
+
     // Generate mipmaps only when copying level 0
-    if (level == 0 && dstTexture.generateMipmaps) _gl.generateMipmap(WebGL.TEXTURE_2D);
+    if ( dstLevel == 0 && dstTexture.generateMipmaps ) {
+      _gl.generateMipmap( glTarget );
+    }
 
     state.unbindTexture();
   }
 
   void copyTextureToTexture3D(
-    BoundingBox sourceBox,
-    Vector3 position,
     Texture srcTexture,
     Texture dstTexture, {
+    srcRegion, 
+    dstPosition,
     int level = 0,
   }) {
-    final width = sourceBox.max.x - sourceBox.min.x;
-    final height = sourceBox.max.y - sourceBox.min.y;
-    final depth = sourceBox.max.z - sourceBox.min.z;
-    final glFormat = utils.convert(dstTexture.format);
-    final glType = utils.convert(dstTexture.type);
-    dynamic glTarget;
+    return copyTextureToTexture( srcTexture, dstTexture, srcRegion: srcRegion, dstPosition: dstPosition, srcLevel: level);
+  }
 
-    if (dstTexture is Data3DTexture) {
-      textures.setTexture3D(dstTexture, 0);
-      glTarget = WebGL.TEXTURE_3D;
-    } else if (dstTexture is DataArrayTexture || dstTexture is CompressedArrayTexture ) {
-      textures.setTexture2DArray(dstTexture, 0);
-      glTarget = WebGL.TEXTURE_2D_ARRAY;
-    } else {
-      console.warning('WebGLRenderer.copyTextureToTexture3D: only supports DataTexture3D and DataTexture2DArray.');
-      return;
+  void initRenderTarget( target ) {
+    if ( properties.get( target )['__webglFramebuffer'] == null ) {
+      textures.setupRenderTarget( target );
     }
-
-    _gl.pixelStorei(WebGL.UNPACK_FLIP_Y_WEBGL, dstTexture.flipY ? 1 : 0);
-    _gl.pixelStorei(WebGL.UNPACK_PREMULTIPLY_ALPHA_WEBGL, dstTexture.premultiplyAlpha?1:0);
-    _gl.pixelStorei(WebGL.UNPACK_ALIGNMENT, dstTexture.unpackAlignment);
-
-    final unpackRowLen = _gl.getParameter(WebGL.UNPACK_ROW_LENGTH);
-    final unpackImageHeight = _gl.getParameter(WebGL.UNPACK_IMAGE_HEIGHT);
-    final unpackSkipPixels = _gl.getParameter(WebGL.UNPACK_SKIP_PIXELS);
-    final unpackSkipRows = _gl.getParameter(WebGL.UNPACK_SKIP_ROWS);
-    final unpackSkipImages = _gl.getParameter(WebGL.UNPACK_SKIP_IMAGES);
-    
-    final image = srcTexture.isCompressedTexture ? srcTexture.mipmaps[0] : srcTexture.image;
-
-    _gl.pixelStorei(WebGL.UNPACK_ROW_LENGTH, image.width);
-    _gl.pixelStorei(WebGL.UNPACK_IMAGE_HEIGHT, image.height);
-    _gl.pixelStorei(WebGL.UNPACK_SKIP_PIXELS, sourceBox.min.x.toInt());
-    _gl.pixelStorei(WebGL.UNPACK_SKIP_ROWS, sourceBox.min.y.toInt());
-    _gl.pixelStorei(WebGL.UNPACK_SKIP_IMAGES, sourceBox.min.z.toInt());
-
-    if (srcTexture is DataTexture || srcTexture is Data3DTexture) {
-      _gl.texSubImage3D(glTarget, level, position.x.toInt(), position.y.toInt(), position.z.toInt(), width.toInt(), height.toInt(), depth.toInt(), glFormat, glType, image.data);
-    } 
-    else {
-      if (dstTexture is CompressedArrayTexture) {
-        _gl.compressedTexSubImage3D(glTarget, level, position.x.toInt(), position.y.toInt(), position.z.toInt(), width.toInt(), height.toInt(), depth.toInt(), glFormat, image.data);
-      } 
-      else {
-        _gl.texSubImage3D(glTarget, level, position.x.toInt(), position.y.toInt(), position.z.toInt(), width.toInt(), height.toInt(), depth.toInt(), glFormat, glType, image);
-      }
-    }
-
-    _gl.pixelStorei(WebGL.UNPACK_ROW_LENGTH, unpackRowLen);
-    _gl.pixelStorei(WebGL.UNPACK_IMAGE_HEIGHT, unpackImageHeight);
-    _gl.pixelStorei(WebGL.UNPACK_SKIP_PIXELS, unpackSkipPixels);
-    _gl.pixelStorei(WebGL.UNPACK_SKIP_ROWS, unpackSkipRows);
-    _gl.pixelStorei(WebGL.UNPACK_SKIP_IMAGES, unpackSkipImages);
-
-    // Generate mipmaps only when copying level 0
-    if (level == 0 && dstTexture.generateMipmaps) _gl.generateMipmap(glTarget);
-
-    state.unbindTexture();
   }
 
   void initTexture(Texture texture) {
@@ -1845,4 +2064,29 @@ class WebGLRenderer {
 		gl.drawingBufferColorSpace = colorSpace == DisplayP3ColorSpace ? 'display-p3' : 'srgb';
 		gl.unpackColorSpace = ColorManagement.workingColorSpace == LinearDisplayP3ColorSpace ? 'display-p3' : 'srgb';
 	}
+
+  void toNormalizedProjectionMatrix(Matrix4 projectionMatrix ) {
+    final m = projectionMatrix.storage;
+
+    // Convert [-1, 1] to [0, 1] projection matrix
+    m[ 2 ] = 0.5 * m[ 2 ] + 0.5 * m[ 3 ];
+    m[ 6 ] = 0.5 * m[ 6 ] + 0.5 * m[ 7 ];
+    m[ 10 ] = 0.5 * m[ 10 ] + 0.5 * m[ 11 ];
+    m[ 14 ] = 0.5 * m[ 14 ] + 0.5 * m[ 15 ];
+  }
+
+  void toReversedProjectionMatrix(Matrix4 projectionMatrix ) {
+    final m = projectionMatrix.storage;
+    final isPerspectiveMatrix = m[ 11 ] == - 1;
+
+    // Reverse [0, 1] projection matrix
+    if ( isPerspectiveMatrix ) {
+      m[ 10 ] = - m[ 10 ] - 1;
+      m[ 14 ] = - m[ 14 ];
+    } 
+    else {
+      m[ 10 ] = - m[ 10 ];
+      m[ 14 ] = - m[ 14 ] + 1;
+    }
+  }
 }

@@ -54,12 +54,7 @@ class WebGLPrograms {
     final geometry = object.geometry;
     final environment = material is MeshStandardMaterial ? scene.environment : null;
 
-    Texture? envMap;
-    if (material is MeshStandardMaterial) {
-      envMap = cubeuvmaps.get(material.envMap ?? environment);
-    } else {
-      envMap = cubemaps.get(material.envMap ?? environment);
-    }
+    Texture? envMap = material is MeshStandardMaterial?cubeuvmaps.get(material.envMap ?? environment):cubemaps.get(material.envMap ?? environment);
 
     final envMapCubeUVHeight = (envMap != null) && (envMap.mapping == CubeUVReflectionMapping) ? envMap.image?.height : null;
 
@@ -339,7 +334,7 @@ class WebGLPrograms {
     return array.join();
   }
 
-  void getProgramCacheKeyParameters(array, WebGLParameters parameters) {
+  void getProgramCacheKeyParameters(List array, WebGLParameters parameters) {
 		array.add( parameters.precision );
 		array.add( parameters.outputColorSpace );
 		array.add( parameters.envMapMode );
@@ -415,6 +410,7 @@ class WebGLPrograms {
 		if ( parameters.alphaHash )_programLayers.enable( 18 );
 		if ( parameters.batching )_programLayers.enable( 19 );
 		if ( parameters.dispersion )_programLayers.enable( 20 );
+		if ( parameters.batchingColor )_programLayers.enable( 21 );
 
 		array.add( _programLayers.mask );
 		_programLayers.disableAll();
@@ -439,7 +435,8 @@ class WebGLPrograms {
 		if ( parameters.opaque )_programLayers.enable( 17 );
 		if ( parameters.pointsUvs )_programLayers.enable( 18 );
 		if ( parameters.decodeVideoTexture )_programLayers.enable( 19 );
-		if ( parameters.alphaToCoverage )_programLayers.enable( 20 );
+		if ( parameters.decodeVideoTextureEmissive )_programLayers.enable( 20 );
+		if ( parameters.alphaToCoverage )_programLayers.enable( 21 );
 
 		array.add( _programLayers.mask );
   }

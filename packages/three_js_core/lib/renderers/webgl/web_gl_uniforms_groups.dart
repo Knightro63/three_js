@@ -183,12 +183,16 @@ class WebGLUniformsGroups{
 					final value = values[ k ];
 					final info = getUniformSize( value );
 					// Calculate the chunk offset
-					final chunkOffsetUniform = offset % chunkSize;
+					final chunkOffset = offset % chunkSize;
+					final chunkPadding = chunkOffset % info['boundary']!; // required padding to match boundary
+					final chunkStart = chunkOffset + chunkPadding; // the start position in the current chunk for the data
+
+          offset += chunkPadding;
 
 					// Check for chunk overflow
-					if ( chunkOffsetUniform != 0 && ( chunkSize - chunkOffsetUniform ) < info['boundary']! ) {
+					if ( chunkStart != 0 && ( chunkSize - chunkStart ) < info['storage']! ) {
 						// Add padding and adjust offset
-						offset += ( chunkSize - chunkOffsetUniform );
+						offset += ( chunkSize - chunkStart );
 					}
 
 					// the following two properties will be used for partial buffer updates

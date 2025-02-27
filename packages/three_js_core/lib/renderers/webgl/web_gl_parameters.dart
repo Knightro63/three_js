@@ -118,6 +118,7 @@ class WebGLParameters {
   String? customProgramCacheKey;
 
   bool decodeVideoTexture = false;
+  bool decodeVideoTextureEmissive = false;
 
   Map<String, dynamic>? uniforms;
 
@@ -133,6 +134,7 @@ class WebGLParameters {
   bool iridescenceThicknessMap = false;
   bool alphaHash = false;
   bool dispersion = false;
+  bool batchingColor = false;
 
   int morphTargetsCount = 0;
   num? cubeUVHeight;
@@ -238,6 +240,7 @@ class WebGLParameters {
     this.clearcoatNormalMap = false,
 
     this.dispersion = false,
+    this.batchingColor = false,
 
     this.iridescence = false,
     this.iridescenceMap = false,
@@ -343,6 +346,7 @@ class WebGLParameters {
     this.useLegacyLights = false,
 
     this.decodeVideoTexture = false,
+    this.decodeVideoTextureEmissive = false,
 
     this.premultipliedAlpha = false,
 
@@ -430,6 +434,8 @@ class WebGLParameters {
     gradientMap = json['gradientMap'] ?? false;
 
     opaque = json['opaque'] ?? false;
+    dispersion = json['dispersion'] ?? false;
+    batchingColor = json['batchingColor'] ?? false;
 
     alphaMap = json['alphaMap'] ?? false;
     alphaTest = json['alphaTest'] ?? false;
@@ -518,6 +524,7 @@ class WebGLParameters {
     useLegacyLights = json['useLegacyLights'] ?? false;
 
     decodeVideoTexture = json['decodeVideoTexture'] ?? false;
+    decodeVideoTextureEmissive = json['decodeVideoTextureEmissive'] ?? false;
 
     premultipliedAlpha = json['premultipliedAlpha'] ?? false;
 
@@ -565,6 +572,9 @@ class WebGLParameters {
       "supportsVertexTextures": supportsVertexTextures,
       "outputColorSpace": outputColorSpace,
       "outputEncoding": outputEncoding,
+      'opaque': opaque,
+      'dispersion': dispersion,
+      'batchingColor': batchingColor,
       "map": map,
       "matcap": matcap,
       "envMap": envMap,
@@ -644,8 +654,8 @@ class WebGLParameters {
       "uniforms": uniforms,
       "vertexAlphas": vertexAlphas,
       "decodeVideoTexture": decodeVideoTexture,
+      'decodeVideoTextureEmissive': decodeVideoTextureEmissive,
       "morphTargetsCount": morphTargetsCount,
-      "opaque": opaque,
       "cubeUVHeight": cubeUVHeight,
       "envMapCubeUVHeight": envMapCubeUVHeight,
       "morphTextureStride": morphTextureStride

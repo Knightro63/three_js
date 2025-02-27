@@ -67,7 +67,7 @@ class _State extends State<WebglModifierSimplifier> {
 
     threeJs.scene.add( three.AmbientLight( 0xffffff, 0.5 ) );
 
-    final light = three.PointLight( 0xffffff, 0.4 );
+    final light = three.PointLight( 0xffffff, 4 );
     threeJs.camera.add( light );
     threeJs.scene.add( threeJs.camera );
 

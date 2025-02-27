@@ -12,6 +12,7 @@ class LightShadow {
   double normalBias = 0;
   double radius = 1;
   double blurSamples = 8;
+  double intensity = 1;
 
   Vector2 mapSize = Vector2(512, 512);
 
@@ -93,6 +94,7 @@ class LightShadow {
   /// this Light.
   LightShadow copy(LightShadow source) {
     camera = source.camera?.clone();
+    intensity = source.intensity;
     bias = source.bias;
     radius = source.radius;
     mapSize.setFrom(source.mapSize);
@@ -109,6 +111,7 @@ class LightShadow {
   Map<String, dynamic> toJson() {
     Map<String, dynamic> object = {};
 
+    if (intensity != 1 ) object['intensity'] = intensity;
     if (bias != 0) object["bias"] = bias;
     if (normalBias != 0) object["normalBias"] = normalBias;
     if (radius != 1) object["radius"] = radius;

@@ -1,6 +1,7 @@
 part of three_webgl;
 
 int programIdCount = 0;
+const COMPLETION_STATUS_KHR = 0x91B1;
 
 class DefaultProgram {
   int id = -1;
@@ -489,6 +490,17 @@ class WebGLProgram extends DefaultProgram with WebGLProgramExtra {
 
     return cachedAttributes!;
   }
+
+	bool get programReady => ( parameters.rendererExtensionParallelShaderCompile == false );
+  set programReady(value){
+    return value;
+  }
+	bool isReady() {
+		if ( programReady == false ) {
+			programReady = gl.getProgramParameter( program!, COMPLETION_STATUS_KHR ).id;
+		}
+		return programReady;
+	}
 
   // free resource
   void destroy() {

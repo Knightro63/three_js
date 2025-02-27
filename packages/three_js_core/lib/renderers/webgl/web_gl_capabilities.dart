@@ -20,13 +20,11 @@ class WebGLCapabilities {
   late int maxVertexUniforms;
   late int maxVaryings;
   late int maxFragmentUniforms;
+  late bool reverseDepthBuffer;
 
   num? maxAnisotropy;
 
   late bool vertexTextures;
-  late bool floatFragmentTextures;
-  late bool floatVertexTextures;
-
   late int maxSamples;
 
   bool get drawBuffers => isWebGL2 || extensions.has('WEBGL_draw_buffers');
@@ -41,6 +39,7 @@ class WebGLCapabilities {
     }
 
     logarithmicDepthBuffer = parameters["logarithmicDepthBuffer"] == true;
+    reverseDepthBuffer = parameters['reverseDepthBuffer'] == true && extensions.has( 'EXT_clip_control' );
 
     maxTextures = gl.getParameter(WebGL.MAX_TEXTURE_IMAGE_UNITS);
     maxVertexTextures = gl.getParameter(WebGL.MAX_VERTEX_TEXTURE_IMAGE_UNITS);
@@ -53,10 +52,8 @@ class WebGLCapabilities {
     maxFragmentUniforms = gl.getParameter(WebGL.MAX_FRAGMENT_UNIFORM_VECTORS);
 
     vertexTextures = maxVertexTextures > 0;
-    floatFragmentTextures = isWebGL2;
-    floatVertexTextures = vertexTextures && floatFragmentTextures;
 
-    maxSamples = isWebGL2 ? gl.getParameter(WebGL.MAX_SAMPLES) : 0;
+    maxSamples = gl.getParameter(WebGL.MAX_SAMPLES);
   }
 
   num getMaxAnisotropy() {

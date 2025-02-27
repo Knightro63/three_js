@@ -16,37 +16,38 @@ class WebGLCubeUVMaps {
 
       // equirect/cube map to cubeUV conversion
       if (isEquirectMap || isCubeMap) {
-        if (texture.isRenderTargetTexture && texture.needsPMREMUpdate == true) {
-          texture.needsPMREMUpdate = false;
+        RenderTarget? renderTarget = cubeUVmaps.get( texture );
+				final currentPMREMVersion = renderTarget != null ? renderTarget.texture.pmremVersion : 0;
 
-          dynamic renderTarget = cubeUVmaps.get(texture);
+        if (texture.isRenderTargetTexture && texture.pmremVersion != currentPMREMVersion) {
+					if ( pmremGenerator == null ) pmremGenerator = new PMREMGenerator( renderer );
 
-          pmremGenerator ??= PMREMGenerator(renderer);
+					renderTarget = isEquirectMap ? pmremGenerator?.fromEquirectangular( texture, renderTarget ) : pmremGenerator?.fromCubemap( texture, renderTarget );
+					renderTarget?.texture.pmremVersion = texture.pmremVersion;
 
-          renderTarget = isEquirectMap
-              ? pmremGenerator!.fromEquirectangular(texture, renderTarget)
-              : pmremGenerator!.fromCubemap(texture, renderTarget);
-          cubeUVmaps.add(key: texture, value: renderTarget);
+					cubeUVmaps.set( texture, renderTarget );
 
-          return renderTarget.texture;
-        } else {
-          if (cubeUVmaps.has(texture)) {
-            return cubeUVmaps.get(texture).texture;
-          } else {
+					return renderTarget?.texture;
+        } 
+        else {
+          if (renderTarget != null) {
+            return renderTarget.texture;
+          } 
+          else {
             final image = texture.image;
 
             if ((isEquirectMap && image != null && image.height > 0) ||
                 (isCubeMap && image != null && isCubeTextureComplete(image))) {
               pmremGenerator ??= PMREMGenerator(renderer);
 
-              final renderTarget =
-                  isEquirectMap ? pmremGenerator!.fromEquirectangular(texture) : pmremGenerator!.fromCubemap(texture);
-              cubeUVmaps.add(key: texture, value: renderTarget);
+              renderTarget = isEquirectMap ? pmremGenerator!.fromEquirectangular(texture) : pmremGenerator!.fromCubemap(texture);
+              cubeUVmaps.set(texture, renderTarget);
 
               texture.addEventListener('dispose', onTextureDispose);
 
               return renderTarget.texture;
-            } else {
+            } 
+            else {
               // image not yet ready. try the conversion next frame
 
               return null;

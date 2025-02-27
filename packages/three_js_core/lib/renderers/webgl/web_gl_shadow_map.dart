@@ -143,8 +143,6 @@ class WebGLShadowMap {
         shadow.map = WebGLRenderTarget(_shadowMapSize.x.toInt(), _shadowMapSize.y.toInt(), WebGLRenderTargetOptions(pars));
         shadow.map!.texture.name = '${light.name}.shadowMap';
 
-        //shadow.mapPass = WebGLRenderTarget(_shadowMapSize.x.toInt(), _shadowMapSize.y.toInt());
-
         shadow.camera!.updateProjectionMatrix();
       }
 

@@ -4,6 +4,10 @@ import 'package:flutter/foundation.dart';
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 
+int ascIdSort( a, b ) {
+	return a - b;
+}
+
 int sortOpaque(Pool a, Pool b ) {
 	return a.z - b.z;
 }
@@ -34,13 +38,15 @@ class Pool{
     this.z = -1,
     this.start = -1,
     this.end = -1,
-    this.count = 0
+    this.count = 0,
+    this.index = -1
   });
 
   int z;
   int start;
   int end;
   int count = 0;
+  int index;
 }
 
 class ReservedRange{
@@ -48,7 +54,7 @@ class ReservedRange{
 		this.vertexStart = - 1,
     this.vertexCount = - 1,
     this.indexStart = - 1,
-    this.indexCount = - 1,
+    this.indexCount = - 1
   });
 
   int vertexStart;
@@ -64,21 +70,27 @@ class MultiDrawRenderList {
 
 	MultiDrawRenderList();
 
-	void push( drawRange, z ) {
-
+	void push(int start, int count, int z, int index ) {
 		final pool = this.pool;
 		final list = this.list;
-		if (index >= pool.length ) {
-			pool.add(Pool());
+		if ( this.index >= pool.length ) {
+
+			pool.add(Pool(
+				start: - 1,
+				count: - 1,
+				z: - 1,
+				index: - 1,
+      ));
 		}
 
-		final item = pool[index];
-		list.add(item);
-		index++;
+		final item = pool[ this.index ];
+		list.add( item );
+		this.index ++;
 
-		item.start = drawRange.start;
-		item.count = drawRange.count;
+		item.start = start;
+		item.count = count;
 		item.z = z;
+		item.index = index;
 	}
 
 	void reset() {
@@ -90,13 +102,15 @@ class MultiDrawRenderList {
 
 final ID_ATTR_NAME = 'batchId';
 final _matrix = Matrix4();
+final _whiteColor = Color( 1, 1, 1 );
 final _invMatrixWorld = Matrix4();
-final _identityMatrix = Matrix4();
 final _projScreenMatrix = Matrix4();
 final _frustum = Frustum();
 final _box = BoundingBox();
 final _sphere = BoundingSphere();
 final _vector = Vector3();
+final _forward = Vector3();
+final _temp = Vector3();
 final _renderList = MultiDrawRenderList();
 final _mesh = Mesh();
 final List<Intersection> _batchIntersects = [];
@@ -133,155 +147,57 @@ class BatchedMesh extends Mesh {
   bool isBatchedMesh = true;
   bool perObjectFrustumCulled = true;
   bool sortObjects = true;
-  bool _geometryInitialized = false;
-  bool _visibilityChanged = true;
 
   BoundingBox? boundingBox;
   BoundingSphere? boundingSphere;
   Function? customSort;
 
+	List _instanceInfo = [];
+	List _geometryInfo = [];
+
+  List _availableInstanceIds = [];
+  List _availableGeometryIds = [];
+  
+  int _nextIndexStart = 0;
+  int _nextVertexStart = 0;
+  int _geometryCount = 0;
+
+  bool _visibilityChanged = true;
+  bool _geometryInitialized = false;
+
   List<Pool> _drawRanges = [];
-  List<ReservedRange> _reservedRanges = [];
 
   List<bool> _visibility = [];
   List<bool> _active = [];
   List<Bounds> _bounds = [];
   
-  late int _maxGeometryCount;
+  late int _maxInstanceCount;
 	late int _maxVertexCount;
 	late int _maxIndexCount;
-  int _geometryCount = 0;
   int multiDrawCount = 0;
 
-	int get maxGeometryCount => _maxGeometryCount;
+	int get maxInstanceCount => _maxInstanceCount;
   
   late Int32List multiDrawCounts;
   late Int32List multiDrawStarts;
-
   Int32List? multiDrawInstances;
 
-  DataTexture? matricesTexture;
+  Texture? matricesTexture;
+	Texture? indirectTexture;
+	Texture? colorsTexture;
 
-	BatchedMesh(int maxGeometryCount,int maxVertexCount, [int? maxIndexCount, Material? material ]):super(BufferGeometry(),material) {
+	BatchedMesh(int maxInstanceCount,int maxVertexCount, [int? maxIndexCount, Material? material ]):super(BufferGeometry(),material) {
 		maxIndexCount ??= maxVertexCount * 2;
 
-    _maxGeometryCount = maxGeometryCount;
+    _maxInstanceCount = maxInstanceCount;
 		_maxVertexCount = maxVertexCount;
 		_maxIndexCount = maxIndexCount;
 
-		multiDrawCounts = Int32List( maxGeometryCount );
-		multiDrawStarts = Int32List( maxGeometryCount );
-    
-    onBeforeRender = ({
-      WebGLRenderer? renderer,
-      RenderTarget? renderTarget,
-      Object3D? mesh,
-      Scene? scene,
-      Camera? camera,
-      BufferGeometry? geometry,
-      Material? material,
-      Map<String, dynamic>? group
-    }) {
-      // if visibility has not changed and frustum culling and object sorting is not required
-      // then skip iterating over all items
-      if ( !_visibilityChanged && !this.perObjectFrustumCulled && !sortObjects ) {
-        return;
-      }
-
-      // the indexed version of the multi draw function requires specifying the start
-      // offset in bytes.
-      final index = geometry?.getIndex();
-      final int bytesPerElement = index == null ? 1 : index.array.BYTES_PER_ELEMENT;
-
-      final active = _active;
-      final visibility = _visibility;
-      final multiDrawStarts = this.multiDrawStarts;
-      final multiDrawCounts = this.multiDrawCounts;
-      final drawRanges = _drawRanges;
-      final perObjectFrustumCulled = this.perObjectFrustumCulled;
-
-      // prepare the frustum in the local frame
-      if ( perObjectFrustumCulled ) {
-
-        _projScreenMatrix
-          .multiply2( camera!.projectionMatrix, camera.matrixWorldInverse )
-          .multiply(matrixWorld );
-        _frustum.setFromMatrix(
-          _projScreenMatrix,
-          renderer!.coordinateSystem
-        );
-      }
-
-      int count = 0;
-      if (sortObjects) {
-        // get the camera position in the local frame
-        _invMatrixWorld.setFrom(matrixWorld ).invert();
-        _vector.setFromMatrixPosition( camera!.matrixWorld ).applyMatrix4( _invMatrixWorld );
-
-        for (int i = 0, l = visibility.length; i < l; i ++ ) {
-          if ( visibility[ i ] && active[ i ] ) {
-            // get the bounds in world space
-            getMatrixAt( i, _matrix );
-            getBoundingSphereAt( i, _sphere ).applyMatrix4( _matrix );
-
-            // determine whether the batched geometry is within the frustum
-            bool culled = false;
-            if ( perObjectFrustumCulled ) {
-              culled = ! _frustum.intersectsSphere( _sphere );
-            }
-
-            if (!culled ) {
-              // get the distance from camera used for sorting
-              final z = _vector.distanceTo( _sphere.center );
-              _renderList.push( drawRanges[ i ], z );
-            }
-          }
-        }
-
-        // Sort the draw ranges and prep for rendering
-        final list = _renderList.list;
-        final customSort = this.customSort;
-        if ( customSort == null ) {
-          list.sort( material!.transparent ? sortTransparent : sortOpaque );
-        } else {
-          customSort.call( this, list, camera );
-        }
-
-        for (int i = 0, l = list.length; i < l; i ++ ) {
-          final item = list[ i ];
-          multiDrawStarts[ count ] = item.start * bytesPerElement;
-          multiDrawCounts[ count ] = item.count;
-          count ++;
-        }
-        _renderList.reset();
-
-      } else {
-        for ( int i = 0, l = visibility.length; i < l; i ++ ) {
-          if ( visibility[ i ] && active[ i ] ) {
-            // determine whether the batched geometry is within the frustum
-            bool culled = false;
-            if ( perObjectFrustumCulled ) {
-              // get the bounds in world space
-              getMatrixAt( i, _matrix );
-              getBoundingSphereAt( i, _sphere ).applyMatrix4( _matrix );
-              culled = ! _frustum.intersectsSphere( _sphere );
-            }
-
-            if ( !culled ) {
-              final range = drawRanges[ i ];
-              multiDrawStarts[ count ] = range.start * bytesPerElement;
-              multiDrawCounts[ count ] = range.count;
-              count ++;
-            }
-          }
-        }
-      }
-
-      multiDrawCount = count;
-      _visibilityChanged = false;
-    };
+		multiDrawCounts = Int32List( maxInstanceCount );
+		multiDrawStarts = Int32List( maxInstanceCount );
 
 		_initMatricesTexture();
+    _initIndirectTexture();
 	}
 
 	void _initMatricesTexture() {
@@ -293,7 +209,7 @@ class BatchedMesh extends Mesh {
 		//       32x32 pixel texture max  256 matrices * 4 pixels = (32 * 32)
 		//       64x64 pixel texture max 1024 matrices * 4 pixels = (64 * 64)
 
-		double sizeSqrt = math.sqrt( _maxGeometryCount * 4 ); // 4 pixels needed for 1 matrix
+		double sizeSqrt = math.sqrt( _maxInstanceCount * 4 ); // 4 pixels needed for 1 matrix
 		int size = ( sizeSqrt / 4 ).ceil() * 4;
 		size = math.max( size, 4 );
 
@@ -302,12 +218,16 @@ class BatchedMesh extends Mesh {
 
 		this.matricesTexture = matricesTexture;
 	}
+	_initIndirectTexture() {
+		int size = math.sqrt( maxInstanceCount ).ceil();
 
+		final indirectArray = Uint32Array( size * size );
+		indirectTexture = DataTexture( indirectArray, size, size, RedIntegerFormat, UnsignedIntType );
+	}
 	_initializeGeometry(BufferGeometry reference ) {
 
 		final geometry = this.geometry;
 		final maxVertexCount = _maxVertexCount;
-		final maxGeometryCount = _maxGeometryCount;
 		final maxIndexCount = _maxIndexCount;
 		if (!_geometryInitialized) {
 			for ( final attributeName in reference.attributes.keys ) {
@@ -324,7 +244,6 @@ class BatchedMesh extends Mesh {
 			}
 
 			if ( reference.getIndex() != null ) {
-
 				final indexArray = maxVertexCount > 65536
 					? Uint32Array( maxIndexCount )
 					: Uint16Array( maxIndexCount );
@@ -337,27 +256,12 @@ class BatchedMesh extends Mesh {
         }
 			}
 
-			final idArray = maxGeometryCount > 65536
-				? Uint32Array( maxVertexCount )
-				: Uint16Array( maxVertexCount );
-        if(idArray is Uint32Array){
-			    geometry?.setAttributeFromString( ID_ATTR_NAME, Uint32BufferAttribute( idArray, 1 ) );
-        }
-        else if(idArray is Uint16Array){
-          geometry?.setAttributeFromString( ID_ATTR_NAME, Uint16BufferAttribute( idArray, 1 ) );
-        }
-
 			_geometryInitialized = true;
 		}
 	}
 
 	// Make sure the geometry is compatible with the existing combined geometry attributes
 	void _validateGeometry(BufferGeometry geometry ) {
-		// check that the geometry doesn't have a version of our reserved id attribute
-		if ( geometry.getAttributeFromString( ID_ATTR_NAME ) ) {
-			throw( 'BatchedMesh: Geometry cannot use attribute "$ID_ATTR_NAME"' );
-		}
-
 		// check to ensure the geometries are using consistent attributes and indices
 		final batchGeometry = this.geometry;
 		if (( geometry.getIndex() != null) != (batchGeometry?.getIndex() != null) ) {
@@ -380,6 +284,30 @@ class BatchedMesh extends Mesh {
 			if ( srcAttribute.itemSize != dstAttribute.itemSize || srcAttribute.normalized != dstAttribute.normalized ) {
 				throw( 'BatchedMesh: All attributes must have a consistent itemSize and normalized value.' );
 			}
+		}
+	}
+
+	/**
+	 * Validates the instance defined by the given ID.
+	 *
+	 * @param {number} instanceId - The the instance to validate.
+	 */
+	validateInstanceId( instanceId ) {
+		final instanceInfo = this._instanceInfo;
+		if ( instanceId < 0 || instanceId >= instanceInfo.length || instanceInfo[ instanceId ].active == false ) {
+			throw( 'THREE.BatchedMesh: Invalid instanceId ${instanceId}. Instance is either out of range or has been deleted.');
+		}
+	}
+
+	/**
+	 * Validates the geometry defined by the given ID.
+	 *
+	 * @param {number} geometryId - The the geometry to validate.
+	 */
+	validateGeometryId( geometryId ) {
+		final geometryInfoList = this._geometryInfo;
+		if ( geometryId < 0 || geometryId >= geometryInfoList.length || geometryInfoList[ geometryId ].active == false ) {
+			throw( 'THREE.BatchedMesh: Invalid geometryId ${geometryId}. Geometry is either out of range or has been deleted.' );
 		}
 	}
 
@@ -425,141 +353,150 @@ class BatchedMesh extends Mesh {
 		}
 	}
 
-	int addGeometry(BufferGeometry geometry, [int vertexCount = - 1, int indexCount = - 1 ]) {
-		_initializeGeometry( geometry );
-		_validateGeometry( geometry );
+	/**
+	 * Adds a new instance to the batch using the geometry of the given ID and returns
+	 * a new id referring to the new instance to be used by other functions.
+	 *
+	 * @param {number} geometryId - The ID of a previously added geometry via {@link BatchedMesh#addGeometry}.
+	 * @return {number} The instance ID.
+	 */
+	addInstance( geometryId ) {
+		final atCapacity = this._instanceInfo.length >= this.maxInstanceCount;
 
 		// ensure we're not over geometry
-		if (_geometryCount >= _maxGeometryCount ) {
-			throw( 'BatchedMesh: Maximum geometry count reached.' );
+		if ( atCapacity && this._availableInstanceIds.length == 0 ) {
+			throw( 'THREE.BatchedMesh: Maximum item count reached.' );
 		}
 
-		// get the necessary range fo the geometry
-		final reservedRange = ReservedRange(
-			vertexStart: - 1,
-			vertexCount: - 1,
-			indexStart: - 1,
-			indexCount: - 1,
-    );
+		final instanceInfo = {
+			'visible': true,
+			'active': true,
+			'geometryIndex': geometryId,
+		};
 
-		ReservedRange? lastRange;
-		final reservedRanges = _reservedRanges;
-		final List<Pool> drawRanges = _drawRanges;
-		final List<Bounds> bounds = _bounds;
-		if (_geometryCount != 0 ) {
-			lastRange = reservedRanges[ reservedRanges.length - 1 ];
+		int? drawId;
+
+		// Prioritize using previously freed instance ids
+		if ( this._availableInstanceIds.length > 0 ) {
+			this._availableInstanceIds.sort( ascIdSort );
+
+			drawId = this._availableInstanceIds.removeAt(0);
+			this._instanceInfo[ drawId! ] = instanceInfo;
+		} 
+    else {
+			drawId = this._instanceInfo.length;
+			this._instanceInfo.add( instanceInfo );
 		}
 
-		if ( vertexCount == - 1 ) {
-			reservedRange.vertexCount = geometry.getAttributeFromString( 'position' ).count;
-		} else {
-			reservedRange.vertexCount = vertexCount;
+		final matricesTexture = this.matricesTexture;
+		_matrix.identity().copyIntoArray( matricesTexture!.image.data, drawId * 16 );
+		matricesTexture.needsUpdate = true;
+
+		final colorsTexture = this.colorsTexture;
+		if ( colorsTexture != null) {
+			_whiteColor.copyIntoArray( colorsTexture.image.data, drawId * 4 );
+			colorsTexture.needsUpdate = true;
 		}
 
-		if ( lastRange == null ) {
-			reservedRange.vertexStart = 0;
-		} else {
-			reservedRange.vertexStart = lastRange.vertexStart + lastRange.vertexCount;
-		}
+		this._visibilityChanged = true;
+		return drawId;
+	}
+
+	int addGeometry(BufferGeometry geometry, [int reservedVertexCount = - 1, int reservedIndexCount = - 1 ]) {
+		this._initializeGeometry( geometry );
+
+		this._validateGeometry( geometry );
+
+		final geometryInfo = {
+			// geometry information
+			'vertexStart': - 1,
+			'vertexCount': - 1,
+			'reservedVertexCount': - 1,
+
+			'indexStart': - 1,
+			'indexCount': - 1,
+			'reservedIndexCount': - 1,
+
+			// draw range information
+			'start': - 1,
+			'count': - 1,
+
+			// state
+			'boundingBox': null,
+			'boundingSphere': null,
+			'active': true,
+		};
+
+		final geometryInfoList = this._geometryInfo;
+		geometryInfo['vertexStart'] = this._nextVertexStart;
+		geometryInfo['reservedVertexCount'] = reservedVertexCount == - 1 ? geometry.getAttributeFromString( 'position' ).count : reservedVertexCount;
 
 		final index = geometry.getIndex();
 		final hasIndex = index != null;
-		if ( hasIndex ) {
-			if ( indexCount	== - 1 ) {
-				reservedRange.indexCount = index.count;
-			} else {
-				reservedRange.indexCount = indexCount;
-			}
 
-			if ( lastRange == null ) {
-				reservedRange.indexStart = 0;
-			} else {
-				reservedRange.indexStart = lastRange.indexStart + lastRange.indexCount;
-			}
+		if ( hasIndex ) {
+			geometryInfo['indexStart'] = this._nextIndexStart;
+			geometryInfo['reservedIndexCount'] = reservedIndexCount == - 1 ? index.count : reservedIndexCount;
 		}
 
 		if (
-			reservedRange.indexStart != - 1 &&
-			reservedRange.indexStart + reservedRange.indexCount > _maxIndexCount ||
-			reservedRange.vertexStart + reservedRange.vertexCount > _maxVertexCount
+			geometryInfo['indexStart'] != - 1 &&
+			(geometryInfo['indexStart'] as int) + (geometryInfo['reservedIndexCount'] as int) > this._maxIndexCount ||
+			(geometryInfo['vertexStart'] as int) + (geometryInfo['reservedVertexCount'] as int) > this._maxVertexCount
 		) {
-
-			throw( 'BatchedMesh: Reserved space request exceeds the maximum buffer size.' );
-
+			throw( 'THREE.BatchedMesh: Reserved space request exceeds the maximum buffer size.' );
 		}
-
-		final visibility = _visibility;
-		final active = _active;
-		final matricesTexture = this.matricesTexture;
-		final matricesArray = this.matricesTexture?.image.data;
-
-		// push new visibility states
-		visibility.add( true );
-		active.add( true );
 
 		// update id
-		final geometryId = _geometryCount;
-		_geometryCount ++;
+		int geometryId;
+		if ( this._availableGeometryIds.length > 0 ) {
+			this._availableGeometryIds.sort( ascIdSort );
 
-		// initialize matrix information
-		_identityMatrix.copyIntoArray( matricesArray, geometryId * 16 );
-		matricesTexture?.needsUpdate = true;
-
-		// add the reserved range and draw range objects
-		reservedRanges.add( reservedRange );
-		drawRanges.add( Pool(
-			start: hasIndex ? reservedRange.indexStart : reservedRange.vertexStart,
-			count: - 1
-    ));
-		bounds.add( Bounds(
-			boxInitialized: false,
-			box: BoundingBox(),
-			sphereInitialized: false,
-			sphere: BoundingSphere()
-    ));
-
-		// set the id for the geometry
-		final idAttribute = this.geometry?.getAttributeFromString( ID_ATTR_NAME );
-		for (int i = 0; i < reservedRange.vertexCount; i ++ ) {
-			idAttribute.setX( reservedRange.vertexStart + i, geometryId );
+			geometryId = this._availableGeometryIds.removeAt(0);
+			geometryInfoList[ geometryId ] = geometryInfo;
+		} 
+    else {
+			geometryId = this._geometryCount;
+			this._geometryCount ++;
+			geometryInfoList.add( geometryInfo );
 		}
 
-		idAttribute.needsUpdate = true;
-
 		// update the geometry
-		setGeometryAt( geometryId, geometry );
+		this.setGeometryAt( geometryId, geometry );
+
+		// increment the next geometry position
+		this._nextIndexStart = (geometryInfo['indexStart'] as int) + (geometryInfo['reservedIndexCount'] as int);
+		this._nextVertexStart = (geometryInfo['vertexStart'] as int) + (geometryInfo['reservedVertexCount'] as int);
 
 		return geometryId;
 	}
 
-	int setGeometryAt(int id,BufferGeometry geometry ) {
-		if ( id >= _geometryCount ) {
-			throw( 'BatchedMesh: Maximum geometry count reached.' );
+	int setGeometryAt(int geometryId, BufferGeometry geometry ) {
+		if ( geometryId >= this._geometryCount ) {
+			throw( 'THREE.BatchedMesh: Maximum geometry count reached.' );
 		}
 
-		_validateGeometry(geometry);
+		this._validateGeometry( geometry );
 
 		final batchGeometry = this.geometry;
 		final hasIndex = batchGeometry?.getIndex() != null;
 		final dstIndex = batchGeometry?.getIndex();
 		final srcIndex = geometry.getIndex();
-		final reservedRange = _reservedRanges[ id ];
+		final geometryInfo = this._geometryInfo[ geometryId ];
 		if (
 			hasIndex &&
-			srcIndex!.count > reservedRange.indexCount ||
-			geometry.attributes['position'].count > reservedRange.vertexCount
+			(srcIndex?.count ?? 0) > geometryInfo.reservedIndexCount ||
+			geometry.attributes['position'].count > geometryInfo.reservedVertexCount
 		) {
-			throw( 'BatchedMesh: Reserved space not large enough for provided geometry.' );
+			throw( 'THREE.BatchedMesh: Reserved space not large enough for provided geometry.' );
 		}
 
-		// copy geometry over
-		final vertexStart = reservedRange.vertexStart;
-		final vertexCount = reservedRange.vertexCount;
-		for ( final attributeName in batchGeometry!.attributes.keys) {
-			if ( attributeName == ID_ATTR_NAME ) {
-				continue;
-			}
+		// copy geometry buffer data over
+		final vertexStart = geometryInfo.vertexStart;
+		final reservedVertexCount = geometryInfo.reservedVertexCount;
+		geometryInfo.vertexCount = geometry.getAttributeFromString( 'position' ).count;
 
+		for ( final attributeName in batchGeometry!.attributes.keys ) {
 			// copy attribute data
 			final srcAttribute = geometry.getAttributeFromString( attributeName );
 			final dstAttribute = batchGeometry.getAttributeFromString( attributeName );
@@ -567,59 +504,56 @@ class BatchedMesh extends Mesh {
 
 			// fill the rest in with zeroes
 			final itemSize = srcAttribute.itemSize;
-			for (int i = srcAttribute.count, l = vertexCount; i < l; i ++ ) {
+			for ( int i = srcAttribute.count, l = reservedVertexCount; i < l; i ++ ) {
 				final index = vertexStart + i;
-				for (int c = 0; c < itemSize; c ++ ) {
+				for ( int c = 0; c < itemSize; c ++ ) {
 					dstAttribute.setComponent( index, c, 0 );
 				}
 			}
 
 			dstAttribute.needsUpdate = true;
-			dstAttribute.addUpdateRange( vertexStart * itemSize, vertexCount * itemSize );
+			dstAttribute.addUpdateRange( vertexStart * itemSize, reservedVertexCount * itemSize );
+
 		}
 
 		// copy index
 		if ( hasIndex ) {
 
-			final indexStart = reservedRange.indexStart;
+			final indexStart = geometryInfo.indexStart;
+			final reservedIndexCount = geometryInfo.reservedIndexCount;
+			geometryInfo.indexCount = geometry.getIndex()?.count;
 
 			// copy index data over
-			for (int i = 0; i < srcIndex!.count; i ++ ) {
-				dstIndex?.setX( indexStart + i, vertexStart + srcIndex.getX( i )!);
+			for (int i = 0; i < (srcIndex?.count ?? 0); i ++ ) {
+				dstIndex?.setX( indexStart + i, vertexStart + srcIndex?.getX( i ) );
 			}
 
 			// fill the rest in with zeroes
-			for (int i = srcIndex.count, l = reservedRange.indexCount; i < l; i ++ ) {
+			for (int i = srcIndex?.count ?? 0, l = reservedIndexCount; i < l; i ++ ) {
 				dstIndex?.setX( indexStart + i, vertexStart );
 			}
 
 			dstIndex?.needsUpdate = true;
-			dstIndex?.addUpdateRange( indexStart, reservedRange.indexCount );
+			dstIndex?.addUpdateRange( indexStart, geometryInfo.reservedIndexCount );
 		}
+
+		// update the draw range
+		geometryInfo.start = hasIndex ? geometryInfo.indexStart : geometryInfo.vertexStart;
+		geometryInfo.count = hasIndex ? geometryInfo.indexCount : geometryInfo.vertexCount;
 
 		// store the bounding boxes
-		final bound = _bounds[ id ];
+		geometryInfo.boundingBox = null;
 		if ( geometry.boundingBox != null ) {
-			bound.box.setFrom( geometry.boundingBox! );
-			bound.boxInitialized = true;
-		} else {
-			bound.boxInitialized = false;
+			geometryInfo.boundingBox = geometry.boundingBox?.clone();
 		}
 
+		geometryInfo.boundingSphere = null;
 		if ( geometry.boundingSphere != null ) {
-			bound.sphere.setFrom( geometry.boundingSphere! );
-			bound.sphereInitialized = true;
-		} else {
-			bound.sphereInitialized = false;
+			geometryInfo.boundingSphere = geometry.boundingSphere?.clone();
 		}
 
-		// set drawRange count
-		final drawRange = _drawRanges[ id ];
-		final posAttr = geometry.getAttributeFromString( 'position' );
-		drawRange.count = hasIndex ? srcIndex?.count : posAttr.count;
-		_visibilityChanged = true;
-
-		return id;
+		this._visibilityChanged = true;
+		return geometryId;
 	}
 
 	deleteGeometry( geometryId ) {
@@ -638,13 +572,6 @@ class BatchedMesh extends Mesh {
 	getInstanceCountAt(int id ) {
 		if (multiDrawInstances == null ) return null;
 		return multiDrawInstances?[ id ];
-	}
-
-	setInstanceCountAt( id, instanceCount ) {
-		multiDrawInstances ??= Int32List.fromList(List.filled(_maxGeometryCount, 1));
-		multiDrawInstances?[ id ] = instanceCount;
-
-		return id;
 	}
 
 	// get bounding box and compute it if it doesn't exist
@@ -834,43 +761,40 @@ class BatchedMesh extends Mesh {
 
   @override
 	BatchedMesh copy(Object3D source, [bool? recursive]) {
+    source as BatchedMesh;
 		super.copy( source );
-		geometry = source.geometry?.clone();
 
-    if(source is BatchedMesh){
-      perObjectFrustumCulled = source.perObjectFrustumCulled;
-      sortObjects = source.sortObjects;
-      boundingBox = source.boundingBox?.clone();
-      boundingSphere = source.boundingSphere?.clone();
+		this.geometry = source.geometry?.clone();
+		this.perObjectFrustumCulled = source.perObjectFrustumCulled;
+		this.sortObjects = source.sortObjects;
+		this.boundingBox = source.boundingBox != null ? source.boundingBox?.clone() : null;
+		this.boundingSphere = source.boundingSphere != null ? source.boundingSphere?.clone() : null;
 
-      _drawRanges = source._drawRanges.sublist(0);//.map( (range){return range;}).toList();
-      _reservedRanges = source._reservedRanges.sublist(0);//.map( (range){return range;}).toList();
+		this._geometryInfo = source._geometryInfo.sublist(0);
+    // .map( info => ( {
+		// 	...info,
 
-      _visibility = source._visibility.sublist(0);
-      _active = source._active.sublist(0);
-      _bounds = source._bounds.map(
-        (bound){
-          return Bounds(
-            boxInitialized: bound.boxInitialized,
-            box: bound.box.clone(),
-            sphereInitialized: bound.sphereInitialized,
-            sphere: bound.sphere.clone()
-          );
-        }
-      ).toList();
+		// 	boundingBox: info.boundingBox !== null ? info.boundingBox.clone() : null,
+		// 	boundingSphere: info.boundingSphere !== null ? info.boundingSphere.clone() : null,
+		// } ) );
+		this._instanceInfo = source._instanceInfo.sublist(0);//.map( info => ( { ...info } ) );
 
-      _maxGeometryCount = source._maxGeometryCount;
-      _maxVertexCount = source._maxVertexCount;
-      _maxIndexCount = source._maxIndexCount;
+		this._maxInstanceCount = source._maxInstanceCount;
+		this._maxVertexCount = source._maxVertexCount;
+		this._maxIndexCount = source._maxIndexCount;
 
-      _geometryInitialized = source._geometryInitialized;
-      _geometryCount = source._geometryCount;
-      multiDrawCounts = source.multiDrawCounts.sublist(0);
-      multiDrawStarts = source.multiDrawStarts.sublist(0);
+		this._geometryInitialized = source._geometryInitialized;
+		this._geometryCount = source._geometryCount;
+		this.multiDrawCounts = source.multiDrawCounts.sublist(0);
+		this.multiDrawStarts = source.multiDrawStarts.sublist(0);
 
-      matricesTexture = source.matricesTexture?.clone() as DataTexture?;
-    }
-		matricesTexture?.image.data = matricesTexture?.image.slice();
+		this.matricesTexture = source.matricesTexture?.clone();
+		this.matricesTexture?.image.data = this.matricesTexture?.image.data.slice();
+
+		if ( this.colorsTexture != null ) {
+			this.colorsTexture = source.colorsTexture?.clone();
+			this.colorsTexture?.image.data = this.colorsTexture?.image.data.slice();
+		}
 
 		return this;
 	}
@@ -883,7 +807,139 @@ class BatchedMesh extends Mesh {
 
 		matricesTexture?.dispose();
 		matricesTexture = null;
+
+		indirectTexture?.dispose();
+		indirectTexture = null;
+
+		colorsTexture?.dispose();
+		colorsTexture = null;
 	}
+
+  @override
+	OnBeforeRender? get onBeforeRender =>({
+    WebGLRenderer? renderer,
+    RenderTarget? renderTarget,
+    Object3D? mesh,
+    Scene? scene,
+    Camera? camera,
+    BufferGeometry? geometry,
+    Material? material,
+    Map<String, dynamic>? group
+  }){
+		// if visibility has not changed and frustum culling and object sorting is not required
+		// then skip iterating over all items
+		if ( ! this._visibilityChanged && ! this.perObjectFrustumCulled && ! this.sortObjects ) {
+			return null;
+		}
+
+		// the indexed version of the multi draw function requires specifying the start
+		// offset in bytes.
+		final index = geometry!.getIndex();
+		final bytesPerElement = index == null ? 1 : index.array.BYTES_PER_ELEMENT;
+
+		final instanceInfo = _instanceInfo;
+		final multiDrawStarts = this.multiDrawStarts;
+		final multiDrawCounts = this.multiDrawCounts;
+		final geometryInfoList = _geometryInfo;
+		final perObjectFrustumCulled = this.perObjectFrustumCulled;
+		final indirectTexture = this.indirectTexture;
+		final indirectArray = indirectTexture?.image.data;
+
+		// prepare the frustum in the local frame
+		if ( perObjectFrustumCulled ) {
+
+			_matrix.multiply2( camera!.projectionMatrix, camera.matrixWorldInverse )
+				.multiply( this.matrixWorld );
+			_frustum.setFromMatrix(
+				_matrix,
+				renderer!.coordinateSystem
+			);
+
+		}
+
+		int multiDrawCount = 0;
+		if ( this.sortObjects ) {
+
+			// get the camera position in the local frame
+			_matrix.setFrom( this.matrixWorld ).invert();
+			_vector.setFromMatrixPosition( camera!.matrixWorld ).applyMatrix4( _matrix );
+			_forward.setValues( 0, 0, - 1 ).transformDirection( camera.matrixWorld ).transformDirection( _matrix );
+
+			for (int i = 0, l = instanceInfo.length; i < l; i ++ ) {
+				if ( instanceInfo[ i ].visible && instanceInfo[ i ].active ) {
+
+					final geometryId = instanceInfo[ i ].geometryIndex;
+
+					// get the bounds in world space
+					this.getMatrixAt( i, _matrix );
+					this.getBoundingSphereAt( geometryId, _sphere ).applyMatrix4( _matrix );
+
+					// determine whether the batched geometry is within the frustum
+					bool culled = false;
+					if ( perObjectFrustumCulled ) {
+						culled = ! _frustum.intersectsSphere( _sphere );
+					}
+
+					if ( ! culled ) {
+						// get the distance from camera used for sorting
+						final geometryInfo = geometryInfoList[ geometryId ];
+						final z = _temp.sub2( _sphere.center, _vector ).dot( _forward );
+						_renderList.push( geometryInfo.start, geometryInfo.count, z.toInt(), i );
+					}
+				}
+			}
+
+			// Sort the draw ranges and prep for rendering
+			final list = _renderList.list;
+			final customSort = this.customSort;
+			if ( customSort == null ) {
+				list.sort( material?.transparent != null? sortTransparent : sortOpaque );
+			} else {
+				customSort.call( this, list, camera );
+			}
+
+			for (int i = 0, l = list.length; i < l; i ++ ) {
+				final item = list[ i ];
+				multiDrawStarts[ multiDrawCount ] = item.start * bytesPerElement;
+				multiDrawCounts[ multiDrawCount ] = item.count;
+				indirectArray[ multiDrawCount ] = item.index;
+				multiDrawCount ++;
+			}
+
+			_renderList.reset();
+
+		} else {
+			for ( int i = 0, l = instanceInfo.length; i < l; i ++ ) {
+				if ( instanceInfo[ i ].visible && instanceInfo[ i ].active ) {
+
+					final geometryId = instanceInfo[ i ].geometryIndex;
+
+					// determine whether the batched geometry is within the frustum
+					bool culled = false;
+					if ( perObjectFrustumCulled ) {
+						// get the bounds in world space
+						this.getMatrixAt( i, _matrix );
+						this.getBoundingSphereAt( geometryId, _sphere ).applyMatrix4( _matrix );
+						culled = ! _frustum.intersectsSphere( _sphere );
+					}
+
+					if ( ! culled ) {
+						final geometryInfo = geometryInfoList[ geometryId ];
+						multiDrawStarts[ multiDrawCount ] = geometryInfo.start * bytesPerElement;
+						multiDrawCounts[ multiDrawCount ] = geometryInfo.count;
+						indirectArray[ multiDrawCount ] = i;
+						multiDrawCount ++;
+					}
+				}
+			}
+		}
+
+		indirectTexture?.needsUpdate = true;
+		this.multiDrawCount = multiDrawCount;
+		this._visibilityChanged = false;
+
+    return null;
+  };
 
   @override
   void onBeforeShadow({

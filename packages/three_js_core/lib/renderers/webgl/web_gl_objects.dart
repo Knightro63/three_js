@@ -30,11 +30,14 @@ class WebGLObjects {
         object.addEventListener('dispose', onInstancedMeshDispose);
       }
 
-      // print(" WebGLObjects update 2 object: ${object} ${object.instanceMatrix} ");
-      attributes.update(object.instanceMatrix, WebGL.ARRAY_BUFFER);
+      if ( updateMap.get( object ) != frame ) {
+        // print(" WebGLObjects update 2 object: ${object} ${object.instanceMatrix} ");
+        attributes.update(object.instanceMatrix, WebGL.ARRAY_BUFFER);
 
-      if (object.instanceColor != null) {
-        attributes.update(object.instanceColor, WebGL.ARRAY_BUFFER);
+        if (object.instanceColor != null) {
+          attributes.update(object.instanceColor, WebGL.ARRAY_BUFFER);
+        }
+        updateMap.set( object, frame );
       }
     }
 

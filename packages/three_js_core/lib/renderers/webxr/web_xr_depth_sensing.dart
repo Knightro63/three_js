@@ -74,6 +74,28 @@ class WebXRDepthSensing {
 		}
 	}
 
+	Mesh? getMesh(ArrayCamera cameraXR ) {
+		if ( this.texture != null ) {
+			if ( this.mesh == null ) {
+				final viewport = cameraXR.cameras[ 0 ].viewport;
+				final material = new ShaderMaterial.fromMap( {
+					'vertexShader': occlusionVertex,
+					'fragmentShader': occlusionFragment,
+					'uniforms': {
+						'depthColor': { 'value': this.texture },
+						'depthWidth': { 'value': viewport?.z },
+						'depthHeight': { 'value': viewport?.w }
+					}
+				} );
+
+				this.mesh = new Mesh( new PlaneGeometry( 20, 20 ), material );
+			}
+		}
+
+		return this.mesh;
+	}
+
+
 	void reset() {
 	  texture = null;
 		mesh = null;

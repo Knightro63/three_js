@@ -97,10 +97,6 @@ class WebGLMorphtargets {
           if (hasMorphPosition) {
             morph.fromBuffer(morphTarget, j);
 
-            if (morphTarget.normalized) {
-              denormalize(morph, morphTarget);
-            }
-
             buffer[offset + stride + 0] = morph.x;
             buffer[offset + stride + 1] = morph.y;
             buffer[offset + stride + 2] = morph.z;
@@ -111,10 +107,6 @@ class WebGLMorphtargets {
             final morphNormal = morphNormals[i];
             morph.fromBuffer(morphNormal, j);
 
-            if (morphNormal.normalized == true) {
-              denormalize(morph, morphNormal);
-            }
-
             buffer[offset + stride + 4] = morph.x;
             buffer[offset + stride + 5] = morph.y;
             buffer[offset + stride + 6] = morph.z;
@@ -124,10 +116,6 @@ class WebGLMorphtargets {
           if (hasMorphColors) {
             final morphColor = morphColors[i];
             morph.fromBuffer(morphColor, j);
-
-            if (morphColor.normalized) {
-              denormalize(morph, morphColor);
-            }
 
             buffer[offset + stride + 8] = morph.x;
             buffer[offset + stride + 9] = morph.y;

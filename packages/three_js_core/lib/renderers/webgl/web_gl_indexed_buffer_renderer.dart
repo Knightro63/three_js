@@ -39,19 +39,12 @@ class WebGLIndexedBufferRenderer extends BaseWebGLBufferRenderer {
 		if ( drawCount == 0 ) return;
 		final extension = extensions.get( 'WEBGL_multi_draw' );
 
-		if ( extension == null ) {
-			for (int i = 0; i < drawCount; i ++ ) {
-				render( starts[ i ] ~/ bytesPerElement, counts[ i ] );
-			}
-		}
-    else {
-			extension.multiDrawElementsWEBGL( mode, counts, 0, type, starts, 0, drawCount );
-			int elementCount = 0;
-			for ( int i = 0; i < drawCount; i ++ ) {
-				elementCount += counts[ i ];
-			}
-			info.update( elementCount, mode, 1 );
-		}
+    extension.multiDrawElementsWEBGL( mode, counts, 0, type, starts, 0, drawCount );
+    int elementCount = 0;
+    for ( int i = 0; i < drawCount; i ++ ) {
+      elementCount += counts[ i ];
+    }
+    info.update( elementCount, mode, 1 );
 	}
 
 	void renderMultiDrawInstances(List<int> starts,List<int> counts,int drawCount,List<int> primcount ) {

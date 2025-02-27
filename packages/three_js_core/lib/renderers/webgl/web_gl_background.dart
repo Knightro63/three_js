@@ -60,6 +60,10 @@ class WebGLBackground {
 		}
 
     if (renderer.autoClear || forceClear) {
+			state.buffers['depth'].setTest( true );
+			state.buffers['depth'].setMask( true );
+			state.buffers['color'].setMask( true );
+
       renderer.clear(renderer.autoClearColor, renderer.autoClearDepth, renderer.autoClearStencil);
     }
   }

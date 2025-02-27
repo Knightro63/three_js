@@ -30,8 +30,10 @@ class Texture with EventDispatcher {
   bool isCompressedTexture = false;
   bool isOpenGLTexture = false;
   bool isRenderTargetTexture = false; // indicates whether a texture belongs to a render target or not
-  bool needsPMREMUpdate = false; // indicates whether this texture should be processed by PMREMGenerator or not (only relevant for render target textures)
+  // bool needsPMREMUpdate = false; // indicates whether this texture should be processed by PMREMGenerator or not (only relevant for render target textures)
   
+	int pmremVersion = 0;
+
   late Source source;
 
   String colorSpace = NoColorSpace;
@@ -266,6 +268,19 @@ class Texture with EventDispatcher {
 
     return uv;
   }
+
+
+	// Setting this property to `true` indicates the engine the PMREM
+	// must be regenerated.
+	
+	// @type {boolean}
+	// @default false
+	// @param {boolean} value
+	set needsPMREMUpdate(bool value ) {
+		if (value) {
+			this.pmremVersion ++;
+		}
+	}
 }
 
 class ImageDataInfo {

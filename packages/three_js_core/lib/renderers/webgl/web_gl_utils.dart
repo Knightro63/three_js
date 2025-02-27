@@ -13,6 +13,7 @@ class WebGLUtils {
     if (p == UnsignedByteType) return WebGL.UNSIGNED_BYTE;
     if (p == UnsignedShort4444Type) return WebGL.UNSIGNED_SHORT_4_4_4_4;
     if (p == UnsignedShort5551Type) return WebGL.UNSIGNED_SHORT_5_5_5_1;
+		if ( p == UnsignedInt5999Type ) return WebGL.UNSIGNED_INT_5_9_9_9_REV;
 
     if (p == ByteType) return WebGL.BYTE;
     if (p == ShortType) return WebGL.SHORT;
@@ -35,18 +36,6 @@ class WebGLUtils {
 		if (p == RGFormat ) return WebGL.RG;
 		if (p == RGIntegerFormat ) return WebGL.RG_INTEGER;
 		if (p == RGBAIntegerFormat ) return WebGL.RGBA_INTEGER;
-
-    // WebGL 1 sRGB fallback
-
-    if (p == SRGBAFormat) {
-      extension = extensions.get('EXT_sRGB');
-
-      if (extension != null) {
-        return extension.SRGB_ALPHA_EXT;
-      } else {
-        return null;
-      }
-    }
 
     // S3TC
 
@@ -184,6 +173,6 @@ class WebGLUtils {
 
     // if "p" can't be resolved, assume the user defines a WebGL constant as a string (fallback/workaround for packed RGB formats)
 
-    return null;//(gl[p] != null) ? gl[p] : null;
+    return (WebGL.get(p) != null) ? WebGL.get(p) : null;
   }
 }

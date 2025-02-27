@@ -56,10 +56,11 @@ class WebGLState {
 
   dynamic scissorParam;
   dynamic viewportParam;
+  WebGLExtensions extensions;
 
-  WebGLState(this.gl) {
+  WebGLState(this.gl, this.extensions) {
     colorBuffer = ColorBuffer(gl);
-    depthBuffer = DepthBuffer(gl);
+    depthBuffer = DepthBuffer(gl,extensions);
     stencilBuffer = StencilBuffer(gl);
 
     colorBuffer.enable = enable;
@@ -789,6 +790,7 @@ class DepthBuffer {
   RenderingContext gl;
 
   bool locked = false;
+  bool reversed = false;
 
   late Function enable;
   late Function disable;
@@ -797,8 +799,29 @@ class DepthBuffer {
 
   int? currentDepthFunc;
   double? currentDepthClear;
+  WebGLExtensions extensions;
 
-  DepthBuffer(this.gl);
+  DepthBuffer(this.gl,this.extensions);
+
+  void setReversed(bool value ){
+    if ( reversed != value ) {
+      final ext = extensions.get( 'EXT_clip_control' );
+      if ( reversed ) {
+        ext.clipControlEXT( ext.LOWER_LEFT_EXT, ext.ZERO_TO_ONE_EXT );
+      } else {
+        ext.clipControlEXT( ext.LOWER_LEFT_EXT, ext.NEGATIVE_ONE_TO_ONE_EXT );
+      }
+      final oldDepth = currentDepthClear;
+      currentDepthClear = null;
+      this.setClear( oldDepth! );
+    }
+
+    reversed = value;
+  }
+
+  bool getReversed() {
+    return reversed;
+  }
 
   void setTest(depthTest) {
     if (depthTest) {

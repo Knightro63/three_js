@@ -15,9 +15,10 @@ class WebXRManager with EventDispatcher {
   bool cameraAutoUpdate = true;
   late final state;
   final WebGLRenderer renderer;
-  final depthSensing = WebXRDepthSensing();
+  final WebXRDepthSensing depthSensing = WebXRDepthSensing();
   bool isPresenting = false;
   RenderingContext gl;
+  late final ArrayCamera cameraXR = ArrayCamera([]);
   
   var session = null;
   double framebufferScaleFactor = 1.0;
@@ -486,8 +487,12 @@ class WebXRManager with EventDispatcher {
     return null;
   }
 
-  hasDepthSensing () {
+  bool hasDepthSensing () {
     return depthSensing.texture != null;
+  }
+
+  getDepthSensingMesh() {
+    return depthSensing.getMesh( cameraXR );
   }
 
   //   	// Animation Loop
