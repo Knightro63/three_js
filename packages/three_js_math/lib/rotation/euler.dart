@@ -222,11 +222,7 @@ class Euler {
           _x = math.atan2(-m23, m33);
           _y = 0;
         }
-
         break;
-
-      default:
-        throw('THREE.Euler: .setFromRotationMatrix() encountered an unknown order: $order');
     }
 
     _order = order;

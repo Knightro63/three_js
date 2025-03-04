@@ -18,20 +18,19 @@ import 'package:three_js_math/three_js_math.dart';
 /// ```
 class OBJExporter{
   static String parseMesh(Mesh mesh){
-    return _parseMesh(mesh,0,0,0,false);
+    return _parseMesh(mesh,0,0,0,false).file;
   }
 
-  static String _parseMesh(Mesh mesh,int indexVertex,int indexUvs,int indexNormals,bool usingParse){
+  static _OBJPM _parseMesh(Mesh mesh,int indexVertex,int indexUvs,int indexNormals,bool usingParse){
     String output = '';
     final Vector3 vertex = Vector3();
 		final Vector3 normal = Vector3();
 		final Vector2 uv = Vector2();
     List<String> face = ['','',''];
 
-    int nbVertex = 0;
-    int nbNormals = 0;
-    int nbVertexUvs = 0;
-    int j = 0;
+    int nbVertex = indexVertex;
+    int nbNormals = indexNormals;
+    int nbVertexUvs = indexUvs;
 
     BufferGeometry? geometry = mesh.geometry;
 
@@ -50,15 +49,15 @@ class OBJExporter{
     // name of the mesh object
     output += 'o ${mesh.name}\n';
 
+    if ( mesh.material != null && mesh.material?.name != null && mesh.material?.name != '') {
+      output += 'usemtl ${mesh.material!.name}\n';
+    }
+
     // vertices
     if(vertices != null) {
       for (int i = 0, l = vertices.length; i < l; i ++, nbVertex++ ) {
-        vertex.x = vertices.getX(i)!.toDouble();
-        vertex.y = vertices.getY(i)!.toDouble();
-        vertex.z = vertices.getZ(i)!.toDouble();
-        // transfrom the vertex to world space
+        vertex.fromBuffer( vertices, i );
         vertex.applyMatrix4( mesh.matrixWorld );
-        // transform the vertex to export format
         output += 'v ${vertex.x} ${vertex.y} ${vertex.z}\n';
       }
     }
@@ -67,8 +66,7 @@ class OBJExporter{
 
     if(uvs != null){
       for (int i = 0, l = uvs.count; i < l; i ++, nbVertexUvs++ ) {
-        uv.x = uvs.getX(i)!.toDouble();
-        uv.y = uvs.getY(i)!.toDouble();
+        uv.fromBuffer( uvs, i );
         // transform the uv to export format
         output += 'vt ${uv.x} ${uv.y}\n';
       }
@@ -79,12 +77,8 @@ class OBJExporter{
     if(normals != null) {
       normalMatrixWorld.getNormalMatrix( mesh.matrixWorld );
       for (int i = 0, l = normals.count; i < l; i ++, nbNormals++ ) {
-        normal.x = normals.getX(i)!.toDouble();
-        normal.y = normals.getY(i)!.toDouble();
-        normal.z = normals.getZ(i)!.toDouble();
-        // transfrom the normal to world space
+        normal.fromBuffer( normals, i );
         normal.applyMatrix3( normalMatrixWorld );
-        // transform the normal to export format
         output += 'vn ${normal.x} ${normal.y} ${normal.z}\n';
       }
     }
@@ -93,7 +87,7 @@ class OBJExporter{
     if(indices != null) {
       for (int i = 0, l = indices.count; i < l; i += 3 ) {
         for(int m = 0; m < 3; m ++ ){
-          j = indices.getX(i + m)!.toInt() + 1;
+          final j = indices.getX(i + m)!.toInt() + 1;
           face[m] = '${indexVertex + j}/${uvs != null? ( indexUvs + j ) : ''}/${indexNormals + j}';
         }
 
@@ -104,7 +98,7 @@ class OBJExporter{
     else{
       for (int i = 0, l = vertices!.length; i < l; i += 3 ) {
         for(int m = 0; m < 3; m ++ ){
-          j = i + m + 1;
+          final j = i + m + 1;
           face[m] = '${indexVertex + j}/${uvs != null? ( indexUvs + j ) : ''}/${indexNormals + j}';
         }
         // transform the face to export format
@@ -112,36 +106,23 @@ class OBJExporter{
       }
     }
 
-    // update index
-    indexVertex += nbVertex;
-    indexUvs += nbVertexUvs;
-    indexNormals += nbNormals;
-
-    return output;
+    return _OBJPM(output, nbVertex, nbNormals, nbVertexUvs);
   }
 
-  static String _parseLine(Line line, int indexVertex ) {
+  static _OBJPM _parseLine(Line line, int indexVertex ) {
     String output = '';
     int nbVertex = 0;
     BufferGeometry? geometry = line.geometry;
     final type = line.type;
     final Vector3 vertex = Vector3();
 
-    // shortcuts
-    Float32BufferAttribute? vertices = geometry?.getAttribute( Attribute.position);
-    //final indices = geometry?.getIndex();
-
-    // name of the line object
+    final Float32BufferAttribute? vertices = geometry?.getAttribute( Attribute.position);
     output += 'o ${line.name}\n';
 
     if( vertices != null) {
       for (int i = 0, l = vertices.length; i < l; i ++, nbVertex++ ) {
-        vertex.x = vertices.getX(i)!.toDouble();
-        vertex.y = vertices.getY(i)!.toDouble();
-        vertex.z = vertices.getZ(i)!.toDouble();
-        // transfrom the vertex to world space
+        vertex.fromBuffer( vertices, i );
         vertex.applyMatrix4( line.matrixWorld );
-        // transform the vertex to export format
         output += 'v ${vertex.x} ${vertex.y} ${vertex.z}\n';
       }
     }
@@ -160,10 +141,43 @@ class OBJExporter{
       }
     }
 
-    // update index
-    indexVertex += nbVertex;
+    return _OBJPM(output, nbVertex);
+  }
 
-    return output;
+  static _OBJPM _parsePoints(Points point, int indexVertex ) {
+    String output = '';
+    int nbVertex = 0;
+    BufferGeometry? geometry = point.geometry;
+    final Vector3 vertex = Vector3();
+    final Color color = Color();
+
+    final Float32BufferAttribute? vertices = geometry?.getAttribute( Attribute.position);
+    final Float32BufferAttribute? colors = geometry?.getAttribute( Attribute.color );
+
+    output += 'o ${point.name}\n';
+
+    if( vertices != null) {
+      for (int i = 0, l = vertices.length; i < l; i ++, nbVertex++ ) {
+        vertex.fromBuffer( vertices, i );
+        vertex.applyMatrix4( point.matrixWorld );
+        output += 'v ${vertex.x} ${vertex.y} ${vertex.z}';
+
+        if ( colors != null ) {
+          color.fromBuffer( colors, i );
+          ColorManagement.fromWorkingColorSpace( color, ColorSpace.srgb );
+          output += ' ${color.red} ${color.green} ${color.blue}';
+        }
+        output += '\n';
+      }
+    }
+
+    output += 'p ';
+    for (int j = 1, l = vertices!.length; j <= l; j++ ) {
+      output += '${indexVertex + j} ';
+    }
+    output += '\n';
+
+    return _OBJPM(output, nbVertex);
   }
 
 	static String parse(Scene object){
@@ -175,11 +189,23 @@ class OBJExporter{
     output = "# Flutter OBJ File: \n";
 		object.traverse((child){
 			if(child is Mesh) {
-				output += _parseMesh(child,indexVertex,indexUvs,indexNormals,true);
+        _OBJPM out = _parseMesh(child,indexVertex,indexUvs,indexNormals,true);
+        output += out.file;
+        indexVertex = out.indexVertex;
+        indexUvs = out.indexUvs;
+        indexNormals = out.indexNormals;
 			}
 
 			if(child is Line) {
-				output += _parseLine(child,indexVertex);
+				_OBJPM out = _parseLine(child,indexVertex);
+        output += out.file;
+        indexVertex = out.indexVertex;
+			}
+
+			if(child is Points) {
+				_OBJPM out = _parsePoints(child,indexVertex);
+        output += out.file;
+        indexVertex = out.indexVertex;
 			}
 		});
 		return output;
@@ -191,4 +217,12 @@ class OBJExporter{
   static void exportMesh(String fileName, Mesh mesh, [String? path]){
     SaveFile.saveString(printName: fileName, fileType: 'obj', data: parseMesh(mesh), path: path);
   }
+}
+
+class _OBJPM{
+  _OBJPM(this.file, this.indexVertex,[ this.indexNormals = 0,this.indexUvs = 0]);
+  int indexVertex;
+  int indexNormals;
+  int indexUvs;
+  String file;
 }

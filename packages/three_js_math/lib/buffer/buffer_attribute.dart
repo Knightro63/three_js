@@ -1,6 +1,16 @@
 import 'dart:typed_data';
 import 'package:three_js_math/three_js_math.dart';
 
+class Ranges{
+  Ranges(
+    this.start, 
+    this.count
+  );
+
+  int start;
+  int count; 
+}
+
 /// This class stores data for an attribute (such as vertex positions, face
 /// indices, normals, colors, UVs, and any custom attributes ) associated with
 /// a [BufferGeometry], which allows for more efficient passing of data
@@ -13,6 +23,7 @@ import 'package:three_js_math/three_js_math.dart';
 abstract class BufferAttribute<TData extends NativeArray> extends BaseBufferAttribute<TData> {
   final _vector = Vector3.zero();
   final _vector2 = Vector2.zero();
+  List<Ranges> updateRanges = [];
 
   bool isBufferAttribute = true;
 
@@ -91,6 +102,14 @@ abstract class BufferAttribute<TData extends NativeArray> extends BaseBufferAttr
     usage = value;
     return this;
   }
+
+	void addUpdateRange(int start,int count ) {
+		this.updateRanges.add(Ranges(start, count ));
+	}
+
+	void clearUpdateRanges() {
+		this.updateRanges.clear();
+	}
 
   /// Copies another BufferAttribute to this BufferAttribute.
   BufferAttribute copy(BufferAttribute source) {
@@ -391,6 +410,39 @@ abstract class BufferAttribute<TData extends NativeArray> extends BaseBufferAttr
     }
 
     return result;
+  }
+
+  static BufferAttribute fromUnknown(NativeArray arrayList, int itemSize, [bool normalized = false]){
+    if(arrayList is Int8Array){
+      return Int8BufferAttribute(arrayList,itemSize,normalized);
+    }
+    else if(arrayList is Uint8Array){
+      return Uint8BufferAttribute(arrayList,itemSize,normalized);
+    }
+    else if(arrayList is Int16Array){
+      return Int16BufferAttribute(arrayList,itemSize,normalized);
+    }
+    else if(arrayList is Uint16Array){
+      return Uint16BufferAttribute(arrayList,itemSize,normalized);
+    }
+    else if(arrayList is Int32Array){
+      return Int32BufferAttribute(arrayList,itemSize,normalized);
+    }
+    else if(arrayList is Uint32Array){
+      return Uint32BufferAttribute(arrayList,itemSize,normalized);
+    }
+    else if(arrayList is Float32Array){
+      return Float16BufferAttribute(arrayList,itemSize,normalized);
+    }
+    else if(arrayList is Float32Array){
+      return Float32BufferAttribute(arrayList,itemSize,normalized);
+    }
+    else if(arrayList is Float64Array){
+      return Float64BufferAttribute(arrayList,itemSize,normalized);
+    }
+    else{
+      throw('Unresolved Array type');
+    }
   }
 }
 

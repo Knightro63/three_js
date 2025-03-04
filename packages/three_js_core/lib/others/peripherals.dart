@@ -16,6 +16,7 @@ enum PeripheralType{
   pointerlockchange,
   pointerlockerror,
   contextmenu,
+  resize,
   orientationchange,
   deviceorientation
 }

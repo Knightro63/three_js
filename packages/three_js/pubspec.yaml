@@ -20,7 +20,7 @@ dependencies:
   three_js_math: ^0.0.3
   three_js_advanced_loaders: ^0.0.4
   three_js_animations: ^0.0.2
-  three_js_controls: ^0.0.5
+  three_js_controls: ^0.0.6
   three_js_core: ^0.0.3
   three_js_core_loaders: ^0.0.3
   three_js_curves: ^0.0.2

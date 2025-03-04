@@ -5,6 +5,9 @@ import 'package:example/controls/misc_controls_device_orientation.dart';
 import 'package:example/controls/misc_controls_fly.dart';
 import 'package:example/controls/misc_controls_pointerlock.dart';
 import 'package:example/controls/misc_controls_transform.dart';
+import 'package:example/exporters/misc_exporter_obj.dart';
+import 'package:example/exporters/misc_exporter_ply.dart';
+import 'package:example/exporters/misc_exporter_stl.dart';
 import 'package:example/games/flutter_game.dart';
 import 'package:example/games/games_fps2.dart';
 import 'package:example/geometry/marching_cubes.dart';
@@ -184,6 +187,15 @@ class MyAppState extends State<MyApp> {
               },
               '/boxselection':(BuildContext context) {
                 return const BoxSelection();
+              },
+              '/misc_exporter_ply':(BuildContext context) {
+                return const MiscExporterPly();
+              },
+              '/misc_exporter_stl':(BuildContext context) {
+                return const MiscExporterSTL();
+              },
+              '/misc_exporter_obj':(BuildContext context) {
+                return const MiscExporterOBJ();
               },
               '/webgl_camera_array':(BuildContext context) {
                 return const WebglCameraArray();

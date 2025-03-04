@@ -57,6 +57,7 @@ Event _removedEvent = Event(type: "removed");
 /// Note that this can be used for grouping objects via the [add] method which adds the object as a child, however it is better to
 /// use [Group] for this.
 class Object3D with EventDispatcher {
+  BoundingSphere? boundingSphere;
   bool disposed = false;
   static Vector3 defaultUp = Vector3(0.0, 1.0, 0.0);
   static bool defaultMatrixAutoUpdate = true;
@@ -749,6 +750,10 @@ class Object3D with EventDispatcher {
     }
   }
 
+  void computeBoundingSphere(){
+    throw('Object3D.computeBoundingSphere is Not implimented!');
+  }
+
   /// meta -- object containing metadata such as materials, textures or images
   /// for the object.
   /// 
@@ -1009,7 +1014,31 @@ class Object3D with EventDispatcher {
   /// [Points] or [Sprite]. Instances of [Object3D], [Group]
   /// or [Bone] are not renderable and thus this callback is not executed
   /// for such objects.
-  OnAfterRender? onAfterRender;
+    OnAfterRender? onAfterRender;
+
+  void onBeforeShadow({
+    WebGLRenderer? renderer,
+    Object3D? scene,
+    Camera? camera,
+    Camera? shadowCamera,
+    BufferGeometry? geometry,
+    Material? material,
+    Map<String, dynamic>? group
+  }) {
+    // print(" Object3D.onAfterRender ${type} ${id} ");
+  }
+
+  void onAfterShadow({
+    WebGLRenderer? renderer,
+    Object3D? scene,
+    Camera? camera,
+    Camera? shadowCamera,
+    BufferGeometry? geometry,
+    Material? material,
+    Map<String, dynamic>? group
+  }) {
+    // print(" Object3D.onAfterRender ${type} ${id} ");
+  }
 
   Matrix4? getValue(String name) {
     if (name == "bindMatrix") {

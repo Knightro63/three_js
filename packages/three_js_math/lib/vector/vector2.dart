@@ -17,10 +17,11 @@ class Vector2 extends Vector{
     this.y = y ?? 0;
   }
 
-  Vector2.fromJson(List<double>? json) {
+  Vector2.fromJson(Map<String,num>? json) {
     if (json != null) {
-      x = json[0];
-      y = json[1];
+      List<num> data = json.values.toList();
+      x = data[0].toDouble();
+      y = data[1].toDouble();
     }
   }
   Vector2.zero([double x = 0, double y = 0]){

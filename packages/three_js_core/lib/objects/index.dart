@@ -12,3 +12,4 @@ export './points.dart';
 export './skeleton.dart';
 export 'skinned_mesh.dart';
 export './sprite.dart';
+export './batched_mesh.dart';

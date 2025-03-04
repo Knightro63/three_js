@@ -40,13 +40,14 @@ class Vector4 extends Vector{
     this.w = w;
   }
 
-  Vector4.fromJson(List<double>? json) {
+  Vector4.fromJson(Map<String,num>? json) {
     storage = Float32List(4);
     if (json != null) {
-      x = json[0];
-      y = json[1];
-      z = json[2];
-      w = json[3];
+      List<num> data = json.values.toList();
+      x = data[0].toDouble();
+      y = data[1].toDouble();
+      z = data[2].toDouble();
+      w = data[3].toDouble();
     }
   }
   double get z => storage[2];

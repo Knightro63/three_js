@@ -118,6 +118,36 @@ class Triangle {
     return (_v0.cross(_v1).dot(direction) < 0) ? true : false;
   }
 
+
+	///  Computes the value barycentrically interpolated for the given point on the
+	///  triangle. Returns `null` if the triangle is degenerate.
+	///
+	///  Vector3 [point] - Position of interpolated point.
+	///  Vector3 [p1] - The first corner of the triangle.
+	///  Vector3 [p2] - The second corner of the triangle.
+	///  Vector3 [p3] - The third corner of the triangle.
+	///  Vector3 [v1] - Value to interpolate of first vertex.
+	///  Vector3 [v2] - Value to interpolate of second vertex.
+	///  Vector3 [v3] - Value to interpolate of third vertex.
+	///  Vector3 [target] - The target vector that is used to store the method's result.
+	///  return Vector3? The interpolated value.
+	static Vector staticGetInterpolation(Vector3 point, Vector3 p1, Vector3 p2, Vector3 p3, Vector v1, Vector v2, Vector v3, Vector target ) {
+		// if (staticGetBarycoord( point, p1, p2, p3, _v3 ) == null ) {
+		// 	target.x = 0;
+		// 	target.y = 0;
+		// 	if ( 'z' in target ) target.z = 0;
+		// 	if ( 'w' in target ) target.w = 0;
+		// 	return null;
+		// }
+
+		target.setScalar( 0 );
+		target.addScaled( v1, _v3.x );
+		target.addScaled( v2, _v3.y );
+		target.addScaled( v3, _v3.z );
+
+		return target;
+	}
+
   Triangle set(Vector3 a, Vector3 b, Vector3 c) {
     this.a.setFrom(a);
     this.b.setFrom(b);
@@ -184,6 +214,10 @@ class Triangle {
   // bool intersectsBox(Box3 box) {
   //   return box.intersectsTriangle(this);
   // }
+
+	Vector getInterpolation(Vector3 point, Vector v1, Vector v2, Vector v3, Vector target ) {
+		return Triangle.staticGetInterpolation( point, this.a, this.b, this.c, v1, v2, v3, target );
+	}
 
   Vector3 closestPointToPoint(Vector3 p, Vector3 target) {
     final a = this.a, b = this.b, c = this.c;
