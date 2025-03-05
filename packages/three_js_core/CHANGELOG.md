@@ -1,3 +1,7 @@
+## 0.0.4
+
+* Updated three_js_math.
+
 ## 0.0.3
 
 * Updated alpha transparency bug and fixed video texture issue.

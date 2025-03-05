@@ -1,7 +1,11 @@
+## 0.0.7
+
+* Updated to the newest version of three_js_core and three_js_math.
+* Changed simple_sensors to three_js_sensors in three_js_controls.
+
 ## 0.0.6
 
 * Updated to the newest version of three_js_core.
-* Changed simple_sensors to three_js_sensors in three_js_controls.
 
 ## 0.0.5
 

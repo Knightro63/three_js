@@ -1,6 +1,6 @@
 ## 0.0.3
 
-* Updated filepicker library.
+* Updated filepicker library and Fixed obj export bug..
 
 ## 0.0.2
 
