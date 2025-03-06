@@ -31,7 +31,6 @@ class _State extends State<AudioTiming> {
       setup: setup,
       settings: three.Settings(
         enableShadowMap: true,
-        useSourceTexture: true
       )
     );
     super.initState();

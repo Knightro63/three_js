@@ -31,6 +31,7 @@ class _State extends State<WebglPostprocessingUnrealBloom> {
       onSetupComplete: (){setState(() {});},
       setup: setup,
       settings: three.Settings(
+        toneMapping: three.ReinhardToneMapping,
         useSourceTexture: true,
       )
     );
@@ -42,6 +43,10 @@ class _State extends State<WebglPostprocessingUnrealBloom> {
     threeJs.dispose();
     three.loading.clear();
     controls.dispose();
+    composer.dispose();
+    renderScene.dispose();
+    bloomPass.dispose();
+    outputPass.dispose();
     super.dispose();
   }
 
@@ -67,6 +72,10 @@ class _State extends State<WebglPostprocessingUnrealBloom> {
   }
 
   late final EffectComposer composer;
+  late final RenderPass renderScene;
+  late final UnrealBloomPass bloomPass;
+  final outputPass = OutputPass();
+
   late final three.OrbitControls controls;
   late final three.AnimationMixer mixer;
 
@@ -93,16 +102,14 @@ class _State extends State<WebglPostprocessingUnrealBloom> {
     final pointLight = three.PointLight( 0xffffff, 1.0 );
     threeJs.camera.add( pointLight );
 
-    final renderScene = RenderPass( threeJs.scene, threeJs.camera );
+    renderScene = RenderPass( threeJs.scene, threeJs.camera );
 
-    final bloomPass = UnrealBloomPass( three.Vector2( threeJs.width, threeJs.height ), 1.5, 0.4, 0.85 );
+    bloomPass = UnrealBloomPass( three.Vector2( threeJs.width, threeJs.height ), 1.5, 0.4, 0.85 );
     bloomPass.threshold = params['threshold']!;
     bloomPass.strength = params['strength']!;
     bloomPass.radius = params['radius']!;
 
-    final outputPass = OutputPass();
-
-    composer = EffectComposer( threeJs.renderer!, threeJs.renderTarget);
+    composer = EffectComposer( threeJs.renderer!,threeJs.renderTarget);
     composer.addPass( renderScene );
     composer.addPass( bloomPass );
     composer.addPass( outputPass );
@@ -117,8 +124,8 @@ class _State extends State<WebglPostprocessingUnrealBloom> {
     mixer.clipAction( clip.optimize() )!.play();
 
     threeJs.postProcessor = ([double? dt]){
-      composer.render(null);
-      
+      threeJs.renderer!.setRenderTarget(null);
+      composer.render(dt);
     };
     threeJs.addAnimationEvent((dt){
       animate(dt);

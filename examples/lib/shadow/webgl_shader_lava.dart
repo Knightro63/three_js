@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart';
 import 'package:example/src/statistics.dart';
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
@@ -30,6 +29,10 @@ class _State extends State<WebglShaderLava> {
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
       setup: setup,
+      settings: three.Settings(
+        autoClear: false,
+        useSourceTexture: true
+      )
     );
     super.initState();
   }
@@ -39,6 +42,10 @@ class _State extends State<WebglShaderLava> {
     timer.cancel();
     threeJs.dispose();
     three.loading.clear();
+    composer.dispose();
+    renderModel.dispose();
+    effectBloom.dispose();
+    outputPass.dispose();
     super.dispose();
   }
 
@@ -56,6 +63,11 @@ class _State extends State<WebglShaderLava> {
 
   late three.OrbitControls controls;
 
+  late final RenderPass renderModel;
+  final effectBloom = BloomPass( 1.25 );
+  late final EffectComposer composer;
+  final outputPass = OutputPass();
+
   Future<void> setup() async {
     threeJs.camera = three.PerspectiveCamera( 35, threeJs.width/threeJs.height, 1, 3000 );
     threeJs.camera.position.z = 4;
@@ -67,7 +79,7 @@ class _State extends State<WebglShaderLava> {
     final cloudTexture = await textureLoader.fromAsset( 'assets/textures/lava/cloud.png' );
     final lavaTexture = await textureLoader.fromAsset( 'assets/textures/lava/lavatile.jpg' );
 
-    //lavaTexture.colorSpace = three.SRGBColorSpace;
+    lavaTexture?.colorSpace = three.SRGBColorSpace;
 
     cloudTexture?.wrapS = three.RepeatWrapping;
     cloudTexture?.wrapT = three.RepeatWrapping;
@@ -154,21 +166,20 @@ class _State extends State<WebglShaderLava> {
     mesh.rotation.x = 0.3;
     threeJs.scene.add( mesh );
 
-    //
-
-    final renderModel = RenderPass( threeJs.scene, threeJs.camera );
-    final effectBloom = BloomPass( 1.25 );
-    final composer = EffectComposer( threeJs.renderer! );
+    renderModel = RenderPass( threeJs.scene, threeJs.camera );
+    composer = EffectComposer( threeJs.renderer!, threeJs.renderTarget);
 
     composer.addPass( renderModel );
     composer.addPass( effectBloom );
-
-    if(kIsWeb){
-      final outputPass = OutputPass();
-      composer.addPass( outputPass );
-    }
+    composer.addPass( outputPass );
 
     controls = three.OrbitControls( threeJs.camera, threeJs.globalKey);
+
+    threeJs.postProcessor = ([double? dt]){
+      threeJs.renderer!.setRenderTarget(null);
+      threeJs.renderer!.render(threeJs.scene, threeJs.camera);
+      composer.render(dt);
+    };
 
     threeJs.addAnimationEvent((dt){
       controls.update();
@@ -176,9 +187,6 @@ class _State extends State<WebglShaderLava> {
 
       mesh.rotation.y += 0.0125 * dt;
       mesh.rotation.x += 0.05 * dt;
-
-      threeJs.renderer?.clear();
-      composer.render(null,dt);
     });
 
   }

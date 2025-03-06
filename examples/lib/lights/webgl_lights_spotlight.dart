@@ -30,7 +30,10 @@ class _State extends State<WebglLightsSpotlight> {
       onSetupComplete: (){setState(() {});},
       setup: setup,
       settings: three.Settings(
-        useSourceTexture: true
+        enableShadowMap: true,
+        shadowMapType: three.PCFSoftShadowMap,
+        toneMapping: three.ACESFilmicToneMapping,
+        toneMappingExposure: 1
       )
     );
     super.initState();
@@ -70,7 +73,7 @@ class _State extends State<WebglLightsSpotlight> {
     controls.target.setValues( 0, 1, 0 );
     controls.update();
 
-    final ambient = three.HemisphereLight( 0xffffff, 0x8d8d8d, 0.15 );
+    final ambient = three.HemisphereLight( 0xffffff, 0x8d8d8d, 0.1 );
     threeJs.scene.add( ambient );
 
     final loader = three.TextureLoader().setPath( 'assets/textures/' );
@@ -89,12 +92,12 @@ class _State extends State<WebglLightsSpotlight> {
       textures[ filename ] = texture;
     }
 
-    final spotLight = three.SpotLight( 0xffffff, 0.9 );
+    final spotLight = three.SpotLight( 0xffffff, 0.9);
     spotLight.position.setValues( 2.5, 5, 2.5 );
     spotLight.angle = math.pi / 6;
     spotLight.penumbra = 1;
     spotLight.decay = 2;
-    spotLight.distance = 0;
+    spotLight.distance = 10;
     spotLight.map = textures[ 'disturb.jpg' ];
 
     spotLight.castShadow = true;
@@ -129,10 +132,6 @@ class _State extends State<WebglLightsSpotlight> {
     mesh1.castShadow = true;
     mesh1.receiveShadow = true;
     threeJs.scene.add( mesh1 );
-
-    threeJs.renderer?.shadowMap.type = three.PCFSoftShadowMap;
-    threeJs.renderer?.toneMapping = three.ACESFilmicToneMapping;
-    threeJs.renderer?.toneMappingExposure = 1;
 
     threeJs.addAnimationEvent((dt){
       final time = DateTime.now().millisecondsSinceEpoch / 3000;

@@ -58,7 +58,6 @@ class _MarchingState extends State<Marching> {
       onSetupComplete: (){setState(() {});},
       setup: setup,
       settings: three.Settings(
-        //useSourceTexture: true,
         renderOptions: {"format": three.RGBAFormat,"samples": 8}
       )
     );

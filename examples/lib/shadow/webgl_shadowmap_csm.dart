@@ -32,7 +32,6 @@ class _State extends State<WebglShadowmapCsm> {
       setup: setup,
       settings: three.Settings(
         shadowMapType: three.PCFSoftShadowMap,
-        useSourceTexture: true
       )
     );
     super.initState();
@@ -90,14 +89,14 @@ class _State extends State<WebglShadowmapCsm> {
     final ambientLight = three.AmbientLight( 0xffffff, 0.1 );
     threeJs.scene.add( ambientLight );
 
-    final additionalDirectionalLight = three.DirectionalLight( 0x000020, 0.1 );
+    final additionalDirectionalLight = three.DirectionalLight( 0x000020, 0.8 );
     additionalDirectionalLight.position.setValues( params['lightX'], params['lightY'], params['lightZ'] ).normalize().scale( - 200 );
     threeJs.scene.add( additionalDirectionalLight );
 
     csm = CSM(
       CSMData(
         maxFar: params['far'],
-        cascades: 4,
+        cascades: 1,
         mode: params['mode'],
         parent: threeJs.scene,
         shadowMapSize: 1024,

@@ -81,10 +81,6 @@ class ThreeJS {
 
   FlutterAngleTexture? texture;
   late final RenderingContext gl;
-  
-  core.WebGLRenderTarget? falseRenderTarget;
-  late final core.Camera falseCamera;
-  late final core.Mesh falseMesh;
 
   core.WebGLRenderTarget? renderTarget;
   core.WebGLRenderer? renderer;
@@ -129,7 +125,6 @@ class ThreeJS {
     }
     renderer?.dispose();
     renderTarget?.dispose();
-    falseRenderTarget?.dispose();
     scene.dispose();
     for(final event in disposeEvents){
       event.call();
@@ -155,8 +150,9 @@ class ThreeJS {
     }
     updating = true;
     double dt = clock.getDelta();
-    render(dt);
+    
     if(settings.animate){
+      render(dt);
       if(!pause){
         for(int i = 0; i < events.length;i++){
           events[i].call(dt);
@@ -171,21 +167,11 @@ class ThreeJS {
     }
     rendererUpdate?.call(); 
     if(postProcessor == null){
-      // false target to get it to run
-      if(sourceTexture != null && !kIsWeb){
-        renderer!.setRenderTarget(falseRenderTarget);
-        renderer!.render(falseMesh,falseCamera );
-        renderer!.setRenderTarget(renderTarget);
-      }
-      
       renderer!.clear();
       renderer!.setViewport(0,0,width,height);
       renderer!.render(scene, camera);
     }
     else{
-      renderer!.clear();
-      renderer!.setRenderTarget(renderTarget);
-      renderer!.setViewport(0,0,width,height);
       postProcessor?.call(dt);
     }
     
@@ -235,11 +221,6 @@ class ThreeJS {
       renderTarget = core.WebGLRenderTarget((width * dpr).toInt(), (height * dpr).toInt(), pars);
       renderer!.setRenderTarget(renderTarget);
       sourceTexture = renderer!.getRenderTargetGLTexture(renderTarget!);
-
-      falseMesh = core.Mesh(core.PlaneGeometry(0,0), null);
-      falseRenderTarget = core.WebGLRenderTarget(0,0, core.WebGLRenderTargetOptions({}));
-      falseCamera = core.Camera();
-      renderer!.setRenderTarget(falseRenderTarget);
     }
   }
   

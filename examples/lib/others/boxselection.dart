@@ -28,11 +28,6 @@ class _State extends State<BoxSelection> {
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
       setup: setup,
-      settings: three.Settings(
-        //enableShadowMap: true,
-        //shadowMapType: three.PCFShadowMap,
-        //useSourceTexture: true
-      )
     );
     super.initState();
   }

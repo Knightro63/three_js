@@ -91,8 +91,10 @@ const List<String> filesJson = [
   "webgl_geometry_csg2",
   "webgl_helpers",
   'webgl_portal',
+  "webgl_modifier_edgesplit",
   "webgl_modifier_subdivision",
   "webgl_modifier_simplifier",
+  "webgl_modifier_tessellation",
   "webgl_morphtargets",
   "webgl_morphtargets_sphere",
   "webgl_morphtargets_horse",
@@ -122,5 +124,5 @@ const List<String> filesJson = [
   //'webgl_opengl_texture',
   //'webgl2_multiple_rendertargets',
   'webgl_postprocessing_unreal_bloom',
-  //'webgl_postprocessing_unreal_bloom_selective',
+  'webgl_postprocessing_unreal_bloom_selective',
 ];

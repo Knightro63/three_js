@@ -29,8 +29,7 @@ class _State extends State<WebglLoaderMd2> {
       onSetupComplete: (){setState(() {});},
       setup: setup,
       settings: three.Settings(
-        // enableShadowMap: true,
-        // useSourceTexture: true
+        enableShadowMap: true,
       )
     );
     super.initState();

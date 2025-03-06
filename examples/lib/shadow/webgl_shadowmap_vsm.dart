@@ -29,9 +29,6 @@ class _State extends State<WebglShadowmapVsm> {
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
       setup: setup,
-      settings: three.Settings(
-        useSourceTexture: true
-      )
     );
     super.initState();
   }
@@ -66,9 +63,9 @@ class _State extends State<WebglShadowmapVsm> {
     threeJs.scene.background = three.Color.fromHex32( 0x222244 );
     threeJs.scene.fog = three.Fog( 0x222244, 50, 100 );
 
-    threeJs.scene.add( three.AmbientLight( 0x444444,0.4 ) );
+    threeJs.scene.add( three.AmbientLight( 0x444444,0.2) );
 
-    final spotLight = three.SpotLight( 0xff8888, 0.8 );
+    final spotLight = three.SpotLight( 0xff3333, 0.8 );
     spotLight.angle = math.pi / 5;
     spotLight.penumbra = 0.3;
     spotLight.position.setValues( 8, 10, 5 );
@@ -81,7 +78,7 @@ class _State extends State<WebglShadowmapVsm> {
     spotLight.shadow?.radius = 4;
     threeJs.scene.add( spotLight );
 
-    final dirLight = three.DirectionalLight( 0x8888ff, 0.8 );
+    final dirLight = three.DirectionalLight( 0x3333ff, 0.8 );
     dirLight.position.setValues( 3, 12, 17 );
     dirLight.castShadow = true;
     dirLight.shadow?.camera?.near = 0.1;

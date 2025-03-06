@@ -5,10 +5,10 @@ import 'pass.dart';
 
 class RenderPass extends Pass {
   bool clearDepth = false;
-  double clearAlpha = 0;
+  double? clearAlpha;
   Color? clearColor;
   Material? overrideMaterial;
-  final Color _oldClearColor = Color(1, 1, 1);
+  final Color _oldClearColor = Color();
 
   RenderPass(Object3D scene, Camera camera, [this.overrideMaterial, this.clearColor, this.clearAlpha = 0]): super() {
     this.scene = scene;
@@ -33,10 +33,13 @@ class RenderPass extends Pass {
 
     if (clearColor != null) {
       renderer.getClearColor(_oldClearColor);
-      oldClearAlpha = renderer.getClearAlpha();
-
-      renderer.setClearColor(clearColor!, clearAlpha);
+      renderer.setClearColor(clearColor!, renderer.getClearAlpha());
     }
+
+		if ( clearAlpha != null ) {
+			oldClearAlpha = renderer.getClearAlpha();
+			renderer.setClearAlpha( clearAlpha! );
+		}
 
     if (clearDepth) {
       renderer.clearDepth();
@@ -53,7 +56,9 @@ class RenderPass extends Pass {
     if (clearColor != null) {
       renderer.setClearColor(_oldClearColor, oldClearAlpha);
     }
-
+		if ( clearAlpha != null ) {
+			renderer.setClearAlpha( oldClearAlpha );
+		}
     if (overrideMaterial != null) {
       scene.overrideMaterial = oldOverrideMaterial;
     }

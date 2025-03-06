@@ -27,9 +27,6 @@ class _MyAppState extends State<WebglSkinningSimple> {
       });
     });
     threeJs = three.ThreeJS(
-      settings: three.Settings(
-        useSourceTexture: true
-      ),
       onSetupComplete: (){setState(() {});},
       setup: setup
     );
@@ -85,7 +82,7 @@ class _MyAppState extends State<WebglSkinningSimple> {
     grid.material?.transparent = true;
     threeJs.scene.add(grid);
 
-    final hemiLight = three.HemisphereLight(0xffffff, 0x444444, 0.6);
+    final hemiLight = three.HemisphereLight(0xffffff, 0x444444, 0.3);
     hemiLight.position.setValues(0, 200, 0);
     threeJs.scene.add(hemiLight);
 

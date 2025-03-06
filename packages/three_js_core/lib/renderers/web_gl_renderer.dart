@@ -587,23 +587,21 @@ class WebGLRenderer {
   // Rendering
 
   void render(Object3D scene, Camera camera) {
-    if (_isContextLost == true) return;
+    if (_isContextLost) return;
 
     // update scene graph
-    if (scene.autoUpdate == true) scene.updateMatrixWorld();
+    if (scene.autoUpdate) scene.updateMatrixWorld();
 
     // update camera matrices and frustum
 
     if (camera.parent == null) camera.updateMatrixWorld();
 
-    if ( xr.enabled == true && xr.isPresenting == true ) {
+    if (xr.enabled && xr.isPresenting) {
     	camera = xr.getCamera();
     }
 
-    if (scene is Scene) {
-      if (scene.onBeforeRender != null) {
-        scene.onBeforeRender!(renderer: this, scene: scene, camera: camera, renderTarget: _currentRenderTarget);
-      }
+    if (scene is Scene && scene.onBeforeRender != null) {
+      scene.onBeforeRender!(renderer: this, scene: scene, camera: camera, renderTarget: _currentRenderTarget);
     }
 
     currentRenderState = renderStates.get(scene, renderCallDepth: renderStateStack.length);
@@ -627,22 +625,24 @@ class WebGLRenderer {
 
     currentRenderList!.finish();
 
-    if (sortObjects == true) {
+    if (sortObjects) {
       currentRenderList!.sort(_opaqueSort, _transparentSort);
     }
 
-    if (_clippingEnabled == true) clipping.beginShadows();
+    if (_clippingEnabled) clipping.beginShadows();
 
     final shadowsArray = currentRenderState!.state.shadowsArray;
     
-    shadowMap.render(shadowsArray, scene, camera);
+    if(kIsWeb){
+      shadowMap.render(shadowsArray, scene, camera);
+    }
 
     currentRenderState!.setupLights(physicallyCorrectLights);
     currentRenderState!.setupLightsView(camera);
 
-    if (_clippingEnabled == true) clipping.endShadows();
+    if (_clippingEnabled) clipping.endShadows();
 
-    if (info.autoReset == true) info.reset();
+    if (info.autoReset) info.reset();
     background.render(currentRenderList!, scene);
 
     // render scene
@@ -659,6 +659,10 @@ class WebGLRenderer {
     } 
     else {
       renderScene(currentRenderList!, scene, camera);
+    }
+
+    if(!kIsWeb){
+      shadowMap.render(shadowsArray, scene, camera);
     }
 
     if (_currentRenderTarget != null) {
@@ -1393,7 +1397,7 @@ class WebGLRenderer {
 
       final webglFramebuffer = properties.get(renderTarget)["__webglFramebuffer"];
 
-      if (renderTarget.isWebGLCubeRenderTarget) {
+      if (renderTarget is WebGLCubeRenderTarget) {
         framebuffer = webglFramebuffer[activeCubeFace];
         isCube = true;
       } 

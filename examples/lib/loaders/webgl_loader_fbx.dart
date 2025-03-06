@@ -27,11 +27,9 @@ class _MyAppState extends State<WebglLoaderFbx> {
       });
     });
     threeJs = three.ThreeJS(
-      
       onSetupComplete: (){setState(() {});},
       setup: setup,
       settings: three.Settings(
-        useSourceTexture: true,
         renderOptions: {
           "minFilter": three.LinearFilter,
           "magFilter": three.LinearFilter,
@@ -89,11 +87,11 @@ class _MyAppState extends State<WebglLoaderFbx> {
 
     controls.maxPolarAngle = math.pi / 2;
 
-    final hemiLight = three.HemisphereLight( 0xffffff, 0x444444 );
+    final hemiLight = three.HemisphereLight( 0xffffff, 0x444444, 0.6 );
     hemiLight.position.setValues( 0, 200, 0 );
     threeJs.scene.add( hemiLight );
 
-    final dirLight = three.DirectionalLight( 0xffffff);
+    final dirLight = three.DirectionalLight( 0xffffff, 0.8);
     dirLight.position.setValues( 0, 200, 100 );
     dirLight.castShadow = true;
     dirLight.shadow!.camera!.top = 180;
@@ -104,13 +102,16 @@ class _MyAppState extends State<WebglLoaderFbx> {
     dirLight.shadow!.camera!.far = 400;
     threeJs.scene.add( dirLight );
 
-    // scene.add( new three.CameraHelper( dirLight.shadow!.camera ) );
+    //threeJs.scene.add(CameraHelper( dirLight.shadow!.camera! ) );
 
     // ground
-    // final mesh = new three.Mesh( new three.PlaneGeometry( 2000, 2000 ), new three.MeshPhongMaterial( { "color": 0x999999, "depthWrite": false } ) );
-    // mesh.rotation.x = - math.pi / 2;
-    // mesh.receiveShadow = true;
-    // scene.add( mesh );
+    final mesh = three.Mesh( 
+      three.PlaneGeometry( 2000, 2000 ), 
+      three.MeshPhongMaterial.fromMap( { "color": 0x999999, "depthWrite": false } ) 
+    );
+    mesh.rotation.x = - math.pi / 2;
+    mesh.receiveShadow = true;
+    threeJs.scene.add( mesh );
 
     final grid = GridHelper( 2000, 20);
     grid.material?.opacity = 0.2;

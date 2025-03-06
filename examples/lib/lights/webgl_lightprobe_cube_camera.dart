@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
 import 'package:example/src/statistics.dart';
@@ -29,9 +30,6 @@ class _State extends State<WebglLightprobeCubeCamera> {
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
       setup: setup,
-      settings: three.Settings(
-        useSourceTexture: true
-      )
     );
     super.initState();
   }
@@ -77,20 +75,20 @@ class _State extends State<WebglLightprobeCubeCamera> {
 
     // probe
     final lightProbe = three.LightProbe();
-    //threeJs.scene.add( lightProbe );
+    threeJs.scene.add( lightProbe );
 
     // envmap
     List<String> genCubeUrls( prefix, postfix ) {
       return [
         prefix + 'px' + postfix, prefix + 'nx' + postfix,
-        prefix + 'py' + postfix, prefix + 'ny' + postfix,
+        '$prefix${kIsWeb?'p':'n'}y$postfix', '$prefix${!kIsWeb?'p':'n'}y$postfix',
         prefix + 'pz' + postfix, prefix + 'nz' + postfix
       ];
     };
 
     final urls = genCubeUrls( 'assets/textures/cube/pisa/', '.png' );
 
-    three.CubeTextureLoader().fromAssetList(urls).then(( cubeTexture ) {
+    three.CubeTextureLoader(flipY: !kIsWeb).fromAssetList(urls).then(( cubeTexture ) {
       threeJs.scene.background = cubeTexture;
       cubeCamera.update( threeJs.renderer!, threeJs.scene );
       lightProbe.copy( LightProbeGenerator.fromCubeRenderTarget( threeJs.renderer!, cubeRenderTarget ) );

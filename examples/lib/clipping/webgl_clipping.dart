@@ -32,7 +32,6 @@ class _State extends State<WebglClipping> {
       setup: setup,
       settings: three.Settings(
         localClippingEnabled: true,
-        useSourceTexture: true
       )
     );
     super.initState();
@@ -68,7 +67,7 @@ class _State extends State<WebglClipping> {
 
     controls = three.OrbitControls(threeJs.camera, threeJs.globalKey);
 
-    threeJs.scene.add(three.AmbientLight(0x505050, 1));
+    threeJs.scene.add(three.AmbientLight(0x505050, 0.2));
 
     final spotLight = three.SpotLight(0xffffff);
     spotLight.angle = math.pi / 5;
@@ -81,7 +80,7 @@ class _State extends State<WebglClipping> {
     spotLight.shadow!.mapSize.height = 1024;
     threeJs.scene.add(spotLight);
 
-    final dirLight = three.DirectionalLight(0x55505a, 1);
+    final dirLight = three.DirectionalLight(0x55505a, 0.2);
     dirLight.position.setValues(0, 3, 0);
     dirLight.castShadow = true;
     dirLight.shadow!.camera!.near = 1;

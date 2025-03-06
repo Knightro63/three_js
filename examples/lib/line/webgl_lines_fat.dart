@@ -142,6 +142,7 @@ class _State extends State<WebglLinesFat> {
     };
 
     threeJs.postProcessor = ([double? dt]){
+      threeJs.renderer!.setViewport(0,0,threeJs.width,threeJs.height);
       threeJs.renderer!.render(threeJs.scene,threeJs.camera );
 
       threeJs.renderer?.setScissorTest( true );

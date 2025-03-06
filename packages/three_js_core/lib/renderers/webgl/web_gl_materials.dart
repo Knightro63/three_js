@@ -114,8 +114,8 @@ class WebGLMaterials {
 
     if (envMap != null) {
       uniforms["envMap"]["value"] = envMap;
-      uniforms["flipEnvMapX"]["value"] = (envMap.type == "CubeTexture" && envMap.isRenderTargetTexture == false) ? -1 : 1;
-      uniforms["flipEnvMapY"]["value"] = (envMap.type == "CubeTexture" && envMap.isRenderTargetTexture == false && kIsWeb) ? 1 : -1;
+      uniforms["flipEnvMapX"]["value"] = (envMap is CubeTexture && envMap.isRenderTargetTexture == false) ? -1 : 1;
+      uniforms["flipEnvMapY"]["value"] = (envMap is CubeTexture && envMap.isRenderTargetTexture == false && kIsWeb) ? 1 : -1;
       uniforms["reflectivity"]["value"] = material.reflectivity;
       uniforms["ior"]["value"] = material.ior;
       uniforms["refractionRatio"]["value"] = material.refractionRatio;
@@ -191,7 +191,7 @@ class WebGLMaterials {
 
     if (uvScaleMap != null) {
       // backwards compatibility
-      if (uvScaleMap.isWebGLRenderTarget) {
+      if (uvScaleMap is WebGLRenderTarget) {
         //uvScaleMap = uvScaleMap.texture;
       }
 
@@ -217,7 +217,7 @@ class WebGLMaterials {
 
     if (uv2ScaleMap != null) {
       // backwards compatibility
-      if (uv2ScaleMap.isWebGLRenderTarget) {
+      if (uv2ScaleMap is WebGLRenderTarget) {
         //uv2ScaleMap = uv2ScaleMap.texture;
       }
 

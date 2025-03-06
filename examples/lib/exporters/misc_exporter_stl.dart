@@ -30,9 +30,6 @@ class _State extends State<MiscExporterSTL> {
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
       setup: setup,
-      settings: three.Settings(
-        useSourceTexture: true
-      )
     );
     gui = Gui((){setState(() {});});
     super.initState();

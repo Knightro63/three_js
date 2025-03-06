@@ -35,7 +35,6 @@ class _State extends State<WebglAnimationSkinningAdditiveBlending> {
       setup: setup,
       settings: three.Settings(
         outputEncoding: three.sRGBEncoding,
-        useSourceTexture: true
       )
     );
     super.initState();
@@ -102,7 +101,7 @@ class _State extends State<WebglAnimationSkinningAdditiveBlending> {
     threeJs.scene.background = three.Color.fromHex32(0xa0a0a0);
     threeJs.scene.fog = three.Fog(0xa0a0a0, 10, 50);
 
-    final hemiLight = three.HemisphereLight(0xffffff, 0x444444,2);
+    final hemiLight = three.HemisphereLight(0xffffff, 0x444444, 0.8);
     hemiLight.position.setValues(0, 20, 0);
     threeJs.scene.add(hemiLight);
 

@@ -27,9 +27,6 @@ class _State extends State<WebglAnimationMultiple> {
       });
     });
     threeJs = three.ThreeJS(
-      settings: three.Settings(
-        useSourceTexture: true,
-      ),
       onSetupComplete: (){setState(() {});},
       setup: setup
     );

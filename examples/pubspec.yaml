@@ -48,6 +48,12 @@ dependency_overrides:
     git:
       url: https://github.com/alex-melnyk/flutter-permission-handler.git 
       path: permission_handler_apple
+  three_js_core:
+    path: ../packages/three_js_core
+  three_js_postprocessing:
+    path: ../packages/three_js_postprocessing
+  three_js_modifers:
+    path: ../packages/three_js_modifers
 
 flutter:
   uses-material-design: true
@@ -60,6 +66,7 @@ flutter:
     - assets/demo.png
     - assets/KOMO-v5.cube
     - assets/screenshots/
+    - assets/models/obj/cerberus/
     - assets/models/obj/male02/
     - assets/models/json/
     - assets/models/gcode/

@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 import '../others/console.dart';
 import '../core/index.dart';
 import 'package:three_js_math/three_js_math.dart';
@@ -121,10 +123,15 @@ class CubeCamera extends Object3D {
     renderer.setRenderTarget(renderTarget, 4);
     renderer.render(scene, cameraPZ);
 
-    renderTarget.texture.generateMipmaps = generateMipmaps;
-
     renderer.setRenderTarget(renderTarget, 5);
     renderer.render(scene, cameraNZ);
+
+    if(!kIsWeb){
+      renderer.setRenderTarget(renderTarget, 5, 1);
+      renderer.render(scene, cameraNZ);
+    }
+
+    renderTarget.texture.generateMipmaps = generateMipmaps;
 
     renderer.setRenderTarget(currentRenderTarget);
     

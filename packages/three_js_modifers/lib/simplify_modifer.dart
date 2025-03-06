@@ -23,10 +23,6 @@ class SimplifyModifier {
 
 		geometry = BufferGeometryUtils.mergeVertices( geometry );
 
-		//
-		// put data of original geometry in different data structures
-		//
-
 		final List<Vertex> vertices = [];
 		final List<Triangle> faces = [];
 
@@ -98,10 +94,10 @@ class SimplifyModifier {
 			_computeEdgeCostAtVertex(vertices[ i ]);
 		}
 
+    Vertex? nextVertex;
 		int z = count;
-
-		while (z-- != 0) {
-			final nextVertex = _minimumCostEdge( vertices );
+		while (z-- != -1) {
+			nextVertex = _minimumCostEdge( vertices );
 
 			if (nextVertex == null) {
 				console.info( 'SimplifyModifier: No next vertex' );
@@ -109,9 +105,8 @@ class SimplifyModifier {
 			}
 
 			_collapse( vertices, faces, nextVertex, nextVertex.collapseNeighbor );
+      
 		}
-
-		//
 
 		final simplifiedGeometry = BufferGeometry();
 		final List<double> position = [];
@@ -120,8 +115,6 @@ class SimplifyModifier {
 		final List<double> tangent = [];
 		final List<double> color = [];
 		final List<int> indx = [];
-
-		//
 
 		for (int i = 0; i < vertices.length; i ++ ) {
 			final vertex = vertices[ i ];

@@ -178,22 +178,22 @@ class WebGLLights {
     for (int i = 0, l = lights.length; i < l; i++) {
       final light = lights[i];
 
-      final color = light.color!;
+      final color = light.color ?? Color();
       final intensity = light.intensity;
       final distance = light.distance;
 
       final shadowMap = (light.shadow != null && light.shadow!.map != null) ? light.shadow!.map!.texture : null;
 
-      if (light.type == "AmbientLight") {
+      if (light is AmbientLight) {
         r += color.red * intensity * scaleFactor;
         g += color.green * intensity * scaleFactor;
         b += color.blue * intensity * scaleFactor;
-      } else if (light.type == "LightProbe") {
+      } else if (light is LightProbe) {
         for (int j = 0; j < 9; j++) {
           state.probe[j].addScaled(light.sh!.coefficients[j], intensity);
         }
       } 
-      else if (light.type == "DirectionalLight") {
+      else if (light is DirectionalLight) {
         final uniforms = cache.get(light);
 
         (uniforms["color"] as Color)..setFrom(light.color!)..scale(light.intensity * scaleFactor);
@@ -225,7 +225,7 @@ class WebGLLights {
 
         directionalLength++;
       } 
-      else if (light.type == "SpotLight") {
+      else if (light is SpotLight) {
         final uniforms = cache.get(light);
 
         (uniforms["position"] as Vector3).setFromMatrixPosition(light.matrixWorld);
@@ -265,7 +265,7 @@ class WebGLLights {
 
         spotLength++;
       } 
-      else if (light.type == "RectAreaLight") {
+      else if (light is RectAreaLight) {
         final uniforms = cache.get(light);
 
         // (a) intensity is the total visible light emitted
@@ -282,7 +282,7 @@ class WebGLLights {
 
         rectAreaLength++;
       } 
-      else if (light.type == "PointLight") {
+      else if (light is PointLight) {
         final uniforms = cache.get(light);
 
         (uniforms["color"] as Color)..setFrom(light.color!)..scale(light.intensity * scaleFactor);
@@ -318,7 +318,7 @@ class WebGLLights {
 
         pointLength++;
       } 
-      else if (light.type == "HemisphereLight") {
+      else if (light is HemisphereLight) {
         final uniforms = cache.get(light);
 
         uniforms["skyColor"]..setFrom(light.color)..scale(intensity * scaleFactor);
@@ -411,7 +411,7 @@ class WebGLLights {
     for (int i = 0, l = lights.length; i < l; i++) {
       final light = lights[i];
 
-      if (light.type == "DirectionalLight") {
+      if (light is DirectionalLight) {
         final uniforms = state.directional[directionalLength];
 
         uniforms["direction"].setFromMatrixPosition(light.matrixWorld);
@@ -420,7 +420,7 @@ class WebGLLights {
         uniforms["direction"].transformDirection(viewMatrix);
 
         directionalLength++;
-      } else if (light.type == "SpotLight") {
+      } else if (light is SpotLight) {
         final uniforms = state.spot[spotLength];
 
         uniforms["position"].setFromMatrixPosition(light.matrixWorld);
@@ -432,7 +432,7 @@ class WebGLLights {
         uniforms["direction"].transformDirection(viewMatrix);
 
         spotLength++;
-      } else if (light.type == "RectAreaLight") {
+      } else if (light is RectAreaLight) {
         final uniforms = state.rectArea[rectAreaLength];
 
         uniforms["position"].setFromMatrixPosition(light.matrixWorld);
@@ -451,14 +451,14 @@ class WebGLLights {
         uniforms["halfHeight"].applyMatrix4(matrix42);
 
         rectAreaLength++;
-      } else if (light.type == "PointLight") {
+      } else if (light is PointLight) {
         final uniforms = state.point[pointLength];
         
         (uniforms["position"] as Vector3).setFromMatrixPosition(light.matrixWorld);
         uniforms["position"].applyMatrix4(viewMatrix);
 
         pointLength++;
-      } else if (light.type == "HemisphereLight") {
+      } else if (light is HemisphereLight) {
         final uniforms = state.hemi[hemiLength];
 
         uniforms["direction"].setFromMatrixPosition(light.matrixWorld);

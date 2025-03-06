@@ -49,6 +49,8 @@ import 'package:example/loaders/webgl_loader_xyz.dart';
 import 'package:example/material/webgl2_multiple_rendertargets.dart';
 import 'package:example/material/webgl_materials_modified.dart';
 import 'package:example/material/webgl_materials_subsurface_scattering.dart';
+import 'package:example/modifers/webgl_modifer_tessellation.dart';
+import 'package:example/modifers/webgl_modifer_edgesplit.dart';
 import 'package:example/modifers/webgl_modifier_simplifier.dart';
 import 'package:example/modifers/webgl_modifier_subdivision.dart';
 import 'package:example/postprocessing/webgl_postprocessing_unreal_bloom.dart';
@@ -75,10 +77,11 @@ import 'package:example/lights/webgl_lights_spotlight.dart';
 import 'package:example/postprocessing/webgl_postprocessing_sobel.dart';
 import 'package:example/shadow/webgl_shader_lava.dart';
 import 'package:example/shadow/webgl_shadowmap_csm.dart';
-import 'package:example/texture/webgl_shadowmap_pointlight.dart';
+import 'package:example/shadow/webgl_shadowmap_pointlight.dart';
 import 'package:example/shadow/webgl_shadowmap_vsm.dart';
 import 'package:example/shadow/webgl_simple_gi.dart';
 import 'package:example/shadow/webgl_water.dart';
+import 'package:example/volume/webgl_ubo_arrays.dart';
 import 'package:example/volume/webgl_volume_cloud.dart';
 import 'package:example/volume/webgl_volume_instancing.dart';
 import 'package:example/volume/webgl_volume_perlin.dart';
@@ -449,11 +452,17 @@ class MyAppState extends State<MyApp> {
               '/webgl_portal':(BuildContext context) {
                 return const WebglPortal();
               },
+              '/webgl_modifier_edgesplit':(BuildContext context) {
+                return const WebglModifierEdgesplit();
+              },
               '/webgl_modifier_subdivision':(BuildContext context) {
                 return const WebglModifierSubdivision();
               },
               '/webgl_modifier_simplifier':(BuildContext context) {
                 return const WebglModifierSimplifier();
+              },
+              '/webgl_modifier_tessellation':(BuildContext context) {
+                return const WebglModifierTessellation();
               },
               '/webgl_morphtargets':(BuildContext context) {
                 return const WebglMorphtargets();
@@ -527,9 +536,9 @@ class MyAppState extends State<MyApp> {
               // '/webgl_nodes_points':(BuildContext context) {
               //   return const WebglNodesPoints();
               // },
-              // '/webgl_ubo_arrays':(BuildContext context) {
-              //   return const WebglUboArrays();
-              // },
+              '/webgl_ubo_arrays':(BuildContext context) {
+                return const WebglUboArrays();
+              },
               '/webxr_vr_rollercoaster':(BuildContext context) {
                 return const WebXRVRRollercoaster();
               },

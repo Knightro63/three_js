@@ -51,17 +51,17 @@ class TessellateModifier {
 		final hasUVs = attributes['uv'] != null;
 		final hasUV1s = attributes['uv1'] != null;
 
-		List<double> positions = attributes['position'].array;
-		List<double> normals = hasNormals ? attributes['normal'].array : null;
-		List<double> colors = hasColors ? attributes['color'].array : null;
-		List<double> uvs = hasUVs ? attributes['uv'].array : null;
-		List<double> uv1s = hasUV1s ? attributes['uv1'].array : null;
+		List<double> positions = attributes['position'].array.toList();
+		List<double>? normals = hasNormals ? attributes['normal']?.array?.toList() : null;
+		List<double>? colors = hasColors ? attributes['color']?.array?.toList() : null;
+		List<double>? uvs = hasUVs ? attributes['uv']?.array?.toList() : null;
+		List<double>? uv1s = hasUV1s ? attributes['uv1']?.array?.toList() : null;
 
 		List<double> positions2 = positions;
-		List<double> normals2 = normals;
-		List<double> colors2 = colors;
-		List<double> uvs2 = uvs;
-		List<double> uv1s2 = uv1s;
+		List<double>? normals2 = normals;
+		List<double>? colors2 = colors;
+		List<double>? uvs2 = uvs;
+		List<double>? uv1s2 = uv1s;
 
 		int iteration = 0;
 		bool tessellating = true;
@@ -80,7 +80,7 @@ class TessellateModifier {
 				final n2 = ns[ b ];
 				final n3 = ns[ c ];
 
-				normals2.addAll([ n1.x, n1.y, n1.z ]);
+				normals2!.addAll([ n1.x, n1.y, n1.z ]);
 				normals2.addAll([ n2.x, n2.y, n2.z ]);
 				normals2.addAll([ n3.x, n3.y, n3.z ]);
 			}
@@ -90,7 +90,7 @@ class TessellateModifier {
 				final c2 = cs[ b ];
 				final c3 = cs[ c ];
 
-				colors2.addAll([ c1.red, c1.green, c1.blue ]);
+				colors2!.addAll([ c1.red, c1.green, c1.blue ]);
 				colors2.addAll([ c2.red, c2.green, c2.blue ]);
 				colors2.addAll([ c3.red, c3.green, c3.blue ]);
 			}
@@ -100,7 +100,7 @@ class TessellateModifier {
 				final u2 = us[ b ];
 				final u3 = us[ c ];
 
-				uvs2.addAll([ u1.x, u1.y ]);
+				uvs2!.addAll([ u1.x, u1.y ]);
 				uvs2.addAll([ u2.x, u2.y ]);
 				uvs2.addAll([ u3.x, u3.y ]);
 			}
@@ -110,7 +110,7 @@ class TessellateModifier {
 				final u22 = u2s[ b ];
 				final u23 = u2s[ c ];
 
-				uv1s2.addAll([ u21.x, u21.y ]);
+				uv1s2!.addAll([ u21.x, u21.y ]);
 				uv1s2.addAll([ u22.x, u22.y ]);
 				uv1s2.addAll([ u23.x, u23.y ]);
 			}
@@ -149,25 +149,25 @@ class TessellateModifier {
 				vc.copyFromArray( positions, i + 6 );
 
 				if ( hasNormals ) {
-					na.copyFromArray( normals, i + 0 );
+					na.copyFromArray( normals!, i + 0 );
 					nb.copyFromArray( normals, i + 3 );
 					nc.copyFromArray( normals, i + 6 );
 				}
 
 				if ( hasColors ) {
-					ca.copyFromArray( colors, i + 0 );
+					ca.copyFromArray( colors!, i + 0 );
 					cb.copyFromArray( colors, i + 3 );
 					cc.copyFromArray( colors, i + 6 );
 				}
 
 				if ( hasUVs ) {
-					ua.copyFromArray( uvs, i2 + 0 );
+					ua.copyFromArray( uvs!, i2 + 0 );
 					ub.copyFromArray( uvs, i2 + 2 );
 					uc.copyFromArray( uvs, i2 + 4 );
 				}
 
 				if ( hasUV1s ) {
-					u2a.copyFromArray( uv1s, i2 + 0 );
+					u2a.copyFromArray( uv1s!, i2 + 0 );
 					u2b.copyFromArray( uv1s, i2 + 2 );
 					u2c.copyFromArray( uv1s, i2 + 4 );
 				}
@@ -217,16 +217,16 @@ class TessellateModifier {
 		geometry2.setAttributeFromString( 'position', Float32BufferAttribute.fromList( positions2, 3 ) );
 
 		if ( hasNormals ) {
-			geometry2.setAttributeFromString( 'normal', Float32BufferAttribute.fromList( normals2, 3 ) );
+			geometry2.setAttributeFromString( 'normal', Float32BufferAttribute.fromList( normals2!, 3 ) );
 		}
 		if ( hasColors ) {
-			geometry2.setAttributeFromString( 'color', Float32BufferAttribute.fromList( colors2, 3 ) );
+			geometry2.setAttributeFromString( 'color', Float32BufferAttribute.fromList( colors2!, 3 ) );
 		}
 		if ( hasUVs ) {
-			geometry2.setAttributeFromString( 'uv', Float32BufferAttribute.fromList( uvs2, 2 ) );
+			geometry2.setAttributeFromString( 'uv', Float32BufferAttribute.fromList( uvs2!, 2 ) );
 		}
 		if ( hasUV1s ) {
-			geometry2.setAttributeFromString( 'uv1', Float32BufferAttribute.fromList( uv1s2, 2 ) );
+			geometry2.setAttributeFromString( 'uv1', Float32BufferAttribute.fromList( uv1s2!, 2 ) );
 		}
 
 		return geometry2;

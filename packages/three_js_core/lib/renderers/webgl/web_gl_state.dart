@@ -177,11 +177,9 @@ class WebGLState {
 
       if (isWebGL2) {
         // gl.DRAW_FRAMEBUFFER is equivalent to gl.FRAMEBUFFER
-
         if (target == WebGL.DRAW_FRAMEBUFFER) {
           currentBoundFramebuffers[WebGL.FRAMEBUFFER] = framebuffer;
         }
-
         if (target == WebGL.FRAMEBUFFER) {
           currentBoundFramebuffers[WebGL.DRAW_FRAMEBUFFER] = framebuffer;
         }

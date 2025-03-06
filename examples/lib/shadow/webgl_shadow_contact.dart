@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
+import 'package:example/src/gui.dart';
 import 'package:example/src/statistics.dart';
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
@@ -7,7 +8,6 @@ import 'package:three_js_helpers/three_js_helpers.dart';
 import 'package:three_js_geometry/three_js_geometry.dart';
 
 class WebglShadowContact extends StatefulWidget {
-  
   const WebglShadowContact({super.key});
 
   @override
@@ -18,9 +18,11 @@ class _MyAppState extends State<WebglShadowContact> {
   List<int> data = List.filled(60, 0, growable: true);
   late Timer timer;
   late three.ThreeJS threeJs;
+  late final Gui gui;
 
   @override
   void initState() {
+    gui = Gui((){setState(() {});});
     timer = Timer.periodic(const Duration(seconds: 1), (t){
       setState(() {
         data.removeAt(0);
@@ -44,11 +46,12 @@ class _MyAppState extends State<WebglShadowContact> {
     timer.cancel();
     threeJs.dispose();
     three.loading.clear();
+    controls.dispose();
     super.dispose();
   }
 
   late three.Mesh blurPlane;
-  late three.WebGLRenderTarget renderTarget2;
+  late three.WebGLRenderTarget renderTarget;
   late three.WebGLRenderTarget renderTargetBlur;
 
   final meshes = [];
@@ -60,15 +63,17 @@ class _MyAppState extends State<WebglShadowContact> {
   late three.Material horizontalBlurMaterial;
   late three.Material verticalBlurMaterial;
 
+  late final three.OrbitControls controls;
+
   Map<String, dynamic> state = {
     "shadow": {
       "blur": 3.5,
-      "darkness": 1,
-      "opacity": 1,
+      "darkness": 1.0,
+      "opacity": 1.0,
     },
     "plane": {
       "color": 0xffffff,
-      "opacity": 1,
+      "opacity": 1.0,
     },
     "showWireframe": false,
   };
@@ -79,7 +84,16 @@ class _MyAppState extends State<WebglShadowContact> {
       body: Stack(
         children: [
           threeJs.build(),
-          Statistics(data: data)
+          Statistics(data: data),
+          if(threeJs.mounted)Positioned(
+            top: 20,
+            right: 20,
+            child: SizedBox(
+              height: threeJs.height,
+              width: 240,
+              child: gui.render()
+            )
+          )
         ],
       ) 
     );
@@ -103,8 +117,11 @@ class _MyAppState extends State<WebglShadowContact> {
     cameraHelper.visible = false;
     threeJs.scene.overrideMaterial = depthMaterial;
 
+		final initialClearAlpha = threeJs.renderer!.getClearAlpha();
+		threeJs.renderer!.setClearAlpha( 0 );
+
     // render to the render target to get the depths
-    threeJs.renderer!.setRenderTarget(renderTarget2);
+    threeJs.renderer!.setRenderTarget(renderTarget);
     threeJs.renderer!.render(threeJs.scene, shadowCamera);
 
     // and reset the override material
@@ -118,7 +135,11 @@ class _MyAppState extends State<WebglShadowContact> {
     blurShadow(state["shadow"]["blur"] * 0.4);
 
     // reset and render the normal scene
+    threeJs.renderer!.setRenderTarget( null );
+    threeJs.renderer!.setClearAlpha( initialClearAlpha );
     threeJs.scene.background = initialBackground;
+
+    threeJs.renderer!.render( threeJs.scene, threeJs.camera );
   }
 
   // renderTarget --> blurPlane (horizontalBlur) --> renderTargetBlur --> blurPlane (verticalBlur) --> renderTarget
@@ -127,7 +148,7 @@ class _MyAppState extends State<WebglShadowContact> {
 
     // blur horizontally and draw in the renderTargetBlur
     blurPlane.material = horizontalBlurMaterial;
-    blurPlane.material!.uniforms["tDiffuse"]["value"] = renderTarget2.texture;
+    blurPlane.material!.uniforms["tDiffuse"]["value"] = renderTarget.texture;
     horizontalBlurMaterial.uniforms["h"]["value"] = amount * 1 / 256;
 
     threeJs.renderer!.setRenderTarget(renderTargetBlur);
@@ -138,7 +159,7 @@ class _MyAppState extends State<WebglShadowContact> {
     blurPlane.material!.uniforms["tDiffuse"]["value"] = renderTargetBlur.texture;
     verticalBlurMaterial.uniforms["v"]["value"] = amount * 1 / 256;
 
-    threeJs.renderer!.setRenderTarget(renderTarget2);
+    threeJs.renderer!.setRenderTarget(renderTarget);
     threeJs.renderer!.render(blurPlane, shadowCamera);
 
     blurPlane.visible = false;
@@ -190,8 +211,8 @@ class _MyAppState extends State<WebglShadowContact> {
 
     final pars = three.WebGLRenderTargetOptions({"format": three.RGBAFormat});
     // the render target that will show the shadows in the plane texture
-    renderTarget2 = three.WebGLRenderTarget(512, 512, pars);
-    renderTarget2.texture.generateMipmaps = false;
+    renderTarget = three.WebGLRenderTarget(512, 512, pars);
+    renderTarget.texture.generateMipmaps = false;
 
     // the render target that we will use to blur the first render target
     renderTargetBlur = three.WebGLRenderTarget(512, 512, pars);
@@ -200,15 +221,17 @@ class _MyAppState extends State<WebglShadowContact> {
     // make a plane and make it face up
     final planeGeometry = three.PlaneGeometry(planeWidth, planeHeight).rotateX(math.pi / 2);
     final planeMaterial = three.MeshBasicMaterial.fromMap({
-      "map": renderTarget2.texture,
+      "map": renderTarget.texture,
       "opacity": state["shadow"]!["opacity"]!,
-      //"transparent": true,
+      "transparent": true,
       "depthWrite": false,
     });
     plane = three.Mesh(planeGeometry, planeMaterial);
     // make sure it's rendered after the fillPlane
     plane.renderOrder = 1;
     shadowGroup.add(plane);
+
+    plane.rotateY(math.pi);
 
     // the plane onto which to blur the texture
     blurPlane = three.Mesh(planeGeometry, null);
@@ -219,7 +242,7 @@ class _MyAppState extends State<WebglShadowContact> {
     final fillPlaneMaterial = three.MeshBasicMaterial.fromMap({
       "color": state["plane"]["color"],
       "opacity": state["plane"]["opacity"],
-      //"transparent": true,
+      "transparent": true,
       "depthWrite": false,
     });
     fillPlane = three.Mesh(planeGeometry, fillPlaneMaterial);
@@ -254,5 +277,34 @@ class _MyAppState extends State<WebglShadowContact> {
 
     verticalBlurMaterial = three.ShaderMaterial.fromMap(three.verticalBlurShader);
     verticalBlurMaterial.depthTest = false;
+
+    controls = three.OrbitControls( threeJs.camera, threeJs.globalKey );
+
+    final shadowFolder = gui.addFolder( 'shadow' )..open();
+    final planeFolder = gui.addFolder( 'plane' )..open();
+    final folder = gui.addFolder('gui')..open();
+
+    shadowFolder.addSlider( state['shadow'], 'blur', 0, 15).step(0.1);
+    shadowFolder.addSlider( state['shadow'], 'darkness', 1, 5)..step(0.1)..onChange((d) {
+      depthMaterial.userData['darkness']['value'] = state['shadow']['darkness'];
+    } );
+    shadowFolder.addSlider( state['shadow'], 'opacity', 0, 1)..step(0.01 )..onChange((d) {
+      plane.material?.opacity = state['shadow']['opacity'];
+    } );
+    planeFolder.addColor( state['plane'], 'color' ).onChange((d) {
+      fillPlane.material?.color = three.Color( state['plane']['color'] );
+    } );
+    planeFolder.addSlider( state['plane'], 'opacity', 0, 1)..step(0.01)..onChange((d) {
+      fillPlane.material?.opacity = state['plane']['opacity'];
+    } );
+
+    folder.addButton( state, 'showWireframe' ).onChange((d) {
+      if ( state['showWireframe'] ) {
+        threeJs.scene.add( cameraHelper );
+      } 
+      else {
+        threeJs.scene.remove( cameraHelper );
+      }
+    });
   }
 }

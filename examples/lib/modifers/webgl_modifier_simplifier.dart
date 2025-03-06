@@ -65,7 +65,7 @@ class _State extends State<WebglModifierSimplifier> {
     controls.enablePan = false;
     controls.enableZoom = false;
 
-    threeJs.scene.add( three.AmbientLight( 0xffffff, 0.5 ) );
+    threeJs.scene.add( three.AmbientLight( 0xffffff, 0.4 ) );
 
     final light = three.PointLight( 0xffffff, 0.4 );
     threeJs.camera.add( light );
@@ -80,7 +80,7 @@ class _State extends State<WebglModifierSimplifier> {
       final simplified = mesh.clone();
       simplified.material = simplified.material?.clone();
       simplified.material?.flatShading = true;
-      final count = ( simplified.geometry?.attributes['position'].count * 0.25 ).floor();
+      final count = ( simplified.geometry?.attributes['position'].count * 0.875 ).floor();
       simplified.geometry = SimplifyModifier.modify( simplified.geometry!, count );
 
       simplified.position.x = 3;

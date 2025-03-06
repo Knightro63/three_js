@@ -78,8 +78,8 @@ class WebGLShadowMap {
   }
 
   void render(List<Light> lights, Object3D scene, Camera camera) {
-    if (scope.enabled == false) return;
-    if (scope.autoUpdate == false && scope.needsUpdate == false) return;
+    if (!scope.enabled) return;
+    if (!scope.autoUpdate && !scope.needsUpdate) return;
 
     if (lights.isEmpty) return;
 
@@ -105,7 +105,7 @@ class WebGLShadowMap {
         continue;
       }
 
-      if (shadow.autoUpdate == false && shadow.needsUpdate == false) continue;
+      if (!shadow.autoUpdate && !shadow.needsUpdate) continue;
 
       _shadowMapSize.setFrom(shadow.mapSize);
 
@@ -127,7 +127,7 @@ class WebGLShadowMap {
         }
       }
 
-      if (shadow.map == null && shadow is! PointLightShadow && type == VSMShadowMap) {
+      if (shadow.map == null && shadow is! PointLightShadow && ((kIsWeb && type == VSMShadowMap) || !kIsWeb)){//}  && type == VSMShadowMap) {
         shadow.map = WebGLRenderTarget(_shadowMapSize.x.toInt(), _shadowMapSize.y.toInt());
         shadow.map!.texture.name = '${light.name}.shadowMap';
 
@@ -148,7 +148,7 @@ class WebGLShadowMap {
 
         shadow.camera!.updateProjectionMatrix();
       }
-
+      
       _renderer.setRenderTarget(shadow.map);
       _renderer.clear();
 
@@ -168,7 +168,7 @@ class WebGLShadowMap {
       if (shadow is! PointLightShadow && type == VSMShadowMap) {
         vSMPass(shadow, camera);
       }
-
+    
       shadow.needsUpdate = false;
     }
 
@@ -199,7 +199,7 @@ class WebGLShadowMap {
 
     // horizontal pass
 
-    shadowMaterialHorizontal.uniforms["shadow_pass"]['value'] = shadow.mapPass!.texture;
+    shadowMaterialHorizontal.uniforms["shadow_pass"]['value'] = shadow.mapPass?.texture;
     shadowMaterialHorizontal.uniforms["resolution"]['value'] = shadow.mapSize;
     shadowMaterialHorizontal.uniforms["radius"]['value'] = shadow.radius;
 
