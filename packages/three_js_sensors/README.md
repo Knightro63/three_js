@@ -6,7 +6,7 @@
 
 A type of three_js api that allows users to add accelerometer and qyroscope sensors to their projects.
 
-This is a updated version of simple_sensors, originally created by [@fettespferd](https://github.com/fettespferd).
+This is an updated version of simple_sensors, originally created by [@fettespferd](https://github.com/fettespferd).
 
 ## Usage
 

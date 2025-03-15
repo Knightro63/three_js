@@ -13,6 +13,11 @@ class MorphTarget {
       if (json["normals"] != null) normals = json["normals"];
     }
   }
+
+  void dispose(){
+    vertices.clear();
+    normals.clear();
+  }
 }
 
 class MorphColor {

@@ -66,10 +66,10 @@ class _State extends State<WebglGeometries> {
 
     three.Mesh object;
 
-    final ambientLight = three.AmbientLight(0xcccccc, 0.15);
+    final ambientLight = three.AmbientLight(0xcccccc, 0.4);
     threeJs.scene.add(ambientLight);
 
-    final pointLight = three.PointLight(0xffffff, 0.8,0,0);
+    final pointLight = three.PointLight(0xffffff, 0.8);
     threeJs.camera.add(pointLight);
     threeJs.scene.add(threeJs.camera);
 

@@ -66,7 +66,7 @@ class _MyAppState extends State<WebglLoaderCollada> {
       threeJs.scene.add( elf );
     });
 
-    final ambientLight = three.AmbientLight( 0xffffff, 0.5 );
+    final ambientLight = three.AmbientLight( 0xffffff );
     threeJs.scene.add( ambientLight );
 
     final directionalLight = three.DirectionalLight( 0xffffff, 0.5 );

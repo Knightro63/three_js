@@ -364,7 +364,6 @@ class PMREMGenerator {
 
     final uniforms = material.uniforms;
 
-    // print(material.uniforms); 
     uniforms['envMap']["value"] = texture;
 
     final size = _cubeSize.toDouble();

@@ -15,4 +15,8 @@ class ArrayCamera extends PerspectiveCamera {
   ArrayCamera(this.cameras) {
     type = 'ArrayCamera';
   }
+
+  void dispose(){
+    cameras.clear();
+  }
 }

@@ -81,8 +81,8 @@ class WebGLShadowMap {
   }
 
   void render(List<Light> lights, Object3D scene, Camera camera) {
-    if (scope.enabled == false) return;
-    if (scope.autoUpdate == false && scope.needsUpdate == false) return;
+    if (!scope.enabled) return;
+    if (!scope.autoUpdate && !scope.needsUpdate) return;
 
     if (lights.isEmpty) return;
 
@@ -111,7 +111,7 @@ class WebGLShadowMap {
         continue;
       }
 
-      if (shadow.autoUpdate == false && shadow.needsUpdate == false) continue;
+      if (!shadow.autoUpdate && !shadow.needsUpdate) continue;
 
       _shadowMapSize.setFrom(shadow.mapSize);
 
@@ -133,7 +133,7 @@ class WebGLShadowMap {
         }
       }
 
-      if (shadow.map == null || toVSM || fromVSM ){//&& shadow is! PointLightShadow && type == VSMShadowMap) {
+      if (shadow.map == null || toVSM || fromVSM && shadow is! PointLightShadow && type == VSMShadowMap) {
 				final Map<String,dynamic> pars = (type != VSMShadowMap ) ? { 'minFilter': NearestFilter, 'magFilter': NearestFilter } : {};
 
 				if ( shadow.map != null ) {
@@ -145,7 +145,7 @@ class WebGLShadowMap {
 
         shadow.camera!.updateProjectionMatrix();
       }
-
+      
       _renderer.setRenderTarget(shadow.map);
       _renderer.clear();
 

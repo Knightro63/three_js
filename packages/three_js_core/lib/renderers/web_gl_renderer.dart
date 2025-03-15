@@ -271,7 +271,6 @@ class WebGLRenderer {
 
     _width = width;
     _height = height;
-
     setViewport(0, 0, width, height);
   }
 
@@ -296,6 +295,9 @@ class WebGLRenderer {
 
   void setViewport(double x, double y, double width, double height) {
     _viewport.setValues(x, y, width, height);
+    _currentViewport.setFrom(_viewport);
+    _currentViewport.scale(_pixelRatio);
+    _currentViewport.floor();
     state.viewport(_currentViewport);
   }
 
@@ -305,6 +307,9 @@ class WebGLRenderer {
 
   void setScissor(double x, double y, double width, double height) {
     _scissor.setValues(x, y, width, height);
+    _currentScissor.setFrom(_scissor);
+    _currentScissor.scale(_pixelRatio);
+    _currentScissor.floor();
     state.scissor(_currentScissor);
   }
 
@@ -644,8 +649,6 @@ class WebGLRenderer {
     else {
       renderer.render(drawStart, drawCount);
     }
-
-    // print("renderBufferDirect - 1: ${DateTime.now().millisecondsSinceEpoch} - ${DateTime.now().microsecondsSinceEpoch}  ");
   }
 
   // Compile
@@ -753,11 +756,11 @@ class WebGLRenderer {
     if (_isContextLost) return;
 
     // update scene graph
-    if (scene.matrixAutoUpdate) scene.updateMatrixWorld();
+    if (scene.matrixWorldAutoUpdate) scene.updateMatrixWorld();
 
     // update camera matrices and frustum
 
-    if (camera.parent == null && camera.matrixAutoUpdate) camera.updateMatrixWorld();
+    if (camera.parent == null && camera.matrixWorldAutoUpdate) camera.updateMatrixWorld();
 
     if ( xr.enabled && xr.isPresenting ) {
       if (xr.cameraAutoUpdate) xr.updateCamera( camera );
@@ -809,7 +812,9 @@ class WebGLRenderer {
 
     if (_clippingEnabled) clipping.beginShadows();
     final shadowsArray = currentRenderState!.state.shadowsArray;
-    shadowMap.render(shadowsArray, scene, camera);
+    if(kIsWeb){
+      shadowMap.render(shadowsArray, scene, camera);
+    }
     if (_clippingEnabled) clipping.endShadows();
 
     if (info.autoReset) info.reset();
@@ -840,10 +845,13 @@ class WebGLRenderer {
       renderScene(currentRenderList!, scene, camera);
     }
 
+    if(!kIsWeb){
+      shadowMap.render(shadowsArray, scene, camera);
+    }
+
     if (_currentRenderTarget != null) {
       // resolve multisample renderbuffers to a single-sample texture if necessary
       textures.updateMultisampleRenderTarget(_currentRenderTarget!);
-
       // Generate mipmap if we're using any kind of mipmap filtering
       textures.updateRenderTargetMipmap(_currentRenderTarget!);
     }
@@ -852,14 +860,13 @@ class WebGLRenderer {
       scene.onAfterRender?.call(renderer: this, scene: scene, camera: camera);
     }
 
-    // _gl.finish();
+    _gl.finish();
 
     bindingStates.resetDefaultState();
     _currentMaterialId = -1;
     _currentCamera = null;
 
     renderStateStack.removeLast();
-
     if (renderStateStack.isNotEmpty) {
       currentRenderState = renderStateStack[renderStateStack.length - 1];
       if (_clippingEnabled) clipping.setGlobalState(clippingPlanes, currentRenderState!.state.camera! );
@@ -1206,7 +1213,6 @@ class WebGLRenderer {
 
       material.onBuild(parameters, this);
       material.onBeforeCompile?.call(parameters, this);
-
       program = programCache.acquireProgram(parameters, programCacheKey);
       programs[programCacheKey] = program;
 
@@ -1293,7 +1299,9 @@ class WebGLRenderer {
     final environment = material is MeshStandardMaterial ? scene.environment : null;
     final colorSpace = ( _currentRenderTarget == null ) ? outputColorSpace : ( _currentRenderTarget?.isXRRenderTarget == true ? _currentRenderTarget?.texture.colorSpace : LinearSRGBColorSpace );
     final envMap = ( material is MeshStandardMaterial ? cubeuvmaps.get( material.envMap ?? environment ) : cubemaps.get( material.envMap ?? environment ) );
-    final vertexAlphas = material.vertexColors == true && geometry?.attributes['color'] != null && geometry?.attributes['color'].itemSize == 4;
+    final vertexAlphas = material.vertexColors && 
+      geometry?.attributes['color'] != null && 
+      geometry?.attributes['color'].itemSize == 4;
     final vertexTangents = geometry?.attributes['tangent'] != null && (material.normalMap != null || (material is MeshPhysicalMaterial && material.anisotropy > 0));
     final morphTargets = geometry?.morphAttributes['position'] != null;
     final morphNormals = geometry?.morphAttributes['normal'] != null;
@@ -1315,9 +1323,7 @@ class WebGLRenderer {
 
     if (_clippingEnabled) {
       if (_localClippingEnabled || camera != _currentCamera ) {
-        final useCache =
-          camera == _currentCamera &&
-          material.id == _currentMaterialId;
+        final useCache = camera == _currentCamera && material.id == _currentMaterialId;
 
         // we might want to call this function with some ClippingGroup
         // object instead of the material, once it becomes feasible
@@ -1325,8 +1331,6 @@ class WebGLRenderer {
         clipping.setState( material, camera, useCache );
       }
     }
-
-    //
 
     bool needsProgramChange = false;
 
@@ -1387,7 +1391,6 @@ class WebGLRenderer {
       materialProperties['__version'] = material.version;
     }
 
-    //
     WebGLProgram? program = materialProperties['currentProgram'];
 
     if (needsProgramChange) {
@@ -1436,8 +1439,7 @@ class WebGLRenderer {
       }
 
       if ( capabilities.logarithmicDepthBuffer ) {
-        pUniformS?.setValue( _gl, 'logDepthBufFC',
-          2.0 / ( math.log( camera.far + 1.0 ) / math.ln2 ) );
+        pUniformS?.setValue( _gl, 'logDepthBufFC', 2.0 / ( math.log( camera.far + 1.0 ) / math.ln2 ) );
       }
 
       // consider moving isOrthographic to UniformLib and WebGLMaterials, see https://github.com/mrdoob/three.js/pull/26467#issuecomment-1645185067
@@ -1577,7 +1579,6 @@ class WebGLRenderer {
   void markUniformsLightsNeedsUpdate(Map<String, dynamic> uniforms, dynamic value) {
     uniforms["ambientLightColor"]["needsUpdate"] = value;
     uniforms["lightProbe"]["needsUpdate"] = value;
-
     uniforms["directionalLights"]["needsUpdate"] = value;
     uniforms["directionalLightShadows"]["needsUpdate"] = value;
     uniforms["pointLights"]["needsUpdate"] = value;
@@ -1750,12 +1751,7 @@ class WebGLRenderer {
     _currentMaterialId = -1; // reset current material to ensure correct uniform bindings
   }
 
-  void readRenderTargetPixels(WebGLRenderTarget? renderTarget, int x, int y, int width, int height, NativeArray buffer, [activeCubeFaceIndex]) {
-    if (!(renderTarget != null && renderTarget.isWebGLRenderTarget ) ) {
-      console.error( 'THREE.WebGLRenderer.readRenderTargetPixels: renderTarget is not THREE.WebGLRenderTarget.' );
-      return;
-    }
-
+  void readRenderTargetPixels(WebGLRenderTarget renderTarget, int x, int y, int width, int height, NativeArray buffer, [activeCubeFaceIndex]) {
     dynamic framebuffer = properties.get(renderTarget)["__webglFramebuffer"]; //can be Map or int
 
     if (renderTarget is WebGLCubeRenderTarget && activeCubeFaceIndex != null) {

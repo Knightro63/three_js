@@ -5,7 +5,7 @@ import 'package:example/src/statistics.dart';
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
 import 'package:three_js_geometry/three_js_geometry.dart';
-import 'package:three_js_objects/noise/water.dart';
+import 'package:three_js_objects/three_js_objects.dart';
 
 class WebglWater extends StatefulWidget {
   
@@ -33,9 +33,6 @@ class _State extends State<WebglWater> {
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
       setup: setup,
-      settings: three.Settings(
-        useSourceTexture: true
-      )
     );
     super.initState();
   }
@@ -61,7 +58,7 @@ class _State extends State<WebglWater> {
             child: SizedBox(
               height: threeJs.height,
               width: 240,
-              child: panel.render()
+              child: panel.render(context)
             )
           )
         ],
@@ -116,13 +113,13 @@ class _State extends State<WebglWater> {
 
     final waterGeometry = three.PlaneGeometry( 20, 20 );
 
-    final water = Water( waterGeometry, {
-      'color': params['color'],
-      'scale': params['scale'],
-      'flowDirection': three.Vector2( params['flowX'], params['flowY'] ),
-      'textureWidth': 1024,
-      'textureHeight': 1024
-    } );
+    final water = Water( waterGeometry, WaterOptions(
+      color: params['color'],
+      scale: params['scale'],
+      flowDirection: three.Vector2( params['flowX'], params['flowY'] ),
+      textureWidth: 1024,
+      textureHeight: 1024
+    ));
 
     water.position.y = 1;
     water.rotation.x = math.pi * - 0.5;
@@ -169,6 +166,10 @@ class _State extends State<WebglWater> {
     controls = three.OrbitControls( threeJs.camera, threeJs.globalKey);
     controls.minDistance = 5;
     controls.maxDistance = 50;
+
+    threeJs.postProcessor = ([dt]){
+      threeJs.renderer?.render(threeJs.scene, threeJs.camera);
+    };
 
     threeJs.addAnimationEvent((delta){
       controls.update();

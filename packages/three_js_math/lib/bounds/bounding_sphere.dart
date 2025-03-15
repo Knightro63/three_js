@@ -3,6 +3,7 @@ import 'dart:math' as math;
 
 final _v1 = Vector3.zero();
 final _v2 = Vector3.zero();
+final _box = BoundingBox();
 
 /// A sphere defined by a center and radius.
 class BoundingSphere{
@@ -54,6 +55,35 @@ class BoundingSphere{
     return this;
   }
 
+	/// Computes the minimum bounding sphere for list of points.
+	/// If the optional center point is given, it is used as the sphere's
+	/// center. Otherwise, the center of the axis-aligned bounding box
+	/// encompassing the points is calculated.
+	///
+	/// [points] - A list of points in 3D space.
+	/// [optionalCenter] - The center of the sphere.
+	/// return  A reference to this sphere.
+	BoundingSphere setFromPoints(List<Vector3> points, [Vector3? optionalCenter ]) {
+		final center = this.center;
+
+		if ( optionalCenter != null ) {
+			center.setFrom( optionalCenter );
+		} 
+    else {
+			_box.setFromPoints(points).getCenter(center);
+		}
+
+		double maxRadiusSq = 0;
+
+		for (int i = 0, il = points.length; i < il; i ++ ) {
+			maxRadiusSq = math.max( maxRadiusSq, center.distanceToSquared( points[ i ] ) );
+		}
+
+		this.radius = math.sqrt( maxRadiusSq );
+
+		return this;
+	}
+
 	bool isEmpty() {
 		return (radius < 0 );
 	}
@@ -75,9 +105,7 @@ class BoundingSphere{
   /// Transforms this sphere with the provided [Matrix4].
   BoundingSphere applyMatrix4(Matrix4 matrix) {
     center.applyMatrix4(matrix);
-
     radius = radius * matrix.getMaxScaleOnAxis();
-
     return this;
   }
 

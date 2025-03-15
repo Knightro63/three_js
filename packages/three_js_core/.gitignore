@@ -16,6 +16,8 @@
 *.iws
 .idea/
 
+renderers_old/
+
 # Visual Studio Code related
 .classpath
 .project

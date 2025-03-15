@@ -59,7 +59,7 @@ class Mesh extends Object3D {
   /// Returns a clone of this [name] object and its descendants.
   @override
   Mesh clone([bool? recursive = true]) {
-    return Mesh(geometry!.clone(), material?.clone()).copy(this, recursive);
+    return Mesh(geometry?.clone(), material?.clone()).copy(this, recursive);
   }
 
   @override

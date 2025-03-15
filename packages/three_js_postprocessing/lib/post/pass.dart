@@ -1,4 +1,5 @@
 import 'package:three_js_core/three_js_core.dart';
+import 'package:three_js_math/three_js_math.dart';
 
 class Pass {
   // if set to true, the pass is processed by the composer
@@ -32,6 +33,8 @@ class Pass {
   void render(WebGLRenderer renderer, WebGLRenderTarget writeBuffer, WebGLRenderTarget readBuffer,{double? deltaTime, bool? maskActive}) {
     throw ('THREE.Pass: .render() must be implemented in derived pass.');
   }
+
+  void dispose() {}
 }
 
 // Helper for passes that need to fill the viewport with a single quad.
@@ -67,4 +70,13 @@ class FullScreenQuad {
   void dispose() {
     _mesh.geometry!.dispose();
   }
+}
+
+
+class FullscreenTriangleGeometry extends BufferGeometry {
+
+	FullscreenTriangleGeometry():super() {
+		this.setAttributeFromString( 'position', Float32BufferAttribute.fromList( [ - 1, 3, 0, - 1, - 1, 0, 3, - 1, 0 ], 3 ) );
+		this.setAttributeFromString( 'uv', Float32BufferAttribute.fromList( [ 0, 2, 0, 0, 2, 0 ], 2 ) );
+	}
 }

@@ -29,9 +29,6 @@ class _State extends State<WebglLightprobeCubeCamera> {
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
       setup: setup,
-      settings: three.Settings(
-        useSourceTexture: true
-      )
     );
     super.initState();
   }
@@ -83,10 +80,10 @@ class _State extends State<WebglLightprobeCubeCamera> {
     List<String> genCubeUrls( prefix, postfix ) {
       return [
         prefix + 'px' + postfix, prefix + 'nx' + postfix,
-        prefix + 'py' + postfix, prefix + 'ny' + postfix,
+        '${prefix}py$postfix', '${prefix}ny$postfix',
         prefix + 'pz' + postfix, prefix + 'nz' + postfix
       ];
-    };
+    }
 
     final urls = genCubeUrls( 'assets/textures/cube/pisa/', '.png' );
 

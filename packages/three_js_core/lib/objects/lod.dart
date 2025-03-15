@@ -183,5 +183,7 @@ class LOD extends Object3D{
     levels.forEach((level){
       level.dispose();
     });
+
+    levels.clear();
   }
 }

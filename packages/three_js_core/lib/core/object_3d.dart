@@ -61,6 +61,7 @@ class Object3D with EventDispatcher {
   bool disposed = false;
   static Vector3 defaultUp = Vector3(0.0, 1.0, 0.0);
   static bool defaultMatrixAutoUpdate = true;
+  static bool defaultMatrixWorldAutoUpdate = true;
 
   int id = _object3DId++;
 
@@ -79,6 +80,7 @@ class Object3D with EventDispatcher {
   Matrix4 matrixWorld = Matrix4.identity();
 
   bool matrixAutoUpdate = Object3D.defaultMatrixAutoUpdate;
+  bool matrixWorldAutoUpdate = Object3D.defaultMatrixWorldAutoUpdate;
   bool matrixWorldNeedsUpdate = false;
 
   Layers layers = Layers();
@@ -1129,6 +1131,12 @@ class Object3D with EventDispatcher {
       background?.dispose();
       background = null;
     }
+  
+    children.clear();
+    userData.clear();
+    extra.clear();
+    morphTargetInfluences.clear();
+    skeleton?.dispose();
   }
 }
 

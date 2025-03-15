@@ -36,6 +36,11 @@ class _State extends State<MiscAnimationKeys> {
   void dispose() {
     timer.cancel();
     threeJs.dispose();
+    texture.dispose();
+    mesh.dispose();
+    object.dispose();
+    mixer.dispose();
+    data.clear();
     super.dispose();
   }
 

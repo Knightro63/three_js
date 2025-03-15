@@ -223,10 +223,10 @@ class CSG {
         positions.getZ(index)
       );
       final normal = Vector3(
-            normals.getX(index),
-            normals.getY(index),
-            normals.getZ(index)
-          );
+        normals.getX(index),
+        normals.getY(index),
+        normals.getZ(index)
+      );
 
       final uv = Vector3(uvs.getX(index), uvs.getY(index),0);
       final color = colorattr != null?Vector3(colorattr.getX(index),colorattr.getY(index),colorattr.getZ(index)): null;

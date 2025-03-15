@@ -29,6 +29,7 @@ This is a dart conversion of three.js and three_dart, originally created by [@mr
 **Android**
  - compileSdkVersion: 34
  - OpenGL supported
+ - Vulkan supported
 
  **Windows**
  - Intel supported.
@@ -59,7 +60,6 @@ Find the example for this API [here](https://github.com/Knightro63/three_js/tree
  - GroupMaterials do not work
 
 **iOS**
- - Buffer Validation issues
  - GroupMaterials do not work
  - Protoplanets does not function correctly
 
@@ -71,6 +71,13 @@ Find the example for this API [here](https://github.com/Knightro63/three_js/tree
 
 **Web**
  - Lens Flare not working correctly
+ - Postprocessing does not work correctly
+
+## Librarues and Plugins
+
+**Physics**
+ - [Omio](https://github.com/Knightro63/oimo_physics)
+ - [Cannon](https://github.com/Knightro63/cannon_physics)
 
 ## Contributing
 

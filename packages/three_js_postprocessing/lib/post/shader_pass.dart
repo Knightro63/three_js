@@ -13,6 +13,17 @@ class ShaderPass extends Pass {
       uniforms = shader.uniforms;
       material = shader;
     } 
+    else{
+			this.uniforms = UniformsUtils.clone( shader!.uniforms );
+
+			this.material = new ShaderMaterial.fromMap( {
+				'name': shader.name ,
+				'defines': shader.defines,
+				'uniforms': this.uniforms,
+				'vertexShader': shader.vertexShader,
+				'fragmentShader': shader.fragmentShader
+			});
+		}
 
     fsQuad = FullScreenQuad(material);
   }
@@ -25,6 +36,7 @@ class ShaderPass extends Pass {
     _defines.addAll(shader?["defines"] ?? {});
 
     material = ShaderMaterial.fromMap({
+      'name': shader?['name'] ?? 'unassigned',
       "defines": _defines,
       "uniforms": uniforms,
       "vertexShader": shader?["vertexShader"],
@@ -54,4 +66,10 @@ class ShaderPass extends Pass {
       fsQuad.render(renderer);
     }
   }
+
+  @override
+	void dispose() {
+		material.dispose();
+		fsQuad.dispose();
+	}
 }

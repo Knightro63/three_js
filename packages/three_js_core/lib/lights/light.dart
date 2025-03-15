@@ -25,7 +25,6 @@ class Light extends Object3D {
   bool isHemisphereLight = false;
 
   dynamic map;
-
   Color? groundColor;
 
   /// [color] - (optional) hexadecimal color of the light. Default
@@ -36,7 +35,7 @@ class Light extends Object3D {
   /// 
   /// Creates a new [name]. Note that this is not intended to be called directly
   /// (use one of derived classes instead).
-  Light(int? color, [double? intensity]) : super() {
+  Light([int? color, double? intensity]) : super() {
     if(color != null){
       this.color = Color.fromHex32(color);
     }

@@ -129,7 +129,7 @@ class WebGLMorphtargets {
 
       morphTextures.set(geometry, entry);
 
-      void disposeTexture() {
+      void disposeTexture(event) {
         texture.dispose();
         morphTextures.delete(geometry);
         geometry.removeEventListener('dispose', disposeTexture);

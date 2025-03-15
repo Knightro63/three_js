@@ -103,13 +103,13 @@ class _State extends State<WebglDecals> {
     controls.minDistance = 50;
     controls.maxDistance = 200;
 
-    threeJs.scene.add( three.AmbientLight( 0x666666 ) );
+    threeJs.scene.add( three.AmbientLight( 0x666666,0.6 ) );
 
-    final dirLight1 = three.DirectionalLight( 0xffddcc, 0.8 );
+    final dirLight1 = three.DirectionalLight( 0xffddcc, 0.6 );
     dirLight1.position.setValues( 1, 0.75, 0.5 );
     threeJs.scene.add( dirLight1 );
 
-    final dirLight2 = three.DirectionalLight( 0xccccff, 0.8 );
+    final dirLight2 = three.DirectionalLight( 0xccccff, 0.6 );
     dirLight2.position.setValues( - 1, 0.75, - 0.5 );
     threeJs.scene.add( dirLight2 );
 

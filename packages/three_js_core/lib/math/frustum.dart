@@ -142,4 +142,8 @@ class Frustum {
 
     return true;
   }
+
+  void dispose(){
+    planes.clear();
+  }
 }

@@ -213,7 +213,7 @@ class _State extends State<MiscControlsFly> {
 
       controls.movementSpeed = 0.033 * d;
       controls.update(delta);
-      composer.render(threeJs.renderer?.getRenderTarget(), delta );
+      composer.render(delta );
     });
   }
 }

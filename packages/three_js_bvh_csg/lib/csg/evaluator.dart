@@ -1,3 +1,5 @@
+import 'package:three_js_math/three_js_math.dart';
+
 import 'csg.dart';
 import 'package:three_js_core/three_js_core.dart';
 
@@ -17,7 +19,7 @@ enum BooleanType{
 
 class Evaluator {
   static Mesh? evaluate(Mesh meshA, Mesh meshB, BooleanType type, [Mesh? result]){
-    late final Mesh mesh;
+    Mesh? mesh;
     switch (type) {
       case BooleanType.union:
         mesh = CSG.unionMesh(meshA, meshB);
@@ -28,13 +30,12 @@ class Evaluator {
       case BooleanType.intersect:
         mesh = CSG.intersectMesh(meshA, meshB);
         break;
-      default:
-        return null;
     }
 
     if(result != null){
+      result.geometry?.dispose();
       result.copy(mesh);
-      mesh.dispose();
+      mesh = null;
       return result;
     }
     else{
@@ -57,13 +58,12 @@ class Evaluator {
       case BooleanType.intersect:
         res = csgA.intersect(csgB);
         break;
-      default:
     }
     
-    final mesh = CSG.toMesh(res, meshA.matrix, meshB.material);
+    Mesh? mesh = CSG.toMesh(res, meshA.matrix, meshB.material);
     if(result != null){
       result.copy(mesh);
-      mesh.dispose();
+      mesh = null;
       return result;
     }
     else{

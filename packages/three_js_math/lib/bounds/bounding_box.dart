@@ -109,6 +109,21 @@ class BoundingBox{
     return this;
   }
 
+	/// Sets the upper and lower bounds of this box so it encloses the position data
+	/// in the given array.
+	///
+	/// [points] - An array holding 3D position data as instances of {@link Vector3}.
+	/// return  A reference to this bounding box.
+	BoundingBox setFromPoints(List<Vector3> points ) {
+		empty();
+
+		for (int i = 0, il = points.length; i < il; i ++ ) {
+			this.expandByPoint( points[ i ] );
+		}
+
+		return this;
+	}
+
   /// Returns a new [BoundingBox] with the same [min] and [max] as this one.
   BoundingBox clone() {
     return BoundingBox().setFrom(this);

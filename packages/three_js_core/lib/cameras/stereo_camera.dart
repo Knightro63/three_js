@@ -96,4 +96,10 @@ class StereoCamera {
     cameraL.matrixWorld..setFrom(camera.matrixWorld)..multiply(_eyeLeft);
     cameraR.matrixWorld..setFrom(camera.matrixWorld)..multiply(_eyeRight);
   }
+
+  void dispose(){
+    cameraL.dispose();
+    cameraR.dispose();
+    _cache.clear();
+  }
 }

@@ -30,15 +30,14 @@ class _MyAppState extends State<WebglLoaderGltf> {
       settings: three.Settings(
         clearAlpha: 0,
         clearColor: 0xffffff,
-        useSourceTexture: true
       ),
     );
     super.initState();
   }
   @override
   void dispose() {
-    controls.dispose();
     timer.cancel();
+    controls.dispose();
     threeJs.dispose();
     three.loading.clear();
     super.dispose();

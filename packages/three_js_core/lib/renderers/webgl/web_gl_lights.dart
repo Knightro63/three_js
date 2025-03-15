@@ -194,7 +194,6 @@ class WebGLLights {
     int numSpotShadows = 0;
 		int numSpotMaps = 0;
 		int numSpotShadowsWithMaps = 0;
-
 		int numLightProbes = 0;
 
     lights.sort((a, b) => shadowCastingLightsFirst(a, b));
@@ -215,7 +214,8 @@ class WebGLLights {
         r += color.red * intensity * scaleFactor;
         g += color.green * intensity * scaleFactor;
         b += color.blue * intensity * scaleFactor;
-      } else if (light is LightProbe) {
+      } 
+      else if (light is LightProbe) {
         for (int j = 0; j < 9; j++) {
           state.probe[j].addScaled(light.sh!.coefficients[j], intensity);
         }
@@ -236,19 +236,13 @@ class WebGLLights {
           shadowUniforms?["shadowRadius"] = shadow.radius;
           shadowUniforms?["shadowMapSize"] = shadow.mapSize;
 
-          // state.directionalShadow[ directionalLength ] = shadowUniforms;
           state.directionalShadow.listSetter(directionalLength, shadowUniforms);
-
-          // state["directionalShadowMap"][ directionalLength ] = shadowMap;
           state.directionalShadowMap.listSetter(directionalLength, shadowMap);
-
-          // state["directionalShadowMatrix"][ directionalLength ] = light.shadow!.matrix;
           state.directionalShadowMatrix.listSetter( directionalLength, light.shadow!.matrix);
 
           numDirectionalShadows++;
         }
 
-        // state.directional[ directionalLength ] = uniforms;
         state.directional.listSetter(directionalLength, uniforms);
 
         directionalLength++;
@@ -265,12 +259,11 @@ class WebGLLights {
         uniforms["penumbraCos"] = math.cos(light.angle! * (1 - light.penumbra!));
         uniforms["decay"] = light.decay;
 
-        state.spot.add(uniforms);
-
+        state.spot.listSetter(spotLength, uniforms);
         final shadow = light.shadow!;
 
 				if ( light.map != null) {
-					state.spotLightMap.add(light.map);//[ numSpotMaps ] = light.map;
+          state.spotLightMap.listSetter(numSpotMaps, light.map);
 					numSpotMaps ++;
 
 					// make sure the lightMatrix is up to date
@@ -290,18 +283,12 @@ class WebGLLights {
           shadowUniforms?["shadowRadius"] = shadow.radius;
           shadowUniforms?["shadowMapSize"] = shadow.mapSize;
 
-          // state.spotShadow[ spotLength ] = shadowUniforms;
           state.spotShadow.listSetter(spotLength, shadowUniforms);
-
-          // state.spotShadowMap[ spotLength ] = shadowMap;
-          // print("1 spotShadowMap: ${state.spotShadowMap} ${spotLength} ${shadowMap} ");
           state.spotShadowMap.listSetter(spotLength, shadowMap);
+          state.spotShadowMatrix.listSetter( spotLength, light.shadow!.matrix);
 
           numSpotShadows++;
         }
-
-        // state.spot[ spotLength ] = uniforms;
-        state.spot.listSetter(spotLength, uniforms);
 
         spotLength++;
       } 
@@ -409,16 +396,16 @@ class WebGLLights {
       state.point.length = pointLength;
       state.hemi.length = hemiLength;
 
-      state.directionalShadow.length = numDirectionalShadows;
-      state.directionalShadowMap.length = numDirectionalShadows;
-      state.pointShadow.length = numPointShadows;
-      state.pointShadowMap.length = numPointShadows;
-      state.spotShadow.length = numSpotShadows;
-      state.spotShadowMap.length = numSpotShadows;
-      state.directionalShadowMatrix.length = numDirectionalShadows;
-      state.pointShadowMatrix.length = numPointShadows;
-      state.spotShadowMatrix.length = numSpotShadows;
-      state.spotLightMap.length = numSpotMaps;
+			state.directionalShadow.length = numDirectionalShadows;
+			state.directionalShadowMap.length = numDirectionalShadows;
+			state.pointShadow.length = numPointShadows;
+			state.pointShadowMap.length = numPointShadows;
+			state.spotShadow.length = numSpotShadows;
+			state.spotShadowMap.length = numSpotShadows;
+			state.directionalShadowMatrix.length = numDirectionalShadows;
+			state.pointShadowMatrix.length = numPointShadows;
+			state.spotLightMatrix.length = numSpotShadows + numSpotMaps - numSpotShadowsWithMaps;
+			state.spotLightMap.length = numSpotMaps;
 			state.numSpotLightShadowsWithMaps = numSpotShadowsWithMaps;
 			state.numLightProbes = numLightProbes;
 

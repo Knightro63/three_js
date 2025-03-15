@@ -169,23 +169,20 @@ class _State extends State<Webgl2MultipleRendertargets> {
   Future<void> setup() async {
     // Create a multi render target with Float buffers
 
-    final renderTarget = three.WebGLMultipleRenderTargets(
+    final renderTarget = three.WebGLRenderTarget(
       (threeJs.width * threeJs.dpr).toInt(),
       (threeJs.height * threeJs.dpr).toInt(),
-      2
+      three.WebGLRenderTargetOptions({
+        'count': 2,
+        'minFilter': three.NearestFilter,
+        'magFilter': three.NearestFilter
+      })
     );
-
-    threeJs.renderTarget = renderTarget;
-
-    for (int i = 0, il = (renderTarget.texture as three.GroupTexture).children.length; i < il; i ++ ) {
-      (renderTarget.texture as three.GroupTexture).children[ i ].minFilter = three.NearestFilter;
-      (renderTarget.texture as three.GroupTexture).children[ i ].magFilter = three.NearestFilter;
-    }
 
     // Name our G-Buffer attachments for debugging
 
-    (renderTarget.texture as three.GroupTexture).children[ 0 ].name = 'diffuse';
-    (renderTarget.texture as three.GroupTexture).children[ 1 ].name = 'normal';
+    renderTarget.textures[0].name = 'diffuse';
+    renderTarget.textures[1].name = 'normal';
 
     // Scene setup
 
@@ -205,6 +202,7 @@ class _State extends State<Webgl2MultipleRendertargets> {
     threeJs.scene.add( three.Mesh(
       TorusKnotGeometry( 1, 0.3, 128, 32 ),
       three.RawShaderMaterial.fromMap( {
+        'name': 'G-Buffer Shader',
         'vertexShader': gbufferVert.trim(),
         'fragmentShader': gbufferFrag.trim(),
         'uniforms': {
@@ -221,13 +219,14 @@ class _State extends State<Webgl2MultipleRendertargets> {
     postCamera = three.OrthographicCamera( - 1, 1, 1, - 1, 0, 1 );
 
     postScene.add( three.Mesh(
-      three.PlaneGeometry( 2, 2 ),
+      three.PlaneGeometry( 2,2),
       three.RawShaderMaterial.fromMap( {
+        'name': 'Post-FX Shader',
         'vertexShader': renderVert.trim(),
         'fragmentShader': renderFrag.trim(),
         'uniforms': {
-          'tDiffuse': { 'value': (renderTarget.texture as three.GroupTexture).children[ 0 ] },
-          'tNormal': { 'value': (renderTarget.texture as three.GroupTexture).children[ 1 ] },
+          'tDiffuse': { 'value': renderTarget.textures[ 0 ] },
+          'tNormal': { 'value': renderTarget.textures[ 1 ] },
         },
         'glslVersion': three.GLSL3
       } )
@@ -235,8 +234,7 @@ class _State extends State<Webgl2MultipleRendertargets> {
     // Controls
 
     controls = three.OrbitControls( threeJs.camera, threeJs.globalKey );
-    threeJs.addAnimationEvent(threeJs.render);
-    
+
     threeJs.postProcessor = ([dt]){
       renderTarget.samples = parameters['samples'].toInt();
 
@@ -246,12 +244,11 @@ class _State extends State<Webgl2MultipleRendertargets> {
         }
       } );
 
-      // render scene into target
-      threeJs.renderer?.render( threeJs.scene, threeJs.camera );
-
-      // render post FX
       threeJs.renderer?.setRenderTarget( null );
       threeJs.renderer?.render( postScene, postCamera );
+
+      threeJs.renderer?.setRenderTarget( renderTarget );
+      threeJs.renderer?.render( threeJs.scene, threeJs.camera );
     };
 
     initGui();

@@ -31,7 +31,6 @@ class _State extends State<WebglInstancingMorph> {
       settings: three.Settings(
         enableShadowMap: true,
         shadowMapType: three.VSMShadowMap,
-        useSourceTexture: true
       )
     );
     super.initState();

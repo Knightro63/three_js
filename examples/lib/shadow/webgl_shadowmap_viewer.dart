@@ -32,7 +32,6 @@ class _MyAppState extends State<WebglShadowmapViewer> {
       onSetupComplete: (){setState(() {});},
       setup: setup,
       settings: three.Settings(
-        useSourceTexture: true,
         renderOptions: {
           "minFilter": three.LinearFilter,
           "magFilter": three.LinearFilter,
@@ -121,7 +120,7 @@ class _MyAppState extends State<WebglShadowmapViewer> {
     final geometry2 = three.BoxGeometry(3, 3, 3);
     final cube = three.Mesh(geometry2, material);
     cube.position.setValues(8, 3, 8);
-    cube.castShadow = true;
+    cube.castShadow = false;
     cube.receiveShadow = true;
     threeJs.scene.add(cube);
 
@@ -130,7 +129,7 @@ class _MyAppState extends State<WebglShadowmapViewer> {
 
     final ground = three.Mesh(geometry3, material);
     ground.scale.scale(3);
-    ground.castShadow = false;
+    ground.castShadow = true;
     ground.receiveShadow = true;
     threeJs.scene.add(ground);
 

@@ -28,7 +28,7 @@ dependencies:
   three_js_postprocessing: ^0.0.2
   three_js_modifers: ^0.0.2
   three_js_terrain: ^0.0.1
-  three_js_exporters: ^0.0.2
+  three_js_exporters: ^0.0.3
   three_js_line: ^0.0.1
   three_js_bvh_csg: ^0.0.1
   three_js_curves: ^0.0.3
@@ -54,6 +54,14 @@ dependency_overrides:
     path: ../packages/three_js_math
   three_js_postprocessing:
     path: ../packages/three_js_postprocessing
+  three_js_modifers:
+    path: ../packages/three_js_modifers
+  three_js_bvh_csg:
+    path: ../packages/three_js_bvh_csg
+  three_js_objects:
+    path: ../packages/three_js_objects
+  flutter_angle:
+    path: ../../flutter_angle/flutter_angle
 
 flutter:
   uses-material-design: true
@@ -66,6 +74,7 @@ flutter:
     - assets/demo.png
     - assets/KOMO-v5.cube
     - assets/screenshots/
+    - assets/models/obj/cerberus/
     - assets/models/obj/male02/
     - assets/models/json/
     - assets/models/gcode/

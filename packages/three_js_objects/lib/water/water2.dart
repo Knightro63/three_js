@@ -164,7 +164,7 @@ class Water extends Mesh {
 		normalMap0?.wrapT = RepeatWrapping;
 		normalMap1?.wrapT = RepeatWrapping;
 
-		//material?.uniforms[ 'tReflectionMap' ]['value'] = reflector.getRenderTarget().texture;
+		material?.uniforms[ 'tReflectionMap' ]['value'] = reflector.getRenderTarget().texture;
 		material?.uniforms[ 'tRefractionMap' ]['value'] = refractor.getRenderTarget().texture;
 		material?.uniforms[ 'tNormalMap0' ]['value'] = normalMap0;
 		material?.uniforms[ 'tNormalMap1' ]['value'] = normalMap1;
@@ -200,7 +200,7 @@ class Water extends Mesh {
       reflector.matrixWorld.setFrom(matrixWorld );
       refractor.matrixWorld.setFrom(matrixWorld );
 
-      reflector.onBeforeRender!(renderer:renderer, scene:scene, camera:camera, renderTarget: renderTarget);
+      reflector.onBeforeRender!(renderer:renderer, scene:scene, camera:camera, renderTarget: null);//, renderTarget: renderTarget);
       refractor.onBeforeRender!(renderer:renderer, scene:scene, camera:camera);
 
       visible = true;

@@ -854,7 +854,6 @@ class BatchedMesh extends Mesh {
 				_matrix,
 				renderer!.coordinateSystem
 			);
-
 		}
 
 		int multiDrawCount = 0;

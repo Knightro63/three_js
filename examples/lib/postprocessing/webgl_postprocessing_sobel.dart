@@ -41,6 +41,7 @@ class _State extends State<WebglPostprocessingSobel> {
     threeJs.dispose();
     three.loading.clear();
     composer.reset(threeJs.renderTarget);
+    composer.dispose();
     super.dispose();
   }
 
@@ -87,25 +88,21 @@ class _State extends State<WebglPostprocessingSobel> {
     final renderPass = RenderPass( threeJs.scene, threeJs.camera );
     composer.addPass( renderPass );
 
-
-    // final effectGrayScale = ShaderPass.fromJson( luminosityShader );
-    // composer.addPass( effectGrayScale );
-
-    // you might want to use a gaussian blur filter before
-    // the next pass to improve the result of the Sobel operator
-
     // Sobel operator
-
     final effectSobel = ShaderPass.fromJson( sobelOperatorShader );
     effectSobel.uniforms[ 'resolution' ]['value'].x = threeJs.width * threeJs.dpr;
     effectSobel.uniforms[ 'resolution' ]['value'].y = threeJs.height * threeJs.dpr;
     composer.addPass( effectSobel );
 
+    // final effectGrayScale = ShaderPass.fromJson( luminosityShader );
+    // composer.addPass( effectGrayScale );
+
     controls = three.OrbitControls( threeJs.camera, threeJs.globalKey );
     controls.enableZoom = false;
 
     threeJs.postProcessor = ([double? dt]){
-      composer.render(threeJs.renderer?.getRenderTarget(),dt);
+      threeJs.renderer!.setRenderTarget(threeJs.renderTarget);
+      composer.render(dt);
     };
 
     threeJs.addAnimationEvent((dt){

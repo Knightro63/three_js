@@ -212,6 +212,9 @@ class Skeleton {
     bones.forEach((bone){
       bone.dispose();
     });
+
+    bones.clear();
+    boneInverses.clear();
   }
 
   Skeleton fromJson(Map<String,dynamic> json, Map<String,Bone?> bones) {

@@ -36,6 +36,8 @@ class webgl_animation_keyframesState extends State<WebglAnimationKeyframes> {
     three.loading.clear();
     timer.cancel();
     threeJs.dispose();
+    controls.dispose();
+    mixer.dispose();
     super.dispose();
   }
 

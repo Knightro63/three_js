@@ -132,7 +132,7 @@ class _State extends State<WebglGeometryTerrain> {
     final imageData = three.Uint8Array.fromList(List.filled(width*height*4, 255));
 
     for (int i = 0, j = 0; i < imageData.length; i += 4, j ++ ) {
-      vector3.x = data[ j - 2 ] - data[ j + 2 ] * 1.0;
+      vector3.x = data[ j - 2 ] - data[ j + 2 ] *1.0;
       vector3.y = 2;
       vector3.z = data[ j - width * 2 ] - data[ j + width * 2 ] *1.0;
       vector3.normalize();

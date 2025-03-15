@@ -159,6 +159,11 @@ class Raycaster {
 
     return intersects;
   }
+
+  void dispose(){
+    params.clear();
+    camera.dispose();
+  }
 }
 
 class Intersection {

@@ -1,6 +1,6 @@
 name: three_js_modifers
 description: "Flutter three_js_modifer package created for three_js and converted from three.js and three_dart package."
-version: 0.0.2
+version: 0.0.3
 homepage: https://github.com/Knightro63/three_js/tree/main/packages/three_js_modifers
 
 environment:
@@ -10,10 +10,10 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  three_js_core: ^0.0.2
-  three_js_math: ^0.0.2
+  three_js_core: ^0.0.4
+  three_js_math: ^0.0.4
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^3.0.0
+  flutter_lints: ^5.0.0

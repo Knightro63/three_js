@@ -3,6 +3,7 @@ import 'package:three_js_math/three_js_math.dart';
 
 class Reflector extends Mesh {
   final bool isReflector = true;
+  bool forceUpdate = false;
   late WebGLRenderTarget renderTarget;
   PerspectiveCamera camera = PerspectiveCamera();
 
@@ -70,8 +71,8 @@ class Reflector extends Mesh {
 			view.sub2( reflectorWorldPosition, cameraWorldPosition );
 
 			// Avoid rendering when reflector is facing away
-
-			if ( view.dot( normal ) > 0 ) return;
+			final isFacingAway = view.dot( normal ) > 0;
+			if ( isFacingAway == true && forceUpdate == false ) return;
 
 			view.reflect( normal ).negate();
 			view.add( reflectorWorldPosition );
@@ -162,6 +163,7 @@ class Reflector extends Mesh {
 			}
 
 			scope.visible = true;
+      forceUpdate = false;
 		};
 	}
 

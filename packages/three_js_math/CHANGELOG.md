@@ -1,7 +1,10 @@
+## 0.0.4
+
+* Fixed vecotrs .fromJson function.
+
 ## 0.0.3
 
 * Updated to new version of flutter_angle for simulator support.
-
 
 ## 0.0.2
 

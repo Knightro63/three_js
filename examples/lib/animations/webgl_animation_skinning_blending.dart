@@ -28,9 +28,6 @@ class _State extends State<WebglAnimationSkinningBlending> {
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
       setup: setup,
-      settings: three.Settings(
-        useSourceTexture: true
-      )
     );
     super.initState();
   }
@@ -69,13 +66,12 @@ class _State extends State<WebglAnimationSkinningBlending> {
     threeJs.scene.background = three.Color.fromHex32(0xffffff);
     threeJs.scene.fog = three.Fog(0xa0a0a0, 10, 50);
 
-    final hemiLight = three.HemisphereLight(0xffffff, 0x444444,2);
+    final hemiLight = three.HemisphereLight(0xffffff, 0x444444, 0.8);
     hemiLight.position.setValues(0, -4, -2);
     threeJs.scene.add(hemiLight);
 
     final dirLight = three.DirectionalLight(0xffffff);
     dirLight.position.setValues(-0, -4, -2);
-    dirLight.castShadow = true;
     dirLight.shadow!.camera!.top = 2;
     dirLight.shadow!.camera!.bottom = -2;
     dirLight.shadow!.camera!.left = -2;
@@ -83,10 +79,6 @@ class _State extends State<WebglAnimationSkinningBlending> {
     dirLight.shadow!.camera!.near = 0.1;
     dirLight.shadow!.camera!.far = 40;
     threeJs.scene.add(dirLight);
-
-    // scene.add( new three.CameraHelper( dirLight.shadow.camera ) );
-
-    // ground
 
     final loader = three.GLTFLoader();
     final gltf = await loader.fromAsset('assets/models/gltf/Soldier.gltf');

@@ -322,13 +322,12 @@ class WebGLPrograms {
       }
     }
 
-    if (parameters.isRawShaderMaterial == false) {
+    if (parameters is! RawShaderMaterial) {
       getProgramCacheKeyParameters(array, parameters);
       getProgramCacheKeyBooleans(array, parameters);
 
       array.add(renderer.outputEncoding.toString());
     }
-
     array.add(parameters.customProgramCacheKey);
 
     return array.join();

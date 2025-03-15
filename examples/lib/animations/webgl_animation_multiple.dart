@@ -27,9 +27,6 @@ class _State extends State<WebglAnimationMultiple> {
       });
     });
     threeJs = three.ThreeJS(
-      settings: three.Settings(
-        useSourceTexture: true,
-      ),
       onSetupComplete: (){setState(() {});},
       setup: setup
     );
@@ -125,19 +122,19 @@ class _State extends State<WebglAnimationMultiple> {
 
     threeJs.scene = three.Scene();
     threeJs.scene.background = three.Color.fromHex32(0xa0a0a0);
-    threeJs.scene.fog = three.Fog(0xa0a0a0, 10, 50);
+    threeJs.scene.fog = three.Fog(0xa0a0a0, 10, 22);
 
-    final hemiLight = three.HemisphereLight(0xffffff, 0x8d8d8d);
+    final hemiLight = three.HemisphereLight(0xffffff, 0x444444);
     hemiLight.position.setValues(0, 20, 0);
     threeJs.scene.add(hemiLight);
 
-    final dirLight = three.DirectionalLight(0xffffff, 3);
+    final dirLight = three.DirectionalLight(0xffffff);
     dirLight.position.setValues(-3, 10, -10);
     dirLight.castShadow = true;
-    dirLight.shadow!.camera!.top = 4;
-    dirLight.shadow!.camera!.bottom = -4;
-    dirLight.shadow!.camera!.left = -4;
-    dirLight.shadow!.camera!.right = 4;
+    dirLight.shadow!.camera!.top = 10;
+    dirLight.shadow!.camera!.bottom = -10;
+    dirLight.shadow!.camera!.left = -10;
+    dirLight.shadow!.camera!.right = 10;
     dirLight.shadow!.camera!.near = 0.1;
     dirLight.shadow!.camera!.far = 40;
     threeJs.scene.add(dirLight);
@@ -145,7 +142,7 @@ class _State extends State<WebglAnimationMultiple> {
     controls = three.OrbitControls(threeJs.camera, threeJs.globalKey);
 
     // ground
-    final groundMesh = three.Mesh(three.PlaneGeometry(200, 200), three.MeshPhongMaterial.fromMap({"color": 0xcbcbcb, "depthWrite": false}));
+    final groundMesh = three.Mesh(three.PlaneGeometry(40, 40), three.MeshPhongMaterial.fromMap({"color": 0x999999, "depthWrite": false}));
 
     groundMesh.rotation.x = -math.pi / 2;
     groundMesh.receiveShadow = true;

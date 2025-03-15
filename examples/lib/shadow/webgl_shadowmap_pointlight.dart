@@ -34,7 +34,6 @@ class _State extends State<WebglShadowmapPointlight> {
         enableShadowMap: true,
         shadowMapType: three.BasicShadowMap,
         localClippingEnabled: true,
-        useSourceTexture: true,
       )
     );
     super.initState();
@@ -75,7 +74,7 @@ class _State extends State<WebglShadowmapPointlight> {
     final test = await generateTexture();
 
     three.PointLight createLight(int color ) {
-      const intensity = 20.0;
+      const intensity = 1.0;
 
       final light = three.PointLight( color, intensity, 20);
       light.castShadow = true;
@@ -97,7 +96,7 @@ class _State extends State<WebglShadowmapPointlight> {
       material = three.MeshPhongMaterial.fromMap( {
         'side': three.DoubleSide,
         'alphaMap': texture,
-        'alphaTest': 0.5
+        'alphaTest': 0.25
       });
 
       sphere = three.Mesh( geometry, material );
@@ -115,7 +114,23 @@ class _State extends State<WebglShadowmapPointlight> {
     threeJs.scene.add( pointLight2 );
 
     localPlane = three.Plane(three.Vector3(0, 0, -14.9), 0.8);
-    createBox();
+    //createBox();
+
+    final geometry = three.BoxGeometry( 30, 30, 30 );
+
+    final material = three.MeshPhongMaterial.fromMap( {
+      'color': 0xa0adaf,
+      'shininess': 10,
+      'specular': 0x111111,
+      'side': three.BackSide
+    } );
+
+    final mesh = three.Mesh( geometry, material );
+    mesh.position.y = 10;
+    mesh.receiveShadow = true;
+    threeJs.scene.add( mesh );
+
+    print('here');
 
     threeJs.addAnimationEvent((dt){
       double time = DateTime.now().millisecondsSinceEpoch * 0.001;

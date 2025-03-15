@@ -5,6 +5,9 @@ import 'package:example/controls/misc_controls_device_orientation.dart';
 import 'package:example/controls/misc_controls_fly.dart';
 import 'package:example/controls/misc_controls_pointerlock.dart';
 import 'package:example/controls/misc_controls_transform.dart';
+import 'package:example/exporters/misc_exporter_obj.dart';
+import 'package:example/exporters/misc_exporter_ply.dart';
+import 'package:example/exporters/misc_exporter_stl.dart';
 import 'package:example/games/flutter_game.dart';
 import 'package:example/games/games_fps2.dart';
 import 'package:example/geometry/marching_cubes.dart';
@@ -46,6 +49,8 @@ import 'package:example/loaders/webgl_loader_xyz.dart';
 import 'package:example/material/webgl2_multiple_rendertargets.dart';
 import 'package:example/material/webgl_materials_modified.dart';
 import 'package:example/material/webgl_materials_subsurface_scattering.dart';
+import 'package:example/modifers/webgl_modifer_tessellation.dart';
+import 'package:example/modifers/webgl_modifer_edgesplit.dart';
 import 'package:example/modifers/webgl_modifier_simplifier.dart';
 import 'package:example/modifers/webgl_modifier_subdivision.dart';
 import 'package:example/postprocessing/webgl_postprocessing_unreal_bloom.dart';
@@ -76,6 +81,7 @@ import 'package:example/shadow/webgl_shadowmap_pointlight.dart';
 import 'package:example/shadow/webgl_shadowmap_vsm.dart';
 import 'package:example/shadow/webgl_simple_gi.dart';
 import 'package:example/shadow/webgl_water.dart';
+import 'package:example/volume/webgl_ubo_arrays.dart';
 import 'package:example/volume/webgl_volume_cloud.dart';
 import 'package:example/volume/webgl_volume_instancing.dart';
 import 'package:example/volume/webgl_volume_perlin.dart';
@@ -184,6 +190,15 @@ class MyAppState extends State<MyApp> {
               },
               '/boxselection':(BuildContext context) {
                 return const BoxSelection();
+              },
+              '/misc_exporter_ply':(BuildContext context) {
+                return const MiscExporterPly();
+              },
+              '/misc_exporter_stl':(BuildContext context) {
+                return const MiscExporterSTL();
+              },
+              '/misc_exporter_obj':(BuildContext context) {
+                return const MiscExporterOBJ();
               },
               '/webgl_camera_array':(BuildContext context) {
                 return const WebglCameraArray();
@@ -437,11 +452,17 @@ class MyAppState extends State<MyApp> {
               '/webgl_portal':(BuildContext context) {
                 return const WebglPortal();
               },
+              '/webgl_modifier_edgesplit':(BuildContext context) {
+                return const WebglModifierEdgesplit();
+              },
               '/webgl_modifier_subdivision':(BuildContext context) {
                 return const WebglModifierSubdivision();
               },
               '/webgl_modifier_simplifier':(BuildContext context) {
                 return const WebglModifierSimplifier();
+              },
+              '/webgl_modifier_tessellation':(BuildContext context) {
+                return const WebglModifierTessellation();
               },
               '/webgl_morphtargets':(BuildContext context) {
                 return const WebglMorphtargets();
@@ -515,9 +536,9 @@ class MyAppState extends State<MyApp> {
               // '/webgl_nodes_points':(BuildContext context) {
               //   return const WebglNodesPoints();
               // },
-              // '/webgl_ubo_arrays':(BuildContext context) {
-              //   return const WebglUboArrays();
-              // },
+              '/webgl_ubo_arrays':(BuildContext context) {
+                return const WebglUboArrays();
+              },
               '/webxr_vr_rollercoaster':(BuildContext context) {
                 return const WebXRVRRollercoaster();
               },

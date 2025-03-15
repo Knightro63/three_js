@@ -37,7 +37,9 @@ class UniformsGroup with EventDispatcher {
 		return this;
 	}
 
-	void dispose() {}
+	void dispose() {
+    uniforms.clear();
+  }
 
 	UniformsGroup copy(UniformsGroup source) {
 		name = source.name;

@@ -28,7 +28,7 @@ class EffectComposer {
       final parameters = {
         "minFilter": LinearFilter,
         "magFilter": LinearFilter,
-        "format": RGBAFormat
+        "format": RGBAFormat,
       };
 
       final size = renderer.getSize(Vector2());
@@ -59,6 +59,7 @@ class EffectComposer {
     passes = [];
 
     copyPass = ShaderPass.fromJson(copyShader);
+    copyPass.material.blending = NoBlending;
 
     clock = Clock(false);
   }
@@ -102,16 +103,15 @@ class EffectComposer {
     return true;
   }
 
-  void render([RenderTarget? currentRenderTarget, double? deltaTime]) {
+  void render([double? deltaTime]) {
     // deltaTime value is in seconds
     deltaTime ??= clock.getDelta();
     bool maskActive = false;
-
-    Pass? pass;
+    final currentRenderTarget = this.renderer.getRenderTarget();
     final il = passes.length;
 
     for (int i = 0; i < il; i++) {
-      pass = passes[i];
+      final pass = passes[i];
 
       if (pass.enabled == false) continue;
 
@@ -123,12 +123,12 @@ class EffectComposer {
           final context = renderer.getContext();
           final stencil = renderer.state.buffers["stencil"];
 
-          context.stencilFunc( context.NOTEQUAL, 1, 0xffffffff );
+          //context.stencilFunc( context.NOTEQUAL, 1, 0xffffffff );
           stencil.setFunc(context.NOTEQUAL, 1, 0xffffffff);
 
           copyPass.render(renderer, writeBuffer, readBuffer, deltaTime: deltaTime);
 
-          context.stencilFunc( context.EQUAL, 1, 0xffffffff );
+          //context.stencilFunc( context.EQUAL, 1, 0xffffffff );
           stencil.setFunc(context.EQUAL, 1, 0xffffffff);
         }
 
@@ -142,7 +142,7 @@ class EffectComposer {
         maskActive = false;
       }
     }
-    if(currentRenderTarget != null) renderer.setRenderTarget(currentRenderTarget);
+    renderer.setRenderTarget(currentRenderTarget);
   }
 
   void reset([WebGLRenderTarget? renderTarget]) {
@@ -185,4 +185,10 @@ class EffectComposer {
 
     setSize(_width, _height);
   }
+
+	void dispose() {
+		renderTarget1.dispose();
+		renderTarget2.dispose();
+		copyPass.dispose();
+	}
 }

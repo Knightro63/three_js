@@ -11,7 +11,7 @@ class EdgeSplitModifier {
 
 	BufferGeometry modify(BufferGeometry geometry, cutOffAngle, [bool tryKeepNormals = true ]) {
 		bool hadNormals = false;
-		List<double>? oldNormals;
+		Float32Array? oldNormals;
 
 		if ( geometry.attributes['normal'] != null) {
 			hadNormals = true;
@@ -88,7 +88,7 @@ class EdgeSplitModifier {
 		}
 
 
-		Map<String, List<dynamic>> edgeSplitToGroups(List<int> indexes, double cutOff, int firstIndex ) {
+		Map<String, List<dynamic>> edgeSplitToGroups(List indexes, double cutOff, int firstIndex ) {
 			_A.setValues( normals[ 3 * firstIndex ], normals[ 3 * firstIndex + 1 ], normals[ 3 * firstIndex + 2 ] ).normalize();
 
 			final result = {
@@ -96,7 +96,8 @@ class EdgeSplitModifier {
 				'currentGroup': [ firstIndex ]
 			};
 
-			for ( final j in indexes ) {
+			for ( final ji in indexes ) {
+        int j = ji;
 				if ( j != firstIndex ) {
 					_B.setValues( normals[ 3 * j ], normals[ 3 * j + 1 ], normals[ 3 * j + 2 ] ).normalize();
 
@@ -111,12 +112,12 @@ class EdgeSplitModifier {
 			return result;
 		}
 
-		void edgeSplit( indexes, cutOff, [original]) {
-			if ( indexes.length == 0 ) return;
+		void edgeSplit(List? indexes, cutOff, [original]) {
+			if ( (indexes?.length ?? 0) == 0 ) return;
 
 			final List<Map<String,List>> groupResults = [];
 
-			for ( final index in indexes ) {
+			for ( final index in indexes! ) {
 				groupResults.add( edgeSplitToGroups( indexes, cutOff, index ) );
 			}
 
@@ -137,7 +138,7 @@ class EdgeSplitModifier {
 			}
 
 			if ( result['splitGroup']!.isNotEmpty ) {
-				edgeSplit( result['splitGroup'], cutOff, original || result['currentGroup']![ 0 ] );
+				edgeSplit( result['splitGroup'], cutOff, original ?? result['currentGroup']![ 0 ] );
 			}
 		}
 
@@ -150,9 +151,9 @@ class EdgeSplitModifier {
 
 		final newAttributes = {};
 		for ( final name in geometry.attributes.keys) {
-			final oldAttribute = geometry.attributes[ name ];
-			final newArray = oldAttribute.array.constructor( ( indexes.length + splitIndexes.length ) * oldAttribute.itemSize );
-			newArray.set( oldAttribute.array );
+			final oldAttribute = geometry.attributes[ name ] as Float32BufferAttribute;
+			final newArray = Float32Array(( indexes.length + splitIndexes.length ) * oldAttribute.itemSize);//oldAttribute.array.constructor( ( indexes.length + splitIndexes.length ) * oldAttribute.itemSize );
+			newArray.set( oldAttribute.array.toList() );
 			newAttributes[name] = Float32BufferAttribute( newArray, oldAttribute.itemSize, oldAttribute.normalized );
 		}
 
@@ -161,8 +162,8 @@ class EdgeSplitModifier {
 
 		for (int i = 0; i < splitIndexes.length; i ++ ) {
 
-			final split = splitIndexes[ i ];
-			final index = indexes[ split.original ];
+			final Map<String, dynamic> split = splitIndexes[ i ];
+			final index = indexes[ split['original'] ];
 
 			for ( final attribute in newAttributes.values) {
 				for (int j = 0; j < attribute.itemSize; j ++ ) {
@@ -171,7 +172,7 @@ class EdgeSplitModifier {
 				}
 			}
 
-			for ( final j in split.indexes ) {
+			for ( final j in split['indexes'] ) {
 				newIndexes[ j ] = indexes.length + i;
 			}
 		}
@@ -180,17 +181,17 @@ class EdgeSplitModifier {
 		geometry.setIndex( Uint32BufferAttribute( newIndexes, 1 ) );
 
 		for ( final name in newAttributes.keys) {
-			geometry.setAttribute( name, newAttributes[ name ] );
+			geometry.setAttributeFromString( name, newAttributes[ name ] );
 		}
 
 		if ( hadNormals ) {
 			geometry.computeVertexNormals();
 
 			if ( oldNormals != null ) {
-				final changedNormals = List.filled(oldNormals.length ~/ 3, false);
-
+				final changedNormals = Map.from(List.filled(oldNormals.length ~/ 3, false).asMap());
+        
 				for ( final splitData in splitIndexes ){
-					changedNormals[ splitData.original ] = true;
+					changedNormals[ splitData['original'] ] = true;
         }
 
 				for (int i = 0; i < changedNormals.length; i ++ ) {

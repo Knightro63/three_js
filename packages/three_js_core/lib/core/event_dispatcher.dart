@@ -35,6 +35,10 @@ class Event {
     value = json['value'];
     data = json['data'];
   }
+
+  void dispose(){
+    object?.dispose();
+  }
 }
 
 /// JavaScript events for custom objects.
@@ -63,6 +67,10 @@ class Event {
 ///
 mixin EventDispatcher {
   Map<String, List<Function>>? _listeners = {};
+
+  void dispose(){
+    _listeners?.clear();
+  }
 
   /// [type] - The type of event to listen to.
   /// 

@@ -56,6 +56,18 @@ class PeripheralsState extends State<Peripherals> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((t) {
+      if (_clientWidth == null || _clientHeight == null) {
+        RenderBox getBox = context.findRenderObject() as RenderBox;
+        _clientWidth = getBox.size.width;
+        _clientHeight = getBox.size.height;
+        Offset temp = getBox.localToGlobal(Offset.zero);
+        _offsetLeft = temp.dx;
+        _offsetTop = temp.dy;
+        
+      }
+      FocusScope.of(context).requestFocus(focusNode);
+    });
   }
 
   void removeAllListeners() {
@@ -76,19 +88,6 @@ class PeripheralsState extends State<Peripherals> {
 
   @override
   Widget build(BuildContext context) {
-    WidgetsBinding.instance.addPostFrameCallback((t) {
-      if (_clientWidth == null || _clientHeight == null) {
-        RenderBox getBox = context.findRenderObject() as RenderBox;
-        _clientWidth = getBox.size.width;
-        _clientHeight = getBox.size.height;
-        Offset temp = getBox.localToGlobal(Offset.zero);
-        _offsetLeft = temp.dx;
-        _offsetTop = temp.dy;
-        
-      }
-      FocusScope.of(context).requestFocus(focusNode);
-    });
-
     return KeyboardListener(
       focusNode: focusNode,
       onKeyEvent: (event){
@@ -107,6 +106,7 @@ class PeripheralsState extends State<Peripherals> {
         },
         onPointerDown: (PointerDownEvent event) {
           _onPointerDown(context, event);
+          FocusScope.of(context).requestFocus(focusNode);
         },
         onPointerMove: (PointerMoveEvent event) {
           _onPointerMove(context, event);

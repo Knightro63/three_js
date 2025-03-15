@@ -37,12 +37,13 @@ class Vector3 extends Vector{
     z = v.z;
   }
 
-  Vector3.fromJson(List<double>? json) {
+  Vector3.fromJson(Map<String,num>? json) {
     storage = Float32List(3);
     if (json != null) {
-      x = json[0];
-      y = json[1];
-      z = json[2];
+      List<num> data = json.values.toList();
+      x = data[0].toDouble();
+      y = data[1].toDouble();
+      z = data[2].toDouble();
     }
   }
 
@@ -718,7 +719,7 @@ class Vector3 extends Vector{
   }
   @override
   List<double> toList() {
-    return [x, y];
+    return [x, y, z];
   }
   @override
   String toString(){

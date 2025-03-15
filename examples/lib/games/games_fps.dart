@@ -105,9 +105,6 @@ class _FPSGamePageState extends State<FPSGame> {
           }
         });
       },
-      settings: three.Settings(
-        useSourceTexture: true
-      ),
       setup: setup
     );
     super.initState();

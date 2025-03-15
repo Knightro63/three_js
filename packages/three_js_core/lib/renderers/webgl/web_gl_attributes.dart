@@ -2,7 +2,6 @@ part of three_webgl;
 
 class WebGLAttributes {
   RenderingContext gl;
-
   bool isWebGL2 = true;
 
   WeakMap buffers = WeakMap();
@@ -69,6 +68,22 @@ class WebGLAttributes {
   }
 
   void updateBuffer(Buffer buffer, BufferAttribute attribute, int bufferType) {
+    final updateRange = attribute.updateRange;
+
+    gl.bindBuffer(bufferType, buffer);
+
+    if (updateRange!["count"] == -1) {
+      // Not using update ranges
+      gl.bufferSubData(bufferType, 0, attribute.array);
+    } 
+    else {
+      console.info(" WebGLAttributes.dart gl.bufferSubData need debug confirm.... ");
+      gl.bufferSubData(bufferType, updateRange["offset"]! * attribute.itemSize, attribute.array);
+      updateRange["count"] = -1; // reset range
+    }
+  }
+
+  void updateBufferNew(Buffer buffer, BufferAttribute attribute, int bufferType) {
     final array = attribute.array;
     final updateRange = attribute.updateRange;
     final updateRanges = attribute.updateRanges;
@@ -85,14 +100,41 @@ class WebGLAttributes {
     //   updateRange["count"] = -1; // reset range
     // }
 
-		if ( updateRange.length != 0 ) {
+    // print(updateRanges);
+
+		else{
+      updateRanges.sort( ( a, b ) => a.start - b.start );
+
+			int mergeIndex = 0;
+
+			for ( int i = 1; i < updateRanges.length; i ++ ) {
+				final previousRange = updateRanges[ mergeIndex ];
+				final range = updateRanges[ i ];
+
+				// We add one here to merge adjacent ranges. This is safe because ranges
+				// operate over positive integers.
+				if ( range.start <= previousRange.start + previousRange.count + 1 ) {
+					previousRange.count = math.max(
+						previousRange.count,
+						range.start + range.count - previousRange.start
+					);
+				} 
+        else {
+					++ mergeIndex;
+					updateRanges[ mergeIndex ] = range;
+				}
+			}
+
 			for (int i = 0, l = updateRanges.length; i < l; i ++ ) {
 				final range = updateRanges[i];
+        Float32Array f = Float32Array.fromList(attribute.array.sublist(range.start,range.count) as List<double>);
 				gl.bufferSubData( 
           bufferType, 
           range.start * array.BYTES_PER_ELEMENT,
-					attribute.array,//.sublist(range.start,range.count), 
+					f,
         );
+
+        f.dispose();
 			}
 
 			attribute.clearUpdateRanges();

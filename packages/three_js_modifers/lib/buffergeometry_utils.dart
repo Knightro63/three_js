@@ -36,13 +36,15 @@ class BufferGeometryUtils{
         attr.normalized
       );
 
-      final morphAttr = geometry.morphAttributes[ name ];
-      if ( morphAttr != null) {
-        // tmpMorphAttributes[ name ] = Float32BufferAttribute(
-        //   Float32Array( morphAttr.count * morphAttr.itemSize ),
-        //   morphAttr.itemSize,
-        //   morphAttr.normalized
-        // );
+      final morphAttributes = geometry.morphAttributes[ name ];
+      if ( morphAttributes != null) {
+        if ( ! tmpMorphAttributes[ name ] ) tmpMorphAttributes[ name ] = [];
+        int j = 0;
+        morphAttributes.forEach( ( morphAttr){
+        final array = Float32Array(morphAttr.count * morphAttr.itemSize);//morphAttr.array.constructor( morphAttr.count * morphAttr.itemSize );
+          tmpMorphAttributes[ name ][ j ] = Float32BufferAttribute(array, morphAttr.itemSize, morphAttr.normalized);//morphAttr.constructor( array, morphAttr.itemSize, morphAttr.normalized );
+          j++;
+        } );
       }
     }
 
@@ -62,8 +64,7 @@ class BufferGeometryUtils{
         final itemSize = attribute.itemSize;
         for (int k = 0; k < itemSize; k ++ ) {
           // double tilde truncates the decimal value
-          hash += '${( attribute.getFrom(getters[ k ], index )! * hashMultiplier + hashAdditive).truncate() },';
-        }
+          hash += '${( attribute.getFrom(getters[ k ], index )! * hashMultiplier + hashAdditive).truncate() },';        }
       }
 
       // Add another reference to the vertex if it's already

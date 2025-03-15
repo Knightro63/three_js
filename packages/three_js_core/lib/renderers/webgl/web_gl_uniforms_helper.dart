@@ -473,7 +473,6 @@ mixin WebGLUniformsHelper {
 
   void setValueV3i(RenderingContext gl, v, [WebGLTextures? textures]) {
     final cache = this.cache;
-
     if (arraysEqual(cache, v)) return;
     gl.uniform3iv(addr, v);
     copyArray(cache, v);
@@ -601,13 +600,11 @@ mixin WebGLUniformsHelper {
 
   void setValueV2fArray(RenderingContext gl, v, [WebGLTextures? textures]) {
     final data = flatten(v, size, 2);
-
     gl.uniform2fv(addr, data);
   }
 
   void setValueV3fArray(RenderingContext gl, v, [WebGLTextures? textures]) {
     final data = flatten(v, size, 3);
-
     gl.uniform3fv(addr, data);
   }
 
@@ -620,13 +617,11 @@ mixin WebGLUniformsHelper {
 
   void setValueM2Array(RenderingContext gl, v, [WebGLTextures? textures]) {
     final data = flatten(v, size, 4);
-
     gl.uniformMatrix2fv(addr, false, data);
   }
 
   void setValueM3Array(RenderingContext gl, v, [WebGLTextures? textures]) {
     final data = flatten(v, size, 9);
-
     gl.uniformMatrix3fv(addr, false, data);
   }
 

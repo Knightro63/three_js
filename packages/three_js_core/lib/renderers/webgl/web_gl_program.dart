@@ -56,7 +56,7 @@ class WebGLProgram extends DefaultProgram with WebGLProgramExtra {
     String prefixVertex, prefixFragment;
     String versionString = parameters.glslVersion != null ? '#version ${parameters.glslVersion}\n' : '';
 
-    if (parameters is RawShaderMaterial) {
+    if (parameters.isRawShaderMaterial) {
       prefixVertex = [
         '#define SHADER_TYPE ${parameters.shaderType}',
         '#define SHADER_NAME ${parameters.shaderName}',
@@ -64,7 +64,7 @@ class WebGLProgram extends DefaultProgram with WebGLProgramExtra {
       ].where((s) => filterEmptyLine(s)).join('\n');
 
       if (prefixVertex.isNotEmpty) {
-        prefixVertex = "$prefixVertex\n";
+        prefixVertex += "\n";
       }
 
       prefixFragment = [
@@ -74,7 +74,7 @@ class WebGLProgram extends DefaultProgram with WebGLProgramExtra {
       ].where((s) => filterEmptyLine(s)).join('\n');
 
       if (prefixFragment.isNotEmpty) {
-        prefixFragment = "$prefixFragment\n";
+        prefixFragment += "\n";
       }
     } 
     else {
@@ -131,8 +131,6 @@ class WebGLProgram extends DefaultProgram with WebGLProgramExtra {
 
         parameters.sheenColorMap ? '#define USE_SHEEN_COLORMAP' : '',
         parameters.sheenRoughnessMap ? '#define USE_SHEEN_ROUGHNESSMAP' : '',
-
-        //
 
         parameters.mapUv != null? '#define MAP_UV ${parameters.mapUv!}': '',
         parameters.alphaMapUv  != null? '#define ALPHAMAP_UV ${parameters.alphaMapUv!}': '',
@@ -263,7 +261,7 @@ class WebGLProgram extends DefaultProgram with WebGLProgramExtra {
         '#endif',
         '\n'
       ].where((s) => filterEmptyLine(s)).join('\n');
-
+      
       prefixFragment = [
         generatePrecision(parameters),
 

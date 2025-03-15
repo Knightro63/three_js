@@ -70,6 +70,18 @@ class _State extends State<WebglSimpleGi> {
 
     // room
     createBox();
+
+    // final materials = three.GroupMaterial();
+
+    // for (int i = 0; i < 8; i ++ ) {
+    //   materials.add( three.MeshBasicMaterial.fromMap( { 'color': (math.Random().nextDouble() * 0xffffff).toInt(), 'side': three.BackSide } ) );
+    // }
+
+    // final boxGeometry = three.BoxGeometry( 3, 3, 3 );
+
+    // final box = three.Mesh( boxGeometry, materials );
+    // threeJs.scene.add( box );
+
     simpleGI(threeJs.renderer!, threeJs.scene );
 
     controls = three.OrbitControls( threeJs.camera, threeJs.globalKey );
@@ -160,6 +172,8 @@ class _State extends State<WebglSimpleGi> {
       }
 
       final colors = attributes['color'].array;
+
+      final startVertex = currentVertex;
       final totalVertex = positions.length / 3;
 
       for (int i = 0; i < 32; i ++ ) {
@@ -194,9 +208,13 @@ class _State extends State<WebglSimpleGi> {
         currentVertex ++;
       }
 
+      (attributes['color'] as three.Float32BufferAttribute).addUpdateRange( startVertex * 3, ( currentVertex - startVertex ) * 3 );
       (attributes['color'] as three.Float32BufferAttribute).needsUpdate = true;
 
       if ( currentVertex >= totalVertex ) {
+        clone = scene.clone();
+        clone.matrixWorldAutoUpdate = false;
+
         bounces++;
         currentVertex = 0;
       }

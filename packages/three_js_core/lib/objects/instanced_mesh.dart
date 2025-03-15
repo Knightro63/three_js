@@ -37,6 +37,10 @@ class InstancedMesh extends Mesh {
     frustumCulled = false;
   }
 
+  void dispsoe(){
+    morphTexture?.dispose();
+  }
+
   @override
   InstancedMesh copy(Object3D source, [bool? recursive]) {
     super.copy(source);
