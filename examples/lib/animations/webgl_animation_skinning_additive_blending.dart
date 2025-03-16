@@ -189,13 +189,13 @@ class _State extends State<WebglAnimationSkinningAdditiveBlending> {
     final folder3 = panel.addFolder( 'General Speed' );
 
     panelSettings = {
-      'modify time scale': 1.0
+      'modify time': 1.0
     };
 
     final baseNames = ['None'];
     baseNames.addAll(baseActions.keys);
 
-    for ( int i = 0, l = baseNames.length; i != l; ++ i ) {
+    for ( int i = 0; i < baseNames.length; i++) {
       final name = baseNames[ i ];
       final settings = baseActions[ name ];
       panelSettings[ name ] = () {
@@ -216,12 +216,12 @@ class _State extends State<WebglAnimationSkinningAdditiveBlending> {
       final settings = additiveActions[ name ];
       panelSettings[name] = settings!['weight'];
       folder2.addSlider( panelSettings, name, 0.0, 1.0 )..step(0.01 )..onChange(( weight ) {
-        setWeight( settings['action'], weight );
+        setWeight( settings['action'], weight);
         settings['weight'] = weight;
       });
     }
 
-    folder3.addSlider(panelSettings, 'modify time scale', 0.0, 1.5)..step(0.01 )..onChange( (x){return modifyTimeScale(x);} );
+    folder3.addSlider(panelSettings, 'modify time', 0.0, 1.5)..step(0.01 )..onChange( (x){return modifyTimeScale(x);} );
 
     folder1.open();
     folder2.open();

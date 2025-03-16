@@ -59,10 +59,10 @@ class _MyAppState extends State<WebglMaterialsBrowser> {
 
     threeJs.scene = three.Scene();
 
-    final ambientLight = three.AmbientLight(0xcccccc, 0.4);
+    final ambientLight = three.AmbientLight(0xcccccc, 1);
     threeJs.scene.add(ambientLight);
 
-    final pointLight = three.PointLight(0xffffff, 0.8);
+    final pointLight = three.PointLight(0xffffff, 200);
     threeJs.camera.add(pointLight);
     threeJs.scene.add(threeJs.camera);
 

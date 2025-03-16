@@ -6,12 +6,17 @@ class UniformsGroup with EventDispatcher {
   String name = '';
   List<Uniform> uniforms = [];
   dynamic usage;
+  int? size;
+  Map? cache;
+  int? bindingPointIndex;
 
 	UniformsGroup():super(){
-		UniformsGroup.id++;
+		UniformsGroup._id++;
+    id = _id;
 	}
 
-  static int id = 0;
+  static int _id = 0;
+  late int id;
 
 	UniformsGroup add(Uniform uniform ) {
 		uniforms.add(uniform);
@@ -45,8 +50,8 @@ class UniformsGroup with EventDispatcher {
 		name = source.name;
 		usage = source.usage;
 
-    for (int j = 0; j < source.uniforms.length; j ++ ) {
-      uniforms.add(uniforms[j].clone());
+    for (final u in source.uniforms) {
+      uniforms.add(u.clone());
     }
 	
 		return this;
@@ -56,7 +61,9 @@ class UniformsGroup with EventDispatcher {
     final UniformsGroup ug = UniformsGroup();
     ug.setName(name);
     ug.setUsage(usage);
-    ug.uniforms = uniforms.removeAt(1) as List<Uniform>;
+    if(uniforms.length > 2){
+      ug.uniforms = uniforms..removeAt(1);
+    }
 		return ug;
 	}
 }

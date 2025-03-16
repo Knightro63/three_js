@@ -16,12 +16,12 @@ class WebGLUniformsGroups{
     maxBindingPoints = gl.getParameter( WebGL.MAX_UNIFORM_BUFFER_BINDINGS );
   }
 
-	void bind(uniformsGroup, WebGLProgram? program ) {
+	void bind(UniformsGroup uniformsGroup, WebGLProgram? program ) {
 		final webglProgram = program?.program;
 		state.uniformBlockBinding( uniformsGroup, webglProgram );
 	}
 
-	void update( uniformsGroup,WebGLProgram? program ) {
+	void update(uniformsGroup, WebGLProgram? program ) {
 		dynamic buffer = buffers[uniformsGroup.id];
 
 		if ( buffer == null ) {
@@ -46,16 +46,16 @@ class WebGLUniformsGroups{
 		}
 	}
 
-	Buffer createBuffer( uniformsGroup ) {
+	Buffer createBuffer(UniformsGroup uniformsGroup ) {
 		final bindingPointIndex = allocateBindingPointIndex();
-		uniformsGroup.__bindingPointIndex = bindingPointIndex;
+		uniformsGroup.bindingPointIndex = bindingPointIndex;
 
 		final buffer = gl.createBuffer();
-		final size = uniformsGroup['__size'];
-		final usage = uniformsGroup['usage'];
+		final size = uniformsGroup.size;
+		final usage = uniformsGroup.usage;
 
 		gl.bindBuffer( WebGL.UNIFORM_BUFFER, buffer );
-		gl.bufferData( WebGL.UNIFORM_BUFFER, size, usage );
+		//gl.bufferData( WebGL.UNIFORM_BUFFER, size!, usage );
 		gl.bindBuffer( WebGL.UNIFORM_BUFFER, null );
 		gl.bindBufferBase( WebGL.UNIFORM_BUFFER, bindingPointIndex, buffer );
 
@@ -164,20 +164,20 @@ class WebGLUniformsGroups{
 		return false;
 	}
 
-	WebGLUniformsGroups prepareUniformsGroup(Map uniformsGroup ) {
+	WebGLUniformsGroups prepareUniformsGroup(UniformsGroup uniformsGroup ) {
 		// determine total buffer size according to the STD140 layout
 		// Hint: STD140 is the only supported layout in WebGL 2
-		final uniforms = uniformsGroup['uniforms'];
+		final uniforms = uniformsGroup.uniforms;
 
 		int offset = 0; // global buffer offset in bytes
 		const int chunkSize = 16; // size of a chunk in bytes
 
 		for (int i = 0, l = uniforms.length; i < l; i ++ ) {
-			final uniformArray = uniforms[ i ] is List ? uniforms[ i ] : [ uniforms[ i ] ];
+			final List<Uniform> uniformArray = [uniforms[ i ]];
 
 			for (int j = 0, jl = uniformArray.length; j < jl; j ++ ) {
 				final uniform = uniformArray[ j ];
-				final values = uniform['value'] is List ? uniform.value : [ uniform.value ];
+				final values = uniform.value is List ? uniform.value : [ uniform.value ];
 
 				for (int k = 0, kl = values.length; k < kl; k ++ ) {
 					final value = values[ k ];
@@ -196,8 +196,8 @@ class WebGLUniformsGroups{
 					}
 
 					// the following two properties will be used for partial buffer updates
-					uniform['__data'] = Float32Array( info['storage']! ~/ Float32List.bytesPerElement);
-					uniform['__offset'] = offset;
+					uniform.data = Float32Array( info['storage']! ~/ Float32List.bytesPerElement);
+					uniform.offset = offset;
 
 					// Update the global offset
 					offset += info['storage']!;
@@ -211,14 +211,14 @@ class WebGLUniformsGroups{
 
 		if ( chunkOffset > 0 ) offset += ( chunkSize - chunkOffset );
 
-		uniformsGroup['__size'] = offset;
-		uniformsGroup['__cache'] = {};
+		uniformsGroup.size = offset;
+		uniformsGroup.cache = {};
 
 		return this;
 	}
 
 	Map<String,int> getUniformSize( value ) {
-		const Map<String,int> info = {
+		final Map<String,int> info = {
 			'boundary': 0, // bytes
 			'storage': 0 // bytes
 		};

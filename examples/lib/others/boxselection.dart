@@ -128,7 +128,7 @@ class _State extends State<BoxSelection> {
 
         for (int i = 0; i < allSelected.length; i ++ ) {
           if(selectionBox.collection[ i ].name != 'selector'){
-            allSelected[ i ].material?.emissive?.setFromHex32( 0xffffff );
+            allSelected[ i ].material?.emissive?.setFromHex32( 0xeeeeee );
           }
         }
       }
@@ -143,7 +143,7 @@ class _State extends State<BoxSelection> {
       final allSelected = selectionBox.select();
 
       for (int i = 0; i < allSelected.length; i ++ ) {
-        allSelected[ i ].material?.emissive?.setFromHex32( 0xffffff );
+        allSelected[ i ].material?.emissive?.setFromHex32( 0xeeeee );
       }
     });
   }

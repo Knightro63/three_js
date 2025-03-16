@@ -553,7 +553,6 @@ class WebGLRenderer {
 
     final drawRange = geometry.drawRange;
     BufferAttribute? position = geometry.attributes["position"];
-
     int drawStart = drawRange['start']! * rangeFactor;
     int drawEnd = ( drawRange['start']! + drawRange['count']! ) * rangeFactor;
 
@@ -1766,20 +1765,31 @@ class WebGLRenderer {
         final textureFormat = texture.format;
         final textureType = texture.type;
 
-        if (capabilities.textureFormatReadable( textureFormat )) {
+        if (textureFormat != RGBAFormat &&
+            utils.convert(textureFormat) != _gl.getParameter(WebGL.IMPLEMENTATION_COLOR_READ_FORMAT)) {
           console.warning('WebGLRenderer.readRenderTargetPixels: renderTarget is not in RGBA or implementation defined format.');
           return;
         }
 
-        if (!capabilities.textureTypeReadable( textureType )) {
-          console.error( 'THREE.WebGLRenderer.readRenderTargetPixels: renderTarget is not in UnsignedByteType or implementation defined type.' );
+        final halfFloatSupportedByExt = textureType == HalfFloatType &&
+            (extensions.get('EXT_color_buffer_half_float') ||
+                (capabilities.isWebGL2 && extensions.get('EXT_color_buffer_float')));
+
+        if (textureType != UnsignedByteType &&
+            utils.convert(textureType) !=
+                _gl.getParameter(WebGL.IMPLEMENTATION_COLOR_READ_TYPE) && // IE11, Edge and Chrome Mac < 52 (#9513)
+            !(textureType == FloatType &&
+                (capabilities.isWebGL2 ||
+                    extensions.get('OES_texture_float') ||
+                    extensions.get('WEBGL_color_buffer_float'))) && // Chrome Mac >= 52 and Firefox
+            !halfFloatSupportedByExt) {
+          console.warning('WebGLRenderer.readRenderTargetPixels: renderTarget is not in UnsignedByteType or implementation defined type.');
           return;
         }
-
         // the following if statement ensures valid read requests (no out-of-bounds pixels, see #8604)
 
         if ((x >= 0 && x <= (renderTarget.width - width)) && (y >= 0 && y <= (renderTarget.height - height))) {
-          _gl.readPixels(x, y, width, height, utils.convert(textureFormat), utils.convert(textureType), buffer);
+          _gl.readPixels(x, y, width, height, utils.convert(textureFormat), utils.convert(textureType), kIsWeb?buffer.data:buffer);
         }
       } finally {
         final framebuffer = (_currentRenderTarget != null) ? properties.get(_currentRenderTarget)["__webglFramebuffer"] : null;

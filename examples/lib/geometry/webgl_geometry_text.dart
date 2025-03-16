@@ -85,7 +85,7 @@ class _MyAppState extends State<WebglGeometryText> {
     dirLight.position.setValues(0, 0, 1).normalize();
     threeJs.scene.add(dirLight);
 
-    final pointLight = three.PointLight(0xffffff, 1.5);
+    final pointLight = three.PointLight(0xffffff, 150);
     pointLight.position.setValues(0, 100, 90);
     threeJs.scene.add(pointLight);
 

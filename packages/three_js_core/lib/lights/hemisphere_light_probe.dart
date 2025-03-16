@@ -4,7 +4,7 @@ import 'light_probe.dart';
 import 'dart:math' as math;
 
 class HemisphereLightProbe extends LightProbe {
-  HemisphereLightProbe(Color skyColor, Color groundColor, double? intensity):super.create(null, intensity) {
+  HemisphereLightProbe(Color skyColor, Color groundColor, [double intensity = 1.0]):super.create(null, intensity) {
     final color1 = Color(skyColor.red, skyColor.green, skyColor.blue);
     final color2 = Color(groundColor.red, groundColor.green, groundColor.blue);
 

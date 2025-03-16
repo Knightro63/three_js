@@ -61,15 +61,15 @@ class _State extends State<WebglMorphtargetsSphere> {
 
     threeJs.camera.lookAt(threeJs.scene.position);
 
-    final light1 = three.PointLight(0xff2200, 0.7);
+    final light1 = three.PointLight(0xff2200, 70);
     light1.position.setValues(100, 100, 100);
     threeJs.scene.add(light1);
 
-    final light2 = three.PointLight(0x22ff00, 0.7);
+    final light2 = three.PointLight(0x22ff00, 70);
     light2.position.setValues(-100, -100, -100);
     threeJs.scene.add(light2);
 
-    threeJs.scene.add(three.AmbientLight(0x111111, 1));
+    threeJs.scene.add(three.AmbientLight(0x111111, 0.4));
 
     final loader = three.GLTFLoader();
 

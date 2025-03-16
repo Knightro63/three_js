@@ -980,9 +980,10 @@ class WebGLTextures {
 
 		state.bindFramebuffer( WebGL.FRAMEBUFFER, framebuffer );
 
-		if ( useMultisampledRTT( renderTarget ) ) {
+		if ( useMultisampledRTT( renderTarget ) && multisampledRTTExt is! bool) {
 			multisampledRTTExt.framebufferTexture2DMultisampleEXT( WebGL.FRAMEBUFFER, attachment, textureTarget, textureProperties['__webglTexture'], 0, getRenderTargetSamples( renderTarget ) );
-		} else if ( textureTarget == WebGL.TEXTURE_2D || ( textureTarget >= WebGL.TEXTURE_CUBE_MAP_POSITIVE_X && textureTarget <= WebGL.TEXTURE_CUBE_MAP_NEGATIVE_Z ) ) { // see #24753
+		} 
+    else if ( textureTarget == WebGL.TEXTURE_2D || ( textureTarget >= WebGL.TEXTURE_CUBE_MAP_POSITIVE_X && textureTarget <= WebGL.TEXTURE_CUBE_MAP_NEGATIVE_Z ) ) { // see #24753
 			_gl.framebufferTexture2D( WebGL.FRAMEBUFFER, attachment, textureTarget, textureProperties['__webglTexture'], level );
 		}
 

@@ -514,7 +514,7 @@ class WebGLState {
     final boundTexture = currentBoundTextures[currentTextureSlot];
 
     if (boundTexture != null && boundTexture.type != null) {
-      gl.bindTexture(boundTexture.type!, texture);
+      gl.bindTexture(boundTexture.type!, kIsWeb?null:texture);
       boundTexture.type = null;
       boundTexture.texture = null;
     }
@@ -631,7 +631,7 @@ class WebGLState {
       currentViewport.setFrom(viewport);
     }
   }
-	void updateUBOMapping( uniformsGroup, Program program ) {
+	void updateUBOMapping(UniformsGroup uniformsGroup, Program program ) {
 		dynamic mapping = uboProgramMap.get( program );
 
 		if ( mapping == null ) {
@@ -642,7 +642,7 @@ class WebGLState {
 		dynamic blockIndex = mapping.get( uniformsGroup );
 
 		if ( blockIndex == null ) {
-			blockIndex = gl.getUniformBlockIndex( program, uniformsGroup['name'] );
+			blockIndex = gl.getUniformBlockIndex( program, uniformsGroup.name );
 			mapping.set( uniformsGroup, blockIndex );
 		}
 	}

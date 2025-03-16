@@ -67,15 +67,11 @@ class webgl_animation_keyframesState extends State<WebglAnimationKeyframes> {
     threeJs.scene.background = three.Color.fromHex32(0xbfe3dd);
     threeJs.scene.environment = pmremGenerator.fromScene(RoomEnvironment(), 0.04).texture;
 
-    final ambientLight = three.AmbientLight( 0xcccccc, 0.4 );
-    threeJs.scene.add( ambientLight );
-
-    final pointLight = three.PointLight( 0xffffff, 0.8 );
-    threeJs.camera.add( pointLight );
-    threeJs.scene.add(threeJs.camera);
-    threeJs.camera.lookAt(threeJs.scene.position);
-
-    controls= three.OrbitControls(threeJs.camera, threeJs.globalKey);
+    controls = three.OrbitControls(threeJs.camera, threeJs.globalKey);
+    controls.target.setValues( 0, 0.5, 0 );
+    controls.update();
+    controls.enablePan = false;
+    controls.enableDamping = true;
 
     final loader = three.GLTFLoader().setPath('assets/models/gltf/test/');
 

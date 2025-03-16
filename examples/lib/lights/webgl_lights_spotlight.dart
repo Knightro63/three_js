@@ -109,7 +109,7 @@ class _State extends State<WebglLightsSpotlight> {
     spotLight.angle = math.pi / 6;
     spotLight.penumbra = 1;
     spotLight.decay = 2;
-    spotLight.distance = 0;
+    spotLight.distance = 20;
     spotLight.map = textures[ 'disturb.jpg' ];
 
     spotLight.castShadow = true;
