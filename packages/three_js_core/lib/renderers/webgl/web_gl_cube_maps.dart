@@ -1,6 +1,7 @@
 part of three_webgl;
 
 class WebGLCubeMaps {
+  bool _didDispose = false;
   WebGLRenderer renderer;
   WeakMap cubemaps = WeakMap();
 
@@ -62,9 +63,12 @@ class WebGLCubeMaps {
   }
 
   void dispose() {
+    if(_didDispose) return;
+    _didDispose = true;
     for(final key in cubemaps.keys){
       cubemaps[key].dispose();
     }
     cubemaps.clear();
+    renderer.dispose();
   }
 }

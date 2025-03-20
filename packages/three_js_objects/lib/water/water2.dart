@@ -21,7 +21,7 @@ class WaterOptions{
     FutureOr<Texture?>? normalMap0,
     FutureOr<Texture?>? normalMap1
   }){
-    this.shader = shader ?? Water.waterShader;
+    this.shader = shader ?? Water2.waterShader;
     this.flowDirection = flowDirection ?? Vector2( 1, 0 );
 
     final textureLoader = TextureLoader();
@@ -38,7 +38,7 @@ class WaterOptions{
 		flowSpeed = options['flowSpeed'] ?? 0.03;
 		reflectivity = options['reflectivity'] ?? 0.02;
 		scale = options['scale'] ?? 1;
-		shader = options['shader'] ?? Water.waterShader;
+		shader = options['shader'] ?? Water2.waterShader;
 
 		final textureLoader = TextureLoader();
 
@@ -83,7 +83,7 @@ class WaterOptions{
  *
  */
 
-class Water extends Mesh {
+class Water2 extends Mesh {
   bool isWater = true;
   final cycle = 0.15; // a cycle of a flow map phase
   late double halfCycle;
@@ -91,7 +91,7 @@ class Water extends Mesh {
   final textureMatrix = Matrix4();
   final clock = Clock();
 
-	Water(super.geometry, [WaterOptions? options]) {
+	Water2(super.geometry, [WaterOptions? options]) {
 		type = 'Water';
     options ??= WaterOptions();
     _init(options);
@@ -146,13 +146,13 @@ class Water extends Mesh {
 		if ( flowMap != null ) {
 			material?.defines?['USE_FLOWMAP'] = '';
 			material?.uniforms[ 'tFlowMap' ] = {
-				type: 't',
+				'type': 't',
 				'value': flowMap
 			};
 		}
     else {
 			material?.uniforms[ 'flowDirection' ] = {
-				type: 'v2',
+				'type': 'v2',
 				'value': flowDirection
 			};
 		}
@@ -192,15 +192,16 @@ class Water extends Mesh {
       Material? material,
       Map<String, dynamic>? group
     }){
+      
       updateTextureMatrix( camera! );
       updateFlow();
 
       visible = true;
 
-      reflector.matrixWorld.setFrom(matrixWorld );
-      refractor.matrixWorld.setFrom(matrixWorld );
+      reflector.matrixWorld.setFrom(this.matrixWorld );
+      refractor.matrixWorld.setFrom(this.matrixWorld );
 
-      reflector.onBeforeRender!(renderer:renderer, scene:scene, camera:camera, renderTarget: null);//, renderTarget: renderTarget);
+      reflector.onBeforeRender!(renderer:renderer, scene:scene, camera:camera);//, renderTarget: renderTarget);
       refractor.onBeforeRender!(renderer:renderer, scene:scene, camera:camera);
 
       visible = true;
@@ -216,7 +217,7 @@ class Water extends Mesh {
 
     textureMatrix.multiply( camera.projectionMatrix );
     textureMatrix.multiply( camera.matrixWorldInverse );
-    textureMatrix.multiply( matrixWorld );
+    textureMatrix.multiply( this.matrixWorld );
   }
 
   void updateFlow() {

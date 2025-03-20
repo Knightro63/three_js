@@ -8,6 +8,7 @@ class DefaultProgram {
 }
 
 class WebGLProgram extends DefaultProgram with WebGLProgramExtra {
+  bool _didDispose = false;
   late String name;
   WebGLRenderer renderer;
   String cacheKey;
@@ -33,6 +34,17 @@ class WebGLProgram extends DefaultProgram with WebGLProgramExtra {
     gl = renderer.getContext();
     program = gl.createProgram();
     init();
+  }
+
+  void dispose(){
+    if(_didDispose) return;
+    _didDispose = true;
+    renderer.dispose();
+    bindingStates.dispose();
+    parameters.dispose();
+    diagnostics.clear();
+    cachedUniforms?.dispose();
+    cachedAttributes?.clear();
   }
 
   void init() {
@@ -468,7 +480,7 @@ class WebGLProgram extends DefaultProgram with WebGLProgramExtra {
       gl.deleteShader(glVertexShader.shader);
       gl.deleteShader(glFragmentShader.shader);
 
-      cachedUniforms = WebGLUniforms( gl, program! );
+      cachedUniforms = WebGLUniforms( gl, this );
       cachedAttributes = fetchAttributeLocations( gl, program! );
     };
   }

@@ -16,6 +16,7 @@ class MultiViews extends StatefulWidget {
 class _MyAppState extends State<MultiViews> {
   three.WebGLRenderer? renderer;
   late FlutterAngleTexture three3dRender;
+  FlutterAngle angle = FlutterAngle();
 
   @override
   void initState() {
@@ -28,8 +29,8 @@ class _MyAppState extends State<MultiViews> {
 
   Future<bool> init() async {
     if(!kIsWeb) {
-      await FlutterAngle.initOpenGL();
-      three3dRender = await FlutterAngle.createTexture(
+      await angle.init();
+      three3dRender = await angle.createTexture(
         AngleOptions(
           width: 1024, 
           height: 1024, 

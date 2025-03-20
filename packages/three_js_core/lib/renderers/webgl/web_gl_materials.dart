@@ -1,10 +1,17 @@
 part of three_webgl;
 
 class WebGLMaterials {
+  bool _didDispose = false;
   WebGLRenderer renderer;
   WebGLProperties properties;
 
   WebGLMaterials(this.renderer, this.properties);
+
+  void dispose(){
+    if(_didDispose) return;
+    _didDispose = true;
+    properties.dispose();
+  }
 
 	void refreshTransformUniform(Texture? map, Map? uniform ) {
 		if ( map?.matrixAutoUpdate == true) {

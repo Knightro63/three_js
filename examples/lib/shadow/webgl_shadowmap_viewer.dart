@@ -74,29 +74,24 @@ class _MyAppState extends State<WebglShadowmapViewer> {
 
     threeJs.scene.add(three.AmbientLight(0x404040,0.4));
 
-    final spotLight = three.SpotLight(0xffffff,100);
+    final spotLight = three.SpotLight(0xffffff,800);
     spotLight.name = 'Spot Light';
-    spotLight.angle = math.pi / 6;
-    spotLight.penumbra = 1;
-    spotLight.decay = 2;
-    spotLight.distance = 150;
+    spotLight.angle = math.pi / 5;
+    spotLight.penumbra = 0.3;
     spotLight.position.setValues(10, 10, 5);
-    
     spotLight.castShadow = true;
-    spotLight.shadow!.camera!.near = 1;
-    spotLight.shadow!.camera!.far = 10;
+    spotLight.shadow!.camera!.near = 8;
+    spotLight.shadow!.camera!.far = 30;
     spotLight.shadow!.mapSize.width = 1024;
     spotLight.shadow!.mapSize.height = 1024;
-    spotLight.shadow?.focus = 1;
-    spotLight.shadow?.bias = - 0.002;
-    spotLight.shadow?.radius = 4;
+    //spotLight.shadow?.focus = 1;
 
     threeJs.scene.add(spotLight);
     
 
     threeJs.scene.add(CameraHelper(spotLight.shadow!.camera!));
 
-    final dirLight = three.DirectionalLight(0xffffff, 1.5);
+    final dirLight = three.DirectionalLight(0xffffff, 1.0);
     dirLight.name = 'Dir. Light';
     dirLight.position.setValues(0, 10, 0);
     dirLight.castShadow = true;

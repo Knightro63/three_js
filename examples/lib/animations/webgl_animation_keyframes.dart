@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:example/src/statistics.dart';
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
-import 'package:three_js_helpers/three_js_helpers.dart';
 
 class WebglAnimationKeyframes extends StatefulWidget {
   
@@ -27,7 +26,7 @@ class webgl_animation_keyframesState extends State<WebglAnimationKeyframes> {
     });
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
-      setup: setup
+      setup: setup,
     );
     super.initState();
   }
@@ -63,9 +62,15 @@ class webgl_animation_keyframesState extends State<WebglAnimationKeyframes> {
     // scene
     threeJs.scene = three.Scene();
 
-    final pmremGenerator = three.PMREMGenerator(threeJs.renderer!);
+    // final pmremGenerator = three.PMREMGenerator(threeJs.renderer!);
     threeJs.scene.background = three.Color.fromHex32(0xbfe3dd);
-    threeJs.scene.environment = pmremGenerator.fromScene(RoomEnvironment(), 0.04).texture;
+    // threeJs.scene.environment = pmremGenerator.fromScene(RoomEnvironment(), sigma: 0.04).texture;
+    threeJs.scene.add(three.AmbientLight(0xffffff,0.8));
+
+    final pointLight = three.PointLight( 0xffffff, 6 );
+    threeJs.camera.add( pointLight );
+    threeJs.scene.add(threeJs.camera);
+    threeJs.camera.lookAt(threeJs.scene.position);
 
     controls = three.OrbitControls(threeJs.camera, threeJs.globalKey);
     controls.target.setValues( 0, 0.5, 0 );
@@ -89,6 +94,13 @@ class webgl_animation_keyframesState extends State<WebglAnimationKeyframes> {
 
     mixer = three.AnimationMixer(model);
     mixer.clipAction(result.animations![0], null, null)!.play();
+
+    threeJs.postProcessor = ([dt]){
+      // threeJs.renderer!.clear();
+      // renderer!.setViewport(0,0,width,height);
+      threeJs.renderer?.setRenderTarget(null);
+      threeJs.renderer!.render(threeJs.scene, threeJs.camera);
+    };
 
     threeJs.addAnimationEvent((dt){
       mixer.update(dt);

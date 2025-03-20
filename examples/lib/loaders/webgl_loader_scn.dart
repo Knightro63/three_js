@@ -80,13 +80,13 @@ class _MyAppState extends State<WebglLoaderSCN> {
 
     threeJs.camera.lookAt(threeJs.scene.position);
 
-    three.SCNLoader loader = three.SCNLoader().setPath('assets/models/scn/');
-    dynamic result = await loader.fromAsset( 'scene.scn' );
+    //three.SCNLoader loader = three.SCNLoader().setPath('assets/models/scn/');
+    //dynamic result = await loader.fromAsset( 'scene.scn' );
 
-    final object = result!.scene;
-    threeJs.scene.add(object);
-    mixer = three.AnimationMixer(object);
-    mixer.clipAction(result.animations![4], null, null)!.play();
+    // final object = result!.scene;
+    // threeJs.scene.add(object);
+    // mixer = three.AnimationMixer(object);
+    // mixer.clipAction(result.animations![4], null, null)!.play();
     
     threeJs.addAnimationEvent((dt){
       mixer.update(dt);

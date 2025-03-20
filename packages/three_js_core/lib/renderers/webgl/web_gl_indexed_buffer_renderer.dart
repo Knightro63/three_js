@@ -1,7 +1,7 @@
 part of three_webgl;
 
 class WebGLIndexedBufferRenderer extends BaseWebGLBufferRenderer {
-  bool isWebGL2 = false;
+  bool _didDispose = false;
   dynamic mode;
   dynamic type;
   late int bytesPerElement;
@@ -10,6 +10,13 @@ class WebGLIndexedBufferRenderer extends BaseWebGLBufferRenderer {
   WebGLInfo info;
 
   WebGLIndexedBufferRenderer(this.gl, this.extensions, this.info);
+
+  void dispose(){
+    if(_didDispose) return;
+    _didDispose = true;
+    extensions.dispose();
+    info.dispose();
+  }
 
   @override
   void setMode(value) {

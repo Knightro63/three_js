@@ -154,15 +154,20 @@ class _State extends State<WebglLoaderMd2> {
 
     final three.MD2Character character = three.MD2Character();
     character.scale = 0.03;
-
+    late three.AnimationMixer mixer;
     await character.loadParts( config ).then((r){
-      character.setAnimation( character.meshBody!.animations[ 0 ]);
+      //character.setAnimation( character.meshBody!.animations[ 0 ]);
+      //final idleAction = mixer.clipAction(animations[0]);
     });
+    final animations = character.meshBody!.animations;
+    mixer = three.AnimationMixer(character.meshBody!);
     threeJs.scene.add( character.root );
 
+    final idleAction = mixer.clipAction(animations[0]);
+    idleAction!.play();
     threeJs.addAnimationEvent((dt){
       controls.update();
-      character.update(dt);
+      mixer.update(dt);
     });
 
     final Map<String,dynamic> playbackConfig = {
@@ -196,7 +201,6 @@ class _State extends State<WebglLoaderMd2> {
         });//folder.add( playbackConfig, name ).name( labelize( name ) );
       }
     }
-
     setupSkinsGUI( ) {
       final folder = wg.addFolder( 'Skins' );
 
@@ -213,9 +217,6 @@ class _State extends State<WebglLoaderMd2> {
         });
       }
     }
-
-    //
-
     setupGUIAnimations() {
       final folder = wg.addFolder( 'Animations' );
 

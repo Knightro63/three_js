@@ -1,6 +1,7 @@
 part of three_webgl;
 
 class WebGLCapabilities {
+  bool _didDispose = false;
   bool isWebGL2 = true;
 
   Map<String, dynamic> parameters;
@@ -27,7 +28,7 @@ class WebGLCapabilities {
   late bool vertexTextures;
   late int maxSamples;
 
-  bool get drawBuffers => isWebGL2 || extensions.has('WEBGL_draw_buffers');
+  bool drawBuffers = true;
 
   WebGLCapabilities(this.gl, this.extensions, this.parameters, this.utils) {
     precision = parameters["precision"] ?? "highp";
@@ -105,5 +106,12 @@ class WebGLCapabilities {
 		}
 
 		return 'lowp';
+  }
+
+  void dispose(){
+    if(_didDispose) return;
+    _didDispose = true;
+    parameters.clear();
+    extensions.dispose();
   }
 }

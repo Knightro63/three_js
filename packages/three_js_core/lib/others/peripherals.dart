@@ -53,6 +53,8 @@ class PeripheralsState extends State<Peripherals> {
 
   dynamic pointerLockElement;
 
+  late final PanGestureRecognizer panGestureRecognizer;
+
   @override
   void initState() {
     super.initState();
@@ -68,6 +70,22 @@ class PeripheralsState extends State<Peripherals> {
       }
       FocusScope.of(context).requestFocus(focusNode);
     });
+
+    panGestureRecognizer = PanGestureRecognizer(
+      supportedDevices: {
+        PointerDeviceKind.touch,
+        PointerDeviceKind.mouse,
+        PointerDeviceKind.stylus,
+        PointerDeviceKind.invertedStylus,
+        PointerDeviceKind.trackpad
+      }
+    )
+    ..onStart = (event){
+
+    }
+    ..onUpdate = (event){
+
+    };
   }
 
   void removeAllListeners() {
@@ -99,9 +117,15 @@ class PeripheralsState extends State<Peripherals> {
         }
       },
       child:Listener(
-        onPointerSignal: (pointerSignal) {
-          if (pointerSignal is PointerScrollEvent) {
-            _onWheel(context, pointerSignal);
+        onPointerPanZoomStart: (event){
+          _onPointerDown(context, event);
+        },
+        onPointerPanZoomUpdate: (event){
+          _onPointerMove(context, event);
+        },
+        onPointerSignal: (event) {
+          if (event is PointerScrollEvent) {
+            _onWheel(context, event);
           }
         },
         onPointerDown: (PointerDownEvent event) {
@@ -132,26 +156,27 @@ class PeripheralsState extends State<Peripherals> {
     //final wpe = WebPointerEvent.fromPointerScrollEvent(context, event);
     _emit(PeripheralType.keyup, event);
   }
+
   void _onWheel(BuildContext context, PointerScrollEvent event) {
-    final wpe = WebPointerEvent.fromPointerScrollEvent(context, event);
+    final wpe = WebPointerEvent.fromEvent(context, event);
     _emit(PeripheralType.wheel, wpe);
   }
 
-  void _onPointerDown(BuildContext context, PointerDownEvent event) {
-    final wpe = WebPointerEvent.fromPointerDownEvent(context, event);
+  void _onPointerDown(BuildContext context, PointerEvent event) {
+    final wpe = WebPointerEvent.fromEvent(context, event);
     _emit(PeripheralType.pointerdown, wpe);
   }
 
-  void _onPointerMove(BuildContext context, PointerMoveEvent event) {
-    final wpe = WebPointerEvent.fromPointerMoveEvent(context, event);
+  void _onPointerMove(BuildContext context, PointerEvent event) {
+    final wpe = WebPointerEvent.fromEvent(context, event);
     _emit(PeripheralType.pointermove, wpe);
   }
   void _onMouseMove(BuildContext context, PointerHoverEvent event) {
-    final wpe = WebPointerEvent.fromMouseMoveEvent(context, event);
+    final wpe = WebPointerEvent.fromEvent(context, event);
     _emit(PeripheralType.pointerHover, wpe);
   }
   void _onPointerUp(BuildContext context, PointerUpEvent event) {
-    final wpe = WebPointerEvent.fromPointerUpEvent(context, event);
+    final wpe = WebPointerEvent.fromEvent(context, event);
     _emit(PeripheralType.pointerup, wpe);
   }
   void _onPointerCancel(BuildContext context, PointerCancelEvent event) {
@@ -271,25 +296,8 @@ class WebPointerEvent {
     return wpe;
   }
 
-  factory WebPointerEvent.fromPointerScrollEvent(
-      BuildContext context, PointerScrollEvent event) {
-    return convertEvent(context, event);
-  }
-
-  factory WebPointerEvent.fromPointerDownEvent(
-      BuildContext context, PointerDownEvent event) {
-    return convertEvent(context, event);
-  }
-
-  factory WebPointerEvent.fromPointerMoveEvent(
-      BuildContext context, PointerMoveEvent event) {
-    return convertEvent(context, event);
-  }
-  factory WebPointerEvent.fromMouseMoveEvent(BuildContext context, PointerHoverEvent event) {
-    return convertEvent(context, event);
-  }
-  factory WebPointerEvent.fromPointerUpEvent(
-      BuildContext context, PointerUpEvent event) {
+  factory WebPointerEvent.fromEvent(
+      BuildContext context, PointerEvent event) {
     return convertEvent(context, event);
   }
 

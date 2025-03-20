@@ -1,10 +1,16 @@
 part of three_webgl;
 
 class WebGLUtils {
-  bool isWebGL2 = true;
+  bool _didDispose = false;
   WebGLExtensions extensions;
 
   WebGLUtils(this.extensions);
+
+  void dispose(){
+    if(_didDispose) return;
+    _didDispose = true;
+    extensions.dispose();
+  }
 
   dynamic convert(int p, [String colorSpace = NoColorSpace]) {
     dynamic extension;

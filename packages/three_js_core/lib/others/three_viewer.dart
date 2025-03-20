@@ -7,12 +7,13 @@ import 'package:three_js_core/others/index.dart';
 import 'package:three_js_core/three_js_core.dart' as core;
 import 'package:three_js_math/three_js_math.dart';
 
+bool isEmulator = false;
+
 class Settings{
   Settings({
     this.useSourceTexture = false,
     this.enableShadowMap = true,
     this.autoClear = true,
-    this.isEmulator = false,
     Map<String,dynamic>? renderOptions,
     this.animate = true,
     this.alpha = false,
@@ -45,7 +46,6 @@ class Settings{
   bool autoClearDepth;
   bool autoClearStencil;
   bool localClippingEnabled;
-  bool isEmulator;
   int clearColor;
   double clearAlpha;
   late Map<String,dynamic> renderOptions;
@@ -111,6 +111,8 @@ class ThreeJS {
   List<Function(double dt)> events = [];
   List<Function()> disposeEvents = [];
 
+  FlutterAngle angle = FlutterAngle();
+
   void addAnimationEvent(Function(double dt) event){
     events.add(event);
   }
@@ -122,9 +124,6 @@ class ThreeJS {
     if(disposed) return;
     disposed = true;
     ticker?.dispose();
-    if(texture != null){
-      FlutterAngle.deleteTexture(texture!);
-    }
     renderer?.dispose();
     renderTarget?.dispose();
     lateRenderer?.dispose();
@@ -133,12 +132,19 @@ class ThreeJS {
       event.call();
     }
 
-    texture = null;
+    
     camera.dispose();
     events.clear();
     disposeEvents.clear();
 
-    // allNativeData.dispose();
+    allNativeData.dispose();
+
+    disposeWebGL.forEach((d){
+      d.dispose(gl);
+    });
+
+    angle.dispose([texture!]);
+    texture = null;
   }
 
   void initSize(BuildContext context){
@@ -173,7 +179,7 @@ class ThreeJS {
   }
   Future<void> render([double? dt]) async{
     if(sourceTexture == null){
-      FlutterAngle.activateTexture(texture!);
+      angle.activateTexture(texture!);
     }
     rendererUpdate?.call(); 
     if(postProcessor == null){
@@ -186,9 +192,9 @@ class ThreeJS {
     }
     
     if(sourceTexture != null){
-      FlutterAngle.activateTexture(texture!);
+      angle.activateTexture(texture!);
     }
-    await FlutterAngle.updateTexture(texture!,sourceTexture);
+    await angle.updateTexture(texture!,sourceTexture);
   }
   
   void initRenderer() {
@@ -279,9 +285,9 @@ class ThreeJS {
     width = screenSize!.width;
     height = screenSize!.height;
     if(texture == null){
-      await FlutterAngle.initOpenGL(false,!kIsWeb&&Platform.isAndroid?settings.isEmulator:false);
+      await angle.init(false,!kIsWeb&&Platform.isAndroid?!isEmulator:false);
       
-      texture = await FlutterAngle.createTexture(      
+      texture = await angle.createTexture(      
         AngleOptions(
           width: width.toInt(), 
           height: height.toInt(), 

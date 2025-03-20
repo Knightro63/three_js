@@ -82,16 +82,12 @@ class _MyAppState extends State<FlutterGame> {
 
     threeJs.scene = three.Scene();
 
-    final ambientLight = three.AmbientLight(0xffffff, 0.3);
+    final ambientLight = three.AmbientLight(0xffffff, 0.4);
     threeJs.scene.add(ambientLight);
 
-    final pointLight = three.PointLight(0xffffff, 0.1);
-
-    pointLight.position.setValues(0, 0, 0);
-
-    threeJs.camera.add(pointLight);
+    final pointLight = three.PointLight( 0xffffff, 10 );
+    threeJs.camera.add( pointLight );
     threeJs.scene.add(threeJs.camera);
-
     threeJs.camera.lookAt(threeJs.scene.position);
 
     three.GLTFLoader loader = three.GLTFLoader(flipY: true).setPath('assets/models/gltf/flutter/');

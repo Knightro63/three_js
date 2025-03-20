@@ -1,6 +1,7 @@
 part of three_webgl;
 
 class WebGLGeometries {
+  bool _didDispose = false;
   RenderingContext gl;
   WebGLAttributes attributes;
   WebGLInfo info;
@@ -144,11 +145,16 @@ class WebGLGeometries {
   }
 
   void dispose() {
+    if(_didDispose) return;
+    _didDispose = true;
     for(final key in wireframeAttributes.keys){
       (wireframeAttributes[key] as BufferAttribute).dispose();
     }
 
     wireframeAttributes.clear();
+    geometries.clear();
     attributes.dispose();
+    info.dispose();
+    bindingStates.dispose();
   }
 }

@@ -358,7 +358,7 @@ class AnimationMixer with EventDispatcher {
     final interpolants = _controlInterpolants,
         lastActiveIndex = _nActiveControlInterpolants++;
 
-    Interpolant? interpolant = interpolants[lastActiveIndex];
+    Interpolant? interpolant = interpolants.length < lastActiveIndex?interpolants[lastActiveIndex]:null;
 
     if (interpolant == null) {
       console.info(" AnimationMixer LinearInterpolant init todo");
@@ -366,7 +366,7 @@ class AnimationMixer with EventDispatcher {
           List<num>.filled(2, 0), 1, _controlInterpolantsResultBuffer);
 
       interpolant.cachedIndex = lastActiveIndex;
-      interpolants[lastActiveIndex] = interpolant;
+      interpolants.listSetter(lastActiveIndex,interpolant);//[lastActiveIndex] = interpolant;
     }
 
     return interpolant;
@@ -381,8 +381,8 @@ class AnimationMixer with EventDispatcher {
     interpolant.cachedIndex = firstInactiveIndex;
     interpolants[firstInactiveIndex] = interpolant;
 
-    lastActiveInterpolant._cacheIndex = prevIndex;
-    interpolants[prevIndex] = lastActiveInterpolant;
+    lastActiveInterpolant.cachedIndex = prevIndex;
+    interpolants.listSetter(prevIndex, lastActiveInterpolant);//[prevIndex] = lastActiveInterpolant;
   }
 
   // return an action for a clip optionally using a custom root target

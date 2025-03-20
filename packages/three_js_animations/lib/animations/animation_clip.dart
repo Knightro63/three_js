@@ -214,14 +214,13 @@ class AnimationClip {
     // tested with https://regex101.com/ on trick sequences
     // such flamingo_flyA_003, flamingo_run1_003, crdeath0059
     RegExp pattern = RegExp(r"^([\w-]*?)([\d]+)$");
-
+    
     // sort morph target names into animation groups based
     // patterns like Walk_001, Walk_002, Run_001, Run_002
     for (final morphTarget in morphTargets) {
       final parts = pattern.allMatches(morphTarget.name);
       if(parts.isNotEmpty){
         final name = parts.first.group(1)!;
-
         List<MorphTarget>? animationMorphTargets = animationToMorphTargets[name];
 
         if (animationMorphTargets == null) {

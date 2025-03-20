@@ -145,6 +145,10 @@ mixin WebGLUniformsHelper {
   UniformLocation addr = UniformLocation(0);
   late int size;
 
+  void dispose(){
+    cache.clear();
+  }
+
   List<double> flatten(List array, int nBlocks, int blockSize) {
     if(array.isEmpty) return [];
     final firstElem = array[0];

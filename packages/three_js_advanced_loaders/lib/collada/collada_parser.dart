@@ -1700,19 +1700,19 @@ class ColladaParser{
       'setJointValue': ( jointIndex, value ) {
         final jointData = jointMap[ jointIndex ];
 
-        if ( jointData ) {
-          final joint = jointData.joint;
+        if ( jointData != null) {
+          final joint = jointData['joint'];
 
-          if ( value > joint.limits.max || value < joint.limits.min ) {
+          if ( value > joint['limits']['max'] || value < joint['limits']['min'] ) {
             console.warning( 'ColladaLoader: Joint $jointIndex value $value outside of limits (min: ${joint['limits']['min']}, max: ${joint['limits']['max']}).' );
           } 
-          else if ( joint.static ) {
+          else if ( joint['static'] == true) {
             console.warning( 'ColladaLoader: Joint $jointIndex is static.' );
           } 
           else {
-            final object = jointData.object;
-            final axis = joint.axis;
-            final transforms = jointData.transforms;
+            final object = jointData['object'];
+            final axis = joint['axis'];
+            final transforms = jointData['transforms'];
 
             matrix.identity();
 
@@ -1724,9 +1724,9 @@ class ColladaParser{
 
               // if there is a connection of the transform node with a joint, apply the joint value
 
-              if ( transform.sid && transform.sid.indexOf( jointIndex ) != - 1 ) {
+              if ( transform['sid'] && transform['sid'].indexOf( jointIndex ) != - 1 ) {
 
-                switch ( joint.type ) {
+                switch ( joint['type'] ) {
 
                   case 'revolute':
                     matrix.multiply( m0.makeRotationAxis( axis, MathUtils.degToRad( value ) ) );
@@ -1768,10 +1768,10 @@ class ColladaParser{
 
             }
 
-            object.matrix.copy( matrix );
+            object.matrix.setFrom( matrix );
             object.matrix.decompose( object.position, object.quaternion, object.scale );
 
-            jointMap[ jointIndex ].position = value;
+            jointMap[ jointIndex ]['position'] = value;
 
           }
 
@@ -2591,13 +2591,12 @@ class ColladaParser{
 
       // now we provide for each vertex a set of four index and weight values.
       // the order of the skin data matches the order of vertices
-
       for (int j = 0; j < BONE_LIMIT; j ++ ) {
         final d = vertexSkinData.length > j ? vertexSkinData[ j ]:null;
 
         if ( d != null ) {
-          build['indices']['array'].add( d['index']);
-          build['weights']['array'].add( d['weight']);
+          build['indices']['array'].add( d['index'] );
+          build['weights']['array'].add( d['weight'] );
         } 
         else {
           build['indices']['array'].add( 0 );

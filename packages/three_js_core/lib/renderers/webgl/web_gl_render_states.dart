@@ -1,6 +1,7 @@
 part of three_webgl;
 
 class WebGLRenderState {
+  bool _didDispose = false;
   late WebGLLights lights;
   WebGLExtensions extensions;
   List<Light> lightsArray = [];
@@ -15,6 +16,16 @@ class WebGLRenderState {
 
   RenderState get state {
     return _renderState;
+  }
+
+  void dispose(){
+    if(_didDispose) return;
+    _didDispose = true;
+    lightsArray.clear();
+    shadowsArray.clear();
+    lights.dispose();
+    lights.dispose();
+    extensions.dispose();
   }
 
   void init(Camera camera) {

@@ -27,6 +27,7 @@ class BaseWebGLBufferRenderer {
 }
 
 class WebGLBufferRenderer extends BaseWebGLBufferRenderer {
+  bool _didDispose = false;
   RenderingContext gl;
   bool isWebGL2 = true;
   dynamic mode;
@@ -34,6 +35,13 @@ class WebGLBufferRenderer extends BaseWebGLBufferRenderer {
   WebGLInfo info;
 
   WebGLBufferRenderer(this.gl, this.extensions, this.info);
+
+  void dispose(){
+    if(_didDispose) return;
+    _didDispose = true;
+    extensions.dispose();
+    info.dispose();
+  }
 
   @override
   void setMode(value) {

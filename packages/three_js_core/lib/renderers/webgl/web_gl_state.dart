@@ -1,6 +1,7 @@
 part of three_webgl;
 
 class WebGLState {
+  bool _didDispose = false;
   RenderingContext gl;
 
   late ColorBuffer colorBuffer;
@@ -735,6 +736,23 @@ class WebGLState {
     colorBuffer.reset();
     depthBuffer.reset();
     stencilBuffer.reset();
+  }
+
+  void dispose(){
+    if(_didDispose) return;
+    _didDispose = true;
+
+    emptyTextures.clear();
+    equationToGL.clear();
+    factorToGL.clear();
+    buffers.clear();
+    enabledCapabilities.clear();
+    currentBoundFramebuffers.clear();
+    defaultDrawbuffers.clear();
+    currentBoundTextures.clear();
+
+    extensions.dispose();
+    currentDrawbuffers.dispose();
   }
 }
 

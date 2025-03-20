@@ -31,7 +31,7 @@ class _State extends State<WebglPostprocessingUnrealBloom> {
       onSetupComplete: (){setState(() {});},
       setup: setup,
       settings: three.Settings(
-        autoClear: false,
+        //autoClear: false,
         toneMapping: three.ReinhardToneMapping,
         useSourceTexture: true,
       )

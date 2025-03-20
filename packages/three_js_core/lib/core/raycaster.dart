@@ -176,6 +176,9 @@ class Intersection {
   int? faceIndex;
   Object3D? object;
   Vector2? uv;
+  Vector2? uv1;
+  Vector3? normal;
+  Vector3? barycoord;
   Vector2? uv2;
   int batchId;
 
@@ -205,12 +208,15 @@ class Intersection {
     required this.distance,
     this.distanceToRay,
     this.point,
+    this.normal,
     this.index,
     this.face,
     this.faceIndex,
     this.object,
     this.uv,
+    this.uv1,
     this.uv2,
+    this.barycoord,
     this.batchId = 0
   });
 
@@ -226,6 +232,9 @@ class Intersection {
       object: json["object"],
       uv: json["uv"],
       uv2: json["uv2"],
+      uv1: json['uv1'],
+      normal: json['normal'],
+      barycoord: json['barycoord'],
       batchId: json["batchId"]
     );
   }

@@ -49,7 +49,7 @@ class Interpolant {
     if (i1 < pp.length) {
       t1 = pp[i1];
     }
-    if (i1 - 1 >= 0) {
+    if (i1 - 1 >= 0 && i1-1 < pp.length) {
       t0 = pp[i1 - 1];
     }
 
@@ -69,7 +69,7 @@ class Interpolant {
           if (t1 == null || t >= t1) {
             for (int giveUpAt = i1 + 2;;) {
               if (t1 == null) {
-                if (t < t0!) break forward_scan;
+                if (t < (t0 ?? 0)) break forward_scan;
 
                 // after end
 

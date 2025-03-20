@@ -60,6 +60,14 @@ dependency_overrides:
     path: ../packages/three_js_bvh_csg
   three_js_objects:
     path: ../packages/three_js_objects
+  three_js_animations:
+    path: ../packages/three_js_animations
+  three_js_transform_controls:
+    path: ../packages/three_js_transform_controls
+  three_js_helpers:
+    path: ../packages/three_js_helpers
+  three_js_advanced_loaders:
+    path: ../packages/three_js_advanced_loaders
   flutter_angle:
     path: ../../flutter_angle/flutter_angle
 
@@ -74,6 +82,7 @@ flutter:
     - assets/demo.png
     - assets/KOMO-v5.cube
     - assets/screenshots/
+    - assets/models/bvh/
     - assets/models/obj/cerberus/
     - assets/models/obj/male02/
     - assets/models/json/

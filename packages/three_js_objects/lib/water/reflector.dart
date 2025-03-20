@@ -11,8 +11,6 @@ class Reflector extends Mesh {
     options ??= {};
 		type = 'Reflector';
 
-		final scope = this;
-
 		final color = Color.fromHex32( options['color'] ?? 0x7F7F7F);
 		final textureWidth = options['textureWidth'] ?? 512;
 		final textureHeight = options['textureHeight'] ?? 512;
@@ -24,15 +22,15 @@ class Reflector extends Mesh {
 		final normal = Vector3();
 		final reflectorWorldPosition = Vector3();
 		final cameraWorldPosition = Vector3();
-		final rotationMatrix = Matrix4();
+		final rotationMatrix = Matrix4.identity();
 		final lookAtPosition = Vector3( 0, 0, - 1 );
-		final clipPlane = Vector4();
+		final clipPlane = Vector4.identity();
 
 		final view = Vector3();
 		final target = Vector3();
-		final q = Vector4();
+		final q = Vector4.identity();
 
-		final textureMatrix = Matrix4();
+		final textureMatrix = Matrix4.identity();
 		final PerspectiveCamera virtualCamera = camera;
 
 	  renderTarget = WebGLRenderTarget( textureWidth, textureHeight, WebGLRenderTargetOptions({'samples': multisample, 'type': HalfFloatType }));
@@ -60,10 +58,10 @@ class Reflector extends Mesh {
       Material? material,
       Map<String, dynamic>? group
     }){
-			reflectorWorldPosition.setFromMatrixPosition( scope.matrixWorld );
+			reflectorWorldPosition.setFromMatrixPosition( this.matrixWorld );
 			cameraWorldPosition.setFromMatrixPosition( camera!.matrixWorld );
 
-			rotationMatrix.extractRotation( scope.matrixWorld );
+			rotationMatrix.extractRotation( this.matrixWorld );
 
 			normal.setValues( 0, 0, 1 );
 			normal.applyMatrix4( rotationMatrix );
@@ -107,7 +105,7 @@ class Reflector extends Mesh {
 			);
 			textureMatrix.multiply( virtualCamera.projectionMatrix );
 			textureMatrix.multiply( virtualCamera.matrixWorldInverse );
-			textureMatrix.multiply( scope.matrixWorld );
+			textureMatrix.multiply( this.matrixWorld );
 
 			// Now update projection matrix with clip plane, implementing code from: http://www.terathon.com/code/oblique.html
 			// Paper explaining this technique: http://www.terathon.com/lengyel/Lengyel-Oblique.pdf
@@ -133,7 +131,7 @@ class Reflector extends Mesh {
 			projectionMatrix.storage[ 14 ] = clipPlane.w;
 
 			// Render
-			scope.visible = false;
+			this.visible = false;
 
 			final currentRenderTarget = renderer?.getRenderTarget();
 			final currentXrEnabled = renderer?.xr.enabled;
@@ -162,7 +160,7 @@ class Reflector extends Mesh {
 				renderer?.state.viewport( viewport );
 			}
 
-			scope.visible = true;
+			this.visible = true;
       forceUpdate = false;
 		};
 	}

@@ -188,10 +188,13 @@ class WebGLParameters {
   bool tangentSpaceNormalMap = false;
   bool objectSpaceNormalMap = false;
   bool uvsVertexOnly = false;
-  bool isWebGL2 = true;
   int outputEncoding = 0;
 
   WebGLParameters.create();
+
+  void dispose(){
+    uniforms?.clear();
+  }
 
   WebGLParameters({
     this.shaderID,

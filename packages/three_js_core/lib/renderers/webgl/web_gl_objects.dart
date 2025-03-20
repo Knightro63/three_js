@@ -1,6 +1,7 @@
 part of three_webgl;
 
 class WebGLObjects {
+  bool _didDispose = false;
   final updateMap = WeakMap();
   WebGLInfo info;
   RenderingContext gl;
@@ -54,9 +55,13 @@ class WebGLObjects {
   }
 
   void dispose() {
+    if(_didDispose) return;
+    _didDispose = true;
     updateMap.clear();
+    attributes.dispose();
+    geometries.dispose();
+    info.dispose();
   }
-
   void onInstancedMeshDispose(event) {
     final instancedMesh = event.target;
 

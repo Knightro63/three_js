@@ -23,22 +23,22 @@ class Water extends Mesh {
 		final sunDirection = options['sunDirection'] ?? Vector3( 0.70707, 0.70707, 0.0 );
 		final sunColor = Color.fromHex32(options['sunColor'] ?? 0xffffff);
 		final waterColor = Color.fromHex32(options['waterColor'] ?? 0x7F7F7F );
-		final eye = options['eye'] ?? Vector3( 0, 0, 0 );
-		final distortionScale = options['distortionScale'] ?? 20.0;
+		final eye = options['eye'] ?? Vector3();
+		final distortionScale = options['distortionScale'] ?? 8.0;
 		final side = options['side'] ?? FrontSide;
 		final fog = options['fog'] ?? false;
 
 		//
 		final mirrorPlane = Plane();
-		final normal = Vector3.zero();
-		final mirrorWorldPosition = Vector3.zero();
-		final cameraWorldPosition = Vector3.zero();
+		final normal = Vector3();
+		final mirrorWorldPosition = Vector3();
+		final cameraWorldPosition = Vector3();
 		final rotationMatrix = Matrix4.identity();
 		final lookAtPosition = Vector3( 0, 0, - 1 );
 		final clipPlane = Vector4.identity();
 
-		final view = Vector3.zero();
-		final target = Vector3.zero();
+		final view = Vector3();
+		final target = Vector3();
 		final q = Vector4.identity();
 
 		final textureMatrix = Matrix4.identity();
@@ -48,21 +48,22 @@ class Water extends Mesh {
 		final renderTarget = WebGLRenderTarget( textureWidth, textureHeight );
 
 		final Map<String,dynamic> mirrorShader = {
+      'name': 'MirrorShader',
 			'uniforms': UniformsUtils.merge( [
-				uniformsLib[ 'fog' ],
+				//uniformsLib[ 'fog' ],
 				uniformsLib[ 'lights' ],
 				{
 					'normalSampler': { 'value': null },
 					'mirrorSampler': { 'value': null },
-					'alpha': { 'value': 1.0 },
-					'time': { 'value': 0.0 },
+					'alpha': { 'value': alpha },
+					'time': { 'value': time },
 					'size': { 'value': 1.0 },
-					'distortionScale': { 'value': 20.0 },
-					'textureMatrix': { 'value': Matrix4.identity() },
-					'sunColor': { 'value': Color.fromHex32( 0x7F7F7F ) },
-					'sunDirection': { 'value': Vector3( 0.70707, 0.70707, 0 ) },
-					'eye': { 'value': Vector3.zero() },
-					'waterColor': { 'value': Color.fromHex32( 0x555555 ) }
+					'distortionScale': { 'value': distortionScale },
+					'textureMatrix': { 'value': textureMatrix },
+					'sunColor': { 'value': sunColor },
+					'sunDirection': { 'value': sunDirection },
+					'eye': { 'value': eye },
+					'waterColor': { 'value': waterColor }
 				}
 			] ),
 
@@ -169,6 +170,7 @@ class Water extends Mesh {
 		};
 
 		final material = ShaderMaterial.fromMap( {
+      'name': mirrorShader['name'],
 			'fragmentShader': mirrorShader['fragmentShader'],
 			'vertexShader': mirrorShader['vertexShader'],
 			'uniforms': UniformsUtils.clone( mirrorShader['uniforms'] ),
@@ -176,18 +178,6 @@ class Water extends Mesh {
 			'side': side,
 			'fog': fog
 		} );
-
-		material.uniforms[ 'mirrorSampler' ]['value'] = renderTarget.texture;
-		material.uniforms[ 'textureMatrix' ]['value'] = textureMatrix;
-		material.uniforms[ 'alpha' ]['value'] = alpha;
-		material.uniforms[ 'time' ]['value'] = time;
-		material.uniforms[ 'normalSampler' ]['value'] = normalSampler;
-		material.uniforms[ 'sunColor' ]['value'] = sunColor;
-		material.uniforms[ 'waterColor' ]['value'] = waterColor;
-		material.uniforms[ 'sunDirection' ]['value'] = sunDirection;
-		material.uniforms[ 'distortionScale' ]['value'] = distortionScale;
-
-		material.uniforms[ 'eye' ]['value'] = eye;
 
 		this.material = material;
 
@@ -201,10 +191,10 @@ class Water extends Mesh {
       Material? material,
       Map<String, dynamic>? group
     }) {
-			mirrorWorldPosition.setFromMatrixPosition( matrixWorld );
+			mirrorWorldPosition.setFromMatrixPosition( this.matrixWorld );
 			cameraWorldPosition.setFromMatrixPosition( camera!.matrixWorld );
 
-			rotationMatrix.extractRotation( matrixWorld );
+			rotationMatrix.extractRotation( this.matrixWorld );
 
 			normal.setValues( 0, 0, 1 );
 			normal.applyMatrix4( rotationMatrix );
@@ -293,7 +283,7 @@ class Water extends Mesh {
 			if ( renderer.autoClear == false ) renderer.clear();
 			renderer.render( scene!, mirrorCamera );
 
-			visible = true;
+			this.visible = true;
 
 			renderer.xr.enabled = currentXrEnabled;
 			renderer.shadowMap.autoUpdate = currentShadowAutoUpdate;

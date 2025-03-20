@@ -29,6 +29,7 @@ void denormalize(Vector morph, BufferAttribute attribute) {
 }
 
 class WebGLMorphtargets {
+  bool _didDispose = false;
   final influencesList = {};
   final morphInfluences = Float32List(8);
   final morphTextures = WeakMap();
@@ -44,6 +45,16 @@ class WebGLMorphtargets {
     for (int i = 0; i < 8; i++) {
       workInfluences.add([i, 0]);
     }
+  }
+
+  void dispose(){
+    if(_didDispose) return;
+    _didDispose = true;
+    influencesList.clear();
+    morphTextures.dispose();
+    workInfluences.clear();
+    capabilities.dispose();
+    textures.dispose();
   }
 
   void update(Object3D object, BufferGeometry geometry, WebGLProgram program) {

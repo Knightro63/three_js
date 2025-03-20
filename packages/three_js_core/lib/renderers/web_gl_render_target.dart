@@ -8,6 +8,7 @@
 part of three_renderers;
 
 class RenderTarget with EventDispatcher {
+  bool _didDispose = false;
   late int width;
   late int height;
   int depth = 1;
@@ -187,15 +188,19 @@ class WebGLRenderTarget extends RenderTarget {
 
   @override
   void dispose() {
+    if(_didDispose) return;
+    _didDispose = true;
     dispatchEvent(Event(type: "dispose"));
     depthTexture?.dispose();
     texture.dispose();
+    options.dispose();
   }
 }
 
 class WebGLRenderTargetOptions {
   int? wrapS;
   int? wrapT;
+  int? wrapR;
   int? magFilter;
   int? minFilter;
   int? format;
@@ -220,6 +225,11 @@ class WebGLRenderTargetOptions {
   bool resolveDepthBuffer = false;
   bool resolveStencilBuffer = false;
 
+  void dispose(){
+    depthTexture?.dispose();
+    depthTexture = null;
+  }
+
   WebGLRenderTargetOptions([Map<String, dynamic>? json]) {
     json ??= {};
     if (json["wrapS"] != null) {
@@ -239,6 +249,9 @@ class WebGLRenderTargetOptions {
     }
     if (json["wrapT"] != null) {
       wrapT = json["wrapT"];
+    }
+    if (json["wrapR"] != null) {
+      wrapR = json["wrapR"];
     }
     if (json["magFilter"] != null) {
       magFilter = json["magFilter"];
@@ -287,6 +300,7 @@ class WebGLRenderTargetOptions {
     return {
       "wrapS": wrapS,
       "wrapT": wrapT,
+      "wrapR": wrapR,
       "magFilter": magFilter,
       "minFilter": minFilter,
       'internalFormat': internalFormat,

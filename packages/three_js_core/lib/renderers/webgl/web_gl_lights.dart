@@ -5,6 +5,10 @@ class UniformsCache {
 
   Map<int, Map<String, dynamic>> lights = {};
 
+  void dispose(){
+    lights.clear();
+  }
+
   Map<String, dynamic> get(light) {
     if (lights[light.id] != null) {
       return lights[light.id]!;
@@ -55,6 +59,10 @@ class UniformsCache {
 
 class ShadowUniformsCache {
   Map<int, Map<String, dynamic>> lights = {};
+
+  void dispose(){
+    lights.clear();
+  }
 
   Map<String, dynamic>? get(light) {
     if (lights[light.id] != null) {
@@ -108,8 +116,8 @@ class ShadowUniformsCache {
 
 int nextVersion = 0;
 
-int shadowCastingLightsFirst(Light lightA, Light lightB) {
-  return ( lightB.castShadow ? 2 : 0 ) - ( lightA.castShadow ? 2 : 0 ) + ( lightB.map != null? 1 : 0 ) - ( lightA.map != null? 1 : 0 );
+int shadowCastingAndTexturingLightsFirst(Light lightA, Light lightB) {
+	return ( lightB.castShadow ? 2 : 0 ) - ( lightA.castShadow ? 2 : 0 ) + ( lightB.map != null? 1 : 0 ) - ( lightA.map != null? 1 : 0 );
 }
 
 class WebGLLights {
@@ -196,7 +204,7 @@ class WebGLLights {
 		int numSpotShadowsWithMaps = 0;
 		int numLightProbes = 0;
 
-    lights.sort((a, b) => shadowCastingLightsFirst(a, b));
+    lights.sort((a, b) => shadowCastingAndTexturingLightsFirst(a, b));
 
     // artist-friendly light intensity scaling factor
     double scaleFactor = (physicallyCorrectLights != true) ? math.pi : 1.0;
@@ -211,9 +219,9 @@ class WebGLLights {
       final shadowMap = (light.shadow != null && light.shadow!.map != null) ? light.shadow!.map!.texture : null;
 
       if (light is AmbientLight) {
-        r += color.red * intensity * scaleFactor;
-        g += color.green * intensity * scaleFactor;
-        b += color.blue * intensity * scaleFactor;
+        r += color.red * intensity;
+        g += color.green * intensity;
+        b += color.blue * intensity;
       } 
       else if (light is LightProbe) {
         for (int j = 0; j < 9; j++) {
@@ -329,13 +337,8 @@ class WebGLLights {
           shadowUniforms?["shadowCameraNear"] = shadow.camera!.near;
           shadowUniforms?["shadowCameraFar"] = shadow.camera!.far;
 
-          // state.pointShadow[ pointLength ] = shadowUniforms;
           state.pointShadow.listSetter(pointLength, shadowUniforms);
-
-          // state.pointShadowMap[ pointLength ] = shadowMap;
           state.pointShadowMap.listSetter(pointLength, shadowMap);
-
-          // state.pointShadowMatrix[ pointLength ] = light.shadow!.matrix;
           state.pointShadowMatrix.listSetter(pointLength, light.shadow!.matrix);
 
           numPointShadows++;
@@ -499,6 +502,13 @@ class WebGLLights {
       }
     }
   }
+
+  void dispose(){
+    state.dispose();
+    cache.dispose();
+    shadowCache.dispose();
+    extensions.dispose();
+  }
 }
 
 class LightState {
@@ -552,5 +562,25 @@ class LightState {
 
     numSpotLightShadowsWithMaps = json['numSpotLightShadowsWithMaps'];
     numLightProbes = json['numLightProbes'];
+  }
+
+  void dispose(){
+    hash.clear();
+    ambient.clear();
+    probe.clear();
+    directional.clear();
+    directionalShadow.clear();
+    directionalShadowMap.clear();
+    directionalShadowMatrix.clear();
+    spot.clear();
+    spotShadow.clear();
+    spotShadowMap.clear();
+    spotShadowMatrix.clear();
+    rectArea.clear();
+    point.clear();
+    pointShadow.clear();
+    pointShadowMap.clear();
+    pointShadowMatrix.clear();
+    hemi.clear();
   }
 }

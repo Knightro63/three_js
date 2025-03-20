@@ -1,17 +1,23 @@
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
-import 'package:three_js_core/others/index.dart';
+import 'package:three_js_core/three_js_core.dart';
 
 import 'package:three_js_math/three_js_math.dart';
-import '../renderers/index.dart';
-import '../cameras/index.dart';
-import '../scenes/index.dart';
-import '../geometries/index.dart';
-import '../core/index.dart';
-import '../materials/index.dart';
-import '../objects/mesh.dart';
 import 'dart:math' as math;
+
+final _origin = Vector3();
+
+class PMREMGeneratorOptions{
+  int size;
+  late final Vector3 position;
+  PMREMGeneratorOptions({
+    Vector3? position,
+    this.size = 256,
+  }){
+    this.position = position ?? _origin;
+  }
+}
 
 /// This class generates a Prefiltered, Mipmapped Radiance Environment Map
 /// (PMREM) from a cubeMap environment texture. This allows different levels of
@@ -31,6 +37,7 @@ int lodMin = 4;
 final extraLodSigma = [0.125, 0.215, 0.35, 0.446, 0.526, 0.582];
 
 class PMREMGenerator {
+  bool _didDispose = false;
   late int totalLods;
 
   // The maximum length of the blur for loop. Smaller sigmas will use fewer
@@ -69,16 +76,16 @@ class PMREMGenerator {
     // Vertices of a dodecahedron (except the opposites, which represent the
     // same axis), used as axis directions evenly spread on a sphere.
     _axisDirections = [
-      Vector3(1, 1, 1),
-      Vector3(-1, 1, 1),
-      Vector3(1, 1, -1),
-      Vector3(-1, 1, -1),
-      Vector3(0, phi, invPhi),
-      Vector3(0, phi, -invPhi),
-      Vector3(invPhi, 0, phi),
-      Vector3(-invPhi, 0, phi),
+      Vector3(-phi, invPhi, 0),
       Vector3(phi, invPhi, 0),
-      Vector3(-phi, invPhi, 0)
+      Vector3(-invPhi, 0, phi),
+      Vector3(invPhi, 0, phi),
+      Vector3(0, phi, -invPhi),
+      Vector3(0, phi, invPhi),
+      Vector3(-1, 1, -1),
+      Vector3(1, 1, -1),
+      Vector3(-1, 1, 1),
+      Vector3(1, 1, 1),
     ];
 
     _renderer = renderer;
@@ -90,14 +97,9 @@ class PMREMGenerator {
     _sizeLods = [];
     _sigmas = [];
 
-    _blurMaterial = null;
-
-    // this._blurMaterial = _getBlurShader(maxSamples);
-    _equirectMaterial = null;
-    _cubemapMaterial = null;
-
     _compileMaterial(_blurMaterial);
   }
+	
 
   /// *
 	/// * Generates a PMREM from a supplied Scene, which can be faster than using an
@@ -106,17 +108,20 @@ class PMREMGenerator {
 	/// * and far planes ensure the scene is rendered in its entirety (the cubeCamera
 	/// * is placed at the origin).
 	/// *
-  WebGLRenderTarget fromScene(Scene scene, [double sigma = 0, double near = 0.1, double far = 100]) {
+  WebGLRenderTarget fromScene(Scene scene, {double sigma = 0, double near = 0.1, double far = 100, PMREMGeneratorOptions? options}) {
+    options ??= PMREMGeneratorOptions();
+
     _oldTarget = _renderer.getRenderTarget();
 		_oldActiveCubeFace = _renderer.getActiveCubeFace();
 		_oldActiveMipmapLevel = _renderer.getActiveMipmapLevel();
 		_oldXrEnabled = _renderer.xr.enabled;
     _renderer.xr.enabled = false;
-    _setSize(256);
-    final cubeUVRenderTarget = _allocateTargets();
+    _setSize(options.size);
+
+    final cubeUVRenderTarget = this._allocateTargets();
     cubeUVRenderTarget.depthBuffer = true;
 
-    _sceneToCubeUV(scene, near, far, cubeUVRenderTarget);
+    _sceneToCubeUV(scene, near, far, cubeUVRenderTarget, options.position);
     if (sigma > 0) {
       _blur(cubeUVRenderTarget, 0, 0, sigma);
     }
@@ -173,11 +178,18 @@ class PMREMGenerator {
 	/// * one of them will cause any others to also become unusable.
 	/// *
   void dispose() {
+    if(_didDispose) return;
+    _didDispose = true;
     _dispose();
+    _cubemapMaterial?.dispose();
+    _equirectMaterial?.dispose();
+    _blurMaterial?.dispose();
+    _pingPongRenderTarget?.dispose();
 
-    if (_cubemapMaterial != null) _cubemapMaterial.dispose();
-    if (_equirectMaterial != null) _equirectMaterial.dispose();
-  }
+    _flatCamera.dispose();
+    _oldTarget?.dispose();
+    _axisDirections.clear();
+    _renderer.dispose();  }
 
   // private interface
 
@@ -239,7 +251,7 @@ class PMREMGenerator {
       "generateMipmaps": false,
       "type": HalfFloatType,
       "format": RGBAFormat,
-      "encoding": LinearEncoding,
+      'colorSpace': LinearSRGBColorSpace,
       "depthBuffer": false
     };
 
@@ -274,7 +286,7 @@ class PMREMGenerator {
     _renderer.compile(tmpMesh, _flatCamera);
   }
 
-  void _sceneToCubeUV(Scene scene, double near, double far, RenderTarget cubeUVRenderTarget) {
+  void _sceneToCubeUV(Scene scene, double near, double far, RenderTarget cubeUVRenderTarget, Vector3 position) {
     const double fov = 90;
     const double aspect = 1;
     final cubeCamera = PerspectiveCamera(fov, aspect, near, far);
@@ -313,14 +325,17 @@ class PMREMGenerator {
       final col = i % 3;
       if (col == 0) {
         cubeCamera.up.setValues(0, upSign[i], 0);
+        cubeCamera.position.setValues( position.x, position.y, position.z );
         cubeCamera.lookAt(Vector3(forwardSign[i], 0, 0));
       } 
       else if (col == 1) {
         cubeCamera.up.setValues(0, 0, upSign[i]);
+        cubeCamera.position.setValues( position.x, position.y, position.z );
         cubeCamera.lookAt(Vector3(0, forwardSign[i], 0));
       } 
       else {
         cubeCamera.up.setValues(0, upSign[i], 0);
+        cubeCamera.position.setValues( position.x, position.y, position.z );
         cubeCamera.lookAt(Vector3(0, 0, forwardSign[i]));
       }
       final size = _cubeSize.toDouble();
@@ -339,7 +354,7 @@ class PMREMGenerator {
     scene.background = background;
   }
 
-  void _textureToCubeUV(texture, RenderTarget cubeUVRenderTarget) {
+  void _textureToCubeUV(Texture texture, RenderTarget cubeUVRenderTarget) {
     final renderer = _renderer;
 
     bool isCubeTexture = (texture.mapping == CubeReflectionMapping ||
@@ -379,11 +394,8 @@ class PMREMGenerator {
     renderer.autoClear = false;
 
     for (int i = 1; i < _lodPlanes.length; i++) {
-      final sigma =
-          math.sqrt(_sigmas[i] * _sigmas[i] - _sigmas[i - 1] * _sigmas[i - 1]);
-
+      final sigma = math.sqrt(_sigmas[i] * _sigmas[i] - _sigmas[i - 1] * _sigmas[i - 1]);
       final poleAxis = _axisDirections[(i - 1) % _axisDirections.length];
-
       _blur(cubeUVRenderTarget, i - 1, i, sigma, poleAxis);
     }
 
@@ -398,12 +410,12 @@ class PMREMGenerator {
 	/// * accurate at the poles, but still does a decent job.
 	/// *
   void _blur(RenderTarget cubeUVRenderTarget, int lodIn, int lodOut, double sigma, [poleAxis]) {
-    final pingPongRenderTarget = _pingPongRenderTarget;
+    final RenderTarget? pingPongRenderTarget = _pingPongRenderTarget;
     _halfBlur(cubeUVRenderTarget, pingPongRenderTarget, lodIn, lodOut, sigma,'latitudinal', poleAxis);
     _halfBlur(pingPongRenderTarget, cubeUVRenderTarget, lodOut, lodOut, sigma,'longitudinal', poleAxis);
   }
 
-  void _halfBlur(RenderTarget targetIn, RenderTarget targetOut, int lodIn, int lodOut, double sigmaRadians, String direction, poleAxis) {
+  void _halfBlur(RenderTarget? targetIn, RenderTarget? targetOut, int lodIn, int lodOut, double sigmaRadians, String direction, poleAxis) {
     final renderer = _renderer;
     final blurMaterial = _blurMaterial;
 
@@ -421,7 +433,7 @@ class PMREMGenerator {
     }
 
     final blurMesh = Mesh(geometry, blurMaterial);
-    final blurUniforms = blurMaterial.uniforms;
+    final blurUniforms = blurMaterial?.uniforms;
 
     final pixels = _sizeLods[lodIn] - 1;
     final radiansPerPixel = isFinite(sigmaRadians)
@@ -455,7 +467,7 @@ class PMREMGenerator {
       weights[i] = weights[i] / sum;
     }
 
-    blurUniforms['envMap']["value"] = targetIn.texture;
+    blurUniforms['envMap']["value"] = targetIn?.texture;
     blurUniforms['samples']["value"] = samples;
     blurUniforms['weights']["value"] = Float32List.fromList(weights);
     blurUniforms['latitudinal']["value"] = direction == 'latitudinal';
@@ -477,7 +489,7 @@ class PMREMGenerator {
   }
 
   bool isFinite(double value) {
-    return value == double.infinity;
+    return value == double.maxFinite;
   }
 
   Map<String,dynamic> _createPlanes(int lodMax) {
@@ -556,9 +568,9 @@ class PMREMGenerator {
     return cubeUVRenderTarget;
   }
 
-  void _setViewport(RenderTarget target, double x, double y, double width, double height) {
-    target.viewport.setValues(x, y, width, height);
-    target.scissor.setValues(x, y, width, height);
+  void _setViewport(RenderTarget? target, double x, double y, double width, double height) {
+    target?.viewport.setValues(x, y, width, height);
+    target?.scissor.setValues(x, y, width, height);
   }
 
   ShaderMaterial _getBlurShader(int lodMax, int width, int height) {

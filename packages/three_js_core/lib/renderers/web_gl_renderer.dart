@@ -3,6 +3,7 @@ part of three_renderers;
 class WebGLRenderer {
   late Map<String, dynamic> parameters;
 
+  bool _didDispose = false;
   bool alpha = false;
   bool depth = true;
   bool stencil = true;
@@ -17,6 +18,7 @@ class WebGLRenderer {
   bool failIfMajorPerformanceCaveat = false;
   bool reverseDepthBuffer = false;
 
+  bool renderBackground = false;
   late WebGLRenderList? currentRenderList;
   late WebGLRenderState? currentRenderState;
 
@@ -426,39 +428,53 @@ class WebGLRenderer {
 
   //
   void dispose() {
+    if(_didDispose) return;
+    _didDispose = true;
     state.reset();
     attributes.dispose();
     renderLists.dispose();
     renderStates.dispose();
-    properties.dispose();
     cubemaps.dispose();
     cubeuvmaps.dispose();
-    objects.dispose();
     bindingStates.dispose();
     programCache.dispose();
-    background.dispose();
 
-    textures.dispose();
-    geometries.dispose();
-    shadowMap.dispose();
-    //materials.renderer.dispose();
-
-    xr.dispose();
-
-    // xr.removeEventListener( 'sessionstart', onXRSessionStart );
-    // xr.removeEventListener( 'sessionend', onXRSessionEnd );
-
-    if (_transmissionRenderTarget != null) {
-      _transmissionRenderTarget!.dispose();
-      _transmissionRenderTarget = null;
-    }
-
+    _transmissionRenderTarget?.dispose();
+    _transmissionRenderTarget = null;
+    
     currentRenderList?.dispose();
     for(final stack in renderListStack){
       stack.dispose();
     }
+    renderListStack.clear();
+    for(final stack in renderStateStack){
+      stack.dispose();
+    }
+    
+    renderStateStack.clear();
+    debug.clear();
+    
+    _currentCamera?.clear();
+    _frustum.dispose();
+    _transmissionRenderTarget?.dispose();
+    _emptyScene.dispose();
+    
+    extensions.dispose();
+    capabilities.dispose();
+    clipping.dispose();
+    utils.dispose();
+    
+    state.dispose();
+    materials.dispose();
+    objects.dispose();
+    morphtargets.dispose();
+    indexedBufferRenderer.dispose();
+    background.dispose();
+    textures.dispose();
+    geometries.dispose();
+    shadowMap.dispose();
 
-    animation.stop();
+    properties.dispose();
   }
 
   // Events
@@ -802,7 +818,7 @@ class WebGLRenderer {
       currentRenderList!.sort(_opaqueSort, _transparentSort);
     }
 
-		final renderBackground = !xr.enabled || !xr.isPresenting || !xr.hasDepthSensing();
+		renderBackground = !xr.enabled || !xr.isPresenting || !xr.hasDepthSensing();
 		if ( renderBackground ) {
       background.addToRenderList( currentRenderList!, scene );
     }
@@ -918,13 +934,13 @@ class WebGLRenderer {
         }
       } 
       else if (object is Mesh || object is Line || object is Points) {
-        if (object is SkinnedMesh) {
-          // update skeleton only once in a frame
-          if (object.skeleton!.frame != info.render["frame"]) {
-            object.skeleton!.update();
-            object.skeleton!.frame = info.render["frame"]!;
-          }
-        }
+        // if (object is SkinnedMesh) {
+        //   // update skeleton only once in a frame
+        //   if (object.skeleton!.frame != info.render["frame"]) {
+        //     object.skeleton!.update();
+        //     object.skeleton!.frame = info.render["frame"]!;
+        //   }
+        // }
 
         // print("object: ${object.type} ${!object.frustumCulled} ${_frustum.intersectsObject(object)} ");
 
@@ -1051,6 +1067,8 @@ class WebGLRenderer {
 
 			clear();
 
+      if ( renderBackground ) background.render( scene );
+
 			// Turn off the features which can affect the frag color for opaque objects pass.
 			// Otherwise they are applied twice in opaque objects pass and transmission objects pass.
 			final currentToneMapping = toneMapping;
@@ -1166,8 +1184,6 @@ class WebGLRenderer {
     }
 
     object.onAfterRender?.call(renderer: this, scene: scene, camera: camera, geometry: geometry, material: material, group: group);
-
-    // print("2 render renderObject type: ${object.type} name: ${object.name} ${DateTime.now().millisecondsSinceEpoch}");
   }
 
   WebGLProgram? getProgram(Material material, Object3D? scene, Object3D object) {
@@ -1210,7 +1226,7 @@ class WebGLRenderer {
     else {
       parameters.uniforms = programCache.getUniforms(material);
 
-      material.onBuild(parameters, this);
+      //material.onBuild(parameters, this);
       material.onBeforeCompile?.call(parameters, this);
       program = programCache.acquireProgram(parameters, programCacheKey);
       programs[programCacheKey] = program;
@@ -1275,6 +1291,7 @@ class WebGLRenderer {
 
     materialProperties['outputColorSpace'] = parameters.outputColorSpace;
     materialProperties['batching'] = parameters.batching;
+    materialProperties['batchingColor'] = parameters.batchingColor;
     materialProperties['instancing'] = parameters.instancing;
     materialProperties['instancingColor'] = parameters.instancingColor;
     materialProperties['instancingMorph'] = parameters.instancingMorph;
@@ -1517,15 +1534,6 @@ class WebGLRenderer {
     if ( refreshMaterial ) {
       pUniformS?.setValue( _gl, 'toneMappingExposure', toneMappingExposure );
       if ( materialProperties['needsLights'] == true) {
-        // the current material requires lighting info
-
-        // note: all lighting uniforms are always set correctly
-        // they simply reference the renderer's state for their
-        // values
-        //
-        // use the current material's .needsUpdate flags to set
-        // the GL state when required
-
         markUniformsLightsNeedsUpdate( mUniformS, refreshLights );
       }
 
@@ -1616,7 +1624,7 @@ class WebGLRenderer {
     final renderTargetProperties = properties.get(renderTarget);
     renderTargetProperties["__hasExternalTextures"] = true;
 
-    if (renderTargetProperties["__hasExternalTextures"] == true) {
+    //if (renderTargetProperties["__hasExternalTextures"] == true) {
       renderTargetProperties["__autoAllocateDepthBuffer"] = depthTexture == null;
 
       if (!(renderTargetProperties["__autoAllocateDepthBuffer"] == true)) {
@@ -1625,7 +1633,7 @@ class WebGLRenderer {
           renderTargetProperties['__useRenderToTexture'] = false;
         }
       }
-    }
+    //}
   }
 
   void setRenderTargetFramebuffer(RenderTarget renderTarget, defaultFramebuffer) {
@@ -1798,7 +1806,7 @@ class WebGLRenderer {
     }
   }
 
-  void copyFramebufferToTexture(position, Texture? texture, {int level = 0}) {
+  void copyFramebufferToTexture(Vector position, Texture? texture, {int level = 0}) {
     //console.warning('copyFramebufferToTexture not supported');
     if (texture is! FramebufferTexture) {
       console.warning('WebGLRenderer: copyFramebufferToTexture() can only be used with FramebufferTexture.');
@@ -1811,22 +1819,19 @@ class WebGLRenderer {
 
     textures.setTexture2D(texture, 0);
     _gl.copyTexSubImage2D(WebGL.TEXTURE_2D, level, 0, 0, position.x.toInt(), position.y.toInt(), width, height);
-    state.unbindTexture(WebGLTexture(WebGL.TEXTURE_2D));
+    state.unbindTexture(kIsWeb?null:WebGLTexture(WebGL.TEXTURE_2D));
   }
 
-  void copyTextureToTexture(Texture srcTexture, dstTexture, {srcRegion, dstPosition, int srcLevel = 0, dstLevel}) {
-			// support the previous signature with just a single dst mipmap level
-			if ( dstLevel == null ) {
-				if ( srcLevel != 0 ) {
-					// @deprecated, r171
-					//warnOnce( 'WebGLRenderer: copyTextureToTexture function signature has changed to support src and dst mipmap levels.' );
-					dstLevel = srcLevel;
-					srcLevel = 0;
-				} 
-        else {
-					dstLevel = 0;
-				}
-			}
+  void copyTextureToTexture(Texture srcTexture, Texture dstTexture, {srcRegion, dstPosition, int srcLevel = 0, dstLevel}) {
+    if ( dstLevel == null ) {
+      if ( srcLevel != 0 ) {
+        dstLevel = srcLevel;
+        srcLevel = 0;
+      } 
+      else {
+        dstLevel = 0;
+      }
+    }
     
     // gather the necessary dimensions to copy
     int width, height, depth, minX, minY, minZ;
@@ -1888,8 +1893,8 @@ class WebGLRenderer {
       glTarget = WebGL.TEXTURE_2D;
     }
 
-    _gl.pixelStorei( WebGL.UNPACK_FLIP_Y_WEBGL, dstTexture.flipY );
-    _gl.pixelStorei( WebGL.UNPACK_PREMULTIPLY_ALPHA_WEBGL, dstTexture.premultiplyAlpha );
+    _gl.pixelStorei( WebGL.UNPACK_FLIP_Y_WEBGL, dstTexture.flipY?1:0 );
+    _gl.pixelStorei( WebGL.UNPACK_PREMULTIPLY_ALPHA_WEBGL, dstTexture.premultiplyAlpha?1:0 );
     _gl.pixelStorei( WebGL.UNPACK_ALIGNMENT, dstTexture.unpackAlignment );
 
     // used for copying data from cpu
@@ -1961,7 +1966,7 @@ class WebGLRenderer {
         if ( srcLevel != 0 ) {
           _gl.blitFramebuffer( minX, minY, width, height, dstX, dstY, width, height, WebGL.COLOR_BUFFER_BIT, WebGL.NEAREST );
         } else if ( isDst3D ) {
-          //_gl.copyTexSubImage3D( glTarget, dstLevel, dstX, dstY, dstZ + i, minX, minY, width, height );
+          _gl.copyTexSubImage3D( glTarget, dstLevel, dstX, dstY, dstZ + i, minX, minY, width, height );
         } else {
           _gl.copyTexSubImage2D( glTarget, dstLevel, dstX, dstY, minX, minY, width, height );
         }

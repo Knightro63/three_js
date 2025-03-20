@@ -4,6 +4,7 @@ final _e1 = Euler();
 final _m1 = Matrix4();
 
 class WebGLBackground {
+  bool _didDispose = false;
   WebGLCubeMaps cubemaps;
   WebGLCubeUVMaps cubeuvmaps;
   WebGLState state;
@@ -216,6 +217,11 @@ class WebGLBackground {
   }
 
   void dispose(){
+    if(_didDispose) return;
+    _didDispose = true;
+    cubemaps.dispose();
+    state.dispose();
+    renderer.dispose();
     planeMesh?.dispose();
     boxMesh?.dispose();
     objects.dispose();

@@ -6,8 +6,12 @@ class WebGLExtensions {
 
   WebGLExtensions(this.gl);
 
+  void dispose(){
+    extensions.clear();
+  }
+
   dynamic getExtension(String name) {
-    return has(name);
+    return _has(name);
   }
 
   void init() {//capabilities
@@ -34,12 +38,21 @@ class WebGLExtensions {
     // getExtension('EXT_color_buffer_half_float');
   }
 
-  dynamic has(String name) {
+  dynamic _has(String name) {
     if (kIsWeb) {
       return hasForWeb(name);
     } 
     else {
       return hasForApp(name);
+    }
+  }
+
+  bool has(String name) {
+    if (kIsWeb) {
+      return hasForWeb(name) != null;
+    } 
+    else {
+      return hasForApp(name) != null;
     }
   }
 
@@ -110,10 +123,10 @@ class WebGLExtensions {
     // developer.log( extensions.keys.toList().toString() );
 
     if (extensions.containsKey(n)) {
-      return extensions.containsKey(n);
+      return extensions[n];//s.containsKey(n);
     } 
     else {
-      return false;
+      return null;
     }
   }
 
@@ -121,7 +134,7 @@ class WebGLExtensions {
     dynamic extension = getExtension(name);
 
     if (extension == null) {
-      console.error('WebGLExtensions.get: $name extension not supported.');
+      console.warning('WebGLExtensions.get: $name extension not supported.');
     }
 
     return extension;

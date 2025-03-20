@@ -1,6 +1,7 @@
 part of three_webgl;
 
 class WebGLClipping {
+  bool _didDispose = false;
   WebGLProperties properties;
 
   Matrix3 viewNormalMatrix = Matrix3.identity();
@@ -18,6 +19,13 @@ class WebGLClipping {
   int numIntersection = 0;
 
   WebGLClipping(this.properties);
+
+  void dispose(){
+    if(_didDispose) return;
+    _didDispose = true;
+    properties.dispose();
+    uniform.clear();
+  }
 
   bool init(List<Plane> planes, bool enableLocalClipping) {
     final enabled = planes.isNotEmpty ||

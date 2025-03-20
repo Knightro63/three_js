@@ -29,7 +29,6 @@ class _State extends State<WebglPostprocessingSobel> {
       onSetupComplete: (){setState(() {});},
       setup: setup,
       settings: three.Settings(
-        //autoClear: false,
         useSourceTexture: true,
       )
     );
@@ -102,11 +101,7 @@ class _State extends State<WebglPostprocessingSobel> {
     controls.enableZoom = false;
 
     threeJs.postProcessor = ([double? dt]){
-      threeJs.renderer!.clear();
-      threeJs.renderer!.render(threeJs.scene, threeJs.camera);
-      threeJs.renderer!.setRenderTarget(null);
       composer.render(dt);
-      
     };
 
     threeJs.addAnimationEvent((dt){

@@ -35,12 +35,26 @@ class WebGLPrograms {
   late bool logarithmicDepthBuffer;
   late bool vertexTextures;
   late String precision;
+  bool _didDispose = false;
 
   WebGLPrograms(this.renderer, this.cubemaps, this.cubeuvmaps, this.extensions, this.capabilities, this.bindingStates, this.clipping) {
     logarithmicDepthBuffer = capabilities.logarithmicDepthBuffer;
     vertexTextures = capabilities.vertexTextures;
 
     precision = capabilities.precision;
+  }
+
+  void dispose(){
+    if(_didDispose) return;
+    _didDispose = true;
+    renderer.dispose();
+    cubemaps.dispose();
+    extensions.dispose();
+    capabilities.dispose();
+    bindingStates.dispose();
+    clipping.dispose();
+    _customShaders.dispose();
+    programs.clear();
   }
 
 	String getChannel(int value ) {
@@ -491,9 +505,5 @@ class WebGLPrograms {
 
   void releaseShaderCache(Material material) {
     _customShaders.remove(material);
-  }
-
-  void dispose() {
-    _customShaders.dispose();
   }
 }

@@ -74,6 +74,8 @@ class Texture with EventDispatcher {
   Function? onUpdate;
   List mipmaps = [];
 
+  Set layerUpdates = Set();
+
   Texture([
     image, 
     int? mapping, 
@@ -214,6 +216,14 @@ class Texture with EventDispatcher {
 
     source.dispose();
   }
+
+	void addLayerUpdate( layerIndex ) {
+		this.layerUpdates.add( layerIndex );
+	}
+
+	void clearLayerUpdates() {
+		this.layerUpdates.clear();
+	}
 
   Vector2 transformUv(Vector2 uv) {
     if (mapping != UVMapping) return uv;

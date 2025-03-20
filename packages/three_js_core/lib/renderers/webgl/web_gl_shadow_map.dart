@@ -1,6 +1,7 @@
 part of three_webgl;
 
 class WebGLShadowMap {
+  bool _didDispose = false;
   Frustum _frustum = Frustum();
   final _shadowMapSize = Vector2.zero();
   final _viewportSize = Vector2.zero();
@@ -70,6 +71,8 @@ class WebGLShadowMap {
   }
 
   void dispose(){
+    if(_didDispose) return;
+    _didDispose = true;
     fullScreenMesh.dispose();
     fullScreenTri.dispose();
 
@@ -78,6 +81,14 @@ class WebGLShadowMap {
 
     shadowMaterialVertical.dispose();
     shadowMaterialHorizontal.dispose();
+
+    _frustum.dispose();
+    shadowSide.clear();
+
+    scope.dispose();
+    _renderer.dispose();
+    _objects.dispose();
+    _capabilities.dispose();
   }
 
   void render(List<Light> lights, Object3D scene, Camera camera) {

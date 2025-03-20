@@ -46,4 +46,6 @@ class WebGLInfo {
     render["points"] = 0;
     render["lines"] = 0;
   }
+
+  void dispose(){}
 }

@@ -32,6 +32,7 @@ import 'package:example/lights/webgl_lightprobe_cube_camera.dart';
 import 'package:example/line/webgl_lines_fat.dart';
 import 'package:example/line/webgl_lines_fat_raycasting.dart';
 import 'package:example/line/webgl_lines_fat_wireframe.dart';
+import 'package:example/loaders/webgl_loader_bvh.dart';
 import 'package:example/loaders/webgl_loader_collada.dart';
 import 'package:example/loaders/webgl_loader_collada_kinematics.dart';
 import 'package:example/loaders/webgl_loader_collada_skinning.dart';
@@ -55,6 +56,8 @@ import 'package:example/modifers/webgl_modifier_simplifier.dart';
 import 'package:example/modifers/webgl_modifier_subdivision.dart';
 import 'package:example/postprocessing/webgl_postprocessing_unreal_bloom.dart';
 import 'package:example/postprocessing/webgl_postprocessing_unreal_bloom_selective.dart';
+import 'package:example/shaders/webgl_shaders_ocean.dart';
+import 'package:example/shaders/webgl_shaders_sky.dart';
 import 'package:example/texture/webgl_materials_video_webcam.dart';
 import 'package:example/others/webgl_geometry_csg.dart';
 import 'package:example/others/webgl_geometry_csg2.dart';
@@ -66,7 +69,7 @@ import 'package:example/others/webgl_lod.dart';
 import 'package:example/texture/webgl_opengl_texture.dart';
 import 'package:example/others/webgl_portal.dart';
 import 'package:example/rollercoster/webxr_vr_rollercoaster.dart';
-import 'package:example/shadow/webgl_shader.dart';
+import 'package:example/shaders/webgl_shader.dart';
 import 'package:example/src/files_json.dart';
 import 'package:example/terrain/three_terrain.dart';
 import 'package:example/terrain/webgl_geometry_terrain.dart';
@@ -75,7 +78,7 @@ import 'package:example/shadow/webgl_lensflars.dart';
 import 'package:example/lights/webgl_lights_rectarealight.dart';
 import 'package:example/lights/webgl_lights_spotlight.dart';
 import 'package:example/postprocessing/webgl_postprocessing_sobel.dart';
-import 'package:example/shadow/webgl_shader_lava.dart';
+import 'package:example/shaders/webgl_shader_lava.dart';
 import 'package:example/shadow/webgl_shadowmap_csm.dart';
 import 'package:example/shadow/webgl_shadowmap_pointlight.dart';
 import 'package:example/shadow/webgl_shadowmap_vsm.dart';
@@ -124,6 +127,7 @@ import 'package:example/controls/misc_controls_map.dart';
 import 'package:example/controls/misc_controls_orbit.dart';
 import 'package:example/controls/misc_controls_trackball.dart';
 import 'package:css/css.dart';
+import 'package:three_js/three_js.dart';
 import 'src/plugins/plugin.dart';
 
 void main() {
@@ -156,6 +160,7 @@ class MyAppState extends State<MyApp> {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    isEmulator = true;
     widthInifity = MediaQuery.of(context).size.width;
     return SafeArea(
       child: MaterialApp(
@@ -310,6 +315,9 @@ class MyAppState extends State<MyApp> {
               },
               '/webgl_loader_texture_basis':(BuildContext context) {
                 return const WebglLoaderTextureBasis();
+              },
+              '/webgl_loader_bvh':(BuildContext context) {
+                return const WebglLoaderBVH();
               },
               '/webgl_loader_collada':(BuildContext context) {
                 return const WebglLoaderCollada();
@@ -532,6 +540,12 @@ class MyAppState extends State<MyApp> {
               },
               '/webgl_shader':(BuildContext context) {
                 return const WebglShader();
+              },
+              '/webgl_shaders_sky':(BuildContext context) {
+                return const WebglShaderSky();
+              },
+              '/webgl_shaders_ocean':(BuildContext context) {
+                return const WebglShaderOcean();
               },
               // '/webgl_nodes_points':(BuildContext context) {
               //   return const WebglNodesPoints();

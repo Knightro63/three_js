@@ -1177,17 +1177,11 @@ class TransformControlsGizmo extends Object3D {
           handle.quaternion.setFrom(_tempQuaternion);
         }
       }
-
       // Hide disabled axes
-      handle.visible =
-          handle.visible && (handle.name.contains('X') || showX);
-      handle.visible =
-          handle.visible && (handle.name.contains('Y') || showY);
-      handle.visible =
-          handle.visible && (handle.name.contains('Z') || showZ);
-      handle.visible = handle.visible &&
-          (handle.name.contains('E') ||
-              (showX && showY && showZ));
+      handle.visible = handle.visible && (!handle.name.contains('X') || showX);
+      handle.visible = handle.visible && (!handle.name.contains('Y') || showY);
+      handle.visible = handle.visible && (!handle.name.contains('Z') || showZ);
+      handle.visible = handle.visible && (!handle.name.contains('E') || (showX && showY && showZ));
 
       // highlight selected axis
 

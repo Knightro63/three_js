@@ -1,6 +1,7 @@
 part of three_webgl;
 
 class WebGLCubeUVMaps {
+  bool _didDispose = false;
   WeakMap cubeUVmaps = WeakMap();
   WebGLRenderer renderer;
   PMREMGenerator? pmremGenerator;
@@ -84,6 +85,8 @@ class WebGLCubeUVMaps {
   }
 
   void dispose() {
+    if(_didDispose) return;
+    _didDispose = true;
     for(final key in cubeUVmaps.keys){
       cubeUVmaps[key].dispose();
     }
@@ -93,5 +96,7 @@ class WebGLCubeUVMaps {
       pmremGenerator?.dispose();
       pmremGenerator = null;
     //}
+
+    renderer.dispose();
   }
 }

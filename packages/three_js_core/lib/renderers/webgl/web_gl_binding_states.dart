@@ -1,6 +1,7 @@
 part of three_webgl;
 
 class WebGLBindingStates {
+  bool _didDispose = false;
   RenderingContext gl;
   WebGLAttributes attributes;
 
@@ -396,6 +397,8 @@ class WebGLBindingStates {
   }
 
   void dispose() {
+    if(_didDispose) return;
+    _didDispose = true;
     reset();
 
     for ( final geometryId in bindingStates.keys ) {
@@ -409,7 +412,12 @@ class WebGLBindingStates {
       }
       programMap.clear();
     }
+    
     bindingStates.clear();
+    attributes.dispose();
+    defaultState.clear();
+    currentState.clear();
+    attributes.dispose();
   }
 
   void releaseStatesOfGeometry(BufferGeometry geometry) {

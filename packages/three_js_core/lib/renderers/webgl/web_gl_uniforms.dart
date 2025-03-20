@@ -46,20 +46,27 @@
 part of three_webgl;
 
 class WebGLUniforms with WebGLUniform {
+  bool _didDispose = false;
   RenderingContext gl;
-  Program program;
+  WebGLProgram program;
 
   WebGLUniforms(this.gl, this.program) {
     seq = [];
     map = {};
 
-    final n = gl.getProgramParameter(program, WebGL.ACTIVE_UNIFORMS);
+    final n = gl.getProgramParameter(program.program!, WebGL.ACTIVE_UNIFORMS);
 
     for (int i = 0; i < n.id; ++i) {
-      final info = gl.getActiveUniform(program, i);
-      final addr = gl.getUniformLocation(program, info.name);
+      final info = gl.getActiveUniform(program.program!, i);
+      final addr = gl.getUniformLocation(program.program!, info.name);
       parseUniform(info, addr, this);
     }
+  }
+
+  void dispose(){
+    if(_didDispose) return;
+    _didDispose = true;
+    program.dispose();
   }
 
   void setValue(RenderingContext gl, String name, dynamic value, [WebGLTextures? textures]) {

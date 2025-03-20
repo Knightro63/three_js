@@ -423,15 +423,16 @@ class AnimationAction {
 
     if (startTime != null) {
       // check for scheduled start of action
-
+    
       final timeRunning = (time - startTime) * timeDirection;
       if (timeRunning < 0 || timeDirection == 0) {
-        return; // yet to come / don't decide when delta = 0
+        deltaTime = 0;
       }
-
-      // start
-      _startTime = null; // unschedule
-      deltaTime = timeDirection * timeRunning;
+      else{
+        // start
+        _startTime = null; // unschedule
+        deltaTime = timeDirection * timeRunning;
+      }
     }
 
     // apply time scale and advance time
@@ -473,9 +474,9 @@ class AnimationAction {
     if (enabled) {
       weight = this.weight;
       final interpolant = _weightInterpolant;
-
       if (interpolant != null) {
-        int interpolantValue = interpolant.evaluate(time)?[0].toInt();
+        final interpolantValues = interpolant.evaluate(time);
+        final interpolantValue = interpolantValues != null && interpolantValues.isNotEmpty?interpolantValues[0]:0.0;
 
         weight *= interpolantValue;
 
@@ -496,14 +497,14 @@ class AnimationAction {
 
   num _updateTimeScale(num time) {
     num timeScale = 0;
-
     if (!paused) {
       timeScale = this.timeScale;
 
       final interpolant = _timeScaleInterpolant;
 
       if (interpolant != null) {
-        final interpolantValue = interpolant.evaluate(time)?[0];
+        final interpolantValues = interpolant.evaluate(time);
+        final interpolantValue = interpolantValues != null && interpolantValues.isNotEmpty?interpolantValues[0]:0;
 
         timeScale *= interpolantValue;
 
@@ -703,7 +704,6 @@ class AnimationAction {
     values[0] = weightNow;
     times[1] = now + duration;
     values[1] = weightThen;
-
     return this;
   }
 }
