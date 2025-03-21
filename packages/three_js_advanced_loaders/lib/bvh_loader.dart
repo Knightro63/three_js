@@ -261,12 +261,12 @@ class __BVHParser {
 			// parse node type and name
 
 			List<String> tokens = firstline.split(RegExp(r"\s+"));
-
+    
 			if ( tokens[ 0 ].toUpperCase() == 'END' && tokens[ 1 ].toUpperCase() == 'SITE' ) {
 				node['type'] = 'ENDSITE';
 				node['name'] = 'ENDSITE'; // bvh end sites have no name
 			} else {
-				node['name'] = tokens[ 1 ];
+				node['name'] = tokens.length > 1? tokens[ 1 ]:'';
 				node['type'] = tokens[ 0 ].toUpperCase();
 			}
 
@@ -285,7 +285,7 @@ class __BVHParser {
 			if ( tokens.length != 4 ) {
 				console.error( 'THREE.BVHLoader: Invalid number of values for OFFSET.' );
 			}
-
+      print(tokens);
 			final offset = Vector3(
 				double.parse( tokens[ 1 ] ),
 				double.parse( tokens[ 2 ] ),

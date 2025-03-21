@@ -6,7 +6,7 @@ enum GuiWidgetType{dropdown,checkbox,color,function,slider,button}
 
 class GuiWidget{
   GuiWidget(String name,this.type,this.update,[this.value,this.items]){
-    _step = items is List && items.length > 2?items[2]:1.0;
+    _step = items is List && items.length > 2 && items[2] is double?items[2]:1.0;
     property = name;
     _name = name;
   }

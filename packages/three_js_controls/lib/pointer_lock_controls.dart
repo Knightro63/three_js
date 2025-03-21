@@ -114,10 +114,10 @@ class PointerLockControls with EventDispatcher {
 
   void lock() {
     isLocked = true;
-    domElement.requestPointerLock();
+    //domElement.requestPointerLock();
   }
 
   void unlock() {
-    scope.domElement.exitPointerLock();
+    //scope.domElement.exitPointerLock();
   }
 }

@@ -31,10 +31,11 @@ class OrbitState {
 
 // The four arrow Keys
 class Keys {
-  static const String left = 'ArrowLeft';
-  static const String up = 'ArrowUp';
-  static const String right = 'ArrowRight';
-  static const String bottom = 'ArrowDown';
+  static const String left = 'Arrow Left';
+  static const String up = 'Arrow Up';
+  static const String right = 'Arrow Right';
+  static const String bottom = 'Arrow Down';
+  static const String shift = 'Shift';
 }
 
 /// Orbit controls allow the camera to orbit around a target.
@@ -44,6 +45,12 @@ class Keys {
 class OrbitControls with EventDispatcher {
   late OrbitControls scope;
   late Camera object;
+
+  String panKey = Keys.shift;
+  String? rotateKey;
+  String? zoomKey;
+
+  bool _panWKey = false;
 
   late GlobalKey<PeripheralsState> listenableKey;
   PeripheralsState get domElement => listenableKey.currentState!;
@@ -206,7 +213,8 @@ class OrbitControls with EventDispatcher {
     scope.domElement.addEventListener(PeripheralType.pointerdown, onPointerDown);
     scope.domElement.addEventListener(PeripheralType.pointercancel, onPointerCancel);
     scope.domElement.addEventListener(PeripheralType.wheel, onMouseWheel);
-
+    scope.domElement.addEventListener(PeripheralType.keydown, onKeyDown);
+    scope.domElement.addEventListener(PeripheralType.keyup, onKeyUp);
     // force an update at start
 
     // so camera.up is the orbit axis
@@ -221,7 +229,7 @@ class OrbitControls with EventDispatcher {
   double get getDistance => object.position.distanceTo(target);
 
   void listenToKeyEvents(domElement) {
-    domElement.addEventListener('keydown', onKeyDown);
+    domElement.addEventListener(PeripheralType.keydown, onKeyDown);
   }
 
   void saveState() {
@@ -305,7 +313,6 @@ class OrbitControls with EventDispatcher {
         scope.minPolarAngle, math.min(scope.maxPolarAngle, spherical.phi));
 
     spherical.makeSafe();
-
     spherical.radius *= scale;
 
     // restrict radius to be between desired limits
@@ -337,7 +344,6 @@ class OrbitControls with EventDispatcher {
     } 
     else {
       sphericalDelta.set(0, 0, 0);
-
       panOffset.setValues(0, 0, 0);
     }
 
@@ -500,17 +506,14 @@ class OrbitControls with EventDispatcher {
 
   void handleMouseMoveRotate(event) {
     rotateEnd.setValues(event.clientX, event.clientY);
-
     rotateDelta.sub2(rotateEnd, rotateStart).scale(scope.rotateSpeed);
 
     final element = scope.domElement;
 
     rotateLeft(2 * math.pi * rotateDelta.x / element.clientHeight); // yes, height
-
     rotateUp(2 * math.pi * rotateDelta.y / element.clientHeight);
 
     rotateStart.setFrom(rotateEnd);
-
     scope.update();
   }
 
@@ -545,11 +548,19 @@ class OrbitControls with EventDispatcher {
 
     scope.update();
   }
-
+  void handleKeyUp(event) {
+    switch (event.keyLabel) {
+      case Keys.shift:
+      case 'Shift Right':
+      case 'Shift Left':
+        _panWKey = false;
+        break;
+    }
+  }
   void handleKeyDown(event) {
     bool needsUpdate = false;
 
-    switch (event.code) {
+    switch (event.keyLabel) {
       case Keys.up:
         pan(0, scope.keyPanSpeed);
         needsUpdate = true;
@@ -569,12 +580,15 @@ class OrbitControls with EventDispatcher {
         pan(-scope.keyPanSpeed, 0);
         needsUpdate = true;
         break;
+
+      case Keys.shift:
+      case 'Shift Right':
+      case 'Shift Left':
+        _panWKey = true;
+        break;
     }
 
     if (needsUpdate) {
-      // prevent the browser from scrolling on cursor Keys
-      event.preventDefault();
-
       scope.update();
     }
   }
@@ -604,7 +618,6 @@ class OrbitControls with EventDispatcher {
   void handleTouchStartDolly() {
     final dx = pointers[0].pageX - pointers[1].pageX;
     final dy = pointers[0].pageY - pointers[1].pageY;
-
     final distance = math.sqrt(dx * dx + dy * dy);
 
     dollyStart.setValues(0, distance);
@@ -612,13 +625,11 @@ class OrbitControls with EventDispatcher {
 
   void handleTouchStartDollyPan() {
     if (scope.enableZoom) handleTouchStartDolly();
-
     if (scope.enablePan) handleTouchStartPan();
   }
 
   void handleTouchStartDollyRotate() {
     if (scope.enableZoom) handleTouchStartDolly();
-
     if (scope.enableRotate) handleTouchStartRotate();
   }
 
@@ -656,9 +667,7 @@ class OrbitControls with EventDispatcher {
     }
 
     panDelta.sub2(panEnd, panStart).scale(scope.panSpeed);
-
     pan(panDelta.x, panDelta.y);
-
     panStart.setFrom(panEnd);
   }
 
@@ -671,25 +680,19 @@ class OrbitControls with EventDispatcher {
     final dy = event.pageY - position.y;
 
     final distance = math.sqrt(dx * dx + dy * dy);
-
     dollyEnd.setValues(0, distance);
-
     dollyDelta.setValues(0, math.pow(dollyEnd.y / dollyStart.y, scope.zoomSpeed).toDouble());
-
     dollyOut(dollyDelta.y);
-
     dollyStart.setFrom(dollyEnd);
   }
 
   void handleTouchMoveDollyPan(event) {
     if (scope.enableZoom) handleTouchMoveDolly(event);
-
     if (scope.enablePan) handleTouchMovePan(event);
   }
 
   void handleTouchMoveDollyRotate(event) {
     if (scope.enableZoom) handleTouchMoveDolly(event);
-
     if (scope.enableRotate) handleTouchMoveRotate(event);
   }
 
@@ -701,7 +704,7 @@ class OrbitControls with EventDispatcher {
     if (scope.enabled == false) return;
 
     if (pointers.isEmpty) {
-      scope.domElement.setPointerCapture(event.pointerId);
+      //scope.domElement.setPointerCapture(event.pointerId);
 
       scope.domElement.addEventListener(PeripheralType.pointermove, onPointerMove);
       scope.domElement.addEventListener(PeripheralType.pointerup, onPointerUp);
@@ -730,7 +733,7 @@ class OrbitControls with EventDispatcher {
     removePointer(event);
 
     if (pointers.isEmpty) {
-      scope.domElement.releasePointerCapture(event.pointerId);
+      //scope.domElement.releasePointerCapture(event.pointerId);
 
       scope.domElement.removeEventListener(PeripheralType.pointermove, onPointerMove);
       scope.domElement.removeEventListener(PeripheralType.pointerup, onPointerUp);
@@ -752,61 +755,49 @@ class OrbitControls with EventDispatcher {
       case 0:
         mouseAction = scope.mouseButtons['left'];
         break;
-
       case 1:
         mouseAction = scope.mouseButtons['MIDDLE'];
         break;
-
       case 2:
         mouseAction = scope.mouseButtons['right'];
         break;
-
       default:
         mouseAction = -1;
+    }
+
+    if(_panWKey){
+      mouseAction = Mouse.pan;
     }
 
     switch (mouseAction) {
       case Mouse.dolly:
         if (scope.enableZoom == false) return;
-
         handleMouseDownDolly(event);
-
         state = OrbitState.dolly;
-
         break;
 
       case Mouse.rotate:
         if (event.ctrlKey || event.metaKey || event.shiftKey) {
           if (scope.enablePan == false) return;
-
           handleMouseDownPan(event);
-
           state = OrbitState.pan;
         } else {
           if (scope.enableRotate == false) return;
-
           handleMouseDownRotate(event);
-
           state = OrbitState.rotate;
         }
-
         break;
 
       case Mouse.pan:
         if (event.ctrlKey || event.metaKey || event.shiftKey) {
           if (scope.enableRotate == false) return;
-
           handleMouseDownRotate(event);
-
           state = OrbitState.rotate;
         } else {
           if (scope.enablePan == false) return;
-
           handleMouseDownPan(event);
-
           state = OrbitState.pan;
         }
-
         break;
 
       default:
@@ -821,26 +812,22 @@ class OrbitControls with EventDispatcher {
   void onMouseMove(event) {
     if (scope.enabled == false) return;
 
+    if(_panWKey){
+      state = OrbitState.pan;
+    }
+
     switch (state) {
       case OrbitState.rotate:
         if (scope.enableRotate == false) return;
-
         handleMouseMoveRotate(event);
-
         break;
-
       case OrbitState.dolly:
         if (scope.enableZoom == false) return;
-
         handleMouseMoveDolly(event);
-
         break;
-
       case OrbitState.pan:
         if (scope.enablePan == false) return;
-
         handleMouseMovePan(event);
-
         break;
     }
   }
@@ -850,19 +837,19 @@ class OrbitControls with EventDispatcher {
         scope.enableZoom == false ||
         state != OrbitState.none) return;
 
-    event.preventDefault();
-
+    //event.preventDefault();
     scope.dispatchEvent(_startEvent);
-
     handleMouseWheel(event);
-
     scope.dispatchEvent(_endEvent);
   }
 
   void onKeyDown(event) {
-    if (scope.enabled == false || scope.enablePan == false) return;
-
+    if (!scope.enabled || !scope.enablePan) return;
     handleKeyDown(event);
+  }
+  void onKeyUp(event) {
+    if (!scope.enabled || !scope.enablePan) return;
+    handleKeyUp(event);
   }
 
   void onTouchStart(event) {
@@ -873,26 +860,19 @@ class OrbitControls with EventDispatcher {
         switch (scope.touches['ONE']) {
           case Touch.rotate:
             if (scope.enableRotate == false) return;
-
             handleTouchStartRotate();
-
             state = OrbitState.touchRotate;
-
             break;
 
           case Touch.pan:
             if (scope.enablePan == false) return;
-
             handleTouchStartPan();
-
             state = OrbitState.touchPan;
-
             break;
 
           default:
             state = OrbitState.none;
         }
-
         break;
 
       case 2:
@@ -930,38 +910,23 @@ class OrbitControls with EventDispatcher {
     switch (state) {
       case OrbitState.touchRotate:
         if (scope.enableRotate == false) return;
-
         handleTouchMoveRotate(event);
-
         scope.update();
-
         break;
-
       case OrbitState.touchPan:
         if (scope.enablePan == false) return;
-
         handleTouchMovePan(event);
-
         scope.update();
-
         break;
-
       case OrbitState.touchDollyPan:
         if (scope.enableZoom == false && scope.enablePan == false) return;
-
         handleTouchMoveDollyPan(event);
-
         scope.update();
-
         break;
-
       case OrbitState.touchDollyRotate:
         if (scope.enableZoom == false && scope.enableRotate == false) return;
-
         handleTouchMoveDollyRotate(event);
-
         scope.update();
-
         break;
 
       default:
@@ -971,7 +936,6 @@ class OrbitControls with EventDispatcher {
 
   void onContextMenu(event) {
     if (scope.enabled == false) return;
-
     event.preventDefault();
   }
 
