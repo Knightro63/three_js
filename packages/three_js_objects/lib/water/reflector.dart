@@ -48,16 +48,7 @@ class Reflector extends Mesh {
 
     this.material = material;
 
-		onBeforeRender = ({
-      WebGLRenderer? renderer,
-      RenderTarget? renderTarget,
-      Object3D? mesh,
-      Scene? scene,
-      Camera? camera,
-      BufferGeometry? geometry,
-      Material? material,
-      Map<String, dynamic>? group
-    }){
+    onAfterRender = ({Camera? camera, BufferGeometry? geometry, Map<String, dynamic>? group, Material? material, WebGLRenderer? renderer, Object3D? scene}){
 			reflectorWorldPosition.setFromMatrixPosition( this.matrixWorld );
 			cameraWorldPosition.setFromMatrixPosition( camera!.matrixWorld );
 

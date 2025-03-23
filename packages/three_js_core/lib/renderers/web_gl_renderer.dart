@@ -1037,8 +1037,8 @@ class WebGLRenderer {
 					'minFilter': LinearMipmapLinearFilter,
 					'samples': 4,
 					'stencilBuffer': stencil,
-					'resolveDepthBuffer': false,
-					'resolveStencilBuffer': false,
+					'resolveDepthBuffer': 0,
+					'resolveStencilBuffer': 0,
           'colorSpace': ColorManagement.workingColorSpace,
         }));
 
@@ -1054,7 +1054,7 @@ class WebGLRenderer {
 			final transmissionRenderTarget = currentRenderState?.state.transmissionRenderTarget[ camera.id ];
 
 			final activeViewport = camera.viewport ?? _currentViewport;
-			transmissionRenderTarget.setSize( activeViewport.z, activeViewport.w );
+			transmissionRenderTarget.setSize( activeViewport.z.toInt(), activeViewport.w.toInt() );
 
 			//
 

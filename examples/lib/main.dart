@@ -49,11 +49,14 @@ import 'package:example/loaders/webgl_loader_vox.dart';
 import 'package:example/loaders/webgl_loader_xyz.dart';
 import 'package:example/material/webgl2_multiple_rendertargets.dart';
 import 'package:example/material/webgl_materials_modified.dart';
+import 'package:example/material/webgl_materials_physical_transmission_alpha.dart';
 import 'package:example/material/webgl_materials_subsurface_scattering.dart';
 import 'package:example/modifers/webgl_modifer_tessellation.dart';
 import 'package:example/modifers/webgl_modifer_edgesplit.dart';
 import 'package:example/modifers/webgl_modifier_simplifier.dart';
 import 'package:example/modifers/webgl_modifier_subdivision.dart';
+import 'package:example/others/webgl_multiple_scenes_comparison.dart';
+import 'package:example/shaders/webgl_refraction.dart';
 import 'package:example/postprocessing/webgl_postprocessing_unreal_bloom.dart';
 import 'package:example/postprocessing/webgl_postprocessing_unreal_bloom_selective.dart';
 import 'package:example/shaders/webgl_shaders_ocean.dart';
@@ -415,6 +418,9 @@ class MyAppState extends State<MyApp> {
               '/webgl_materials':(BuildContext context) {
                 return const WebglMaterials();
               },
+              '/webgl_materials_physical_transmission_alpha':(BuildContext context) {
+                return const WebglMaterialsPhysicalTransmissionAlpha();
+              },
               '/webgl_materials_modified':(BuildContext context) {
                 return const WebglMaterialsModified();
               },
@@ -514,6 +520,9 @@ class MyAppState extends State<MyApp> {
               '/multi_views':(BuildContext context) {
                 return const MultiViews();
               },
+              '/webgl_multiple_scenes_comparison':(BuildContext context) {
+                return const WebglMultipleScenesComparison();
+              },
               '/games_fps':(BuildContext context) {
                 return const FPSGame2();
               },
@@ -546,6 +555,9 @@ class MyAppState extends State<MyApp> {
               },
               '/webgl_shaders_ocean':(BuildContext context) {
                 return const WebglShaderOcean();
+              },
+              '/webgl_refraction':(BuildContext context) {
+                return const WebglRefraction();
               },
               // '/webgl_nodes_points':(BuildContext context) {
               //   return const WebglNodesPoints();

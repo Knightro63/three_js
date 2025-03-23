@@ -8,9 +8,9 @@ import 'package:three_js_math/three_js_math.dart';
  * http://29a.ch/ && http://29a.ch/slides/2012/webglwater/ : Water shader explanations in WebGL
  */
 
-class Water extends Mesh {
+class WaterOld extends Mesh {
 
-	Water(super.geometry, [Map<String,dynamic>? options] ) {
+	WaterOld(super.geometry, [Map<String,dynamic>? options] ) {
     options ??= {};
 
 		final textureWidth = options['textureWidth'] ?? 512;
@@ -45,7 +45,7 @@ class Water extends Mesh {
 
 		final mirrorCamera = PerspectiveCamera();
 
-		final renderTarget = WebGLRenderTarget( textureWidth, textureHeight );
+		final rt = WebGLRenderTarget( textureWidth, textureHeight );
 
 		final Map<String,dynamic> mirrorShader = {
       'name': 'MirrorShader',
@@ -55,15 +55,15 @@ class Water extends Mesh {
 				{
 					'normalSampler': { 'value': null },
 					'mirrorSampler': { 'value': null },
-					'alpha': { 'value': alpha },
-					'time': { 'value': time },
+					'alpha': { 'value': 1.0 },
+					'time': { 'value': 1.0 },
 					'size': { 'value': 1.0 },
-					'distortionScale': { 'value': distortionScale },
-					'textureMatrix': { 'value': textureMatrix },
-					'sunColor': { 'value': sunColor },
-					'sunDirection': { 'value': sunDirection },
-					'eye': { 'value': eye },
-					'waterColor': { 'value': waterColor }
+					'distortionScale': { 'value': 20.0 },
+					'textureMatrix': { 'value': Matrix4.identity() },
+					'sunColor': { 'value': Color.fromHex32(0x7f7f7f) },
+					'sunDirection': { 'value': Vector3( 0.70707, 0.70707, 0 ) },
+					'eye': { 'value': Vector3() },
+					'waterColor': { 'value': Color.fromHex32( 0x555555 ) }
 				}
 			] ),
 
@@ -179,18 +179,22 @@ class Water extends Mesh {
 			'fog': fog
 		} );
 
+		material.uniforms[ 'mirrorSampler' ]['value'] = rt.texture;
+		material.uniforms[ 'textureMatrix' ]['value'] = textureMatrix;
+		material.uniforms[ 'alpha' ]['value'] = alpha;
+		material.uniforms[ 'time' ]['value'] = time;
+		material.uniforms[ 'normalSampler' ]['value'] = normalSampler;
+		material.uniforms[ 'sunColor' ]['value'] = sunColor;
+		material.uniforms[ 'waterColor' ]['value'] = waterColor;
+		material.uniforms[ 'sunDirection' ]['value'] = sunDirection;
+		material.uniforms[ 'distortionScale' ]['value'] = distortionScale;
+
+		material.uniforms[ 'eye' ]['value'] = eye;
+
 		this.material = material;
 
-		onBeforeRender = ({
-      WebGLRenderer? renderer,
-      RenderTarget? renderTarget,
-      Object3D? mesh,
-      Scene? scene,
-      Camera? camera,
-      BufferGeometry? geometry,
-      Material? material,
-      Map<String, dynamic>? group
-    }) {
+    onAfterRender = ({Camera? camera, BufferGeometry? geometry, Map<String, dynamic>? group, Material? material, WebGLRenderer? renderer, Object3D? scene}){
+
 			mirrorWorldPosition.setFromMatrixPosition( this.matrixWorld );
 			cameraWorldPosition.setFromMatrixPosition( camera!.matrixWorld );
 
@@ -271,12 +275,12 @@ class Water extends Mesh {
 			final currentXrEnabled = renderer.xr.enabled;
 			final currentShadowAutoUpdate = renderer.shadowMap.autoUpdate;
 
-			visible = false;
+			this.visible = false;
 
 			renderer.xr.enabled = false; // Avoid camera modification and recursion
 			renderer.shadowMap.autoUpdate = false; // Avoid re-computing shadows
 
-			renderer.setRenderTarget( renderTarget );
+			renderer.setRenderTarget( rt );
 
 			renderer.state.buffers['depth'].setMask( true ); // make sure the depth buffer is writable so it can be properly cleared, see #18897
 

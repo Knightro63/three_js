@@ -1,7 +1,4 @@
 import 'package:three_js_math/three_js_math.dart';
-
-import './index.dart';
-import '../vector/index.dart';
 import 'dart:math' as math;
 
 final _v0 = Vector3.zero();
@@ -29,14 +26,14 @@ extension TriangleUtil on Triangle{
     return target;
   }
 
-	static Vector getInterpolatedAttribute(NativeArray attr, int i1, int i2, int i3, Vector3 barycoord, Vector target ) {
+	static Vector getInterpolatedAttribute(BufferAttribute attr, int i1, int i2, int i3, Vector3 barycoord, Vector target ) {
 		_v40.setScalar( 0 );
 		_v41.setScalar( 0 );
 		_v42.setScalar( 0 );
 
-		_v40.fromNativeArray( attr, i1 );
-		_v41.fromNativeArray( attr, i2 );
-		_v42.fromNativeArray( attr, i3 );
+		_v40.fromBuffer( attr, i1 );
+		_v41.fromBuffer( attr, i2 );
+		_v42.fromBuffer( attr, i3 );
 
 		target.setScalar( 0 );
 		target.addScaled( _v40, barycoord.x );

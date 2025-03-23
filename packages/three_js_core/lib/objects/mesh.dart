@@ -280,7 +280,7 @@ class Mesh extends Object3D {
 		}
 	}
 
-  Intersection? checkGeometryIntersection(Mesh object, Material? material, Raycaster raycaster, Ray ray, NativeArray? uv, NativeArray? uv1, NativeArray? normal, int a, int b, int c ) {
+  Intersection? checkGeometryIntersection(Mesh object, Material? material, Raycaster raycaster, Ray ray, BufferAttribute? uv, BufferAttribute? uv1, BufferAttribute? normal, int a, int b, int c ) {
     object.getVertexPosition( a, _vA );
     object.getVertexPosition( b, _vB );
     object.getVertexPosition( c, _vC );

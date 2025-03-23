@@ -671,7 +671,7 @@ class Vector4 extends Vector{
   Vector4 fromBuffer(BufferAttribute attribute, int index) {
     x = attribute.getX(index)!.toDouble();
     y = attribute.getY(index)!.toDouble();
-    z = attribute.getZ(index)!.toDouble();
+    z = attribute.getZ(index)?.toDouble() ?? 0.0;
     w = (attribute.getW(index) ?? 0).toDouble();
 
     return this;

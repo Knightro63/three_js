@@ -356,7 +356,7 @@ class WebPointerEvent {
     touch.pointer = 522;
     touch.pageX = event['scale'];
     touch.pageY = event['scale'];
-    print(event['scale']);
+
     touch.clientX = event['scale'];
     touch.clientY = event['scale'];
 

@@ -21,7 +21,7 @@ class WaterOptions{
     FutureOr<Texture?>? normalMap0,
     FutureOr<Texture?>? normalMap1
   }){
-    this.shader = shader ?? Water2.waterShader;
+    this.shader = shader ?? Water.waterShader;
     this.flowDirection = flowDirection ?? Vector2( 1, 0 );
 
     final textureLoader = TextureLoader();
@@ -38,7 +38,7 @@ class WaterOptions{
 		flowSpeed = options['flowSpeed'] ?? 0.03;
 		reflectivity = options['reflectivity'] ?? 0.02;
 		scale = options['scale'] ?? 1;
-		shader = options['shader'] ?? Water2.waterShader;
+		shader = options['shader'] ?? Water.waterShader;
 
 		final textureLoader = TextureLoader();
 
@@ -83,7 +83,7 @@ class WaterOptions{
  *
  */
 
-class Water2 extends Mesh {
+class Water extends Mesh {
   bool isWater = true;
   final cycle = 0.15; // a cycle of a flow map phase
   late double halfCycle;
@@ -91,7 +91,7 @@ class Water2 extends Mesh {
   final textureMatrix = Matrix4();
   final clock = Clock();
 
-	Water2(super.geometry, [WaterOptions? options]) {
+	Water(super.geometry, [WaterOptions? options]) {
 		type = 'Water';
     options ??= WaterOptions();
     _init(options);
@@ -182,27 +182,17 @@ class Water2 extends Mesh {
 		material?.uniforms[ 'config' ]['value'].z = halfCycle; // halfCycle
 		material?.uniforms[ 'config' ]['value'].w = scale*1.0; // scale
 
-    onBeforeRender = ({
-      WebGLRenderer? renderer,
-      RenderTarget? renderTarget,
-      Object3D? mesh,
-      Scene? scene,
-      Camera? camera,
-      BufferGeometry? geometry,
-      Material? material,
-      Map<String, dynamic>? group
-    }){
-      
+    onAfterRender = ({Camera? camera, BufferGeometry? geometry, Map<String, dynamic>? group, Material? material, WebGLRenderer? renderer, Object3D? scene}){
       updateTextureMatrix( camera! );
       updateFlow();
 
-      visible = true;
+      visible = false;
 
       reflector.matrixWorld.setFrom(this.matrixWorld );
       refractor.matrixWorld.setFrom(this.matrixWorld );
 
-      reflector.onBeforeRender!(renderer:renderer, scene:scene, camera:camera);//, renderTarget: renderTarget);
-      refractor.onBeforeRender!(renderer:renderer, scene:scene, camera:camera);
+      reflector.onAfterRender!(renderer:renderer, scene:scene, camera:camera);
+      refractor.onAfterRender!(renderer:renderer, scene:scene, camera:camera);
 
       visible = true;
     };

@@ -181,19 +181,7 @@ class Refractor extends Mesh {
 			scope.visible = true;
 		}
 
-		//
-
-		onBeforeRender = ({
-      WebGLRenderer? renderer,
-      RenderTarget? renderTarget,
-      Object3D? mesh,
-      Scene? scene,
-      Camera? camera,
-      BufferGeometry? geometry,
-      Material? material,
-      Map<String, dynamic>? group
-    }){
-
+    onAfterRender = ({Camera? camera, BufferGeometry? geometry, Map<String, dynamic>? group, Material? material, WebGLRenderer? renderer, Object3D? scene}){
 			// ensure refractors are rendered only once per frame
 
 			if ( camera?.userData['refractor'] == true ) return;
@@ -206,7 +194,7 @@ class Refractor extends Mesh {
 			updateTextureMatrix( camera! );
 			updateVirtualCamera( camera );
 			render( renderer!, scene!, camera );
-		};
+    };
 	}
 
   WebGLRenderTarget getRenderTarget() {

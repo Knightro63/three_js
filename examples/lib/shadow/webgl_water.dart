@@ -33,9 +33,6 @@ class _State extends State<WebglWater> {
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
       setup: setup,
-      settings: three.Settings(
-        //useSourceTexture: true
-      )
     );
     super.initState();
   }
@@ -116,7 +113,7 @@ class _State extends State<WebglWater> {
 
     final waterGeometry = three.PlaneGeometry( 20, 20 );
 
-    final water = Water2( waterGeometry, WaterOptions(
+    final water = Water( waterGeometry, WaterOptions(
       color: params['color'],
       scale: params['scale'],
       flowDirection: three.Vector2( params['flowX'], params['flowY'] ),

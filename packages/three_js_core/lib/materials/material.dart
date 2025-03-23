@@ -575,7 +575,40 @@ class Material with EventDispatcher {
       wireframeLinewidth = newValue.toDouble();
     } else if (key == "shadowSide") {
       shadowSide = newValue;
-    } else if (key == "specular") {
+    }
+    else if (key == "transmission") {
+      transmission = newValue.toDouble();
+    }
+    else if (key == "thickness") {
+      thickness = newValue;
+    }
+    else if (key == "attenuationDistance") {
+      attenuationDistance = newValue;
+    }
+    else if (key == "ior") {
+      ior = newValue;
+    }
+    else if(key == 'thicknessMap'){
+      thicknessMap = newValue;
+    }
+    else if(key == 'specularIntensity'){
+      specularIntensity = newValue;
+    }
+    else if(key == 'attenuationColor'){
+      if (newValue is Color) {
+        attenuationColor = newValue;
+      } else {
+        attenuationColor = Color.fromHex32(newValue);
+      }
+    }
+    else if(key == 'specularColor'){
+      if (newValue is Color) {
+        specularColor = newValue;
+      } else {
+        specularColor = Color.fromHex32(newValue);
+      }
+    }
+    else if (key == "specular") {
       if (newValue is Color) {
         specular = newValue;
       } else {

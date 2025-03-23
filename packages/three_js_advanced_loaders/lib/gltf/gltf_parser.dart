@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:typed_data';
-
 import 'gltf_mesh_standard_sg_material.dart';
 import 'gltf_helper.dart';
 import 'gltf_cubic_spline_interpolant.dart';
@@ -33,6 +32,8 @@ class GLTFParser {
 
   late Map textureCache;
   late Map sourceCache;
+
+  GLTFParser get parser => this;
 
   GLTFParser(Map<String, dynamic>? json, Map<String, dynamic>? options) {
     this.json = json ?? {};
@@ -99,7 +100,7 @@ class GLTFParser {
 
     // Mark the special nodes/meshes in json for efficient parse
     _invokeAll((ext) {
-      return ext.markDefs != null && ext.markDefs() != null;
+      return ext?.markDefs != null && ext?.markDefs?.call() != null;
     });
 
     final scenes = await getDependencies('scene');
@@ -202,7 +203,7 @@ class GLTFParser {
     extensions.add(this);
 
     for (int i = 0; i < extensions.length; i++) {
-      final result = await func(extensions[i]);
+      final result = await func(extensions[i].parser);
       if (result != null) return result;
     }
   }
@@ -214,9 +215,11 @@ class GLTFParser {
     final results = [];
 
     for (int i = 0; i < extensions.length; i++) {
-      final result = await func(extensions[i]);
+      //if(extensions[i] is GLTFExtension){
+        final result = await func(extensions[i]);
 
-      if (result != null) results.add(result);
+        if (result != null) results.add(result);
+      //}
     }
 
     return results;
@@ -243,7 +246,7 @@ class GLTFParser {
           break;
 
         case 'mesh':
-          dependency = await _invokeOne((GLTFParser? ext) async {
+          dependency = await _invokeOne((ext) async {
             return ext?.loadMesh != null ? await ext!.loadMesh(index) : null;
           });
           break;
@@ -254,8 +257,8 @@ class GLTFParser {
 
         case 'bufferView':
           dependency = await _invokeOne((ext) async {
-            return ext.loadBufferView != null
-                ? await ext.loadBufferView(index)
+            return ext?.loadBufferView != null
+                ? await ext?.loadBufferView?.call(index)
                 : null;
           });
 
@@ -267,16 +270,16 @@ class GLTFParser {
 
         case 'material':
           dependency = await _invokeOne((ext) async {
-            return ext.loadMaterial != null
-                ? await ext.loadMaterial(index)
+            return ext?.loadMaterial != null
+                ? await ext?.loadMaterial?.call(index)
                 : null;
           });
           break;
 
         case 'texture':
           dependency = await _invokeOne((ext) async {
-            return ext.loadTexture != null
-                ? await ext.loadTexture(index)
+            return ext?.loadTexture != null
+                ? await ext?.loadTexture?.call(index)
                 : null;
           });
           break;
@@ -812,14 +815,14 @@ class GLTFParser {
       }
 
       materialType = await _invokeOne((ext) async {
-        return ext.getMaterialType != null
-            ? await ext.getMaterialType(materialIndex)
+        return ext?.getMaterialType != null
+            ? await ext?.getMaterialType?.call(materialIndex)
             : null;
       });
 
       final v = await _invokeAll((ext) {
-        return ext.extendMaterialParams != null &&
-            ext.extendMaterialParams(materialIndex, materialParams) != null;
+        return ext?.extendMaterialParams != null &&
+            ext?.extendMaterialParams?.call(materialIndex, materialParams) != null;
       });
 
       pending.add(v);
@@ -1328,7 +1331,7 @@ class GLTFParser {
 
     final pending = [];
 
-    final meshPromise = await _invokeOne((GLTFParser? ext) {
+    final meshPromise = await _invokeOne((ext) {
       return ext?.createNodeMesh != null ? ext!.createNodeMesh(nodeIndex) : null;
     });
 
@@ -1357,8 +1360,8 @@ class GLTFParser {
     }
 
     List results = await _invokeAll((ext) async {
-      return ext.createNodeAttachment != null
-          ? await ext.createNodeAttachment(nodeIndex)
+      return ext?.createNodeAttachment != null
+          ? await ext?.createNodeAttachment?.call(nodeIndex)
           : null;
     });
 
