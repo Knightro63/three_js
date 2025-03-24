@@ -19,7 +19,7 @@ class WebGLTextures {
 
   bool supportsInvalidateFramenbuffer = false;
 
-  final _imageDimensions = Vector2();
+  //final _imageDimensions = Vector2();
   final Map _videoTextures = {};
 
   final WeakMap _sources = WeakMap();
@@ -40,8 +40,8 @@ class WebGLTextures {
     maxTextureSize = capabilities.maxTextureSize;
     maxSamples = capabilities.maxSamples;
 
-    multisampledRTTExt = extensions.has( 'WEBGL_multisampled_render_to_texture' ) != null? extensions.get( 'WEBGL_multisampled_render_to_texture' ) : null;
-    multisampledRenderToTextureExtension = extensions.has('WEBGL_multisampled_render_to_texture') != null
+    multisampledRTTExt = extensions.has( 'WEBGL_multisampled_render_to_texture' )? extensions.get( 'WEBGL_multisampled_render_to_texture' ) : null;
+    multisampledRenderToTextureExtension = extensions.has('WEBGL_multisampled_render_to_texture')
         ? extensions.get('WEBGL_multisampled_render_to_texture')
         : null;
 

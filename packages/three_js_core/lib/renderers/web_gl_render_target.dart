@@ -239,10 +239,10 @@ class WebGLRenderTargetOptions {
       count = json['count'];
     }
     if(json['resolveDepthBuffer'] != null){
-      count = json['resolveDepthBuffer'];
+      resolveDepthBuffer = json['resolveDepthBuffer'];
     }
     if(json['resolveStencilBuffer'] != null){
-      count = json['resolveStencilBuffer'];
+      resolveStencilBuffer = json['resolveStencilBuffer'];
     }
     if(json['internalFormat'] != null){
       internalFormat = json['internalFormat'];

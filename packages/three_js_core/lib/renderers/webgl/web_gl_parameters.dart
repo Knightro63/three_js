@@ -606,6 +606,7 @@ class WebGLParameters {
       "sheen": sheen,
       "transmission": transmission,
       "transmissionMap": transmissionMap,
+      "transmissionMapUv": transmissionMapUv,
       "thicknessMap": thicknessMap,
       "combine": combine,
       "vertexTangents": vertexTangents,

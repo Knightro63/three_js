@@ -305,7 +305,7 @@ class WebGLPrograms {
 			extensionClipCullDistance: material.extensions != null && material.extensions?['clipCullDistance'] == true && extensions.has( 'WEBGL_clip_cull_distance' ),
 			extensionMultiDraw: material.extensions != null && material.extensions?['multiDraw'] == true && extensions.has( 'WEBGL_multi_draw' ) != null,
 
-			rendererExtensionParallelShaderCompile: extensions.has( 'KHR_parallel_shader_compile' ) != null,
+			rendererExtensionParallelShaderCompile: extensions.has( 'KHR_parallel_shader_compile' ),
 
 			customProgramCacheKey: material.customProgramCacheKey()
     );
