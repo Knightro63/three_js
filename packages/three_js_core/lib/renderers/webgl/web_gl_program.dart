@@ -333,7 +333,7 @@ class WebGLProgram extends DefaultProgram with WebGLProgramExtra {
         parameters.sheenColorMap ? '#define USE_SHEEN_COLORMAP' : '',
         parameters.sheenRoughnessMap ? '#define USE_SHEEN_ROUGHNESSMAP' : '',
 
-        //parameters.transmission ? '#define USE_TRANSMISSION' : '',
+        parameters.transmission ? '#define USE_TRANSMISSION' : '',
         parameters.transmissionMap ? '#define USE_TRANSMISSIONMAP' : '',
         parameters.thicknessMap ? '#define USE_THICKNESSMAP' : '',
 

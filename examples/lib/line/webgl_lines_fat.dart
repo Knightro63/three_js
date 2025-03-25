@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:example/src/gui.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:example/src/statistics.dart';
 import 'package:three_js/three_js.dart' as three;
@@ -110,7 +111,7 @@ class _State extends State<WebglLinesFat> {
 
     matLine = LineMaterial.fromMap( {
       'color': 0xffffff,
-      'linewidth': 5, // in world units with size attenuation, pixels otherwise
+      'linewidth': kIsWeb?500:5, // in world units with size attenuation, pixels otherwise
       'vertexColors': true,
     } );
     matLine.alphaToCoverage = true;
@@ -136,10 +137,6 @@ class _State extends State<WebglLinesFat> {
     threeJs.scene.add( line1 );
 
     initGui();
-
-    threeJs.rendererUpdate = ([double? dt]){
-      //threeJs.renderer?.setClearColor(three.Color.fromHex32(0x222222), 1 );
-    };
 
     threeJs.postProcessor = ([double? dt]){
       threeJs.renderer!.setViewport(0,0,threeJs.width,threeJs.height);

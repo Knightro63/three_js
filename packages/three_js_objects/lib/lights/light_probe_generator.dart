@@ -4,88 +4,85 @@ import 'package:three_js_math/three_js_math.dart';
 
 class LightProbeGenerator {
 	// https://www.ppsloan.org/publications/StupidSH36.pdf
-	// static LightProbe fromCubeTexture(CubeTexture cubeTexture ) {
-	// 	double totalWeight = 0;
+	static LightProbe fromCubeTexture(CubeTexture cubeTexture ) {
+		double totalWeight = 0;
 
-	// 	final coord = Vector3();
-	// 	final dir = Vector3();
-	// 	final color = Color();
-	// 	final List<double> shBasis = [ 0, 0, 0, 0, 0, 0, 0, 0, 0 ];
-	// 	final sh = SphericalHarmonics3();
-	// 	final shCoefficients = sh.coefficients;
+		final coord = Vector3();
+		final dir = Vector3();
+		final color = Color();
+		final List<double> shBasis = [ 0, 0, 0, 0, 0, 0, 0, 0, 0 ];
+		final sh = SphericalHarmonics3();
+		final shCoefficients = sh.coefficients;
 
-	// 	for (int faceIndex = 0; faceIndex < 6; faceIndex ++ ) {
-	// 		final image = cubeTexture.image[ faceIndex ];
-	// 		final width = image.width;
-	// 		final height = image.height;
-	// 		final canvas = document.createElement( 'canvas' );
+		for (int faceIndex = 0; faceIndex < 6; faceIndex ++ ) {
+			final image = cubeTexture.image[ faceIndex ];
 
-	// 		canvas.width = width;
-	// 		canvas.height = height;
+			// canvas.width = width;
+			// canvas.height = height;
 
-	// 		final context = canvas.getContext( '2d' );
-	// 		context.drawImage( image, 0, 0, width, height );
+			// final context = canvas.getContext( '2d' );
+			// context.drawImage( image, 0, 0, width, height );
 
-	// 		final imageData = context.getImageData( 0, 0, width, height );
-	// 		final data = imageData.data;
-	// 		final imageWidth = imageData.width; // assumed to be square
-	// 		final pixelSize = 2 / imageWidth;
+			// final imageData = context.getImageData( 0, 0, width, height );
+			final data = image.data;
+			final imageWidth = image.width; // assumed to be square
+			final pixelSize = 2 / imageWidth;
 
-	// 		for (int i = 0, il = data.length; i < il; i += 4 ) { // RGBA assumed
-	// 			// pixel color
-	// 			color.setRGB( data[ i ] / 255, data[ i + 1 ] / 255, data[ i + 2 ] / 255 );
+			for (int i = 0, il = data.length; i < il; i += 4 ) { // RGBA assumed
+				// pixel color
+				color.setRGB( data[ i ] / 255, data[ i + 1 ] / 255, data[ i + 2 ] / 255 );
 
-	// 			// convert to linear color space
-	// 			convertColorToLinear( color, cubeTexture.colorSpace );
+				// convert to linear color space
+				convertColorToLinear( color, cubeTexture.colorSpace );
 
-	// 			// pixel coordinate on unit cube
+				// pixel coordinate on unit cube
 
-	// 			final pixelIndex = i / 4;
-	// 			final col = - 1 + ( pixelIndex % imageWidth + 0.5 ) * pixelSize;
-	// 			final row = 1 - ( ( pixelIndex / imageWidth ).floor() + 0.5 ) * pixelSize;
+				final pixelIndex = i / 4;
+				final col = - 1 + ( pixelIndex % imageWidth + 0.5 ) * pixelSize;
+				final row = 1 - ( ( pixelIndex / imageWidth ).floor() + 0.5 ) * pixelSize;
 
-	// 			switch ( faceIndex ) {
-	// 				case 0: coord.setValues( - 1, row, - col ); break;
-	// 				case 1: coord.setValues( 1, row, col ); break;
-	// 				case 2: coord.setValues( - col, 1, - row ); break;
-	// 				case 3: coord.setValues( - col, - 1, row ); break;
-	// 				case 4: coord.setValues( - col, row, 1 ); break;
-	// 				case 5: coord.setValues( col, row, - 1 ); break;
-	// 			}
+				switch ( faceIndex ) {
+					case 0: coord.setValues( - 1, row, - col ); break;
+					case 1: coord.setValues( 1, row, col ); break;
+					case 2: coord.setValues( - col, 1, - row ); break;
+					case 3: coord.setValues( - col, - 1, row ); break;
+					case 4: coord.setValues( - col, row, 1 ); break;
+					case 5: coord.setValues( col, row, - 1 ); break;
+				}
 
-	// 			// weight assigned to this pixel
+				// weight assigned to this pixel
 
-	// 			final lengthSq = coord.length2;
-	// 			final weight = 4 / ( math.sqrt( lengthSq ) * lengthSq );
+				final lengthSq = coord.length2;
+				final weight = 4 / ( math.sqrt( lengthSq ) * lengthSq );
 
-	// 			totalWeight += weight;
+				totalWeight += weight;
 
-	// 			// direction vector to this pixel
-	// 			dir.setFrom( coord ).normalize();
+				// direction vector to this pixel
+				dir.setFrom( coord ).normalize();
 
-	// 			// evaluate SH basis functions in direction dir
-	// 			SphericalHarmonics3.getBasisAt( dir, shBasis );
+				// evaluate SH basis functions in direction dir
+				SphericalHarmonics3.getBasisAt( dir, shBasis );
 
-	// 			// accummuulate
-	// 			for (int j = 0; j < 9; j ++ ) {
-	// 				shCoefficients[ j ].x += shBasis[ j ] * color.red * weight;
-	// 				shCoefficients[ j ].y += shBasis[ j ] * color.green * weight;
-	// 				shCoefficients[ j ].z += shBasis[ j ] * color.blue * weight;
-	// 			}
-	// 		}
-	// 	}
+				// accummuulate
+				for (int j = 0; j < 9; j ++ ) {
+					shCoefficients[ j ].x += shBasis[ j ] * color.red * weight;
+					shCoefficients[ j ].y += shBasis[ j ] * color.green * weight;
+					shCoefficients[ j ].z += shBasis[ j ] * color.blue * weight;
+				}
+			}
+		}
 
-	// 	// normalize
-	// 	final norm = ( 4 * math.pi ) / totalWeight;
+		// normalize
+		final norm = ( 4 * math.pi ) / totalWeight;
 
-	// 	for (int j = 0; j < 9; j ++ ) {
-	// 		shCoefficients[ j ].x *= norm;
-	// 		shCoefficients[ j ].y *= norm;
-	// 		shCoefficients[ j ].z *= norm;
-	// 	}
+		for (int j = 0; j < 9; j ++ ) {
+			shCoefficients[ j ].x *= norm;
+			shCoefficients[ j ].y *= norm;
+			shCoefficients[ j ].z *= norm;
+		}
 
-	// 	return LightProbe( sh );
-	// }
+		return LightProbe( sh );
+	}
 
 	static LightProbe fromCubeRenderTarget(WebGLRenderer renderer,WebGLCubeRenderTarget cubeRenderTarget ) {
 		// The renderTarget must be set to RGBA in order to make readRenderTargetPixels works

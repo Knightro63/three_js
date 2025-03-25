@@ -87,6 +87,7 @@ flutter:
     - assets/models/bvh/
     - assets/models/obj/cerberus/
     - assets/models/obj/male02/
+    - assets/models/obj/
     - assets/models/json/
     - assets/models/gcode/
     - assets/models/ply/binary/

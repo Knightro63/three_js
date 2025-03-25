@@ -372,7 +372,7 @@ class GLTFMaterialsClearcoatExtension extends GLTFExtension {
       final materialDef = parser.json["materials"][materialIndex];
 
       if (materialDef["extensions"] == null ||
-          materialDef["extensions"][name]) return null;
+          materialDef["extensions"]?[name] == false) return null;
 
       return MeshPhysicalMaterial;
     };
@@ -607,7 +607,6 @@ class GLTFMaterialsVolumeExtension extends GLTFExtension {
       List<Future> pending = [];
 
       final extension = materialDef["extensions"][name];
-      print(extension);
 
       materialParams['thickness'] = extension['thicknessFactor'] ?? 0;
 

@@ -201,9 +201,9 @@ class GuiWidget{
     );
   }
   Widget _color([BuildContext? context]){
-    final r = (0xff0000 & value?[name]) >> 16;
-    final g = (0x00ff00 & value?[name]) >> 8;
-    final b = (0x0000ff & value?[name]) >> 0;
+    final r = (0xff0000 & (value?[name] ?? 0)) >> 16;
+    final g = (0x00ff00 & (value?[name] ?? 0)) >> 8;
+    final b = (0x0000ff & (value?[name] ?? 0)) >> 0;
     final color = Color.fromARGB(255, r, g, b);
     
     return  Row(

@@ -203,7 +203,7 @@ class GLTFParser {
     extensions.add(this);
 
     for (int i = 0; i < extensions.length; i++) {
-      final result = await func(extensions[i].parser);
+      final result = await func(extensions[i]);
       if (result != null) return result;
     }
   }
@@ -215,11 +215,8 @@ class GLTFParser {
     final results = [];
 
     for (int i = 0; i < extensions.length; i++) {
-      //if(extensions[i] is GLTFExtension){
-        final result = await func(extensions[i]);
-
-        if (result != null) results.add(result);
-      //}
+      final result = await func(extensions[i]);
+      if (result != null) results.add(result);
     }
 
     return results;

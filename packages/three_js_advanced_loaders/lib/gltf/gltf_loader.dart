@@ -58,6 +58,10 @@ class GLTFLoader extends Loader {
     pluginCallbacks = [];
 
     register((parser) {
+      return GLTFMaterialsAnisotropyExtension(parser);
+    });
+
+    register((parser) {
       return GLTFMaterialsClearcoatExtension(parser);
     });
 

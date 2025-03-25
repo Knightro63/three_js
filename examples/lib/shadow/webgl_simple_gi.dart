@@ -68,19 +68,16 @@ class _State extends State<WebglSimpleGi> {
     final torusKnot = GIMesh( torusGeometry, material );
     threeJs.scene.add( torusKnot );
 
-    // room
-    createBox();
+    final materials = three.GroupMaterial();
 
-    // final materials = three.GroupMaterial();
+    for (int i = 0; i < 8; i ++ ) {
+      materials.add( three.MeshBasicMaterial.fromMap( { 'color': (math.Random().nextDouble() * 0xffffff).toInt(), 'side': three.BackSide } ) );
+    }
 
-    // for (int i = 0; i < 8; i ++ ) {
-    //   materials.add( three.MeshBasicMaterial.fromMap( { 'color': (math.Random().nextDouble() * 0xffffff).toInt(), 'side': three.BackSide } ) );
-    // }
+    final boxGeometry = three.BoxGeometry( 3, 3, 3 );
 
-    // final boxGeometry = three.BoxGeometry( 3, 3, 3 );
-
-    // final box = three.Mesh( boxGeometry, materials );
-    // threeJs.scene.add( box );
+    final box = three.Mesh( boxGeometry, materials );
+    threeJs.scene.add( box );
 
     simpleGI(threeJs.renderer!, threeJs.scene );
 
@@ -94,41 +91,6 @@ class _State extends State<WebglSimpleGi> {
       compute?.call();
       controls.update();
     });
-  }
-
-  void createBox(){
-    const size = 1.5;
-    final planeGeo = three.PlaneGeometry( size*2,size*2 );
-    // walls
-    final planeTop = three.Mesh( planeGeo, three.MeshBasicMaterial.fromMap( { 'color': (math.Random().nextDouble() * 0xffffff).toInt()} ) );
-    planeTop.position.y = size;
-    planeTop.rotateX( math.pi / 2 );
-    threeJs.scene.add( planeTop );
-
-    final planeBottom = three.Mesh( planeGeo, three.MeshBasicMaterial.fromMap( { 'color': (math.Random().nextDouble() * 0xffffff).toInt() } ) );
-    planeBottom.rotateX( - math.pi / 2 );
-    planeBottom.position.y = -size;
-    threeJs.scene.add( planeBottom );
-
-    final planeFront = three.Mesh( planeGeo, three.MeshBasicMaterial.fromMap( { 'color': (math.Random().nextDouble() * 0xffffff).toInt() } ) );
-    planeFront.position.z = size;
-    planeFront.rotateY( math.pi );
-    threeJs.scene.add( planeFront );
-
-    final planeBack = three.Mesh( planeGeo, three.MeshBasicMaterial.fromMap( { 'color': (math.Random().nextDouble() * 0xffffff).toInt() } ) );
-    planeBack.position.z = - size;
-    //planeBack.rotateY( math.pi );
-    threeJs.scene.add( planeBack );
-
-    final planeRight = three.Mesh( planeGeo, three.MeshBasicMaterial.fromMap( { 'color': (math.Random().nextDouble() * 0xffffff).toInt() } ) );
-    planeRight.position.x = size;
-    planeRight.rotateY( - math.pi / 2 );
-    threeJs.scene.add( planeRight );
-
-    final planeLeft = three.Mesh( planeGeo, three.MeshBasicMaterial.fromMap( { 'color': (math.Random().nextDouble() * 0xffffff).toInt() } ) );
-    planeLeft.position.x = - size;
-    planeLeft.rotateY( math.pi / 2 );
-    threeJs.scene.add( planeLeft );
   }
 
   void Function([double?])? compute;

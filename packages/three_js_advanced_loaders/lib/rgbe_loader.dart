@@ -85,7 +85,7 @@ class RGBELoader extends DataTextureLoader {
         texture.minFilter = NearestFilter;
         texture.magFilter = NearestFilter;
         texture.generateMipmaps = false;
-        texture.flipY = true;
+        texture.flipY = flipY;
         break;
 
       case FloatType:
@@ -93,7 +93,7 @@ class RGBELoader extends DataTextureLoader {
         texture.minFilter = LinearFilter;
         texture.magFilter = LinearFilter;
         texture.generateMipmaps = false;
-        texture.flipY = true;
+        texture.flipY = flipY;
         break;
 
       case HalfFloatType:
@@ -101,7 +101,7 @@ class RGBELoader extends DataTextureLoader {
         texture.minFilter = LinearFilter;
         texture.magFilter = LinearFilter;
         texture.generateMipmaps = false;
-        texture.flipY = true;
+        texture.flipY = flipY;
         break;
     }
 

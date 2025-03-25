@@ -135,19 +135,15 @@ class _State extends State<WebglMaterialsSubsurfaceScattering> {
     } );
 
     // LOADER
-    // final loaderFBX = three.FBXLoader();
-    // loaderFBX.fromAsset( 'assets/models/fbx/stanford-bunny.fbx').then(( object ) {
-    //   model = object?.children[ 0 ];
-    //   model?.position.setValues( 0, 0, 10 );
-    //   model?.scale.setScalar( 1 );
-    //   model?.material = material;
-    //   threeJs.scene.add( model );
-    // });
+    final loaderOBJ = three.OBJLoader();
+    await loaderOBJ.fromAsset( 'assets/models/obj/stanford-bunny.obj').then(( object ) {
+      model = object?.children[ 0 ];
+      model?.position.setValues( -100, -600, 0 );
+      model?.scale.setScalar( 5000 );
+      model?.material = material;
+      threeJs.scene.add( model );
+    });
 
-    model = three.Mesh(three.BoxGeometry(500,500,500),material);//object?.children[ 0 ];
-    model?.position.setValues( 0, 0, 10 );
-    model?.scale.setScalar( 1 );
-    threeJs.scene.add( model );
     initGUI( material.uniforms );
   }
 

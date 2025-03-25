@@ -14,14 +14,14 @@ Map<String, dynamic> uniformsLib = {
   },
   "specularmap": {
     "specularMap": <String,dynamic>{'value': null},
-    'specularMapTransform': { 'value': /*@__PURE__*/ Matrix3.identity() }
+    'specularMapTransform': { 'value': Matrix3.identity() }
   },
   "envmap": {
     "envMap": {},
     "flipEnvMapX": {"value": -1},
     "flipEnvMapY": {"value": 1},
     
-    'envMapRotation': { 'value': /*@__PURE__*/ Matrix3.identity() },
+    'envMapRotation': { 'value': Matrix3.identity() },
     "flipEnvMap": {"value": -1},
     "reflectivity": {"value": 1.0}, // basic, lambert, phong
     "ior": {"value": 1.5}, // physical
@@ -30,40 +30,40 @@ Map<String, dynamic> uniformsLib = {
   "aomap": {
     "aoMap": <String,dynamic>{'value': null},
     "aoMapIntensity": {"value": 1},
-    'aoMapTransform': { 'value': /*@__PURE__*/ Matrix3.identity() }
+    'aoMapTransform': { 'value': Matrix3.identity() }
   },
   "lightmap": {
     "lightMap": <String,dynamic>{'value': null},
     "lightMapIntensity": {"value": 1},
-    'lightMapTransform': { 'value': /*@__PURE__*/ Matrix3.identity() }
+    'lightMapTransform': { 'value': Matrix3.identity() }
   },
   "emissivemap": {
     "emissiveMap": <String,dynamic>{'value': null},
-    'emissiveMapTransform': { 'value': /*@__PURE__*/ Matrix3.identity() }
+    'emissiveMapTransform': { 'value': Matrix3.identity() }
   },
   "bumpmap": {
     "bumpMap": <String,dynamic>{'value': null},
-    'bumpMapTransform': { 'value': /*@__PURE__*/ Matrix3.identity() },
+    'bumpMapTransform': { 'value': Matrix3.identity() },
     "bumpScale": {"value": 1}
   },
   "normalmap": {
     "normalMap": <String,dynamic>{'value': null},
-    'normalMapTransform': { 'value': /*@__PURE__*/ Matrix3.identity() },
+    'normalMapTransform': { 'value': Matrix3.identity() },
     "normalScale": {"value": Vector2(1, 1)}
   },
   "displacementmap": {
     "displacementMap": <String,dynamic>{'value': null},
-    'displacementMapTransform': { 'value': /*@__PURE__*/ Matrix3.identity() },
+    'displacementMapTransform': { 'value': Matrix3.identity() },
     "displacementScale": {"value": 1},
     "displacementBias": {"value": 0}
   },
   "roughnessmap": {
     "roughnessMap": <String,dynamic>{'value': null},
-    'roughnessMapTransform': { 'value': /*@__PURE__*/ Matrix3.identity() }
+    'roughnessMapTransform': { 'value': Matrix3.identity() }
   },
   "metalnessmap": {
     "metalnessMap": <String,dynamic>{'value': null},
-    'metalnessMapTransform': { 'value': /*@__PURE__*/ Matrix3.identity() }
+    'metalnessMapTransform': { 'value': Matrix3.identity() }
   },
   "gradientmap": {
     "gradientMap": <String,dynamic>{'value': null}
@@ -156,7 +156,7 @@ Map<String, dynamic> uniformsLib = {
     "scale": {"value": 1.0},
     "map": <String,dynamic>{'value': null},
     "alphaMap": <String,dynamic>{'value': null},
-    'alphaMapTransform': { 'value': /*@__PURE__*/ Matrix3.identity() },
+    'alphaMapTransform': { 'value': Matrix3.identity() },
     "alphaTest": {"value": 0.0},
     "uvTransform": {"value": Matrix3.identity()}
   },
@@ -166,9 +166,9 @@ Map<String, dynamic> uniformsLib = {
     "center": {"value": Vector2(0.5, 0.5)},
     "rotation": {"value": 0.0},
     "map": <String,dynamic>{'value': null},
-    'mapTransform': { 'value': /*@__PURE__*/ Matrix3.identity() },
+    'mapTransform': { 'value': Matrix3.identity() },
     "alphaMap": <String,dynamic>{'value': null},
-    'alphaMapTransform': { 'value': /*@__PURE__*/ Matrix3.identity() },
+    'alphaMapTransform': { 'value': Matrix3.identity() },
     "alphaTest": {"value": 0.0},
     "uvTransform": {"value": Matrix3.identity()}
   }

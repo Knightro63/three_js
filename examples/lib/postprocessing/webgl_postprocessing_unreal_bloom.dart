@@ -31,7 +31,7 @@ class _State extends State<WebglPostprocessingUnrealBloom> {
       onSetupComplete: (){setState(() {});},
       setup: setup,
       settings: three.Settings(
-        //autoClear: false,
+        // autoClear: false,
         toneMapping: three.ReinhardToneMapping,
         useSourceTexture: true,
       )
@@ -125,7 +125,8 @@ class _State extends State<WebglPostprocessingUnrealBloom> {
     mixer.clipAction( clip.optimize() )!.play();
 
     threeJs.postProcessor = ([double? dt]){
-      threeJs.renderer!.setRenderTarget(null);
+      threeJs.renderer!.setRenderTarget(threeJs.renderTarget);
+      threeJs.renderer!.render(threeJs.scene, threeJs.camera);
       composer.render(dt);
       //threeJs.renderer!.render(threeJs.scene, threeJs.camera);
     };

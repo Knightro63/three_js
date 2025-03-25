@@ -232,7 +232,7 @@ class ThreeJS {
       renderer!.toneMappingExposure = settings.toneMappingExposure;
     }
 
-    if(settings.useSourceTexture && !kIsWeb){
+    if(settings.useSourceTexture){
       final core.WebGLRenderTargetOptions pars = core.WebGLRenderTargetOptions(settings.renderOptions);
       renderTarget = core.WebGLRenderTarget((width * dpr).toInt(), (height * dpr).toInt(), pars);
       renderer!.setRenderTarget(renderTarget);

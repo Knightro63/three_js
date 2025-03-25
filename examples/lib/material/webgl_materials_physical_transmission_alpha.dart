@@ -31,7 +31,7 @@ class _State extends State<WebglMaterialsPhysicalTransmissionAlpha> {
       settings: three.Settings(
         enableShadowMap: true,
         toneMapping: three.ACESFilmicToneMapping,
-        useSourceTexture: true
+        toneMappingExposure: params['exposure']
       )
     );
     super.initState();
@@ -91,7 +91,6 @@ class _State extends State<WebglMaterialsPhysicalTransmissionAlpha> {
     threeJs.scene = three.Scene();
     threeJs.scene.add( three.AmbientLight( 0xffffff ) );
 
-
     threeJs.camera = three.PerspectiveCamera( 40, threeJs.width / threeJs.height, 1, 2000 );
     threeJs.camera.position.setValues( - 5, 0.5, 0 );
 
@@ -107,7 +106,6 @@ class _State extends State<WebglMaterialsPhysicalTransmissionAlpha> {
     hdrEquirect.mapping = three.EquirectangularReflectionMapping;
     final gltf = await three.GLTFLoader().setPath( 'assets/models/gltf/' ).fromAsset( 'DragonAttenuation.glb');
     gltf!.scene.traverse(( child ) {
-      print(child.material);
       if (child is three.Mesh && child.material is three.MeshPhysicalMaterial ) {
         mesh = child;
         material = mesh.material!;
@@ -124,7 +122,7 @@ class _State extends State<WebglMaterialsPhysicalTransmissionAlpha> {
 
         params['transmission'] = mesh.material!.transmission;
         params['thickness'] = mesh.material!.thickness;
-        //params['attenuationColor'] = color..setFrom( mesh.material?.attenuationColor! )..getHex();
+        params['attenuationColor'] = (color..setFrom( mesh.material!.attenuationColor!)).getHex();
         params['attenuationDistance'] = mesh.material!.attenuationDistance;
       }
     } );
@@ -168,17 +166,21 @@ class _State extends State<WebglMaterialsPhysicalTransmissionAlpha> {
       material.thickness = params['thickness'];
     } );
 
-    // gui.addColor( params, 'attenuationColor' )
-    // ..name ='attenuation color'
-    // ..onChange((e) {
-    //   material.attenuationColor?.setFromHex32( params['attenuationColor'] );
-    // } );
+    gui.addColor( params, 'attenuationColor' )
+    ..name ='At Color'
+    ..onChange((e) {
+      material.attenuationColor?.setFromHex32( params['attenuationColor'] );
+    } );
 
-    gui.addSlider( params, 'attenuationDistance', 0, 1, 0.01 ).onChange((e) {
+    gui.addSlider( params, 'attenuationDistance', 0, 1, 0.01 )
+    ..name = 'At Distance'
+    ..onChange((e) {
         material.attenuationDistance = params['attenuationDistance'];
       } );
 
-    gui.addSlider( params, 'specularIntensity', 0, 1, 0.01 ).onChange((e) {
+    gui.addSlider( params, 'specularIntensity', 0, 1, 0.01 )
+    ..name = 'specular'
+    ..onChange((e) {
       material.specularIntensity = params['specularIntensity'];
     } );
 
@@ -187,7 +189,7 @@ class _State extends State<WebglMaterialsPhysicalTransmissionAlpha> {
     } );
 
     gui.addSlider( params, 'envMapIntensity', 0, 1, 0.01 )
-    ..name = 'envMap intensity'
+    ..name = 'envMap'
     ..onChange((e) {
       material.envMapIntensity = params['envMapIntensity'];
     } );

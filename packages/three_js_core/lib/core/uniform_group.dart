@@ -5,7 +5,7 @@ class UniformsGroup with EventDispatcher {
   bool isUniformsGroup = true;
   String name = '';
   List<Uniform> uniforms = [];
-  dynamic usage;
+  int? usage;
   int? size;
   Map? cache;
   int? bindingPointIndex;

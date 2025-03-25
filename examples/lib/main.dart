@@ -28,6 +28,7 @@ import 'package:example/instancing/webgl_instancing_dynamic.dart';
 import 'package:example/instancing/webgl_instancing_morph.dart';
 import 'package:example/instancing/webgl_instancing_raycasting.dart';
 import 'package:example/instancing/webgl_instancing_scatter.dart';
+import 'package:example/lights/webgl_lightprobe.dart';
 import 'package:example/lights/webgl_lightprobe_cube_camera.dart';
 import 'package:example/line/webgl_lines_fat.dart';
 import 'package:example/line/webgl_lines_fat_raycasting.dart';
@@ -48,6 +49,7 @@ import 'package:example/loaders/webgl_loader_usdz.dart';
 import 'package:example/loaders/webgl_loader_vox.dart';
 import 'package:example/loaders/webgl_loader_xyz.dart';
 import 'package:example/material/webgl2_multiple_rendertargets.dart';
+import 'package:example/material/webgl_materials_car.dart';
 import 'package:example/material/webgl_materials_modified.dart';
 import 'package:example/material/webgl_materials_physical_transmission_alpha.dart';
 import 'package:example/material/webgl_materials_subsurface_scattering.dart';
@@ -109,6 +111,7 @@ import 'package:example/geometry/webgl_geometry_colors.dart';
 import 'package:example/geometry/webgl_geometry_shapes.dart';
 import 'package:example/geometry/webgl_geometry_text.dart';
 import 'package:example/others/multi_views.dart';
+import 'package:example/others/webgl_multi_views.dart';
 import 'package:example/others/webgl_helpers.dart';
 import 'package:example/instancing/webgl_instancing_performance.dart';
 import 'package:example/morphtargets/webgl_skinning_simple.dart';
@@ -231,6 +234,9 @@ class MyAppState extends State<MyApp> {
               },
               '/webgl_lightprobe_cube_camera':(BuildContext context) {
                 return const WebglLightprobeCubeCamera();
+              },
+              '/webgl_lightprobe':(BuildContext context) {
+                return const WebglLightprobe();
               },
               '/webgl_geometry_text':(BuildContext context) {
                 return const WebglGeometryText();
@@ -418,6 +424,9 @@ class MyAppState extends State<MyApp> {
               '/webgl_materials':(BuildContext context) {
                 return const WebglMaterials();
               },
+              '/webgl_materials_car':(BuildContext context) {
+                return const WebglMaterialsCar();
+              },
               '/webgl_materials_physical_transmission_alpha':(BuildContext context) {
                 return const WebglMaterialsPhysicalTransmissionAlpha();
               },
@@ -516,6 +525,9 @@ class MyAppState extends State<MyApp> {
               },
               '/webgl_materials_video_webcam':(BuildContext context){
                 return const WebglMaterialsVideoWebcam();
+              },
+              '/webgl_multi_views':(BuildContext context) {
+                return const WebglMultiViews();
               },
               '/multi_views':(BuildContext context) {
                 return const MultiViews();

@@ -51,11 +51,11 @@ class WebGLUniformsGroups{
 		uniformsGroup.bindingPointIndex = bindingPointIndex;
 
 		final buffer = gl.createBuffer();
-		// final size = uniformsGroup.size;
-		// final usage = uniformsGroup.usage;
+		final size = uniformsGroup.size;
+		final usage = uniformsGroup.usage;
 
 		gl.bindBuffer( WebGL.UNIFORM_BUFFER, buffer );
-		//gl.bufferData( WebGL.UNIFORM_BUFFER, size!, usage );
+		gl.bufferData( WebGL.UNIFORM_BUFFER, size!, usage);
 		gl.bindBuffer( WebGL.UNIFORM_BUFFER, null );
 		gl.bindBufferBase( WebGL.UNIFORM_BUFFER, bindingPointIndex, buffer );
 
@@ -64,7 +64,7 @@ class WebGLUniformsGroups{
 
 	int allocateBindingPointIndex() {
 		for (int i = 0; i < maxBindingPoints; i ++ ) {
-			if ( allocatedBindingPoints.contains( i )) {
+			if (!allocatedBindingPoints.contains( i )) {
 				allocatedBindingPoints.add( i );
 				return i;
 			}

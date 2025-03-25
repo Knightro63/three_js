@@ -576,6 +576,12 @@ class Material with EventDispatcher {
     } else if (key == "shadowSide") {
       shadowSide = newValue;
     }
+    else if (key == "envMap") {
+      envMap = newValue;
+    }
+    else if (key == "envMapIntensity") {
+      envMapIntensity = newValue.toDouble();
+    }
     else if (key == "transmission") {
       transmission = newValue.toDouble();
     }

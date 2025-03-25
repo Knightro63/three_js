@@ -855,9 +855,10 @@ class WebGLRenderer {
       }
     } 
     else {
-			if (transmissiveObjects != null && transmissiveObjects.isNotEmpty) renderTransmissionPass( opaqueObjects!, transmissiveObjects, scene, camera );
 			if ( renderBackground ) background.render( scene );
+      if (kIsWeb && transmissiveObjects != null && transmissiveObjects.isNotEmpty) renderTransmissionPass( opaqueObjects!, transmissiveObjects, scene, camera );
       renderScene(currentRenderList!, scene, camera);
+      if(!kIsWeb && transmissiveObjects != null && transmissiveObjects.isNotEmpty) renderTransmissionPass( opaqueObjects!, transmissiveObjects, scene, camera );
     }
 
     if(!kIsWeb){
