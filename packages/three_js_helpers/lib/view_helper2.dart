@@ -2,16 +2,9 @@ import 'dart:math' as math;
 import 'package:three_js_math/three_js_math.dart';
 import 'package:flutter/material.dart' hide Material;
 import 'package:three_js_core/three_js_core.dart';
+import 'view_helper.dart';
 
-enum OffsetType {
-  topLeft,
-  bottomLeft,
-  bottomRight,
-  topRight,
-  center
-}
-
-class ViewHelper extends Object3D{
+class ViewHelper2 extends Object3D{
   final bool isViewHelper = true;
   bool animating = false;
   late GlobalKey<PeripheralsState> listenableKey;
@@ -45,7 +38,7 @@ class ViewHelper extends Object3D{
   final point = Vector3();
   final turnRate = 2 * math.pi; // turn rate in angles per second
 
-  ViewHelper({
+  ViewHelper2({
     required this.camera, 
     required this.listenableKey, 
     required this.screenSize,
