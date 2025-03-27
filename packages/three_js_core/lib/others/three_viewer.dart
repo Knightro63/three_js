@@ -139,10 +139,6 @@ class ThreeJS {
 
     allNativeData.dispose();
 
-    disposeWebGL.forEach((d){
-      d.dispose(gl);
-    });
-
     angle.dispose([texture!]);
     texture = null;
   }

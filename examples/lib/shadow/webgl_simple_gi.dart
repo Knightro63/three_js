@@ -87,7 +87,6 @@ class _State extends State<WebglSimpleGi> {
 
     threeJs.addAnimationEvent((dt){
       threeJs.renderer!.setRenderTarget( null );
-      threeJs.renderer!.render( threeJs.scene, threeJs.camera );
       compute?.call();
       controls.update();
     });

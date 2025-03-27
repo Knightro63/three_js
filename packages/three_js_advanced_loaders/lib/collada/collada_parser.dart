@@ -1218,7 +1218,8 @@ class ColladaParser{
 
       if ( isColor ) {
         // convert the vertex colors from srgb to linear if present
-        final startIndex = array.length - sourceStride - 1;
+        int startIndex = array.length - sourceStride - 1;
+        if(startIndex == -1) startIndex = 0;
         tempColor.setRGB(
           array[ startIndex + 0 ],
           array[ startIndex + 1 ],

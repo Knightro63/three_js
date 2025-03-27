@@ -96,12 +96,12 @@ class _State extends State<WebglMultipleScenesComparison> {
 
     threeJs.renderer?.setScissorTest(true);
 
-    threeJs.addAnimationEvent((dt){
+    threeJs.postProcessor = ([dt]){
       threeJs.renderer!.setScissor( 0, 0, sliderPos, threeJs.height );
       threeJs.renderer!.render( threeJs.scene, threeJs.camera );
       threeJs.renderer!.setScissor( sliderPos, 0, threeJs.width,threeJs.height );
       threeJs.renderer!.render( sceneR, threeJs.camera );
-    });
+    };
   }
 
   void initMeshes() {

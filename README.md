@@ -15,7 +15,7 @@ This is a dart conversion of three.js and three_dart, originally created by [@mr
 ## Requirements
 
 **MacOS**
- - Minimum os Deployment Target: 10.14
+ - Minimum os Deployment Target: 10.15
  - Xcode 13 or newer
  - Swift 5
  - Metal supported
@@ -29,6 +29,7 @@ This is a dart conversion of three.js and three_dart, originally created by [@mr
 **Android**
  - compileSdkVersion: 34
  - OpenGL supported
+ - Vulkan supported
 
  **Windows**
  - Intel supported.
@@ -36,7 +37,7 @@ This is a dart conversion of three.js and three_dart, originally created by [@mr
  - Direct3D 11 and OpenGL supported
 
 **Web**
- - WebGL2 support.
+ - WebGL2 supported
 
 **Linux**
  - Unsupported
@@ -55,22 +56,30 @@ Find the example for this API [here](https://github.com/Knightro63/three_js/tree
 
 ## Know Issues
 
+**All**
+ - Transmissive does not work
+
 **MacOS**
- - GroupMaterials do not work
 
 **iOS**
  - Buffer Validation issues
- - GroupMaterials do not work
  - Protoplanets does not function correctly
 
 **Android**
- - GroupMaterials do not work
+ - Morphtargets dones not work
 
 **Windows**
- - GroupMaterials do not work
 
 **Web**
  - Lens Flare not working correctly
+ - Postprocessing does not work
+
+## Librarues and Plugins
+
+**Physics**
+ - [Omio](https://github.com/Knightro63/oimo_physics)
+ - [Cannon](https://github.com/Knightro63/cannon_physics)
+ - [Terrain](https://github.com/Knightro63/three_js/tree/main/packages/three_js_terrain)
 
 ## Contributing
 

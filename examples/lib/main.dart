@@ -48,16 +48,16 @@ import 'package:example/loaders/webgl_loader_stl.dart';
 import 'package:example/loaders/webgl_loader_usdz.dart';
 import 'package:example/loaders/webgl_loader_vox.dart';
 import 'package:example/loaders/webgl_loader_xyz.dart';
-import 'package:example/material/webgl2_multiple_rendertargets.dart';
-import 'package:example/material/webgl_materials_car.dart';
+import 'package:example/multi_views/webgl2_multiple_rendertargets.dart';
 import 'package:example/material/webgl_materials_modified.dart';
 import 'package:example/material/webgl_materials_physical_transmission_alpha.dart';
 import 'package:example/material/webgl_materials_subsurface_scattering.dart';
+import 'package:example/mirror/webgl_mirror.dart';
 import 'package:example/modifers/webgl_modifer_tessellation.dart';
 import 'package:example/modifers/webgl_modifer_edgesplit.dart';
 import 'package:example/modifers/webgl_modifier_simplifier.dart';
 import 'package:example/modifers/webgl_modifier_subdivision.dart';
-import 'package:example/others/webgl_multiple_scenes_comparison.dart';
+import 'package:example/multi_views/webgl_multiple_scenes_comparison.dart';
 import 'package:example/shaders/webgl_refraction.dart';
 import 'package:example/postprocessing/webgl_postprocessing_unreal_bloom.dart';
 import 'package:example/postprocessing/webgl_postprocessing_unreal_bloom_selective.dart';
@@ -72,7 +72,7 @@ import 'package:example/others/webgl_custom_attributes_lines.dart';
 import 'package:example/others/webgl_interactive_voxelpainter.dart';
 import 'package:example/others/webgl_lod.dart';
 import 'package:example/texture/webgl_opengl_texture.dart';
-import 'package:example/others/webgl_portal.dart';
+import 'package:example/mirror/webgl_portal.dart';
 import 'package:example/rollercoster/webxr_vr_rollercoaster.dart';
 import 'package:example/shaders/webgl_shader.dart';
 import 'package:example/src/files_json.dart';
@@ -88,11 +88,12 @@ import 'package:example/shadow/webgl_shadowmap_csm.dart';
 import 'package:example/shadow/webgl_shadowmap_pointlight.dart';
 import 'package:example/shadow/webgl_shadowmap_vsm.dart';
 import 'package:example/shadow/webgl_simple_gi.dart';
-import 'package:example/shadow/webgl_water.dart';
+import 'package:example/water/webgl_water.dart';
 import 'package:example/volume/webgl_ubo_arrays.dart';
 import 'package:example/volume/webgl_volume_cloud.dart';
 import 'package:example/volume/webgl_volume_instancing.dart';
 import 'package:example/volume/webgl_volume_perlin.dart';
+import 'package:example/water/webgl_water_flowmap.dart';
 import 'package:flutter/material.dart';
 import 'package:example/animations/misc_animation_keys.dart';
 import 'package:example/animations/webgl_animation_keyframes.dart';
@@ -110,8 +111,8 @@ import 'package:example/geometry/webgl_geometries.dart';
 import 'package:example/geometry/webgl_geometry_colors.dart';
 import 'package:example/geometry/webgl_geometry_shapes.dart';
 import 'package:example/geometry/webgl_geometry_text.dart';
-import 'package:example/others/multi_views.dart';
-import 'package:example/others/webgl_multi_views.dart';
+import 'package:example/multi_views/multi_views.dart';
+import 'package:example/multi_views/webgl_multi_views.dart';
 import 'package:example/others/webgl_helpers.dart';
 import 'package:example/instancing/webgl_instancing_performance.dart';
 import 'package:example/morphtargets/webgl_skinning_simple.dart';
@@ -424,9 +425,6 @@ class MyAppState extends State<MyApp> {
               '/webgl_materials':(BuildContext context) {
                 return const WebglMaterials();
               },
-              '/webgl_materials_car':(BuildContext context) {
-                return const WebglMaterialsCar();
-              },
               '/webgl_materials_physical_transmission_alpha':(BuildContext context) {
                 return const WebglMaterialsPhysicalTransmissionAlpha();
               },
@@ -463,6 +461,9 @@ class MyAppState extends State<MyApp> {
               '/webgl_water':(BuildContext context) {
                 return const WebglWater();
               },
+              '/webgl_water_flowmap':(BuildContext context) {
+                return const WebglWaterFlowmap();
+              },
               '/webgl_geometry_csg':(BuildContext context) {
                 return const WebglGeometryCSG();
               },
@@ -474,6 +475,9 @@ class MyAppState extends State<MyApp> {
               },
               '/webgl_portal':(BuildContext context) {
                 return const WebglPortal();
+              },
+              '/webgl_mirror':(BuildContext context) {
+                return const WebglMirror();
               },
               '/webgl_modifier_edgesplit':(BuildContext context) {
                 return const WebglModifierEdgesplit();

@@ -11,6 +11,8 @@ class Reflector extends Mesh {
     options ??= {};
 		type = 'Reflector';
 
+    final scope = this;
+
 		final color = Color.fromHex32( options['color'] ?? 0x7F7F7F);
 		final textureWidth = options['textureWidth'] ?? 512;
 		final textureHeight = options['textureHeight'] ?? 512;
@@ -49,10 +51,11 @@ class Reflector extends Mesh {
     this.material = material;
 
     onAfterRender = ({Camera? camera, BufferGeometry? geometry, Map<String, dynamic>? group, Material? material, WebGLRenderer? renderer, Object3D? scene}){
-			reflectorWorldPosition.setFromMatrixPosition( this.matrixWorld );
+		//onBeforeRender = ({Camera? camera, BufferGeometry? geometry, Map<String, dynamic>? group, Material? material, Object3D? mesh, RenderTarget? renderTarget, WebGLRenderer? renderer, Scene? scene}){
+      reflectorWorldPosition.setFromMatrixPosition( scope.matrixWorld );
 			cameraWorldPosition.setFromMatrixPosition( camera!.matrixWorld );
 
-			rotationMatrix.extractRotation( this.matrixWorld );
+			rotationMatrix.extractRotation( scope.matrixWorld );
 
 			normal.setValues( 0, 0, 1 );
 			normal.applyMatrix4( rotationMatrix );
@@ -61,7 +64,7 @@ class Reflector extends Mesh {
 
 			// Avoid rendering when reflector is facing away
 			final isFacingAway = view.dot( normal ) > 0;
-			if ( isFacingAway == true && forceUpdate == false ) return;
+			if ( isFacingAway == true && this.forceUpdate == false ) return;
 
 			view.reflect( normal ).negate();
 			view.add( reflectorWorldPosition );
@@ -96,7 +99,7 @@ class Reflector extends Mesh {
 			);
 			textureMatrix.multiply( virtualCamera.projectionMatrix );
 			textureMatrix.multiply( virtualCamera.matrixWorldInverse );
-			textureMatrix.multiply( this.matrixWorld );
+			textureMatrix.multiply( scope.matrixWorld );
 
 			// Now update projection matrix with clip plane, implementing code from: http://www.terathon.com/code/oblique.html
 			// Paper explaining this technique: http://www.terathon.com/lengyel/Lengyel-Oblique.pdf
@@ -122,7 +125,7 @@ class Reflector extends Mesh {
 			projectionMatrix.storage[ 14 ] = clipPlane.w;
 
 			// Render
-			this.visible = false;
+			scope.visible = false;
 
 			final currentRenderTarget = renderer?.getRenderTarget();
 			final currentXrEnabled = renderer?.xr.enabled;
@@ -151,7 +154,7 @@ class Reflector extends Mesh {
 				renderer?.state.viewport( viewport );
 			}
 
-			this.visible = true;
+			scope.visible = true;
       forceUpdate = false;
 		};
 	}
@@ -162,6 +165,7 @@ class Reflector extends Mesh {
 
   @override
   void dispose() {
+    super.dispose();
     renderTarget.dispose();
     material?.dispose();
   }

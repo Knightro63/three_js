@@ -194,7 +194,7 @@ class Refractor extends Mesh {
 			updateTextureMatrix( camera! );
 			updateVirtualCamera( camera );
 			render( renderer!, scene!, camera );
-    };
+   		};
 	}
 
   WebGLRenderTarget getRenderTarget() {
@@ -203,6 +203,7 @@ class Refractor extends Mesh {
 
   @override
   void dispose() {
+	super.dispose();
     renderTarget.dispose();
     material?.dispose();
   }
