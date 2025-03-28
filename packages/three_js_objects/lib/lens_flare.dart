@@ -119,7 +119,7 @@ class Lensflare extends Mesh {
 			'uniforms': {
 				'map': <String,dynamic>{ 'value': null },
 				'occlusionMap': <String,dynamic>{ 'value': occlusionMap },
-				'color': <String,dynamic>{ 'value': Color( 0xffffff ) },
+				'color': <String,dynamic>{ 'value': Color.fromHex32( 0xffffff ) },
 				'scale': <String,dynamic>{ 'value': Vector2() },
 				'screenPosition': <String,dynamic>{ 'value': Vector3() }
 			},

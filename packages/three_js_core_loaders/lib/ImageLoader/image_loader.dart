@@ -19,7 +19,7 @@ class ImageLoader extends Loader {
 
   @override
   Future<ImageElement?> fromNetwork(Uri uri) async{
-    final url = uri.path;
+    final url = uri.toString();
     final cacheName = url;
     
     final cached = Cache.get(cacheName);

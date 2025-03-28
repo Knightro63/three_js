@@ -479,7 +479,7 @@ class WebGLRenderer {
 
   // Events
   void onContextLost( event ) {
-    event.preventDefault();
+    //event.preventDefault();
     console.info( 'THREE.WebGLRenderer: Context Lost.' );
     _isContextLost = true;
   }
@@ -1807,7 +1807,7 @@ class WebGLRenderer {
     }
   }
 
-  void copyFramebufferToTexture(Vector position, Texture? texture, {int level = 0}) {
+  void copyFramebufferToTexture(Vector? position, Texture? texture, {int level = 0}) {
     //console.warning('copyFramebufferToTexture not supported');
     if (texture is! FramebufferTexture) {
       console.warning('WebGLRenderer: copyFramebufferToTexture() can only be used with FramebufferTexture.');
@@ -1818,9 +1818,12 @@ class WebGLRenderer {
     final width = (texture.image.width * levelScale).floor();
     final height = (texture.image.height * levelScale).floor();
 
+    final x = position != null ? position.x.toInt() : 0;
+    final y = position != null ? position.y.toInt() : 0;
+
     textures.setTexture2D(texture, 0);
-    _gl.copyTexSubImage2D(WebGL.TEXTURE_2D, level, 0, 0, position.x.toInt(), position.y.toInt(), width, height);
-    state.unbindTexture(kIsWeb?null:WebGLTexture(WebGL.TEXTURE_2D));
+    _gl.copyTexSubImage2D(WebGL.TEXTURE_2D, level, 0, 0, x, y, width, height);
+    state.unbindTexture(WebGLTexture(WebGL.TEXTURE_2D));
   }
 
   void copyTextureToTexture(Texture srcTexture, Texture dstTexture, {srcRegion, dstPosition, int srcLevel = 0, dstLevel}) {

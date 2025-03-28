@@ -455,7 +455,7 @@ class TrackballControls with EventDispatcher {
 
     if (scope.noZoom == true) return;
 
-    event.preventDefault();
+    //event.preventDefault();
 
     switch (event.deltaMode) {
       case 2:
@@ -552,7 +552,7 @@ class TrackballControls with EventDispatcher {
 
   void contextmenu(event) {
     if (scope.enabled == false) return;
-    event.preventDefault();
+    //event.preventDefault();
   }
 
   void addPointer(event) {

@@ -109,7 +109,7 @@ class _State extends State<WebglInstancingRaycast> {
   }
 
   void onMouseMove( event ) {
-    event.preventDefault();
+    //event.preventDefault();
     mouse.x = ( event.clientX / threeJs.width ) * 2 - 1;
     mouse.y = - ( event.clientY / threeJs.height ) * 2 + 1;
   }

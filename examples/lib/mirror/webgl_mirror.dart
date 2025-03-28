@@ -28,6 +28,11 @@ class _State extends State<WebglMirror> {
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
       setup: setup,
+      settings: three.Settings(
+        localClippingEnabled: true,
+        toneMapping: three.ACESFilmicToneMapping,
+        useSourceTexture: true
+      )
     );
     super.initState();
   }
@@ -163,13 +168,13 @@ class _State extends State<WebglMirror> {
     blueLight.position.setValues( 0, 50, 550 );
     threeJs.scene.add( blueLight );
 
-    threeJs.postProcessor = ([dt]){
-    //   //
-      // threeJs.renderer?.setRenderTarget(null);
-      threeJs.renderer?.render( threeJs.scene, threeJs.camera );
-      // verticalMirror.onAfterRender!(renderer:threeJs.renderer, scene:threeJs.scene, camera:threeJs.camera);
+    // threeJs.postProcessor = ([dt]){
+    // //   //
+    //   // threeJs.renderer?.setRenderTarget(null);
+    //   threeJs.renderer?.render( threeJs.scene, threeJs.camera );
+    //   // verticalMirror.onAfterRender!(renderer:threeJs.renderer, scene:threeJs.scene, camera:threeJs.camera);
 
-    };
+    // };
 
     //
 

@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:math' as math;
-import 'package:flutter/foundation.dart';
 import 'package:example/src/statistics.dart';
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
@@ -178,17 +177,7 @@ class _State extends State<MiscControlsFly> {
     controls.dragToLook = false;
 
     final dMoonVec = three.Vector3.zero();
-
     final composer = EffectComposer(threeJs.renderer!);
-    if(kIsWeb){
-      final renderModel = RenderPass(threeJs.scene, threeJs.camera);
-      final effectFilm = FilmPass(noiseIntensity: 0.35 );
-      final outputPass = OutputPass();
-
-      composer.addPass( renderModel );
-      composer.addPass( effectFilm );
-      composer.addPass( outputPass );
-    }
     
     threeJs.addAnimationEvent((delta){
       const rotationSpeed = 0.02;

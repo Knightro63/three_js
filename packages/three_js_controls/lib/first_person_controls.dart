@@ -277,7 +277,7 @@ class FirstPersonControls with EventDispatcher {
   }
 
 	void contextmenu( event ) {
-		event.preventDefault();
+		//event.preventDefault();
 	}
 
   /// Should be called if the controls is no longer required.

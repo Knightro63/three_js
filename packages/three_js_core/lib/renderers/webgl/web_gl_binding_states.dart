@@ -249,8 +249,8 @@ class WebGLBindingStates {
     }
   }
 
-  void vertexAttribPointer(int index, int size, int type, bool normalized, int stride, int offset) {
-    if ((type == WebGL.INT || type == WebGL.UNSIGNED_INT)) {
+  void vertexAttribPointer(int index, int size, int type, bool normalized, int stride, int offset, bool integer) {
+    if (integer){//(type == WebGL.INT || type == WebGL.UNSIGNED_INT) && !kIsWeb) {
       gl.vertexAttribIPointer(index, size, type, stride, offset);
     } else {
       gl.vertexAttribPointer(index, size, type, normalized, stride, offset);
@@ -304,6 +304,8 @@ class WebGLBindingStates {
           final type = attribute["type"];
           final bytesPerElement = attribute["bytesPerElement"];
 
+          final integer = ( type == WebGL.INT || type == WebGL.UNSIGNED_INT) && geometryAttribute.gpuType == IntType;
+
           if (geometryAttribute is InterleavedBufferAttribute) {
             final data = geometryAttribute.data;
             final stride = data?.stride;
@@ -335,7 +337,8 @@ class WebGLBindingStates {
                 type,
                 normalized,
                 (stride! * bytesPerElement).toInt(),
-                ((offset + (size ~/ programAttribute.locationSize) * i) * bytesPerElement).toInt()
+                ((offset + (size ~/ programAttribute.locationSize) * i) * bytesPerElement).toInt(),
+                integer
               );
             }
           } 
@@ -363,7 +366,8 @@ class WebGLBindingStates {
                 type,
                 normalized, 
                 (size * bytesPerElement).toInt(), 
-                ((size ~/ programAttribute.locationSize) * i * bytesPerElement).toInt()
+                ((size ~/ programAttribute.locationSize) * i * bytesPerElement).toInt(),
+                integer
               );
             }
           }
