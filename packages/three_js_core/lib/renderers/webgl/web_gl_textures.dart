@@ -395,7 +395,7 @@ class WebGLTextures {
       }
     }
     if(kIsWeb){
-          state.bindTexture(WebGL.TEXTURE_2D, textureProperties["__webglTexture"], WebGL.TEXTURE0 + slot);
+      state.bindTexture(WebGL.TEXTURE_2D, textureProperties["__webglTexture"], WebGL.TEXTURE0 + slot);
     }
     else{
       state.activeTexture(WebGL.TEXTURE0 + slot);

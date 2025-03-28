@@ -85,6 +85,11 @@ class _State extends State<WebglSimpleGi> {
     controls.minDistance = 1;
     controls.maxDistance = 10;
 
+    threeJs.postProcessor = ([dt]){
+      threeJs.renderer?.setRenderTarget(null);
+      threeJs.renderer?.render(threeJs.scene, threeJs.camera);
+    };
+
     threeJs.addAnimationEvent((dt){
       threeJs.renderer!.setRenderTarget( null );
       compute?.call();

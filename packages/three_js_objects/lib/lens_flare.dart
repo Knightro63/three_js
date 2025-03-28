@@ -227,9 +227,7 @@ class Lensflare extends Mesh {
 				final vecY = - positionScreen.y * 2;
 
 				for (int i = 0, l = elements.length; i < l; i ++ ) {
-
 					final element = elements[i];
-
 					final uniforms = material2.uniforms;
 
 					uniforms[ 'color' ]['value'].setFrom( element.color );
@@ -245,15 +243,11 @@ class Lensflare extends Mesh {
 					material2.uniformsNeedUpdate = true;
 
 					renderer.renderBufferDirect( camera, null, geometry, material2, mesh2, null );
-
 				}
-
 			}
-
 		};
 
 		dispose1 = () {
-
 			material1a.dispose();
 			material1b.dispose();
 			material2.dispose();
@@ -277,7 +271,6 @@ class Lensflare extends Mesh {
   }
 }
 
-
 class LensflareElement {
   Texture texture;
   double size;
@@ -295,13 +288,11 @@ const _shader = {
 	'name': 'LensflareElementShader',
 
 	'uniforms': {
-
 		'map': { 'value': null },
 		'occlusionMap': { 'value': null },
 		'color': { 'value': null },
 		'scale': { 'value': null },
 		'screenPosition': { 'value': null }
-
 	},
 
 	'vertexShader': /* glsl */'''
