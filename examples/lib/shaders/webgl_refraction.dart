@@ -148,7 +148,7 @@ class _State extends State<WebglRefraction> {
     threeJs.scene.add( blueLight );
 
     threeJs.addAnimationEvent((dt){
-      final time = threeJs.clock.getElapsedTime();
+      final time = threeJs.clock.elapsedTime;
 
       refractor.material!.uniforms['time']['value'] = time;
 
