@@ -1,4 +1,4 @@
-import 'dart:html';
+import 'package:web/web.dart';
 import "dart:typed_data";
 // import "package:three_js_core/three_js_core.dart";
 // import "package:three_js_math/buffer/buffer_attribute.dart";

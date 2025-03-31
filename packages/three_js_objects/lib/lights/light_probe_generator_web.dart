@@ -1,5 +1,6 @@
+import 'dart:js_interop';
 import 'dart:math' as math;
-import 'dart:html' as html;
+import 'package:web/web.dart' as html;
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 
@@ -32,7 +33,7 @@ class LightProbeGenerator {
       context.drawImage( image.data, 0, 0);
 
       final imageData = context.getImageData( 0, 0, width, height );
-      final data = imageData.data;
+      final data = imageData.data.toDart;
       final imageWidth = imageData.width; // assumed to be square
       final pixelSize = 2 / imageWidth;
 

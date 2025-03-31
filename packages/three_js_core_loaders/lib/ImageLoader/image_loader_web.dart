@@ -1,20 +1,17 @@
 import 'dart:async';
 import 'dart:typed_data';
-import 'dart:html' as html;
+import 'package:web/web.dart' as html;
 import 'dart:convert';
 import 'package:three_js_core/three_js_core.dart';
-import 'package:three_js_math/three_js_math.dart';
 
 import '../utils/blob.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:three_js_core/three_js_core.dart';
-import 'package:image/image.dart';
 
 class ImageLoaderLoader {
-  static Future<html.ImageElement> loadImage(url, bool flipY,{Function? imageDecoder}) {
-    final completer = Completer<html.ImageElement>();
-    final imageDom = html.ImageElement();
+  static Future<html.HTMLImageElement> loadImage(url, bool flipY,{Function? imageDecoder}) {
+    final completer = Completer<html.HTMLImageElement>();
+    final imageDom = html.HTMLImageElement();
     imageDom.crossOrigin = "anonymous";
 
     imageDom.onLoad.listen((e) {
@@ -23,7 +20,7 @@ class ImageLoaderLoader {
 
     if (url is Blob) {
       final blob = html.Blob([url.data.buffer], url.options["type"]);
-      imageDom.src = html.Url.createObjectUrl(blob);
+      imageDom.src = html.URL.createObjectURL(blob);
     } 
     else {
       if (url.startsWith("assets") || url.startsWith("packages")) {
@@ -38,7 +35,7 @@ class ImageLoaderLoader {
   }
 }
 
-html.ImageElement setDimensions(html.ImageElement imageElement, String? dimensions) {
+html.HTMLImageElement setDimensions(html.HTMLImageElement imageElement, String? dimensions) {
   if (dimensions == null || dimensions.isEmpty) {
     console.error("null or empty dimenstions String, could not set dimenstions");
     return imageElement;
@@ -101,7 +98,7 @@ List? _getJpegDimensions(Uint8List bytes) {
   return null; // Dimensions not found
 }
 
-html.ImageElement createImageElementFromBytes(Uint8List bytes, [String? dimensions]) {
+html.HTMLImageElement createImageElementFromBytes(Uint8List bytes, [String? dimensions]) {
   // Convert bytes to a base64-encoded string
   final base64String = base64Encode(bytes);
 
@@ -109,7 +106,7 @@ html.ImageElement createImageElementFromBytes(Uint8List bytes, [String? dimensio
   final dataUrl = 'data:image/jpg;base64,$base64String';
 
   // Create an ImageElement and set its source to the data URL
-  html.ImageElement imageElement = html.ImageElement();
+  html.HTMLImageElement imageElement = html.ImageElement();
   imageElement.src = dataUrl;
   List? dimensions = _getJpegDimensions(bytes);
   //imageElement = setDimensions(imageElement, dimensions);
@@ -128,29 +125,29 @@ html.ImageElement createImageElementFromBytes(Uint8List bytes, [String? dimensio
 Future<ImageElement?> processImage(Uint8List? bytes, String? url, bool flipY) {
   final completer = Completer<ImageElement>();
   if(bytes != null){
-    html.ImageElement imageElement = createImageElementFromBytes(bytes, url);
+    html.HTMLImageElement imageElement = createImageElementFromBytes(bytes, url);
     //image = image?.convert(format:Format.uint8,numChannels: 4);
     completer.complete(
       ImageElement(
         url: url,
         data: imageElement,
-        width: imageElement.width!,
-        height: imageElement.height!
+        width: imageElement.width,
+        height: imageElement.height
       )
     );
   }
   else{
-    final imageDom = html.ImageElement();
+    final imageDom = html.HTMLImageElement();
     imageDom.crossOrigin = "anonymous";
-    imageDom.src = url;
+    imageDom.src = url!;
 
     imageDom.onLoad.listen((e) {
       completer.complete(
         ImageElement(
           url: url,
           data: imageDom,
-          width: imageDom.width!.toDouble(),
-          height: imageDom.height!.toDouble()
+          width: imageDom.width.toDouble(),
+          height: imageDom.height.toDouble()
         )
       );
     });

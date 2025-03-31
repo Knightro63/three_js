@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:typed_data';
-import 'dart:html' as html;
+import 'package:web/web.dart' as html;
 import 'package:three_js_math/three_js_math.dart';
 
 import '../utils/blob.dart';
@@ -10,9 +10,9 @@ import 'package:three_js_core/three_js_core.dart';
 import 'package:image/image.dart';
 
 class ImageLoaderLoader {
-  static Future<html.ImageElement> loadImage(url, bool flipY,{Function? imageDecoder}) {
-    final completer = Completer<html.ImageElement>();
-    final imageDom = html.ImageElement();
+  static Future<html.HTMLImageElement> loadImage(url, bool flipY,{Function? imageDecoder}) {
+    final completer = Completer<html.HTMLImageElement>();
+    final imageDom = html.HTMLImageElement();
     imageDom.crossOrigin = "";
 
     imageDom.onLoad.listen((e) {
@@ -21,7 +21,7 @@ class ImageLoaderLoader {
 
     if (url is Blob) {
       final blob = html.Blob([url.data.buffer], url.options["type"]);
-      imageDom.src = html.Url.createObjectUrl(blob);
+      imageDom.src = html.URL.createObjectURL(blob);
     } 
     else {
       if (url.startsWith("assets") || url.startsWith("packages")) {
@@ -54,17 +54,17 @@ Future<ImageElement?> processImage(Uint8List? bytes, String? url, bool flipY) {
     );
   }
   else{
-    final imageDom = html.ImageElement();
+    final imageDom = html.HTMLImageElement();
     imageDom.crossOrigin = "";
-    imageDom.src = url;
+    imageDom.src = url!;
 
     imageDom.onLoad.listen((e) {
       completer.complete(
         ImageElement(
           url: url,
           data: imageDom,
-          width: imageDom.width!.toDouble(),
-          height: imageDom.height!.toDouble()
+          width: imageDom.width.toDouble(),
+          height: imageDom.height.toDouble()
         )
       );
     });
