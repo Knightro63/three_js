@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:js_interop';
 import 'dart:typed_data';
 import 'package:web/web.dart' as html;
 import 'dart:convert';
@@ -19,7 +20,7 @@ class ImageLoaderLoader {
     });
 
     if (url is Blob) {
-      final blob = html.Blob([url.data.buffer], url.options["type"]);
+      final blob = html.Blob([(url.data as Uint8List).buffer.jsify()!].jsify()! as JSArray<JSAny>, url.options["type"]);
       imageDom.src = html.URL.createObjectURL(blob);
     } 
     else {
