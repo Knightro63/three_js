@@ -118,6 +118,8 @@ flutter:
     - assets/models/gltf/RobotExpressive/
     - assets/models/gltf/DamagedHelmet/glTF/
     - assets/models/gltf/AnimatedMorphSphere/glTF/
+    - assets/models/gltf/ShaderBall2/
+    - assets/models/gltf/ferrari/
     - assets/models/svg/
     - assets/models/fbx/
     - assets/textures/

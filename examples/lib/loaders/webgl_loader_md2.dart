@@ -80,9 +80,9 @@ class _State extends State<WebglLoaderMd2> {
 
     // LIGHTS
 
-    threeJs.scene.add( three.AmbientLight( 0x666666,1 ) );
+    threeJs.scene.add( three.AmbientLight( 0x666666, 1 ) );
 
-    final light1 = three.SpotLight( 0xffffff, 0.8 );
+    final light1 = three.SpotLight( 0xffffff, 25 );
     light1.position.setValues( 2, 5, 10 );
     light1.angle = 0.5;
     light1.penumbra = 0.5;
@@ -92,7 +92,7 @@ class _State extends State<WebglLoaderMd2> {
     light1.shadow?.mapSize.height = 1024;
     threeJs.scene.add( light1 );
 
-    final light2 = three.SpotLight( 0xffffff, 0.8 );
+    final light2 = three.SpotLight( 0xffffff, 25 );
     light2.position.setValues( - 1, 3.5, 3.5 );
     light2.angle = 0.5;
     light2.penumbra = 0.5;
@@ -153,22 +153,6 @@ class _State extends State<WebglLoaderMd2> {
     );
 
     final three.MD2Character character = three.MD2Character();
-    character.scale = 0.03;
-    late three.AnimationMixer mixer;
-    await character.loadParts( config ).then((r){
-      //character.setAnimation( character.meshBody!.animations[ 0 ]);
-      //final idleAction = mixer.clipAction(animations[0]);
-    });
-    final animations = character.meshBody!.animations;
-    mixer = three.AnimationMixer(character.meshBody!);
-    threeJs.scene.add( character.root );
-
-    final idleAction = mixer.clipAction(animations[0]);
-    idleAction!.play();
-    threeJs.addAnimationEvent((dt){
-      controls.update();
-      mixer.update(dt);
-    });
 
     final Map<String,dynamic> playbackConfig = {
       'speed': 1.0,
@@ -236,8 +220,18 @@ class _State extends State<WebglLoaderMd2> {
       }
     }
 
-    setupSkinsGUI();
-    setupWeaponsGUI();
-    setupGUIAnimations();
+    character.onLoadComplete = (){
+      setupSkinsGUI();
+      setupWeaponsGUI();
+      setupGUIAnimations();
+    };
+    character.scale = 0.03;
+    await character.loadParts( config );
+    threeJs.scene.add( character.root );
+    threeJs.addAnimationEvent((dt){
+      controls.update();
+    });
+
+
   }
 }

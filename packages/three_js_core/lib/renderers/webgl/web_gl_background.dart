@@ -108,19 +108,20 @@ class WebGLBackground {
 				objects.update(boxMesh!);
 			}
 
-			_e1.copy( (scene as Scene).backgroundRotation );
+      (scene as Scene);
+			_e1.copy(scene.backgroundRotation);
 
 			// accommodate left-handed frame
 			_e1.x *= - 1; _e1.y *= - 1; _e1.z *= - 1;
 
-			if ( background is CubeTexture && background.isRenderTargetTexture) {
+			if ( background is CubeTexture && !background.isRenderTargetTexture) {
 				// environment maps which are not cube render targets or PMREMs follow a different convention
 				_e1.y *= - 1;
 				_e1.z *= - 1;
 			}
 
 			boxMesh!.material!.uniforms['envMap']['value'] = background;
-			boxMesh!.material!.uniforms['flipEnvMap']['value'] = ( background is CubeTexture && background.isRenderTargetTexture) ? - 1 : 1;
+			boxMesh!.material!.uniforms['flipEnvMap']['value'] = ( background is CubeTexture && !background.isRenderTargetTexture) ? - 1 : 1;
 			boxMesh!.material!.uniforms['backgroundBlurriness']['value'] = scene.backgroundBlurriness;
 			boxMesh!.material!.uniforms['backgroundIntensity']['value'] = scene.backgroundIntensity;
 			boxMesh!.material!.uniforms['backgroundRotation']['value'].setFromMatrix4( _m1.makeRotationFromEuler( _e1 ) );

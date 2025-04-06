@@ -1,5 +1,7 @@
 part of three_renderers;
 
+enum RenderType{after,before,custom}
+
 class WebGLRenderer {
   late Map<String, dynamic> parameters;
 
@@ -108,14 +110,14 @@ class WebGLRenderer {
   bool _localClippingEnabled = false;
 
   // transmission
-
+  double transmissionResolutionScale = 1.0;
   RenderTarget? _transmissionRenderTarget;
 
   // camera matrices cache
 
   final projScreenMatrix = Matrix4.identity();
 
-  final _vector3 = Vector3.zero();
+  final _vector3 = Vector3();
 
   final _emptyScene = Scene();
 
@@ -456,7 +458,6 @@ class WebGLRenderer {
     
     _currentCamera?.clear();
     _frustum.dispose();
-    _transmissionRenderTarget?.dispose();
     _emptyScene.dispose();
     
     extensions.dispose();
@@ -856,9 +857,8 @@ class WebGLRenderer {
     } 
     else {
 			if ( renderBackground ) background.render( scene );
-      if (kIsWeb && transmissiveObjects != null && transmissiveObjects.isNotEmpty) renderTransmissionPass( opaqueObjects!, transmissiveObjects, scene, camera );
       renderScene(currentRenderList!, scene, camera);
-      if(!kIsWeb && transmissiveObjects != null && transmissiveObjects.isNotEmpty) renderTransmissionPass( opaqueObjects!, transmissiveObjects, scene, camera );
+      if(transmissiveObjects != null && transmissiveObjects.isNotEmpty) renderTransmissionPass( opaqueObjects!, transmissiveObjects, scene, camera );
     }
 
     if(!kIsWeb){
@@ -1023,7 +1023,7 @@ class WebGLRenderer {
     state.setPolygonOffset(false);
   }
 
-  void renderTransmissionPass(List<RenderItem> opaqueObjects, transmissiveObjects, Object3D scene, Camera camera) {
+  void renderTransmissionPass(List<RenderItem> opaqueObjects, List<RenderItem> transmissiveObjects, Object3D scene, Camera camera) {
 			final overrideMaterial = scene is Scene? scene.overrideMaterial : null;
 
 			if ( overrideMaterial != null ) {
@@ -1042,20 +1042,12 @@ class WebGLRenderer {
 					'resolveStencilBuffer': false,
           'colorSpace': ColorManagement.workingColorSpace,
         }));
-
-				// debug
-
-				// final geometry = new PlaneGeometry();
-				// final material = new MeshBasicMaterial( { MaterialProperty.map: _transmissionRenderTarget?.texture } );
-
-				// final mesh = new Mesh( geometry, material );
-				// scene.add( mesh );
 			}
 
 			final RenderTarget transmissionRenderTarget = currentRenderState?.state.transmissionRenderTarget[ camera.id ];
 
 			final activeViewport = camera.viewport ?? _currentViewport;
-			transmissionRenderTarget.setSize( activeViewport.z.toInt(), activeViewport.w.toInt() );
+			transmissionRenderTarget.setSize( (activeViewport.z * transmissionResolutionScale).toInt(), (activeViewport.w * transmissionResolutionScale).toInt());
 
 			//
 
@@ -1065,7 +1057,6 @@ class WebGLRenderer {
 			getClearColor( currentClearColor );
 			currentClearAlpha = getClearAlpha();
 			if ( currentClearAlpha < 1 ) setClearColor( Color.fromHex32(0xffffff), 0.5 );
-
 			clear();
 
       if ( renderBackground ) background.render( scene );
@@ -1091,7 +1082,7 @@ class WebGLRenderer {
 
 			if (!extensions.has( 'WEBGL_multisampled_render_to_texture' ) ) { // see #28131
 				bool renderTargetNeedsUpdate = false;
-
+        
 				for ( int i = 0, l = transmissiveObjects.length; i < l; i ++ ) {
 					final renderItem = transmissiveObjects[ i ];
 
@@ -1100,14 +1091,13 @@ class WebGLRenderer {
 					final material = renderItem.material;
 					final group = renderItem.group;
 
-					if ( material.side == DoubleSide && object.layers.test( camera.layers ) ) {
-
+					if ( material!.side == DoubleSide && object!.layers.test( camera.layers ) ) {
 						final currentSide = material.side;
 
 						material.side = BackSide;
 						material.needsUpdate = true;
 
-						renderObject( object, scene, camera, geometry, material, group );
+						renderObject( object, scene, camera, geometry!, material, group );
 
 						material.side = currentSide;
 						material.needsUpdate = true;
@@ -1896,10 +1886,11 @@ class WebGLRenderer {
       textures.setTexture2D( dstTexture, 0 );
       glTarget = WebGL.TEXTURE_2D;
     }
-
-    _gl.pixelStorei( WebGL.UNPACK_FLIP_Y_WEBGL, dstTexture.flipY?1:0 );
-    _gl.pixelStorei( WebGL.UNPACK_PREMULTIPLY_ALPHA_WEBGL, dstTexture.premultiplyAlpha?1:0 );
-    _gl.pixelStorei( WebGL.UNPACK_ALIGNMENT, dstTexture.unpackAlignment );
+    if(kIsWeb){
+      _gl.pixelStorei( WebGL.UNPACK_FLIP_Y_WEBGL, dstTexture.flipY?1:0 );
+      _gl.pixelStorei( WebGL.UNPACK_PREMULTIPLY_ALPHA_WEBGL, dstTexture.premultiplyAlpha?1:0 );
+      _gl.pixelStorei( WebGL.UNPACK_ALIGNMENT, dstTexture.unpackAlignment );
+    }
 
     // used for copying data from cpu
     final currentUnpackRowLen = _gl.getParameter( WebGL.UNPACK_ROW_LENGTH );

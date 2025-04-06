@@ -223,7 +223,7 @@ class SkinnedMesh extends Mesh {
       else {
         vector.setValues(1, 0, 0, 0); // do something reasonable
       }
-      skinWeight.setXYZW(i, vector.x.toDouble(), vector.y.toDouble(), vector.z.toDouble(), vector.w.toDouble());
+      skinWeight.setXYZW(i, vector.x, vector.y, vector.z, vector.w);
     }
   }
 

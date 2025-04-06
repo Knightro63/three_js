@@ -903,7 +903,7 @@ class Matrix4 {
     return this;
   }
 
-  Matrix4 makeOrthographic(double left, double right, double top, double bottom, double near, double far) {
+  Matrix4 makeOrthographic(double left, double right, double top, double bottom, double near, double far, [int coordinateSystem = 2000]) {
     final te = storage;
     final w = 1.0 / (right - left);
     final h = 1.0 / (top - bottom);
@@ -911,7 +911,17 @@ class Matrix4 {
 
     final x = (right + left) * w;
     final y = (top + bottom) * h;
-    final z = (far + near) * p;
+		double z, zInv;
+
+		if ( coordinateSystem == 2000 ) {
+			z = ( far + near ) * p;
+			zInv = - 2 * p;
+		} else if ( coordinateSystem == 2001 ) {
+			z = near * p;
+			zInv = - 1 * p;
+		} else {
+			throw( 'THREE.Matrix4.makeOrthographic(): Invalid coordinate system: $coordinateSystem');
+		}
 
     te[0] = 2 * w;
     te[4] = 0;
@@ -923,7 +933,7 @@ class Matrix4 {
     te[13] = -y;
     te[2] = 0;
     te[6] = 0;
-    te[10] = -2 * p;
+    te[10] = zInv;
     te[14] = -z;
     te[3] = 0;
     te[7] = 0;

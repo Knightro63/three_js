@@ -53,7 +53,7 @@ class _MyAppState extends State<WebglLoaderColladaKinematics> {
   }
 
   three.Object3D? dae;
-  Map<String, dynamic>? kinematics;
+  three.KinematicsData? kinematics;
   final tweenParameters = {};
   late final three.Tween kinematicsTween;
   
@@ -116,9 +116,9 @@ class _MyAppState extends State<WebglLoaderColladaKinematics> {
       final duration = math.Random().nextInt(4000)+1000;//three.MathUtils.randInt( 1000, 5000 );
       final target = {};
 
-      for ( final prop in kinematics!['joints'].keys) {
-        if (kinematics!['joints'][ prop ]['static'] == false) {
-          final joint = kinematics!['joints'][ prop ];
+      for ( final prop in kinematics!.joints.keys) {
+        if (kinematics!.joints[ prop ]['static'] == false) {
+          final joint = kinematics!.joints[ prop ];
           final old = tweenParameters[ prop ];
           final position = old ?? joint['zeroPosition'];
           tweenParameters[ prop ] = position;
@@ -129,9 +129,9 @@ class _MyAppState extends State<WebglLoaderColladaKinematics> {
       kinematicsTween = three.Tween( tweenParameters ).to( target, duration ).easing( three.Easing.Quadratic[three.ETTypes.Out] );
       
       kinematicsTween.onUpdate(( object, g) {
-        for ( final prop in kinematics!['joints'].keys ) {
-          if (!kinematics!['joints'][ prop ]['static'] ) {
-            kinematics!['setJointValue']( prop, object[ prop ] );
+        for ( final prop in kinematics!.joints.keys ) {
+          if (!kinematics!.joints[ prop ]['static'] ) {
+            kinematics!.setJointValue?.call( prop, object[ prop ] );
           }
         }
       } );

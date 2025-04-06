@@ -816,7 +816,7 @@ class BatchedMesh extends Mesh {
 	}
 
   @override
-	OnBeforeRender? get onBeforeRender =>({
+	OnRender? get onBeforeRender =>({
     WebGLRenderer? renderer,
     RenderTarget? renderTarget,
     Object3D? mesh,

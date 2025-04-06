@@ -90,19 +90,51 @@ class MeshPhysicalMaterial extends MeshStandardMaterial {
     setValuesFromString(parameters);
   }
   void _init(){
-    clearcoatRoughness = 0.0;
     type = 'MeshPhysicalMaterial';
-    clearcoatNormalScale = Vector2(1, 1);
-    thickness = 0.0;
-    attenuationColor = Color(1, 1, 1);
-    attenuationDistance = 0.0;
-    specularIntensity = 1.0;
-    specularColor = Color(1, 1, 1);
+
+		this.anisotropyRotation = 0;
+		this.anisotropyMap = null;
+
+		this.clearcoatMap = null;
+		this.clearcoatRoughness = 0.0;
+		this.clearcoatRoughnessMap = null;
+		this.clearcoatNormalScale = new Vector2( 1, 1 );
+		this.clearcoatNormalMap = null;
+		this.iridescenceMap = null;
+		this.iridescenceIOR = 1.3;
+		this.iridescenceThicknessRange = [ 100, 400 ];
+		this.iridescenceThicknessMap = null;
+
+		this.sheenColor = new Color( 0x000000 );
+		this.sheenColorMap = null;
+		this.sheenRoughness = 1.0;
+		this.sheenRoughnessMap = null;
+
+		this.transmissionMap = null;
+
+		this.thickness = 0;
+		this.thicknessMap = null;
+		this.attenuationDistance = double.infinity;
+		this.attenuationColor = new Color( 1, 1, 1 );
+
+		this.specularIntensity = 1.0;
+		this.specularIntensityMap = null;
+		this.specularColor = new Color( 1, 1, 1 );
+		this.specularColorMap = null;
+
+    sheenColor = Color.fromHex32( 0x000000 );
+
     ior = 1.5;
     dispersion = 0;
 
     defines = {'STANDARD': '', 'PHYSICAL': ''};
 
+		_anisotropy = 0;
+		clearcoat = 0;
+		_dispersion = 0;
+		_iridescence = 0;
+		sheen = 0.0;
+		transmission = 0;
   }
 
   @override

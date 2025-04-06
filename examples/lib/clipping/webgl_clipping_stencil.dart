@@ -172,7 +172,9 @@ class _State extends State<WebglClippingStencil> {
       final po = three.Mesh(planeGeom, planeMat);
       po.onAfterRender = ({
         three.WebGLRenderer? renderer,
-        three.Object3D? scene,
+        three.RenderTarget? renderTarget,
+        three.Object3D? mesh,
+        three.Scene? scene,
         three.Camera? camera,
         three.BufferGeometry? geometry,
         three.Material? material,

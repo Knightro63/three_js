@@ -29,9 +29,7 @@ class _State extends State<WebglMirror> {
       onSetupComplete: (){setState(() {});},
       setup: setup,
       settings: three.Settings(
-        localClippingEnabled: true,
         toneMapping: three.ACESFilmicToneMapping,
-        useSourceTexture: true
       )
     );
     super.initState();
@@ -72,8 +70,6 @@ class _State extends State<WebglMirror> {
     cameraControls.minDistance = 10;
     cameraControls.update();
 
-    //
-
     final planeGeo = three.PlaneGeometry( 100.1, 100.1 );
 
     three.BufferGeometry geometry = CircleGeometry( radius: 40, segments: 64 );
@@ -85,6 +81,7 @@ class _State extends State<WebglMirror> {
     } );
     groundMirror.position.y = 0.5;
     groundMirror.rotateX( - math.pi / 2 );
+    groundMirror.renderType = three.RenderType.custom;
     threeJs.scene.add( groundMirror );
 
     geometry = three.PlaneGeometry( 100, 100 );
@@ -96,8 +93,8 @@ class _State extends State<WebglMirror> {
     } );
     verticalMirror.position.y = 50;
     verticalMirror.position.z = - 50;
+    verticalMirror.renderType = three.RenderType.custom;
     threeJs.scene.add( verticalMirror );
-
 
     final sphereGroup = three.Object3D();
     threeJs.scene.add( sphereGroup );
@@ -152,32 +149,28 @@ class _State extends State<WebglMirror> {
     threeJs.scene.add( planeLeft );
 
     // lights
-    final mainLight = three.PointLight( 0xe7e7e7, 2.5, 250, 0 );
+    final mainLight = three.PointLight( 0xe7e7e7, 0.35, 250, 0 );
     mainLight.position.y = 60;
     threeJs.scene.add( mainLight );
 
-    final greenLight = three.PointLight( 0x00ff00, 0.5, 1000, 0 );
+    final greenLight = three.PointLight( 0x00ff00, 0.15, 1000, 0 );
     greenLight.position.setValues( 550, 50, 0 );
     threeJs.scene.add( greenLight );
 
-    final redLight = three.PointLight( 0xff0000, 0.5, 1000, 0 );
+    final redLight = three.PointLight( 0xff0000, 0.15, 1000, 0 );
     redLight.position.setValues( - 550, 50, 0 );
     threeJs.scene.add( redLight );
 
-    final blueLight = three.PointLight( 0xbbbbfe, 0.5, 1000, 0 );
+    final blueLight = three.PointLight( 0xbbbbfe, 0.15, 1000, 0 );
     blueLight.position.setValues( 0, 50, 550 );
     threeJs.scene.add( blueLight );
 
-    // threeJs.postProcessor = ([dt]){
-    // //   //
-    //   // threeJs.renderer?.setRenderTarget(null);
-    //   threeJs.renderer?.render( threeJs.scene, threeJs.camera );
-    //   // verticalMirror.onAfterRender!(renderer:threeJs.renderer, scene:threeJs.scene, camera:threeJs.camera);
-
-    // };
-
-    //
-
+    threeJs.postProcessor = ([dt]){
+      threeJs.renderer?.setRenderTarget(threeJs.renderTarget);
+      threeJs.renderer?.render( threeJs.scene, threeJs.camera );
+      groundMirror.customRender?.call(renderer: threeJs.renderer,scene: threeJs.scene, camera: threeJs.camera);
+      verticalMirror.customRender?.call(renderer: threeJs.renderer,scene: threeJs.scene, camera: threeJs.camera);
+    };
 
     threeJs.addAnimationEvent((dt){
       final timer = DateTime.now().millisecondsSinceEpoch * 0.01;

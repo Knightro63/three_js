@@ -1,8 +1,5 @@
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:three_js_core/three_js_core.dart';
-
 import 'package:three_js_math/three_js_math.dart';
 import 'dart:math' as math;
 
@@ -55,9 +52,9 @@ class PMREMGenerator {
   int _oldActiveMipmapLevel = 0;
   bool _oldXrEnabled = false;
 
-  late double phi;
-  late double invPhi;
-  late List<Vector3> _axisDirections;
+  late final double phi;
+  late final double invPhi;
+  late final List<Vector3> _axisDirections;
 
   late WebGLRenderer _renderer;
   dynamic _pingPongRenderTarget;
@@ -223,7 +220,7 @@ class PMREMGenerator {
     } else {
       // Equirectangular
 
-      _setSize(texture.image.width ~/ 4 ?? 256);
+      _setSize(texture.image.width ~/ 4);
     }
 
     _oldTarget = _renderer.getRenderTarget();
@@ -409,13 +406,13 @@ class PMREMGenerator {
 	/// * the poles) to approximate the orthogonally-separable blur. It is least
 	/// * accurate at the poles, but still does a decent job.
 	/// *
-  void _blur(RenderTarget cubeUVRenderTarget, int lodIn, int lodOut, double sigma, [poleAxis]) {
+  void _blur(RenderTarget cubeUVRenderTarget, int lodIn, int lodOut, double sigma, [Vector3? poleAxis]) {
     final RenderTarget? pingPongRenderTarget = _pingPongRenderTarget;
-    _halfBlur(cubeUVRenderTarget, pingPongRenderTarget, lodIn, lodOut, sigma,'latitudinal', poleAxis);
+    _halfBlur(cubeUVRenderTarget, pingPongRenderTarget, lodIn, lodOut, sigma, 'latitudinal', poleAxis);
     _halfBlur(pingPongRenderTarget, cubeUVRenderTarget, lodOut, lodOut, sigma,'longitudinal', poleAxis);
   }
 
-  void _halfBlur(RenderTarget? targetIn, RenderTarget? targetOut, int lodIn, int lodOut, double sigmaRadians, String direction, poleAxis) {
+  void _halfBlur(RenderTarget? targetIn, RenderTarget? targetOut, int lodIn, int lodOut, double sigmaRadians, String direction, Vector3? poleAxis) {
     final renderer = _renderer;
     final blurMaterial = _blurMaterial;
 
@@ -436,13 +433,9 @@ class PMREMGenerator {
     final blurUniforms = blurMaterial?.uniforms;
 
     final pixels = _sizeLods[lodIn] - 1;
-    final radiansPerPixel = isFinite(sigmaRadians)
-        ? math.pi / (2 * pixels)
-        : 2 * math.pi / (2 * maxSamples - 1);
+    final radiansPerPixel = isFinite(sigmaRadians)? math.pi / (2 * pixels): 2 * math.pi / (2 * maxSamples - 1);
     final sigmaPixels = sigmaRadians / radiansPerPixel;
-    final samples = isFinite(sigmaRadians)
-        ? 1 + (standardDeviations * sigmaPixels).floor()
-        : maxSamples;
+    final samples = isFinite(sigmaRadians)? 1 + (standardDeviations * sigmaPixels).floor(): maxSamples;
 
     if (samples > maxSamples) {
       console.warning("sigmaRadians, $sigmaRadians, is too large and will clip, as it requested $samples samples when the maximum is set to $maxSamples");
@@ -477,11 +470,11 @@ class PMREMGenerator {
     }
 
     blurUniforms['dTheta']["value"] = radiansPerPixel;
-    blurUniforms['mipInt']["value"] = _lodMax - lodIn;
+    blurUniforms['mipInt']["value"] = this._lodMax - lodIn;
 
     final double outputSize = _sizeLods[lodOut].toDouble();
-    final x = 3 * outputSize *(lodOut > _lodMax - lodMin ? lodOut - _lodMax + lodMin : 0);
-    final y = 4 * (_cubeSize - outputSize);
+    final x = 3 * outputSize *(lodOut > this._lodMax - lodMin ? lodOut - this._lodMax + lodMin : 0);
+    final y = 4 * (this._cubeSize - outputSize);
 
     _setViewport(targetOut, x, y, 3 * outputSize, 2 * outputSize);
     renderer.setRenderTarget(targetOut);
@@ -547,9 +540,9 @@ class PMREMGenerator {
       }
 
       final planes = BufferGeometry();
-      planes.setAttributeFromString('position', Float32BufferAttribute.fromList(position, positionSize, false));
-      planes.setAttributeFromString('uv', Float32BufferAttribute.fromList(uv, uvSize, false));
-      planes.setAttributeFromString('faceIndex', Int32BufferAttribute.fromList(faceIndex, faceIndexSize, false));
+      planes.setAttributeFromString('position', Float32BufferAttribute.fromList(position, positionSize));
+      planes.setAttributeFromString('uv', Float32BufferAttribute.fromList(uv, uvSize));
+      planes.setAttributeFromString('faceIndex', Int32BufferAttribute.fromList(faceIndex, faceIndexSize));
       lodPlanes.add(planes);
 
       if (lod > lodMin) {
@@ -697,7 +690,7 @@ class PMREMGenerator {
     final shaderMaterial = ShaderMaterial.fromMap({
       "name": 'CubemapToCubeUV',
       "uniforms": {
-        'envMap': <String,dynamic>{},
+        'envMap': <String,dynamic>{"value":null},
         'flipEnvMap': {"value": -1}
       },
       "vertexShader": _getCommonVertexShader(),
@@ -726,28 +719,8 @@ class PMREMGenerator {
     return shaderMaterial;
   }
 
-  String _getPlatformVertexHelper() {
-    if (kIsWeb) {
-      return "";
-    }
-
-    if (Platform.isMacOS) {
-      return """
-        #define attribute in
-        #define varying out
-        #define texture2D texture
-      """;
-    }
-
-    return """
-    """;
-  }
-
   String _getCommonVertexShader() {
     return """
-
-      ${_getPlatformVertexHelper()}
-
       precision mediump float;
       precision mediump int;
 

@@ -135,10 +135,8 @@ class OrthographicCamera extends Camera {
       bottom = top - scaleH * view!.height;
     }
 
-    projectionMatrix.makeOrthographic(left, right, top, bottom, near, far);
-
-    projectionMatrixInverse.setFrom(projectionMatrix);
-    projectionMatrixInverse.invert();
+    projectionMatrix.makeOrthographic(left, right, top, bottom, near, far, this.coordinateSystem );
+    projectionMatrixInverse.setFrom(projectionMatrix).invert();
   }
 
   /// [meta] -- object containing metadata such as textures or images in objects'

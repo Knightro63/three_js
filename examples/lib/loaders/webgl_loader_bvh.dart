@@ -57,7 +57,7 @@ class _State extends State<WebglLoaderBVH> {
     threeJs.camera.position.setValues( 0, 200, 300 );
 
     threeJs.scene = three.Scene();
-    threeJs.scene.background = three.Color( 0xeeeeee );
+    threeJs.scene.background = three.Color.fromHex32( 0xeeeeee );
 
     threeJs.scene.add( GridHelper( 400, 10 ) );
 

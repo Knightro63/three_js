@@ -7,8 +7,6 @@ import 'package:three_js_core/others/index.dart';
 import 'package:three_js_core/three_js_core.dart' as core;
 import 'package:three_js_math/three_js_math.dart';
 
-bool isEmulator = false;
-
 class Settings{
   Settings({
     this.useSourceTexture = false,
@@ -281,7 +279,7 @@ class ThreeJS {
     width = screenSize!.width;
     height = screenSize!.height;
     if(texture == null){
-      await angle.init(false,!kIsWeb&&Platform.isAndroid?!isEmulator:false);
+      await angle.init(false,true);
       
       texture = await angle.createTexture(      
         AngleOptions(

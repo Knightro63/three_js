@@ -9,7 +9,7 @@ class RoomEnvironment extends Scene {
     final roomMaterial = MeshStandardMaterial.fromMap({"side": BackSide});
     final boxMaterial = MeshStandardMaterial({});
 
-    final mainLight = PointLight(0xffffff, 5.0, 28, 2);
+    final mainLight = PointLight(0xffffff, 900, 28, 2);
     mainLight.position.setValues(0.418, 16.199, 0.300);
     add(mainLight);
 

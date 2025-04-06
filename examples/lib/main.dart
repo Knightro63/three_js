@@ -1,3 +1,4 @@
+import 'package:example/animations/webgl_animation_walk.dart';
 import 'package:example/audio/orientation.dart';
 import 'package:example/audio/sandbox.dart';
 import 'package:example/audio/timing.dart';
@@ -48,6 +49,8 @@ import 'package:example/loaders/webgl_loader_stl.dart';
 import 'package:example/loaders/webgl_loader_usdz.dart';
 import 'package:example/loaders/webgl_loader_vox.dart';
 import 'package:example/loaders/webgl_loader_xyz.dart';
+import 'package:example/material/webgl_materials_car.dart';
+import 'package:example/material/webgl_materials_physical_transmission.dart';
 import 'package:example/multi_views/webgl2_multiple_rendertargets.dart';
 import 'package:example/material/webgl_materials_modified.dart';
 import 'package:example/material/webgl_materials_physical_transmission_alpha.dart';
@@ -58,6 +61,7 @@ import 'package:example/modifers/webgl_modifer_edgesplit.dart';
 import 'package:example/modifers/webgl_modifier_simplifier.dart';
 import 'package:example/modifers/webgl_modifier_subdivision.dart';
 import 'package:example/multi_views/webgl_multiple_scenes_comparison.dart';
+import 'package:example/shaders/webgl_random_uv.dart';
 import 'package:example/shaders/webgl_refraction.dart';
 import 'package:example/postprocessing/webgl_postprocessing_unreal_bloom.dart';
 import 'package:example/postprocessing/webgl_postprocessing_unreal_bloom_selective.dart';
@@ -134,7 +138,6 @@ import 'package:example/controls/misc_controls_map.dart';
 import 'package:example/controls/misc_controls_orbit.dart';
 import 'package:example/controls/misc_controls_trackball.dart';
 import 'package:css/css.dart';
-import 'package:three_js/three_js.dart';
 import 'src/plugins/plugin.dart';
 
 void main() {
@@ -167,7 +170,6 @@ class MyAppState extends State<MyApp> {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    isEmulator = true;
     widthInifity = MediaQuery.of(context).size.width;
     return SafeArea(
       child: MaterialApp(
@@ -392,6 +394,9 @@ class MyAppState extends State<MyApp> {
               '/webgl_animation_multiple':(BuildContext context) {
                 return const WebglAnimationMultiple();
               },
+              '/webgl_animation_walk':(BuildContext context) {
+                return const WebglAnimationWalk();
+              },
               '/webgl_skinning_simple':(BuildContext context) {
                 return const WebglSkinningSimple();
               },
@@ -425,8 +430,14 @@ class MyAppState extends State<MyApp> {
               '/webgl_materials':(BuildContext context) {
                 return const WebglMaterials();
               },
+              '/webgl_materials_car':(BuildContext context) {
+                return const WebglMaterialsCar();
+              },
               '/webgl_materials_physical_transmission_alpha':(BuildContext context) {
                 return const WebglMaterialsPhysicalTransmissionAlpha();
+              },
+              '/webgl_materials_physical_transmission':(BuildContext context) {
+                return const WebglMaterialsPhysicalTransmission();
               },
               '/webgl_materials_modified':(BuildContext context) {
                 return const WebglMaterialsModified();
@@ -568,6 +579,9 @@ class MyAppState extends State<MyApp> {
               },
               '/webgl_shaders_sky':(BuildContext context) {
                 return const WebglShaderSky();
+              },
+              '/webgl_random_uv':(BuildContext context) {
+                return const WebglRandomUV();
               },
               '/webgl_shaders_ocean':(BuildContext context) {
                 return const WebglShaderOcean();

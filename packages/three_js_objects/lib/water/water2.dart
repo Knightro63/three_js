@@ -182,7 +182,7 @@ class Water extends Mesh {
 		material?.uniforms[ 'config' ]['value'].z = halfCycle; // halfCycle
 		material?.uniforms[ 'config' ]['value'].w = scale*1.0; // scale
 
-    onAfterRender = ({Camera? camera, BufferGeometry? geometry, Map<String, dynamic>? group, Material? material, WebGLRenderer? renderer, Object3D? scene}){
+    onAfterRender = ({Camera? camera, BufferGeometry? geometry, Map<String, dynamic>? group, Material? material, Object3D? mesh, RenderTarget? renderTarget, WebGLRenderer? renderer, Scene? scene}){
       updateTextureMatrix( camera! );
       updateFlow();
 

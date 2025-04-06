@@ -230,7 +230,7 @@ class WebGLPrograms {
 			specularColorMapUv: material.specularColorMap ==null?null:getChannel( material.specularColorMap!.channel ),
 			specularIntensityMapUv: material.specularIntensityMap ==null?null:getChannel( material.specularIntensityMap!.channel ),
 
-			transmissionMapUv: material.transmissionMap ==null?null:getChannel( material.transmissionMap!.channel ),
+			transmissionMapUv: material.transmissionMap == null?null:getChannel( material.transmissionMap!.channel ),
 			thicknessMapUv: material.thicknessMap ==null?null:getChannel( material.thicknessMap!.channel ),
 
 			alphaMapUv: material.alphaMap ==null?null:getChannel( material.alphaMap!.channel ),

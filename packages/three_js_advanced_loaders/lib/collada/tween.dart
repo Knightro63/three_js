@@ -699,7 +699,7 @@ class Tween{
             if (elapsedTime > totalTime) {
               return 1;
             }
-            var timesRepeated = (elapsedTime ~/ durationAndDelay);
+            var timesRepeated = (elapsedTime / durationAndDelay).truncate();
             var timeIntoCurrentRepeat = elapsedTime - timesRepeated * durationAndDelay;
             // TODO use %?
             // const timeIntoCurrentRepeat = elapsedTime % durationAndDelay

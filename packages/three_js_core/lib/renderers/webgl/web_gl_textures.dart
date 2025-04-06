@@ -133,7 +133,6 @@ class WebGLTextures {
 			if ( glType == WebGL.UNSIGNED_BYTE ) internalFormat = WebGL.RGBA8UI;
 			if ( glType == WebGL.UNSIGNED_SHORT ) internalFormat = WebGL.RGBA16UI;
 			if ( glType == WebGL.UNSIGNED_INT ) internalFormat = WebGL.RGBA32UI;
-			if ( glType == WebGL.BYTE ) internalFormat = WebGL.RGBA8I;
 			if ( glType == WebGL.SHORT ) internalFormat = WebGL.RGBA16I;
 			if ( glType == WebGL.INT ) internalFormat = WebGL.RGBA32I;
 
@@ -568,11 +567,11 @@ class WebGLTextures {
     if (source.version != source.currentVersion || forceUpload) {
 
       _gl.pixelStorei(WebGL.UNPACK_ALIGNMENT, texture.unpackAlignment);
-      //if (kIsWeb) {
+      if (kIsWeb) {
         _gl.pixelStorei(WebGL.UNPACK_FLIP_Y_WEBGL, texture.flipY ? 1 : 0);
         _gl.pixelStorei(WebGL.UNPACK_PREMULTIPLY_ALPHA_WEBGL, texture.premultiplyAlpha ? 1 : 0);
         _gl.pixelStorei(WebGL.UNPACK_COLORSPACE_CONVERSION_WEBGL, WebGL.NONE);
-      //}
+      }
 
       dynamic image = texture.image;//resizeImage(texture.image, needsPowerOfTwo, false, maxTextureSize);
       image = verifyColorSpace(texture, image);

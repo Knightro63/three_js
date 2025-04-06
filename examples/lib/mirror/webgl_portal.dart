@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 import 'package:example/src/statistics.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
 import 'package:three_js_geometry/three_js_geometry.dart';
@@ -33,7 +34,6 @@ class _State extends State<WebglPortal> {
       settings: three.Settings(
         localClippingEnabled: true,
         toneMapping: three.ACESFilmicToneMapping,
-        useSourceTexture: true
       )
     );
     super.initState();
@@ -163,7 +163,6 @@ class _State extends State<WebglPortal> {
     threeJs.scene.add( blueLight );
 
     void renderPortal(three.Mesh thisPortalMesh,three.Mesh otherPortalMesh,three.WebGLRenderTarget thisPortalTexture ) {
-      // set the portal camera position to be reflected about the portal plane
       thisPortalMesh.worldToLocal( reflectedPosition.setFrom( threeJs.camera.position ) );
       reflectedPosition.x *= - 1.0; reflectedPosition.z *= - 1.0;
       otherPortalMesh.localToWorld( reflectedPosition );
@@ -187,7 +186,15 @@ class _State extends State<WebglPortal> {
       thisPortalMesh.visible = true; // re-enable this portal's visibility for general rendering
     }
 
+    void render(currentRenderTarget){
+      threeJs.renderer?.setRenderTarget( currentRenderTarget );
+      threeJs.renderer!.setViewport(0,0,threeJs.width,threeJs.height);
+      threeJs.renderer?.render( threeJs.scene, threeJs.camera );
+    }
+
     threeJs.postProcessor = ([double? dt]) {
+      final currentRenderTarget = threeJs.renderer?.getRenderTarget();
+      if(!kIsWeb) render(currentRenderTarget);
       // move the bouncing sphere(s)
       final timerOne = DateTime.now().millisecondsSinceEpoch * 0.01;
       final timerTwo = timerOne + math.pi * 10.0;
@@ -209,7 +216,7 @@ class _State extends State<WebglPortal> {
       smallSphereTwo.rotation.z = timerTwo * 0.8;
 
       // save the original camera properties
-      final currentRenderTarget = threeJs.renderer?.getRenderTarget();
+      
       final currentXrEnabled = threeJs.renderer?.xr.enabled;
       final currentShadowAutoUpdate = threeJs.renderer?.shadowMap.autoUpdate;
       threeJs.renderer?.xr.enabled = false; // Avoid camera modification
@@ -222,10 +229,8 @@ class _State extends State<WebglPortal> {
       // restore the original rendering properties
       threeJs.renderer?.xr.enabled = currentXrEnabled!;
       threeJs.renderer?.shadowMap.autoUpdate = currentShadowAutoUpdate!;
-      threeJs.renderer?.setRenderTarget( currentRenderTarget );
 
-      // render the main scene
-      threeJs.renderer?.render( threeJs.scene, threeJs.camera );
+      if(kIsWeb) render(currentRenderTarget);
     };
   }
 }

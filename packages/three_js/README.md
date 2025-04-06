@@ -57,17 +57,20 @@ Find the example for this API [here](https://github.com/Knightro63/three_js/tree
 ## Know Issues
 
 **All**
- - Transmissive does not work
+ - MD2 annimations do not work
+ - Collada animations do not work
+ - Collada kinnametics does not work
+ - PMREM gives weird artifacts
 
 **MacOS**
 
 **iOS**
- - Buffer Validation issues
  - Protoplanets does not function correctly
 
 **Android**
  - Morphtargets dones not work
-
+ - Some RGBELoaders cause app to crash
+ 
 **Windows**
 
 **Web**
@@ -76,10 +79,10 @@ Find the example for this API [here](https://github.com/Knightro63/three_js/tree
 
 ## Librarues and Plugins
 
-**Physics**
- - [Omio](https://github.com/Knightro63/oimo_physics)
- - [Cannon](https://github.com/Knightro63/cannon_physics)
- - [Terrain](https://github.com/Knightro63/three_js/tree/main/packages/three_js_terrain)
+**ADD-ONS**
+ - [Omio](https://github.com/Knightro63/oimo_physics) a physics engine for three_js
+ - [Cannon](https://github.com/Knightro63/cannon_physics) a physics engine for three_js
+ - [Terrain](https://github.com/Knightro63/three_js/tree/main/packages/three_js_terrain) a map generator for three_js
 
 ## Contributing
 

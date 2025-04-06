@@ -118,7 +118,7 @@ class _State extends State<WebglMaterialsPhysicalTransmissionAlpha> {
 
         params['ior'] = mesh.material!.ior;
         params['specularIntensity'] = mesh.material!.specularIntensity;
-        params['emissiveIntensity'] = mesh.material!.emissiveIntensity;
+        //params['emissiveIntensity'] = mesh.material!.emissiveIntensity;
 
         params['transmission'] = mesh.material!.transmission;
         params['thickness'] = mesh.material!.thickness;

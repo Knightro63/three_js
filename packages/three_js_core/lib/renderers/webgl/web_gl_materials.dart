@@ -14,10 +14,11 @@ class WebGLMaterials {
   }
 
 	void refreshTransformUniform(Texture? map, Map? uniform ) {
-		if ( map?.matrixAutoUpdate == true) {
-			map!.updateMatrix();
+    if(map == null) return;
+		if ( map.matrixAutoUpdate == true) {
+			map.updateMatrix();
 		}
-		uniform?['value'].setFrom( map?.matrix );
+		uniform?['value']?.setFrom( map.matrix );
 	}
 
   void refreshFogUniforms(Map uniforms, FogBase fog) {
@@ -46,6 +47,9 @@ class WebGLMaterials {
     } else if (material is MeshStandardMaterial) {
       refreshUniformsCommon(uniforms, material);
       refreshUniformsStandard(uniforms, material);
+			if ( material is MeshPhysicalMaterial ) {
+				refreshUniformsPhysical( uniforms, material, transmissionRenderTarget );
+      }
     } else if (material is MeshPhysicalMaterial) {
       refreshUniformsCommon(uniforms, material);
       refreshUniformsStandard(uniforms, material);
@@ -248,7 +252,7 @@ class WebGLMaterials {
     uniforms["roughness"]["value"] = material.roughness;
     if (material.metalnessMap != null) {
       uniforms["metalnessMap"]["value"] = material.metalnessMap;
-      refreshTransformUniform( material.roughnessMap!, uniforms['roughnessMapTransform'] );
+      refreshTransformUniform( material.roughnessMap, uniforms['roughnessMapTransform'] );
     }
 
     if (material.envMap != null) {
@@ -261,7 +265,7 @@ class WebGLMaterials {
     uniforms["ior"]["value"] = material.ior; // also part of uniforms common
 
     if (material.sheen > 0) {
-      uniforms["sheenColor"]["value"].setFrom(material.sheenColor);
+      uniforms["sheenColor"]["value"].setFrom(material.sheenColor).multiplyScalar( material.sheen );
 
       uniforms["sheenRoughness"]["value"] = material.sheenRoughness;
 
@@ -291,10 +295,9 @@ class WebGLMaterials {
       }
 
       if (material.clearcoatNormalMap != null) {
-        uniforms["clearcoatNormalScale"]["value"].setFrom(material.clearcoatNormalScale);
         uniforms["clearcoatNormalMap"]["value"] = material.clearcoatNormalMap;
         refreshTransformUniform( material.clearcoatNormalMap!, uniforms['clearcoatNormalMapTransform'] );
-
+        uniforms["clearcoatNormalScale"]["value"].setFrom(material.clearcoatNormalScale);
         if (material.side == BackSide) {
           uniforms["clearcoatNormalScale"]["value"].negate();
         }
@@ -325,10 +328,11 @@ class WebGLMaterials {
     if (material.transmission > 0) {
       uniforms["transmission"]["value"] = material.transmission;
       uniforms["transmissionSamplerMap"]["value"] = transmissionRenderTarget?.texture;
-      uniforms["transmissionSamplerSize"]["value"].set(transmissionRenderTarget?.width, transmissionRenderTarget?.height);
+      uniforms["transmissionSamplerSize"]["value"].setValues(transmissionRenderTarget?.width.toDouble() ?? 0.0, transmissionRenderTarget?.height.toDouble() ?? 0.0);
 
       if (material.transmissionMap != null) {
         uniforms["transmissionMap"]["value"] = material.transmissionMap;
+        refreshTransformUniform( material.transmissionMap, uniforms['transmissionMapTransform'] );
       }
 
       uniforms["thickness"]["value"] = material.thickness;
@@ -352,15 +356,13 @@ class WebGLMaterials {
 
     uniforms["specularIntensity"]["value"] = material.specularIntensity;
     uniforms["attenuationColor"]["value"].setFrom(material.attenuationColor);
-
-    if (material.specularIntensityMap != null) {
-      uniforms["specularIntensityMap"]["value"] = material.specularIntensityMap;
-      refreshTransformUniform( material.specularIntensityMap!, uniforms['specularIntensityMapTransform'] );
-    }
-
     if (material.specularColorMap != null) {
       uniforms["specularColorMap"]["value"] = material.specularColorMap;
       refreshTransformUniform( material.specularColorMap!, uniforms['specularColorMapTransform'] );
+    }
+    if (material.specularIntensityMap != null) {
+      uniforms["specularIntensityMap"]["value"] = material.specularIntensityMap;
+      refreshTransformUniform( material.specularIntensityMap!, uniforms['specularIntensityMapTransform'] );
     }
   }
 

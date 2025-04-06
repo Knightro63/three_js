@@ -59,8 +59,10 @@ class MD2Character {
 		}
 
 		void checkLoadingComplete() {
-			loadCounter -= 1;
-			if ( loadCounter == 0 ) onLoadComplete?.call();
+			loadCounter--;
+			if ( loadCounter == 0 ){ 
+        onLoadComplete?.call();
+      }
 		}
 
 		Future<List<Texture>> loadTextures( baseUrl, textureUrls ) async{

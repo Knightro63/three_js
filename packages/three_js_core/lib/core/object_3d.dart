@@ -13,20 +13,11 @@ import 'event_dispatcher.dart';
 import './layers.dart';
 import './raycaster.dart';
 
-typedef OnBeforeRender = void Function({
+typedef OnRender = void Function({
   WebGLRenderer? renderer,
   RenderTarget? renderTarget,
   Object3D? mesh,
   Scene? scene,
-  Camera? camera,
-  BufferGeometry? geometry,
-  Material? material,
-  Map<String, dynamic>? group
-});
-
-typedef OnAfterRender = void Function({
-  WebGLRenderer? renderer,
-  Object3D? scene,
   Camera? camera,
   BufferGeometry? geometry,
   Material? material,
@@ -133,7 +124,7 @@ class Object3D with EventDispatcher {
   // onBeforeRender({WebGLRenderer? renderer, scene, Camera? camera, RenderTarget? renderTarget, dynamic? geometry, Material? material, dynamic group}) {
   // print(" Object3D.onBeforeRender ${type} ${id} ");
   // }
-  OnBeforeRender? onBeforeRender;
+  OnRender? onBeforeRender;
 
   dynamic background;
   Texture? environment;
@@ -1016,7 +1007,9 @@ class Object3D with EventDispatcher {
   /// [Points] or [Sprite]. Instances of [Object3D], [Group]
   /// or [Bone] are not renderable and thus this callback is not executed
   /// for such objects.
-    OnAfterRender? onAfterRender;
+  OnRender? onAfterRender;
+
+  OnRender? customRender;
 
   void onBeforeShadow({
     WebGLRenderer? renderer,

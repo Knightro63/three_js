@@ -71,12 +71,12 @@ class _MyAppState extends State<FlutterGame> {
   three.Joystick? joystick;
   
   Future<void> setup() async {
-    joystick = threeJs.width < 850?three.Joystick(
-      size: 150,
-      margin: const EdgeInsets.only(left: 35, bottom: 35),
-      screenSize: Size(threeJs.width, threeJs.height), 
-      listenableKey: threeJs.globalKey
-    ):null;
+    // joystick = three.Joystick(
+    //   size: 150,
+    //   margin: const EdgeInsets.only(left: 35, bottom: 35),
+    //   screenSize: Size(threeJs.width, threeJs.height), 
+    //   listenableKey: threeJs.globalKey
+    // );
     threeJs.camera = three.PerspectiveCamera(45, threeJs.width / threeJs.height, 1, 2200);
     threeJs.camera.position.setValues(3, 6, 10);
 

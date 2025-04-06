@@ -4,6 +4,7 @@ import 'package:three_js_math/three_js_math.dart';
 class Reflector extends Mesh {
   final bool isReflector = true;
   bool forceUpdate = false;
+  RenderType renderType = RenderType.after;
   late WebGLRenderTarget renderTarget;
   PerspectiveCamera camera = PerspectiveCamera();
 
@@ -50,10 +51,9 @@ class Reflector extends Mesh {
 
     this.material = material;
 
-    onAfterRender = ({Camera? camera, BufferGeometry? geometry, Map<String, dynamic>? group, Material? material, WebGLRenderer? renderer, Object3D? scene}){
-		//onBeforeRender = ({Camera? camera, BufferGeometry? geometry, Map<String, dynamic>? group, Material? material, Object3D? mesh, RenderTarget? renderTarget, WebGLRenderer? renderer, Scene? scene}){
+    void render(WebGLRenderer? renderer, Object3D? scene, Camera camera){
       reflectorWorldPosition.setFromMatrixPosition( scope.matrixWorld );
-			cameraWorldPosition.setFromMatrixPosition( camera!.matrixWorld );
+			cameraWorldPosition.setFromMatrixPosition( camera.matrixWorld );
 
 			rotationMatrix.extractRotation( scope.matrixWorld );
 
@@ -157,6 +157,22 @@ class Reflector extends Mesh {
 			scope.visible = true;
       forceUpdate = false;
 		};
+
+    onAfterRender = ({Camera? camera, BufferGeometry? geometry, Map<String, dynamic>? group, Material? material, Object3D? mesh, RenderTarget? renderTarget, WebGLRenderer? renderer, Scene? scene}){
+      if(renderType == RenderType.after){
+        render(renderer,scene,camera!);
+      }
+    };
+    onBeforeRender = ({Camera? camera, BufferGeometry? geometry, Map<String, dynamic>? group, Material? material, Object3D? mesh, RenderTarget? renderTarget, WebGLRenderer? renderer, Scene? scene}){
+      if(renderType == RenderType.before){
+        render(renderer,scene,camera!);
+      }
+    };
+    customRender = ({Camera? camera, BufferGeometry? geometry, Map<String, dynamic>? group, Material? material, Object3D? mesh, RenderTarget? renderTarget, WebGLRenderer? renderer, Scene? scene}){
+      if(renderType == RenderType.custom){
+        render(renderer,scene,camera!);
+      }
+    };
 	}
 
   WebGLRenderTarget getRenderTarget() {

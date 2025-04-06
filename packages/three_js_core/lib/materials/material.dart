@@ -232,7 +232,7 @@ class Material with EventDispatcher {
   double _transmission = 0.0;
   double get transmission => _transmission;
   set transmission(double value) {
-    if ((_transmission > 0) != (value > 0)) {
+    if (_transmission > 0 != value > 0) {
       version++;
     }
 
@@ -625,7 +625,7 @@ class Material with EventDispatcher {
     }else if(key == ''){
 
     }else if (key == 'emissiveIntensity') {
-      emissiveIntensity = newValue;
+      emissiveIntensity = newValue.toDouble();
     }
     else {
       console.error("Material.setValues key: $key newValue: $newValue is not support");

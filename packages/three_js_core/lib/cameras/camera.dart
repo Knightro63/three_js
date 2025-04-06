@@ -56,6 +56,7 @@ class Camera extends Object3D {
 
   CameraView? view;//Map<String, dynamic>? view;
   Vector4? viewport;
+  int coordinateSystem = 2000;
 
   /// Creates a new [name]. Note that this class is not intended to be called
   /// directly; you probably want a [PerspectiveCamera] or

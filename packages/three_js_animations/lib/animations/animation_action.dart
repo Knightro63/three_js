@@ -235,13 +235,13 @@ class AnimationAction {
   /// Increases the [page:.weight weight] of this action gradually from `0` to
   /// `1`, within the passed time interval. This method can be chained.
   AnimationAction fadeIn(num duration) {
-    return _scheduleFading(duration, 0, 1);
+    return scheduleFading(duration, 0, 1);
   }
 
   /// Decreases the [weight] of this action gradually from `1` to
   /// `0`, within the passed time interval. This method can be chained.
   AnimationAction fadeOut(num duration) {
-    return _scheduleFading(duration, 1, 0);
+    return scheduleFading(duration, 1, 0);
   }
 
   /// Causes this action to [fadeIn], fading out another action
@@ -253,7 +253,7 @@ class AnimationAction {
   /// 
   /// Note: Like with `fadeIn`/`fadeOut`, the fading starts/ends with a weight
   /// of `1`.
-  AnimationAction crossFadeFrom(AnimationAction fadeOutAction, num duration, bool warp) {
+  AnimationAction crossFadeFrom(AnimationAction fadeOutAction, num duration, [bool warp = false]) {
     fadeOutAction.fadeOut(duration);
     fadeIn(duration);
 
@@ -476,6 +476,7 @@ class AnimationAction {
       final interpolant = _weightInterpolant;
       if (interpolant != null) {
         final interpolantValues = interpolant.evaluate(time);
+        //TODO
         final interpolantValue = interpolantValues != null && interpolantValues.isNotEmpty?interpolantValues[0]:0.0;
 
         weight *= interpolantValue;
@@ -687,7 +688,7 @@ class AnimationAction {
     }
   }
 
-  AnimationAction _scheduleFading(num duration, num weightNow, num weightThen) {
+  AnimationAction scheduleFading(num duration, num weightNow, num weightThen) {
     final AnimationMixer mixer = this.mixer;
     final num now = mixer.time;
     Interpolant? interpolant = _weightInterpolant;
