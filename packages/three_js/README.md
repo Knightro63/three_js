@@ -63,6 +63,7 @@ Find the example for this API [here](https://github.com/Knightro63/three_js/tree
  - PMREM gives weird artifacts
 
 **MacOS**
+ - Audio has a [bug](https://github.com/bluefireteam/audioplayers/issues/1296)
 
 **iOS**
  - Protoplanets does not function correctly
@@ -76,6 +77,7 @@ Find the example for this API [here](https://github.com/Knightro63/three_js/tree
 **Web**
  - Lens Flare not working correctly
  - Postprocessing does not work
+ - Track pad has some bugs
 
 ## Librarues and Plugins
 

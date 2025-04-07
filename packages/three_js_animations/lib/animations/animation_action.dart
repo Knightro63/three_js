@@ -468,6 +468,7 @@ class AnimationAction {
     }
   }
 
+
   double _updateWeight(num time) {
     double weight = 0;
 
@@ -476,7 +477,6 @@ class AnimationAction {
       final interpolant = _weightInterpolant;
       if (interpolant != null) {
         final interpolantValues = interpolant.evaluate(time);
-        //TODO
         final interpolantValue = interpolantValues != null && interpolantValues.isNotEmpty?interpolantValues[0]:0.0;
 
         weight *= interpolantValue;
@@ -505,7 +505,7 @@ class AnimationAction {
 
       if (interpolant != null) {
         final interpolantValues = interpolant.evaluate(time);
-        final interpolantValue = interpolantValues != null && interpolantValues.isNotEmpty?interpolantValues[0]:0;
+        final interpolantValue = interpolantValues != null && interpolantValues.isNotEmpty?interpolantValues[0]:0.0;
 
         timeScale *= interpolantValue;
 
@@ -558,7 +558,6 @@ class AnimationAction {
           time = 0;
         } else {
           this.time = time;
-
           break handle_stop;
         }
 
@@ -586,7 +585,6 @@ class AnimationAction {
 
         if (deltaTime >= 0) {
           loopCount = 0;
-
           _setEndings(true, repetitions == 0, pingPong);
         } 
         else {
@@ -625,7 +623,8 @@ class AnimationAction {
               direction: deltaTime > 0 ? 1 : -1
             )
           );
-        } else {
+        } 
+        else {
           // keep running
 
           if (pending == 1) {
@@ -673,15 +672,13 @@ class AnimationAction {
       // assuming for LoopOnce atStart == atEnd == true
 
       if (atStart) {
-        settings["endingStart"] =
-            zeroSlopeAtStart ? ZeroSlopeEnding : ZeroCurvatureEnding;
+        settings["endingStart"] = zeroSlopeAtStart ? ZeroSlopeEnding : ZeroCurvatureEnding;
       } else {
         settings["endingStart"] = WrapAroundEnding;
       }
 
       if (atEnd) {
-        settings["endingEnd"] =
-            zeroSlopeAtEnd ? ZeroSlopeEnding : ZeroCurvatureEnding;
+        settings["endingEnd"] = zeroSlopeAtEnd ? ZeroSlopeEnding : ZeroCurvatureEnding;
       } else {
         settings["endingEnd"] = WrapAroundEnding;
       }

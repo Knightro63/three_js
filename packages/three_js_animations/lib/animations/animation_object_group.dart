@@ -45,6 +45,8 @@ class AnimationObjectGroup {
   late Map<String,int> _bindingsIndicesByPath;
   List<Mesh> _objects = [];
 
+  late Map<String,dynamic> stats;
+
   /// [items] - an arbitrary number of meshes that share the same
 	/// animation state.
   AnimationObjectGroup(List<Mesh>? items) {
@@ -63,6 +65,20 @@ class AnimationObjectGroup {
     _parsedPaths = []; // inside: { we don't care, here }
     _bindings = []; // inside: Array< PropertyBinding >
     _bindingsIndicesByPath = {}; // inside: indices in these arrays
+
+		stats = {
+			'objects': {
+				'total': () {
+					return _objects.length;
+				},
+				'inUse': () {
+					return _objects.length - nCachedObjects_;
+				}
+			},
+			'bindingsPerObject': () {
+				return _bindings.length;
+			}
+		};
   }
 
   /// Adds an arbitrary number of objects to this `AnimationObjectGroup`.

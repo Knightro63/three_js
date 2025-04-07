@@ -83,8 +83,8 @@ class _State extends State<WebglAnimationSkinningAdditiveBlending> {
     'run': <String,dynamic>{ 'weight': 0.0  }
   };
   final Map<String,dynamic> additiveActions = {
-    'sneak_pose': <String,dynamic>{ 'weight': 0.0  },
-    'sad_pose': <String,dynamic>{ 'weight': 0.0  },
+    //'sneak_pose': <String,dynamic>{ 'weight': 0.0  },
+    //'sad_pose': <String,dynamic>{ 'weight': 0.0  },
     'agree': <String,dynamic>{ 'weight': 0.0  },
     'headShake': <String,dynamic>{ 'weight': 0.0  }
   };
@@ -158,18 +158,17 @@ class _State extends State<WebglAnimationSkinningAdditiveBlending> {
         allActions.add( action );
 
       } 
-      else if ( additiveActions[ name ] != null) {
+      else if ( additiveActions[ name ] != null && !clip.name.endsWith( '_pose' )) {
         // Make the clip additive and remove the reference frame
-        // three.AnimationUtils().makeClipAdditive( clip );
+        three.AnimationUtils.makeClipAdditive( clip );
+        if ( clip.name.endsWith( '_pose' ) ) {
+          clip = three.AnimationUtils.subclip( clip, clip.name, 2, 3);
+        }
 
-        // if ( clip.name.endsWith( '_pose' ) ) {
-        //   clip = three.AnimationUtils().subclip( clip, clip.name, 2, 3);
-        // }
-
-        // final action = mixer.clipAction( clip );
-        // activateAction( action! );
-        // additiveActions[ name ]['action'] = action;
-        // allActions.add( action );
+        final action = mixer.clipAction( clip );
+        activateAction( action! );
+        additiveActions[ name ]['action'] = action;
+        allActions.add( action );
       }
     }
 
@@ -189,7 +188,7 @@ class _State extends State<WebglAnimationSkinningAdditiveBlending> {
 
   void createPanel() {
     final folder1 = panel.addFolder( 'Base Actions' );
-    //final folder2 = panel.addFolder( 'Additive Action Weights' );
+    final folder2 = panel.addFolder( 'Additive Action Weights' );
     final folder3 = panel.addFolder( 'General Speed' );
 
     panelSettings = {
@@ -216,19 +215,19 @@ class _State extends State<WebglAnimationSkinningAdditiveBlending> {
       crossFadeControls.add(folder1.addFunction(name)..onFinishChange(panelSettings[ name ]));
     }
 
-    // for (final name in additiveActions.keys ) {
-    //   final settings = additiveActions[ name ];
-    //   panelSettings[name] = settings!['weight'];
-    //   folder2.addSlider( panelSettings, name, 0.0, 1.0 )..step(0.01 )..onChange(( weight ) {
-    //     setWeight( settings['action'], weight);
-    //     settings['weight'] = weight;
-    //   });
-    // }
+    for (final name in additiveActions.keys ) {
+      final settings = additiveActions[ name ];
+      panelSettings[name] = settings!['weight'];
+      folder2.addSlider( panelSettings, name, 0.0, 1.0 )..step(0.01 )..onChange(( weight ) {
+        setWeight( settings['action'], weight);
+        settings['weight'] = weight;
+      });
+    }
 
     folder3.addSlider(panelSettings, 'modify time', 0.0, 1.5)..step(0.01 )..onChange( (x){return modifyTimeScale(x);} );
 
     folder1.open();
-    //folder2.open();
+    folder2.open();
     folder3.open();
   }
 
@@ -244,7 +243,6 @@ class _State extends State<WebglAnimationSkinningAdditiveBlending> {
   }
 
   void prepareCrossFade(three.AnimationAction? startAction, three.AnimationAction? endAction, double duration ) {
-    print("Action: $startAction, $endAction, $duration");
     // If the current action is 'idle', execute the crossfade immediately;
     // else wait until the current action has finished its current loop
 
@@ -280,23 +278,16 @@ class _State extends State<WebglAnimationSkinningAdditiveBlending> {
   void executeCrossFade(three.AnimationAction? startAction,three.AnimationAction? endAction,double duration ) {
     // Not only the start action, but also the end action must get a weight of 1 before fading
     // (concerning the start action this is already guaranteed in this place)
-
     if ( endAction != null) {
       setWeight( endAction, 1 );
-      endAction.time = 0;
-
       if ( startAction != null) {
-        // Crossfade with warping
         startAction.crossFadeTo( endAction, duration, false );
       } 
       else {
-        print('here');
-        // Fade in
         endAction.fadeIn( duration );
       }
     } 
     else {
-      // Fade out
       startAction?.fadeOut( duration );
     }
   }

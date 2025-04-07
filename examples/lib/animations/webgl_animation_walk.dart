@@ -169,7 +169,7 @@ class _State extends State<WebglAnimationWalk> {
     const size = 50.0;
     const repeat = 16.0;
     
-    final pointLight = three.PointLight( 0xffffff, 0.15 );
+    final pointLight = three.PointLight( 0xffffff, 0.05 );
     threeJs.camera.add( pointLight );
     threeJs.scene.add(threeJs.camera);
     threeJs.camera.lookAt(threeJs.scene.position);
@@ -211,7 +211,7 @@ class _State extends State<WebglAnimationWalk> {
 
     final bulbMat = three.MeshStandardMaterial.fromMap( { 
       'emissive': 0xffffee, 
-      'emissiveIntensity': 20.0, 
+      'emissiveIntensity': 1.0, 
       'color': 0x000000 
     } );
     bulbLight.add( three.Mesh( bulbGeometry, bulbMat ) );
@@ -221,8 +221,8 @@ class _State extends State<WebglAnimationWalk> {
   }
 
   Future<void> loadModel() async{
-    final loader = three.GLTFLoader();
-    await loader.fromAsset( 'assets/models/gltf/Soldier.gltf').then(( gltf ) {
+    final loader = three.GLTFLoader().setPath('assets/models/gltf/Soldier/');
+    await loader.fromAsset( 'Soldier.gltf').then(( gltf ) {
       model = gltf!.scene;
       group.add( model );
       model.rotation.y = math.pi;
@@ -257,7 +257,6 @@ class _State extends State<WebglAnimationWalk> {
       createPanel();
 
       final animations = gltf.animations;
-
       mixer = three.AnimationMixer( model );
 
       actions = {
@@ -317,7 +316,7 @@ class _State extends State<WebglAnimationWalk> {
     }
 
     // move object
-
+    model.rotation.x = 0;
     if ( controls.current != 'Idle' ) {
       // run/walk velocity
       final velocity = controls.current == 'Run' ? controls.runVelocity : controls.walkVelocity;
@@ -349,8 +348,7 @@ class _State extends State<WebglAnimationWalk> {
     }
 
     mixer.update( delta );
-    orbitControls.update();
-    model.rotation.x = 0;
+    //orbitControls.update();
   }
 
   double unwrapRad(double r ) {
@@ -384,7 +382,7 @@ class _State extends State<WebglAnimationWalk> {
 	}
 	void onKeyUp( event ) {
     final key = controls.key;
-    switch ( event.toString().replaceAll(' ', '')) {
+    switch ( event.debugName.toString().replaceAll(' ', '')) {
       case 'ArrowUp': case 'KeyW': case 'KeyZ': key[ 0 ] = key[ 0 ] < 0 ? 0 : key[ 0 ]; break;
       case 'ArrowDown': case 'KeyS': key[ 0 ] = key[ 0 ] > 0 ? 0 : key[ 0 ]; break;
       case 'ArrowLeft': case 'KeyA': case 'KeyQ': key[ 1 ] = key[ 1 ] < 0 ? 0 : key[ 1 ]; break;

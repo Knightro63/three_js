@@ -56,8 +56,7 @@ class AnimationClip {
 
     for (int i = 0, n = tracks.length; i != n; ++i) {
       final track = this.tracks[i];
-
-      duration = math.max(duration, track.times[track.times.length - 1]);
+      duration = math.max(duration, track.times.last);
     }
 
     this.duration = duration;
@@ -210,7 +209,7 @@ class AnimationClip {
 	/// overridden in an `AnimationAction` via [animationAction.setDuration].
   static List<AnimationClip> createClipsFromMorphTargetSequences(List<MorphTarget> morphTargets, int fps, [bool noLoop = false]) {
     final Map<String,List<MorphTarget>> animationToMorphTargets = {};
-
+    //TODO
     // tested with https://regex101.com/ on trick sequences
     // such flamingo_flyA_003, flamingo_run1_003, crdeath0059
     RegExp pattern = RegExp(r"^([\w-]*?)([\d]+)$");
@@ -242,6 +241,7 @@ class AnimationClip {
   }
 
   // parse the animation.hierarchy format
+  @Deprecated('parseAnimation() is deprecated and will be removed with r185')
   static AnimationClip? parseAnimation(Map<String,dynamic>? animation, bones) {
     if (animation == null) {
       console.warning('AnimationClip: No animation in JsonLoader data.');
@@ -254,7 +254,7 @@ class AnimationClip {
         final List<double> times = [];
         final List<double> values = [];
 
-        //AnimationUtils.flattenJSON(animationKeys, times, values, propertyName);
+        AnimationUtils.flattenJSON(animationKeys, times, values, propertyName);
 
         // empty keys are filtered out, so check again
         if (times.isNotEmpty) {
@@ -349,13 +349,15 @@ class AnimationClip {
   }
 }
 
-String getTrackTypeForValueTypeName(typeName) {
+String getTrackTypeForValueTypeName(String typeName) {
   switch (typeName.toLowerCase()) {
     case 'scalar':
     case 'double':
     case 'float':
     case 'number':
     case 'integer':
+    case 'int':
+    case 'num':
       return "NumberKeyframeTrack";
 
     case 'vector':
@@ -392,7 +394,7 @@ KeyframeTrack parseKeyframeTrack(Map<String,dynamic> json) {
     final List<num> times = [];
     final List<num> values = [];
 
-    //AnimationUtils.flattenJSON(json.keys.toList(), times, values, 'value');
+    AnimationUtils.flattenJSON(json.keys.toList(), times, values, 'value');
 
     json['times'] = times;
     json['values'] = values;
@@ -407,23 +409,17 @@ KeyframeTrack parseKeyframeTrack(Map<String,dynamic> json) {
   // }
 
   if (trackType == "NumberKeyframeTrack") {
-    return NumberKeyframeTrack(
-        json['name'], json['times'], json['values'], json['interpolation']);
+    return NumberKeyframeTrack(json['name'], json['times'], json['values'], json['interpolation']);
   } else if (trackType == "VectorKeyframeTrack") {
-    return VectorKeyframeTrack(
-        json['name'], json['times'], json['values'], json['interpolation']);
+    return VectorKeyframeTrack(json['name'], json['times'], json['values'], json['interpolation']);
   } else if (trackType == "ColorKeyframeTrack") {
-    return ColorKeyframeTrack(
-        json['name'], json['times'], json['values'], json['interpolation']);
+    return ColorKeyframeTrack(json['name'], json['times'], json['values'], json['interpolation']);
   } else if (trackType == "QuaternionKeyframeTrack") {
-    return QuaternionKeyframeTrack(
-        json['name'], json['times'], json['values'], json['interpolation']);
+    return QuaternionKeyframeTrack(json['name'], json['times'], json['values'], json['interpolation']);
   } else if (trackType == "BooleanKeyframeTrack") {
-    return BooleanKeyframeTrack(
-        json['name'], json['times'], json['values'], json['interpolation']);
+    return BooleanKeyframeTrack(json['name'], json['times'], json['values'], json['interpolation']);
   } else if (trackType == "StringKeyframeTrack") {
-    return StringKeyframeTrack(
-        json['name'], json['times'], json['values'], json['interpolation']);
+    return StringKeyframeTrack(json['name'], json['times'], json['values'], json['interpolation']);
   } else {
     throw ("AnimationClip.parseKeyframeTrack trackType: $trackType ");
   }
