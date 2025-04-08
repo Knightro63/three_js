@@ -1047,7 +1047,7 @@ class Material with EventDispatcher {
     if (propertyName == "color") {
       color = value;
     } else if (propertyName == "opacity") {
-      opacity = value;
+      opacity = value.toDouble();
     } else if (propertyName == "emissive") {
       emissive = value;
     } else if (propertyName == "flatShading") {
@@ -1069,9 +1069,9 @@ class Material with EventDispatcher {
     } else if (propertyName == "side") {
       side = value;
     } else if (propertyName == "roughness") {
-      roughness = value;
+      roughness = value.toDouble();
     } else if (propertyName == "metalness") {
-      metalness = value;
+      metalness = value.toDouble();
     } else {
       throw ("Material.setProperty type: $type propertyName: $propertyName is not support ");
     }

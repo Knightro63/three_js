@@ -66,7 +66,8 @@ class ThreeJS {
     required this.setup,
     Size? size,
     core.WebGLRenderer? renderer,
-    this.texture
+    this.texture,
+    this.loadingWidget,
   }){
     this.settings = settings ?? Settings();
     _size = size;
@@ -74,6 +75,7 @@ class ThreeJS {
   }
 
   //bool _allowDeleteTexture = true;
+  Widget? loadingWidget;
   Size? _size;
   late Settings settings;
   final GlobalKey<core.PeripheralsState> globalKey = GlobalKey<core.PeripheralsState>();
@@ -315,14 +317,26 @@ class ThreeJS {
             child: SizeChangedLayoutNotifier(
               child: Builder(builder: (BuildContext context) {
                   if (kIsWeb) {
-                    return texture != null? HtmlElementView(viewType:texture!.textureId.toString()):Container();
+                    return texture != null && mounted? HtmlElementView(viewType:texture!.textureId.toString()):loadingWidget ?? Container(
+                      width: MediaQuery.of(context).size.width,
+                      height: MediaQuery.of(context).size.height,
+                      color: Theme.of(context).canvasColor,
+                      alignment: Alignment.center,
+                      child: const CircularProgressIndicator()
+                    );
                   } 
                   else {
-                    return texture != null?
+                    return texture != null && mounted?
                       Transform.scale(
                         scaleY: sourceTexture != null || Platform.isAndroid?1:-1,
                         child:Texture(textureId: texture!.textureId)
-                      ):Container();
+                      ):loadingWidget ?? Container(
+                        width: MediaQuery.of(context).size.width,
+                        height: MediaQuery.of(context).size.height,
+                        color: Theme.of(context).canvasColor,
+                        alignment: Alignment.center,
+                        child: const CircularProgressIndicator()
+                      );
                   }
                 })
               )

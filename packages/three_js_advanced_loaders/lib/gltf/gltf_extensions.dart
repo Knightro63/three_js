@@ -680,28 +680,26 @@ class GLTFTextureWebPExtension extends GLTFExtension {
     loadTexture = loadTexture2;
   }
 
-  Future<Texture?>? loadTexture2(textureIndex) {
+  Future<Texture?>? loadTexture2(int textureIndex) {
     final name = this.name;
     final parser = this.parser;
     Map<String, dynamic> json = parser.json;
-
     Map<String, dynamic> textureDef = json["textures"][textureIndex];
 
-    if (textureDef["extensions"] == null ||
-        textureDef["extensions"][name] == null) {
+    if (textureDef["extensions"] == null || textureDef["extensions"][name] == null) {
       return null;
     }
 
     final exten = textureDef["extensions"][name];
     final source = json["images"][exten["source"]];
-    final loader = source.uri
-        ? parser.options['manager'].getHandler(source.uri)
+    final loader = source['uri'] != null
+        ? parser.options['manager'].getHandler(source['uri']) ?? parser.textureLoader
         : parser.textureLoader;
 
     final isSupported = detectSupport();
 
     if (isSupported){
-      return parser.loadTextureImage(textureIndex, source, loader);
+      return parser.loadTextureImage(textureIndex, exten["source"], loader);
     }
 
     if (json["extensionsRequired"] != null &&

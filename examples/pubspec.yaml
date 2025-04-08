@@ -121,6 +121,7 @@ flutter:
     - assets/models/gltf/ShaderBall2/
     - assets/models/gltf/ferrari/
     - assets/models/gltf/Soldier/
+    - assets/models/gltf/Dungon_Warkarma/
     - assets/models/svg/
     - assets/models/fbx/
     - assets/textures/

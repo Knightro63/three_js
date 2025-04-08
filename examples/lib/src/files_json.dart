@@ -1,4 +1,5 @@
 const List<String> filesJson = [
+  'webgl_periodictable',
   'timing',
   'orientation',
   'sandbox',
@@ -81,6 +82,7 @@ const List<String> filesJson = [
   "webgl_materials_physical_transmission",
   "webgl_materials_physical_transmission_alpha",
   'webgl_materials_car',
+  //'flutter_material',
   "webgl_animation_skinning_blending",
   "webgl_animation_skinning_additive_blending",
   "webgl_animation_skinning_morph",
@@ -129,6 +131,7 @@ const List<String> filesJson = [
   'webgl_random_uv',
   'webgl_refraction',
   'webgl_shaders_ocean',
+  'webgpu_performance',
   //'webgl_ubo_arrays',
   'webxr_vr_rollercoaster',
   'webgl2_multiple_rendertargets',

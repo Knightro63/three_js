@@ -533,17 +533,14 @@ class GLTFParser {
         ? parser.extensions[extensions["MSFT_TEXTURE_DDS"]]["ddsLoader"]
         : textureLoader;
 
-
     return loadTextureImage(textureIndex, sourceIndex, loader);
   }
 
-  Future<Texture?> loadTextureImage(textureIndex, sourceIndex, loader) async {
+  Future<Texture?> loadTextureImage(int textureIndex, int sourceIndex, TextureLoader loader) async {
     final parser = this;
     final json = this.json;
-
-    Map textureDef = json["textures"][textureIndex];
-    Map sourceDef = json["images"][sourceIndex];
-
+    final textureDef = json["textures"][textureIndex];
+    final sourceDef = json["images"][sourceIndex];
     final cacheKey = '${(sourceDef["uri"] ?? sourceDef["bufferView"])}:${textureDef["sampler"]}';
 
     if (textureCache[cacheKey] != null) {

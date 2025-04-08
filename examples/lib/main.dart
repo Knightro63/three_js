@@ -49,6 +49,7 @@ import 'package:example/loaders/webgl_loader_stl.dart';
 import 'package:example/loaders/webgl_loader_usdz.dart';
 import 'package:example/loaders/webgl_loader_vox.dart';
 import 'package:example/loaders/webgl_loader_xyz.dart';
+import 'package:example/texture/webgl_video_texture.dart';
 import 'package:example/material/webgl_materials_car.dart';
 import 'package:example/material/webgl_materials_physical_transmission.dart';
 import 'package:example/multi_views/webgl2_multiple_rendertargets.dart';
@@ -61,6 +62,7 @@ import 'package:example/modifers/webgl_modifer_edgesplit.dart';
 import 'package:example/modifers/webgl_modifier_simplifier.dart';
 import 'package:example/modifers/webgl_modifier_subdivision.dart';
 import 'package:example/multi_views/webgl_multiple_scenes_comparison.dart';
+import 'package:example/others/webgpu_performance.dart';
 import 'package:example/shaders/webgl_random_uv.dart';
 import 'package:example/shaders/webgl_refraction.dart';
 import 'package:example/postprocessing/webgl_postprocessing_unreal_bloom.dart';
@@ -92,6 +94,7 @@ import 'package:example/shadow/webgl_shadowmap_csm.dart';
 import 'package:example/shadow/webgl_shadowmap_pointlight.dart';
 import 'package:example/shadow/webgl_shadowmap_vsm.dart';
 import 'package:example/shadow/webgl_simple_gi.dart';
+import 'package:example/texture/webgl_periodictable.dart';
 import 'package:example/water/webgl_water.dart';
 import 'package:example/volume/webgl_ubo_arrays.dart';
 import 'package:example/volume/webgl_volume_cloud.dart';
@@ -192,6 +195,9 @@ class MyAppState extends State<MyApp> {
                   callback: callback,
                   prevLocation: pageLocation,
                 );
+              },
+              '/webgl_periodictable':(BuildContext context) {
+                return const WebglPeriodictable();
               },
               '/timing':(BuildContext context) {
                 return const AudioTiming();
@@ -430,6 +436,9 @@ class MyAppState extends State<MyApp> {
               '/webgl_materials':(BuildContext context) {
                 return const WebglMaterials();
               },
+              '/flutter_material':(BuildContext context) {
+                return const WebglVideoTexture();
+              },
               '/webgl_materials_car':(BuildContext context) {
                 return const WebglMaterialsCar();
               },
@@ -588,6 +597,9 @@ class MyAppState extends State<MyApp> {
               },
               '/webgl_refraction':(BuildContext context) {
                 return const WebglRefraction();
+              },
+              '/webgpu_performance':(BuildContext context) {
+                return const WebgpuPerformance();
               },
               // '/webgl_nodes_points':(BuildContext context) {
               //   return const WebglNodesPoints();

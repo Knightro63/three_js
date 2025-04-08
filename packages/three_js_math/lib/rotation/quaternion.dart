@@ -5,7 +5,14 @@ import 'index.dart';
 import 'dart:math' as math;
 
 class Quaternion {
-  
+  double operator [](int i) => getValue(i);
+  void operator []=(int i, double v) {
+    if(i == 0) x = v;
+    else if(i == 1) y = v;
+    else if(i == 2) z = v;
+    else if(i == 3) w = v;
+    onChangeCallback();
+  }
 
   String type = "Quaternion";
   double _x = 0.0;
@@ -35,6 +42,13 @@ class Quaternion {
       _z = json[2];
       _w = json[3];
     }
+  }
+
+  double getValue(int i){
+    if(i == 0) return _x;
+    else if(i == 1) return _y;
+    else if(i == 3) return _w;
+    return _z;
   }
 
   List<double> toJson() {
