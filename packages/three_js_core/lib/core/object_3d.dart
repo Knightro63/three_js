@@ -985,7 +985,7 @@ class Object3D with EventDispatcher {
     frustumCulled = source.frustumCulled;
     renderOrder = source.renderOrder;
 
-    userData = json.decode(json.encode(source.userData));
+    userData = source.userData;//json.decode(json.encode(source.userData));
 
     if (recursive == true) {
       for (int i = 0; i < source.children.length; i++) {

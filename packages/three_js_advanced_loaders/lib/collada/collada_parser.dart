@@ -1535,6 +1535,8 @@ class ColladaParser{
       }
     }
 
+    print(data);
+
     return data;
   }
 
@@ -2617,6 +2619,8 @@ class ColladaParser{
           break;
       }
     }
+
+    print(data);
     return data;
   }
 
@@ -2640,7 +2644,6 @@ class ColladaParser{
           break;
       }
     }
-
     return data;
   }
 

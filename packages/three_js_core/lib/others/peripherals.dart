@@ -297,7 +297,7 @@ class WebPointerEvent {
     final wpe = WebPointerEvent();
 
     wpe.pointerId = 512;
-    wpe.pointerType = 'mouse';
+    wpe.pointerType = 'touch_pad';
     wpe.button = 0;
 
     RenderBox getBox = context.findRenderObject() as RenderBox;
