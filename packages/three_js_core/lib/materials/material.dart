@@ -576,6 +576,9 @@ class Material with EventDispatcher {
     } else if (key == "shadowSide") {
       shadowSide = newValue;
     }
+    else if(key == "bumpMap"){
+      bumpMap = newValue;
+    }
     else if (key == "envMap") {
       envMap = newValue;
     }

@@ -1,0 +1,37 @@
+name: solar_system
+description: "A new Flutter project."
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.7.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  three_js: ^0.0.5
+  three_js_geometry: ^0.0.2
+  css:
+    git:
+      url: https://github.com/Knightro63/css.git
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+dependency_overrides:
+  three_js_core:
+    path: ../packages/three_js_core
+  three_js_math:
+    path: ../packages/three_js_math
+  three_js_controls:
+    path: ../packages/three_js_controls
+  flutter_angle: ^0.1.0
+  
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/Planets/
+    - assets/stars/
