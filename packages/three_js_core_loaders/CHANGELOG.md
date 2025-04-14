@@ -4,10 +4,6 @@
 * Updated to newest version of three_js core and math.
 * Converted from html to web packages.
 
-## 0.0.3
-
-* Updated to newest version of three_js core and math.
-
 ## 0.0.2
 
 * Fixed loading from network.
