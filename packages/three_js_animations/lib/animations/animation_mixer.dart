@@ -32,6 +32,8 @@ class AnimationMixer with EventDispatcher {
 
   final _controlInterpolantsResultBuffer = List<num>.filled(1, 0);
 
+  Map<String,dynamic>? stats;
+
   /// [rootObject] - the object whose animations shall be played
 	/// by this mixer.
   AnimationMixer(this.root) {
@@ -75,11 +77,11 @@ class AnimationMixer with EventDispatcher {
 
           continue;
         }
-
+        //TODO
+        //final path = prototypeAction?.propertyBindings[i]?.binding.parsedPath ?? prototypeAction;
         final path = prototypeAction != null
             ? prototypeAction.propertyBindings[i]?.binding.parsedPath
             : null;
-
         binding = PropertyMixer(
             PropertyBinding.create(root, trackName, path) as PropertyBinding,
             track.valueTypeName,
@@ -105,7 +107,7 @@ class AnimationMixer with EventDispatcher {
             clipUuid = action.clip.uuid,
             actionsForClip = actionsByClip[clipUuid];
 
-        _bindAction(action, actionsForClip ?? actionsForClip.knownActions[0]);
+        _bindAction(action, actionsForClip.knownActions[0] ?? actionsForClip);
         _addInactiveAction(action, clipUuid, rootUuid);
       }
 
@@ -158,6 +160,33 @@ class AnimationMixer with EventDispatcher {
 
     _controlInterpolants = []; // same game as above
     _nActiveControlInterpolants = 0;
+
+		stats = {
+			'actions': {
+				'total': () {
+					return _actions.length;
+				},
+				'inUse': () {
+					return _nActiveActions;
+				}
+			},
+			'bindings': {
+				'total': () {
+					return bindings.length;
+				},
+				'inUse': () {
+					return _nActiveBindings;
+				}
+			},
+			'controlInterpolants': {
+				'total': () {
+					return _controlInterpolants.length;
+				},
+				'inUse': () {
+					return _nActiveControlInterpolants;
+				}
+			}
+		};
   }
 
   // Memory management for AnimationAction objects
@@ -208,12 +237,12 @@ class AnimationMixer with EventDispatcher {
 
     action.cacheIndex = null;
 
-    final clipUuid = action.clip.uuid,
-        actionsByClip = this.actionsByClip,
-        actionsForClip = actionsByClip[clipUuid],
-        knownActionsForClip = actionsForClip.knownActions,
-        lastKnownAction = knownActionsForClip[knownActionsForClip.length - 1],
-        byClipCacheIndex = action.byClipCacheIndex;
+    final clipUuid = action.clip.uuid;
+    final actionsByClip = this.actionsByClip;
+    final actionsForClip = actionsByClip[clipUuid];
+    final knownActionsForClip = actionsForClip.knownActions;
+    final lastKnownAction = knownActionsForClip[knownActionsForClip.length - 1];
+    final byClipCacheIndex = action.byClipCacheIndex;
 
     lastKnownAction.byClipCacheIndex = byClipCacheIndex;
     knownActionsForClip[byClipCacheIndex] = lastKnownAction;
@@ -224,11 +253,9 @@ class AnimationMixer with EventDispatcher {
     Map actionByRoot = actionsForClip.actionByRoot;
     final rootUuid = (action.localRoot ?? root).uuid;
 
-    // delete actionByRoot[ rootUuid ];
     actionByRoot.remove(rootUuid);
 
     if (knownActionsForClip.isEmpty()) {
-      // delete actionsByClip[ clipUuid ];
       actionsByClip.remove(clipUuid);
     }
 
@@ -272,7 +299,6 @@ class AnimationMixer with EventDispatcher {
     //        a        s
     //         <-swap->
     //        s        a
-
     final actions = _actions,
         prevIndex = action.cacheIndex!,
         firstInactiveIndex = --_nActiveActions,
@@ -317,11 +343,9 @@ class AnimationMixer with EventDispatcher {
     bindings[cacheIndex] = lastInactiveBinding;
     bindings.removeLast();
 
-    // delete bindingByName[ trackName ];
     bindingByName?.remove(trackName);
 
     if (bindingByName != null && bindingByName.keys.isEmpty) {
-      // delete bindingsByRoot[ rootUuid ];
       bindingsByRoot.remove(rootUuid);
     }
   }
@@ -358,7 +382,7 @@ class AnimationMixer with EventDispatcher {
     final interpolants = _controlInterpolants,
         lastActiveIndex = _nActiveControlInterpolants++;
 
-    Interpolant? interpolant = interpolants[lastActiveIndex];
+    Interpolant? interpolant = interpolants.length < lastActiveIndex?interpolants[lastActiveIndex]:null;
 
     if (interpolant == null) {
       console.info(" AnimationMixer LinearInterpolant init todo");
@@ -366,7 +390,7 @@ class AnimationMixer with EventDispatcher {
           List<num>.filled(2, 0), 1, _controlInterpolantsResultBuffer);
 
       interpolant.cachedIndex = lastActiveIndex;
-      interpolants[lastActiveIndex] = interpolant;
+      interpolants.listSetter(lastActiveIndex,interpolant);
     }
 
     return interpolant;
@@ -379,10 +403,10 @@ class AnimationMixer with EventDispatcher {
         lastActiveInterpolant = interpolants[firstInactiveIndex];
 
     interpolant.cachedIndex = firstInactiveIndex;
-    interpolants[firstInactiveIndex] = interpolant;
+    interpolants.listSetter(firstInactiveIndex, interpolant);
 
-    lastActiveInterpolant._cacheIndex = prevIndex;
-    interpolants[prevIndex] = lastActiveInterpolant;
+    lastActiveInterpolant.cachedIndex = prevIndex;
+    interpolants.listSetter(prevIndex, lastActiveInterpolant);
   }
 
   // return an action for a clip optionally using a custom root target
@@ -549,8 +573,7 @@ class AnimationMixer with EventDispatcher {
 
         deactivateAction(action);
 
-        final cacheIndex = action.cacheIndex!,
-            lastInactiveAction = actions[actions.length - 1];
+        final cacheIndex = action.cacheIndex!, lastInactiveAction = actions[actions.length - 1];
 
         action.cacheIndex = null;
         action.byClipCacheIndex = null;
@@ -562,7 +585,6 @@ class AnimationMixer with EventDispatcher {
         _removeInactiveBindingsForAction(action);
       }
 
-      // delete actionsByClip[ clipUuid ];
       actionsByClip.remove(clipUuid);
     }
   }

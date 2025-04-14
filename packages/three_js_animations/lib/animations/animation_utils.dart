@@ -20,14 +20,6 @@ class AnimationUtils {
 
   /// Converts an array to a specific type.
   static List<num> convertArray(List<num> array, String type, [bool forceClone = false]) {
-    // final 'null' and 'null' pass
-    // if (array == null || !forceClone && array.runtimeType.toString() == type) {
-    //   return array;
-    // }
-
-    // if (array is TypedData && type == 'List<num>') {
-    //   return array;
-    // }
     if(!forceClone && type == 'List<num>'){
       return array;
     }
@@ -85,63 +77,62 @@ class AnimationUtils {
 
   // function for parsing AOS keyframe formats
   // this does nothing in Dart
-  // static void flattenJSON(List<String> jsonKeys, List<num> times, List<num> values, String valuePropertyName) {
-    // int i = 1;
-    // String key = jsonKeys[0];
+  static void flattenJSON(List? jsonKeys, List<num> times, List<num> values, String valuePropertyName) {
+    int i = 1;
+    Map? key = jsonKeys?[0];
 
-    // while (key != null && key[valuePropertyName] == null) {
-    //   key = jsonKeys[i++];
-    // }
+    while (key != null && key[valuePropertyName] == null) {
+      key = jsonKeys?[i++];
+    }
 
-    // if (key == null) return; // no data
+    if (key == null) return; // no data
 
-    // final value = key[valuePropertyName];
-    // if (value == null) return; // no data
+    dynamic value = key[valuePropertyName];
+    if (value == null) return; // no data
 
-    // // if ( Array.isArray( value ) ) {
-    // if (value.runtimeType.toString() == "List<num>") {
-    //   do {
-    //     value = key[valuePropertyName];
+    // if ( Array.isArray( value ) ) {
+    if (value.runtimeType == List) {
+      do {
+        value = key?[valuePropertyName];
 
-    //     if (value != null) {
-    //       times.add(key.time);
-    //       values.add.apply(values, value); // push all elements
+        if (value != null) {
+          times.add(key?['time']);
+          values.addAll(value); // push all elements
+        }
 
-    //     }
+        key = jsonKeys?[i++];
+      } while (key != null);
+    } 
+    else if (value.toArray != null) {
+      // ...assume THREE.Math-ish
 
-    //     key = jsonKeys[i++];
-    //   } while (key != null);
-    // } 
-    // else if (value.toArray != null) {
-    //   // ...assume THREE.Math-ish
+      do {
+        value = key?[valuePropertyName];
 
-    //   do {
-    //     value = key[valuePropertyName];
+        if (value != null) {
+          times.add(key?['time']);
+          value.toArray(values, values.length);
+        }
 
-    //     if (value != null) {
-    //       times.add(key.time);
-    //       value.toArray(values, values.length);
-    //     }
+        key = jsonKeys?[i++];
+      } while (key != null);
+    } 
+    else {
+      do {
+        value = key?[valuePropertyName];
 
-    //     key = jsonKeys[i++];
-    //   } while (key != null);
-    // } 
-    // else {
-    //   do {
-    //     value = key[valuePropertyName];
+        if (value != null) {
+          times.add(key?['time']);
+          values.add(value);
+        }
 
-    //     if (value != null) {
-    //       times.add(key.time);
-    //       values.add(value);
-    //     }
-
-    //     key = jsonKeys[i++];
-    //   } while (key != null);
-    // }
-  // }
+        key = jsonKeys?[i++];
+      } while (key != null);
+    }
+  }
 
   /// Creates a new clip, containing only the segment of the original clip between the given frames.
-  AnimationClip subclip(AnimationClip sourceClip, String name, int startFrame, int endFrame, {int fps = 30}) {
+  static AnimationClip subclip(AnimationClip sourceClip, String name, int startFrame, int endFrame, {int fps = 30}) {
     final clip = sourceClip.clone();
 
     clip.name = name;
@@ -169,8 +160,8 @@ class AnimationUtils {
 
       if (times.isEmpty) continue;
 
-      track.times = AnimationUtils.convertArray(times, track.times.runtimeType.toString());
-      track.values = AnimationUtils.convertArray(values, track.values.runtimeType.toString());
+      track.times = times;//AnimationUtils.convertArray(times, track.times.runtimeType.toString());
+      track.values = values;//AnimationUtils.convertArray(values, track.values.runtimeType.toString());
 
       tracks.add(track);
     }
@@ -199,7 +190,7 @@ class AnimationUtils {
   }
 
   /// Converts the keyframes of the given animation clip to an additive format.
-  AnimationClip makeClipAdditive(AnimationClip targetClip,{int referenceFrame = 0, AnimationClip? referenceClip, int fps = 30}) {
+  static AnimationClip makeClipAdditive(AnimationClip targetClip,{int referenceFrame = 0, AnimationClip? referenceClip, int fps = 30}) {
     referenceClip ??= targetClip;
 
     if (fps <= 0) fps = 30;

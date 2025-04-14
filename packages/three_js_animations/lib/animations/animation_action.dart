@@ -235,13 +235,13 @@ class AnimationAction {
   /// Increases the [page:.weight weight] of this action gradually from `0` to
   /// `1`, within the passed time interval. This method can be chained.
   AnimationAction fadeIn(num duration) {
-    return _scheduleFading(duration, 0, 1);
+    return scheduleFading(duration, 0, 1);
   }
 
   /// Decreases the [weight] of this action gradually from `1` to
   /// `0`, within the passed time interval. This method can be chained.
   AnimationAction fadeOut(num duration) {
-    return _scheduleFading(duration, 1, 0);
+    return scheduleFading(duration, 1, 0);
   }
 
   /// Causes this action to [fadeIn], fading out another action
@@ -253,7 +253,7 @@ class AnimationAction {
   /// 
   /// Note: Like with `fadeIn`/`fadeOut`, the fading starts/ends with a weight
   /// of `1`.
-  AnimationAction crossFadeFrom(AnimationAction fadeOutAction, num duration, bool warp) {
+  AnimationAction crossFadeFrom(AnimationAction fadeOutAction, num duration, [bool warp = false]) {
     fadeOutAction.fadeOut(duration);
     fadeIn(duration);
 
@@ -423,15 +423,16 @@ class AnimationAction {
 
     if (startTime != null) {
       // check for scheduled start of action
-
+    
       final timeRunning = (time - startTime) * timeDirection;
       if (timeRunning < 0 || timeDirection == 0) {
-        return; // yet to come / don't decide when delta = 0
+        deltaTime = 0;
       }
-
-      // start
-      _startTime = null; // unschedule
-      deltaTime = timeDirection * timeRunning;
+      else{
+        // start
+        _startTime = null; // unschedule
+        deltaTime = timeDirection * timeRunning;
+      }
     }
 
     // apply time scale and advance time
@@ -467,15 +468,16 @@ class AnimationAction {
     }
   }
 
+
   double _updateWeight(num time) {
     double weight = 0;
 
     if (enabled) {
       weight = this.weight;
       final interpolant = _weightInterpolant;
-
       if (interpolant != null) {
-        int interpolantValue = interpolant.evaluate(time)?[0].toInt();
+        final interpolantValues = interpolant.evaluate(time);
+        final interpolantValue = interpolantValues != null && interpolantValues.isNotEmpty?interpolantValues[0]:0.0;
 
         weight *= interpolantValue;
 
@@ -496,14 +498,14 @@ class AnimationAction {
 
   num _updateTimeScale(num time) {
     num timeScale = 0;
-
     if (!paused) {
       timeScale = this.timeScale;
 
       final interpolant = _timeScaleInterpolant;
 
       if (interpolant != null) {
-        final interpolantValue = interpolant.evaluate(time)?[0];
+        final interpolantValues = interpolant.evaluate(time);
+        final interpolantValue = interpolantValues != null && interpolantValues.isNotEmpty?interpolantValues[0]:0.0;
 
         timeScale *= interpolantValue;
 
@@ -556,7 +558,6 @@ class AnimationAction {
           time = 0;
         } else {
           this.time = time;
-
           break handle_stop;
         }
 
@@ -584,7 +585,6 @@ class AnimationAction {
 
         if (deltaTime >= 0) {
           loopCount = 0;
-
           _setEndings(true, repetitions == 0, pingPong);
         } 
         else {
@@ -623,7 +623,8 @@ class AnimationAction {
               direction: deltaTime > 0 ? 1 : -1
             )
           );
-        } else {
+        } 
+        else {
           // keep running
 
           if (pending == 1) {
@@ -671,22 +672,20 @@ class AnimationAction {
       // assuming for LoopOnce atStart == atEnd == true
 
       if (atStart) {
-        settings["endingStart"] =
-            zeroSlopeAtStart ? ZeroSlopeEnding : ZeroCurvatureEnding;
+        settings["endingStart"] = zeroSlopeAtStart ? ZeroSlopeEnding : ZeroCurvatureEnding;
       } else {
         settings["endingStart"] = WrapAroundEnding;
       }
 
       if (atEnd) {
-        settings["endingEnd"] =
-            zeroSlopeAtEnd ? ZeroSlopeEnding : ZeroCurvatureEnding;
+        settings["endingEnd"] = zeroSlopeAtEnd ? ZeroSlopeEnding : ZeroCurvatureEnding;
       } else {
         settings["endingEnd"] = WrapAroundEnding;
       }
     }
   }
 
-  AnimationAction _scheduleFading(num duration, num weightNow, num weightThen) {
+  AnimationAction scheduleFading(num duration, num weightNow, num weightThen) {
     final AnimationMixer mixer = this.mixer;
     final num now = mixer.time;
     Interpolant? interpolant = _weightInterpolant;
@@ -703,7 +702,6 @@ class AnimationAction {
     values[0] = weightNow;
     times[1] = now + duration;
     values[1] = weightThen;
-
     return this;
   }
 }

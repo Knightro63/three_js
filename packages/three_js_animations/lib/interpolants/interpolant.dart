@@ -49,7 +49,7 @@ class Interpolant {
     if (i1 < pp.length) {
       t1 = pp[i1];
     }
-    if (i1 - 1 >= 0) {
+    if (i1 - 1 >= 0 && i1-1 < pp.length) {
       t0 = pp[i1 - 1];
     }
 
@@ -66,16 +66,16 @@ class Interpolant {
           //-
           //- 				if ( t >= t1 || t1 == null ) {
           forward_scan:
-          if (t1 == null || t >= t1) {
+          if (t1 == null || !(t < t1)) {
             for (int giveUpAt = i1 + 2;;) {
               if (t1 == null) {
-                if (t < t0!) break forward_scan;
+                if (t < (t0 ?? 0)) break forward_scan;
 
                 // after end
 
                 i1 = pp.length;
                 cachedIndex = i1;
-                return afterEnd(i1 - 1, t, t0) ?? [];
+                return copySampleValue(i1 - 1);//, t, t0) ?? [];
               }
 
               if (i1 == giveUpAt) break; // this loop
@@ -120,7 +120,7 @@ class Interpolant {
                 // before start
 
                 cachedIndex = 0;
-                return beforeStart(0, t, t1) ?? [];
+                return copySampleValue(0);//, t, t1) ?? [];
               }
 
               if (i1 == giveUpAt) break; // this loop
@@ -176,13 +176,13 @@ class Interpolant {
 
         if (t0 == null) {
           cachedIndex = 0;
-          return beforeStart(0, t, t1) ?? [];
+          return copySampleValue(0);//, t, t1) ?? [];
         }
 
         if (t1 == null) {
           i1 = pp.length;
           cachedIndex = i1;
-          return afterEnd(i1 - 1, t0, t) ?? [];
+          return copySampleValue(i1 - 1);//, t0, t) ?? [];
         }
       } // seek
 
