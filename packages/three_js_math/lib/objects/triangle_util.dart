@@ -1,11 +1,14 @@
-import './index.dart';
-import '../vector/index.dart';
+import 'package:three_js_math/three_js_math.dart';
 import 'dart:math' as math;
 
 final _v0 = Vector3.zero();
 final _v1 = Vector3.zero();
 final _v2 = Vector3.zero();
 final _v3 = Vector3.zero();
+
+final _v40 = Vector4();
+final _v41 = Vector4();
+final _v42 = Vector4();
 
 extension TriangleUtil on Triangle{
   static Vector3 getNormal(Vector3 a, Vector3 b, Vector3 c, Vector3 target) {
@@ -22,6 +25,24 @@ extension TriangleUtil on Triangle{
     target.setValues(0, 0, 0);
     return target;
   }
+
+	static Vector getInterpolatedAttribute(BufferAttribute attr, int i1, int i2, int i3, Vector3 barycoord, Vector target ) {
+		_v40.setScalar( 0 );
+		_v41.setScalar( 0 );
+		_v42.setScalar( 0 );
+
+		_v40.fromBuffer( attr, i1 );
+		_v41.fromBuffer( attr, i2 );
+		_v42.fromBuffer( attr, i3 );
+
+		target.setScalar( 0 );
+		target.addScaled( _v40, barycoord.x );
+		target.addScaled( _v41, barycoord.y );
+		target.addScaled( _v42, barycoord.z );
+
+		return target;
+	}
+
   static Vector3 getBarycoord(Vector3 point, Vector3 a, Vector3 b, Vector3 c, Vector3 target) {
     _v0.sub2(c, a);
     _v1.sub2(b, a);

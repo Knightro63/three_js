@@ -212,9 +212,41 @@ const P3Primaries = 'p3';
 const GLSL1 = '100';
 const GLSL3 = '300 es';
 const SRGBColorSpace = 'srgb';
-const LinearSRGBColorSpace = 'srgb-linear';
 
 const MAX_SAFE_INTEGER = 9999999999;
 
 const SRGBFormat = 1034; // fallback for WebGL 1
 const SRGBAFormat = 1035; // fallback for WebGL 1
+
+const ConstantColorFactor = 211;
+const OneMinusConstantColorFactor = 212;
+const ConstantAlphaFactor = 213;
+const OneMinusConstantAlphaFactor = 214;
+const AgXToneMapping = 6;
+const NeutralToneMapping = 7;
+const AttachedBindMode = 'attached';
+const DetachedBindMode = 'detached';
+const UnsignedInt5999Type = 35902;
+
+const RGB_BPTC_SIGNED_Format = 36494;
+const RGB_BPTC_UNSIGNED_Format = 36495;
+const RED_RGTC1_Format = 36283;
+const SIGNED_RED_RGTC1_Format = 36284;
+const RED_GREEN_RGTC2_Format = 36285;
+const SIGNED_RED_GREEN_RGTC2_Format = 36286;
+
+const LinearSRGBColorSpace = 'srgb-linear';
+const DisplayP3ColorSpace = 'display-p3';
+const LinearDisplayP3ColorSpace = 'display-p3-linear';
+
+const NeverCompare = 512;
+const LessCompare = 513;
+const EqualCompare = 514;
+const LessEqualCompare = 515;
+const GreaterCompare = 516;
+const NotEqualCompare = 517;
+const GreaterEqualCompare = 518;
+const AlwaysCompare = 519;
+
+const WebGLCoordinateSystem = 2000;
+const WebGPUCoordinateSystem = 2001;

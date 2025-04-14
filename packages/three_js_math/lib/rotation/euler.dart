@@ -38,6 +38,14 @@ class Euler {
   
   static const RotationOrders defaultOrder = RotationOrders.xyz;
 
+  double operator [](int i) => getValue(i);
+  void operator []=(int i, double v) {
+    if(i == 0) x = v;
+    else if(i == 1) y = v;
+    else if(i == 2) z = v;
+    onChangeCallback();
+  }
+
   late double _x;
   late double _y;
   late double _z;
@@ -85,6 +93,12 @@ class Euler {
   set order(RotationOrders value) {
     _order = value;
     onChangeCallback();
+  }
+
+  double getValue(int i){
+    if(i == 0) return _x;
+    else if(i == 1) return _y;
+    return _z;
   }
 
   /// [x] - the angle of the x axis in radians.

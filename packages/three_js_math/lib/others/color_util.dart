@@ -2,7 +2,28 @@ import 'dart:typed_data';
 import 'package:three_js_math/three_js_math.dart';
 import 'dart:math' as math;
 
-enum ColorSpace{linear,srgb}
+enum ColorSpace{
+  no,
+  linear,
+  srgb,
+  dp3,
+  ldp3;
+
+  static ColorSpace fromString(String string){
+    switch (string) {
+      case NoColorSpace:
+        return ColorSpace.no;
+      case SRGBColorSpace:
+        return ColorSpace.srgb;
+      case LinearDisplayP3ColorSpace:
+        return ColorSpace.ldp3;
+      case DisplayP3ColorSpace:
+        return ColorSpace.dp3;
+      default:
+      return ColorSpace.linear;
+    }
+  }
+}
 
 final Color _color = Color();
 
@@ -373,21 +394,55 @@ class Color{
 	}
 }
 
+final lsrgb2ldp3 = Matrix3.identity().setValues(
+	0.8224621, 0.177538, 0.0,
+	0.0331941, 0.9668058, 0.0,
+	0.0170827, 0.0723974, 0.9105199,
+);
+
+final ldp32lsrgb =  Matrix3.identity().setValues(
+	1.2249401, - 0.2249404, 0.0,
+	- 0.0420569, 1.0420571, 0.0,
+	- 0.0196376, - 0.0786361, 1.0982735
+);
+
 // JavaScript RGB-to-RGB transforms, defined as
 // FN[InputColorSpace][OutputColorSpace] callback functions.
-final fn = {
+final fn = <ColorSpace,dynamic>{
 	ColorSpace.srgb: { 
-    ColorSpace.linear: Color.srgbToLinear 
+    ColorSpace.linear: Color.srgbToLinear,
+    'transfer': SRGBTransfer,
+    'primaries': Rec709Primaries,
+		'toReference': (Color color ) => color.convertSRGBToLinear(),
+		'fromReference': (Color color ) => color.convertLinearToSRGB(),
   },
 	ColorSpace.linear: { 
-    ColorSpace.srgb: Color.linearToSRGB 
+    ColorSpace.srgb: Color.linearToSRGB ,
+    'transfer': LinearTransfer,
+    'primaries': Rec709Primaries,
+		'toReference': (Color color ) => color,
+		'fromReference': (Color color ) => color,
+  },
+	ColorSpace.dp3: { 
+    ColorSpace.dp3: Color.srgbToLinear,
+    'transfer': SRGBTransfer,
+    'primaries': P3Primaries,
+		'toReference': (Color color ) => color.convertSRGBToLinear().applyMatrix3( ldp32lsrgb ),
+		'fromReference': (Color color ) => color.applyMatrix3( lsrgb2ldp3 ).convertLinearToSRGB(),
+  },
+	ColorSpace.ldp3: { 
+    ColorSpace.ldp3: Color.linearToSRGB ,
+    'transfer': LinearTransfer,
+    'primaries': P3Primaries,
+		'toReference': (Color color ) => color.applyMatrix3( ldp32lsrgb ),
+		'fromReference': (Color color ) => color.applyMatrix3( lsrgb2ldp3 ),
   },
 };
 
 class ColorManagement {
 	static bool legacyMode = true;
 
-	static get workingColorSpace {
+	static ColorSpace get workingColorSpace {
 		return ColorSpace.linear;
 	}
 
@@ -426,5 +481,14 @@ class ColorManagement {
 
 	static Color toWorkingColorSpace(Color color, ColorSpace? sourceColorSpace){
 		return convert(color, sourceColorSpace, workingColorSpace);
+	}
+
+	static String getPrimaries(ColorSpace colorSpace ) {
+		return fn[colorSpace]['primaries'];
+	}
+
+	static String getTransfer(ColorSpace colorSpace) {
+		if (colorSpace == ColorSpace.no) return LinearTransfer;
+		return fn[colorSpace]!['transfer'];
 	}
 }

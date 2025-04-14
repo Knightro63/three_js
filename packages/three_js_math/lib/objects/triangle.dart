@@ -1,11 +1,9 @@
 import 'dart:math' as math;
-import 'index.dart';
-import '../vector/index.dart';
+import 'package:three_js_math/three_js_math.dart';
 
 class Triangle {
   static final _v0 = Vector3.zero();
   static final _v1 = Vector3.zero();
-  static final _v2 = Vector3.zero();
   static final _v3 = Vector3.zero();
 
   static final _vab = Vector3.zero();
@@ -64,43 +62,13 @@ class Triangle {
     return target.setValues(0, 0, 0);
   }
 
-  // static/instance method to calculate barycentric coordinates
-  // based on: http://www.blackpawn.com/texts/pointinpoly/default.html
-  static Vector3 staticGetBarycoord(Vector3 point, Vector3 a, Vector3 b, Vector3 c, Vector3 target) {
-    _v0.sub2(c, a);
-    _v1.sub2(b, a);
-    _v2.sub2(point, a);
-
-    final dot00 = _v0.dot(_v0);
-    final dot01 = _v0.dot(_v1);
-    final dot02 = _v0.dot(_v2);
-    final dot11 = _v1.dot(_v1);
-    final dot12 = _v1.dot(_v2);
-
-    final denom = (dot00 * dot11 - dot01 * dot01);
-
-    // collinear or singular triangle
-    if (denom == 0) {
-      // arbitrary location outside of triangle?
-      // not sure if this is the best idea, maybe should be returning null
-      return target.setValues(-2, -1, -1);
-    }
-
-    final invDenom = 1 / denom;
-    final u = (dot11 * dot02 - dot01 * dot12) * invDenom;
-    final v = (dot00 * dot12 - dot01 * dot02) * invDenom;
-
-    // barycentric coordinates must always sum to 1
-    return target.setValues(1 - u - v, v, u);
-  }
-
   static bool staticContainsPoint(Vector3 point, Vector3 a, Vector3 b, Vector3 c) {
-    staticGetBarycoord(point, a, b, c, _v3);
+    TriangleUtil.getBarycoord(point, a, b, c, _v3);
     return (_v3.x >= 0) && (_v3.y >= 0) && ((_v3.x + _v3.y) <= 1);
   }
 
   static staticGetUV(Vector3 point, Vector3 p1, Vector3 p2, Vector3 p3, Vector2 uv1, Vector2 uv2, Vector2 uv3, Vector target) {
-    staticGetBarycoord(point, p1, p2, p3, _v3);
+    TriangleUtil.getBarycoord(point, p1, p2, p3, _v3);
 
     target.setValues(0.0, 0.0);
     target.addScaled(uv1, _v3.x);
@@ -196,7 +164,7 @@ class Triangle {
   }
 
   Vector3 getBarycoord(Vector3 point, Vector3 target) {
-    return Triangle.staticGetBarycoord(point, a, b, c, target);
+    return TriangleUtil.getBarycoord(point, a, b, c, target);
   }
 
   dynamic getUV(Vector3 point, Vector2 uv1, Vector2 uv2, Vector2 uv3, Vector target) {

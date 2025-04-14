@@ -24,7 +24,7 @@ class InterleavedBufferAttribute extends BufferAttribute {
 
   @override
   NativeArray get array {
-    return data!.array;
+    return data?.array ?? Uint16Array(0);
   }
 
   @override

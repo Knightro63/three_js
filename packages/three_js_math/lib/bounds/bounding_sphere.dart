@@ -88,6 +88,15 @@ class BoundingSphere{
 		return (radius < 0 );
 	}
 
+	/// Returns `true` if this sphere contains the given point inclusive of
+	/// the surface of the sphere.
+	///
+	/// Vector3 [point] - The point to check.
+	// return bool Whether this sphere contains the given point or not.
+	bool containsPoint(Vector3 point ) {
+		return ( point.distanceToSquared( this.center ) <= ( this.radius * this.radius ) );
+	}
+
   /// Makes the sphere empty by setting [center] to (0, 0, 0) and
   /// [radius] to -1.
   BoundingSphere empty() {
