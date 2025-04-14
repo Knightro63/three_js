@@ -72,10 +72,7 @@ dependency_overrides:
     path: ../packages/three_js_helpers
   three_js_advanced_loaders:
     path: ../packages/three_js_advanced_loaders
-  flutter_angle:
-    path: ../../flutter_angle/flutter_angle
-  flutter_angle_darwin:
-    path: ../../flutter_angle/flutter_angle_darwin
+  flutter_angle: ^0.2.1
 
 flutter:
   uses-material-design: true

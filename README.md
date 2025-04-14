@@ -15,7 +15,7 @@ This is a dart conversion of three.js and three_dart, originally created by [@mr
 ## Requirements
 
 **MacOS**
- - Minimum os Deployment Target: 10.15
+ - Minimum os Deployment Target: 10.14
  - Xcode 13 or newer
  - Swift 5
  - Metal supported
@@ -25,6 +25,9 @@ This is a dart conversion of three.js and three_dart, originally created by [@mr
  - Xcode 13 or newer
  - Swift 5
  - Metal supported
+
+**iOS-Simulator**
+ - No longer supported due to IOSurface issue, please use override to flutter_angle: ^0.1.0 for testing on simulator.
 
 **Android**
  - compileSdkVersion: 34
@@ -38,6 +41,9 @@ This is a dart conversion of three.js and three_dart, originally created by [@mr
 
 **Web**
  - WebGL2 supported
+
+**WASM**
+ - Currently not supported due to WebGL2RenderingContext conversion issue.
 
 **Linux**
  - Unsupported
