@@ -1,6 +1,7 @@
 part of three_webgl;
 
 class WebGLGeometries {
+  bool _didDispose = false;
   RenderingContext gl;
   WebGLAttributes attributes;
   WebGLInfo info;
@@ -21,6 +22,14 @@ class WebGLGeometries {
     for (String name in geometry.attributes.keys) {
       attributes.remove(geometry.attributes[name]);
     }
+
+		for (final name in geometry.morphAttributes.keys) {
+			final array = geometry.morphAttributes[ name ];
+
+			for (int i = 0, l = array.length; i < l; i ++ ) {
+				attributes.remove( array[ i ] );
+			}
+		}
 
     geometry.removeEventListener('dispose', onGeometryDispose);
 
@@ -60,22 +69,8 @@ class WebGLGeometries {
   void update(BufferGeometry geometry) {
     final geometryAttributes = geometry.attributes;
 
-    // Updating index buffer in VAO now. See WebGLBindingStates.
-
     for (final name in geometryAttributes.keys) {
-      attributes.update(geometryAttributes[name], WebGL.ARRAY_BUFFER, name: name);
-    }
-
-    // morph targets
-
-    final morphAttributes = geometry.morphAttributes;
-
-    for (final name in morphAttributes.keys) {
-      final array = morphAttributes[name]!;
-
-      for (int i = 0, l = array.length; i < l; i++) {
-        attributes.update(array[i], WebGL.ARRAY_BUFFER, name: "$name - morphAttributes i: $i");
-      }
+      attributes.update(geometryAttributes[name], WebGL.ARRAY_BUFFER);
     }
   }
 
@@ -97,7 +92,7 @@ class WebGLGeometries {
         indices.addAll([a, b, b, c, c, a]);
       }
     } 
-    else {
+    else if( geometryPosition != null ){
       final array = geometryPosition.array;
       version = geometryPosition.version;
 
@@ -109,14 +104,17 @@ class WebGLGeometries {
         indices.addAll([a, b, b, c, c, a]);
       }
     }
+    else{
+      return;
+    }
 
     BufferAttribute attribute;
     final max = indices.getMaxValue();
     if (max != null && max > 65535) {
-      attribute = Uint32BufferAttribute.fromList(indices, 1, false);
+      attribute = Uint32BufferAttribute.fromList(indices, 1);
     } 
     else {
-      attribute = Uint16BufferAttribute.fromList(indices, 1, false);
+      attribute = Uint16BufferAttribute.fromList(indices, 1);
     }
 
     attribute.version = version;
@@ -125,7 +123,7 @@ class WebGLGeometries {
 
     final previousAttribute = wireframeAttributes.get(geometry);
     if (previousAttribute != null) attributes.remove(previousAttribute);
-    wireframeAttributes.add(key: geometry, value: attribute);
+    wireframeAttributes.set(geometry, attribute);
   }
 
   BufferAttribute<NativeArray<num>>? getWireframeAttribute(BufferGeometry geometry) {
@@ -147,11 +145,16 @@ class WebGLGeometries {
   }
 
   void dispose() {
+    if(_didDispose) return;
+    _didDispose = true;
     for(final key in wireframeAttributes.keys){
       (wireframeAttributes[key] as BufferAttribute).dispose();
     }
 
     wireframeAttributes.clear();
+    geometries.clear();
     attributes.dispose();
+    info.dispose();
+    bindingStates.dispose();
   }
 }

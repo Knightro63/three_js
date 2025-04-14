@@ -18,6 +18,7 @@ class FogExp2 extends FogBase {
   }
 
   /// Returns a new FogExp2 instance with the same parameters as this one.
+  @override
   FogExp2 clone() {
     return FogExp2(color.getHex(), density);
   }

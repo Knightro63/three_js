@@ -38,6 +38,7 @@ class MeshLambertMaterial extends Material {
     color = Color.fromHex32(0xffffff); // diffuse
 
     map = null;
+    envMapRotation = Euler();
 
     lightMap = null;
     lightMapIntensity = 1.0;
@@ -88,6 +89,7 @@ class MeshLambertMaterial extends Material {
 		specularMap = source.specularMap;
 		alphaMap = source.alphaMap;
 		envMap = source.envMap;
+    envMapRotation?.copy(source.envMapRotation!);
 		combine = source.combine;
 		reflectivity = source.reflectivity;
 		refractionRatio = source.refractionRatio;

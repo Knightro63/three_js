@@ -159,6 +159,11 @@ class Raycaster {
 
     return intersects;
   }
+
+  void dispose(){
+    params.clear();
+    camera.dispose();
+  }
 }
 
 class Intersection {
@@ -170,10 +175,10 @@ class Intersection {
   Face? face;
   int? faceIndex;
   Object3D? object;
-  Vector3? normal;
-  Vector3? barycoord;
   Vector2? uv;
   Vector2? uv1;
+  Vector3? normal;
+  Vector3? barycoord;
   Vector2? uv2;
   int batchId;
 
@@ -203,15 +208,15 @@ class Intersection {
     required this.distance,
     this.distanceToRay,
     this.point,
+    this.normal,
     this.index,
     this.face,
     this.faceIndex,
     this.object,
-    this.normal,
-    this.barycoord,
     this.uv,
     this.uv1,
     this.uv2,
+    this.barycoord,
     this.batchId = 0
   });
 
@@ -225,11 +230,11 @@ class Intersection {
       face: json["face"],
       faceIndex: json["faceIndex"],
       object: json["object"],
-      normal: json["normal"],
-      barycoord: json['barycoord'],
       uv: json["uv"],
-      uv1: json["uv1"],
       uv2: json["uv2"],
+      uv1: json['uv1'],
+      normal: json['normal'],
+      barycoord: json['barycoord'],
       batchId: json["batchId"]
     );
   }
@@ -243,13 +248,7 @@ class Face {
   late int materialIndex;
 
   Face(this.a, this.b, this.c, this.normal, this.materialIndex);
-  Face.fromMap({
-    required this.a, 
-    required this.b, 
-    required this.c, 
-    required this.normal,
-    required this.materialIndex
-  });
+
   factory Face.fromJson(Map<String, dynamic> json) {
     return Face(
       json["a"],

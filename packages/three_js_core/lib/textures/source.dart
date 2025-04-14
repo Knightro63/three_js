@@ -8,11 +8,13 @@ class Source {
   dynamic data;
   late int version;
   int currentVersion = 0;
+  bool dataReady = false;
 
   /// [data] -- The data definition of a texture. Default is `null`.
 	Source([this.data]){
     uuid = MathUtils.generateUUID();
     version = 0;
+    dataReady = true;
 	}
 
 	set needsUpdate(bool value ) {

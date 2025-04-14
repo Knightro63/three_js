@@ -22,89 +22,34 @@ final mat2array = Float32List(4);
 
 class SingleUniform with WebGLUniformsHelper {
   late Function setValue;
-  late int activeInfoType;
+  late int type;
   late ActiveInfo activeInfo;
 
   SingleUniform(id, this.activeInfo, UniformLocation addr) {
     this.id = id;
     this.addr = addr;
-    activeInfoType = activeInfo.type;
-    setValue = getSingularSetter(id, activeInfo);
+    cache = {};
+    type = activeInfo.type;
+    setValue = getSingularSetter(activeInfo.type);
   }
-
-  // for DEBUG
-  // setValue( gl, value, textures ) {
-
-  //   String vt = value.runtimeType.toString();
-
-  //   if(vt == "Color" || vt == "Matrix4" || vt == "Vector3" || vt == "Vector2" || vt == "Matrix3") {
-  //     print("SingleUniform. setValue id: ${id} value: ${value.toJson()}  type: ${activeInfo.type} ");
-  //   } else if(value.runtimeType.toString().indexOf("List<") >= 0) {
-  //     final v0 = value[0];
-  //     String v0t = v0.runtimeType.toString();
-  //     if(v0t == "Matrix4" || v0t == "Vector3" || v0t == "Vector2" || v0t == "Matrix3" ) {
-  //       print("SingleUniform. setValue id: ${id} value: ${value.map((e) => e.toJson())}  type: ${activeInfo.type} ");
-  //     } else {
-  //       print("SingleUniform. setValue id: ${id} value: ${value}  type: ${activeInfo.type} ");
-  //     }
-  //   } else {
-  //     print("SingleUniform. setValue id: ${id} value: ${value} type: ${activeInfo.type} ");
-  //   }
-
-  //   Function fn = getSingularSetter( id, activeInfo );
-  //   fn(gl, value, textures);
-  // }
-
-  // this.path = activeInfo.name; // DEBUG
-
 }
 
 class PureArrayUniform with WebGLUniformsHelper {
   late Function setValue;
-  late int activeInfoType;
-  late dynamic activeInfo;
+  late int type;
+  late ActiveInfo activeInfo;
 
   PureArrayUniform(id, this.activeInfo, addr) {
     this.id = id;
     this.addr = addr;
     cache = {};
     size = activeInfo.size;
-    activeInfoType = activeInfo.type;
-    setValue = getPureArraySetter(id, activeInfo, );
+    type = activeInfo.type;
+    setValue = getPureArraySetter(activeInfo.type);
   }
-
-  // for DEBUG
-  // setValue( gl, value, textures ) {
-  //   String vt = value.runtimeType.toString();
-
-  //   if(vt == "Color" || vt == "Matrix4" || vt == "Vector3" || vt == "Vector2" || vt == "Matrix3") {
-  //     print("PureArrayUniform. setValue id: ${id} value: ${value.toJson()} type: ${activeInfo.type}");
-  //   } else if(value.runtimeType.toString().indexOf("List<") >= 0) {
-  //     final v0 = value[0];
-  //     String v0t = v0.runtimeType.toString();
-  //     if(v0t == "Matrix4" || v0t == "Vector3" || v0t == "Vector2" || v0t == "Matrix3") {
-  //       print("PureArrayUniform. setValue id: ${id} value: ${value.map((e) => e.toJson())} type: ${activeInfo.type}");
-  //     } else {
-  //       print("PureArrayUniform. setValue id: ${id} value: ${value} type: ${activeInfo.type}");
-  //     }
-
-  //   } else {
-  //     print("PureArrayUniform. setValue id: ${id} value: ${value} type: ${activeInfo.type}");
-  //   }
-
-  //   Function fn = getPureArraySetter( id, activeInfo );
-  //   fn(gl, value, textures);
-  // }
-
-  // this.path = activeInfo.name; // DEBUG
 
   void updateCache(data) {
     final cache = this.cache;
-
-    // if ( data is Float32Array && cache.length != data.length ) {
-    //   this.cache = Float32Array( data.length );
-    // }
-
     copyArray(cache, data);
   }
 }
@@ -115,8 +60,6 @@ mixin WebGLUniform {
 }
 
 class StructuredUniform with WebGLUniformsHelper, WebGLUniform {
-  late int activeInfoType;
-
   StructuredUniform(id) {
     this.id = id;
     seq = [];
@@ -169,7 +112,7 @@ void parseUniform(ActiveInfo activeInfo, UniformLocation addr, WebGLUniform cont
     final idIsIndex = match.group(2) == ']';
     final subscript = match.group(3);
 
-    if (idIsIndex) id = int.parse(id); // convert to integer
+    if (idIsIndex) id = int.tryParse(id) ?? 0; // convert to integer
 
     final matchEnd = match.end;
 
@@ -202,8 +145,12 @@ mixin WebGLUniformsHelper {
   UniformLocation addr = UniformLocation(0);
   late int size;
 
-  List<double> flatten(List array, int nBlocks, int blockSize) {
-    //if(array.isEmpty) return [];
+  void dispose(){
+    cache.clear();
+  }
+
+  List<double> flatten(List? array, int nBlocks, int blockSize) {
+    if(array == null || array.isEmpty) return [];
     final firstElem = array[0];
 
     if (firstElem is num || firstElem is double || firstElem is int) {
@@ -523,7 +470,7 @@ mixin WebGLUniformsHelper {
   void setValueV2i(RenderingContext gl, Vector v, [WebGLTextures? textures]) {
     final cache = this.cache;
     if (arraysEqual(cache, v)) return;
-    List<int> iv = [v.x.toInt(),v.y.toInt()];
+    Int32List iv = Int32List.fromList([v.x.toInt(),v.y.toInt()]);
     gl.uniform2iv(addr, iv);
     copyArray(cache, v.copyIntoArray());
   }
@@ -551,9 +498,7 @@ mixin WebGLUniformsHelper {
     final cache = this.cache;
 
     if (cache[0] == v) return;
-
     gl.uniform1ui(addr, v);
-
     cache[0] = v;
   }
 
@@ -561,9 +506,7 @@ mixin WebGLUniformsHelper {
     final cache = this.cache;
 
     if (arraysEqual(cache, v)) return;
-
     gl.uniform2uiv(addr, v);
-
     copyArray(cache, v);
   }
 
@@ -571,9 +514,7 @@ mixin WebGLUniformsHelper {
     final cache = this.cache;
 
     if (arraysEqual(cache, v)) return;
-
     gl.uniform3uiv(addr, v);
-
     copyArray(cache, v);
   }
 
@@ -581,54 +522,32 @@ mixin WebGLUniformsHelper {
     final cache = this.cache;
 
     if (arraysEqual(cache, v)) return;
-
     gl.uniform4uiv(addr, v);
-
     copyArray(cache, v);
   }
 
   // Helper to pick the right setter for the singular case
 
-  Function getSingularSetter(id, activeInfo) {
-    final type = activeInfo.type;
+  Function getSingularSetter(int type) {
     switch (type) {
-      case 0x1406:
-        return setValueV1f; // FLOAT
-      case 0x8b50:
-        return setValueV2f; // _VEC2
-      case 0x8b51:
-        return setValueV3f; // _VEC3
-      case 0x8b52:
-        return setValueV4f; // _VEC4
+      case 0x1406: return setValueV1f; // FLOAT
+      case 0x8b50: return setValueV2f; // _VEC2
+      case 0x8b51: return setValueV3f; // _VEC3
+      case 0x8b52: return setValueV4f; // _VEC4
 
-      case 0x8b5a:
-        return setValueM2; // _MAT2
-      case 0x8b5b:
-        return setValueM3; // _MAT3
-      case 0x8b5c:
-        return setValueM4; // _MAT4
+      case 0x8b5a: return setValueM2; // _MAT2
+      case 0x8b5b: return setValueM3; // _MAT3
+      case 0x8b5c: return setValueM4; // _MAT4
 
-      case 0x1404:
-      case 0x8b56:
-        return setValueV1i; // INT, BOOL
-      case 0x8b53:
-      case 0x8b57:
-        return setValueV2i; // _VEC2
-      case 0x8b54:
-      case 0x8b58:
-        return setValueV3i; // _VEC3
-      case 0x8b55:
-      case 0x8b59:
-        return setValueV4i; // _VEC4
+      case 0x1404: case 0x8b56: return setValueV1i; // INT, BOOL
+      case 0x8b53: case 0x8b57: return setValueV2i; // _VEC2
+      case 0x8b54: case 0x8b58: return setValueV3i; // _VEC3
+      case 0x8b55: case 0x8b59: return setValueV4i; // _VEC4
 
-      case 0x1405:
-        return setValueV1ui; // UINT
-      case 0x8dc6:
-        return setValueV2ui; // _VEC2
-      case 0x8dc7:
-        return setValueV3ui; // _VEC3
-      case 0x8dc8:
-        return setValueV4ui; // _VEC4
+      case 0x1405: return setValueV1ui; // UINT
+      case 0x8dc6: return setValueV2ui; // _VEC2
+      case 0x8dc7: return setValueV3ui; // _VEC3
+      case 0x8dc8: return setValueV4ui; // _VEC4
 
       case 0x8b5e: // SAMPLER_2D
       case 0x8d66: // SAMPLER_EXTERNAL_OES
@@ -654,13 +573,12 @@ mixin WebGLUniformsHelper {
       case 0x8dc4: // SAMPLER_2D_ARRAY_SHADOW
         return setValueT2DArray1;
       default:
-        throw ("getSingularSetter id: $id name: ${activeInfo.name} size: ${activeInfo.size} type: ${activeInfo.type}  ");
+        throw ("getSingularSetter id: $id type: $type");
     }
   }
 
   // Array of scalars
   void setValueV1fArray(RenderingContext gl, v, [WebGLTextures? textures]) {
-    
     final data = flatten(v, size, 1);
     gl.uniform1fv(addr, data);
   }
@@ -743,8 +661,10 @@ mixin WebGLUniformsHelper {
 
     final units = allocTexUnits(textures, n);
 
-    // print("setValueT1Array n: ${n} ");
-    gl.uniform1iv(addr, units);
+    if (!arraysEqual(cache, units)){
+      gl.uniform1iv(addr, units);
+      copyArray(cache, units);
+    }
 
     for (int i = 0; i != n; ++i) {
       textures?.setTexture2D(v[i] ?? emptyTexture, units[i]);
@@ -768,7 +688,10 @@ mixin WebGLUniformsHelper {
 
     final units = allocTexUnits(textures, n);
 
-    gl.uniform1iv(addr, units);
+    if (!arraysEqual(cache, units)){
+      gl.uniform1iv(addr, units);
+      copyArray(cache, units);
+    }
 
     for (int i = 0; i != n; ++i) {
       textures?.setTextureCube(v[i] ?? emptyCubeTexture, units[i]);
@@ -780,7 +703,10 @@ mixin WebGLUniformsHelper {
 
     final units = allocTexUnits(textures, n);
 
-    gl.uniform1iv(addr, units);
+    if (!arraysEqual(cache, units)){
+      gl.uniform1iv(addr, units);
+      copyArray(cache, units);
+    }
 
     for (int i = 0; i != n; ++i) {
       textures?.setTexture2DArray(v[i] ?? emptyArrayTexture, units[i]);
@@ -789,49 +715,26 @@ mixin WebGLUniformsHelper {
 
   // Helper to pick the right setter for a pure (bottom-level) array
 
-  getPureArraySetter(id, activeInfo, [nothing]) {
-    final type = activeInfo.type;
-
-    // print("getPureArraySetter id: ${id} type: ${activeInfo.type}  ");
-
+  dynamic getPureArraySetter(int type) {
     switch (type) {
-      case 0x1406:
-        return setValueV1fArray; // FLOAT
-      case 0x8b50:
-        return setValueV2fArray; // _VEC2
-      case 0x8b51:
-        return setValueV3fArray; // _VEC3
-      case 0x8b52:
-        return setValueV4fArray; // _VEC4
+      case 0x1406: return setValueV1fArray; // FLOAT
+      case 0x8b50: return setValueV2fArray; // _VEC2
+      case 0x8b51: return setValueV3fArray; // _VEC3
+      case 0x8b52: return setValueV4fArray; // _VEC4
 
-      case 0x8b5a:
-        return setValueM2Array; // _MAT2
-      case 0x8b5b:
-        return setValueM3Array; // _MAT3
-      case 0x8b5c:
-        return setValueM4Array; // _MAT4
+      case 0x8b5a: return setValueM2Array; // _MAT2
+      case 0x8b5b: return setValueM3Array; // _MAT3
+      case 0x8b5c: return setValueM4Array; // _MAT4
 
-      case 0x1404:
-      case 0x8b56:
-        return setValueV1iArray; // INT, BOOL
-      case 0x8b53:
-      case 0x8b57:
-        return setValueV2iArray; // _VEC2
-      case 0x8b54:
-      case 0x8b58:
-        return setValueV3iArray; // _VEC3
-      case 0x8b55:
-      case 0x8b59:
-        return setValueV4iArray; // _VEC4
+      case 0x1404: case 0x8b56: return setValueV1iArray; // INT, BOOL
+      case 0x8b53: case 0x8b57: return setValueV2iArray; // _VEC2
+      case 0x8b54: case 0x8b58: return setValueV3iArray; // _VEC3
+      case 0x8b55: case 0x8b59: return setValueV4iArray; // _VEC4
 
-      case 0x1405:
-        return setValueV1uiArray; // UINT
-      case 0x8dc6:
-        return setValueV2uiArray; // _VEC2
-      case 0x8dc7:
-        return setValueV3uiArray; // _VEC3
-      case 0x8dc8:
-        return setValueV4uiArray; // _VEC4
+      case 0x1405: return setValueV1uiArray; // UINT
+      case 0x8dc6: return setValueV2uiArray; // _VEC2
+      case 0x8dc7: return setValueV3uiArray; // _VEC3
+      case 0x8dc8: return setValueV4uiArray; // _VEC4
 
       case 0x8b5e: // SAMPLER_2D
       case 0x8d66: // SAMPLER_EXTERNAL_OES

@@ -1,11 +1,13 @@
 part of three_webgl;
 
 class WebGLCapabilities {
+  bool _didDispose = false;
   bool isWebGL2 = true;
 
   Map<String, dynamic> parameters;
   RenderingContext gl;
   WebGLExtensions extensions;
+  WebGLUtils utils;
 
   String precision = 'highp';
   String maxPrecision = "highp";
@@ -19,18 +21,16 @@ class WebGLCapabilities {
   late int maxVertexUniforms;
   late int maxVaryings;
   late int maxFragmentUniforms;
+  late bool reverseDepthBuffer;
 
   num? maxAnisotropy;
 
   late bool vertexTextures;
-  late bool floatFragmentTextures;
-  late bool floatVertexTextures;
-
   late int maxSamples;
 
-  bool get drawBuffers => isWebGL2 || extensions.has('WEBGL_draw_buffers');
+  bool drawBuffers = true;
 
-  WebGLCapabilities(this.gl, this.extensions, this.parameters) {
+  WebGLCapabilities(this.gl, this.extensions, this.parameters, this.utils) {
     precision = parameters["precision"] ?? "highp";
 
     maxPrecision = getMaxPrecision(precision);
@@ -40,6 +40,7 @@ class WebGLCapabilities {
     }
 
     logarithmicDepthBuffer = parameters["logarithmicDepthBuffer"] == true;
+    reverseDepthBuffer = parameters['reverseDepthBuffer'] == true && extensions.has( 'EXT_clip_control' );
 
     maxTextures = gl.getParameter(WebGL.MAX_TEXTURE_IMAGE_UNITS);
     maxVertexTextures = gl.getParameter(WebGL.MAX_VERTEX_TEXTURE_IMAGE_UNITS);
@@ -52,10 +53,8 @@ class WebGLCapabilities {
     maxFragmentUniforms = gl.getParameter(WebGL.MAX_FRAGMENT_UNIFORM_VECTORS);
 
     vertexTextures = maxVertexTextures > 0;
-    floatFragmentTextures = isWebGL2;
-    floatVertexTextures = vertexTextures && floatFragmentTextures;
 
-    maxSamples = isWebGL2 ? gl.getParameter(WebGL.MAX_SAMPLES) : 0;
+    maxSamples = gl.getParameter(WebGL.MAX_SAMPLES);
   }
 
   num getMaxAnisotropy() {
@@ -72,7 +71,47 @@ class WebGLCapabilities {
     return maxAnisotropy!;
   }
 
-  String getMaxPrecision(precision) {
-    return 'highp';
+	bool textureFormatReadable(int textureFormat ) {
+		if ( textureFormat != RGBAFormat && utils.convert( textureFormat ) != gl.getParameter( WebGL.IMPLEMENTATION_COLOR_READ_FORMAT ) ) {
+			return false;
+		}
+		return true;
+	}
+
+	bool textureTypeReadable(int textureType ) {
+		final halfFloatSupportedByExt = ( textureType == HalfFloatType ) && ( extensions.has( 'EXT_color_buffer_half_float' ) || extensions.has( 'EXT_color_buffer_float' ) );
+
+		if ( textureType != UnsignedByteType && utils.convert( textureType ) != gl.getParameter( WebGL.IMPLEMENTATION_COLOR_READ_TYPE ) && // Edge and Chrome Mac < 52 (#9513)
+			textureType != FloatType && ! halfFloatSupportedByExt ) {
+			return false;
+		}
+
+		return true;
+	}
+  String getMaxPrecision([String? precision]) {
+		if ( precision == 'highp' ) {
+			if ( gl.getShaderPrecisionFormat( WebGL.VERTEX_SHADER, WebGL.HIGH_FLOAT ).precision > 0 &&
+				gl.getShaderPrecisionFormat( WebGL.FRAGMENT_SHADER, WebGL.HIGH_FLOAT ).precision > 0 ) {
+				return 'highp';
+			}
+
+			precision = 'mediump';
+		}
+
+		if ( precision == 'mediump' ) {
+			if ( gl.getShaderPrecisionFormat( WebGL.VERTEX_SHADER, WebGL.MEDIUM_FLOAT ).precision > 0 &&
+				gl.getShaderPrecisionFormat( WebGL.FRAGMENT_SHADER, WebGL.MEDIUM_FLOAT ).precision > 0 ) {
+				return 'mediump';
+			}
+		}
+
+		return 'lowp';
+  }
+
+  void dispose(){
+    if(_didDispose) return;
+    _didDispose = true;
+    parameters.clear();
+    extensions.dispose();
   }
 }

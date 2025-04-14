@@ -1,4 +1,4 @@
-String lightsLambertVertex = """
+const String lightsLambertVertex = """
 vec3 diffuse = vec3( 1.0 );
 
 GeometricContext geometry;

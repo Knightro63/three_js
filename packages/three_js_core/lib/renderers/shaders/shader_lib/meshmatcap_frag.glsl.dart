@@ -1,4 +1,4 @@
-String meshmatcapFrag = """
+const String meshmatcapFrag = """
 #define MATCAP
 
 uniform vec3 diffuse;
@@ -7,19 +7,6 @@ uniform sampler2D matcap;
 
 varying vec3 vViewPosition;
 
-#ifndef FLAT_SHADED
-
-	varying vec3 vNormal;
-
-	#ifdef USE_TANGENT
-
-		varying vec3 vTangent;
-		varying vec3 vBitangent;
-
-	#endif
-
-#endif
-
 #include <common>
 #include <dithering_pars_fragment>
 #include <color_pars_fragment>
@@ -27,6 +14,7 @@ varying vec3 vViewPosition;
 #include <map_pars_fragment>
 #include <alphamap_pars_fragment>
 #include <alphatest_pars_fragment>
+#include <alphahash_pars_fragment>
 #include <fog_pars_fragment>
 #include <normal_pars_fragment>
 #include <bumpmap_pars_fragment>
@@ -36,15 +24,15 @@ varying vec3 vViewPosition;
 
 void main() {
 
-	#include <clipping_planes_fragment>
-
 	vec4 diffuseColor = vec4( diffuse, opacity );
+	#include <clipping_planes_fragment>
 
 	#include <logdepthbuf_fragment>
 	#include <map_fragment>
 	#include <color_fragment>
 	#include <alphamap_fragment>
 	#include <alphatest_fragment>
+	#include <alphahash_fragment>
 	#include <normal_fragment_begin>
 	#include <normal_fragment_maps>
 
@@ -64,10 +52,10 @@ void main() {
 	#endif
 
 	vec3 outgoingLight = diffuseColor.rgb * matcapColor.rgb;
-  #include <output_fragment>
 
+	#include <opaque_fragment>
 	#include <tonemapping_fragment>
-	#include <encodings_fragment>
+	#include <colorspace_fragment>
 	#include <fog_fragment>
 	#include <premultiplied_alpha_fragment>
 	#include <dithering_fragment>

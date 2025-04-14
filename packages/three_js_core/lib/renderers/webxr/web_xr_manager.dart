@@ -15,8 +15,10 @@ class WebXRManager with EventDispatcher {
   bool cameraAutoUpdate = true;
   late final state;
   final WebGLRenderer renderer;
+  final WebXRDepthSensing depthSensing = WebXRDepthSensing();
   bool isPresenting = false;
   RenderingContext gl;
+  late final ArrayCamera cameraXR = ArrayCamera([]);
   
   var session = null;
   double framebufferScaleFactor = 1.0;
@@ -475,6 +477,22 @@ class WebXRManager with EventDispatcher {
     if ( glBaseLayer != null && glBaseLayer.fixedFoveation != null ) {
       glBaseLayer.fixedFoveation = foveation;
     }
+  }
+
+  String? getEnvironmentBlendMode () {
+    if ( session != null ) {
+      return session.environmentBlendMode;
+    }
+
+    return null;
+  }
+
+  bool hasDepthSensing () {
+    return depthSensing.texture != null;
+  }
+
+  getDepthSensingMesh() {
+    return depthSensing.getMesh( cameraXR );
   }
 
   //   	// Animation Loop

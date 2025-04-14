@@ -11,6 +11,10 @@ class FogBase {
   bool isFog = false;
   bool isFogExp2 = false;
 
+  FogBase clone() {
+    throw(" need implement .... ");
+  }
+
   Map<String,dynamic> toJson() {
     throw(" need implement .... ");
   }
@@ -33,6 +37,7 @@ class Fog extends FogBase {
   }
 
   /// Returns a new fog instance with the same parameters as this one.
+  @override
   Fog clone() {
     return Fog(color.getHex(), near, far);
   }

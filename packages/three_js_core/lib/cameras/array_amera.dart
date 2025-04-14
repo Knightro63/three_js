@@ -9,11 +9,14 @@ import 'perspective_camera.dart';
 /// to define for each sub camera the `viewport` property which determines the
 /// part of the viewport that is rendered with this camera.
 class ArrayCamera extends PerspectiveCamera {
-  late List<Camera> cameras;
+  List<Camera> cameras = [];
 
   /// [array]: An array of cameras.
-  ArrayCamera(List<Camera> array) {
-    cameras = array;
+  ArrayCamera(this.cameras) {
     type = 'ArrayCamera';
+  }
+
+  void dispose(){
+    cameras.clear();
   }
 }

@@ -1,4 +1,4 @@
-String cubeVert = """
+const String cubeVert = """
 varying vec3 vWorldDirection;
 
 #include <common>

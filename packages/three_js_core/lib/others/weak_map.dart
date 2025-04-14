@@ -55,6 +55,10 @@ class WeakMap<K, V> {
     add(key: key, value: value);
   }
 
+  void dispose(){
+    _map.clear();
+  }
+
   void add({required K key, required V value}) {
     // if (_allowedInExpando(key)) {
     //   expando[key!] = value;

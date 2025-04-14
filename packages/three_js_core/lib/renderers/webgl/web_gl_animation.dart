@@ -22,7 +22,7 @@ class WebGLAnimation {
   }
 
   void stop() {
-    context.cancelAnimationFrame(requestId);
+    context?.cancelAnimationFrame(requestId);
     isAnimating = false;
   }
 

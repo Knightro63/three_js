@@ -1,4 +1,3 @@
-import 'dart:convert';
 import '../others/console.dart';
 import 'package:three_js_math/three_js_math.dart';
 import '../materials/index.dart';
@@ -13,20 +12,11 @@ import 'event_dispatcher.dart';
 import './layers.dart';
 import './raycaster.dart';
 
-typedef OnBeforeRender = void Function({
+typedef OnRender = void Function({
   WebGLRenderer? renderer,
   RenderTarget? renderTarget,
   Object3D? mesh,
   Scene? scene,
-  Camera? camera,
-  BufferGeometry? geometry,
-  Material? material,
-  Map<String, dynamic>? group
-});
-
-typedef OnAfterRender = void Function({
-  WebGLRenderer? renderer,
-  Object3D? scene,
   Camera? camera,
   BufferGeometry? geometry,
   Material? material,
@@ -61,6 +51,7 @@ class Object3D with EventDispatcher {
   bool disposed = false;
   static Vector3 defaultUp = Vector3(0.0, 1.0, 0.0);
   static bool defaultMatrixAutoUpdate = true;
+  static bool defaultMatrixWorldAutoUpdate = true;
 
   int id = _object3DId++;
 
@@ -79,6 +70,7 @@ class Object3D with EventDispatcher {
   Matrix4 matrixWorld = Matrix4.identity();
 
   bool matrixAutoUpdate = Object3D.defaultMatrixAutoUpdate;
+  bool matrixWorldAutoUpdate = Object3D.defaultMatrixWorldAutoUpdate;
   bool matrixWorldNeedsUpdate = false;
 
   Layers layers = Layers();
@@ -131,7 +123,7 @@ class Object3D with EventDispatcher {
   // onBeforeRender({WebGLRenderer? renderer, scene, Camera? camera, RenderTarget? renderTarget, dynamic? geometry, Material? material, dynamic group}) {
   // print(" Object3D.onBeforeRender ${type} ${id} ");
   // }
-  OnBeforeRender? onBeforeRender;
+  OnRender? onBeforeRender;
 
   dynamic background;
   Texture? environment;
@@ -992,7 +984,7 @@ class Object3D with EventDispatcher {
     frustumCulled = source.frustumCulled;
     renderOrder = source.renderOrder;
 
-    userData = json.decode(json.encode(source.userData));
+    userData = source.userData;//json.decode(json.encode(source.userData));
 
     if (recursive == true) {
       for (int i = 0; i < source.children.length; i++) {
@@ -1014,7 +1006,9 @@ class Object3D with EventDispatcher {
   /// [Points] or [Sprite]. Instances of [Object3D], [Group]
   /// or [Bone] are not renderable and thus this callback is not executed
   /// for such objects.
-    OnAfterRender? onAfterRender;
+  OnRender? onAfterRender;
+
+  OnRender? customRender;
 
   void onBeforeShadow({
     WebGLRenderer? renderer,
@@ -1129,6 +1123,12 @@ class Object3D with EventDispatcher {
       background?.dispose();
       background = null;
     }
+  
+    children.clear();
+    userData.clear();
+    extra.clear();
+    morphTargetInfluences.clear();
+    skeleton?.dispose();
   }
 }
 

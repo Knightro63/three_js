@@ -1,4 +1,4 @@
-String envmapFragment = """
+const String envmapFragment = """
 #ifdef USE_ENVMAP
 
 	#ifdef ENV_WORLDPOS
@@ -36,11 +36,7 @@ String envmapFragment = """
 
 	#ifdef ENVMAP_TYPE_CUBE
 
-		vec4 envColor = textureCube( envMap, vec3( flipEnvMapX * reflectVec.x,flipEnvMapY * reflectVec.yz ) );
-
-	#elif defined( ENVMAP_TYPE_CUBE_UV )
-
-		vec4 envColor = textureCubeUV( envMap, reflectVec, 0.0 );
+		vec4 envColor = textureCube( envMap, envMapRotation * vec3( flipEnvMap * reflectVec.x, reflectVec.yz ) );
 
 	#else
 

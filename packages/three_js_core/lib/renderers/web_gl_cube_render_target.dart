@@ -1,8 +1,7 @@
 part of three_renderers;
 
 class WebGLCubeRenderTarget extends WebGLRenderTarget {
-  WebGLCubeRenderTarget(int size, [WebGLRenderTargetOptions? options]) : super(size, size, options) {
-    isWebGLCubeRenderTarget = true;
+  WebGLCubeRenderTarget([int size = 1, WebGLRenderTargetOptions? options]) : super(size, size, options) {
     // By convention -- likely based on the RenderMan spec from the 1990's -- cube maps are specified by WebGL (and three.js)
     // in a coordinate system in which positive-x is to the right when looking up the positive-z axis -- in other words,
     // in a left-handed coordinate system. By continuing this convention, preexisting cube maps continued to render correctly.
@@ -13,13 +12,22 @@ class WebGLCubeRenderTarget extends WebGLRenderTarget {
     final image = ImageElement(width: size, height: size, depth: 1);
     final images = [image, image, image, image, image, image];
 
-    options = options ?? WebGLRenderTargetOptions({});
-    texture = CubeTexture(images, options.mapping, options.wrapS, options.wrapT, options.magFilter, options.minFilter,
-        options.format, options.type, options.anisotropy, options.encoding);
+    texture = CubeTexture(
+      images, 
+      this.options.mapping, 
+      this.options.wrapS, 
+      this.options.wrapT, 
+      this.options.magFilter, 
+      this.options.minFilter, 
+      this.options.format, 
+      this.options.type, 
+      this.options.anisotropy, 
+      this.options.encoding
+    );
     texture.isRenderTargetTexture = true;
 
-    texture.generateMipmaps = options.generateMipmaps;
-    texture.minFilter = options.minFilter ?? LinearFilter;
+    texture.generateMipmaps = this.options.generateMipmaps;
+    texture.minFilter = this.options.minFilter ?? LinearFilter;
   }
 
   WebGLCubeRenderTarget fromEquirectangularTexture(WebGLRenderer renderer, Texture texture) {
@@ -32,7 +40,7 @@ class WebGLCubeRenderTarget extends WebGLRenderTarget {
 
     final shader = {
       "uniforms": {
-        "tEquirect": {},
+        "tEquirect": <String,dynamic>{'value': null},
       },
       "vertexShader": """
 

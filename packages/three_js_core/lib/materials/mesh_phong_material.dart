@@ -42,6 +42,7 @@ class MeshPhongMaterial extends Material {
     normalScale = Vector2(1, 1);
 
     map = null;
+    envMapRotation = Euler();
 
     lightMap = null;
     lightMapIntensity = 1.0;
@@ -116,6 +117,7 @@ class MeshPhongMaterial extends Material {
     alphaMap = source.alphaMap;
 
     envMap = source.envMap;
+    envMapRotation?.copy(source.envMapRotation!);
     combine = source.combine;
     reflectivity = source.reflectivity;
     refractionRatio = source.refractionRatio;

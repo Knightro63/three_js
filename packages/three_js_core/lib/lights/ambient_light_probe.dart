@@ -12,7 +12,7 @@ class AmbientLightProbe extends LightProbe{
   /// strength/intensity. Default is `1`.
   /// 
   /// Creates a new [name].
-  AmbientLightProbe(Color color, [double? intensity]):super.create(null,intensity){
+  AmbientLightProbe(Color color, [double intensity = 1.0]):super.create(null,intensity){
     final color1 = Color(color.red, color.green, color.blue);
     // without extra factor of PI in the shader, would be 2 / math.sqrt( math.pi );
     sh!.coefficients[ 0 ].setValues( color1.red, color1.green, color1.blue );

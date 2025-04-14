@@ -26,7 +26,7 @@ class MeshBasicMaterial extends Material {
   void _init(){
     type = 'MeshBasicMaterial';
     color = Color(1, 1, 1); // emissive
-
+    envMapRotation = Euler();
     map = null;
 
     lightMap = null;
@@ -72,6 +72,7 @@ class MeshBasicMaterial extends Material {
     alphaMap = source.alphaMap;
 
     envMap = source.envMap;
+    envMapRotation?.copy(source.envMapRotation!);
     combine = source.combine;
     reflectivity = source.reflectivity;
     refractionRatio = source.refractionRatio;

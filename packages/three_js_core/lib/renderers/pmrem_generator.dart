@@ -1,16 +1,20 @@
-import 'dart:io';
 import 'package:flutter/foundation.dart';
-import 'package:three_js_core/others/index.dart';
-
+import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
-import '../renderers/index.dart';
-import '../cameras/index.dart';
-import '../scenes/index.dart';
-import '../geometries/index.dart';
-import '../core/index.dart';
-import '../materials/index.dart';
-import '../objects/mesh.dart';
 import 'dart:math' as math;
+
+final _origin = Vector3();
+
+class PMREMGeneratorOptions{
+  int size;
+  late final Vector3 position;
+  PMREMGeneratorOptions({
+    Vector3? position,
+    this.size = 256,
+  }){
+    this.position = position ?? _origin;
+  }
+}
 
 /// This class generates a Prefiltered, Mipmapped Radiance Environment Map
 /// (PMREM) from a cubeMap environment texture. This allows different levels of
@@ -30,6 +34,7 @@ int lodMin = 4;
 final extraLodSigma = [0.125, 0.215, 0.35, 0.446, 0.526, 0.582];
 
 class PMREMGenerator {
+  bool _didDispose = false;
   late int totalLods;
 
   // The maximum length of the blur for loop. Smaller sigmas will use fewer
@@ -41,13 +46,15 @@ class PMREMGenerator {
   dynamic _sigmas;
 
   final _flatCamera = OrthographicCamera();
-
   final _clearColor = Color(1, 1, 1);
   RenderTarget? _oldTarget;
+  int _oldActiveCubeFace = 0;
+  int _oldActiveMipmapLevel = 0;
+  bool _oldXrEnabled = false;
 
-  late double phi;
-  late double invPhi;
-  late List<Vector3> _axisDirections;
+  late final double phi;
+  late final double invPhi;
+  late final List<Vector3> _axisDirections;
 
   late WebGLRenderer _renderer;
   dynamic _pingPongRenderTarget;
@@ -66,16 +73,16 @@ class PMREMGenerator {
     // Vertices of a dodecahedron (except the opposites, which represent the
     // same axis), used as axis directions evenly spread on a sphere.
     _axisDirections = [
-      Vector3(1, 1, 1),
-      Vector3(-1, 1, 1),
-      Vector3(1, 1, -1),
-      Vector3(-1, 1, -1),
-      Vector3(0, phi, invPhi),
-      Vector3(0, phi, -invPhi),
-      Vector3(invPhi, 0, phi),
-      Vector3(-invPhi, 0, phi),
+      Vector3(-phi, invPhi, 0),
       Vector3(phi, invPhi, 0),
-      Vector3(-phi, invPhi, 0)
+      Vector3(-invPhi, 0, phi),
+      Vector3(invPhi, 0, phi),
+      Vector3(0, phi, -invPhi),
+      Vector3(0, phi, invPhi),
+      Vector3(-1, 1, -1),
+      Vector3(1, 1, -1),
+      Vector3(-1, 1, 1),
+      Vector3(1, 1, 1),
     ];
 
     _renderer = renderer;
@@ -87,14 +94,9 @@ class PMREMGenerator {
     _sizeLods = [];
     _sigmas = [];
 
-    _blurMaterial = null;
-
-    // this._blurMaterial = _getBlurShader(maxSamples);
-    _equirectMaterial = null;
-    _cubemapMaterial = null;
-
     _compileMaterial(_blurMaterial);
   }
+	
 
   /// *
 	/// * Generates a PMREM from a supplied Scene, which can be faster than using an
@@ -103,16 +105,22 @@ class PMREMGenerator {
 	/// * and far planes ensure the scene is rendered in its entirety (the cubeCamera
 	/// * is placed at the origin).
 	/// *
-  WebGLRenderTarget fromScene(Scene scene, [double sigma = 0, double near = 0.1, double far = 100]) {
-    _oldTarget = _renderer.getRenderTarget();
+  WebGLRenderTarget fromScene(Scene scene, {double sigma = 0, double near = 0.1, double far = 100, PMREMGeneratorOptions? options}) {
+    options ??= PMREMGeneratorOptions();
 
-    _setSize(256);
-    final cubeUVRenderTarget = _allocateTargets();
+    _oldTarget = _renderer.getRenderTarget();
+		_oldActiveCubeFace = _renderer.getActiveCubeFace();
+		_oldActiveMipmapLevel = _renderer.getActiveMipmapLevel();
+		_oldXrEnabled = _renderer.xr.enabled;
+    _renderer.xr.enabled = false;
+    _setSize(options.size);
+
+    final cubeUVRenderTarget = this._allocateTargets();
     cubeUVRenderTarget.depthBuffer = true;
 
-    _sceneToCubeUV(scene, near, far, cubeUVRenderTarget);
+    _sceneToCubeUV(scene, near, far, cubeUVRenderTarget, options.position);
     if (sigma > 0) {
-      _blur(cubeUVRenderTarget, 0, 0, sigma, null);
+      _blur(cubeUVRenderTarget, 0, 0, sigma);
     }
 
     _applyPMREM(cubeUVRenderTarget);
@@ -167,11 +175,18 @@ class PMREMGenerator {
 	/// * one of them will cause any others to also become unusable.
 	/// *
   void dispose() {
+    if(_didDispose) return;
+    _didDispose = true;
     _dispose();
+    _cubemapMaterial?.dispose();
+    _equirectMaterial?.dispose();
+    _blurMaterial?.dispose();
+    _pingPongRenderTarget?.dispose();
 
-    if (_cubemapMaterial != null) _cubemapMaterial.dispose();
-    if (_equirectMaterial != null) _equirectMaterial.dispose();
-  }
+    _flatCamera.dispose();
+    _oldTarget?.dispose();
+    _axisDirections.clear();
+    _renderer.dispose();  }
 
   // private interface
 
@@ -182,8 +197,7 @@ class PMREMGenerator {
 
   void _dispose() {
     _blurMaterial?.dispose();
-
-    if (_pingPongRenderTarget != null) _pingPongRenderTarget.dispose();
+    _pingPongRenderTarget?.dispose();
 
     for (int i = 0; i < _lodPlanes.length; i++) {
       _lodPlanes[i].dispose();
@@ -191,7 +205,8 @@ class PMREMGenerator {
   }
 
   void _cleanup(RenderTarget outputTarget) {
-    _renderer.setRenderTarget(_oldTarget);
+    _renderer.setRenderTarget(_oldTarget,_oldActiveCubeFace, _oldActiveMipmapLevel);
+    _renderer.xr.enabled = _oldXrEnabled;
     outputTarget.scissorTest = false;
     _setViewport(outputTarget, 0, 0, outputTarget.width.toDouble(), outputTarget.height.toDouble());
   }
@@ -205,10 +220,15 @@ class PMREMGenerator {
     } else {
       // Equirectangular
 
-      _setSize(texture.image.width ~/ 4 ?? 256);
+      _setSize(texture.image.width ~/ 4);
     }
 
     _oldTarget = _renderer.getRenderTarget();
+		_oldActiveCubeFace = _renderer.getActiveCubeFace();
+		_oldActiveMipmapLevel = _renderer.getActiveMipmapLevel();
+		_oldXrEnabled = _renderer.xr.enabled;
+
+    _renderer.xr.enabled = false;
 
     final cubeUVRenderTarget = renderTarget ?? _allocateTargets();
     _textureToCubeUV(texture, cubeUVRenderTarget);
@@ -228,7 +248,7 @@ class PMREMGenerator {
       "generateMipmaps": false,
       "type": HalfFloatType,
       "format": RGBAFormat,
-      "encoding": LinearEncoding,
+      'colorSpace': LinearSRGBColorSpace,
       "depthBuffer": false
     };
 
@@ -263,7 +283,7 @@ class PMREMGenerator {
     _renderer.compile(tmpMesh, _flatCamera);
   }
 
-  void _sceneToCubeUV(Scene scene, double near, double far, RenderTarget cubeUVRenderTarget) {
+  void _sceneToCubeUV(Scene scene, double near, double far, RenderTarget cubeUVRenderTarget, Vector3 position) {
     const double fov = 90;
     const double aspect = 1;
     final cubeCamera = PerspectiveCamera(fov, aspect, near, far);
@@ -302,14 +322,17 @@ class PMREMGenerator {
       final col = i % 3;
       if (col == 0) {
         cubeCamera.up.setValues(0, upSign[i], 0);
+        cubeCamera.position.setValues( position.x, position.y, position.z );
         cubeCamera.lookAt(Vector3(forwardSign[i], 0, 0));
       } 
       else if (col == 1) {
         cubeCamera.up.setValues(0, 0, upSign[i]);
+        cubeCamera.position.setValues( position.x, position.y, position.z );
         cubeCamera.lookAt(Vector3(0, forwardSign[i], 0));
       } 
       else {
         cubeCamera.up.setValues(0, upSign[i], 0);
+        cubeCamera.position.setValues( position.x, position.y, position.z );
         cubeCamera.lookAt(Vector3(0, 0, forwardSign[i]));
       }
       final size = _cubeSize.toDouble();
@@ -328,7 +351,7 @@ class PMREMGenerator {
     scene.background = background;
   }
 
-  void _textureToCubeUV(texture, RenderTarget cubeUVRenderTarget) {
+  void _textureToCubeUV(Texture texture, RenderTarget cubeUVRenderTarget) {
     final renderer = _renderer;
 
     bool isCubeTexture = (texture.mapping == CubeReflectionMapping ||
@@ -337,8 +360,8 @@ class PMREMGenerator {
     if (isCubeTexture) {
       _cubemapMaterial ??= _getCubemapShader();
 
-      _cubemapMaterial.uniforms["flipEnvMapX"]["value"] = (texture.isRenderTargetTexture == false) ? -1 : 1;
-      _cubemapMaterial.uniforms["flipEnvMapY"]["value"] = 1;
+      _cubemapMaterial.uniforms["flipEnvMap"]["value"] =
+          (texture.isRenderTargetTexture == false) ? -1 : 1;
     } else {
       _equirectMaterial ??= _getEquirectMaterial();
     }
@@ -368,11 +391,8 @@ class PMREMGenerator {
     renderer.autoClear = false;
 
     for (int i = 1; i < _lodPlanes.length; i++) {
-      final sigma =
-          math.sqrt(_sigmas[i] * _sigmas[i] - _sigmas[i - 1] * _sigmas[i - 1]);
-
+      final sigma = math.sqrt(_sigmas[i] * _sigmas[i] - _sigmas[i - 1] * _sigmas[i - 1]);
       final poleAxis = _axisDirections[(i - 1) % _axisDirections.length];
-
       _blur(cubeUVRenderTarget, i - 1, i, sigma, poleAxis);
     }
 
@@ -386,13 +406,13 @@ class PMREMGenerator {
 	/// * the poles) to approximate the orthogonally-separable blur. It is least
 	/// * accurate at the poles, but still does a decent job.
 	/// *
-  void _blur(RenderTarget cubeUVRenderTarget, int lodIn, int lodOut, double sigma, poleAxis) {
-    final pingPongRenderTarget = _pingPongRenderTarget;
-    _halfBlur(cubeUVRenderTarget, pingPongRenderTarget, lodIn, lodOut, sigma,'latitudinal', poleAxis);
+  void _blur(RenderTarget cubeUVRenderTarget, int lodIn, int lodOut, double sigma, [Vector3? poleAxis]) {
+    final RenderTarget? pingPongRenderTarget = _pingPongRenderTarget;
+    _halfBlur(cubeUVRenderTarget, pingPongRenderTarget, lodIn, lodOut, sigma, 'latitudinal', poleAxis);
     _halfBlur(pingPongRenderTarget, cubeUVRenderTarget, lodOut, lodOut, sigma,'longitudinal', poleAxis);
   }
 
-  void _halfBlur(RenderTarget targetIn, RenderTarget targetOut, int lodIn, int lodOut, double sigmaRadians, String direction, poleAxis) {
+  void _halfBlur(RenderTarget? targetIn, RenderTarget? targetOut, int lodIn, int lodOut, double sigmaRadians, String direction, Vector3? poleAxis) {
     final renderer = _renderer;
     final blurMaterial = _blurMaterial;
 
@@ -410,16 +430,12 @@ class PMREMGenerator {
     }
 
     final blurMesh = Mesh(geometry, blurMaterial);
-    final blurUniforms = blurMaterial.uniforms;
+    final blurUniforms = blurMaterial?.uniforms;
 
     final pixels = _sizeLods[lodIn] - 1;
-    final radiansPerPixel = isFinite(sigmaRadians)
-        ? math.pi / (2 * pixels)
-        : 2 * math.pi / (2 * maxSamples - 1);
+    final radiansPerPixel = isFinite(sigmaRadians)? math.pi / (2 * pixels): 2 * math.pi / (2 * maxSamples - 1);
     final sigmaPixels = sigmaRadians / radiansPerPixel;
-    final samples = isFinite(sigmaRadians)
-        ? 1 + (standardDeviations * sigmaPixels).floor()
-        : maxSamples;
+    final samples = isFinite(sigmaRadians)? 1 + (standardDeviations * sigmaPixels).floor(): maxSamples;
 
     if (samples > maxSamples) {
       console.warning("sigmaRadians, $sigmaRadians, is too large and will clip, as it requested $samples samples when the maximum is set to $maxSamples");
@@ -444,7 +460,7 @@ class PMREMGenerator {
       weights[i] = weights[i] / sum;
     }
 
-    blurUniforms['envMap']["value"] = targetIn.texture;
+    blurUniforms['envMap']["value"] = targetIn?.texture;
     blurUniforms['samples']["value"] = samples;
     blurUniforms['weights']["value"] = Float32List.fromList(weights);
     blurUniforms['latitudinal']["value"] = direction == 'latitudinal';
@@ -454,11 +470,11 @@ class PMREMGenerator {
     }
 
     blurUniforms['dTheta']["value"] = radiansPerPixel;
-    blurUniforms['mipInt']["value"] = _lodMax - lodIn;
+    blurUniforms['mipInt']["value"] = this._lodMax - lodIn;
 
     final double outputSize = _sizeLods[lodOut].toDouble();
-    final x = 3 * outputSize *(lodOut > _lodMax - lodMin ? lodOut - _lodMax + lodMin : 0);
-    final y = 4 * (_cubeSize - outputSize);
+    final x = 3 * outputSize *(lodOut > this._lodMax - lodMin ? lodOut - this._lodMax + lodMin : 0);
+    final y = 4 * (this._cubeSize - outputSize);
 
     _setViewport(targetOut, x, y, 3 * outputSize, 2 * outputSize);
     renderer.setRenderTarget(targetOut);
@@ -466,7 +482,7 @@ class PMREMGenerator {
   }
 
   bool isFinite(double value) {
-    return value == double.infinity;
+    return value == double.maxFinite;
   }
 
   Map<String,dynamic> _createPlanes(int lodMax) {
@@ -510,24 +526,12 @@ class PMREMGenerator {
         double x = (face % 3) * 2 / 3 - 1;
         double y = face > 2 ? 0 : -1;
         List<double> coordinates = [
-          x,
-          y,
-          0,
-          x + 2 / 3,
-          y,
-          0,
-          x + 2 / 3,
-          y + 1,
-          0,
-          x,
-          y,
-          0,
-          x + 2 / 3,
-          y + 1,
-          0,
-          x,
-          y + 1,
-          0
+          x, y, 0,
+          x + 2 / 3, y, 0,
+          x + 2 / 3, y + 1, 0,
+          x, y, 0,
+          x + 2 / 3, y + 1, 0,
+          x, y + 1, 0
         ];
         position.set(coordinates, positionSize * vertices * face);
         uv.set(uv1, uvSize * vertices * face);
@@ -536,9 +540,9 @@ class PMREMGenerator {
       }
 
       final planes = BufferGeometry();
-      planes.setAttributeFromString('position', Float32BufferAttribute.fromList(position, positionSize, false));
-      planes.setAttributeFromString('uv', Float32BufferAttribute.fromList(uv, uvSize, false));
-      planes.setAttributeFromString('faceIndex', Int32BufferAttribute.fromList(faceIndex, faceIndexSize, false));
+      planes.setAttributeFromString('position', Float32BufferAttribute.fromList(position, positionSize));
+      planes.setAttributeFromString('uv', Float32BufferAttribute.fromList(uv, uvSize));
+      planes.setAttributeFromString('faceIndex', Int32BufferAttribute.fromList(faceIndex, faceIndexSize));
       lodPlanes.add(planes);
 
       if (lod > lodMin) {
@@ -557,9 +561,9 @@ class PMREMGenerator {
     return cubeUVRenderTarget;
   }
 
-  void _setViewport(RenderTarget target, double x, double y, double width, double height) {
-    target.viewport.setValues(x, y, width, height);
-    target.scissor.setValues(x, y, width, height);
+  void _setViewport(RenderTarget? target, double x, double y, double width, double height) {
+    target?.viewport.setValues(x, y, width, height);
+    target?.scissor.setValues(x, y, width, height);
   }
 
   ShaderMaterial _getBlurShader(int lodMax, int width, int height) {
@@ -571,10 +575,10 @@ class PMREMGenerator {
         'n': maxSamples,
         'CUBEUV_TEXEL_WIDTH': 1.0 / width,
         'CUBEUV_TEXEL_HEIGHT': 1.0 / height,
-        // 'CUBEUV_MAX_MIP': "$lodMax.0",
+        'CUBEUV_MAX_MIP': "$lodMax.0",
       },
       "uniforms": {
-        'envMap': {},
+        'envMap': <String,dynamic>{"value": null},
         'samples': {"value": 1},
         'weights': {"value": weights},
         'latitudinal': {"value": false},
@@ -655,7 +659,7 @@ class PMREMGenerator {
   ShaderMaterial _getEquirectMaterial() {
     final shaderMaterial = ShaderMaterial.fromMap({
       "name": 'EquirectangularToCubeUV',
-      "uniforms": {'envMap': {}},
+      "uniforms": <String,dynamic>{'envMap': <String,dynamic>{'value': null}},
       "vertexShader": _getCommonVertexShader(),
       "fragmentShader": """
 
@@ -686,9 +690,8 @@ class PMREMGenerator {
     final shaderMaterial = ShaderMaterial.fromMap({
       "name": 'CubemapToCubeUV',
       "uniforms": {
-        'envMap': {},
-        'flipEnvMapX': {"value": -1},
-        'flipEnvMapY': {"value": 1}
+        'envMap': <String,dynamic>{"value":null},
+        'flipEnvMap': {"value": -1}
       },
       "vertexShader": _getCommonVertexShader(),
       "fragmentShader": """
@@ -696,8 +699,7 @@ class PMREMGenerator {
         precision mediump float;
         precision mediump int;
 
-        uniform float flipEnvMapX;
-        uniform float flipEnvMapY;
+        uniform float flipEnvMap;
 
         varying vec3 vOutputDirection;
 
@@ -705,7 +707,7 @@ class PMREMGenerator {
 
         void main() {
 
-          gl_FragColor = textureCube( envMap, vec3( flipEnvMapX * vOutputDirection.x, flipEnvMapY *vOutputDirection.yz ) );
+          gl_FragColor = textureCube( envMap, vec3( flipEnvMap * vOutputDirection.x, vOutputDirection.yz ) );
 
         }
       """,
@@ -717,28 +719,8 @@ class PMREMGenerator {
     return shaderMaterial;
   }
 
-  String _getPlatformVertexHelper() {
-    if (kIsWeb) {
-      return "";
-    }
-
-    if (Platform.isMacOS) {
-      return """
-        #define attribute in
-        #define varying out
-        #define texture2D texture
-      """;
-    }
-
-    return """
-    """;
-  }
-
   String _getCommonVertexShader() {
     return """
-
-      ${_getPlatformVertexHelper()}
-
       precision mediump float;
       precision mediump int;
 

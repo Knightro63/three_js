@@ -1,7 +1,15 @@
-String mapParticleParsFragment = """
-#if defined( USE_MAP ) || defined( USE_ALPHAMAP )
+const String mapParticleParsFragment = """
+#if defined( USE_POINTS_UV )
 
-	uniform mat3 uvTransform;
+	varying vec2 vUv;
+
+#else
+
+	#if defined( USE_MAP ) || defined( USE_ALPHAMAP )
+
+		uniform mat3 uvTransform;
+
+	#endif
 
 #endif
 

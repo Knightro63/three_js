@@ -1,4 +1,4 @@
-String cubeUvReflectionFragment = """
+const String cubeUvReflectionFragment = """
 #ifdef ENVMAP_TYPE_CUBE_UV
 
 	#define cubeUV_minMipLevel 4.0
@@ -85,7 +85,7 @@ String cubeUvReflectionFragment = """
 
 		float faceSize = exp2( mipInt );
 
-		vec2 uv = getUV( direction, face ) * ( faceSize - 2.0 ) + 1.0;
+		highp vec2 uv = getUV( direction, face ) * ( faceSize - 2.0 ) + 1.0; // #25071
 
 		if ( face > 2.0 ) {
 
@@ -97,55 +97,57 @@ String cubeUvReflectionFragment = """
 
 		uv.x += face * faceSize;
 
-    uv.x += filterInt * 3.0 * cubeUV_minTileSize;
+		uv.x += filterInt * 3.0 * cubeUV_minTileSize;
+
 		uv.y += 4.0 * ( exp2( CUBEUV_MAX_MIP ) - faceSize );
+
 		uv.x *= CUBEUV_TEXEL_WIDTH;
 		uv.y *= CUBEUV_TEXEL_HEIGHT;
 
 		#ifdef texture2DGradEXT
-      return texture2DGradEXT( envMap, uv, vec2( 0.0 ), vec2( 0.0 ) ).rgb; // disable anisotropic filtering
+
+			return texture2DGradEXT( envMap, uv, vec2( 0.0 ), vec2( 0.0 ) ).rgb; // disable anisotropic filtering
+
 		#else
+
 			return texture2D( envMap, uv ).rgb;
+
 		#endif
+
 	}
 
 	// These defines must match with PMREMGenerator
 
-	#define r0 1.0
-	#define v0 0.339
-	#define m0 - 2.0
-	#define r1 0.8
-	#define v1 0.276
-	#define m1 - 1.0
-	#define r4 0.4
-	#define v4 0.046
-	#define m4 2.0
-	#define r5 0.305
-	#define v5 0.016
-	#define m5 3.0
-	#define r6 0.21
-	#define v6 0.0038
-	#define m6 4.0
+	#define cubeUV_r0 1.0
+	#define cubeUV_m0 - 2.0
+	#define cubeUV_r1 0.8
+	#define cubeUV_m1 - 1.0
+	#define cubeUV_r4 0.4
+	#define cubeUV_m4 2.0
+	#define cubeUV_r5 0.305
+	#define cubeUV_m5 3.0
+	#define cubeUV_r6 0.21
+	#define cubeUV_m6 4.0
 
 	float roughnessToMip( float roughness ) {
 
 		float mip = 0.0;
 
-		if ( roughness >= r1 ) {
+		if ( roughness >= cubeUV_r1 ) {
 
-			mip = ( r0 - roughness ) * ( m1 - m0 ) / ( r0 - r1 ) + m0;
+			mip = ( cubeUV_r0 - roughness ) * ( cubeUV_m1 - cubeUV_m0 ) / ( cubeUV_r0 - cubeUV_r1 ) + cubeUV_m0;
 
-		} else if ( roughness >= r4 ) {
+		} else if ( roughness >= cubeUV_r4 ) {
 
-			mip = ( r1 - roughness ) * ( m4 - m1 ) / ( r1 - r4 ) + m1;
+			mip = ( cubeUV_r1 - roughness ) * ( cubeUV_m4 - cubeUV_m1 ) / ( cubeUV_r1 - cubeUV_r4 ) + cubeUV_m1;
 
-		} else if ( roughness >= r5 ) {
+		} else if ( roughness >= cubeUV_r5 ) {
 
-			mip = ( r4 - roughness ) * ( m5 - m4 ) / ( r4 - r5 ) + m4;
+			mip = ( cubeUV_r4 - roughness ) * ( cubeUV_m5 - cubeUV_m4 ) / ( cubeUV_r4 - cubeUV_r5 ) + cubeUV_m4;
 
-		} else if ( roughness >= r6 ) {
+		} else if ( roughness >= cubeUV_r6 ) {
 
-			mip = ( r5 - roughness ) * ( m6 - m5 ) / ( r5 - r6 ) + m5;
+			mip = ( cubeUV_r5 - roughness ) * ( cubeUV_m6 - cubeUV_m5 ) / ( cubeUV_r5 - cubeUV_r6 ) + cubeUV_m5;
 
 		} else {
 
@@ -158,7 +160,7 @@ String cubeUvReflectionFragment = """
 
 	vec4 textureCubeUV( sampler2D envMap, vec3 sampleDir, float roughness ) {
 
-		float mip = clamp( roughnessToMip( roughness ), m0, CUBEUV_MAX_MIP );
+		float mip = clamp( roughnessToMip( roughness ), cubeUV_m0, CUBEUV_MAX_MIP );
 
 		float mipF = fract( mip );
 

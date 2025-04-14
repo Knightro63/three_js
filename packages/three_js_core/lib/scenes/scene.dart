@@ -1,16 +1,27 @@
 import '../core/index.dart';
 import '../materials/index.dart';
 import './fog.dart';
+import 'package:three_js_math/three_js_math.dart';
 
 /// Scenes allow you to set up what and where is to be rendered by three.js.
 /// 
 /// This is where you place objects, lights and cameras.
 class Scene extends Object3D {
   FogBase? fog;
+  double backgroundBlurriness = 0;
+  double backgroundIntensity = 1;
+
+  Euler backgroundRotation = Euler();
+
+  double environmentIntensity = 1;
+  Euler environmentRotation = Euler();
 
   Scene() : super(){
     autoUpdate = true; // checked by the renderer
     type = 'Scene';
+    background = null;
+    environment = null;
+    fog = null;
   }
 
   Scene.fromJson(Map<String, dynamic> json, Map<String, dynamic> rootJson): super.fromJson(json, rootJson){
@@ -47,16 +58,17 @@ class Scene extends Object3D {
 
   @override
   Scene copy(Object3D source, [bool? recursive]) {
+    source as Scene;
     super.copy(source);
 
-    // if ( source.background !== null ) this.background = source.background.clone();
-    // if ( source.environment !== null ) this.environment = source.environment.clone();
-    // if ( source.fog !== null ) this.fog = source.fog.clone();
+    if ( source.background != null ) background = source.background.clone();
+    if ( source.environment != null ) environment = source.environment?.clone();
+    if ( source.fog != null ) fog = source.fog?.clone();
 
-    // if ( source.overrideMaterial !== null ) this.overrideMaterial = source.overrideMaterial.clone();
+    if ( source.overrideMaterial != null ) overrideMaterial = source.overrideMaterial?.clone();
 
-    // this.autoUpdate = source.autoUpdate;
-    // this.matrixAutoUpdate = source.matrixAutoUpdate;
+    autoUpdate = source.autoUpdate;
+    matrixAutoUpdate = source.matrixAutoUpdate;
 
     return this;
   }

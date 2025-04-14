@@ -1,3 +1,8 @@
+## 0.1.0
+
+* Updated to the most current Opengl three.js renderer.
+* Updated to the newest version of three_js _math.
+
 ## 0.0.4
 
 * Updated three_js_math.

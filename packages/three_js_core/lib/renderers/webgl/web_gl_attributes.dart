@@ -2,15 +2,11 @@ part of three_webgl;
 
 class WebGLAttributes {
   RenderingContext gl;
-  WebGLCapabilities capabilities;
-
   bool isWebGL2 = true;
 
   WeakMap buffers = WeakMap();
 
-  WebGLAttributes(this.gl, this.capabilities) {
-    isWebGL2 = capabilities.isWebGL2;
-  }
+  WebGLAttributes(this.gl);
 
   Map<String, dynamic> createBuffer(dynamic attribute, int bufferType, {String? name}) {//BufferAttribute<NativeArray<num>>
     final array = attribute.array;
@@ -24,9 +20,7 @@ class WebGLAttributes {
     gl.bindBuffer(bufferType, buffer);
     gl.bufferData(bufferType, array, usage);
 
-    if (attribute.onUploadCallback != null) {
-      attribute.onUploadCallback!();
-    }
+    attribute.onUploadCallback?.call();
 
     if (attribute is Float32BufferAttribute) {
       type = WebGL.FLOAT;
@@ -89,8 +83,68 @@ class WebGLAttributes {
     }
   }
 
+  void updateBufferNew(Buffer buffer, BufferAttribute attribute, int bufferType) {
+    final array = attribute.array;
+    final updateRange = attribute.updateRange;
+    final updateRanges = attribute.updateRanges;
+
+    gl.bindBuffer(bufferType, buffer);
+
+    if (updateRange!["count"] == -1) {
+      // Not using update ranges
+      gl.bufferSubData(bufferType, 0, attribute.array);
+    } 
+    // else {
+    //   console.info(" WebGLAttributes.dart gl.bufferSubData need debug confirm.... ");
+    //   gl.bufferSubData(bufferType, updateRange["offset"]! * attribute.itemSize, attribute.array);
+    //   updateRange["count"] = -1; // reset range
+    // }
+
+    // print(updateRanges);
+
+		else{
+      updateRanges.sort( ( a, b ) => a.start - b.start );
+
+			int mergeIndex = 0;
+
+			for ( int i = 1; i < updateRanges.length; i ++ ) {
+				final previousRange = updateRanges[ mergeIndex ];
+				final range = updateRanges[ i ];
+
+				// We add one here to merge adjacent ranges. This is safe because ranges
+				// operate over positive integers.
+				if ( range.start <= previousRange.start + previousRange.count + 1 ) {
+					previousRange.count = math.max(
+						previousRange.count,
+						range.start + range.count - previousRange.start
+					);
+				} 
+        else {
+					++ mergeIndex;
+					updateRanges[ mergeIndex ] = range;
+				}
+			}
+
+			for (int i = 0, l = updateRanges.length; i < l; i ++ ) {
+				final range = updateRanges[i];
+        Float32Array f = Float32Array.fromList(attribute.array.sublist(range.start,range.count) as List<double>);
+				gl.bufferSubData( 
+          bufferType, 
+          range.start * array.BYTES_PER_ELEMENT,
+					f,
+        );
+
+        f.dispose();
+			}
+
+			attribute.clearUpdateRanges();
+		}
+
+    attribute.onUploadCallback?.call();
+  }
+
   dynamic get(BaseBufferAttribute attribute) {
-    if (attribute.type == "InterleavedBufferAttribute") {
+    if (attribute is InterleavedBufferAttribute) {
       return buffers.get(attribute.data);
     } 
     else {
@@ -112,7 +166,7 @@ class WebGLAttributes {
     buffers.clear();
   }
   void remove(BufferAttribute attribute) {
-    if (attribute.type == "InterleavedBufferAttribute") {
+    if (attribute is InterleavedBufferAttribute) {
       final data = buffers.get(attribute.data);
 
       if (data != null) {
@@ -131,7 +185,7 @@ class WebGLAttributes {
   }
 
   void update(attribute, bufferType, {String? name}) {
-    if (attribute.type == "GLBufferAttribute") {
+    if (attribute is GLBufferAttribute) {
       final cached = buffers.get(attribute);
       if (cached == null || cached["version"] < attribute.version) {
         buffers.add(key: attribute, value: createBuffer(attribute, bufferType, name: name));
@@ -139,7 +193,7 @@ class WebGLAttributes {
       return;
     }
 
-    if (attribute.type == "InterleavedBufferAttribute") {
+    if (attribute is InterleavedBufferAttribute) {
       attribute = attribute.data;
     }
 

@@ -1,4 +1,4 @@
-String fogParsVertex = """
+const String fogParsVertex = """
 #ifdef USE_FOG
 
 	varying float vFogDepth;

@@ -1,6 +1,7 @@
 part of three_webgl;
 
 class WebGLObjects {
+  bool _didDispose = false;
   final updateMap = WeakMap();
   WebGLInfo info;
   RenderingContext gl;
@@ -30,21 +31,37 @@ class WebGLObjects {
         object.addEventListener('dispose', onInstancedMeshDispose);
       }
 
-      // print(" WebGLObjects update 2 object: ${object} ${object.instanceMatrix} ");
-      attributes.update(object.instanceMatrix, WebGL.ARRAY_BUFFER);
+      if ( updateMap.get( object ) != frame ) {
+        // print(" WebGLObjects update 2 object: ${object} ${object.instanceMatrix} ");
+        attributes.update(object.instanceMatrix, WebGL.ARRAY_BUFFER);
 
-      if (object.instanceColor != null) {
-        attributes.update(object.instanceColor, WebGL.ARRAY_BUFFER);
+        if (object.instanceColor != null) {
+          attributes.update(object.instanceColor, WebGL.ARRAY_BUFFER);
+        }
+        updateMap.set( object, frame );
       }
     }
 
+		if ( object is SkinnedMesh ) {
+			final skeleton = object.skeleton;
+
+			if ( updateMap.get( skeleton ) != frame ) {
+				skeleton?.update();
+				updateMap.set( skeleton, frame );
+			}
+		}
+    
     return buffergeometry;
   }
 
   void dispose() {
+    if(_didDispose) return;
+    _didDispose = true;
     updateMap.clear();
+    attributes.dispose();
+    geometries.dispose();
+    info.dispose();
   }
-
   void onInstancedMeshDispose(event) {
     final instancedMesh = event.target;
 

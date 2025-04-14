@@ -49,17 +49,17 @@ class BufferGeometry with EventDispatcher {
 
   String type = "BufferGeometry";
   BoundingBox? boundingBox;
+  BoundingSphere? boundingSphere;
   String name = "";
   Map<String, dynamic> attributes = {};
   Map<String, List<BufferAttribute>> morphAttributes = {};
   bool morphTargetsRelative = false;
-  BoundingSphere? boundingSphere;
   Map<String, int> drawRange = {"start": 0, "count": double.maxFinite.toInt()};
   Map<String, dynamic> userData = {};
   List<Map<String, dynamic>> groups = [];
   BufferAttribute? index;
 
-  late List<MorphTarget> morphTargets;
+  List<MorphTarget>? morphTargets;
   BufferGeometry? directGeometry;
 
   bool disposed = false;
@@ -71,8 +71,8 @@ class BufferGeometry with EventDispatcher {
   bool lineDistancesNeedUpdate = false;
   bool groupsNeedUpdate = false;
 
-  late List<Color> colors;
-  late List<double> lineDistances;
+  List<Color>? colors;
+  List<double>? lineDistances;
 
   Map<String, dynamic>? parameters;
 
@@ -1032,7 +1032,9 @@ class BufferGeometry with EventDispatcher {
 
     if(morphAttributes.isNotEmpty){
       for(final temp in morphAttributes.keys){
-        (morphAttributes[temp] as BaseBufferAttribute?)?.dispose();
+        morphAttributes[temp]?.forEach((bn){
+          (bn as BufferAttribute?)?.dispose();
+        });
       }
     }
 
@@ -1046,6 +1048,17 @@ class BufferGeometry with EventDispatcher {
 
     index?.dispose();
     directGeometry?.dispose();
+    attributes.clear();
+    morphTargets?.clear();
+    userData.clear();
+
+    drawRange.clear();
+    groups.clear();
+    index?.dispose();
+    directGeometry?.dispose();
+    colors?.clear();
+    lineDistances?.clear();
+    parameters?.clear();
   }
 }
 
@@ -1073,5 +1086,9 @@ class BufferGeometryParameters {
 
   Map<String, dynamic> toJson() {
     return {"curveSegments": curveSegments};
+  }
+
+  void dispose(){
+    options.clear();
   }
 }

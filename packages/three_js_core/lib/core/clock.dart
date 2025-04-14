@@ -4,9 +4,12 @@ class Clock {
   late bool autoStart;
   late int startTime;
   late int oldTime;
+  late int _prevTime;
   late double elapsedTime;
   late bool running;
   int fps = 0;
+
+  int _frames = 0;
 
   //// [autoStart] — (optional) whether to automatically start the clock when
   /// [getDelta]() is called for the first time. Default is `true`.
@@ -24,6 +27,7 @@ class Clock {
     startTime = now();
 
     oldTime = startTime;
+    _prevTime = startTime;
     elapsedTime = 0;
     running = true;
     fps = 0;
@@ -59,15 +63,19 @@ class Clock {
       start();
       return 0;
     }
-
+    final newTime = now();
     if (running) {
-      final newTime = now();
       diff = (newTime - oldTime) / 1000;
       oldTime = newTime;
-      fps = (diff*3600).toInt();
+      //fps = (diff*3600).toInt();
       elapsedTime += diff;
+      _frames++;
     }
-
+    if ( newTime >= _prevTime + 1000 ) {
+      fps = ( _frames * 1000 ) ~/ ( newTime - _prevTime );
+      _prevTime = newTime;
+      _frames = 0;
+    }
     return diff;
   }
 }

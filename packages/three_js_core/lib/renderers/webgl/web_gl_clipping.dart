@@ -1,6 +1,7 @@
 part of three_webgl;
 
 class WebGLClipping {
+  bool _didDispose = false;
   WebGLProperties properties;
 
   Matrix3 viewNormalMatrix = Matrix3.identity();
@@ -19,7 +20,14 @@ class WebGLClipping {
 
   WebGLClipping(this.properties);
 
-  bool init(List<Plane> planes, bool enableLocalClipping, Camera camera) {
+  void dispose(){
+    if(_didDispose) return;
+    _didDispose = true;
+    properties.dispose();
+    uniform.clear();
+  }
+
+  bool init(List<Plane> planes, bool enableLocalClipping) {
     final enabled = planes.isNotEmpty ||
         enableLocalClipping ||
         // enable state of previous frame - the clipping code has to
@@ -29,7 +37,6 @@ class WebGLClipping {
 
     localClippingEnabled = enableLocalClipping;
 
-    globalState = projectPlanes(planes, camera, 0, null);
     numGlobalPlanes = planes.length;
 
     return enabled;
@@ -42,8 +49,12 @@ class WebGLClipping {
 
   void endShadows() {
     renderingShadows = false;
-    resetGlobalState();
   }
+
+  void setGlobalState(List<Plane> planes,Camera camera ) {
+		globalState = projectPlanes( planes, camera, 0 );
+	}
+
 
   void setState(Material material, Camera camera, bool useCache) {
     final planes = material.clippingPlanes;
@@ -53,13 +64,10 @@ class WebGLClipping {
     final materialProperties = properties.get(material);
 
     if (!localClippingEnabled || planes == null || planes.isEmpty || renderingShadows && !clipShadows) {
-      // there's no local clipping
-
       if (renderingShadows) {
-        // there's no global clipping
-
         projectPlanes();
-      } else {
+      } 
+      else {
         resetGlobalState();
       }
     } 
@@ -93,15 +101,16 @@ class WebGLClipping {
     numIntersection = 0;
   }
 
-  List<double>? projectPlanes([planes, camera, dstOffset, skipTransform]) {
+  List<double>? projectPlanes([List<Plane>? planes, Camera? camera, int dstOffset = 0, bool skipTransform = false]) {
     final nPlanes = planes != null ? planes.length : 0;
     List<double>? dstArray;
 
     if (nPlanes != 0) {
       dstArray = uniform["value"];
 
-      if (skipTransform != true || dstArray == null) {
-        final flatSize = dstOffset + nPlanes * 4, viewMatrix = camera.matrixWorldInverse;
+      if (!skipTransform || dstArray == null) {
+        final flatSize = dstOffset + nPlanes * 4;
+        final viewMatrix = camera?.matrixWorldInverse ?? Matrix4.identity();
 
         viewNormalMatrix.getNormalMatrix(viewMatrix);
 
@@ -110,7 +119,7 @@ class WebGLClipping {
         }
 
         for (int i = 0, i4 = dstOffset; i != nPlanes; ++i, i4 += 4) {
-          plane..copyFrom(planes[i])..applyMatrix4(viewMatrix, viewNormalMatrix);
+          plane..copyFrom(planes![i])..applyMatrix4(viewMatrix, viewNormalMatrix);
 
           plane.normal.copyIntoArray(dstArray, i4);
           dstArray[i4 + 3] = plane.constant;

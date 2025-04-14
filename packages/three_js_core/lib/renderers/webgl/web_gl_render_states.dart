@@ -1,21 +1,36 @@
 part of three_webgl;
 
 class WebGLRenderState {
+  bool _didDispose = false;
   late WebGLLights lights;
   WebGLExtensions extensions;
-  WebGLCapabilities capabilities;
   List<Light> lightsArray = [];
   List<Light> shadowsArray = [];
+  Map transmissionRenderTarget = {};
+  late RenderState _renderState;
 
-  WebGLRenderState(this.extensions, this.capabilities) {
-    lights = WebGLLights(extensions, capabilities);
+  WebGLRenderState(this.extensions) {
+    lights = WebGLLights(extensions);
+    _renderState = RenderState(lights, lightsArray, shadowsArray, null, {});
   }
 
   RenderState get state {
-    return RenderState(lights, lightsArray, shadowsArray);
+    return _renderState;
   }
 
-  void init() {
+  void dispose(){
+    if(_didDispose) return;
+    _didDispose = true;
+    lightsArray.clear();
+    shadowsArray.clear();
+    lights.dispose();
+    lights.dispose();
+    extensions.dispose();
+  }
+
+  void init(Camera camera) {
+    state.camera = camera;
+
     lightsArray.length = 0;
     shadowsArray.length = 0;
   }
@@ -39,20 +54,19 @@ class WebGLRenderState {
 
 class WebGLRenderStates {
   WebGLExtensions extensions;
-  WebGLCapabilities capabilities;
   WeakMap renderStates = WeakMap();
 
-  WebGLRenderStates(this.extensions, this.capabilities);
+  WebGLRenderStates(this.extensions);
 
   WebGLRenderState get(Object3D scene, {int renderCallDepth = 0}) {
     WebGLRenderState renderState;
 
     if (!renderStates.has(scene)) {
-      renderState = WebGLRenderState(extensions, capabilities);
+      renderState = WebGLRenderState(extensions);
       renderStates.add(key: scene, value: [renderState]);
     } else {
       if (renderCallDepth >= renderStates.get(scene).length) {
-        renderState = WebGLRenderState(extensions, capabilities);
+        renderState = WebGLRenderState(extensions);
         renderStates.get(scene).add(renderState);
       } else {
         renderState = renderStates.get(scene)[renderCallDepth];
@@ -71,6 +85,8 @@ class RenderState {
   WebGLLights lights;
   List<Light> lightsArray;
   List<Light> shadowsArray;
+  Camera? camera;
+  Map transmissionRenderTarget;
 
-  RenderState(this.lights, this.lightsArray, this.shadowsArray);
+  RenderState(this.lights, this.lightsArray, this.shadowsArray, this.camera, this.transmissionRenderTarget);
 }

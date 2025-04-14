@@ -103,8 +103,8 @@ class MultiDrawRenderList {
 final ID_ATTR_NAME = 'batchId';
 final _matrix = Matrix4();
 final _whiteColor = Color( 1, 1, 1 );
-final _invMatrixWorld = Matrix4();
-final _projScreenMatrix = Matrix4();
+// final _invMatrixWorld = Matrix4();
+// final _projScreenMatrix = Matrix4();
 final _frustum = Frustum();
 final _box = BoundingBox();
 final _sphere = BoundingSphere();
@@ -816,7 +816,7 @@ class BatchedMesh extends Mesh {
 	}
 
   @override
-	OnBeforeRender? get onBeforeRender =>({
+	OnRender? get onBeforeRender =>({
     WebGLRenderer? renderer,
     RenderTarget? renderTarget,
     Object3D? mesh,
@@ -852,7 +852,7 @@ class BatchedMesh extends Mesh {
 				.multiply( this.matrixWorld );
 			_frustum.setFromMatrix(
 				_matrix,
-				//renderer!.coordinateSystem
+				renderer!.coordinateSystem
 			);
 		}
 

@@ -3,6 +3,10 @@ part of three_webgl;
 class WebGLProperties {
   final properties = WeakMap<dynamic, Map<String, dynamic>?>();
 
+  bool has( object ) {
+		return properties.has( object );
+	}
+
   Map<String, dynamic> get(object) {
     Map<String, dynamic> map;
 
@@ -21,10 +25,13 @@ class WebGLProperties {
   }
 
   void update(object, key, value) {
-    final m = properties[object]!;
+    // final m = properties[object]!;
+    // m[key] = value;
 
-    m[key] = value;
+    properties.get( object )![ key ] = value;
   }
 
-  void dispose() {}
+  void dispose() {
+    properties.clear();
+  }
 }

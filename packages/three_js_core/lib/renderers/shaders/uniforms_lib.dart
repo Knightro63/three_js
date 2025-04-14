@@ -4,48 +4,70 @@ Map<String, dynamic> uniformsLib = {
   "common": {
     "diffuse": {"value": Color.fromHex32(0xffffff)},
     "opacity": {"value": 1.0},
-    "map": {},
+    "map": <String,dynamic>{'value': null},
+    "mapTransform": {"value": Matrix3.identity()},
+    "alphaMap": <String,dynamic>{'value': null},
+    "alphaMapTransform": {"value": Matrix3.identity()},
+    "alphaTest": {"value": 0.0},
     "uvTransform": {"value": Matrix3.identity()},
     "uv2Transform": {"value": Matrix3.identity()},
-    "alphaMap": {},
-    "alphaTest": {"value": 0.0}
   },
   "specularmap": {
-    "specularMap": {},
+    "specularMap": <String,dynamic>{'value': null},
+    'specularMapTransform': { 'value': Matrix3.identity() }
   },
   "envmap": {
     "envMap": {},
     "flipEnvMapX": {"value": -1},
     "flipEnvMapY": {"value": 1},
+    
+    'envMapRotation': { 'value': Matrix3.identity() },
+    "flipEnvMap": {"value": -1},
     "reflectivity": {"value": 1.0}, // basic, lambert, phong
     "ior": {"value": 1.5}, // physical
     "refractionRatio": {"value": 0.98}, // basic, lambert, phong
   },
   "aomap": {
-    "aoMap": {},
-    "aoMapIntensity": {"value": 1}
+    "aoMap": <String,dynamic>{'value': null},
+    "aoMapIntensity": {"value": 1},
+    'aoMapTransform': { 'value': Matrix3.identity() }
   },
   "lightmap": {
-    "lightMap": {},
-    "lightMapIntensity": {"value": 1}
+    "lightMap": <String,dynamic>{'value': null},
+    "lightMapIntensity": {"value": 1},
+    'lightMapTransform': { 'value': Matrix3.identity() }
   },
-  "emissivemap": {"emissiveMap": {}},
+  "emissivemap": {
+    "emissiveMap": <String,dynamic>{'value': null},
+    'emissiveMapTransform': { 'value': Matrix3.identity() }
+  },
   "bumpmap": {
-    "bumpMap": {},
+    "bumpMap": <String,dynamic>{'value': null},
+    'bumpMapTransform': { 'value': Matrix3.identity() },
     "bumpScale": {"value": 1}
   },
   "normalmap": {
-    "normalMap": {},
+    "normalMap": <String,dynamic>{'value': null},
+    'normalMapTransform': { 'value': Matrix3.identity() },
     "normalScale": {"value": Vector2(1, 1)}
   },
   "displacementmap": {
-    "displacementMap": {},
+    "displacementMap": <String,dynamic>{'value': null},
+    'displacementMapTransform': { 'value': Matrix3.identity() },
     "displacementScale": {"value": 1},
     "displacementBias": {"value": 0}
   },
-  "roughnessmap": {"roughnessMap": {}},
-  "metalnessmap": {"metalnessMap": {}},
-  "gradientmap": {"gradientMap": {}},
+  "roughnessmap": {
+    "roughnessMap": <String,dynamic>{'value': null},
+    'roughnessMapTransform': { 'value': Matrix3.identity() }
+  },
+  "metalnessmap": {
+    "metalnessMap": <String,dynamic>{'value': null},
+    'metalnessMapTransform': { 'value': Matrix3.identity() }
+  },
+  "gradientmap": {
+    "gradientMap": <String,dynamic>{'value': null}
+  },
   "fog": {
     "fogDensity": {"value": 0.00025},
     "fogNear": {"value": 1},
@@ -88,8 +110,10 @@ Map<String, dynamic> uniformsLib = {
       "properties": {"shadowBias": {}, "shadowNormalBias": {}, "shadowRadius": {}, "shadowMapSize": {}}
     },
 
+    'spotLightMap': { 'value': [] },
     "spotShadowMap": {"value": []},
     "spotShadowMatrix": {"value": []},
+    'spotLightMatrix': { 'value': [] },
 
     "pointLights": {
       "value": [],
@@ -122,16 +146,17 @@ Map<String, dynamic> uniformsLib = {
       "properties": {"color": {}, "position": {}, "width": {}, "height": {}}
     },
 
-    "ltc_1": {},
-    "ltc_2": {}
+    "ltc_1": <String,dynamic>{'value': null},
+    "ltc_2": <String,dynamic>{'value': null}
   },
   "points": {
     "diffuse": {"value": Color.fromHex32(0xffffff)},
     "opacity": {"value": 1.0},
     "size": {"value": 1.0},
     "scale": {"value": 1.0},
-    "map": {},
-    "alphaMap": {},
+    "map": <String,dynamic>{'value': null},
+    "alphaMap": <String,dynamic>{'value': null},
+    'alphaMapTransform': { 'value': Matrix3.identity() },
     "alphaTest": {"value": 0.0},
     "uvTransform": {"value": Matrix3.identity()}
   },
@@ -140,8 +165,10 @@ Map<String, dynamic> uniformsLib = {
     "opacity": {"value": 1.0},
     "center": {"value": Vector2(0.5, 0.5)},
     "rotation": {"value": 0.0},
-    "map": {},
-    "alphaMap": {},
+    "map": <String,dynamic>{'value': null},
+    'mapTransform': { 'value': Matrix3.identity() },
+    "alphaMap": <String,dynamic>{'value': null},
+    'alphaMapTransform': { 'value': Matrix3.identity() },
     "alphaTest": {"value": 0.0},
     "uvTransform": {"value": Matrix3.identity()}
   }

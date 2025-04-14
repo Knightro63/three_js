@@ -1,4 +1,4 @@
-String colorFragment = """
+const String colorFragment = """
 #if defined( USE_COLOR_ALPHA )
 
 	diffuseColor *= vColor;

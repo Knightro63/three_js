@@ -5,6 +5,7 @@ import './bone.dart';
 import 'dart:math' as math;
 
 final _offsetMatrix = Matrix4.identity();
+//final _identityMatrix = Matrix4.identity();
 
 /// Use an array of [bones] to create a skeleton that can be used by
 /// a [SkinnedMesh].
@@ -211,6 +212,9 @@ class Skeleton {
     bones.forEach((bone){
       bone.dispose();
     });
+
+    bones.clear();
+    boneInverses.clear();
   }
 
   Skeleton fromJson(Map<String,dynamic> json, Map<String,Bone?> bones) {

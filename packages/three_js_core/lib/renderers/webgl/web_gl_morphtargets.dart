@@ -29,6 +29,7 @@ void denormalize(Vector morph, BufferAttribute attribute) {
 }
 
 class WebGLMorphtargets {
+  bool _didDispose = false;
   final influencesList = {};
   final morphInfluences = Float32List(8);
   final morphTextures = WeakMap();
@@ -46,109 +47,112 @@ class WebGLMorphtargets {
     }
   }
 
-  void update(Object3D object, BufferGeometry geometry, Material material, WebGLProgram program) {
+  void dispose(){
+    if(_didDispose) return;
+    _didDispose = true;
+    influencesList.clear();
+    morphTextures.dispose();
+    workInfluences.clear();
+    capabilities.dispose();
+    textures.dispose();
+  }
+
+  void update(Object3D object, BufferGeometry geometry, WebGLProgram program) {
     List<num>? objectInfluences = object.morphTargetInfluences;
-    if (capabilities.isWebGL2) {
-      final morphAttribute = geometry.morphAttributes["position"] ?? geometry.morphAttributes["normal"] ?? geometry.morphAttributes["color"];
-      final morphTargetsCount = (morphAttribute != null) ? morphAttribute.length : 0;
 
-      Map? entry = morphTextures.get(geometry);
-      if (entry == null || (entry["count"] != morphTargetsCount)) {
-        if (entry != null) entry["texture"].dispose();
+    final morphAttribute = geometry.morphAttributes["position"] ?? geometry.morphAttributes["normal"] ?? geometry.morphAttributes["color"];
+    final morphTargetsCount = (morphAttribute != null) ? morphAttribute.length : 0;
 
-        final hasMorphPosition = geometry.morphAttributes["position"] != null;
-        final hasMorphNormals = geometry.morphAttributes["normal"] != null;
-        final hasMorphColors = geometry.morphAttributes["color"] != null;
+    Map? entry = morphTextures.get(geometry);
 
-        final morphTargets = geometry.morphAttributes["position"] ?? [];
-        final morphNormals = geometry.morphAttributes["normal"] ?? [];
-        final morphColors = geometry.morphAttributes["color"] ?? [];
+    if (entry == null || (entry["count"] != morphTargetsCount)) {
+      if (entry != null) entry["texture"].dispose();
 
-        int vertexDataCount = 0;
-        if (hasMorphPosition) vertexDataCount = 1;
-        if (hasMorphNormals) vertexDataCount = 2;
-        if (hasMorphColors) vertexDataCount = 3;
+      final hasMorphPosition = geometry.morphAttributes["position"] != null;
+      final hasMorphNormals = geometry.morphAttributes["normal"] != null;
+      final hasMorphColors = geometry.morphAttributes["color"] != null;
 
-        int width = (geometry.attributes["position"].count * vertexDataCount).toInt();
-        int height = 1;
+      final morphTargets = geometry.morphAttributes["position"] ?? [];
+      final morphNormals = geometry.morphAttributes["normal"] ?? [];
+      final morphColors = geometry.morphAttributes["color"] ?? [];
 
-        if (width > capabilities.maxTextureSize) {
-          height = (width / capabilities.maxTextureSize).ceil();
-          width = capabilities.maxTextureSize.toInt();
-        }
+      int vertexDataCount = 0;
+      if (hasMorphPosition) vertexDataCount = 1;
+      if (hasMorphNormals) vertexDataCount = 2;
+      if (hasMorphColors) vertexDataCount = 3;
 
-        final buffer = Float32Array((width * height * 4 * morphTargetsCount).toInt());
+      int width = (geometry.attributes["position"].count * vertexDataCount).toInt();
+      int height = 1;
 
-        final texture = DataArrayTexture(buffer, width, height, morphTargetsCount);
-        texture.type = FloatType;
-        texture.needsUpdate = true;
-
-        int vertexDataStride = vertexDataCount * 4;
-
-        for (int i = 0; i < morphTargetsCount; i++) {
-          final morphTarget = morphTargets[i];
-
-          int offset = (width * height * 4 * i).toInt();
-
-          for (int j = 0; j < morphTarget.count; j++) {
-            final stride = j * vertexDataStride;
-
-            if (hasMorphPosition) {
-              morph.fromBuffer(morphTarget, j);
-
-              if (morphTarget.normalized) {
-                denormalize(morph, morphTarget);
-              }
-
-              buffer[offset + stride + 0] = morph.x;
-              buffer[offset + stride + 1] = morph.y;
-              buffer[offset + stride + 2] = morph.z;
-              buffer[offset + stride + 3] = 0;
-            }
-
-            if (hasMorphNormals) {
-              final morphNormal = morphNormals[i];
-              morph.fromBuffer(morphNormal, j);
-
-              if (morphNormal.normalized == true) {
-                denormalize(morph, morphNormal);
-              }
-
-              buffer[offset + stride + 4] = morph.x;
-              buffer[offset + stride + 5] = morph.y;
-              buffer[offset + stride + 6] = morph.z;
-              buffer[offset + stride + 7] = 0;
-            }
-
-            if (hasMorphColors) {
-              final morphColor = morphColors[i];
-              morph.fromBuffer(morphColor, j);
-
-              if (morphColor.normalized) {
-                denormalize(morph, morphColor);
-              }
-
-              buffer[offset + stride + 8] = morph.x;
-              buffer[offset + stride + 9] = morph.y;
-              buffer[offset + stride + 10] = morph.z;
-              buffer[offset + stride + 11] = ((morphColor.itemSize == 4) ? morph.w : 1);
-            }
-          }
-        }
-
-        entry = {"count": morphTargetsCount, "texture": texture, "size": Vector2(width.toDouble(), height.toDouble())};
-
-        morphTextures.set(geometry, entry);
-
-        void disposeTexture() {
-          texture.dispose();
-          morphTextures.delete(geometry);
-          geometry.removeEventListener('dispose', disposeTexture);
-        }
-
-        geometry.addEventListener('dispose', disposeTexture);
+      if (width > capabilities.maxTextureSize) {
+        height = (width / capabilities.maxTextureSize).ceil();
+        width = capabilities.maxTextureSize.toInt();
       }
 
+      final buffer = Float32Array((width * height * 4 * morphTargetsCount).toInt());
+
+      final texture = DataArrayTexture(buffer, width, height, morphTargetsCount);
+      texture.type = FloatType;
+      texture.needsUpdate = true;
+
+      int vertexDataStride = vertexDataCount * 4;
+
+      for (int i = 0; i < morphTargetsCount; i++) {
+        final morphTarget = morphTargets[i];
+
+        int offset = (width * height * 4 * i).toInt();
+
+        for (int j = 0; j < morphTarget.count; j++) {
+          final stride = j * vertexDataStride;
+
+          if (hasMorphPosition) {
+            morph.fromBuffer(morphTarget, j);
+
+            buffer[offset + stride + 0] = morph.x;
+            buffer[offset + stride + 1] = morph.y;
+            buffer[offset + stride + 2] = morph.z;
+            buffer[offset + stride + 3] = 0;
+          }
+
+          if (hasMorphNormals) {
+            final morphNormal = morphNormals[i];
+            morph.fromBuffer(morphNormal, j);
+
+            buffer[offset + stride + 4] = morph.x;
+            buffer[offset + stride + 5] = morph.y;
+            buffer[offset + stride + 6] = morph.z;
+            buffer[offset + stride + 7] = 0;
+          }
+
+          if (hasMorphColors) {
+            final morphColor = morphColors[i];
+            morph.fromBuffer(morphColor, j);
+
+            buffer[offset + stride + 8] = morph.x;
+            buffer[offset + stride + 9] = morph.y;
+            buffer[offset + stride + 10] = morph.z;
+            buffer[offset + stride + 11] = ((morphColor.itemSize == 4) ? morph.w : 1);
+          }
+        }
+      }
+
+      entry = {"count": morphTargetsCount, "texture": texture, "size": Vector2(width.toDouble(), height.toDouble())};
+
+      morphTextures.set(geometry, entry);
+
+      void disposeTexture(event) {
+        texture.dispose();
+        morphTextures.delete(geometry);
+        geometry.removeEventListener('dispose', disposeTexture);
+      }
+
+      geometry.addEventListener('dispose', disposeTexture);
+    }
+
+		if ( object is InstancedMesh && object.morphTexture != null ) {
+			program.getUniforms().setValue( gl, 'morphTexture', object.morphTexture, textures );
+		} 
+    else {
       double morphInfluencesSum = 0;
 
       for (int i = 0; i < objectInfluences.length; i++) {
@@ -158,91 +162,9 @@ class WebGLMorphtargets {
       final morphBaseInfluence = geometry.morphTargetsRelative ? 1 : 1 - morphInfluencesSum;
       program.getUniforms().setValue(gl, 'morphTargetBaseInfluence', morphBaseInfluence);
       program.getUniforms().setValue(gl, 'morphTargetInfluences', objectInfluences);
-
-      program.getUniforms().setValue(gl, 'morphTargetsTexture', entry["texture"], textures);
-      program.getUniforms().setValue(gl, 'morphTargetsTextureSize', entry["size"]);
-    } 
-    else {
-      // When object doesn't have morph target influences defined, we treat it as a 0-length array
-      // This is important to make sure we set up morphTargetBaseInfluence / morphTargetInfluences
-
-      final length = objectInfluences.length;
-
-      List<List<num>>? influences = influencesList[geometry.id];
-
-      if (influences == null || influences.length != length) {
-        influences = [];
-
-        for (int i = 0; i < length; i++) {
-          influences.add([i, 0.0]);
-        }
-
-        influencesList[geometry.id] = influences;
-      }
-
-      // Collect influences
-
-      for (int i = 0; i < length; i++) {
-        final influence = influences[i];
-        influence[0] = i;
-        influence[1] = objectInfluences[i];
-      }
-
-      influences.sort(absNumericalSort);
-
-      for (int i = 0; i < 8; i++) {
-        if (i < length && influences[i][1] != 0) {
-          workInfluences[i][0] = influences[i][0];
-          workInfluences[i][1] = influences[i][1];
-        } else {
-          workInfluences[i][0] = MathUtils.maxSafeInteger;
-          workInfluences[i][1] = 0;
-        }
-      }
-
-      workInfluences.sort(numericalSort);
-
-      final morphTargets = geometry.morphAttributes["position"];
-      final morphNormals = geometry.morphAttributes["normal"];
-
-      double morphInfluencesSum = 0;
-
-      for (int i = 0; i < 8; i++) {
-        final influence = workInfluences[i];
-        final index = influence[0].toInt();
-        final value = influence[1];
-
-        if (index != MathUtils.maxSafeInteger && value != 0) {
-          if (morphTargets != null && geometry.getAttributeFromString('morphTarget$i') != morphTargets[index]) {
-            geometry.setAttributeFromString('morphTarget$i', morphTargets[index]);
-          }
-
-          if (morphNormals != null && geometry.getAttributeFromString('morphNormal$i') != morphNormals[index]) {
-            geometry.setAttributeFromString('morphNormal$i', morphNormals[index]);
-          }
-
-          morphInfluences[i] = value.toDouble();
-          morphInfluencesSum += value;
-        } 
-        else {
-          if (morphTargets != null && geometry.hasAttributeFromString('morphTarget$i') == true) {
-            geometry.deleteAttributeFromString('morphTarget$i');
-          }
-
-          if (morphNormals != null && geometry.hasAttributeFromString('morphNormal$i') == true) {
-            geometry.deleteAttributeFromString('morphNormal$i');
-          }
-
-          morphInfluences[i] = 0;
-        }
-      }
-
-      // GLSL shader uses formula baseinfluence * base + sum(target * influence)
-      // This allows us to switch between absolute morphs and relative morphs without changing shader code
-      // When baseinfluence = 1 - sum(influence), the above is equivalent to sum((target - base) * influence)
-      final morphBaseInfluence = geometry.morphTargetsRelative ? 1 : 1 - morphInfluencesSum;
-      program.getUniforms().setValue(gl, 'morphTargetBaseInfluence', morphBaseInfluence);
-      program.getUniforms().setValue(gl, 'morphTargetInfluences', morphInfluences);
     }
+    
+    program.getUniforms().setValue(gl, 'morphTargetsTexture', entry["texture"], textures);
+    program.getUniforms().setValue(gl, 'morphTargetsTextureSize', entry["size"]);
   }
 }

@@ -68,6 +68,7 @@ class MeshStandardMaterial extends Material {
     metalness = 0.0;
 
     map = null;
+    envMapRotation = Euler();
 
     lightMap = null;
     lightMapIntensity = 1.0;
@@ -152,6 +153,7 @@ class MeshStandardMaterial extends Material {
     alphaMap = source.alphaMap;
 
     envMap = source.envMap;
+    envMapRotation?.copy(source.envMapRotation!);
     envMapIntensity = source.envMapIntensity;
 
     wireframe = source.wireframe;

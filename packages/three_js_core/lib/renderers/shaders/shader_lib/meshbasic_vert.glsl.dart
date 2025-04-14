@@ -1,7 +1,7 @@
-String meshbasicVert = /* glsl */ """
+const String meshbasicVert = /* glsl */ """
 #include <common>
+#include <batching_pars_vertex>
 #include <uv_pars_vertex>
-#include <uv2_pars_vertex>
 #include <envmap_pars_vertex>
 #include <color_pars_vertex>
 #include <fog_pars_vertex>
@@ -13,9 +13,10 @@ String meshbasicVert = /* glsl */ """
 void main() {
 
 	#include <uv_vertex>
-	#include <uv2_vertex>
 	#include <color_vertex>
-  #include <morphcolor_vertex>
+	#include <morphinstance_vertex>
+	#include <morphcolor_vertex>
+	#include <batching_vertex>
 
 	#if defined ( USE_ENVMAP ) || defined ( USE_SKINNING )
 

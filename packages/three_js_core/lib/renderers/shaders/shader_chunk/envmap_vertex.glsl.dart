@@ -1,4 +1,4 @@
-String envmapVertex = """
+const String envmapVertex = """
 #ifdef USE_ENVMAP
 
 	#ifdef ENV_WORLDPOS

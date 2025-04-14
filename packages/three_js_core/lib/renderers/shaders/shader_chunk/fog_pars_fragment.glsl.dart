@@ -1,4 +1,4 @@
-String fogParsFragment = """
+const String fogParsFragment = """
 #ifdef USE_FOG
 
 	uniform vec3 fogColor;

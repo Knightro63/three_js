@@ -66,7 +66,8 @@ class ThreeJS {
     required this.setup,
     Size? size,
     core.WebGLRenderer? renderer,
-    this.texture
+    this.texture,
+    this.loadingWidget,
   }){
     this.settings = settings ?? Settings();
     _size = size;
@@ -74,6 +75,7 @@ class ThreeJS {
   }
 
   //bool _allowDeleteTexture = true;
+  Widget? loadingWidget;
   Size? _size;
   late Settings settings;
   final GlobalKey<core.PeripheralsState> globalKey = GlobalKey<core.PeripheralsState>();
@@ -109,6 +111,8 @@ class ThreeJS {
   List<Function(double dt)> events = [];
   List<Function()> disposeEvents = [];
 
+  FlutterAngle angle = FlutterAngle();
+
   void addAnimationEvent(Function(double dt) event){
     events.add(event);
   }
@@ -120,15 +124,23 @@ class ThreeJS {
     if(disposed) return;
     disposed = true;
     ticker?.dispose();
-    if(texture != null){
-      FlutterAngle.deleteTexture(texture!);
-    }
     renderer?.dispose();
     renderTarget?.dispose();
+    lateRenderer?.dispose();
     scene.dispose();
     for(final event in disposeEvents){
       event.call();
     }
+
+    
+    camera.dispose();
+    events.clear();
+    disposeEvents.clear();
+
+    allNativeData.dispose();
+
+    angle.dispose([texture!]);
+    texture = null;
   }
 
   void initSize(BuildContext context){
@@ -163,7 +175,7 @@ class ThreeJS {
   }
   Future<void> render([double? dt]) async{
     if(sourceTexture == null){
-      FlutterAngle.activateTexture(texture!);
+      angle.activateTexture(texture!);
     }
     rendererUpdate?.call(); 
     if(postProcessor == null){
@@ -176,9 +188,9 @@ class ThreeJS {
     }
     
     if(sourceTexture != null){
-      FlutterAngle.activateTexture(texture!);
+      angle.activateTexture(texture!);
     }
-    await FlutterAngle.updateTexture(texture!,sourceTexture);
+    await angle.updateTexture(texture!,sourceTexture);
   }
   
   void initRenderer() {
@@ -269,9 +281,9 @@ class ThreeJS {
     width = screenSize!.width;
     height = screenSize!.height;
     if(texture == null){
-      await FlutterAngle.initOpenGL(true);
+      await angle.init(false,true);
       
-      texture = await FlutterAngle.createTexture(      
+      texture = await angle.createTexture(      
         AngleOptions(
           width: width.toInt(), 
           height: height.toInt(), 
@@ -293,7 +305,6 @@ class ThreeJS {
       initSize(context);
       return core.Peripherals(
         key: globalKey,
-        
         builder: (BuildContext context) {
           return Container(
             width: width,
@@ -306,14 +317,26 @@ class ThreeJS {
             child: SizeChangedLayoutNotifier(
               child: Builder(builder: (BuildContext context) {
                   if (kIsWeb) {
-                    return texture != null? HtmlElementView(viewType:texture!.textureId.toString()):Container();
+                    return texture != null && mounted? HtmlElementView(viewType:texture!.textureId.toString()):loadingWidget ?? Container(
+                      width: MediaQuery.of(context).size.width,
+                      height: MediaQuery.of(context).size.height,
+                      color: Theme.of(context).canvasColor,
+                      alignment: Alignment.center,
+                      child: const CircularProgressIndicator()
+                    );
                   } 
                   else {
-                    return texture != null?
+                    return texture != null && mounted?
                       Transform.scale(
                         scaleY: sourceTexture != null || Platform.isAndroid?1:-1,
                         child:Texture(textureId: texture!.textureId)
-                      ):Container();
+                      ):loadingWidget ?? Container(
+                        width: MediaQuery.of(context).size.width,
+                        height: MediaQuery.of(context).size.height,
+                        color: Theme.of(context).canvasColor,
+                        alignment: Alignment.center,
+                        child: const CircularProgressIndicator()
+                      );
                   }
                 })
               )

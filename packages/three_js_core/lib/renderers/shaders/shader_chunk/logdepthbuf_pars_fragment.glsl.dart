@@ -1,5 +1,5 @@
-String logdepthbufParsFragment = """
-#if defined( USE_LOGDEPTHBUF ) && defined( USE_LOGDEPTHBUF_EXT )
+const String logdepthbufParsFragment = """
+#if defined( USE_LOGDEPTHBUF )
 
 	uniform float logDepthBufFC;
 	varying float vFragDepth;

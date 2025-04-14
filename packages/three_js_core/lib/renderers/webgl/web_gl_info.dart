@@ -3,15 +3,25 @@ part of three_webgl;
 class WebGLInfo {
   RenderingContext gl;
 
-  Map<String, int> memory = {"geometries": 0, "textures": 0};
-  Map<String, double> render = {"frame": 0.0, "calls": 0.0, "triangles": 0.0, "points": 0.0, "lines": 0.0};
+  Map<String, int> memory = {
+    "geometries": 0, 
+    "textures": 0
+  };
+
+  Map<String, double> render = {
+    "frame": 0.0, 
+    "calls": 0.0, 
+    "triangles": 0.0, 
+    "points": 0.0, 
+    "lines": 0.0
+  };
 
   dynamic programs;
   bool autoReset = true;
 
   WebGLInfo(this.gl);
 
-  void update(int count, int mode, int instanceCount) {
+  void update(count, mode, instanceCount) {
     render["calls"] = render["calls"]! + 1;
 
     if (mode == WebGL.TRIANGLES) {
@@ -36,4 +46,6 @@ class WebGLInfo {
     render["points"] = 0;
     render["lines"] = 0;
   }
+
+  void dispose(){}
 }

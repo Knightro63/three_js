@@ -1,5 +1,7 @@
 export './background_frag.glsl.dart';
 export './background_vert.glsl.dart';
+export './background_cube_frag.glsl.dart';
+export './background_cube_vert.glsl.dart';
 export './cube_frag.glsl.dart';
 export './cube_vert.glsl.dart';
 export './depth_frag.glsl.dart';

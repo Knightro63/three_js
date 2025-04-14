@@ -1,4 +1,4 @@
-String fogFragment = """
+const String fogFragment = """
 #ifdef USE_FOG
 
 	#ifdef FOG_EXP2

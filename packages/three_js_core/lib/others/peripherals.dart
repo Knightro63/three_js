@@ -53,9 +53,45 @@ class PeripheralsState extends State<Peripherals> {
 
   dynamic pointerLockElement;
 
+  late final PanGestureRecognizer panGestureRecognizer;
+
+  double _prevScale = 0;
+
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((t) {
+      if (_clientWidth == null || _clientHeight == null) {
+        RenderBox getBox = context.findRenderObject() as RenderBox;
+        _clientWidth = getBox.size.width;
+        _clientHeight = getBox.size.height;
+        Offset temp = getBox.localToGlobal(Offset.zero);
+        _offsetLeft = temp.dx;
+        _offsetTop = temp.dy;
+        
+      }
+      FocusScope.of(context).requestFocus(focusNode);
+    });
+
+    panGestureRecognizer = PanGestureRecognizer(
+      supportedDevices: {
+        PointerDeviceKind.touch,
+        PointerDeviceKind.mouse,
+        PointerDeviceKind.stylus,
+        PointerDeviceKind.invertedStylus,
+        PointerDeviceKind.trackpad
+      }
+    )
+    ..onStart = (event){
+      _onDragEvent(context, PeripheralType.pointerdown ,event);
+    }
+    ..onEnd = (event){
+      _onDragEvent(context, PeripheralType.pointerup, event);
+
+    }
+    ..onUpdate = (event){
+      _onDragEvent(context, PeripheralType.pointermove,event);
+    };
   }
 
   void removeAllListeners() {
@@ -76,19 +112,6 @@ class PeripheralsState extends State<Peripherals> {
 
   @override
   Widget build(BuildContext context) {
-    WidgetsBinding.instance.addPostFrameCallback((t) {
-      if (_clientWidth == null || _clientHeight == null) {
-        RenderBox getBox = context.findRenderObject() as RenderBox;
-        _clientWidth = getBox.size.width;
-        _clientHeight = getBox.size.height;
-        Offset temp = getBox.localToGlobal(Offset.zero);
-        _offsetLeft = temp.dx;
-        _offsetTop = temp.dy;
-        
-      }
-      FocusScope.of(context).requestFocus(focusNode);
-    });
-
     return KeyboardListener(
       focusNode: focusNode,
       onKeyEvent: (event){
@@ -99,28 +122,34 @@ class PeripheralsState extends State<Peripherals> {
           _onKeyUpEvent(context, event.logicalKey);
         }
       },
-      child:Listener(
-        onPointerSignal: (pointerSignal) {
-          if (pointerSignal is PointerScrollEvent) {
-            _onWheel(context, pointerSignal);
-          }
+      child:GestureDetector(
+        onScaleUpdate: (event){
+          double s = event.scale-_prevScale < 0?1:-1;
+          _onScaleEvent(context, PeripheralType.wheel, {'scale':s});
+          _prevScale = event.scale;
         },
-        onPointerDown: (PointerDownEvent event) {
-          _onPointerDown(context, event);
-        },
-        onPointerMove: (PointerMoveEvent event) {
-          _onPointerMove(context, event);
-        },
-        onPointerUp: (PointerUpEvent event) {
-          _onPointerUp(context, event);
-        },
-        onPointerCancel: (PointerCancelEvent event) {
-          _onPointerCancel(context, event);
-        },
-        onPointerHover: (PointerHoverEvent event){
-          _onMouseMove(context, event);
-        },
-        child: widget.builder(context),
+        child: Listener(
+          onPointerPanZoomStart: panGestureRecognizer.addPointerPanZoom,
+          onPointerSignal: (event) {
+            if (event is PointerScrollEvent) {
+              _onPointerEvent(context, PeripheralType.wheel, event);
+            }
+          },
+          onPointerDown: (PointerDownEvent event) {
+            _onPointerEvent(context, PeripheralType.pointerdown, event);
+            FocusScope.of(context).requestFocus(focusNode);
+          },
+          onPointerMove: (PointerMoveEvent event) {
+            _onPointerEvent(context, PeripheralType.pointermove, event);
+          },
+          onPointerUp: (PointerUpEvent event) {
+            _onPointerEvent(context, PeripheralType.pointerup, event);
+          },
+          onPointerHover: (PointerHoverEvent event){
+            _onPointerEvent(context, PeripheralType.pointerHover , event);
+          },
+          child: widget.builder(context),
+        )
       )
     );
   }
@@ -132,30 +161,18 @@ class PeripheralsState extends State<Peripherals> {
     //final wpe = WebPointerEvent.fromPointerScrollEvent(context, event);
     _emit(PeripheralType.keyup, event);
   }
-  void _onWheel(BuildContext context, PointerScrollEvent event) {
-    final wpe = WebPointerEvent.fromPointerScrollEvent(context, event);
-    _emit(PeripheralType.wheel, wpe);
-  }
 
-  void _onPointerDown(BuildContext context, PointerDownEvent event) {
-    final wpe = WebPointerEvent.fromPointerDownEvent(context, event);
-    _emit(PeripheralType.pointerdown, wpe);
+  void _onScaleEvent(BuildContext context, PeripheralType type, event) {
+    final wpe = WebPointerEvent.fromScaleEvent(context, event);
+    _emit(type, wpe);
   }
-
-  void _onPointerMove(BuildContext context, PointerMoveEvent event) {
-    final wpe = WebPointerEvent.fromPointerMoveEvent(context, event);
-    _emit(PeripheralType.pointermove, wpe);
+  void _onDragEvent(BuildContext context, PeripheralType type, event) {
+    final wpe = WebPointerEvent.fromDragEvent(context, event);
+    _emit(type, wpe);
   }
-  void _onMouseMove(BuildContext context, PointerHoverEvent event) {
-    final wpe = WebPointerEvent.fromMouseMoveEvent(context, event);
-    _emit(PeripheralType.pointerHover, wpe);
-  }
-  void _onPointerUp(BuildContext context, PointerUpEvent event) {
-    final wpe = WebPointerEvent.fromPointerUpEvent(context, event);
-    _emit(PeripheralType.pointerup, wpe);
-  }
-  void _onPointerCancel(BuildContext context, PointerCancelEvent event) {
-    // emit("pointercancel", event);
+  void _onPointerEvent(BuildContext context, PeripheralType type, PointerEvent event) {
+    final wpe = WebPointerEvent.fromPointerEvent(context, event);
+    _emit(type, wpe);
   }
 
   void _emit(PeripheralType name, event) {
@@ -166,22 +183,6 @@ class PeripheralsState extends State<Peripherals> {
         cb(event);
       }
     }
-  }
-
-  void setPointerCapture(int pointerId) {
-    // TODO
-  }
-
-  void releasePointerCapture(int pointerId) {
-    // TODO
-  }
-
-  void requestPointerLock() {
-    // TODO
-  }
-
-  void exitPointerLock() {
-    // TODO
   }
 }
 
@@ -216,9 +217,22 @@ class WebPointerEvent {
   }
 
   static int getButton(event) {
-    if (event.kind == PointerDeviceKind.touch && event is PointerDownEvent) {
+    if(event is DragUpdateDetails || event is DragStartDetails){
       return 0;
-    } else {
+    }
+    else if(event is ScaleUpdateDetails){
+      return 4;
+    }
+    else if (
+      event.kind == PointerDeviceKind.touch && 
+      event is PointerDownEvent
+    ) {
+      return 0;
+    }
+    else if(event is PointerPanZoomUpdateEvent){
+      return 2;
+    }
+    else {
       final leftButtonPressed = event.buttons & 1 > 0;
       final rightButtonPressed = event.buttons & 2 > 0;
       final middleButtonPressed = event.buttons & 4 > 0;
@@ -235,7 +249,7 @@ class WebPointerEvent {
     }
   }
 
-  static WebPointerEvent convertEvent(context, event) {
+  static WebPointerEvent convertPointerEvent(BuildContext context, PointerEvent event) {
     final wpe = WebPointerEvent();
 
     wpe.pointerId = event.pointer;
@@ -249,15 +263,23 @@ class WebPointerEvent {
     wpe.pageX = event.position.dx;
     wpe.pageY = event.position.dy;
 
-    if (event is PointerScrollEvent) {
-      wpe.deltaX = event.scrollDelta.dx;
-      wpe.deltaY = event.scrollDelta.dy;
-    }
-    final EventTouch touch = EventTouch();
     //if(event is PointerMoveEvent || event is PointerHoverEvent) {
       wpe.movementX = event.delta.dx;
       wpe.movementY = event.delta.dy;
     //}
+
+    if (event is PointerScrollEvent) {
+      wpe.deltaX = event.scrollDelta.dx;
+      wpe.deltaY = event.scrollDelta.dy;
+    }
+    else if(event is PointerPanZoomUpdateEvent){
+      wpe.deltaX = event.localPanDelta.dx;
+      wpe.deltaY = event.localPanDelta.dy;
+
+      wpe.clientX = event.position.dx - event.pan.dx;
+      wpe.clientY = event.position.dy - event.pan.dy;
+    }
+    final EventTouch touch = EventTouch();
 
     touch.pointer = event.pointer;
     touch.pageX = event.position.dx;
@@ -271,32 +293,88 @@ class WebPointerEvent {
     return wpe;
   }
 
-  factory WebPointerEvent.fromPointerScrollEvent(
-      BuildContext context, PointerScrollEvent event) {
-    return convertEvent(context, event);
+  static WebPointerEvent convertDragEvent(BuildContext context, event) {
+    final wpe = WebPointerEvent();
+
+    wpe.pointerId = 512;
+    wpe.pointerType = 'touch_pad';
+    wpe.button = 0;
+
+    RenderBox getBox = context.findRenderObject() as RenderBox;
+    final local = getBox.globalToLocal(event.globalPosition);
+    wpe.clientX = local.dx;
+    wpe.clientY = local.dy;
+
+    wpe.pageX = event.globalPosition.dx;
+    wpe.pageY = event.globalPosition.dy;
+    if(event is! DragStartDetails && event is! DragEndDetails){
+      wpe.movementX = event.delta.dx;
+      wpe.movementY = event.delta.dy;
+    }
+
+    wpe.deltaX = event.globalPosition.dx;
+    wpe.deltaY = event.globalPosition.dy;
+    wpe.clientX = event.globalPosition.dx;
+    wpe.clientY = event.globalPosition.dy;
+
+    final EventTouch touch = EventTouch();
+
+    touch.pointer = 512;
+    touch.pageX = event.localPosition.dx;
+    touch.pageY = event.localPosition.dy;
+    touch.clientX = event.localPosition.dx;
+    touch.clientY = event.localPosition.dy;
+
+    wpe.touches.add(touch);
+    wpe.changedTouches = [touch];
+
+    return wpe;
+  }
+  static WebPointerEvent convertScaleEvent(BuildContext context, event) {
+    final wpe = WebPointerEvent();
+
+    wpe.pointerId = 522;
+    wpe.pointerType = 'mouse';
+    wpe.button = 4;
+
+    wpe.clientX = event['scale'];
+    wpe.clientY = event['scale'];
+
+    wpe.pageX = event['scale'];
+    wpe.pageY = event['scale'];
+    wpe.movementX = event['scale'];
+    wpe.movementY = event['scale'];
+
+    wpe.deltaX = event['scale'];
+    wpe.deltaY = event['scale'];
+
+    wpe.clientX = event['scale'];
+    wpe.clientY = event['scale'];
+
+    final EventTouch touch = EventTouch();
+
+    touch.pointer = 522;
+    touch.pageX = event['scale'];
+    touch.pageY = event['scale'];
+
+    touch.clientX = event['scale'];
+    touch.clientY = event['scale'];
+
+    wpe.touches.add(touch);
+    wpe.changedTouches = [touch];
+
+    return wpe;
   }
 
-  factory WebPointerEvent.fromPointerDownEvent(
-      BuildContext context, PointerDownEvent event) {
-    return convertEvent(context, event);
+  factory WebPointerEvent.fromPointerEvent(BuildContext context, PointerEvent event) {
+    return convertPointerEvent(context, event);
   }
-
-  factory WebPointerEvent.fromPointerMoveEvent(
-      BuildContext context, PointerMoveEvent event) {
-    return convertEvent(context, event);
+  factory WebPointerEvent.fromDragEvent(BuildContext context, event) {
+    return convertDragEvent(context, event);
   }
-  factory WebPointerEvent.fromMouseMoveEvent(BuildContext context, PointerHoverEvent event) {
-    return convertEvent(context, event);
+  factory WebPointerEvent.fromScaleEvent(BuildContext context, event) {
+    return convertScaleEvent(context, event);
   }
-  factory WebPointerEvent.fromPointerUpEvent(
-      BuildContext context, PointerUpEvent event) {
-    return convertEvent(context, event);
-  }
-
-  void preventDefault() {
-    // TODO
-  }
-  
   @override
   String toString() {
     return "pointerId: $pointerId button: $button pointerType: $pointerType clientX: $clientX clientY: $clientY pageX: $pageX pageY: $pageY ";

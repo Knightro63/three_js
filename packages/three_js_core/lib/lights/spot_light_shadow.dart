@@ -1,5 +1,6 @@
+import 'package:three_js_math/math/index.dart';
+
 import '../cameras/index.dart';
-import 'dart:math' as math;
 import 'light.dart';
 import 'light_shadow.dart';
 
@@ -53,8 +54,7 @@ class SpotLightShadow extends LightShadow {
   @override
   void updateMatrices(Light light, {int viewportIndex = 0}) {
     PerspectiveCamera camera = this.camera as PerspectiveCamera;
-
-    final fov = (math.pi / 180.0) * 2 * light.angle! * focus;
+    final fov = light.angle!.toDeg()* 2 * focus;
     final aspect = mapSize.x / mapSize.y;
     final far = light.distance ?? camera.far;
 

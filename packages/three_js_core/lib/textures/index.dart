@@ -14,4 +14,6 @@ export 'open_gl_texture.dart';
 export 'framebuffer_texture.dart';
 export './source.dart';
 export 'group_texture.dart';
-
+export 'comperssed_array_texture.dart';
+export 'texture_utils.dart';
+export 'flutter_texture.dart';

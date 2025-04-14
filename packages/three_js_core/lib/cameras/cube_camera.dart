@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 
-import '../others/console.dart';
 import '../core/index.dart';
 import 'package:three_js_math/three_js_math.dart';
 import '../renderers/index.dart';
@@ -46,11 +45,6 @@ class CubeCamera extends Object3D {
 
   CubeCamera(double near, double far, this.renderTarget) {
     type = 'CubeCamera';
-
-    if (renderTarget.isWebGLCubeRenderTarget != true) {
-      console.warning('CubeCamera: The constructor now expects an instance of WebGLCubeRenderTarget as third parameter.');
-      return;
-    }
 
     cameraPX = PerspectiveCamera(fov, aspect, near, far);
     cameraPX.layers = layers;
@@ -139,5 +133,16 @@ class CubeCamera extends Object3D {
     renderer.xr.enabled = currentXrEnabled;
 
     renderTarget.texture.needsPMREMUpdate = true;
+  }
+
+  @override
+  void dispose(){
+    super.dispose();
+    cameraNX.dispose();
+    cameraNY.dispose();
+    cameraNZ.dispose();
+    cameraPX.dispose();
+    cameraPY.dispose();
+    cameraPZ.dispose();
   }
 }

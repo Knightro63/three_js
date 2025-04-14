@@ -16,18 +16,31 @@ class BaseWebGLBufferRenderer {
   void setMode(value) {
     throw (" BaseWebGLBufferRenderer.setMode value: $value ");
   }
+
+  void renderMultiDraw(List<int> starts, List<int> counts, int drawCount) {
+    throw (" BaseWebGLBufferRenderer.renderMultiDraw not supported ");
+  }
+
+  void renderMultiDrawInstances(List<int> starts, List<int> counts, int drawCount, List<int> primcount ) {
+    throw (" BaseWebGLBufferRenderer.renderMultiDrawInstances not supported ");
+  }
 }
 
 class WebGLBufferRenderer extends BaseWebGLBufferRenderer {
+  bool _didDispose = false;
   RenderingContext gl;
   bool isWebGL2 = true;
   dynamic mode;
   WebGLExtensions extensions;
   WebGLInfo info;
-  WebGLCapabilities capabilities;
 
-  WebGLBufferRenderer(this.gl, this.extensions, this.info, this.capabilities) {
-    isWebGL2 = capabilities.isWebGL2;
+  WebGLBufferRenderer(this.gl, this.extensions, this.info);
+
+  void dispose(){
+    if(_didDispose) return;
+    _didDispose = true;
+    extensions.dispose();
+    info.dispose();
   }
 
   @override
@@ -44,24 +57,51 @@ class WebGLBufferRenderer extends BaseWebGLBufferRenderer {
   @override
   void renderInstances(int start, int count, int primcount) {
     if (primcount == 0) return;
-
-    dynamic extension;
-    String methodName;
-
-    if (isWebGL2) {
-      gl.drawArraysInstanced(mode, start, count, primcount);
-    } 
-    else {
-      extension = extensions.get('ANGLE_instanced_arrays');
-      methodName = 'drawArraysInstancedANGLE';
-
-      if (extension == null) {
-        console.info('WebGLBufferRenderer: using three.InstancedBufferGeometry but hardware does not support extension ANGLE_instanced_arrays.');
-        return;
-      }
-      extension[methodName](mode, start, count, primcount);
-    }
-
+    gl.drawArraysInstanced(mode, start, count, primcount);
     info.update(count, mode, primcount);
   }
+
+  @override
+	void renderMultiDraw(List<int> starts, List<int> counts, int drawCount) {
+		if ( drawCount == 0 ) return;
+		final extension = extensions.get( 'WEBGL_multi_draw' );
+
+		if ( extension == null ) {
+			for (int i = 0; i < drawCount; i ++ ) {
+				render(starts[i], counts[i]);
+			}
+		} 
+    else {
+			extension.multiDrawArraysWEBGL( mode, starts, 0, counts, 0, drawCount );
+			int elementCount = 0;
+			for (int i = 0; i < drawCount; i ++ ) {
+				elementCount += counts[i];
+			}
+
+			info.update( elementCount, mode, 1 );
+		}
+	}
+
+  @override
+	void renderMultiDrawInstances(List<int> starts, List<int> counts, int drawCount, List<int> primcount ) {
+		if ( drawCount == 0 ) return;
+		final extension = extensions.get( 'WEBGL_multi_draw' );
+
+		if ( extension == null ) {
+			for (int i = 0; i < starts.length; i ++ ) {
+				renderInstances(starts[i], counts[i], primcount[i]);
+			}
+		} 
+    else {
+			extension.multiDrawArraysInstancedWEBGL( mode, starts, 0, counts, 0, primcount, 0, drawCount );
+
+			int elementCount = 0;
+			for (int i = 0; i < drawCount; i ++ ) {
+				elementCount += counts[ i ];
+			}
+			for (int i = 0; i < primcount.length; i ++ ) {
+				info.update(elementCount, mode, primcount[i]);
+			}
+		}
+	}
 }

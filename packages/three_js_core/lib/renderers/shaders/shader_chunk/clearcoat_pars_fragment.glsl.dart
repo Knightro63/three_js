@@ -1,13 +1,7 @@
-String clearcoatParsFragment = """
+const String clearcoatParsFragment = """
 #ifdef USE_CLEARCOATMAP
 
 	uniform sampler2D clearcoatMap;
-
-#endif
-
-#ifdef USE_CLEARCOAT_ROUGHNESSMAP
-
-	uniform sampler2D clearcoatRoughnessMap;
 
 #endif
 
@@ -15,6 +9,12 @@ String clearcoatParsFragment = """
 
 	uniform sampler2D clearcoatNormalMap;
 	uniform vec2 clearcoatNormalScale;
+
+#endif
+
+#ifdef USE_CLEARCOAT_ROUGHNESSMAP
+
+	uniform sampler2D clearcoatRoughnessMap;
 
 #endif
 """;

@@ -1,4 +1,4 @@
-String depthFrag = """
+const String depthFrag = """
 #if DEPTH_PACKING == 3200
 
 	uniform float opacity;
@@ -11,6 +11,7 @@ String depthFrag = """
 #include <map_pars_fragment>
 #include <alphamap_pars_fragment>
 #include <alphatest_pars_fragment>
+#include <alphahash_pars_fragment>
 #include <logdepthbuf_pars_fragment>
 #include <clipping_planes_pars_fragment>
 
@@ -18,9 +19,8 @@ varying vec2 vHighPrecisionZW;
 
 void main() {
 
-	#include <clipping_planes_fragment>
-
 	vec4 diffuseColor = vec4( 1.0 );
+	#include <clipping_planes_fragment>
 
 	#if DEPTH_PACKING == 3200
 
@@ -31,6 +31,7 @@ void main() {
 	#include <map_fragment>
 	#include <alphamap_fragment>
 	#include <alphatest_fragment>
+	#include <alphahash_fragment>
 
 	#include <logdepthbuf_fragment>
 

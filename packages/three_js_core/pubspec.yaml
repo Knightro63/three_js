@@ -1,6 +1,6 @@
 name: three_js_core
 description: "Flutter three_js_core package converted from threejs and three_dart package made for three_js."
-version: 0.0.4
+version: 0.1.0
 homepage: https://github.com/Knightro63/three_js/tree/main/packages/three_js_core
 
 environment:
@@ -10,11 +10,11 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  logger: ^2.3.0
-  three_js_math: ^0.0.4
+  logger: ^2.5.0
+  three_js_math: ^0.1.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^3.0.0
+  flutter_lints: ^5.0.0
 

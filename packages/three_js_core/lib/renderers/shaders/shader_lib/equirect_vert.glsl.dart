@@ -1,4 +1,4 @@
-String equirectVert = """
+const String equirectVert = """
 varying vec3 vWorldDirection;
 
 #include <common>

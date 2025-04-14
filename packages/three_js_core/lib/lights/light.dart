@@ -24,6 +24,7 @@ class Light extends Object3D {
   bool isHemisphereLightProbe = false;
   bool isHemisphereLight = false;
 
+  dynamic map;
   Color? groundColor;
 
   /// [color] - (optional) hexadecimal color of the light. Default
@@ -58,9 +59,7 @@ class Light extends Object3D {
 
     Light source1 = source as Light;
 
-    if(source1.color != null){
-      color?.setFrom(source1.color!);
-    }
+    color?.setFrom(source1.color!);
     intensity = source1.intensity;
 
     return this;

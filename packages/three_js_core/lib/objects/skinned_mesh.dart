@@ -10,8 +10,13 @@ final _basePosition = Vector3.zero();
 final _skinIndex = Vector4.identity();
 final _skinWeight = Vector4.identity();
 
-final _vector = Vector3.zero();
-final _matrix = Matrix4.identity();
+final _vector3 = Vector3();
+final _matrix4 = Matrix4();
+final _vertex = Vector3();
+
+final _sphere = BoundingSphere();
+final _inverseMatrix = Matrix4();
+final _ray = Ray();
 
 /// A mesh that has a [Skeleton] with [bones] that can then be
 /// used to animate the vertices of the geometry.
@@ -61,8 +66,10 @@ final _matrix = Matrix4.identity();
 /// ```
 /// 
 class SkinnedMesh extends Mesh {
-  String bindMode = "attached";
+  String bindMode = AttachedBindMode;
   Matrix4 bindMatrixInverse = Matrix4.identity();
+  BoundingBox? boundingBox;
+  BoundingSphere? boundingSphere;
 
   /// [geometry] - an instance of [BufferGeometry].
   /// 
@@ -72,6 +79,49 @@ class SkinnedMesh extends Mesh {
     type = "SkinnedMesh";
     bindMatrix = Matrix4.identity();
   }
+
+	
+	/// Computes the bounding box of the skinned mesh, and updates {@link SkinnedMesh#boundingBox}.
+	/// The bounding box is not automatically computed by the engine; this method must be called by your app.
+	/// If the skinned mesh is animated, the bounding box should be recomputed per frame in order to reflect
+	/// the current animation state.
+	void computeBoundingBox() {
+		final geometry = this.geometry;
+
+		if ( this.boundingBox == null ) {
+			this.boundingBox = new BoundingBox();
+		}
+
+		this.boundingBox?.empty();
+
+		final positionAttribute = geometry?.getAttributeFromString( 'position' );
+
+		for (int i = 0; i < positionAttribute.count; i ++ ) {
+			this.getVertexPosition( i, _vertex );
+			this.boundingBox?.expandByPoint( _vertex );
+		}
+	}
+
+  /// Computes the bounding sphere of the skinned mesh, and updates {@link SkinnedMesh#boundingSphere}.
+  /// The bounding sphere is automatically computed by the engine once when it is needed, e.g., for ray casting
+  /// and view frustum culling. If the skinned mesh is animated, the bounding sphere should be recomputed
+  /// per frame in order to reflect the current animation state.
+	void computeBoundingSphere() {
+		final geometry = this.geometry;
+
+		if ( this.boundingSphere == null ) {
+			this.boundingSphere = new BoundingSphere();
+		}
+
+		this.boundingSphere?.empty();
+
+		final positionAttribute = geometry?.getAttributeFromString( 'position' );
+
+		for (int i = 0; i < positionAttribute.count; i ++ ) {
+			this.getVertexPosition( i, _vertex );
+			this.boundingSphere?.expandByPoint( _vertex );
+		}
+	}
 
   /// This method does currently not clone an instance of [name] correctly.
   /// Please use [SkeletonUtils.clone] in the meanwhile.
@@ -94,6 +144,44 @@ class SkinnedMesh extends Mesh {
 
     return this;
   }
+
+	void raycast(Raycaster raycaster, List<Intersection> intersects ) {
+		final material = this.material;
+		final matrixWorld = this.matrixWorld;
+
+		if ( material == null ) return;
+
+		// test with bounding sphere in world space
+
+		if ( this.boundingSphere == null ) this.computeBoundingSphere();
+
+		_sphere.setFrom( this.boundingSphere! );
+		_sphere.applyMatrix4( matrixWorld );
+
+		if ( raycaster.ray.intersectsSphere( _sphere ) == false ) return;
+
+		// convert ray to local space of skinned mesh
+
+		_inverseMatrix.setFrom( matrixWorld ).invert();
+		_ray.copyFrom( raycaster.ray ).applyMatrix4( _inverseMatrix );
+
+		// test with bounding box in local space
+
+		if ( this.boundingBox != null ) {
+			if ( _ray.intersectsBox( this.boundingBox! ) == false ) return;
+		}
+
+		// test for intersections with geometry
+
+		this.computeIntersections( raycaster, intersects, _ray );
+	}
+
+  @override
+	Vector3 getVertexPosition(int index, Vector3 target ) {
+		super.getVertexPosition( index, target );
+		this.applyBoneTransform( index, target );
+		return target;
+	}
   
   /// [skeleton] - [Skeleton] created from a [Bones] tree.
   /// 
@@ -135,7 +223,7 @@ class SkinnedMesh extends Mesh {
       else {
         vector.setValues(1, 0, 0, 0); // do something reasonable
       }
-      skinWeight.setXYZW(i, vector.x.toDouble(), vector.y.toDouble(), vector.z.toDouble(), vector.w.toDouble());
+      skinWeight.setXYZW(i, vector.x, vector.y, vector.z, vector.w);
     }
   }
 
@@ -143,10 +231,10 @@ class SkinnedMesh extends Mesh {
   void updateMatrixWorld([bool force = false]) {
     super.updateMatrixWorld(force);
 
-    if (bindMode == 'attached') {
+    if (bindMode == AttachedBindMode) {
       bindMatrixInverse..setFrom(matrixWorld)..invert();
     } 
-    else if (bindMode == 'detached') {
+    else if (bindMode == DetachedBindMode) {
       bindMatrixInverse..setFrom(bindMatrix!)..invert();
     } 
     else {
@@ -169,10 +257,10 @@ class SkinnedMesh extends Mesh {
       final weight = _skinWeight[i];
       if (weight != 0) {
         final boneIndex = _skinIndex[i].toInt();
-        _matrix.multiply2(skeleton!.bones[boneIndex].matrixWorld,
+        _matrix4.multiply2(skeleton!.bones[boneIndex].matrixWorld,
             skeleton.boneInverses[boneIndex]);
         target.addScaled(
-            _vector..setFrom(_basePosition)..applyMatrix4(_matrix), weight);
+            _vector3..setFrom(_basePosition)..applyMatrix4(_matrix4), weight);
       }
     }
     target.applyMatrix4(bindMatrixInverse);

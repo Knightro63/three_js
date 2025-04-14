@@ -104,6 +104,7 @@ enum MaterialProperty{
 /// The following properties and methods are inherited by all other material
 /// types (although they may have different defaults).
 class Material with EventDispatcher {
+  Euler? envMapRotation;
   dynamic metalnessNode;
   dynamic roughnessNode;
   dynamic normalNode;
@@ -115,8 +116,9 @@ class Material with EventDispatcher {
   bool fog = false;
   int blending = NormalBlending;
   int side = FrontSide;
-  bool vertexColors = false;
 
+  bool vertexColors = false;
+  bool forceSinglePass = false;
   bool sizeAttenuation = false;
 
   Vector2? normalScale;
@@ -145,6 +147,7 @@ class Material with EventDispatcher {
   List<Plane>? clippingPlanes;
   bool clipIntersection = false;
   bool clipShadows = false;
+  bool alphaHash = false;
 
   int? shadowSide;
   bool colorWrite = true;
@@ -214,6 +217,10 @@ class Material with EventDispatcher {
   Texture? specularColorMap;
   Texture? sheenColorMap;
 
+  Texture? anisotropyMap;
+  Texture? iridescenceMap;
+  Texture? iridescenceThicknessMap;
+
   Texture? gradientMap;
   double sheen = 0.0;
   Color? sheenColor;
@@ -225,7 +232,7 @@ class Material with EventDispatcher {
   double _transmission = 0.0;
   double get transmission => _transmission;
   set transmission(double value) {
-    if ((_transmission > 0) != (value > 0)) {
+    if (_transmission > 0 != value > 0) {
       version++;
     }
 
@@ -338,7 +345,6 @@ class Material with EventDispatcher {
   late Function customProgramCacheKey;
 
   Map<String, dynamic> extra = {};
-
   String? shaderid;
 
   String get shaderID => shaderid ?? type;
@@ -569,7 +575,49 @@ class Material with EventDispatcher {
       wireframeLinewidth = newValue.toDouble();
     } else if (key == "shadowSide") {
       shadowSide = newValue;
-    } else if (key == "specular") {
+    }
+    else if(key == "bumpMap"){
+      bumpMap = newValue;
+    }
+    else if (key == "envMap") {
+      envMap = newValue;
+    }
+    else if (key == "envMapIntensity") {
+      envMapIntensity = newValue.toDouble();
+    }
+    else if (key == "transmission") {
+      transmission = newValue.toDouble();
+    }
+    else if (key == "thickness") {
+      thickness = newValue;
+    }
+    else if (key == "attenuationDistance") {
+      attenuationDistance = newValue;
+    }
+    else if (key == "ior") {
+      ior = newValue;
+    }
+    else if(key == 'thicknessMap'){
+      thicknessMap = newValue;
+    }
+    else if(key == 'specularIntensity'){
+      specularIntensity = newValue;
+    }
+    else if(key == 'attenuationColor'){
+      if (newValue is Color) {
+        attenuationColor = newValue;
+      } else {
+        attenuationColor = Color.fromHex32(newValue);
+      }
+    }
+    else if(key == 'specularColor'){
+      if (newValue is Color) {
+        specularColor = newValue;
+      } else {
+        specularColor = Color.fromHex32(newValue);
+      }
+    }
+    else if (key == "specular") {
       if (newValue is Color) {
         specular = newValue;
       } else {
@@ -580,7 +628,7 @@ class Material with EventDispatcher {
     }else if(key == ''){
 
     }else if (key == 'emissiveIntensity') {
-      emissiveIntensity = newValue;
+      emissiveIntensity = newValue.toDouble();
     }
     else {
       console.error("Material.setValues key: $key newValue: $newValue is not support");
@@ -792,6 +840,7 @@ class Material with EventDispatcher {
     if (dashSize != null) data["dashSize"] = dashSize;
     if (gapSize != null) data["gapSize"] = gapSize;
     if (scale != null) data["scale"] = scale;
+    data['alphaHash'] = alphaHash;
 
     if (dithering == true) data["dithering"] = true;
 
@@ -801,6 +850,9 @@ class Material with EventDispatcher {
     }
     if (premultipliedAlpha == true) {
       data["premultipliedAlpha"] = premultipliedAlpha;
+    }
+    if(forceSinglePass == true){
+      data['forceSinglePass'] = forceSinglePass;
     }
 
     if (wireframe == true) data["wireframe"] = wireframe;
@@ -898,6 +950,7 @@ class Material with EventDispatcher {
     clipShadows = source.clipShadows;
 
     shadowSide = source.shadowSide;
+    alphaHash = source.alphaHash;
 
     colorWrite = source.colorWrite;
 
@@ -912,6 +965,7 @@ class Material with EventDispatcher {
     alphaTest = source.alphaTest;
     alphaToCoverage = source.alphaToCoverage;
     premultipliedAlpha = source.premultipliedAlpha;
+    forceSinglePass = source.forceSinglePass;
 
     visible = source.visible;
 
@@ -996,7 +1050,7 @@ class Material with EventDispatcher {
     if (propertyName == "color") {
       color = value;
     } else if (propertyName == "opacity") {
-      opacity = value;
+      opacity = value.toDouble();
     } else if (propertyName == "emissive") {
       emissive = value;
     } else if (propertyName == "flatShading") {
@@ -1018,9 +1072,9 @@ class Material with EventDispatcher {
     } else if (propertyName == "side") {
       side = value;
     } else if (propertyName == "roughness") {
-      roughness = value;
+      roughness = value.toDouble();
     } else if (propertyName == "metalness") {
-      metalness = value;
+      metalness = value.toDouble();
     } else {
       throw ("Material.setProperty type: $type propertyName: $propertyName is not support ");
     }

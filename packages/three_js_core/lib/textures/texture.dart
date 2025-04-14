@@ -21,6 +21,7 @@ int textureId = 0;
 class Texture with EventDispatcher {
   static String? defaultImage;
   static int defaultMapping = UVMapping;
+  int channel = 0;
 
   bool isTexture = true;
   bool isWebGLRenderTarget = false;
@@ -29,8 +30,10 @@ class Texture with EventDispatcher {
   bool isCompressedTexture = false;
   bool isOpenGLTexture = false;
   bool isRenderTargetTexture = false; // indicates whether a texture belongs to a render target or not
-  bool needsPMREMUpdate = false; // indicates whether this texture should be processed by PMREMGenerator or not (only relevant for render target textures)
+  // bool needsPMREMUpdate = false; // indicates whether this texture should be processed by PMREMGenerator or not (only relevant for render target textures)
   
+	int pmremVersion = 0;
+
   late Source source;
 
   String colorSpace = NoColorSpace;
@@ -70,6 +73,8 @@ class Texture with EventDispatcher {
   int version = 0;
   Function? onUpdate;
   List mipmaps = [];
+
+  Set layerUpdates = Set();
 
   Texture([
     image, 
@@ -212,6 +217,14 @@ class Texture with EventDispatcher {
     source.dispose();
   }
 
+	void addLayerUpdate( layerIndex ) {
+		this.layerUpdates.add( layerIndex );
+	}
+
+	void clearLayerUpdates() {
+		this.layerUpdates.clear();
+	}
+
   Vector2 transformUv(Vector2 uv) {
     if (mapping != UVMapping) return uv;
 
@@ -265,6 +278,19 @@ class Texture with EventDispatcher {
 
     return uv;
   }
+
+
+	// Setting this property to `true` indicates the engine the PMREM
+	// must be regenerated.
+	
+	// @type {boolean}
+	// @default false
+	// @param {boolean} value
+	set needsPMREMUpdate(bool value ) {
+		if (value) {
+			this.pmremVersion ++;
+		}
+	}
 }
 
 class ImageDataInfo {

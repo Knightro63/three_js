@@ -7,26 +7,23 @@
 
 part of three_renderers;
 
-abstract class RenderTarget with EventDispatcher {
+class RenderTarget with EventDispatcher {
+  bool _didDispose = false;
   late int width;
   late int height;
   int depth = 1;
 
   late bool depthBuffer;
-  bool isWebGLCubeRenderTarget = false;
-  bool isWebGLMultisampleRenderTarget = false;
-  bool isWebGLMultipleRenderTargets = false;
+  late bool resolveDepthBuffer;
+  late bool resolveStencilBuffer;
+  // bool isWebGLCubeRenderTarget = false;
+  // bool isWebGL3DRenderTarget = false;
+  // bool isWebGLArrayRenderTarget = false;
   bool isXRRenderTarget = false;
+  // bool isWebGLMultipleRenderTargets = false;
 
-  bool useMultisampleRenderToTexture = false;
-  bool useMultisampleRenderbuffer = false;
-  bool ignoreDepthForMultisampleCopy = false;
-  bool hasExternalTextures = false;
-  bool useRenderToTexture = false;
-  bool useRenderbuffer = false;
-
-  // Texture or List<Texture> ???
-  late Texture texture;
+  List<Texture> textures = [];
+  //late Texture _texture;
   late Vector4 scissor;
   late bool scissorTest;
   late Vector4 viewport;
@@ -35,6 +32,7 @@ abstract class RenderTarget with EventDispatcher {
   DepthTexture? depthTexture;
 
   late int _samples;
+  late WebGLRenderTargetOptions options;
 
   int get samples => _samples;
 
@@ -43,40 +41,29 @@ abstract class RenderTarget with EventDispatcher {
     _samples = value;
   }
 
-  WebGLRenderTarget clone() {
-    throw ("RenderTarget clone need implemnt ");
-  }
+	Texture get texture => textures[0];
 
-  void setSize(int width, int height, [int depth = 1]) {
-    throw ("RenderTarget setSize need implemnt ");
-  }
+	set texture(Texture value ) {
+    if(textures.isEmpty){
+      textures.add(value);
+    }
+    else{
+		  textures[0] = value;
+    }
+	}
 
-  bool is3D() {
-    throw ("RenderTarget is3D need implemnt ");
-  }
 
-  void dispose() {
-    throw ("RenderTarget dispose need implemnt ");
-  }
-}
-
-class WebGLRenderTarget extends RenderTarget {
-  bool isWebGLRenderTarget = true;
-  late WebGLRenderTargetOptions options;
-
-  WebGLRenderTarget(int width, int height, [WebGLRenderTargetOptions? options]) {
-    this.width = width;
-    this.height = height;
+  RenderTarget(this.width, this.height, [WebGLRenderTargetOptions? options]):super(){
     scissor = Vector4(0, 0, width.toDouble(), height.toDouble());
     scissorTest = false;
 
     viewport = Vector4(0, 0, width.toDouble(), height.toDouble());
 
-    this.options = options ?? WebGLRenderTargetOptions({});
+    this.options = options ?? WebGLRenderTargetOptions();
 
     final image = ImageElement(width: width, height: height, depth: 1);
 
-    texture = Texture(
+    final texture = Texture(
       image, 
       this.options.mapping, 
       this.options.wrapS, 
@@ -92,30 +79,76 @@ class WebGLRenderTarget extends RenderTarget {
     texture.isRenderTargetTexture = true;
     texture.flipY = false;
     texture.generateMipmaps = this.options.generateMipmaps;
+    texture.internalFormat = this.options.internalFormat;
     texture.minFilter = this.options.minFilter != null ? this.options.minFilter! : LinearFilter;
+		textures = [];
 
+		final count = this.options.count;
+		for (int i = 0; i < count; i ++ ) {
+			textures.add(texture.clone());
+			textures[i].isRenderTargetTexture = true;
+		}
+    
     depthBuffer = this.options.depthBuffer != null ? this.options.depthBuffer! : true;
     stencilBuffer = this.options.stencilBuffer;
     depthTexture = this.options.depthTexture;
 
-    ignoreDepthForMultisampleCopy = this.options.ignoreDepth;
-    hasExternalTextures = false;
-    useMultisampleRenderToTexture = false;
-    useMultisampleRenderbuffer = false;
+		resolveDepthBuffer = this.options.resolveDepthBuffer;
+		resolveStencilBuffer = this.options.resolveStencilBuffer;
 
     _samples = (options != null && options.samples != null) ? options.samples! : 0;
   }
 
-  @override
+  RenderTarget clone() {
+    return RenderTarget(1,1).copy( this );
+  }
+
+  RenderTarget copy(RenderTarget source){
+		height = source.height;
+    width = source.width;
+		depth = source.depth;
+
+		scissor.setFrom( source.scissor );
+		scissorTest = source.scissorTest;
+
+		viewport.setFrom( source.viewport );
+
+		textures.length = 0;
+
+		for (int i = 0, il = source.textures.length; i < il; i ++ ) {
+			textures.add(source.textures[ i ].clone());
+			textures[ i ].isRenderTargetTexture = true;
+		}
+
+		// ensure image object is not shared, see #20328
+
+		final image = source.texture.image;
+		texture.source = Source( image );
+
+		depthBuffer = source.depthBuffer;
+		stencilBuffer = source.stencilBuffer;
+
+		resolveDepthBuffer = source.resolveDepthBuffer;
+		resolveStencilBuffer = source.resolveStencilBuffer;
+
+		if ( source.depthTexture != null ) depthTexture = source.depthTexture!.clone();
+
+		samples = source.samples;
+
+		return this;
+  }
+
   void setSize(int width, int height, [int depth = 1]) {
     if (this.width != width || this.height != height || this.depth != depth) {
       this.width = width;
       this.height = height;
       this.depth = depth;
 
-      texture.image!.width = width;
-      texture.image!.height = height;
-      texture.image!.depth = depth;
+			for (int i = 0, il = textures.length; i < il; i ++ ) {
+				textures[ i ].image.width = width;
+				textures[ i ].image.height = height;
+				textures[ i ].image.depth = depth;
+			}
 
       dispose();
     }
@@ -124,32 +157,27 @@ class WebGLRenderTarget extends RenderTarget {
     scissor.setValues(0, 0, width.toDouble(), height.toDouble());
   }
 
+  bool is3D() {
+    throw ("RenderTarget is3D need implemnt ");
+  }
+
+  void dispose() {
+    dispatchEvent(Event(type: "dispose"));
+  }
+}
+
+class WebGLRenderTarget extends RenderTarget {
+  bool isWebGLRenderTarget = true;
+  WebGLRenderTarget(super.width, super.height, [super.options]);
+
   @override
   WebGLRenderTarget clone() {
     return WebGLRenderTarget(width, height, options).copy(this);
   }
 
-  WebGLRenderTarget copy(WebGLRenderTarget source) {
-    width = source.width;
-    height = source.height;
-    depth = source.depth;
-
-    viewport.setFrom(source.viewport);
-    scissor.setFrom(source.scissor);
-
-    texture = source.texture.clone();
-    texture.isRenderTargetTexture = true;
-
-    texture.source = Source(source.texture.image);
-
-    depthBuffer = source.depthBuffer;
-    stencilBuffer = source.stencilBuffer;
-    if (source.depthTexture != null) {
-      depthTexture = source.depthTexture!.clone();
-    }
-
-    samples = source.samples;
-
+  @override
+  WebGLRenderTarget copy(RenderTarget source) {
+    super.copy(source);
     return this;
   }
 
@@ -160,15 +188,19 @@ class WebGLRenderTarget extends RenderTarget {
 
   @override
   void dispose() {
+    if(_didDispose) return;
+    _didDispose = true;
     dispatchEvent(Event(type: "dispose"));
     depthTexture?.dispose();
     texture.dispose();
+    options.dispose();
   }
 }
 
 class WebGLRenderTargetOptions {
   int? wrapS;
   int? wrapT;
+  int? wrapR;
   int? magFilter;
   int? minFilter;
   int? format;
@@ -187,13 +219,39 @@ class WebGLRenderTargetOptions {
   bool useRenderToTexture = false;
 
   int? samples;
+  int? internalFormat;
+  int count = 1;
 
-  WebGLRenderTargetOptions(Map<String, dynamic> json) {
+  bool resolveDepthBuffer = false;
+  bool resolveStencilBuffer = false;
+
+  void dispose(){
+    depthTexture?.dispose();
+    depthTexture = null;
+  }
+
+  WebGLRenderTargetOptions([Map<String, dynamic>? json]) {
+    json ??= {};
     if (json["wrapS"] != null) {
       wrapS = json["wrapS"];
     }
+    if(json['count'] != null){
+      count = json['count'];
+    }
+    if(json['resolveDepthBuffer'] != null){
+      resolveDepthBuffer = json['resolveDepthBuffer'];
+    }
+    if(json['resolveStencilBuffer'] != null){
+      resolveStencilBuffer = json['resolveStencilBuffer'];
+    }
+    if(json['internalFormat'] != null){
+      internalFormat = json['internalFormat'];
+    }
     if (json["wrapT"] != null) {
       wrapT = json["wrapT"];
+    }
+    if (json["wrapR"] != null) {
+      wrapR = json["wrapR"];
     }
     if (json["magFilter"] != null) {
       magFilter = json["magFilter"];
@@ -242,10 +300,15 @@ class WebGLRenderTargetOptions {
     return {
       "wrapS": wrapS,
       "wrapT": wrapT,
+      "wrapR": wrapR,
       "magFilter": magFilter,
       "minFilter": minFilter,
+      'internalFormat': internalFormat,
       "format": format,
+      'count': count,
       "type": type,
+      'resolveStencilBuffer': resolveStencilBuffer,
+      'resolveDepthBuffer': resolveDepthBuffer,
       "anisotropy": anisotropy,
       "depthBuffer": depthBuffer,
       "mapping": mapping,

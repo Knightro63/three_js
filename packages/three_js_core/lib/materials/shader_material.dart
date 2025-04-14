@@ -70,7 +70,7 @@ import '../renderers/shaders/shader_chunk/default_vertex.glsl.dart';
 ///   </li>
 /// </ul>
 class ShaderMaterial extends Material {
-  List<UniformsGroup> uniformsGroups = [];
+  List uniformsGroups = [];
 
   /// [parameters] - (optional) an object with one or more
   /// properties defining the material's appearance. Any property of the
@@ -104,8 +104,8 @@ class ShaderMaterial extends Material {
 
   void _init(){
     type = 'ShaderMaterial';
-    defines = {};
-    uniforms = {};
+    defines = <String,dynamic>{};
+    uniforms = <String,dynamic>{};
     uniformsGroups = [];
 
     vertexShader = defaultVertex;
@@ -119,6 +119,8 @@ class ShaderMaterial extends Material {
     fog = false; // set to use scene fog
     lights = false; // set to use scene lights
     clipping = false; // set to use user-defined clipping planes
+
+    forceSinglePass = true;
 
     extensions = {
       "derivatives": false, // set to use derivatives
@@ -161,6 +163,10 @@ class ShaderMaterial extends Material {
     clipping = source.clipping;
 
     extensions = json.decode(json.encode(source.extensions));
+
+    if(source is ShaderMaterial){
+      uniformsGroups = cloneUniformsGroups( source.uniformsGroups );
+    }
 
     glslVersion = source.glslVersion;
 

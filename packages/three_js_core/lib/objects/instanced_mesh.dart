@@ -37,6 +37,10 @@ class InstancedMesh extends Mesh {
     frustumCulled = false;
   }
 
+  void dispsoe(){
+    morphTexture?.dispose();
+  }
+
   @override
   InstancedMesh copy(Object3D source, [bool? recursive]) {
     super.copy(source);
@@ -157,6 +161,7 @@ class InstancedMesh extends Mesh {
     dispatchEvent(Event(type: "dispose"));
 		morphTexture?.dispose();
 		morphTexture = null;
+    _instanceIntersects.clear();
   }
 
 	void computeBoundingSphere() {

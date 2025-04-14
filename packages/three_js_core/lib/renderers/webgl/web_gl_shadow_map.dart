@@ -1,6 +1,7 @@
 part of three_webgl;
 
 class WebGLShadowMap {
+  bool _didDispose = false;
   Frustum _frustum = Frustum();
   final _shadowMapSize = Vector2.zero();
   final _viewportSize = Vector2.zero();
@@ -36,8 +37,11 @@ class WebGLShadowMap {
   final WebGLObjects _objects;
   final WebGLCapabilities _capabilities;
   late int _maxTextureSize;
+  
+  late int _previousType;
 
   WebGLShadowMap(this._renderer, this._objects, this._capabilities) {
+    _previousType = type;
     _maxTextureSize = _capabilities.maxTextureSize;
 
     _depthMaterial = MeshDepthMaterial.fromMap({"depthPacking": RGBADepthPacking});
@@ -67,6 +71,8 @@ class WebGLShadowMap {
   }
 
   void dispose(){
+    if(_didDispose) return;
+    _didDispose = true;
     fullScreenMesh.dispose();
     fullScreenTri.dispose();
 
@@ -75,6 +81,14 @@ class WebGLShadowMap {
 
     shadowMaterialVertical.dispose();
     shadowMaterialHorizontal.dispose();
+
+    _frustum.dispose();
+    shadowSide.clear();
+
+    scope.dispose();
+    _renderer.dispose();
+    _objects.dispose();
+    _capabilities.dispose();
   }
 
   void render(List<Light> lights, Object3D scene, Camera camera) {
@@ -94,6 +108,9 @@ class WebGLShadowMap {
     state.buffers["color"].setClear(1.0, 1.0, 1.0, 1.0, false);
     state.buffers["depth"].setTest(true);
     state.setScissorTest(false);
+
+		final toVSM = ( _previousType != VSMShadowMap && type == VSMShadowMap );
+		final fromVSM = ( _previousType == VSMShadowMap && type != VSMShadowMap );
 
     // render depth map
 
@@ -127,23 +144,14 @@ class WebGLShadowMap {
         }
       }
 
-      if (shadow.map == null && shadow is! PointLightShadow && ((kIsWeb && type == VSMShadowMap) || !kIsWeb)){//}  && type == VSMShadowMap) {
-        shadow.map = WebGLRenderTarget(_shadowMapSize.x.toInt(), _shadowMapSize.y.toInt());
-        shadow.map!.texture.name = '${light.name}.shadowMap';
+      if (shadow.map == null || toVSM || fromVSM && shadow is! PointLightShadow && type == VSMShadowMap) {
+				final Map<String,dynamic> pars = (type != VSMShadowMap ) ? { 'minFilter': NearestFilter, 'magFilter': NearestFilter } : {};
 
-        shadow.mapPass = WebGLRenderTarget(_shadowMapSize.x.toInt(), _shadowMapSize.y.toInt());
+				if ( shadow.map != null ) {
+					shadow.map?.dispose();
+				}
 
-        shadow.camera!.updateProjectionMatrix();
-      }
-
-      if (shadow.map == null) {
-        final pars = WebGLRenderTargetOptions({
-          "minFilter": NearestFilter, 
-          "magFilter": NearestFilter, 
-          "format": RGBAFormat
-        });
-
-        shadow.map = WebGLRenderTarget(_shadowMapSize.x.toInt(), _shadowMapSize.y.toInt(), pars);
+        shadow.map = WebGLRenderTarget(_shadowMapSize.x.toInt(), _shadowMapSize.y.toInt(), WebGLRenderTargetOptions(pars));
         shadow.map!.texture.name = '${light.name}.shadowMap';
 
         shadow.camera!.updateProjectionMatrix();
@@ -168,9 +176,10 @@ class WebGLShadowMap {
       if (shadow is! PointLightShadow && type == VSMShadowMap) {
         vSMPass(shadow, camera);
       }
-    
+
       shadow.needsUpdate = false;
     }
+    _previousType = type;
 
     scope.needsUpdate = false;
     _renderer.setRenderTarget(currentRenderTarget, activeCubeFace, activeMipmapLevel);
@@ -187,6 +196,8 @@ class WebGLShadowMap {
       shadowMaterialHorizontal.needsUpdate = true;
     }
 
+		shadow.mapPass ??= WebGLRenderTarget( _shadowMapSize.x.toInt(), _shadowMapSize.y.toInt() );
+
     // vertical pass
 
     shadowMaterialVertical.uniforms["shadow_pass"]['value'] = shadow.map!.texture;
@@ -199,7 +210,7 @@ class WebGLShadowMap {
 
     // horizontal pass
 
-    shadowMaterialHorizontal.uniforms["shadow_pass"]['value'] = shadow.mapPass?.texture;
+    shadowMaterialHorizontal.uniforms["shadow_pass"]['value'] = shadow.mapPass!.texture;
     shadowMaterialHorizontal.uniforms["resolution"]['value'] = shadow.mapSize;
     shadowMaterialHorizontal.uniforms["radius"]['value'] = shadow.radius;
 
@@ -224,38 +235,38 @@ class WebGLShadowMap {
       result = customMaterial;
     } else {
       result = light is PointLight ? _distanceMaterial : _depthMaterial;
-    }
 
-    if ((
-      _renderer.localClippingEnabled && 
-      material.clipShadows == true && 
-      material.clippingPlanes!.isNotEmpty
-      ) || 
-      (material.displacementMap != null && material.displacementScale != 0 ) ||
-			( material.alphaMap  != null && material.alphaTest > 0 ) ||
-      (material.map != null && material.alphaTest > 0)
-    ) {
-      // in this case we need a unique material instance reflecting the
-      // appropriate state
+      if ((
+        _renderer.localClippingEnabled && 
+        material.clipShadows == true && 
+        material.clippingPlanes!.isNotEmpty
+        ) || 
+        (material.displacementMap != null && material.displacementScale != 0 ) ||
+        ( material.alphaMap  != null && material.alphaTest > 0 ) ||
+        (material.map != null && material.alphaTest > 0)
+      ) {
+        // in this case we need a unique material instance reflecting the
+        // appropriate state
 
-      final keyA = result.uuid;
-      final keyB = material.uuid;
+        final keyA = result.uuid;
+        final keyB = material.uuid;
 
-      Map? materialsForVariant = _materialCache[keyA];
+        Map? materialsForVariant = _materialCache[keyA];
 
-      if (materialsForVariant == null) {
-        materialsForVariant = {};
-        _materialCache[keyA] = materialsForVariant;
+        if (materialsForVariant == null) {
+          materialsForVariant = {};
+          _materialCache[keyA] = materialsForVariant;
+        }
+
+        Material? cachedMaterial = materialsForVariant[keyB];
+
+        if (cachedMaterial == null) {
+          cachedMaterial = result.clone();
+          materialsForVariant[keyB] = cachedMaterial;
+        }
+
+        result = cachedMaterial;
       }
-
-      Material? cachedMaterial = materialsForVariant[keyB];
-
-      if (cachedMaterial == null) {
-        cachedMaterial = result.clone();
-        materialsForVariant[keyB] = cachedMaterial;
-      }
-
-      result = cachedMaterial;
     }
 
     result.visible = material.visible;
@@ -280,15 +291,15 @@ class WebGLShadowMap {
     result.linewidth = material.linewidth;
 
     if (light is PointLight == true && result is MeshDistanceMaterial) {
-      result.referencePosition.setFromMatrixPosition(light.matrixWorld);
-      result.nearDistance = shadowCameraNear;
-      result.farDistance = shadowCameraFar;
+      // result.referencePosition.setFromMatrixPosition(light.matrixWorld);
+      // result.nearDistance = shadowCameraNear;
+      // result.farDistance = shadowCameraFar;
 
-      return result;
-    } 
-    else {
-      return result;
+			final materialProperties = _renderer.properties.get( result );
+			materialProperties['light'] = light;
     }
+
+    return result;
   }
 
   void renderObject(Object3D object, Camera camera, Camera shadowCamera, Light light, int type) {
@@ -313,13 +324,17 @@ class WebGLShadowMap {
 
             if (groupMaterial.visible) {//groupMaterial != null && 
               final depthMaterial = getDepthMaterial(object, groupMaterial, light, shadowCamera.near, shadowCamera.far, type);
+              object.onBeforeShadow(renderer: _renderer, scene: object, camera: camera, shadowCamera: shadowCamera, geometry: geometry, material: depthMaterial, group: group);
               _renderer.renderBufferDirect(shadowCamera, null, geometry, depthMaterial, object, group);
+              object.onAfterShadow(renderer: _renderer, scene: object, camera: camera, shadowCamera: shadowCamera, geometry: geometry, material: depthMaterial, group: group);
             }
           }
         } 
         else if (material != null && material.visible) {
           final depthMaterial = getDepthMaterial(object, material, light, shadowCamera.near, shadowCamera.far, type);
+          object.onBeforeShadow(renderer: _renderer, scene: object, camera: camera, shadowCamera: shadowCamera, geometry: geometry, material: depthMaterial);
           _renderer.renderBufferDirect(shadowCamera, null, geometry, depthMaterial, object, null);
+          object.onAfterShadow(renderer: _renderer, scene: object, camera: camera, shadowCamera: shadowCamera, geometry: geometry, material: depthMaterial);
         }
       }
     }
