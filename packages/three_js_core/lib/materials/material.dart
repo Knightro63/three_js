@@ -456,6 +456,8 @@ class Material with EventDispatcher {
       }
     } else if (key == "colorWrite") {
       colorWrite = newValue;
+    } else if (key == "combine") {
+      combine = newValue;
     } else if (key == "defines") {
       defines = newValue;
     } else if (key == "depthPacking") {

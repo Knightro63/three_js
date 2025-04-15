@@ -16,6 +16,9 @@
 *.iws
 .idea/
 
+.metadata
+analysis_options.yaml
+
 # Visual Studio Code related
 .classpath
 .project
