@@ -1,5 +1,4 @@
 import 'dart:math' as math;
-import 'package:three_js_math/buffer/index.dart';
 import 'package:xml/xpath.dart';
 import 'package:three_js_animations/three_js_animations.dart';
 import 'package:three_js_core_loaders/three_js_core_loaders.dart';
@@ -29,7 +28,7 @@ class ColladaParser{
 
   final tempColor =Color();
   final List<AnimationClip> animations = [];
-  Map<String,dynamic> kinematics = {};
+  KinematicsData? kinematics;
 
   final Map<String,Map<String,dynamic>> library = {
     'animations': {},
@@ -173,7 +172,6 @@ class ColladaParser{
 
     for (final child in xml.descendantElements ) {
       String id;
-
       switch ( child.name.local ) {
         case 'source':
           id = child.getAttribute( 'id' )!;
@@ -187,13 +185,10 @@ class ColladaParser{
           id = child.getAttribute( 'target' )!;
           data['channels']![ id ] = parseAnimationChannel( child );
           break;
-
         case 'animation':
-          // hierarchy of related animations
           parseAnimation( child );
           hasChildren = true;
           break;
-
         default:
           console.info( child );
       }
@@ -235,10 +230,8 @@ class ColladaParser{
     bool empty = true;
 
     // check, if values of a property are missing in our keyframes
-
     for (int i = 0; i < keyframes.length; i ++ ) {
       keyframe = keyframes[ i ];
-
       if ( keyframe.value[ property ] == null ) {
         keyframe.value[ property ] = null; // mark as missing
       } 
@@ -316,15 +309,12 @@ class ColladaParser{
       case 'translate':
         console.warning( 'ColladaLoader: Animation transform type "$transform" not yet implemented. ');
         break;
-
       case 'rotate':
         console.warning( 'ColladaLoader: Animation transform type "$transform" not yet implemented.' );
         break;
-
       case 'scale':
         console.warning( 'ColladaLoader: Animation transform type "$transform" not yet implemented.' );
         break;
-
     }
 
     final keyframes = prepareAnimationData( data, defaultMatrix );
@@ -1200,7 +1190,6 @@ class ColladaParser{
   }
 
   buildGeometryData(Map<String, dynamic> primitive, Map<String, dynamic>? source, int offset, array, [bool isColor = false ]) {
-    //offset ??= 0;
     final List<int> indices = primitive['p'];
     final int stride = primitive['stride'];
     final List<int>? vcount = primitive['vcount'];
@@ -1208,7 +1197,7 @@ class ColladaParser{
     final sourceArray = source?['array'];
     final sourceStride = source?['stride'];
 
-    pushVector( i ) {
+    void pushVector(int i ) {
       var index = indices[ i + offset ] * sourceStride;
       final length = index + sourceStride;
 
@@ -1218,7 +1207,8 @@ class ColladaParser{
 
       if ( isColor ) {
         // convert the vertex colors from srgb to linear if present
-        final startIndex = array.length - sourceStride - 1;
+        int startIndex = array.length - sourceStride - 1;
+        if(startIndex == -1) startIndex = 0;
         tempColor.setRGB(
           array[ startIndex + 0 ],
           array[ startIndex + 1 ],
@@ -1545,6 +1535,8 @@ class ColladaParser{
       }
     }
 
+    print(data);
+
     return data;
   }
 
@@ -1600,38 +1592,41 @@ class ColladaParser{
 
   buildTransformList(XmlElement node ) {
     final transforms = [];
-    final elements = collada.xpath( '//node[@id="${node.getAttribute('id')}"]' );
+    final elements = collada.xpath( '//node[@id="${node.getAttribute('id')}"]' ).toString().split('\n');
     for (final child in elements) {
+      final data = child.split('>')..removeLast();
+      final names = data.first.replaceAll('<', '').split(' ');
+      final name = names.first.trim();
+      final String? sid = names.length > 1 && names[1].contains('sid')?names[1].replaceAll('"', '').replaceAll('sid=', ""):null;
+      final innerText = data.last.split('</').first.trim();
       var array, vector;
-      switch ( child.parentElement!.name.local ) {
+      switch ( name) {
         case 'matrix':
-          array = parseFloats( child.innerText );
+          array = parseFloats( innerText );
           final matrix = Matrix4.identity().copyFromArray( array ).transpose();
           transforms.add( {
-            'sid': child.getAttribute( 'sid' ),
-            'type': child.parentElement!.name.local,
+            'sid': sid,
+            'type': name,
             'obj': matrix
           } );
           break;
-
         case 'translate':
         case 'scale':
-          array = parseFloats( child.innerText );
-          vector =Vector3().copyFromArray( array );
+          array = parseFloats( innerText );
+          vector = Vector3().copyFromArray( array );
           transforms.add( {
-            'sid': child.getAttribute( 'sid' ),
-            'type': child.parentElement!.name.local,
+            'sid': sid,
+            'type': name,
             'obj': vector
           } );
           break;
-
         case 'rotate':
-          array = parseFloats( child.innerText );
-          vector =Vector3().copyFromArray( array );
+          array = parseFloats( innerText );
+          vector = Vector3().copyFromArray( array );
           final angle = MathUtils.degToRad( array[ 3 ] );
           transforms.add( {
-            'sid': child.getAttribute( 'sid' ),
-            'type': child.parentElement!.name.local,
+            'sid': sid,
+            'type': name,
             'obj': vector,
             'angle': angle
           } );
@@ -1684,102 +1679,83 @@ class ColladaParser{
     }
 
     final m0 = Matrix4.identity();
-    kinematics = {
-      'joints': kinematicsModel['joints'],
-
-      'getJointValue': ( jointIndex ) {
+    kinematics = KinematicsData(
+      joints: kinematicsModel['joints'],
+      getJointValue: ( jointIndex ) {
         final jointData = jointMap[ jointIndex ];
 
         if ( jointData != null) {
           return jointData['position'];
-        } else {
-          console.warning( 'ColladaLoader: Joint $jointIndex doesn\'t exist.' );
         }
+        console.warning( 'ColladaLoader: Joint $jointIndex doesn\'t exist.' );
+        return null;
       },
-
-      'setJointValue': ( jointIndex, value ) {
+      setJointValue: ( jointIndex, value ) {
         final jointData = jointMap[ jointIndex ];
+        if ( jointData != null) {
+          final joint = jointData['joint'];
 
-        if ( jointData ) {
-          final joint = jointData.joint;
-
-          if ( value > joint.limits.max || value < joint.limits.min ) {
+          if ( value > joint['limits']['max'] || value < joint['limits']['min'] ) {
             console.warning( 'ColladaLoader: Joint $jointIndex value $value outside of limits (min: ${joint['limits']['min']}, max: ${joint['limits']['max']}).' );
           } 
-          else if ( joint.static ) {
+          else if ( joint['static'] == true) {
             console.warning( 'ColladaLoader: Joint $jointIndex is static.' );
           } 
           else {
-            final object = jointData.object;
-            final axis = joint.axis;
-            final transforms = jointData.transforms;
+            final Group object = jointData['object'];
+            final Vector3 axis = joint['axis'];
+            final List transforms = jointData['transforms'];
 
             matrix.identity();
 
             // each update, we have to apply all transforms in the correct order
 
-            for ( var i = 0; i < transforms.length; i ++ ) {
-
-              final transform = transforms[ i ];
+            for (int i = 0; i < transforms.length; i ++ ) {
+              final Map<String,dynamic> transform = transforms[ i ];
 
               // if there is a connection of the transform node with a joint, apply the joint value
-
-              if ( transform.sid && transform.sid.indexOf( jointIndex ) != - 1 ) {
-
-                switch ( joint.type ) {
-
+              if ( transform['sid'] != null && transform['sid'].contains( jointIndex )) {
+                switch ( joint['type'] ) {
                   case 'revolute':
                     matrix.multiply( m0.makeRotationAxis( axis, MathUtils.degToRad( value ) ) );
                     break;
-
                   case 'prismatic':
                     matrix.multiply( m0.makeTranslation( axis.x * value, axis.y * value, axis.z * value ) );
                     break;
-
                   default:
-                    console.warning( 'ColladaLoader: Unknown joint type: ${joint.type}');
+                    console.warning( 'ColladaLoader: Unknown joint type: ${joint['type']}');
                     break;
-
                 }
-
-              } else {
-
-                switch ( transform.type ) {
-
+              } 
+              else {
+                switch ( transform['type'] ) {
                   case 'matrix':
-                    matrix.multiply( transform.obj );
+                    matrix.multiply( transform['obj'] );
                     break;
-
                   case 'translate':
-                    matrix.multiply( m0.makeTranslation( transform.obj.x, transform.obj.y, transform.obj.z ) );
+                    matrix.multiply( m0.makeTranslation( transform['obj'].x, transform['obj'].y, transform['obj'].z ) );
                     break;
-
                   case 'scale':
-                    matrix.scale( transform.obj );
+                    matrix.scale( transform['obj'] );
                     break;
-
                   case 'rotate':
-                    matrix.multiply( m0.makeRotationAxis( transform.obj, transform.angle ) );
+                    matrix.multiply( m0.makeRotationAxis( transform['obj'], transform['angle'] ) );
                     break;
-
                 }
-
               }
-
             }
 
-            object.matrix.copy( matrix );
+            object.matrix.setFrom( matrix );
             object.matrix.decompose( object.position, object.quaternion, object.scale );
 
-            jointMap[ jointIndex ].position = value;
-
+            jointMap[ jointIndex ]['position'] = value;
           }
-
-        } else {
+        } 
+        else {
           console.info( 'ColladaLoader: $jointIndex does not exist.' );
         }
       }
-    };
+    );
   }
 
   // nodes
@@ -1844,7 +1820,7 @@ class ColladaParser{
       switch ( child.name.local ) {
         case 'node':
           data['nodes'].add( child.getAttribute( 'id' ) );
-          //parseNode( child );
+          parseNode( child );
           break;
         case 'instance_camera':
           data['instanceCameras'].add( parseId( child.getAttribute( 'url' )! ) );
@@ -2068,7 +2044,7 @@ class ColladaParser{
 
     Object3D? object;
 
-    if ( nodes.length == 0 && objects.length == 1 ) {
+    if ( nodes.isEmpty && objects.length == 1 ) {
       object = objects[ 0 ];
     } 
     else {
@@ -2344,7 +2320,6 @@ class ColladaParser{
     };
 
     for (final child in xml.descendantElements) {
-      
       switch ( child.name.local ) {
         case 'bind_shape_matrix':
           data['bindShapeMatrix'] = parseFloats( child.innerText );
@@ -2538,7 +2513,7 @@ class ColladaParser{
 
   Map<String, dynamic> buildSkin(Map<String, dynamic> data ) {
     int descending( a, b ) {
-      return (b['weight'] - a['weight']).toInt();
+      return ((b['weight'] - a['weight'])).toInt();
     }
 
     const BONE_LIMIT = 4;
@@ -2557,7 +2532,6 @@ class ColladaParser{
 
     final sources = data['sources'];
     final Map<String, dynamic> vertexWeights = data['vertexWeights'];
-
     final vcount = vertexWeights['vcount'];
     final v = vertexWeights['v'];
     final jointOffset = vertexWeights['inputs']['JOINT']['offset'];
@@ -2565,8 +2539,9 @@ class ColladaParser{
 
     final jointSource = data['sources'][ data['joints']['inputs']['JOINT'] ];
     final inverseSource = data['sources'][ data['joints']['inputs']['INV_BIND_MATRIX'] ];
+    
     final weights = sources[ vertexWeights['inputs']['WEIGHT']['id'] ]['array'];
-    var stride = 0;
+    int stride = 0;
 
     // process skin data for each vertex
 
@@ -2591,12 +2566,11 @@ class ColladaParser{
 
       // now we provide for each vertex a set of four index and weight values.
       // the order of the skin data matches the order of vertices
-
       for (int j = 0; j < BONE_LIMIT; j ++ ) {
         final d = vertexSkinData.length > j ? vertexSkinData[ j ]:null;
 
         if ( d != null ) {
-          build['indices']['array'].add( d['index']);
+          build['indices']['array'].add( d['index'] );
           build['weights']['array'].add( d['weight']);
         } 
         else {
@@ -2609,7 +2583,7 @@ class ColladaParser{
     // setup bind matrix
 
     if ( data['bindShapeMatrix'] != null) {
-      build['bindMatrix'] = Matrix4.identity().copyFromArray( data['bindShapeMatrix'] ).transpose();
+      build['bindMatrix'] = Matrix4().copyFromArray( data['bindShapeMatrix'] ).transpose();
     } 
     else {
       build['bindMatrix'] = Matrix4.identity();
@@ -2619,7 +2593,7 @@ class ColladaParser{
 
     for (int i = 0, l = jointSource['array'].length; i < l; i ++ ) {
       final name = jointSource['array'][ i ];
-      final boneInverse = Matrix4.identity().copyFromArray( inverseSource['array'], (i * inverseSource['stride']).toInt() ).transpose();
+      final boneInverse = Matrix4().copyFromArray( inverseSource['array'], (i * inverseSource['stride']).toInt() ).transpose();
       build['joints'].add( { 'name': name, 'boneInverse': boneInverse } );
     }
 
@@ -2645,6 +2619,8 @@ class ColladaParser{
           break;
       }
     }
+
+    print(data);
     return data;
   }
 
@@ -2668,7 +2644,6 @@ class ColladaParser{
           break;
       }
     }
-
     return data;
   }
 
@@ -2688,11 +2663,10 @@ class ColladaParser{
   }
 
   Map<String,dynamic> parseKinematicsJointParameter(XmlElement xml ) {
-
     final Map<String,dynamic> data = {
       'sid': xml.getAttribute( 'sid' ),
       'name': xml.getAttribute( 'name' ) ?? '',
-      'axis':Vector3(),
+      'axis': Vector3(),
       'limits': {
         'min': 0.0,
         'max': 0.0
@@ -2707,7 +2681,7 @@ class ColladaParser{
       switch ( child.name.local ) {
         case 'axis':
           final array = parseFloats( child.innerText );
-          data['axis'].copyFromArray( array );
+          (data['axis'] as Vector3).copyFromArray( array );
           break;
         case 'limits':
           final max = child.getElement( 'max' )!;
@@ -2734,19 +2708,15 @@ class ColladaParser{
     };
 
     final array = parseFloats( xml.innerText );
-
     switch (data['type']) {
-
       case 'matrix':
-        data['obj'] =Matrix4.identity().copyFromArray( array ).transpose();
+        data['obj'] = Matrix4().copyFromArray( array ).transpose();
         break;
       case 'translate':
-        data['obj'] =Vector3();
-        data['obj'].copyFromArray( array );
+        data['obj'] = Vector3().copyFromArray( array );
         break;
       case 'rotate':
-        data['obj'] =Vector3();
-        data['obj'].copyFromArray( array );
+        data['obj'] = Vector3().copyFromArray( array );
         data['angle'] = MathUtils.degToRad( array[ 3 ] );
         break;
     }

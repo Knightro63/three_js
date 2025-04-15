@@ -31,7 +31,7 @@ class MD2Character {
   List<Texture> skinsWeapon = [];
 
   List<MorphAnimMesh> weapons = [];
-  AnimationAction? activeAnimation;
+  //AnimationAction? activeAnimation;
   AnimationMixer? mixer;
   void Function()? onLoadComplete;
   int loadCounter = 0;
@@ -59,8 +59,10 @@ class MD2Character {
 		}
 
 		void checkLoadingComplete() {
-			loadCounter -= 1;
-			if ( loadCounter == 0 ) onLoadComplete?.call();
+			loadCounter--;
+			if ( loadCounter == 0 ){ 
+        onLoadComplete?.call();
+      }
 		}
 
 		Future<List<Texture>> loadTextures( baseUrl, textureUrls ) async{
@@ -181,7 +183,7 @@ class MD2Character {
 			}
 		}
 		activeClip = clipName;
-		syncWeaponAnimation();
+		//syncWeaponAnimation();
 	}
 
 	void syncWeaponAnimation() {

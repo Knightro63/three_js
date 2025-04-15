@@ -1,3 +1,7 @@
+## 0.1.0
+
+* Updated to three_js latest packages.
+
 ## 0.0.5
 
 * Added camera position helper.

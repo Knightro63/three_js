@@ -58,6 +58,10 @@ class GLTFLoader extends Loader {
     pluginCallbacks = [];
 
     register((parser) {
+      return GLTFMaterialsAnisotropyExtension(parser);
+    });
+
+    register((parser) {
       return GLTFMaterialsClearcoatExtension(parser);
     });
 
@@ -177,7 +181,7 @@ class GLTFLoader extends Loader {
   }
 
   GLTFLoader register(Function callback) {
-    if (pluginCallbacks.contains(callback)) {
+    if (!pluginCallbacks.contains(callback)) {
       pluginCallbacks.add(callback);
     }
 
@@ -219,7 +223,6 @@ class GLTFLoader extends Loader {
     if (json["asset"] == null || num.parse(json["asset"]["version"]) < 2.0) {
       throw('THREE.GLTFLoader: Unsupported asset. glTF versions >= 2.0 are supported.');
     }
-
     final parser = GLTFParser(json, {
       "path": path != ''?path:resourcePath ?? '',
       "crossOrigin": crossOrigin,
@@ -229,9 +232,7 @@ class GLTFLoader extends Loader {
       "_ktx2Loader": _ktx2Loader,
       "_meshoptDecoder": _meshoptDecoder
     });
-
     parser.fileLoader.setRequestHeader(requestHeader);
-
     for (int i = 0; i < pluginCallbacks.length; i++) {
       final plugin = pluginCallbacks[i](parser);
       plugins[plugin.name] = plugin;

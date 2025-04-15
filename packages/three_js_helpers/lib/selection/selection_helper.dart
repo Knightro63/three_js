@@ -52,7 +52,7 @@ class SelectionHelper {
 	}
 
   void onPointerDown( event ) {
-    if (enabled == false || event.button != options.button) return;
+    if (enabled == false || event.button != options.button || event.pointerType == 'touch_pad') return;
     updatePointer(event);
     camera.add(
       selectionBox
@@ -76,7 +76,7 @@ class SelectionHelper {
   }
 
   void onPointerMove( event ) {
-    if (!enabled || !_isDown) return;
+    if (!enabled || !_isDown || event.pointerType == 'touch_pad') return;
     updatePointer(event);
     _endPoint.setFrom(_pointer);
     _endPoint.z = 0;
@@ -84,7 +84,7 @@ class SelectionHelper {
   }
 
   void onPointerUp (event) {
-    if (!enabled || !_isDown) return;
+    if (!enabled || !_isDown || event.pointerType == 'touch_pad') return;
     _isDown = false;
     onSelectOver();
   }

@@ -1,6 +1,6 @@
 name: three_js_advanced_loaders
 description: "Flutter advanced loaders package e.g.(gltf, glb and fbx) converted from threejs and three_dart package."
-version: 0.0.5
+version: 0.1.0
 homepage: https://github.com/Knightro63/three_js/tree/main/packages/three_js_advanced_loaders
 
 topics:
@@ -26,8 +26,8 @@ dependencies:
   three_js_curves: ^0.1.0
   three_js_math: ^0.1.0
   three_js_geometry: ^0.1.0
-  three_js_animations: ^0.0.2
-  three_js_controls: ^0.0.5
+  three_js_animations: ^0.1.0
+  three_js_controls: ^0.1.0
     
 dev_dependencies:
   flutter_test:
