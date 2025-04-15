@@ -1,6 +1,10 @@
+## 0.1.0
+
+* Updated to the newest version of three_js packages;
+
 ## 0.0.3
 
-* Updated filepicker library and Fixed obj export bug..
+* Updated filepicker library and Fixed obj export bug.
 
 ## 0.0.2
 
