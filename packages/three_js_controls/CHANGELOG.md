@@ -1,3 +1,7 @@
+## 0.1.0
+
+* Updated three_js packages.
+
 ## 0.0.6
 
 * Changed simpe_sensor to three_js_sensors.

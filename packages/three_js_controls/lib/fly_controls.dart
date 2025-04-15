@@ -134,7 +134,7 @@ class FlyControls{
 	}
 
   void mousedown( event ) {
-		event.preventDefault();
+		//event.preventDefault();
 		//event.stopPropagation();
 
 		if (dragToLook ) {
@@ -164,7 +164,7 @@ class FlyControls{
 	}
 
 	void mouseup( event ) {
-		event.preventDefault();
+		//event.preventDefault();
 		//event.stopPropagation();
 
 		if (dragToLook ) {
@@ -241,7 +241,7 @@ class FlyControls{
 	}
 
 	void contextmenu( event ) {
-		event.preventDefault();
+		//event.preventDefault();
 	}
 
   /// Should be called if the controls is no longer required.
