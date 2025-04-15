@@ -4,11 +4,9 @@ version: 0.1.0
 homepage: https://github.com/Knightro63/three_js/tree/main/packages/three_js_advanced_loaders
 
 topics:
-  - glb
   - gltf
   - collada
   - usda
-  - animations
   - flutter3d
   - model3d
 
