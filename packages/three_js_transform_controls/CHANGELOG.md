@@ -1,4 +1,4 @@
-## 0.0.3
+## 0.1.0
 
 * Updated to newest version of three_js packages.
 
