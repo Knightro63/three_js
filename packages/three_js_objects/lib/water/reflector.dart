@@ -3,6 +3,8 @@ import 'package:three_js_math/three_js_math.dart';
 
 class Reflector extends Mesh {
   final bool isReflector = true;
+  bool forceUpdate = false;
+  RenderType renderType = RenderType.after;
   late WebGLRenderTarget renderTarget;
   PerspectiveCamera camera = PerspectiveCamera();
 
@@ -10,7 +12,7 @@ class Reflector extends Mesh {
     options ??= {};
 		type = 'Reflector';
 
-		final scope = this;
+    final scope = this;
 
 		final color = Color.fromHex32( options['color'] ?? 0x7F7F7F);
 		final textureWidth = options['textureWidth'] ?? 512;
@@ -23,15 +25,15 @@ class Reflector extends Mesh {
 		final normal = Vector3();
 		final reflectorWorldPosition = Vector3();
 		final cameraWorldPosition = Vector3();
-		final rotationMatrix = Matrix4();
+		final rotationMatrix = Matrix4.identity();
 		final lookAtPosition = Vector3( 0, 0, - 1 );
-		final clipPlane = Vector4();
+		final clipPlane = Vector4.identity();
 
 		final view = Vector3();
 		final target = Vector3();
-		final q = Vector4();
+		final q = Vector4.identity();
 
-		final textureMatrix = Matrix4();
+		final textureMatrix = Matrix4.identity();
 		final PerspectiveCamera virtualCamera = camera;
 
 	  renderTarget = WebGLRenderTarget( textureWidth, textureHeight, WebGLRenderTargetOptions({'samples': multisample, 'type': HalfFloatType }));
@@ -49,18 +51,9 @@ class Reflector extends Mesh {
 
     this.material = material;
 
-		onBeforeRender = ({
-      WebGLRenderer? renderer,
-      RenderTarget? renderTarget,
-      Object3D? mesh,
-      Scene? scene,
-      Camera? camera,
-      BufferGeometry? geometry,
-      Material? material,
-      Map<String, dynamic>? group
-    }){
-			reflectorWorldPosition.setFromMatrixPosition( scope.matrixWorld );
-			cameraWorldPosition.setFromMatrixPosition( camera!.matrixWorld );
+    void render(WebGLRenderer? renderer, Object3D? scene, Camera camera){
+      reflectorWorldPosition.setFromMatrixPosition( scope.matrixWorld );
+			cameraWorldPosition.setFromMatrixPosition( camera.matrixWorld );
 
 			rotationMatrix.extractRotation( scope.matrixWorld );
 
@@ -70,8 +63,8 @@ class Reflector extends Mesh {
 			view.sub2( reflectorWorldPosition, cameraWorldPosition );
 
 			// Avoid rendering when reflector is facing away
-
-			if ( view.dot( normal ) > 0 ) return;
+			final isFacingAway = view.dot( normal ) > 0;
+			if ( isFacingAway == true && this.forceUpdate == false ) return;
 
 			view.reflect( normal ).negate();
 			view.add( reflectorWorldPosition );
@@ -162,7 +155,24 @@ class Reflector extends Mesh {
 			}
 
 			scope.visible = true;
+      forceUpdate = false;
 		};
+
+    onAfterRender = ({Camera? camera, BufferGeometry? geometry, Map<String, dynamic>? group, Material? material, Object3D? mesh, RenderTarget? renderTarget, WebGLRenderer? renderer, Scene? scene}){
+      if(renderType == RenderType.after){
+        render(renderer,scene,camera!);
+      }
+    };
+    onBeforeRender = ({Camera? camera, BufferGeometry? geometry, Map<String, dynamic>? group, Material? material, Object3D? mesh, RenderTarget? renderTarget, WebGLRenderer? renderer, Scene? scene}){
+      if(renderType == RenderType.before){
+        render(renderer,scene,camera!);
+      }
+    };
+    customRender = ({Camera? camera, BufferGeometry? geometry, Map<String, dynamic>? group, Material? material, Object3D? mesh, RenderTarget? renderTarget, WebGLRenderer? renderer, Scene? scene}){
+      if(renderType == RenderType.custom){
+        render(renderer,scene,camera!);
+      }
+    };
 	}
 
   WebGLRenderTarget getRenderTarget() {
@@ -171,6 +181,7 @@ class Reflector extends Mesh {
 
   @override
   void dispose() {
+    super.dispose();
     renderTarget.dispose();
     material?.dispose();
   }

@@ -8,9 +8,9 @@ import 'package:three_js_math/three_js_math.dart';
  * http://29a.ch/ && http://29a.ch/slides/2012/webglwater/ : Water shader explanations in WebGL
  */
 
-class Water extends Mesh {
+class WaterOld extends Mesh {
 
-	Water(super.geometry, [Map<String,dynamic>? options] ) {
+	WaterOld(super.geometry, [Map<String,dynamic>? options] ) {
     options ??= {};
 
 		final textureWidth = options['textureWidth'] ?? 512;
@@ -23,45 +23,46 @@ class Water extends Mesh {
 		final sunDirection = options['sunDirection'] ?? Vector3( 0.70707, 0.70707, 0.0 );
 		final sunColor = Color.fromHex32(options['sunColor'] ?? 0xffffff);
 		final waterColor = Color.fromHex32(options['waterColor'] ?? 0x7F7F7F );
-		final eye = options['eye'] ?? Vector3( 0, 0, 0 );
-		final distortionScale = options['distortionScale'] ?? 20.0;
+		final eye = options['eye'] ?? Vector3();
+		final distortionScale = options['distortionScale'] ?? 8.0;
 		final side = options['side'] ?? FrontSide;
 		final fog = options['fog'] ?? false;
 
 		//
 		final mirrorPlane = Plane();
-		final normal = Vector3.zero();
-		final mirrorWorldPosition = Vector3.zero();
-		final cameraWorldPosition = Vector3.zero();
+		final normal = Vector3();
+		final mirrorWorldPosition = Vector3();
+		final cameraWorldPosition = Vector3();
 		final rotationMatrix = Matrix4.identity();
 		final lookAtPosition = Vector3( 0, 0, - 1 );
 		final clipPlane = Vector4.identity();
 
-		final view = Vector3.zero();
-		final target = Vector3.zero();
+		final view = Vector3();
+		final target = Vector3();
 		final q = Vector4.identity();
 
 		final textureMatrix = Matrix4.identity();
 
 		final mirrorCamera = PerspectiveCamera();
 
-		final renderTarget = WebGLRenderTarget( textureWidth, textureHeight );
+		final rt = WebGLRenderTarget( textureWidth, textureHeight );
 
 		final Map<String,dynamic> mirrorShader = {
+      'name': 'MirrorShader',
 			'uniforms': UniformsUtils.merge( [
-				uniformsLib[ 'fog' ],
+				//uniformsLib[ 'fog' ],
 				uniformsLib[ 'lights' ],
 				{
 					'normalSampler': { 'value': null },
 					'mirrorSampler': { 'value': null },
 					'alpha': { 'value': 1.0 },
-					'time': { 'value': 0.0 },
+					'time': { 'value': 1.0 },
 					'size': { 'value': 1.0 },
 					'distortionScale': { 'value': 20.0 },
 					'textureMatrix': { 'value': Matrix4.identity() },
-					'sunColor': { 'value': Color.fromHex32( 0x7F7F7F ) },
+					'sunColor': { 'value': Color.fromHex32(0x7f7f7f) },
 					'sunDirection': { 'value': Vector3( 0.70707, 0.70707, 0 ) },
-					'eye': { 'value': Vector3.zero() },
+					'eye': { 'value': Vector3() },
 					'waterColor': { 'value': Color.fromHex32( 0x555555 ) }
 				}
 			] ),
@@ -169,6 +170,7 @@ class Water extends Mesh {
 		};
 
 		final material = ShaderMaterial.fromMap( {
+      'name': mirrorShader['name'],
 			'fragmentShader': mirrorShader['fragmentShader'],
 			'vertexShader': mirrorShader['vertexShader'],
 			'uniforms': UniformsUtils.clone( mirrorShader['uniforms'] ),
@@ -177,7 +179,7 @@ class Water extends Mesh {
 			'fog': fog
 		} );
 
-		material.uniforms[ 'mirrorSampler' ]['value'] = renderTarget.texture;
+		material.uniforms[ 'mirrorSampler' ]['value'] = rt.texture;
 		material.uniforms[ 'textureMatrix' ]['value'] = textureMatrix;
 		material.uniforms[ 'alpha' ]['value'] = alpha;
 		material.uniforms[ 'time' ]['value'] = time;
@@ -191,20 +193,12 @@ class Water extends Mesh {
 
 		this.material = material;
 
-		onBeforeRender = ({
-      WebGLRenderer? renderer,
-      RenderTarget? renderTarget,
-      Object3D? mesh,
-      Scene? scene,
-      Camera? camera,
-      BufferGeometry? geometry,
-      Material? material,
-      Map<String, dynamic>? group
-    }) {
-			mirrorWorldPosition.setFromMatrixPosition( matrixWorld );
+    onAfterRender = ({Camera? camera, BufferGeometry? geometry, Map<String, dynamic>? group, Material? material, WebGLRenderer? renderer, Object3D? scene}){
+
+			mirrorWorldPosition.setFromMatrixPosition( this.matrixWorld );
 			cameraWorldPosition.setFromMatrixPosition( camera!.matrixWorld );
 
-			rotationMatrix.extractRotation( matrixWorld );
+			rotationMatrix.extractRotation( this.matrixWorld );
 
 			normal.setValues( 0, 0, 1 );
 			normal.applyMatrix4( rotationMatrix );
@@ -281,19 +275,19 @@ class Water extends Mesh {
 			final currentXrEnabled = renderer.xr.enabled;
 			final currentShadowAutoUpdate = renderer.shadowMap.autoUpdate;
 
-			visible = false;
+			this.visible = false;
 
 			renderer.xr.enabled = false; // Avoid camera modification and recursion
 			renderer.shadowMap.autoUpdate = false; // Avoid re-computing shadows
 
-			renderer.setRenderTarget( renderTarget );
+			renderer.setRenderTarget( rt );
 
 			renderer.state.buffers['depth'].setMask( true ); // make sure the depth buffer is writable so it can be properly cleared, see #18897
 
 			if ( renderer.autoClear == false ) renderer.clear();
 			renderer.render( scene!, mirrorCamera );
 
-			visible = true;
+			this.visible = true;
 
 			renderer.xr.enabled = currentXrEnabled;
 			renderer.shadowMap.autoUpdate = currentShadowAutoUpdate;

@@ -4,6 +4,7 @@ import 'reflector.dart';
 
 class Refractor extends Mesh {
   final bool isRefractor = true;
+  RenderType renderType = RenderType.after;
   late WebGLRenderTarget renderTarget;
   PerspectiveCamera camera = PerspectiveCamera();
 
@@ -152,7 +153,7 @@ class Refractor extends Mesh {
 
 		//
 
-		void render(WebGLRenderer renderer, Object3D scene, Camera camera ) {
+		void _render(WebGLRenderer renderer, Object3D scene, Camera camera ) {
 			scope.visible = false;
 
 			final currentRenderTarget = renderer.getRenderTarget();
@@ -181,32 +182,32 @@ class Refractor extends Mesh {
 			scope.visible = true;
 		}
 
-		//
-
-		onBeforeRender = ({
-      WebGLRenderer? renderer,
-      RenderTarget? renderTarget,
-      Object3D? mesh,
-      Scene? scene,
-      Camera? camera,
-      BufferGeometry? geometry,
-      Material? material,
-      Map<String, dynamic>? group
-    }){
-
-			// ensure refractors are rendered only once per frame
-
-			if ( camera?.userData['refractor'] == true ) return;
+    void render(WebGLRenderer? renderer, Object3D? scene, Camera camera){
+			if ( camera.userData['refractor'] == true ) return;
 			// avoid rendering when the refractor is viewed from behind
 			if ( !visible( camera ) == true ) return;
 
-			// update
-
 			updateRefractorPlane();
-			updateTextureMatrix( camera! );
+			updateTextureMatrix( camera );
 			updateVirtualCamera( camera );
-			render( renderer!, scene!, camera );
-		};
+			_render( renderer!, scene!, camera );
+   	};
+
+    onAfterRender = ({Camera? camera, BufferGeometry? geometry, Map<String, dynamic>? group, Material? material, Object3D? mesh, RenderTarget? renderTarget, WebGLRenderer? renderer, Scene? scene}){
+      if(renderType == RenderType.after){
+        render(renderer,scene,camera!);
+      }
+    };
+    onBeforeRender = ({Camera? camera, BufferGeometry? geometry, Map<String, dynamic>? group, Material? material, Object3D? mesh, RenderTarget? renderTarget, WebGLRenderer? renderer, Scene? scene}){
+      if(renderType == RenderType.before){
+        render(renderer,scene,camera!);
+      }
+    };
+    customRender = ({Camera? camera, BufferGeometry? geometry, Map<String, dynamic>? group, Material? material, Object3D? mesh, RenderTarget? renderTarget, WebGLRenderer? renderer, Scene? scene}){
+      if(renderType == RenderType.custom){
+        render(renderer,scene,camera!);
+      }
+    };
 	}
 
   WebGLRenderTarget getRenderTarget() {
@@ -215,6 +216,7 @@ class Refractor extends Mesh {
 
   @override
   void dispose() {
+	super.dispose();
     renderTarget.dispose();
     material?.dispose();
   }
