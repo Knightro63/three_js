@@ -1,3 +1,7 @@
+## 0.1.0
+
+* Updated to the newest version of three_js packages.
+
 ## 0.0.7
 
 * Updated to the newest version of three_js_core and three_js_math.
