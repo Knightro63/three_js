@@ -247,7 +247,7 @@ class ArcballControls with EventDispatcher {
     for (int i = 0; i < mouseActions.length; i++) {
       if (mouseActions[i]['mouse'] == 2) {
         //prevent only if button 2 is actually used
-        event.preventDefault();
+        //event.preventDefault();
         break;
       }
     }
@@ -516,7 +516,7 @@ class ArcballControls with EventDispatcher {
       final mouseOp = getOpFromAction(3, modifier);
 
       if (mouseOp != null) {
-        event.preventDefault();
+        //event.preventDefault();
         dispatchEvent(_startEvent);
 
         const notchDeltaY = 125; //distance of one notch of mouse wheel
