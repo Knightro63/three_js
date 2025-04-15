@@ -1,7 +1,11 @@
-## 0.0.1
+## 0.1.0
 
-* Initial release.
+* Updated to newest version of three_js core, math, and curves.
 
 ## 0.0.2
 
 * Updated to newest version of three_js core, math, and curves.
+
+## 0.0.1
+
+* Initial release.
