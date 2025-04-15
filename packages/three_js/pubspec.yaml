@@ -25,8 +25,8 @@ dependencies:
   three_js_core_loaders: ^0.1.0
   three_js_curves: ^0.1.0
   three_js_simple_loaders: ^0.1.0
-  three_js_text: ^0.0.3
-  three_js_audio: ^0.0.2
+  three_js_text: ^0.1.0
+  three_js_audio: ^0.1.0
   three_js_geometry: ^0.1.0
 
 dev_dependencies:
