@@ -1,4 +1,4 @@
-group 'tjs_sensors'
+group 'finaldev.tjs_sensors'
 version '1.0-SNAPSHOT'
 
 buildscript {
@@ -25,7 +25,7 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 
 android {
-    namespace 'tjs_sensors'
+    namespace 'finaldev.tjs_sensors'
     compileSdkVersion 34
 
     compileOptions {

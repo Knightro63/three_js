@@ -1,4 +1,4 @@
-package tjs_sensors
+package finaldev.tjs_sensors
 
 import android.content.Context
 import android.hardware.Sensor
