@@ -1,3 +1,8 @@
+## 0.1.1
+
+* Fixed pubspec.yaml file.
+
+
 ## 0.1.0
 
 * Android name change.
