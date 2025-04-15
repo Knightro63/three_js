@@ -1,6 +1,6 @@
 name: three_js_audio
 description: "Flutter audio package converted from threejs and three_dart package."
-version: 0.0.3
+version: 0.1.0
 homepage: https://github.com/Knightro63/three_js/tree/main/packages/three_js_audio
 
 environment:
@@ -11,11 +11,11 @@ dependencies:
   flutter:
     sdk: flutter
   audioplayers: ^6.2.0
-  three_js_core: ^0.0.3
-  three_js_math: ^0.0.3
-  three_js_core_loaders: ^0.0.3
+  three_js_core: ^0.1.0
+  three_js_math: ^0.1.0
+  three_js_core_loaders: ^0.1.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^3.0.0
+  flutter_lints: ^5.0.0

@@ -1,3 +1,7 @@
+## 0.1.0
+
+* Updated to the newest versions of three_js packages.
+
 ## 0.0.3
 
 * Updated audioplayers library.
