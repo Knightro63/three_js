@@ -23,7 +23,7 @@ class LightProbeGenerator {
 			final height = image.height;
 
 
-      final html.CanvasElement canvas = html.document.createElement( 'canvas' ) as html.CanvasElement;
+      final html.HTMLCanvasElement canvas = html.document.createElement( 'canvas' ) as html.HTMLCanvasElement;
 
       canvas.width = width;
       canvas.height = height;

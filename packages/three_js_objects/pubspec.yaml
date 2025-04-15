@@ -14,6 +14,7 @@ dependencies:
   three_js_core_loaders: ^0.1.0
   three_js_math: ^0.1.0
   three_js_helpers: ^0.1.0
+  web: ^1.1.1
 
 dev_dependencies:
   flutter_test:
