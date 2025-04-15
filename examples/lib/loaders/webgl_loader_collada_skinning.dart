@@ -80,13 +80,8 @@ class _MyAppState extends State<WebglLoaderColladaSkinning> {
       threeJs.scene.add(skeleton);
     } );
 
-    //
-
     final gridHelper = GridHelper( 10, 20, 0xc1c1c1, 0x8d8d8d );
     threeJs.scene.add( gridHelper );
-
-    //
-
     final ambientLight = three.AmbientLight( 0xffffff, 0.6 );
     threeJs.scene.add( ambientLight );
 

@@ -31,7 +31,7 @@ class _MyAppState extends State<WebglShadowContact> {
     });
     threeJs = three.ThreeJS(
       settings: three.Settings(
-        alpha: true,
+        //alpha: true,
         useSourceTexture: true
       ),
       
@@ -91,7 +91,7 @@ class _MyAppState extends State<WebglShadowContact> {
             child: SizedBox(
               height: threeJs.height,
               width: 240,
-              child: gui.render()
+              child: gui.render(context)
             )
           )
         ],
@@ -135,7 +135,7 @@ class _MyAppState extends State<WebglShadowContact> {
     blurShadow(state["shadow"]["blur"] * 0.4);
 
     // reset and render the normal scene
-    threeJs.renderer!.setRenderTarget( null );
+    threeJs.renderer!.setRenderTarget( threeJs.renderTarget );
     threeJs.renderer!.setClearAlpha( initialClearAlpha );
     threeJs.scene.background = initialBackground;
 
@@ -292,7 +292,7 @@ class _MyAppState extends State<WebglShadowContact> {
       plane.material?.opacity = state['shadow']['opacity'];
     } );
     planeFolder.addColor( state['plane'], 'color' ).onChange((d) {
-      fillPlane.material?.color = three.Color( state['plane']['color'] );
+      fillPlane.material?.color = three.Color.fromHex32( state['plane']['color'] );
     } );
     planeFolder.addSlider( state['plane'], 'opacity', 0, 1)..step(0.01)..onChange((d) {
       fillPlane.material?.opacity = state['plane']['opacity'];

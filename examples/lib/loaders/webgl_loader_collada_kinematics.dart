@@ -53,8 +53,9 @@ class _MyAppState extends State<WebglLoaderColladaKinematics> {
   }
 
   three.Object3D? dae;
-  Map<String, dynamic>? kinematics;
+  three.KinematicsData? kinematics;
   final tweenParameters = {};
+  late final three.Tween kinematicsTween;
   
   Future<void> setup() async {
     threeJs.camera = three.PerspectiveCamera( 45, threeJs.width / threeJs.height, 1, 2000 );
@@ -97,7 +98,7 @@ class _MyAppState extends State<WebglLoaderColladaKinematics> {
     setupTween();
 
     threeJs.addAnimationEvent((dt){
-      //TWEEN.update();
+      kinematicsTween.update();
 
       final timer = DateTime.now().millisecondsSinceEpoch * 0.0001;
 
@@ -112,33 +113,32 @@ class _MyAppState extends State<WebglLoaderColladaKinematics> {
 
   void setupTween() {
     if(kinematics != null){
-      //final duration = math.Random().nextInt(4000)+1000;//three.MathUtils.randInt( 1000, 5000 );
+      final duration = math.Random().nextInt(4000)+1000;//three.MathUtils.randInt( 1000, 5000 );
       final target = {};
 
-      for ( final prop in kinematics!['joints'].keys) {
-        if (!kinematics!['joints'][ prop ]['static']) {
-          final joint = kinematics!['joints'][ prop ];
+      for ( final prop in kinematics!.joints.keys) {
+        if (kinematics!.joints[ prop ]['static'] == false) {
+          final joint = kinematics!.joints[ prop ];
           final old = tweenParameters[ prop ];
           final position = old ?? joint['zeroPosition'];
-
           tweenParameters[ prop ] = position;
-          target[prop] = math.Random().nextInt(joint['limits']['max'].toInt())+joint['limits']['min'].toInt();//three.MathUtils.randInt( joint.limits.min, joint.limits.max );
+          target[prop] = math.Random().nextInt(joint['limits']['max'].toInt()-joint['limits']['min'].toInt())+joint['limits']['min'].toInt();//three.MathUtils.randInt( joint.limits.min, joint.limits.max );
         }
       }
 
-      // kinematicsTween = TWEEN.Tween( tweenParameters ).to( target, duration ).easing( TWEEN.Easing.Quadratic.Out );
+      kinematicsTween = three.Tween( tweenParameters ).to( target, duration ).easing( three.Easing.Quadratic[three.ETTypes.Out] );
       
-      // kinematicsTween.onUpdate(( object ) {
-      //   for ( final prop in kinematics!['joints'] ) {
-      //     if (!kinematics!['joints'][ prop ]['static'] ) {
-      //       kinematics!['setJointValue']( prop, object[ prop ] );
-      //     }
-      //   }
-      // } );
+      kinematicsTween.onUpdate(( object, g) {
+        for ( final prop in kinematics!.joints.keys ) {
+          if (!kinematics!.joints[ prop ]['static'] ) {
+            kinematics!.setJointValue?.call( prop, object[ prop ] );
+          }
+        }
+      } );
 
-      // kinematicsTween.start();
+      kinematicsTween.start();
 
-      // setTimeout( setupTween, duration );
+      //setTimeout( setupTween, duration );
     }
   }
 }

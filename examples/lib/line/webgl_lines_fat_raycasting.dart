@@ -90,7 +90,7 @@ class _State extends State<WebglLinesFatRaycasting> {
 
     matLine = LineMaterial.fromMap( {
       'color': 0xffffff,
-      'linewidth': 1, // in world units with size attenuation, pixels otherwise
+      'linewidth': 10, // in world units with size attenuation, pixels otherwise
       'vertexColors': true,
     } );
     matLine.worldUnits = true;
@@ -200,7 +200,7 @@ class _State extends State<WebglLinesFatRaycasting> {
 
       final intersects = raycaster.intersectObject( obj, false );
 
-      if ( intersects.length > 0 ) {
+      if ( intersects.isNotEmpty ) {
 
         sphereInter.visible = true;
         sphereOnLine.visible = true;
@@ -229,7 +229,6 @@ class _State extends State<WebglLinesFatRaycasting> {
   }
 
   void initGui() {
-    print(raycaster.params['Line2']);
     final params = {
       'line type': 'LineSegmentsGeometry',
       'world units': matLine.worldUnits,
@@ -272,7 +271,7 @@ class _State extends State<WebglLinesFatRaycasting> {
       matThresholdLine.visible = val;
     } );
 
-    folder.addSlider( params, 'width', 1, 10 ).onChange(( val ) {
+    folder.addSlider( params, 'width', 10, 100 ).onChange(( val ) {
       matLine.linewidth = val;
       matThresholdLine.linewidth = matLine.linewidth! + raycaster.params['Line2'].threshold;
     } );

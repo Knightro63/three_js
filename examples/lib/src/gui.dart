@@ -5,7 +5,11 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 enum GuiWidgetType{dropdown,checkbox,color,function,slider,button}
 
 class GuiWidget{
-  GuiWidget(this.name,this.type,this.update,[this.value,this.items]);
+  GuiWidget(String name,this.type,this.update,[this.value,this.items]){
+    _step = items is List && items.length > 2 && items[2] is double?items[2]:1.0;
+    property = name;
+    _name = name;
+  }
 
   void Function()? setActive;
   void Function()? setInactive;
@@ -14,10 +18,10 @@ class GuiWidget{
   Map<String,dynamic>? value;
   GuiWidgetType type;
   dynamic items;
-  String name;
-  String get property => name;
-
-  double _step = 1;
+  late String _name;
+  late String property;
+  String get name => _name;
+  double _step = 1.0;
 
   void Function()? _onFinished;
   Function(dynamic)? _onChanged;
@@ -30,6 +34,10 @@ class GuiWidget{
   }
   void step(double val){
     _step = val;
+  }
+
+  set name(newName){
+    _name = newName;
   }
 
   Widget _createDD(){
@@ -49,15 +57,15 @@ class GuiWidget{
         ),
         _SavedWidgets._dropDown(
           itemVal: items, 
-          value: value?[name],
+          value: value?[property],
           radius: 5,
           color: CSS.darkTheme.canvasColor,
           width: 135,
           margin: const EdgeInsets.all(0),
           height: 25,
           onchange: (value){
-            this.value?[name] = value;
-            _onChanged?.call(this.value?[name]);
+            this.value?[property] = value;
+            _onChanged?.call(this.value?[property]);
             _onFinished?.call();
             update();
           }
@@ -68,8 +76,8 @@ class GuiWidget{
   Widget _checkBox(){
     return InkWell(
       onTap: (){
-        value?[name] = !value?[name];
-        _onChanged?.call(value?[name]);
+        value?[property] = !value?[property];
+        _onChanged?.call(value?[property]);
         _onFinished?.call();
         update();
       },
@@ -87,7 +95,7 @@ class GuiWidget{
               Text(name),
             ]
           ),
-          _SavedWidgets.checkBox(value?[name])
+          _SavedWidgets.checkBox(value?[property])
         ]
       )
     );
@@ -121,16 +129,16 @@ class GuiWidget{
               divisions: (items[1]-items[0])~/_step,
               max: items[1],
               onChanged: (newRating){
-                value?[name] = newRating;
-                _onChanged?.call(value?[name]);
+                value?[property] = newRating;
+                _onChanged?.call(value?[property]);
                 update();
               },
               onChangeEnd: (newRating) {
-                value?[name] = newRating;
+                value?[property] = newRating;
                 _onFinished?.call();
                 update();
               },
-              value: value?[name],
+              value: value?[property],
             ),
           ),
         )
@@ -140,9 +148,9 @@ class GuiWidget{
   Widget _createButton(){
     return InkWell(
       onTap: (){
-        value?[name] = !value?[name];
+        value?[property] = !value?[property];
         _onFinished?.call();
-        _onChanged?.call(value?[name]);
+        _onChanged?.call(value?[property]);
         update();
       },
       child: SizedBox(
@@ -159,7 +167,7 @@ class GuiWidget{
               width: 220,
               height: 30,
               decoration: BoxDecoration(
-                color: value?[name]?Colors.purple:CSS.darkTheme.canvasColor,
+                color: value?[property]?Colors.purple:CSS.darkTheme.canvasColor,
                 borderRadius: BorderRadius.circular(15)
               ),
               alignment: Alignment.center,
@@ -193,9 +201,9 @@ class GuiWidget{
     );
   }
   Widget _color([BuildContext? context]){
-    final r = (0xff0000 & value?[name]) >> 16;
-    final g = (0x00ff00 & value?[name]) >> 8;
-    final b = (0x0000ff & value?[name]) >> 0;
+    final r = (0xff0000 & (value?[name] ?? 0)) >> 16;
+    final g = (0x00ff00 & (value?[name] ?? 0)) >> 8;
+    final b = (0x0000ff & (value?[name] ?? 0)) >> 0;
     final color = Color.fromARGB(255, r, g, b);
     
     return  Row(
@@ -298,6 +306,9 @@ class Folder{
 
   late String _name;
   String get name => _name;
+  set name (newName){
+    _name = newName;
+  }
   bool get isOpen => _isOpen;
   bool _isOpen = false;
 
@@ -319,8 +330,8 @@ class Folder{
     _widgets.add(GuiWidget(name, GuiWidgetType.dropdown, update, value, ddItem));
     return _widgets.last;
   }
-  GuiWidget addSlider(Map<String,dynamic> value, String name, double min, double max){
-    _widgets.add(GuiWidget(name, GuiWidgetType.slider, update, value, [min,max]));
+  GuiWidget addSlider(Map<String,dynamic> value, String name, double min, double max, [double step = 1.0]){
+    _widgets.add(GuiWidget(name, GuiWidgetType.slider, update, value, [min,max,step]));
     return _widgets.last;
   }
   GuiWidget addCheckBox(Map<String,dynamic> value, String name){

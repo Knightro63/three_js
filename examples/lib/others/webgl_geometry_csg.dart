@@ -68,7 +68,7 @@ class _State extends State<WebglGeometryCSG> {
 
   late three.OrbitControls controls;
   late three.Mesh  wireframe;
-  three.Mesh result = three.Mesh();
+  final three.Mesh result = three.Mesh();
 
   final Map<String,dynamic> params = {
     'operation': 'subtract',
@@ -106,8 +106,7 @@ class _State extends State<WebglGeometryCSG> {
         // 'transparent': true
       }),
     );
-
-    //threeJs.scene.add(baseBrush);
+    //threeJs.scene.add(baseBrush.clone());
 
     brush = three.Mesh(
       CylinderGeometry( 1, 1, 5, 45 ),
@@ -121,8 +120,8 @@ class _State extends State<WebglGeometryCSG> {
         'transparent': true
       }),
     );
-    //threeJs.scene.add(brush);
-
+    //threeJs.scene.add(brush.clone());
+    
     core = three.Mesh( 
       IcosahedronGeometry( 0.15, 1 ),
       three.MeshStandardMaterial.fromMap( {
@@ -140,7 +139,10 @@ class _State extends State<WebglGeometryCSG> {
     // create wireframe
     wireframe = three.Mesh(
       null,
-      three.MeshBasicMaterial.fromMap( { 'color': 0x009688, 'wireframe': true } ),
+      three.MeshBasicMaterial.fromMap( { 
+        'color': 0x000000, 
+        'wireframe': true,
+      } ),
     );
     threeJs.scene.add( wireframe );
 
@@ -160,10 +162,7 @@ class _State extends State<WebglGeometryCSG> {
   }
 
 	void updateCSG() {
-    result.dispose();
-    threeJs.scene.remove(result);
-    result = Evaluator.evaluate( baseBrush, brush, BooleanType.fromString(params['operation']))!;
-    threeJs.scene.add(result);
+    Evaluator.evaluate( baseBrush, brush, BooleanType.fromString(params['operation']),result)!;
   }
 
   void createGui(){

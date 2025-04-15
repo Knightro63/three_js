@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
 import 'package:three_js_helpers/three_js_helpers.dart';
 
+
 class WebglLoaderGltf3 extends StatefulWidget {
-  
   const WebglLoaderGltf3({super.key});
 
   @override
@@ -13,9 +13,13 @@ class WebglLoaderGltf3 extends StatefulWidget {
 }
 
 class _MyAppState extends State<WebglLoaderGltf3> {
+  static final _textKey = GlobalKey<FormState>();
+
   List<int> data = List.filled(60, 0, growable: true);
   late Timer timer;
   late three.ThreeJS threeJs;
+  TextEditingController controller = TextEditingController();
+  final FocusNode focusNode = FocusNode();
 
   @override
   void initState() {
@@ -37,10 +41,14 @@ class _MyAppState extends State<WebglLoaderGltf3> {
   }
   @override
   void dispose() {
-    controls.dispose();
     timer.cancel();
+    controls.dispose();
     threeJs.dispose();
     three.loading.clear();
+
+    focusNode.dispose();
+    controller.dispose();
+
     super.dispose();
   }
 
@@ -50,7 +58,49 @@ class _MyAppState extends State<WebglLoaderGltf3> {
       body: Stack(
         children: [
           threeJs.build(),
-          Statistics(data: data)
+          Statistics(data: data),
+          Container(
+            margin: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+            width: MediaQuery.of(context).size.width,
+            height: 240,
+            alignment: Alignment.center,
+            child: TextField(
+              key: _textKey,
+              keyboardType: TextInputType.multiline,
+              autofocus: false,
+              focusNode: focusNode,
+              //textAlignVertical: TextAlignVertical.center,
+              onTap: (){
+                FocusScope.of(context).requestFocus(focusNode);
+              },
+              onChanged: (t){
+                print(t);
+              },
+              onEditingComplete:(){
+                print('did Complete');
+              },
+              controller: controller,
+              style: Theme.of(context).primaryTextTheme.bodyMedium,
+              decoration: InputDecoration(
+                isDense: true,
+                //labelText: label,
+                filled: true,
+                fillColor: Theme.of(context).splashColor,
+                contentPadding: const EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 0.0),
+                border: const OutlineInputBorder(
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(10.0),
+                  ),
+                  borderSide: BorderSide(
+                      width: 0, 
+                      style: BorderStyle.none,
+                  ),
+                ),
+                hintStyle: Theme.of(context).primaryTextTheme.bodyMedium!.copyWith(color: Colors.grey),
+                hintText: 'Type Text Here'
+              ),
+            )
+          )
         ],
       ) 
     );

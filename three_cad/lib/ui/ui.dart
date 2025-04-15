@@ -14,7 +14,6 @@ import 'package:three_js_helpers/three_js_helpers.dart';
 import 'package:three_js_exporters/three_js_exporters.dart';
 import 'package:three_js_geometry/three_js_geometry.dart';
 import 'package:three_js_transform_controls/three_js_transform_controls.dart';
-import '../src/cad/view_helper2.dart';
 
 import '../src/navigation/gui.dart';
 import '../src/cad/origin.dart';
@@ -64,7 +63,7 @@ class _UIPageState extends State<UIScreen> {
   
   three.Group sketches = three.Group();
   three.Group bodies = three.Group();
-  late final ViewHelper viewHelper;
+  late final ViewHelper2 viewHelper;
 
   @override
   void initState(){
@@ -287,7 +286,7 @@ class _UIPageState extends State<UIScreen> {
   }
 
   void creteHelpers(){
-    viewHelper = ViewHelper(
+    viewHelper = ViewHelper2(
       //size: 1.8,
       offsetType: OffsetType.topRight,
       offset: three.Vector2(10, 10),

@@ -1,10 +1,10 @@
 import 'dart:async';
+import 'dart:math' as math;
 import 'package:example/src/statistics.dart';
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
 
 class WebglLoaderGltf extends StatefulWidget {
-  
   const WebglLoaderGltf({super.key});
 
   @override
@@ -36,8 +36,8 @@ class _MyAppState extends State<WebglLoaderGltf> {
   }
   @override
   void dispose() {
-    controls.dispose();
     timer.cancel();
+    controls.dispose();
     threeJs.dispose();
     three.loading.clear();
     super.dispose();
@@ -66,14 +66,16 @@ class _MyAppState extends State<WebglLoaderGltf> {
 
     controls = three.OrbitControls(threeJs.camera, threeJs.globalKey);
 
-    three.RGBELoader rgbeLoader = three.RGBELoader(flipY: true);
+    three.RGBELoader rgbeLoader = three.RGBELoader();
     rgbeLoader.setPath('assets/textures/equirectangular/');
     final hdrTexture = await rgbeLoader.fromAsset('royal_esplanade_1k.hdr');
     hdrTexture?.mapping = three.EquirectangularReflectionMapping;
     
     threeJs.scene.background = hdrTexture;
     threeJs.scene.environment = hdrTexture;
-
+    threeJs.scene.backgroundRotation = three.Euler(math.pi);
+    threeJs.scene.environmentRotation = three.Euler(math.pi);
+    
     threeJs.scene.add( three.AmbientLight( 0xffffff ) );
 
     three.GLTFLoader loader = three.GLTFLoader().setPath('assets/models/gltf/DamagedHelmet/glTF/');

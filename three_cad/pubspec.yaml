@@ -27,6 +27,35 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^4.0.0
 
+
+dependency_overrides:
+  permission_handler_apple:
+    git:
+      url: https://github.com/alex-melnyk/flutter-permission-handler.git 
+      path: permission_handler_apple
+  three_js_core:
+    path: ../packages/three_js_core
+  three_js_core_loaders:
+    path: ../packages/three_js_core_loaders
+  three_js_math:
+    path: ../packages/three_js_math
+  three_js_modifers:
+    path: ../packages/three_js_modifers
+  three_js_bvh_csg:
+    path: ../packages/three_js_bvh_csg
+  three_js_objects:
+    path: ../packages/three_js_objects
+  three_js_transform_controls:
+    path: ../packages/three_js_transform_controls
+  three_js_controls:
+    path: ../packages/three_js_controls
+  three_js_helpers:
+    path: ../packages/three_js_helpers
+  flutter_angle:
+    path: ../../flutter_angle/flutter_angle
+  flutter_angle_darwin:
+    path: ../../flutter_angle/flutter_angle_darwin
+
 flutter:
   uses-material-design: true
   assets:

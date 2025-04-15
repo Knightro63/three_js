@@ -71,27 +71,23 @@ class _MyAppState extends State<FlutterGame> {
   three.Joystick? joystick;
   
   Future<void> setup() async {
-    joystick = threeJs.width < 850?three.Joystick(
-      size: 150,
-      margin: const EdgeInsets.only(left: 35, bottom: 35),
-      screenSize: Size(threeJs.width, threeJs.height), 
-      listenableKey: threeJs.globalKey
-    ):null;
+    // joystick = three.Joystick(
+    //   size: 150,
+    //   margin: const EdgeInsets.only(left: 35, bottom: 35),
+    //   screenSize: Size(threeJs.width, threeJs.height), 
+    //   listenableKey: threeJs.globalKey
+    // );
     threeJs.camera = three.PerspectiveCamera(45, threeJs.width / threeJs.height, 1, 2200);
     threeJs.camera.position.setValues(3, 6, 10);
 
     threeJs.scene = three.Scene();
 
-    final ambientLight = three.AmbientLight(0xffffff, 0.3);
+    final ambientLight = three.AmbientLight(0xffffff, 0.4);
     threeJs.scene.add(ambientLight);
 
-    final pointLight = three.PointLight(0xffffff, 0.1);
-
-    pointLight.position.setValues(0, 0, 0);
-
-    threeJs.camera.add(pointLight);
+    final pointLight = three.PointLight( 0xffffff, 10 );
+    threeJs.camera.add( pointLight );
     threeJs.scene.add(threeJs.camera);
-
     threeJs.camera.lookAt(threeJs.scene.position);
 
     three.GLTFLoader loader = three.GLTFLoader(flipY: true).setPath('assets/models/gltf/flutter/');

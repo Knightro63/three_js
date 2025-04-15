@@ -1,5 +1,7 @@
 import 'dart:typed_data';
 import 'package:three_js_exporters/three_js_exporters.dart';
+//import 'package:three_js_helpers/three_js_helpers.dart';
+import 'package:three_js_objects/three_js_objects.dart';
 
 import '../src/change_image.dart';
 import '../src/gui.dart';
@@ -86,13 +88,14 @@ class _State extends State<TerrainPage> {
     );
   }
 
-  late three.DirectionalLight skyLight;
-  late three.Mesh water;
   late three.DirectionalLight light;
-  late three.Mesh skyDome;
   late three.Mesh sand;
   three.Object3D? terrainScene;
   Uint8List? heightMapImage;
+
+  late final Sky sky;
+  late final Water water;
+  final three.Vector3 sun = three.Vector3();
 
   Future<void> setup() async{
     threeJs.scene = three.Scene();
@@ -162,9 +165,9 @@ class _State extends State<TerrainPage> {
     decoFolder.addDropDown(guiSettings,'texture', ['Blended', 'Grayscale', 'Wireframe']).onFinishChange((){regenerate(blend);});
     decoFolder.addDropDown(guiSettings,'scattering', ['Altitude', 'Linear', 'Cosine', 'CosineLayers', 'DiamondSquare', 'Particles', 'Perlin', 'PerlinAltitude', 'Simplex', 'Value', 'Weierstrass', 'Worley']).onFinishChange(scatterMeshes);
     decoFolder.addSlider(guiSettings,'spread', 0, 100)..step(1)..onFinishChange(scatterMeshes);
-    decoFolder.addColor(guiSettings,'lightColor').onChange((val) {
-      skyLight.color?.setFromHex32(val);
-    });
+    // decoFolder.addColor(guiSettings,'lightColor').onChange((val) {
+    //   skyLight.color?.setFromHex32(val);
+    // });
     var sizeFolder = gui.addFolder('Size');
     sizeFolder.addSlider(guiSettings,'size', 1024, 3072)..step(256)..onFinishChange((){regenerate(blend);});
     sizeFolder.addSlider(guiSettings,'maxHeight', 2, 300)..step(2)..onFinishChange((){regenerate(blend);});
@@ -181,31 +184,29 @@ class _State extends State<TerrainPage> {
     ..addFunction('Regenerate').onFinishChange((){regenerate(blend);});
   }
   Future<void> setupWorld() async{
-    three.TextureLoader().fromAsset('assets/textures/three_terrain/sky1.jpg').then((t1) {
-      t1?.minFilter = three.LinearFilter; // Texture is not a power-of-two size; use smoother interpolation.
-      skyDome = three.Mesh(
-        three.SphereGeometry(8192, 16, 16, 0, math.pi*2, 0, math.pi*0.5),
-        three.MeshBasicMaterial.fromMap({'map': t1, 'side': three.BackSide, 'fog': false})
-      );
-      skyDome.position.y = -99;
-      threeJs.scene.add(skyDome);
-    });
+    generateSky();
+    generateWater();
+    // three.TextureLoader().fromAsset('assets/textures/three_terrain/sky1.jpg').then((t1) {
+    //   t1?.minFilter = three.LinearFilter; // Texture is not a power-of-two size; use smoother interpolation.
+    //   skyDome = three.Mesh(
+    //     three.SphereGeometry(8192, 16, 16, 0, math.pi*2, 0, math.pi*0.5),
+    //     three.MeshBasicMaterial.fromMap({'map': t1, 'side': three.BackSide, 'fog': false})
+    //   );
+    //   skyDome.position.y = -99;
+    //   threeJs.scene.add(skyDome);
+    // });
 
-    water = three.Mesh(
-      three.PlaneGeometry(16384+1024, 16384+1024, 16, 16),
-      three.MeshLambertMaterial.fromMap({'color': 0x006ba0, 'transparent': true, 'opacity': 0.6})
-    );
-    water.position.y = -99;
-    water.rotation.x = -0.5 * math.pi;
-    threeJs.scene.add(water);
+    // water = three.Mesh(
+    //   three.PlaneGeometry(16384+1024, 16384+1024, 16, 16),
+    //   three.MeshLambertMaterial.fromMap({'color': 0x006ba0, 'transparent': true, 'opacity': 0.6})
+    // );
+    // water.position.y = -99;
+    // water.rotation.x = -0.5 * math.pi;
+    // threeJs.scene.add(water);
 
-    skyLight = three.DirectionalLight(0xe8bdb0, 1.5);
-    skyLight.position.setValues(2950, 2625, -160); // Sun on the sky texture
-    threeJs.scene.add(skyLight);
-
-    light = three.DirectionalLight(0xc3eaff, 0.75);
-    light.position.setValues(-1, -0.5, -1);
-    threeJs.scene.add(light);
+    // skyLight = three.DirectionalLight(0xe8bdb0, 1.5);
+    // skyLight.position.setValues(2950, 2625, -160); // Sun on the sky texture
+    // threeJs.scene.add(skyLight);
   }
 
   three.Object3D buildTree() {
@@ -345,7 +346,7 @@ class _State extends State<TerrainPage> {
   }
 
   Future<void> settings() async{
-    guiSettings['lightColor'] = skyLight.color!.getHex();
+    //guiSettings['lightColor'] = skyLight.color!.getHex();
     // var elevationGraph = document.getElementById('elevation-graph'),
     //     slopeGraph = document.getElementById('slope-graph'),
     //     analyticsValues = document.getElementsByClassName('value');
@@ -462,7 +463,7 @@ class _State extends State<TerrainPage> {
     terrainScene = terrain.Terrain.create(o);
     applySmoothing(guiSettings['smoothing'], o);
     threeJs.scene.add(terrainScene);
-    skyDome.visible = sand.visible = water.visible = guiSettings['texture'] != 'Wireframe';
+    //skyDome.visible = sand.visible = water.visible = guiSettings['texture'] != 'Wireframe';
     // var he = document.getElementById('heightmap');
     // if (he != null) {
     //   o.heightmap = he;
@@ -481,5 +482,90 @@ class _State extends State<TerrainPage> {
   }
   bool altitudeSpread(three.Vector3 v,double k,three.Vector3 v2,int i){//double v, double k) {
     return k % 4 == 0 && math.Random().nextDouble() < altitudeProbability(v.z);
+  }
+
+  void generateSky(){
+    //threeJs.scene.add(three.AmbientLight(0xffffff,0.8));
+    light = three.DirectionalLight(0xc3eaff, 0.75);
+    light.position.setFrom(sun);
+    threeJs.scene.add(light);
+
+    threeJs.scene.add(threeJs.camera);
+    threeJs.camera.lookAt(threeJs.scene.position);
+
+    sky = Sky.create();
+    sky.scale.setScalar( 10000 );
+    threeJs.scene.add( sky );
+
+    final skyUniforms = sky.material!.uniforms;
+
+    skyUniforms[ 'turbidity' ]['value'] = 10;
+    skyUniforms[ 'rayleigh' ]['value'] = 2;
+    skyUniforms[ 'mieCoefficient' ]['value'] = 0.005;
+    skyUniforms[ 'mieDirectionalG' ]['value'] = 0.8;
+
+    final parameters = {
+      'elevation': 2.0,
+      'azimuth': 180.0
+    };
+
+    final sceneEnv = three.Scene();
+    sceneEnv.add( sky );
+    threeJs.scene.add( sky );
+
+    void updateSun(r) {
+      final phi = three.MathUtils.degToRad( 90 - parameters['elevation']!);
+      final theta = three.MathUtils.degToRad( parameters['azimuth']!);
+
+      sun.setFromSphericalCoords( 1, phi, theta );
+      sky.material!.uniforms[ 'sunPosition' ]['value'].setFrom( sun );
+      light.position.setFrom(sky.material!.uniforms[ 'sunPosition' ]['value']);
+      if(terrainScene!= null)light.lookAt(terrainScene!.position);
+    }
+
+    updateSun('');
+
+    final folderSky = gui.addFolder( 'Sky' );
+    folderSky.addSlider( parameters, 'elevation', 0, 90, 0.1 ).onChange( updateSun );
+    folderSky.addSlider( parameters, 'azimuth', - 180, 180, 0.1 ).onChange( updateSun );
+  }
+
+  void generateWater(){
+    final Map<String,dynamic> params = {
+      'color': 0xa6ceec,
+      'scale': 5.0,
+      'flowX': 1.0,
+      'flowY': 1.0
+    };
+
+    final waterGeometry = three.PlaneGeometry(16384+1024, 16384+1024, 16, 16);
+  
+    final water = Water( waterGeometry, WaterOptions(
+      color: params['color'],
+      scale: params['scale'],
+      flowDirection: three.Vector2( params['flowX'], params['flowY'] ),
+      textureWidth: 1024,
+      textureHeight: 1024
+    ));
+
+    water.rotation.x = math.pi * - 0.5;
+    water.position.y = -99;
+    threeJs.scene.add( water );
+
+    final folderWater = gui.addFolder('Water');
+    // folderWater.addColor( params, 'color' ).onChange( ( value ) {
+    //   (water.material?.uniforms[ 'color' ]['value'] as three.Color).setFromHex32( value );
+    // } );
+    folderWater.addSlider( params, 'scale', 1, 200 ).onChange( ( value ) {
+      water.material?.uniforms[ 'config' ]['value'].w = value;
+    } );
+    folderWater.addSlider( params, 'flowX', - 1, 1 )..step( 0.01 )..onChange( ( value ) {
+      water.material?.uniforms[ 'flowDirection' ]['value'].x = value;
+      water.material?.uniforms[ 'flowDirection' ]['value'].normalize();
+    } );
+    folderWater.addSlider( params, 'flowY', - 1, 1 )..step( 0.01 )..onChange( ( value ) {
+      water.material?.uniforms[ 'flowDirection' ]['value'].y = value;
+      water.material?.uniforms[ 'flowDirection' ]['value'].normalize();
+    } ); 
   }
 }

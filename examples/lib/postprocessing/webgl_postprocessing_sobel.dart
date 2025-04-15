@@ -101,7 +101,6 @@ class _State extends State<WebglPostprocessingSobel> {
     controls.enableZoom = false;
 
     threeJs.postProcessor = ([double? dt]){
-      threeJs.renderer!.setRenderTarget(threeJs.renderTarget);
       composer.render(dt);
     };
 

@@ -63,9 +63,9 @@ class _State extends State<WebglShadowmapVsm> {
     threeJs.scene.background = three.Color.fromHex32( 0x222244 );
     threeJs.scene.fog = three.Fog( 0x222244, 50, 100 );
 
-    threeJs.scene.add( three.AmbientLight( 0x444444,0.2) );
+    threeJs.scene.add( three.AmbientLight( 0x444444,0.4) );
 
-    final spotLight = three.SpotLight( 0xff3333, 0.8 );
+    final spotLight = three.SpotLight( 0xff3333, 10 );
     spotLight.angle = math.pi / 5;
     spotLight.penumbra = 0.3;
     spotLight.position.setValues( 8, 10, 5 );

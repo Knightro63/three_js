@@ -90,7 +90,6 @@ class _State extends State<WebglLensflars> {
       threeJs.scene.add( mesh );
     }
 
-
     // lights
 
     final dirLight = three.DirectionalLight( 0xffffff, 0.15 );

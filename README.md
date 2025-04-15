@@ -26,9 +26,13 @@ This is a dart conversion of three.js and three_dart, originally created by [@mr
  - Swift 5
  - Metal supported
 
+**iOS-Simulator**
+ - No longer supported due to IOSurface issue, please use override to flutter_angle: ^0.1.0 for testing on simulator.
+
 **Android**
  - compileSdkVersion: 34
  - OpenGL supported
+ - Vulkan supported
 
  **Windows**
  - Intel supported.
@@ -36,7 +40,10 @@ This is a dart conversion of three.js and three_dart, originally created by [@mr
  - Direct3D 11 and OpenGL supported
 
 **Web**
- - WebGL2 support.
+ - WebGL2 supported
+
+**WASM**
+ - Currently not supported due to WebGL2RenderingContext conversion issue.
 
 **Linux**
  - Unsupported
@@ -55,22 +62,35 @@ Find the example for this API [here](https://github.com/Knightro63/three_js/tree
 
 ## Know Issues
 
+**All**
+ - MD2 annimations do not work
+ - Collada animations do not work
+ - Collada kinnametics does not work
+ - PMREM gives weird artifacts
+
 **MacOS**
- - GroupMaterials do not work
+ - Audio has a [bug](https://github.com/bluefireteam/audioplayers/issues/1296)
 
 **iOS**
- - Buffer Validation issues
- - GroupMaterials do not work
  - Protoplanets does not function correctly
 
 **Android**
- - GroupMaterials do not work
-
+ - Morphtargets dones not work
+ - Some RGBELoaders cause app to crash
+ 
 **Windows**
- - GroupMaterials do not work
 
 **Web**
  - Lens Flare not working correctly
+ - Postprocessing does not work
+ - Track pad has some bugs
+
+## Librarues and Plugins
+
+**ADD-ONS**
+ - [Omio](https://github.com/Knightro63/oimo_physics) a physics engine for three_js
+ - [Cannon](https://github.com/Knightro63/cannon_physics) a physics engine for three_js
+ - [Terrain](https://github.com/Knightro63/three_js/tree/main/packages/three_js_terrain) a map generator for three_js
 
 ## Contributing
 

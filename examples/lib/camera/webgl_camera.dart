@@ -29,7 +29,8 @@ class _MyAppState extends State<WebglCamera> {
       onSetupComplete: (){setState(() {});},
       setup: setup,
       postProcessor: postProcessor,
-      settings: three.Settings(renderOptions: {
+      settings: three.Settings(
+        renderOptions: {
         "minFilter": three.LinearFilter,
         "magFilter": three.LinearFilter,
         "format": three.RGBAFormat,
@@ -44,9 +45,14 @@ class _MyAppState extends State<WebglCamera> {
     threeJs.dispose();
     threeJs.renderer!.setScissor( 0, 0, threeJs.width , threeJs.height);
     super.dispose();
-  }
-  late three.Mesh mesh;
 
+    cameraPerspective.dispose();
+    cameraOrtho.dispose();
+    cameraRig.dispose();
+    activeCamera.dispose();
+  }
+  
+  late three.Mesh mesh;
   late three.Camera cameraPerspective;
   late three.Camera cameraOrtho;
 
@@ -130,8 +136,6 @@ class _MyAppState extends State<WebglCamera> {
     aspect = threeJs.width / threeJs.height;
     threeJs.scene = three.Scene();
 
-    //
-
     threeJs.camera = three.PerspectiveCamera(50, 0.5 * aspect, 1, 10000);
     threeJs.camera.position.z = 2500;
 
@@ -141,7 +145,6 @@ class _MyAppState extends State<WebglCamera> {
     cameraPerspectiveHelper = CameraHelper(cameraPerspective);
     threeJs.scene.add(cameraPerspectiveHelper);
 
-    //
     cameraOrtho = three.OrthographicCamera(
         0.5 * frustumSize * aspect / -2,
         0.5 * frustumSize * aspect / 2,
@@ -153,12 +156,8 @@ class _MyAppState extends State<WebglCamera> {
     cameraOrthoHelper = CameraHelper(cameraOrtho);
     threeJs.scene.add(cameraOrthoHelper);
 
-    //
-
     activeCamera = cameraPerspective;
     activeHelper = cameraPerspectiveHelper;
-
-    // counteract different front orientation of cameras vs rig
 
     cameraOrtho.rotation.y = math.pi;
     cameraPerspective.rotation.y = math.pi;
@@ -169,8 +168,6 @@ class _MyAppState extends State<WebglCamera> {
     cameraRig.add(cameraOrtho);
 
     threeJs.scene.add(cameraRig);
-
-    //
 
     mesh = three.Mesh(three.SphereGeometry(100, 16, 8), three.MeshBasicMaterial.fromMap({"color": 0xffffff, "wireframe": true}));
     threeJs.scene.add(mesh);
@@ -185,8 +182,6 @@ class _MyAppState extends State<WebglCamera> {
     mesh3.position.z = 150;
     cameraRig.add(mesh3);
 
-    //
-
     final geometry = three.BufferGeometry();
     List<double> vertices = [];
 
@@ -196,11 +191,8 @@ class _MyAppState extends State<WebglCamera> {
       vertices.add(randFloatSpread(2000)); // z
     }
 
-    geometry.setAttributeFromString(
-        'position', three.Float32BufferAttribute.fromList(vertices, 3));
-
-    final particles = three.Points(
-        geometry, three.PointsMaterial.fromMap({"color": 0x888888}));
+    geometry.setAttributeFromString('position', three.Float32BufferAttribute.fromList(vertices, 3));
+    final particles = three.Points(geometry, three.PointsMaterial.fromMap({"color": 0x888888}));
     threeJs.scene.add(particles);
 
     threeJs.renderer!.setScissorTest( true );

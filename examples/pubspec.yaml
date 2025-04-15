@@ -17,21 +17,18 @@ dependencies:
   css:
     git:
       url: https://github.com/Knightro63/css.git
-  three_js:
-    path: ../packages/three_js
-  three_js_helpers: ^0.0.5
-  three_js_geometry: ^0.0.2
-  three_js_transform_controls: ^0.0.3
-  three_js_svg: ^0.0.3
-  three_js_objects: ^0.0.2
-  three_js_tjs_loader: ^0.0.3
-  three_js_postprocessing: ^0.0.2
-  three_js_modifers: ^0.0.2
-  three_js_terrain: ^0.0.1
-  three_js_exporters: ^0.0.3
-  three_js_line: ^0.0.1
-  three_js_bvh_csg: ^0.0.1
-  three_js_curves: ^0.0.3
+  three_js: ^0.1.0
+  three_js_helpers: ^0.1.0
+  three_js_transform_controls: ^0.1.0
+  three_js_svg: ^0.1.0
+  three_js_objects: ^0.1.0
+  three_js_tjs_loader: ^0.1.0
+  three_js_postprocessing: ^0.1.0
+  three_js_modifers: ^0.1.0
+  three_js_terrain: ^0.1.0
+  three_js_exporters: ^0.1.0
+  three_js_line: ^0.1.0
+  three_js_bvh_csg: ^0.1.0
 
   permission_handler: ^11.3.1
   camera: ^0.10.6
@@ -48,12 +45,6 @@ dependency_overrides:
     git:
       url: https://github.com/alex-melnyk/flutter-permission-handler.git 
       path: permission_handler_apple
-  three_js_core:
-    path: ../packages/three_js_core
-  three_js_postprocessing:
-    path: ../packages/three_js_postprocessing
-  three_js_modifers:
-    path: ../packages/three_js_modifers
 
 flutter:
   uses-material-design: true
@@ -66,8 +57,10 @@ flutter:
     - assets/demo.png
     - assets/KOMO-v5.cube
     - assets/screenshots/
+    - assets/models/bvh/
     - assets/models/obj/cerberus/
     - assets/models/obj/male02/
+    - assets/models/obj/
     - assets/models/json/
     - assets/models/gcode/
     - assets/models/ply/binary/
@@ -94,6 +87,10 @@ flutter:
     - assets/models/gltf/RobotExpressive/
     - assets/models/gltf/DamagedHelmet/glTF/
     - assets/models/gltf/AnimatedMorphSphere/glTF/
+    - assets/models/gltf/ShaderBall2/
+    - assets/models/gltf/ferrari/
+    - assets/models/gltf/Soldier/
+    - assets/models/gltf/Dungon_Warkarma/
     - assets/models/svg/
     - assets/models/fbx/
     - assets/textures/
@@ -108,4 +105,6 @@ flutter:
     - assets/textures/cube/Park2/
     - assets/textures/cube/pisa/
     - assets/textures/three_terrain/
+    - assets/textures/water/
+    - assets/textures/floors/
     - assets/sounds/

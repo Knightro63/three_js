@@ -68,55 +68,33 @@ class _State extends State<WebglSimpleGi> {
     final torusKnot = GIMesh( torusGeometry, material );
     threeJs.scene.add( torusKnot );
 
-    // room
-    createBox();
+    final materials = three.GroupMaterial();
+
+    for (int i = 0; i < 8; i ++ ) {
+      materials.add( three.MeshBasicMaterial.fromMap( { 'color': (math.Random().nextDouble() * 0xffffff).toInt(), 'side': three.BackSide } ) );
+    }
+
+    final boxGeometry = three.BoxGeometry( 3, 3, 3 );
+
+    final box = three.Mesh( boxGeometry, materials );
+    threeJs.scene.add( box );
+
     simpleGI(threeJs.renderer!, threeJs.scene );
 
     controls = three.OrbitControls( threeJs.camera, threeJs.globalKey );
     controls.minDistance = 1;
     controls.maxDistance = 10;
 
+    threeJs.postProcessor = ([dt]){
+      threeJs.renderer?.setRenderTarget(null);
+      threeJs.renderer?.render(threeJs.scene, threeJs.camera);
+    };
+
     threeJs.addAnimationEvent((dt){
       threeJs.renderer!.setRenderTarget( null );
-      threeJs.renderer!.render( threeJs.scene, threeJs.camera );
       compute?.call();
       controls.update();
     });
-  }
-
-  void createBox(){
-    const size = 1.5;
-    final planeGeo = three.PlaneGeometry( size*2,size*2 );
-    // walls
-    final planeTop = three.Mesh( planeGeo, three.MeshBasicMaterial.fromMap( { 'color': (math.Random().nextDouble() * 0xffffff).toInt()} ) );
-    planeTop.position.y = size;
-    planeTop.rotateX( math.pi / 2 );
-    threeJs.scene.add( planeTop );
-
-    final planeBottom = three.Mesh( planeGeo, three.MeshBasicMaterial.fromMap( { 'color': (math.Random().nextDouble() * 0xffffff).toInt() } ) );
-    planeBottom.rotateX( - math.pi / 2 );
-    planeBottom.position.y = -size;
-    threeJs.scene.add( planeBottom );
-
-    final planeFront = three.Mesh( planeGeo, three.MeshBasicMaterial.fromMap( { 'color': (math.Random().nextDouble() * 0xffffff).toInt() } ) );
-    planeFront.position.z = size;
-    planeFront.rotateY( math.pi );
-    threeJs.scene.add( planeFront );
-
-    final planeBack = three.Mesh( planeGeo, three.MeshBasicMaterial.fromMap( { 'color': (math.Random().nextDouble() * 0xffffff).toInt() } ) );
-    planeBack.position.z = - size;
-    //planeBack.rotateY( math.pi );
-    threeJs.scene.add( planeBack );
-
-    final planeRight = three.Mesh( planeGeo, three.MeshBasicMaterial.fromMap( { 'color': (math.Random().nextDouble() * 0xffffff).toInt() } ) );
-    planeRight.position.x = size;
-    planeRight.rotateY( - math.pi / 2 );
-    threeJs.scene.add( planeRight );
-
-    final planeLeft = three.Mesh( planeGeo, three.MeshBasicMaterial.fromMap( { 'color': (math.Random().nextDouble() * 0xffffff).toInt() } ) );
-    planeLeft.position.x = - size;
-    planeLeft.rotateY( math.pi / 2 );
-    threeJs.scene.add( planeLeft );
   }
 
   void Function([double?])? compute;
@@ -160,6 +138,8 @@ class _State extends State<WebglSimpleGi> {
       }
 
       final colors = attributes['color'].array;
+
+      final startVertex = currentVertex;
       final totalVertex = positions.length / 3;
 
       for (int i = 0; i < 32; i ++ ) {
@@ -194,9 +174,13 @@ class _State extends State<WebglSimpleGi> {
         currentVertex ++;
       }
 
+      (attributes['color'] as three.Float32BufferAttribute).addUpdateRange( startVertex * 3, ( currentVertex - startVertex ) * 3 );
       (attributes['color'] as three.Float32BufferAttribute).needsUpdate = true;
 
       if ( currentVertex >= totalVertex ) {
+        clone = scene.clone();
+        clone.matrixWorldAutoUpdate = false;
+
         bounces++;
         currentVertex = 0;
       }

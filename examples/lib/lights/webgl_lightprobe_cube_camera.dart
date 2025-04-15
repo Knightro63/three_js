@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
 import 'package:example/src/statistics.dart';
@@ -81,14 +80,14 @@ class _State extends State<WebglLightprobeCubeCamera> {
     List<String> genCubeUrls( prefix, postfix ) {
       return [
         prefix + 'px' + postfix, prefix + 'nx' + postfix,
-        '$prefix${kIsWeb?'p':'n'}y$postfix', '$prefix${!kIsWeb?'p':'n'}y$postfix',
+        '${prefix}py$postfix', '${prefix}ny$postfix',
         prefix + 'pz' + postfix, prefix + 'nz' + postfix
       ];
-    };
+    }
 
     final urls = genCubeUrls( 'assets/textures/cube/pisa/', '.png' );
 
-    three.CubeTextureLoader(flipY: !kIsWeb).fromAssetList(urls).then(( cubeTexture ) {
+    three.CubeTextureLoader().fromAssetList(urls).then(( cubeTexture ) {
       threeJs.scene.background = cubeTexture;
       cubeCamera.update( threeJs.renderer!, threeJs.scene );
       lightProbe.copy( LightProbeGenerator.fromCubeRenderTarget( threeJs.renderer!, cubeRenderTarget ) );

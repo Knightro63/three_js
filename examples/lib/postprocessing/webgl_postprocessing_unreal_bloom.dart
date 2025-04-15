@@ -31,6 +31,7 @@ class _State extends State<WebglPostprocessingUnrealBloom> {
       onSetupComplete: (){setState(() {});},
       setup: setup,
       settings: three.Settings(
+       //autoClear: false,
         toneMapping: three.ReinhardToneMapping,
         useSourceTexture: true,
       )
@@ -80,10 +81,10 @@ class _State extends State<WebglPostprocessingUnrealBloom> {
   late final three.AnimationMixer mixer;
 
   final Map<String,double> params = {
-    'threshold': 0,
+    'threshold': 0.0,
     'strength': 1.0,
-    'radius': 0,
-    'exposure': 1
+    'radius': 0.0,
+    'exposure': 1.0
   };
 
   Future<void> setup() async {
@@ -124,8 +125,14 @@ class _State extends State<WebglPostprocessingUnrealBloom> {
     mixer.clipAction( clip.optimize() )!.play();
 
     threeJs.postProcessor = ([double? dt]){
+      //threeJs.renderer!.clear();
       threeJs.renderer!.setRenderTarget(null);
+      threeJs.renderer!.render(threeJs.scene, threeJs.camera);
+      //threeJs.renderer!.setRenderTarget(threeJs.renderTarget);
       composer.render(dt);
+      threeJs.renderer!.setRenderTarget(threeJs.renderTarget);
+      //threeJs.renderer!.render(threeJs.scene, threeJs.camera);
+      //threeJs.renderer!.render(threeJs.scene, threeJs.camera);
     };
     threeJs.addAnimationEvent((dt){
       animate(dt);
@@ -147,7 +154,7 @@ class _State extends State<WebglPostprocessingUnrealBloom> {
 
     final toneMappingFolder = gui.addFolder( 'tone mapping'.toUpperCase() );
 
-    toneMappingFolder.addSlider( params, 'exposure', 0.1, 1.0 )..step(0.1)..onChange(( value ) {
+    toneMappingFolder.addSlider( params, 'exposure', 0.1, 2.0 )..step(0.1)..onChange(( value ) {
       threeJs.renderer!.toneMappingExposure = math.pow( value, 4.0 ).toDouble();
     });
   }

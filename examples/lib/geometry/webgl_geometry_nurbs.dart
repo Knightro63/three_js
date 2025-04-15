@@ -144,6 +144,7 @@ class _State extends State<WebglGeometryNurbs> {
     const List<double> knots2 = [ 0, 0, 0, 0, 1, 1, 1, 1 ];
     final nurbsSurface = three.NURBSSurface( degree1, degree2, knots1, knots2, nsControlPoints );
 
+    //final map = (await three.TextureLoader(flipY: true).fromNetwork(Uri.parse("https://storage.googleapis.com/cms-storage-bucket/a9d6ce81aee44ae017ee.png")))!;
     final map = (await three.TextureLoader().fromAsset( 'assets/textures/uv_grid_opengl.jpg' ))!;
     map.wrapS = map.wrapT = three.RepeatWrapping;
     map.anisotropy = 16;

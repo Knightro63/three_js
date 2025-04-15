@@ -83,8 +83,8 @@ class _State extends State<WebglAnimationSkinningAdditiveBlending> {
     'run': <String,dynamic>{ 'weight': 0.0  }
   };
   final Map<String,dynamic> additiveActions = {
-    'sneak_pose': <String,dynamic>{ 'weight': 0.0  },
-    'sad_pose': <String,dynamic>{ 'weight': 0.0  },
+    //'sneak_pose': <String,dynamic>{ 'weight': 0.0  },
+    //'sad_pose': <String,dynamic>{ 'weight': 0.0  },
     'agree': <String,dynamic>{ 'weight': 0.0  },
     'headShake': <String,dynamic>{ 'weight': 0.0  }
   };
@@ -92,10 +92,14 @@ class _State extends State<WebglAnimationSkinningAdditiveBlending> {
 
   Future<void> setup() async {
     threeJs.camera = three.PerspectiveCamera(45, threeJs.width / threeJs.height, 1, 100);
-    threeJs.camera.position.setValues(-1, 3, 3);
-    threeJs.camera.lookAt(three.Vector3(0, 1, 0));
+    threeJs.camera.position.setValues(-1, 2, 3);
+    //threeJs.camera.lookAt(three.Vector3(0, 1, 0));
 
     controls = three.OrbitControls(threeJs.camera, threeJs.globalKey);
+    controls.enablePan = false;
+    controls.enableZoom = false;
+    controls.target.setValues( 0, 1, 0 );
+    controls.update();
 
     threeJs.scene = three.Scene();
     threeJs.scene.background = three.Color.fromHex32(0xa0a0a0);
@@ -154,12 +158,11 @@ class _State extends State<WebglAnimationSkinningAdditiveBlending> {
         allActions.add( action );
 
       } 
-      else if ( additiveActions[ name ] != null) {
+      else if ( additiveActions[ name ] != null && !clip.name.endsWith( '_pose' )) {
         // Make the clip additive and remove the reference frame
-        three.AnimationUtils().makeClipAdditive( clip );
-
+        three.AnimationUtils.makeClipAdditive( clip );
         if ( clip.name.endsWith( '_pose' ) ) {
-          clip = three.AnimationUtils().subclip( clip, clip.name, 2, 3);
+          clip = three.AnimationUtils.subclip( clip, clip.name, 2, 3);
         }
 
         final action = mixer.clipAction( clip );
@@ -172,13 +175,13 @@ class _State extends State<WebglAnimationSkinningAdditiveBlending> {
     createPanel();
 
     threeJs.addAnimationEvent((dt){
-      controls.update();
-      for ( int i = 0; i != numAnimations; ++ i ) {
-        final action = allActions[ i ];
+      for ( int i = 0; i != 2; ++ i ) {
+        final three.AnimationAction action = allActions[ i ];
         final clip = action.getClip();
         final settings = baseActions[ clip.name ] ?? additiveActions[ clip.name ];
         settings['weight'] = action.getEffectiveWeight();
       }
+      
       mixer.update(dt);
     });
   }
@@ -189,13 +192,13 @@ class _State extends State<WebglAnimationSkinningAdditiveBlending> {
     final folder3 = panel.addFolder( 'General Speed' );
 
     panelSettings = {
-      'modify time scale': 1.0
+      'modify time': 1.0
     };
 
     final baseNames = ['None'];
     baseNames.addAll(baseActions.keys);
 
-    for ( int i = 0, l = baseNames.length; i != l; ++ i ) {
+    for ( int i = 0; i < baseNames.length; i++) {
       final name = baseNames[ i ];
       final settings = baseActions[ name ];
       panelSettings[ name ] = () {
@@ -216,32 +219,16 @@ class _State extends State<WebglAnimationSkinningAdditiveBlending> {
       final settings = additiveActions[ name ];
       panelSettings[name] = settings!['weight'];
       folder2.addSlider( panelSettings, name, 0.0, 1.0 )..step(0.01 )..onChange(( weight ) {
-        setWeight( settings['action'], weight );
+        setWeight( settings['action'], weight);
         settings['weight'] = weight;
       });
     }
 
-    folder3.addSlider(panelSettings, 'modify time scale', 0.0, 1.5)..step(0.01 )..onChange( (x){return modifyTimeScale(x);} );
+    folder3.addSlider(panelSettings, 'modify time', 0.0, 1.5)..step(0.01 )..onChange( (x){return modifyTimeScale(x);} );
 
     folder1.open();
     folder2.open();
     folder3.open();
-
-    crossFadeControls.forEach((GuiWidget control ) {
-      control.setInactive = () {
-        //control.domElement.classList.add( 'control-inactive' );
-      };
-
-      control.setActive = () {
-        //control.domElement.classList.remove( 'control-inactive' );
-      };
-
-      final settings = baseActions[ control.property ];
-
-      if (settings == null || settings['weight'] == null) {
-        control.setInactive?.call();
-      }
-    } );
   }
 
   void activateAction(three.AnimationAction action ) {
@@ -256,7 +243,6 @@ class _State extends State<WebglAnimationSkinningAdditiveBlending> {
   }
 
   void prepareCrossFade(three.AnimationAction? startAction, three.AnimationAction? endAction, double duration ) {
-
     // If the current action is 'idle', execute the crossfade immediately;
     // else wait until the current action has finished its current loop
 
@@ -276,21 +262,10 @@ class _State extends State<WebglAnimationSkinningAdditiveBlending> {
     else {
       currentBaseAction = 'None';
     }
-
-    crossFadeControls.forEach((GuiWidget control ) {
-      final name = control.property;
-
-      if ( name == currentBaseAction ) {
-        control.setActive?.call();
-      } else {
-        control.setInactive?.call();
-      }
-    } );
   }
 
   void synchronizeCrossFade(three.AnimationAction startAction, three.AnimationAction endAction, double duration ) {
     void onLoopFinished( event ) {
-      print(event);
       if ( event.action == startAction ) {
         mixer.removeEventListener( 'loop', onLoopFinished );
         executeCrossFade( startAction, endAction, duration );
@@ -303,20 +278,16 @@ class _State extends State<WebglAnimationSkinningAdditiveBlending> {
   void executeCrossFade(three.AnimationAction? startAction,three.AnimationAction? endAction,double duration ) {
     // Not only the start action, but also the end action must get a weight of 1 before fading
     // (concerning the start action this is already guaranteed in this place)
-
     if ( endAction != null) {
       setWeight( endAction, 1 );
-      endAction.time = 0;
-
       if ( startAction != null) {
-        // Crossfade with warping
-        startAction.crossFadeTo( endAction, duration, true );
-      } else {
-        // Fade in
+        startAction.crossFadeTo( endAction, duration, false );
+      } 
+      else {
         endAction.fadeIn( duration );
       }
-    } else {
-      // Fade out
+    } 
+    else {
       startAction?.fadeOut( duration );
     }
   }

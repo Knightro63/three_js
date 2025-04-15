@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
+import 'package:example/src/gui.dart';
 import 'package:example/src/statistics.dart';
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
@@ -15,10 +16,12 @@ class WebglLoaderMd2 extends StatefulWidget {
 class _State extends State<WebglLoaderMd2> {
   List<int> data = List.filled(60, 0, growable: true);
   late Timer timer;
+  late Gui wg;
   late three.ThreeJS threeJs;
 
   @override
   void initState() {
+    wg = Gui((){setState(() {});});
     timer = Timer.periodic(const Duration(seconds: 1), (t){
       setState(() {
         data.removeAt(0);
@@ -49,7 +52,16 @@ class _State extends State<WebglLoaderMd2> {
       body: Stack(
         children: [
           threeJs.build(),
-          Statistics(data: data)
+          Statistics(data: data),
+          if(threeJs.mounted)Positioned(
+            top: 20,
+            right: 20,
+            child: SizedBox(
+              height: threeJs.height,
+              width: 240,
+              child: wg.render(context)
+            )
+          )
         ],
       ) 
     );
@@ -68,9 +80,9 @@ class _State extends State<WebglLoaderMd2> {
 
     // LIGHTS
 
-    threeJs.scene.add( three.AmbientLight( 0x666666,1 ) );
+    threeJs.scene.add( three.AmbientLight( 0x666666, 1 ) );
 
-    final light1 = three.SpotLight( 0xffffff, 0.8 );
+    final light1 = three.SpotLight( 0xffffff, 25 );
     light1.position.setValues( 2, 5, 10 );
     light1.angle = 0.5;
     light1.penumbra = 0.5;
@@ -80,7 +92,7 @@ class _State extends State<WebglLoaderMd2> {
     light1.shadow?.mapSize.height = 1024;
     threeJs.scene.add( light1 );
 
-    final light2 = three.SpotLight( 0xffffff, 0.8 );
+    final light2 = three.SpotLight( 0xffffff, 25 );
     light2.position.setValues( - 1, 3.5, 3.5 );
     light2.angle = 0.5;
     light2.penumbra = 0.5;
@@ -140,20 +152,86 @@ class _State extends State<WebglLoaderMd2> {
       ]
     );
 
-    final character = three.MD2Character();
+    final three.MD2Character character = three.MD2Character();
+
+    final Map<String,dynamic> playbackConfig = {
+      'speed': 1.0,
+      'wireframe': false
+    };
+
+    final gui = wg.addFolder('GUI')..open();
+
+    gui.addSlider( playbackConfig, 'speed', 0, 2 )..step(0.1)..onChange( (val) {
+      playbackConfig['speed'] = val;
+      character.setPlaybackRate(val);
+    } );
+
+    gui.addButton( playbackConfig, 'wireframe' ).onChange((val) {
+      character.setWireframe( val );
+    } );
+
+    setupWeaponsGUI() {
+      final folder = wg.addFolder( 'Weapons' );
+      generateCallback( index ) {
+        character.setWeapon( index );
+        character.setWireframe( playbackConfig['wireframe'] );
+      }
+
+      for ( int i = 0; i < character.weapons.length; i ++ ) {
+        final name = character.weapons[ i ].name;
+        playbackConfig[ name ] = false;
+        folder.addButton(playbackConfig,name).onChange((val){
+          generateCallback( i );
+        });//folder.add( playbackConfig, name ).name( labelize( name ) );
+      }
+    }
+    setupSkinsGUI( ) {
+      final folder = wg.addFolder( 'Skins' );
+
+      generateCallback( index ) {
+        character.setSkin( index );
+      }
+
+      for (int i = 0; i < character.skinsBody.length; i ++ ) {
+        final name = character.skinsBody[ i ].name;
+
+        playbackConfig[ name ] = false;
+        folder.addButton(playbackConfig,name).onChange((val){
+          generateCallback( i );
+        });
+      }
+    }
+    setupGUIAnimations() {
+      final folder = wg.addFolder( 'Animations' );
+
+      generateCallback ( animationClip ){
+        character.setAnimation( animationClip );
+      }
+
+      final animations = character.meshBody!.animations;
+
+      for (int i = 0; i < animations.length; i ++ ) {
+        final clip = animations[ i ];
+
+        playbackConfig[ clip.name ] = false;//generateCallback( clip );
+        folder.addButton(playbackConfig,clip.name).onChange((val){
+          generateCallback( clip );
+        });//folder.addButton( playbackConfig, clip.name, clip.name);
+      }
+    }
+
+    character.onLoadComplete = (){
+      setupSkinsGUI();
+      setupWeaponsGUI();
+      setupGUIAnimations();
+    };
     character.scale = 0.03;
-
-    await character.loadParts( config ).then((r){
-      character.setAnimation( character.meshBody!.animations[ 12 ]);
-      print(character.meshBody!.animations[ 1 ].name);
-      character.setPlaybackRate( 1.0 );
-      character.setWeapon( 3 );
-    });
+    await character.loadParts( config );
     threeJs.scene.add( character.root );
-
     threeJs.addAnimationEvent((dt){
       controls.update();
-      character.update(dt);
     });
+
+
   }
 }

@@ -113,12 +113,12 @@ class _State extends State<WebglClippingStencil> {
     threeJs.scene = three.Scene();
     threeJs.camera = three.PerspectiveCamera(36, threeJs.width / threeJs.height, 1, 100);
     threeJs.camera.position.setValues(2, 2, 2);
-    threeJs.scene.add(three.AmbientLight(0xffffff, 0.5));
+    threeJs.scene.add(three.AmbientLight(0xffffff, 1.5));
     threeJs.camera.lookAt(threeJs.scene.position);
 
     controls = three.OrbitControls(threeJs.camera, threeJs.globalKey);
 
-    final dirLight = three.DirectionalLight(0xffffff, 1);
+    final dirLight = three.DirectionalLight(0xffffff, 3);
     dirLight.position.setValues(5, 10, 7.5);
     dirLight.castShadow = true;
     dirLight.shadow!.camera!.right = 2;
@@ -172,7 +172,9 @@ class _State extends State<WebglClippingStencil> {
       final po = three.Mesh(planeGeom, planeMat);
       po.onAfterRender = ({
         three.WebGLRenderer? renderer,
-        three.Object3D? scene,
+        three.RenderTarget? renderTarget,
+        three.Object3D? mesh,
+        three.Scene? scene,
         three.Camera? camera,
         three.BufferGeometry? geometry,
         three.Material? material,
@@ -185,7 +187,7 @@ class _State extends State<WebglClippingStencil> {
       object.add(stencilGroup);
       poGroup.add(po);
       planeObjects.add(po);
-      //threeJs.scene.add(poGroup);
+      threeJs.scene.add(poGroup);
     }
 
     final material = three.MeshStandardMaterial.fromMap({

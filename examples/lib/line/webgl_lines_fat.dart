@@ -110,7 +110,7 @@ class _State extends State<WebglLinesFat> {
 
     matLine = LineMaterial.fromMap( {
       'color': 0xffffff,
-      'linewidth': 5, // in world units with size attenuation, pixels otherwise
+      'linewidth': 50, // in world units with size attenuation, pixels otherwise
       'vertexColors': true,
     } );
     matLine.alphaToCoverage = true;
@@ -137,10 +137,6 @@ class _State extends State<WebglLinesFat> {
 
     initGui();
 
-    threeJs.rendererUpdate = ([double? dt]){
-      //threeJs.renderer?.setClearColor(three.Color.fromHex32(0x222222), 1 );
-    };
-
     threeJs.postProcessor = ([double? dt]){
       threeJs.renderer!.setViewport(0,0,threeJs.width,threeJs.height);
       threeJs.renderer!.render(threeJs.scene,threeJs.camera );
@@ -165,7 +161,7 @@ class _State extends State<WebglLinesFat> {
     final Map<String,dynamic> param = {
       'line type': 'LineGeometry',
       'world units': true,
-      'width': 5.0,
+      'width': 50.0,
       'alphaToCoverage': true,
       'dashed': false,
       'dash scale': 1.0,
@@ -192,7 +188,7 @@ class _State extends State<WebglLinesFat> {
       matLine.needsUpdate = true;
     } );
 
-    folder.addSlider( param, 'width', 1.0, 10.0 ).onChange(( val ) {
+    folder.addSlider( param, 'width', 10.0, 100.0 ).onChange(( val ) {
       matLine.linewidth = val;
     });
 

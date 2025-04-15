@@ -59,7 +59,6 @@ class _State extends State<WebglShadowmapPointlight> {
     );
   }
 
-  late final three.Plane localPlane;
   late three.OrbitControls controls;
 
   Future<void> setup() async {
@@ -74,7 +73,7 @@ class _State extends State<WebglShadowmapPointlight> {
     final test = await generateTexture();
 
     three.PointLight createLight(int color ) {
-      const intensity = 1.0;
+      const intensity = 5.0;
 
       final light = three.PointLight( color, intensity, 20);
       light.castShadow = true;
@@ -96,7 +95,7 @@ class _State extends State<WebglShadowmapPointlight> {
       material = three.MeshPhongMaterial.fromMap( {
         'side': three.DoubleSide,
         'alphaMap': texture,
-        'alphaTest': 0.25
+        'alphaTest': 0.5
       });
 
       sphere = three.Mesh( geometry, material );
@@ -113,8 +112,19 @@ class _State extends State<WebglShadowmapPointlight> {
     final pointLight2 = createLight( 0xff8888 );
     threeJs.scene.add( pointLight2 );
 
-    localPlane = three.Plane(three.Vector3(0, 0, -14.9), 0.8);
-    createBox();
+    final geometry = three.BoxGeometry( 30, 30, 30 );
+
+    final material = three.MeshPhongMaterial.fromMap( {
+      'color': 0xa0adaf,
+      'shininess': 10,
+      'specular': 0x111111,
+      'side': three.BackSide
+    } );
+
+    final mesh = three.Mesh( geometry, material );
+    mesh.position.y = 10;
+    mesh.receiveShadow = true;
+    threeJs.scene.add( mesh );
 
     threeJs.addAnimationEvent((dt){
       double time = DateTime.now().millisecondsSinceEpoch * 0.001;
@@ -137,56 +147,6 @@ class _State extends State<WebglShadowmapPointlight> {
 
       controls.update();
     });
-  }
-
-  void createBox(){
-    const size = 15.0;
-    final planeGeo = three.PlaneGeometry( size*2,size*2 );
-    final material = three.MeshPhongMaterial.fromMap( {
-      'color': 0xa0adaf,
-      'shininess': 10,
-      'specular': 0x111111,
-    } );
-
-    // walls
-    final planeTop = three.Mesh( planeGeo,material);
-    planeTop.receiveShadow = true;
-    planeTop.position.y = size+5;
-    planeTop.rotateX( math.pi / 2 );
-    threeJs.scene.add( planeTop );
-
-    final planeBottom = three.Mesh( planeGeo,material);
-    planeBottom.rotateX( - math.pi / 2 );
-    planeBottom.receiveShadow = true;
-    planeBottom.position.y = -size+5;
-    threeJs.scene.add( planeBottom );
-
-    final planeFront = three.Mesh( planeGeo,material);
-    planeFront.position.z = size;
-    planeFront.position.y = 5;
-    planeFront.receiveShadow = true;
-    planeFront.rotateY( math.pi );
-    threeJs.scene.add( planeFront );
-
-    final planeBack = three.Mesh( planeGeo,material);
-    planeBack.position.z = - size;
-    planeBack.position.y = 5;
-    planeBack.receiveShadow = true;
-    threeJs.scene.add( planeBack );
-
-    final planeRight = three.Mesh( planeGeo,material);
-    planeRight.position.x = size;
-    planeRight.position.y = 5;
-    planeRight.receiveShadow = true;
-    planeRight.rotateY( - math.pi / 2 );
-    threeJs.scene.add( planeRight );
-
-    final planeLeft = three.Mesh( planeGeo,material);
-    planeLeft.position.x = - size;
-    planeLeft.position.y = 5;
-    planeLeft.receiveShadow = true;
-    planeLeft.rotateY( math.pi / 2 );
-    threeJs.scene.add( planeLeft );
   }
 
   Future<three.ImageElement> generateTexture() async{

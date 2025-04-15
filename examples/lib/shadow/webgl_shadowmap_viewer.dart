@@ -32,12 +32,14 @@ class _MyAppState extends State<WebglShadowmapViewer> {
       onSetupComplete: (){setState(() {});},
       setup: setup,
       settings: three.Settings(
-        renderOptions: {
-          "minFilter": three.LinearFilter,
-          "magFilter": three.LinearFilter,
-          "format": three.RGBAFormat,
-          "samples": 4
-        }
+        enableShadowMap: true,
+        shadowMapType: three.BasicShadowMap,
+        // renderOptions: {
+        //   "minFilter": three.LinearFilter,
+        //   "magFilter": three.LinearFilter,
+        //   "format": three.RGBAFormat,
+        //   "samples": 4
+        // }
       )
     );
     super.initState();
@@ -63,16 +65,16 @@ class _MyAppState extends State<WebglShadowmapViewer> {
 
   void setup() {
     threeJs.camera = three.PerspectiveCamera(45, threeJs.width / threeJs.height, 1, 1000);
-    threeJs.camera.position.setValues(0, 15, 70);
+    threeJs.camera.position.setValues(0, 15, 35);
 
     threeJs.scene = three.Scene();
     threeJs.camera.lookAt(threeJs.scene.position);
 
     // Lights
 
-    threeJs.scene.add(three.AmbientLight(0x404040));
+    threeJs.scene.add(three.AmbientLight(0x404040,0.4));
 
-    final spotLight = three.SpotLight(0xffffff);
+    final spotLight = three.SpotLight(0xffffff,800);
     spotLight.name = 'Spot Light';
     spotLight.angle = math.pi / 5;
     spotLight.penumbra = 0.3;
@@ -82,11 +84,14 @@ class _MyAppState extends State<WebglShadowmapViewer> {
     spotLight.shadow!.camera!.far = 30;
     spotLight.shadow!.mapSize.width = 1024;
     spotLight.shadow!.mapSize.height = 1024;
+    //spotLight.shadow?.focus = 1;
+
     threeJs.scene.add(spotLight);
+    
 
     threeJs.scene.add(CameraHelper(spotLight.shadow!.camera!));
 
-    final dirLight = three.DirectionalLight(0xffffff, 1);
+    final dirLight = three.DirectionalLight(0xffffff, 1.0);
     dirLight.name = 'Dir. Light';
     dirLight.position.setValues(0, 10, 0);
     dirLight.castShadow = true;
@@ -120,16 +125,16 @@ class _MyAppState extends State<WebglShadowmapViewer> {
     final geometry2 = three.BoxGeometry(3, 3, 3);
     final cube = three.Mesh(geometry2, material);
     cube.position.setValues(8, 3, 8);
-    cube.castShadow = false;
+    cube.castShadow = true;
     cube.receiveShadow = true;
     threeJs.scene.add(cube);
 
     final geometry3 = three.BoxGeometry(10, 0.15, 10);
-    material = three.MeshPhongMaterial.fromMap({"color": 0xa0adaf, "shininess": 150, "specular": 0x111111});
+    material = three.MeshPhongMaterial.fromMap({"color": 0xa0adaf, "shininess": 150, "specular": three.Color.fromHex32(0x111111)});
 
     final ground = three.Mesh(geometry3, material);
     ground.scale.scale(3);
-    ground.castShadow = true;
+    ground.castShadow = false;
     ground.receiveShadow = true;
     threeJs.scene.add(ground);
 

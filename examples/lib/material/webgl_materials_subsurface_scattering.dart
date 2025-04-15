@@ -71,22 +71,20 @@ class _State extends State<WebglMaterialsSubsurfaceScattering> {
 
     threeJs.scene =three.Scene();
 
-    // Lights
-
     threeJs.scene.add(three.AmbientLight( 0xc1c1c1 ) );
 
-    final directionalLight =three.DirectionalLight( 0xffffff, 0.03 );
+    final directionalLight = three.DirectionalLight( 0xffffff, 0.03 );
     directionalLight.position.setValues( 0.0, 0.5, 0.5 ).normalize();
     threeJs.scene.add( directionalLight );
 
-    final pointLight1 =three.Mesh(three.SphereGeometry( 4, 8, 8 ),three.MeshBasicMaterial.fromMap( { 'color': 0xc1c1c1 } ) );
+    final pointLight1 = three.Mesh(three.SphereGeometry( 4, 8, 8 ),three.MeshBasicMaterial.fromMap( { 'color': 0xc1c1c1 } ) );
     pointLight1.add(three.PointLight( 0xc1c1c1, 4.0, 300, 0 ) );
     threeJs.scene.add( pointLight1 );
     pointLight1.position.x = 0;
     pointLight1.position.y = - 50;
     pointLight1.position.z = 350;
 
-    final pointLight2 =three.Mesh(three.SphereGeometry( 4, 8, 8 ),three.MeshBasicMaterial.fromMap( { 'color': 0xc1c100 } ) );
+    final pointLight2 = three.Mesh(three.SphereGeometry( 4, 8, 8 ),three.MeshBasicMaterial.fromMap( { 'color': 0xc1c100 } ) );
     pointLight2.add(three.PointLight( 0xc1c100, 0.75, 500, 0 ) );
     threeJs.scene.add( pointLight2 );
     pointLight2.position.x = - 100;
@@ -110,7 +108,7 @@ class _State extends State<WebglMaterialsSubsurfaceScattering> {
     final imgTexture = await loader.fromAsset('assets/models/fbx/white.jpg' );
     imgTexture?.colorSpace = three.SRGBColorSpace;
 
-    final thicknessTexture = loader.fromAsset( 'assets/models/fbx/bunny_thickness.jpg' );
+    final thicknessTexture = await loader.fromAsset( 'assets/models/fbx/bunny_thickness.jpg' );
     imgTexture?.wrapS = imgTexture.wrapT = three.RepeatWrapping;
 
     final shader = subsurfaceScatteringShader;
@@ -137,19 +135,15 @@ class _State extends State<WebglMaterialsSubsurfaceScattering> {
     } );
 
     // LOADER
-    // final loaderFBX = three.FBXLoader();
-    // loaderFBX.fromAsset( 'assets/models/fbx/stanford-bunny.fbx').then(( object ) {
-    //   model = object?.children[ 0 ];
-    //   model?.position.setValues( 0, 0, 10 );
-    //   model?.scale.setScalar( 1 );
-    //   model?.material = material;
-    //   threeJs.scene.add( model );
-    // });
+    final loaderOBJ = three.OBJLoader();
+    await loaderOBJ.fromAsset( 'assets/models/obj/stanford-bunny.obj').then(( object ) {
+      model = object?.children[ 0 ];
+      model?.position.setValues( -100, -600, 0 );
+      model?.scale.setScalar( 5000 );
+      model?.material = material;
+      threeJs.scene.add( model );
+    });
 
-    model = three.Mesh(three.BoxGeometry(500,500,500),material);//object?.children[ 0 ];
-    model?.position.setValues( 0, 0, 10 );
-    model?.scale.setScalar( 1 );
-    threeJs.scene.add( model );
     initGUI( material.uniforms );
   }
 

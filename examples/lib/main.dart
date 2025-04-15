@@ -1,3 +1,4 @@
+import 'package:example/animations/webgl_animation_walk.dart';
 import 'package:example/audio/orientation.dart';
 import 'package:example/audio/sandbox.dart';
 import 'package:example/audio/timing.dart';
@@ -28,10 +29,12 @@ import 'package:example/instancing/webgl_instancing_dynamic.dart';
 import 'package:example/instancing/webgl_instancing_morph.dart';
 import 'package:example/instancing/webgl_instancing_raycasting.dart';
 import 'package:example/instancing/webgl_instancing_scatter.dart';
+import 'package:example/lights/webgl_lightprobe.dart';
 import 'package:example/lights/webgl_lightprobe_cube_camera.dart';
 import 'package:example/line/webgl_lines_fat.dart';
 import 'package:example/line/webgl_lines_fat_raycasting.dart';
 import 'package:example/line/webgl_lines_fat_wireframe.dart';
+import 'package:example/loaders/webgl_loader_bvh.dart';
 import 'package:example/loaders/webgl_loader_collada.dart';
 import 'package:example/loaders/webgl_loader_collada_kinematics.dart';
 import 'package:example/loaders/webgl_loader_collada_skinning.dart';
@@ -46,15 +49,26 @@ import 'package:example/loaders/webgl_loader_stl.dart';
 import 'package:example/loaders/webgl_loader_usdz.dart';
 import 'package:example/loaders/webgl_loader_vox.dart';
 import 'package:example/loaders/webgl_loader_xyz.dart';
-import 'package:example/material/webgl2_multiple_rendertargets.dart';
+import 'package:example/texture/webgl_video_texture.dart';
+import 'package:example/material/webgl_materials_car.dart';
+import 'package:example/material/webgl_materials_physical_transmission.dart';
+import 'package:example/multi_views/webgl2_multiple_rendertargets.dart';
 import 'package:example/material/webgl_materials_modified.dart';
+import 'package:example/material/webgl_materials_physical_transmission_alpha.dart';
 import 'package:example/material/webgl_materials_subsurface_scattering.dart';
+import 'package:example/mirror/webgl_mirror.dart';
 import 'package:example/modifers/webgl_modifer_tessellation.dart';
 import 'package:example/modifers/webgl_modifer_edgesplit.dart';
 import 'package:example/modifers/webgl_modifier_simplifier.dart';
 import 'package:example/modifers/webgl_modifier_subdivision.dart';
+import 'package:example/multi_views/webgl_multiple_scenes_comparison.dart';
+import 'package:example/others/webgpu_performance.dart';
+import 'package:example/shaders/webgl_random_uv.dart';
+import 'package:example/shaders/webgl_refraction.dart';
 import 'package:example/postprocessing/webgl_postprocessing_unreal_bloom.dart';
 import 'package:example/postprocessing/webgl_postprocessing_unreal_bloom_selective.dart';
+import 'package:example/shaders/webgl_shaders_ocean.dart';
+import 'package:example/shaders/webgl_shaders_sky.dart';
 import 'package:example/texture/webgl_materials_video_webcam.dart';
 import 'package:example/others/webgl_geometry_csg.dart';
 import 'package:example/others/webgl_geometry_csg2.dart';
@@ -64,9 +78,9 @@ import 'package:example/others/webgl_custom_attributes_lines.dart';
 import 'package:example/others/webgl_interactive_voxelpainter.dart';
 import 'package:example/others/webgl_lod.dart';
 import 'package:example/texture/webgl_opengl_texture.dart';
-import 'package:example/others/webgl_portal.dart';
+import 'package:example/mirror/webgl_portal.dart';
 import 'package:example/rollercoster/webxr_vr_rollercoaster.dart';
-import 'package:example/shadow/webgl_shader.dart';
+import 'package:example/shaders/webgl_shader.dart';
 import 'package:example/src/files_json.dart';
 import 'package:example/terrain/three_terrain.dart';
 import 'package:example/terrain/webgl_geometry_terrain.dart';
@@ -75,16 +89,18 @@ import 'package:example/shadow/webgl_lensflars.dart';
 import 'package:example/lights/webgl_lights_rectarealight.dart';
 import 'package:example/lights/webgl_lights_spotlight.dart';
 import 'package:example/postprocessing/webgl_postprocessing_sobel.dart';
-import 'package:example/shadow/webgl_shader_lava.dart';
+import 'package:example/shaders/webgl_shader_lava.dart';
 import 'package:example/shadow/webgl_shadowmap_csm.dart';
 import 'package:example/shadow/webgl_shadowmap_pointlight.dart';
 import 'package:example/shadow/webgl_shadowmap_vsm.dart';
 import 'package:example/shadow/webgl_simple_gi.dart';
-import 'package:example/shadow/webgl_water.dart';
+import 'package:example/texture/webgl_periodictable.dart';
+import 'package:example/water/webgl_water.dart';
 import 'package:example/volume/webgl_ubo_arrays.dart';
 import 'package:example/volume/webgl_volume_cloud.dart';
 import 'package:example/volume/webgl_volume_instancing.dart';
 import 'package:example/volume/webgl_volume_perlin.dart';
+import 'package:example/water/webgl_water_flowmap.dart';
 import 'package:flutter/material.dart';
 import 'package:example/animations/misc_animation_keys.dart';
 import 'package:example/animations/webgl_animation_keyframes.dart';
@@ -102,7 +118,8 @@ import 'package:example/geometry/webgl_geometries.dart';
 import 'package:example/geometry/webgl_geometry_colors.dart';
 import 'package:example/geometry/webgl_geometry_shapes.dart';
 import 'package:example/geometry/webgl_geometry_text.dart';
-import 'package:example/others/multi_views.dart';
+import 'package:example/multi_views/multi_views.dart';
+import 'package:example/multi_views/webgl_multi_views.dart';
 import 'package:example/others/webgl_helpers.dart';
 import 'package:example/instancing/webgl_instancing_performance.dart';
 import 'package:example/morphtargets/webgl_skinning_simple.dart';
@@ -179,6 +196,9 @@ class MyAppState extends State<MyApp> {
                   prevLocation: pageLocation,
                 );
               },
+              '/webgl_periodictable':(BuildContext context) {
+                return const WebglPeriodictable();
+              },
               '/timing':(BuildContext context) {
                 return const AudioTiming();
               },
@@ -223,6 +243,9 @@ class MyAppState extends State<MyApp> {
               },
               '/webgl_lightprobe_cube_camera':(BuildContext context) {
                 return const WebglLightprobeCubeCamera();
+              },
+              '/webgl_lightprobe':(BuildContext context) {
+                return const WebglLightprobe();
               },
               '/webgl_geometry_text':(BuildContext context) {
                 return const WebglGeometryText();
@@ -311,6 +334,9 @@ class MyAppState extends State<MyApp> {
               '/webgl_loader_texture_basis':(BuildContext context) {
                 return const WebglLoaderTextureBasis();
               },
+              '/webgl_loader_bvh':(BuildContext context) {
+                return const WebglLoaderBVH();
+              },
               '/webgl_loader_collada':(BuildContext context) {
                 return const WebglLoaderCollada();
               },
@@ -374,6 +400,9 @@ class MyAppState extends State<MyApp> {
               '/webgl_animation_multiple':(BuildContext context) {
                 return const WebglAnimationMultiple();
               },
+              '/webgl_animation_walk':(BuildContext context) {
+                return const WebglAnimationWalk();
+              },
               '/webgl_skinning_simple':(BuildContext context) {
                 return const WebglSkinningSimple();
               },
@@ -406,6 +435,18 @@ class MyAppState extends State<MyApp> {
               },
               '/webgl_materials':(BuildContext context) {
                 return const WebglMaterials();
+              },
+              '/flutter_material':(BuildContext context) {
+                return const WebglVideoTexture();
+              },
+              '/webgl_materials_car':(BuildContext context) {
+                return const WebglMaterialsCar();
+              },
+              '/webgl_materials_physical_transmission_alpha':(BuildContext context) {
+                return const WebglMaterialsPhysicalTransmissionAlpha();
+              },
+              '/webgl_materials_physical_transmission':(BuildContext context) {
+                return const WebglMaterialsPhysicalTransmission();
               },
               '/webgl_materials_modified':(BuildContext context) {
                 return const WebglMaterialsModified();
@@ -440,6 +481,9 @@ class MyAppState extends State<MyApp> {
               '/webgl_water':(BuildContext context) {
                 return const WebglWater();
               },
+              '/webgl_water_flowmap':(BuildContext context) {
+                return const WebglWaterFlowmap();
+              },
               '/webgl_geometry_csg':(BuildContext context) {
                 return const WebglGeometryCSG();
               },
@@ -451,6 +495,9 @@ class MyAppState extends State<MyApp> {
               },
               '/webgl_portal':(BuildContext context) {
                 return const WebglPortal();
+              },
+              '/webgl_mirror':(BuildContext context) {
+                return const WebglMirror();
               },
               '/webgl_modifier_edgesplit':(BuildContext context) {
                 return const WebglModifierEdgesplit();
@@ -503,8 +550,14 @@ class MyAppState extends State<MyApp> {
               '/webgl_materials_video_webcam':(BuildContext context){
                 return const WebglMaterialsVideoWebcam();
               },
+              '/webgl_multi_views':(BuildContext context) {
+                return const WebglMultiViews();
+              },
               '/multi_views':(BuildContext context) {
                 return const MultiViews();
+              },
+              '/webgl_multiple_scenes_comparison':(BuildContext context) {
+                return const WebglMultipleScenesComparison();
               },
               '/games_fps':(BuildContext context) {
                 return const FPSGame2();
@@ -532,6 +585,21 @@ class MyAppState extends State<MyApp> {
               },
               '/webgl_shader':(BuildContext context) {
                 return const WebglShader();
+              },
+              '/webgl_shaders_sky':(BuildContext context) {
+                return const WebglShaderSky();
+              },
+              '/webgl_random_uv':(BuildContext context) {
+                return const WebglRandomUV();
+              },
+              '/webgl_shaders_ocean':(BuildContext context) {
+                return const WebglShaderOcean();
+              },
+              '/webgl_refraction':(BuildContext context) {
+                return const WebglRefraction();
+              },
+              '/webgpu_performance':(BuildContext context) {
+                return const WebgpuPerformance();
               },
               // '/webgl_nodes_points':(BuildContext context) {
               //   return const WebglNodesPoints();

@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:math' as math;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:example/src/statistics.dart';
 import 'package:three_js/three_js.dart' as three;
@@ -71,7 +73,9 @@ class _State extends State<WebglLoaderUsdz> {
     rgbeLoader.mapping = three.EquirectangularReflectionMapping;
     threeJs.scene.background = rgbeLoader;
     threeJs.scene.environment = rgbeLoader;
-
+    if(!kIsWeb){
+      threeJs.scene.backgroundRotation = three.Euler(math.pi);
+    }
     threeJs.scene.add( three.AmbientLight( 0xffffff ) );
     
     final three.Group usdz = (await three.USDZLoader().fromAsset('assets/models/usdz/saeukkang.usdz'))!;

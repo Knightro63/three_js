@@ -46,6 +46,7 @@ class _MyAppState extends State<WebglLoaderFbx> {
     timer.cancel();
     threeJs.dispose();
     three.loading.clear();
+    mixer?.dispose();
     super.dispose();
   }
 
