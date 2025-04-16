@@ -15,7 +15,7 @@ environment:
   flutter: ">=1.17.0"
 
 dependencies:
-  archive: ^4.0.5
+  archive: ^3.6.1
   xml: ^6.5.0
   flutter:
     sdk: flutter
