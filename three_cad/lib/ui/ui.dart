@@ -63,7 +63,7 @@ class _UIPageState extends State<UIScreen> {
   
   three.Group sketches = three.Group();
   three.Group bodies = three.Group();
-  late final ViewHelper2 viewHelper;
+  ViewHelper2? viewHelper;
 
   @override
   void initState(){
@@ -150,7 +150,10 @@ class _UIPageState extends State<UIScreen> {
     threeJs.scene.add(origin.grid);
     threeJs.scene.add(bodies);
     threeJs.scene.add(sketches);
-    creteHelpers();
+    WidgetsBinding.instance.addPostFrameCallback((_){
+      creteHelpers();
+    });
+    
     threeJs.domElement.addEventListener(
       three.PeripheralType.resize, 
       threeJs.onWindowResize
@@ -237,8 +240,8 @@ class _UIPageState extends State<UIScreen> {
     threeJs.addAnimationEvent((dt){
       origin.update();
       orbit.update();
-      if ( viewHelper.animating ) {
-        viewHelper.update( dt );
+      if (viewHelper != null && viewHelper!.animating ) {
+        viewHelper!.update( dt );
         orbit.target.setFrom(origin.childred.children[0].position);
       }
     });
@@ -299,7 +302,7 @@ class _UIPageState extends State<UIScreen> {
     threeJs.renderer?.autoClear = false;
     threeJs.postProcessor = ([double? dt]){
       threeJs.renderer?.render( threeJs.scene, threeJs.camera );
-      viewHelper.render(threeJs.renderer!);
+      viewHelper?.render(threeJs.renderer!);
     };
   }
 

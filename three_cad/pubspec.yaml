@@ -11,13 +11,12 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.8
   flutter_svg: ^2.0.10+1
-  three_js: ^0.0.5
-  three_js_helpers: ^0.0.4
-  three_js_line: ^0.0.1
-  three_js_bvh_csg: ^0.0.1
-  three_js_exporters: ^0.0.2
-  three_js_geometry: ^0.0.2
-  three_js_transform_controls: ^0.0.3
+  three_js: ^0.1.0
+  three_js_helpers: ^0.1.0
+  three_js_line: ^0.1.0
+  three_js_bvh_csg: ^0.1.0
+  three_js_exporters: ^0.1.0
+  three_js_transform_controls: ^0.1.0
   css:
     git:
       url: https://github.com/Knightro63/css.git
@@ -25,7 +24,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^4.0.0
+  flutter_lints: ^5.0.0
 
 
 dependency_overrides:
@@ -33,28 +32,6 @@ dependency_overrides:
     git:
       url: https://github.com/alex-melnyk/flutter-permission-handler.git 
       path: permission_handler_apple
-  three_js_core:
-    path: ../packages/three_js_core
-  three_js_core_loaders:
-    path: ../packages/three_js_core_loaders
-  three_js_math:
-    path: ../packages/three_js_math
-  three_js_modifers:
-    path: ../packages/three_js_modifers
-  three_js_bvh_csg:
-    path: ../packages/three_js_bvh_csg
-  three_js_objects:
-    path: ../packages/three_js_objects
-  three_js_transform_controls:
-    path: ../packages/three_js_transform_controls
-  three_js_controls:
-    path: ../packages/three_js_controls
-  three_js_helpers:
-    path: ../packages/three_js_helpers
-  flutter_angle:
-    path: ../../flutter_angle/flutter_angle
-  flutter_angle_darwin:
-    path: ../../flutter_angle/flutter_angle_darwin
 
 flutter:
   uses-material-design: true
