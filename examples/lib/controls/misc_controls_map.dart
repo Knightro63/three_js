@@ -30,6 +30,7 @@ class _MyAppState extends State<MiscControlsMap> {
       onSetupComplete: (){setState(() {});},
       setup: setup,
       settings: three.Settings(
+        useOpenGL: true,
         renderOptions: {
           "minFilter": three.LinearFilter,
           "magFilter": three.LinearFilter,

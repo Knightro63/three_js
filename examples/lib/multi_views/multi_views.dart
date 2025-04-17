@@ -1,5 +1,5 @@
 import 'dart:async';
-
+import '../src/statistics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Matrix4;
 import 'package:flutter_angle/flutter_angle.dart';
@@ -106,6 +106,9 @@ class _multi_views1_State extends State<MultiViews1> {
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
       setup: setup,
+      settings: three.Settings(
+        useOpenGL: useOpenGL
+      ),
       size: const Size(300,300),
       renderer: widget.renderer,
       rendererUpdate: (){
@@ -180,6 +183,9 @@ class _multi_views2_State extends State<MultiViews2> {
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
       setup: setup,
+      settings: three.Settings(
+        useOpenGL: useOpenGL
+      ),
       size: const Size(300,300),
       renderer: widget.renderer,
       rendererUpdate: (){

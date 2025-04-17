@@ -49,6 +49,7 @@ import 'package:example/loaders/webgl_loader_stl.dart';
 import 'package:example/loaders/webgl_loader_usdz.dart';
 import 'package:example/loaders/webgl_loader_vox.dart';
 import 'package:example/loaders/webgl_loader_xyz.dart';
+import 'package:example/src/statistics.dart';
 import 'package:example/texture/webgl_video_texture.dart';
 import 'package:example/material/webgl_materials_car.dart';
 import 'package:example/material/webgl_materials_physical_transmission.dart';
@@ -149,7 +150,6 @@ void main() {
 }
 class MyApp extends StatefulWidget{
   const MyApp({super.key,}) ;
-
   @override
   MyAppState createState() => MyAppState();
 }
@@ -158,6 +158,13 @@ class MyAppState extends State<MyApp> {
   final GlobalKey<NavigatorState> _navKey = GlobalKey<NavigatorState>();
   String onPage = '';
   double pageLocation = 0;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    useOpenGL = true;
+  }
 
   void callback(String page, [double? location]){
     onPage = page;

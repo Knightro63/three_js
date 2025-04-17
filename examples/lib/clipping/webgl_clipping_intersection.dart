@@ -27,11 +27,11 @@ class _State extends State<WebglClippingIntersection> {
       });
     });
     threeJs = three.ThreeJS(
-      
       onSetupComplete: (){setState(() {});},
       setup: setup,
       settings: three.Settings(
-        localClippingEnabled: true
+        localClippingEnabled: true,
+        useOpenGL: true
       )
     );
     super.initState();

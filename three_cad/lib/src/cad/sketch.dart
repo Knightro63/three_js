@@ -363,9 +363,9 @@ class Draw with EventDispatcher{
   }
   void drawBoxCenter(Vector3 mousePosition){
     if(_newSketch && !_newSketchDidStart){
+      print(sketch!.meshPlane.rotation.toArray());
       sketch?.sketches.add(
-        DrawType.createBoxCenter(mousePosition)
-        ..rotation = sketch!.meshPlane.rotation
+        DrawType.createBoxCenter(mousePosition,sketch!.meshPlane.rotation)
       );
       sketch?.render.add(sketch?.currentSketch);
       _newSketchDidStart = true;

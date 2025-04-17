@@ -37,6 +37,7 @@ class _State extends State<WebglClippingStencil> {
         localClippingEnabled: true,
         clearColor: 0x263238,
         clearAlpha: 1.0,
+        useOpenGL: true
       )
     );
     super.initState();

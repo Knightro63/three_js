@@ -34,6 +34,7 @@ class _State extends State<WebglPostprocessingUnrealBloomSelective> {
       settings: three.Settings(
         //animate: false,
         useSourceTexture: true,
+        useOpenGL: useOpenGL
       )
     );
     super.initState();

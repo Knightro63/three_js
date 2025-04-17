@@ -32,6 +32,7 @@ class _State extends State<WebglMaterialsCar> {
       setup: setup,
       settings: three.Settings(
         enableShadowMap: true,
+        useOpenGL: useOpenGL,
         toneMapping: three.ACESFilmicToneMapping,
         toneMappingExposure: 0.85
       )

@@ -31,7 +31,10 @@ class _MyAppState extends State<WebglLoaderSvg> {
     threeJs = three.ThreeJS(
       
       onSetupComplete: (){setState(() {});},
-      setup: setup
+      setup: setup,
+      settings: three.Settings(
+        useOpenGL: true
+      )
     );
     super.initState();
   }

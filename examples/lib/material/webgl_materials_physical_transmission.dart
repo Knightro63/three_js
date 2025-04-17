@@ -30,6 +30,7 @@ class _State extends State<WebglMaterialsPhysicalTransmission> {
       onSetupComplete: (){setState(() {});},
       setup: setup,
       settings: three.Settings(
+        useOpenGL: useOpenGL,
         enableShadowMap: true,
         toneMapping: three.ACESFilmicToneMapping,
         toneMappingExposure: params['exposure']

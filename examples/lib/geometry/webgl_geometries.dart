@@ -32,6 +32,7 @@ class _State extends State<WebglGeometries> {
       setup: setup,
       settings: three.Settings(
         localClippingEnabled: true,
+        useOpenGL: true
       )
     );
     super.initState();

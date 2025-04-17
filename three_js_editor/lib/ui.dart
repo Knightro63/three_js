@@ -127,6 +127,9 @@ class _UIPageState extends State<UIScreen> {
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
       setup: setup,
+      settings: three.Settings(
+        useOpenGL: true
+      )
     );
     rightClick = RightClick(
       context: context,
@@ -1220,6 +1223,9 @@ class _UIPageState extends State<UIScreen> {
                             GetFilePicker.pickFiles(['glb','gltf']).then((value)async{
                               if(value != null){
                                 for(int i = 0; i < value.files.length;i++){
+                                  final loader = three.GLTFLoader();
+                                  final String path = value.files[i].path!;
+                                  loader.setPath(path.replaceAll(path.split('/').last, ''));
                                   final object = await three.GLTFLoader().fromPath(value.files[i].path!);
                                   final three.BoundingBox box = three.BoundingBox();
                                   box.setFromObject(object!.scene);

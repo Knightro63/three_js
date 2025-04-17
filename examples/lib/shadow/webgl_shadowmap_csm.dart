@@ -32,6 +32,7 @@ class _State extends State<WebglShadowmapCsm> {
       setup: setup,
       settings: three.Settings(
         shadowMapType: three.PCFSoftShadowMap,
+        useOpenGL: useOpenGL
       )
     );
     super.initState();

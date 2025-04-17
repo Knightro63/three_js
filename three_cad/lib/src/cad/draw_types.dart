@@ -61,7 +61,7 @@ enum DrawType{
     return objects;
   }
   
-  static Group createBoxCenter(Vector3 position){
+  static Group createBoxCenter(Vector3 position, Euler rotation){
     Group objects = Group()..name = 'boxCenter';
     objects.add(creatPoint(Vector3(-1,1,0)));
     objects.add(create2PointLine(Vector3(-1,1,0),Vector3(1,1,0)));
@@ -77,6 +77,9 @@ enum DrawType{
     objects.add(creatPoint(Vector3(0,0,0)));
     return objects    
       ..scale.scale(0)
+      ..rotation.x = rotation.z
+      ..rotation.y = rotation.y
+      ..rotation.z = rotation.x
       ..position.x = position.x
       ..position.y = position.y
       ..position.z = position.z;

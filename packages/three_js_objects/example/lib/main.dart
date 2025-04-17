@@ -74,7 +74,8 @@ class _MarchingState extends State<Marching> {
       onSetupComplete: (){setState(() {});},
       setup: setup,
       settings: three.Settings(
-        renderOptions: {"format": tmath.RGBAFormat,"samples": 8}
+        renderOptions: {"format": tmath.RGBAFormat,"samples": 8},
+        useOpenGL: true
       )
     );
     super.initState();

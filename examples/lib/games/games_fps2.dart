@@ -44,7 +44,10 @@ class _FPSGame2PageState extends State<FPSGame2> {
       onSetupComplete: (){
         setState(() {});
       },
-      setup: setup
+      setup: setup,
+      settings: three.Settings(
+        useOpenGL: true
+      )
     );
     super.initState();
   }

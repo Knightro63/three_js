@@ -33,6 +33,7 @@ class _State extends State<WebglLoaderMd2> {
       setup: setup,
       settings: three.Settings(
         enableShadowMap: true,
+        useOpenGL: useOpenGL
       )
     );
     super.initState();

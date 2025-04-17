@@ -33,6 +33,7 @@ class _MyAppState extends State<WebglLoaderSCN> {
       // },
       settings: three.Settings(
         clearAlpha: 0,
+        useOpenGL: true,
         clearColor: 0xffffff
       ),
     );

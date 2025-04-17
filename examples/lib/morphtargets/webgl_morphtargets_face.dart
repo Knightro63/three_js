@@ -30,7 +30,8 @@ class _State extends State<WebglMorphtargetsFace> {
       onSetupComplete: (){setState(() {});},
       setup: setup,
       settings: three.Settings(
-        toneMapping: three.ACESFilmicToneMapping
+        toneMapping: three.ACESFilmicToneMapping,
+        useOpenGL: useOpenGL
       )
     );
     super.initState();

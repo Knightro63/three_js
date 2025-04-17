@@ -28,7 +28,8 @@ class _State extends State<WebglUboArrays> {
       onSetupComplete: (){setState(() {});},
       setup: setup,
       settings: three.Settings(
-        useSourceTexture: true
+        useSourceTexture: true,
+        useOpenGL: useOpenGL
       ),
       windowResizeUpdate: (newSize){
 				threeJs.camera.aspect = threeJs.width / threeJs.height;

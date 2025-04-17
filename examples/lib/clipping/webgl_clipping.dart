@@ -32,6 +32,7 @@ class _State extends State<WebglClipping> {
       setup: setup,
       settings: three.Settings(
         localClippingEnabled: true,
+        useOpenGL: true
       )
     );
     super.initState();

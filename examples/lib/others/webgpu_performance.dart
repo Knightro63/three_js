@@ -27,7 +27,8 @@ class _State extends State<WebgpuPerformance> {
       setup: setup,
       settings: three.Settings(
         toneMapping: three.ACESFilmicToneMapping,
-        toneMappingExposure: 1
+        toneMappingExposure: 1,
+        useOpenGL: useOpenGL
       )
     );
     super.initState();

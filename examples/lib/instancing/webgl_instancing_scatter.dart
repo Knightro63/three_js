@@ -34,6 +34,9 @@ class _State extends State<WebglInstancingScatter> {
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
       setup: setup,
+      settings: three.Settings(
+        useOpenGL: useOpenGL
+      )
     );
     super.initState();
   }
