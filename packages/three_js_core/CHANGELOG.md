@@ -1,3 +1,7 @@
+## 0.1.1
+
+* Added the ability to change to opengl in ThreeJS viewer settings
+
 ## 0.1.0
 
 * Updated to the most current Opengl three.js renderer.
