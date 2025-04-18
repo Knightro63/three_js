@@ -1,0 +1,228 @@
+part of three_webgl;
+
+class RenderItem {
+  int id = 0;
+  Object3D? object;
+  BufferGeometry? geometry;
+  Material? material;
+  dynamic program;
+  int groupOrder = 0;
+  int renderOrder = 0;
+  double z = 0;
+  Map<String, dynamic>? group;
+
+  void dispose(){
+    material?.dispose();
+    object?.dispose();
+    geometry?.dispose();
+  }
+  RenderItem({
+    this.id = 0,
+    this.object,
+    this.geometry,
+    this.material,
+    this.program,
+    this.groupOrder = 0,
+    this.renderOrder = 0,
+    this.z = 0,
+    this.group
+  });
+  RenderItem.fromMap(Map<String, dynamic> json) {
+    if (json["id"] != null) {
+      id = json["id"];
+    }
+    if (json["object"] != null) {
+      object = json["object"];
+    }
+    if (json["geometry"] != null) {
+      geometry = json["geometry"];
+    }
+    if (json["material"] != null) {
+      material = json["material"];
+    }
+    if (json["program"] != null) {
+      program = json["program"];
+    }
+    if (json["groupOrder"] != null) {
+      groupOrder = json["groupOrder"];
+    }
+
+    if (json["renderOrder"] != null) {
+      renderOrder = json["renderOrder"];
+    }
+    if (json["z"] != null) {
+      z = json["z"];
+    }
+    if (json["group"] != null) {
+      group = json["group"];
+    }
+  }
+}
+
+class WebGLRenderList {
+  WebGLRenderList();
+
+  Map<int, RenderItem> renderItems = {};
+  int renderItemsIndex = 0;
+
+  List<RenderItem> opaque = [];
+  List<RenderItem> transmissive = [];
+  List<RenderItem> transparent = [];
+
+  final defaultProgram = DefaultProgram();
+
+  void init() {
+    renderItemsIndex = 0;
+    opaque.clear();
+    transmissive.clear();
+    transparent.clear();
+  }
+
+  void dispose(){
+    for(final key in renderItems.keys){
+      renderItems[key]?.dispose();
+    }
+    for(final o in opaque){
+      o.dispose();
+    }
+    for(final t in transmissive){
+      t.dispose();
+    }
+    for(final t in transparent){
+      t.dispose();
+    }
+  }
+
+  RenderItem getNextRenderItem(
+    Object3D object, 
+    BufferGeometry? geometry, 
+    Material? material, 
+    int groupOrder, 
+    double z,
+    Map<String, dynamic>? group
+  ) {
+    RenderItem? renderItem = renderItems[renderItemsIndex];
+
+    if (renderItem == null) {
+      renderItem = RenderItem.fromMap({
+        "id": object.id,
+        "object": object,
+        "geometry": geometry,
+        "material": material,
+        "groupOrder": groupOrder,
+        "renderOrder": object.renderOrder,
+        "z": z,
+        "group": group
+      });
+    } 
+    else {
+      renderItem = RenderItem(
+        id: object.id,
+        object: object,
+        geometry: geometry,
+        material: material,
+        groupOrder: groupOrder,
+        renderOrder: object.renderOrder,
+        z: z,
+        group: group
+      );
+    }
+    
+    renderItems[renderItemsIndex] = renderItem;
+    renderItemsIndex++;
+
+    return renderItem;
+  }
+
+  void push(Object3D object, BufferGeometry geometry, Material material, int groupOrder, double z, Map<String, dynamic>? group) {
+    final renderItem = getNextRenderItem(object, geometry, material, groupOrder, z, group);
+
+    if (material.transmission > 0.0) {
+      transmissive.add(renderItem);
+    } 
+    else {
+      if (material.transparent) {
+        transparent.add(renderItem);
+      } 
+      else {
+        opaque.add(renderItem);
+      }
+    }
+  }
+
+  void unshift(Object3D object, BufferGeometry? geometry, Material? material, int groupOrder, double z, Map<String, dynamic>? group) {
+    final renderItem = getNextRenderItem(object, geometry, material, groupOrder, z, group);
+    
+    if ((material?.transmission ?? 0) > 0.0) {
+      transmissive.insert(0, renderItem);
+    } 
+    else {
+      if (material?.transparent == true) {
+        transparent.insert(0, renderItem);
+      } 
+      else {
+        opaque.insert(0, renderItem);
+      }
+    }
+  }
+
+  void sort(customOpaqueSort, customTransparentSort) {
+    if (opaque.length > 1) {
+      opaque.sort(customOpaqueSort ?? painterSortStable);
+    }
+
+    if (transmissive.length > 1) {
+      transmissive.sort(customTransparentSort ?? reversePainterSortStable);
+    }
+
+    if (transparent.length > 1) {
+      transparent.sort(customTransparentSort ?? reversePainterSortStable);
+    }
+  }
+
+  void finish() {
+    // Clear references from inactive renderItems in the list
+
+    for (int i = renderItemsIndex, il = renderItems.length; i < il; i++) {
+      final renderItem = renderItems[i]!;
+
+      if (renderItem.id == 0) break;
+
+      renderItem.id = 0;
+      renderItem.object = null;
+      renderItem.geometry = null;
+      renderItem.material = null;
+      renderItem.program = null;
+      renderItem.group = null;
+    }
+  }
+
+  int painterSortStable(RenderItem a, RenderItem b) {
+    if (a.groupOrder != b.groupOrder) {
+      return a.groupOrder - b.groupOrder;
+    } else if (a.renderOrder != b.renderOrder) {
+      return (a.renderOrder - b.renderOrder) > 0 ? 1 : -1;
+    } else if (a.program != b.program) {
+      return a.program.id - b.program.id;
+    } else if (a.material!.id != b.material!.id) {
+      return a.material!.id - b.material!.id;
+    } else if (a.z != b.z) {
+      return (a.z - b.z) > 0 ? 1 : -1;
+    } else {
+      return a.id - b.id;
+    }
+  }
+
+  int reversePainterSortStable(RenderItem a, RenderItem b) {
+    if (a.groupOrder != b.groupOrder) {
+      return a.groupOrder - b.groupOrder;
+    } else if (a.renderOrder != b.renderOrder) {
+      return a.renderOrder - b.renderOrder;
+    } else if (a.z != b.z) {
+      final v = b.z - a.z;
+      return v > 0 ? 1 : -1;
+    } else {
+      return a.id - b.id;
+    }
+  }
+}

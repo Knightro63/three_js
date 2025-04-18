@@ -1,0 +1,20 @@
+name: three_js_core
+description: "Flutter three_js_core package converted from threejs and three_dart package made for three_js."
+version: 0.0.1
+homepage: https://github.com/Knightro63/three_js/tree/main/packages/three_js_core
+
+environment:
+  sdk: '>=3.3.2 <4.0.0'
+  flutter: ">=1.17.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  logger: ^2.5.0
+  js: ^0.7.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
