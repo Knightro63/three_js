@@ -33,7 +33,8 @@ class _State extends State<WebglLightprobe> {
       onSetupComplete: (){setState(() {});},
       setup: setup,
       settings: three.Settings(
-        toneMapping: three.NoToneMapping
+        toneMapping: three.NoToneMapping,
+        useOpenGL: useOpenGL
       )
     );
     super.initState();

@@ -27,7 +27,7 @@ class _State extends State<WebglMultipleScenesComparison> {
       onSetupComplete: (){setState(() {});},
       setup: setup,
       settings: three.Settings(
-        
+        useOpenGL: useOpenGL
       )
     );
     super.initState();

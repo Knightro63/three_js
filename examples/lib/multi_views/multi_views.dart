@@ -1,96 +1,35 @@
 import 'dart:async';
-
-import 'package:flutter/foundation.dart';
+import '../src/statistics.dart';
 import 'package:flutter/material.dart' hide Matrix4;
-import 'package:flutter_angle/flutter_angle.dart';
 import 'package:three_js/three_js.dart' as three;
 
 class MultiViews extends StatefulWidget {
-  
   const MultiViews({super.key});
-
   @override
   createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MultiViews> {
-  three.WebGLRenderer? renderer;
-  late FlutterAngleTexture three3dRender;
-  FlutterAngle angle = FlutterAngle();
-
-  @override
-  void initState() {
-    super.initState();
-  }
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  Future<bool> init() async {
-    if(!kIsWeb) {
-      await angle.init();
-      three3dRender = await angle.createTexture(
-        AngleOptions(
-          width: 1024, 
-          height: 1024, 
-          dpr: 1
-        )
-      );
-
-      Map<String, dynamic> options = {
-        "width": 1024,
-        "height": 1024,
-        "gl": three3dRender.getContext(),
-        "antialias": true,
-      };
-      renderer = three.WebGLRenderer(options);
-      renderer!.autoClear = true;
-    }
-    return true;
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-
-      body: FutureBuilder<bool>(
-        future: init(),
-        builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
-          if (!snapshot.hasData) {
-            return const CircularProgressIndicator();
-          }
-          else{
-            return SingleChildScrollView(
-              child: _build(context)
-            );
-          }
-        }
-      ),
-    );
-
-  }
-
-  Widget _build(BuildContext context) {
-    return Column(
-      children: [
-        MultiViews1(renderer: renderer),
-        Container(height: 2, color: Colors.red,),
-        MultiViews2(renderer: renderer)
-      ],
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          const MultiViews1(),
+          Container(height: 2, color: Colors.red,),
+          const MultiViews2()
+        ],
+      )
     );
   }
-
 }
 
 class MultiViews1 extends StatefulWidget {
-  final three.WebGLRenderer? renderer;
-  const MultiViews1({super.key, this.renderer});
-
+  const MultiViews1({super.key});
   @override
-  createState() => _multi_views1_State();
+  createState() => _MultiViews1State();
 }
-class _multi_views1_State extends State<MultiViews1> {
+class _MultiViews1State extends State<MultiViews1> {
   List<int> data = List.filled(60, 0, growable: true);
   late Timer timer;
   late three.ThreeJS threeJs;
@@ -106,11 +45,10 @@ class _multi_views1_State extends State<MultiViews1> {
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
       setup: setup,
+      settings: three.Settings(
+        useOpenGL: useOpenGL
+      ),
       size: const Size(300,300),
-      renderer: widget.renderer,
-      rendererUpdate: (){
-        if (!kIsWeb) threeJs.renderer!.setRenderTarget(threeJs.renderTarget);
-      }
     );
     super.initState();
   }
@@ -158,13 +96,11 @@ class _multi_views1_State extends State<MultiViews1> {
 }
 
 class MultiViews2 extends StatefulWidget {
-  final three.WebGLRenderer? renderer;
-  const MultiViews2({super.key, this.renderer});
-
+  const MultiViews2({super.key});
   @override
-  createState() => _multi_views2_State();
+  createState() => _MultiViews2State();
 }
-class _multi_views2_State extends State<MultiViews2> {
+class _MultiViews2State extends State<MultiViews2> {
   List<int> data = List.filled(60, 0, growable: true);
   late Timer timer;
   late three.ThreeJS threeJs;
@@ -180,11 +116,10 @@ class _multi_views2_State extends State<MultiViews2> {
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
       setup: setup,
+      settings: three.Settings(
+        useOpenGL: useOpenGL
+      ),
       size: const Size(300,300),
-      renderer: widget.renderer,
-      rendererUpdate: (){
-        if (!kIsWeb) threeJs.renderer!.setRenderTarget(threeJs.renderTarget);
-      }
     );
     super.initState();
   }

@@ -27,6 +27,9 @@ class _State extends State<WebglOpenglTexture> {
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
       setup: setup,
+      settings: three.Settings(
+        useOpenGL: useOpenGL
+      )
     );
     super.initState();
   }

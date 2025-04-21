@@ -33,6 +33,7 @@ class _MyAppState extends State<FlutterGame> {
       settings: three.Settings(
         clearAlpha: 0,
         clearColor: 0xffffff,
+        useOpenGL: useOpenGL
       ),
     );
     super.initState();

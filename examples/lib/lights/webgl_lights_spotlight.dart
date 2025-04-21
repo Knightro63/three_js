@@ -33,6 +33,7 @@ class _State extends State<WebglLightsSpotlight> {
       onSetupComplete: (){setState(() {});},
       setup: setup,
       settings: three.Settings(
+        useOpenGL: useOpenGL,
         enableShadowMap: true,
         shadowMapType: three.PCFSoftShadowMap,
         toneMapping: three.ACESFilmicToneMapping,

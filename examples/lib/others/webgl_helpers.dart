@@ -30,7 +30,10 @@ class _State extends State<WebglHelpers> {
     threeJs = three.ThreeJS(
       
       onSetupComplete: (){setState(() {});},
-      setup: setup
+      setup: setup,
+      settings: three.Settings(
+        useOpenGL: true
+      )
     );
     super.initState();
   }

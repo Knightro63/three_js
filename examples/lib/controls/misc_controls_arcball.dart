@@ -28,7 +28,10 @@ class _MyAppState extends State<MiscControlsArcball> {
     });
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
-      setup: setup
+      setup: setup,
+      settings: three.Settings(
+        useOpenGL: true
+      )
     );
     super.initState();
   }

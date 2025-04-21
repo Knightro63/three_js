@@ -28,7 +28,9 @@ class _MyAppState extends State<WebglLoaderColladaSkinning> {
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
       setup: setup,
-      settings: three.Settings()
+      settings: three.Settings(
+        useOpenGL: useOpenGL
+      )
     );
     super.initState();
   }

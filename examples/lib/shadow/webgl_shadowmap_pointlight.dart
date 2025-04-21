@@ -34,6 +34,7 @@ class _State extends State<WebglShadowmapPointlight> {
         enableShadowMap: true,
         shadowMapType: three.BasicShadowMap,
         localClippingEnabled: true,
+        useOpenGL: useOpenGL
       )
     );
     super.initState();

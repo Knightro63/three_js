@@ -30,6 +30,7 @@ class _State extends State<WebglMirror> {
       setup: setup,
       settings: three.Settings(
         toneMapping: three.ACESFilmicToneMapping,
+        useOpenGL: useOpenGL
       )
     );
     super.initState();

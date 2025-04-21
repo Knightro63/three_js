@@ -45,14 +45,16 @@ enum DrawType{
 
     position.needsUpdate = true;
   }
-  static Group createCircle(Vector3 position){
+  static Group createCircle(Vector3 position, Euler rotation){
     Group objects = Group()..name = 'circle';
     objects.add(creatPoint(position));
 
     final edges = EdgesGeometry( CircleGeometry(radius: 1, segments: 64),math.pi/8 ); 
-    final line = 
-    LineSegments(edges, LineBasicMaterial.fromMap({'color': 0x06A7E2}))
+    final line = LineSegments(edges, LineBasicMaterial.fromMap({'color': 0x06A7E2}))
     ..scale.scale(0)
+    ..rotation.x = rotation.x
+    ..rotation.y = rotation.y
+    ..rotation.z = rotation.z
     ..position.x = position.x
     ..position.y = position.y
     ..position.z = position.z;
@@ -61,7 +63,7 @@ enum DrawType{
     return objects;
   }
   
-  static Group createBoxCenter(Vector3 position){
+  static Group createBoxCenter(Vector3 position, Euler rotation){
     Group objects = Group()..name = 'boxCenter';
     objects.add(creatPoint(Vector3(-1,1,0)));
     objects.add(create2PointLine(Vector3(-1,1,0),Vector3(1,1,0)));
@@ -77,12 +79,15 @@ enum DrawType{
     objects.add(creatPoint(Vector3(0,0,0)));
     return objects    
       ..scale.scale(0)
+      ..rotation.x = rotation.x
+      ..rotation.y = rotation.y
+      ..rotation.z = rotation.z
       ..position.x = position.x
       ..position.y = position.y
       ..position.z = position.z;
   }
 
-  static Group createBox2Point(Vector3 position){
+  static Group createBox2Point(Vector3 position, Euler rotation){
     Group objects = Group()..name = 'box2Point';
     objects.add(creatPoint(Vector3(1,0,0)));
     objects.add(create2PointLine(Vector3(1,0,0),Vector3(1,1,0)));
@@ -95,6 +100,9 @@ enum DrawType{
 
     return objects    
       ..scale.scale(0)
+      ..rotation.x = rotation.x
+      ..rotation.y = rotation.y
+      ..rotation.z = rotation.z
       ..position.x = position.x
       ..position.y = position.y
       ..position.z = position.z;

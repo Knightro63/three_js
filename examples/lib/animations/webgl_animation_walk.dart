@@ -67,7 +67,8 @@ class _State extends State<WebglAnimationWalk> {
       settings: three.Settings(
         toneMapping: three.ACESFilmicToneMapping,
         toneMappingExposure: 0.5,
-        enableShadowMap: true
+        enableShadowMap: true,
+        useOpenGL: useOpenGL
       )
     );
     super.initState();

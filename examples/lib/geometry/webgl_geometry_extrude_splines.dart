@@ -30,6 +30,9 @@ class _State extends State<WebglGeometryExtrudeSplines> {
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
       setup: setup,
+      settings: three.Settings(
+        useOpenGL: useOpenGL
+      )
     );
     super.initState();
   }

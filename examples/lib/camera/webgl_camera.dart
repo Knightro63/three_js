@@ -30,6 +30,7 @@ class _MyAppState extends State<WebglCamera> {
       setup: setup,
       postProcessor: postProcessor,
       settings: three.Settings(
+        useOpenGL: useOpenGL,
         renderOptions: {
         "minFilter": three.LinearFilter,
         "magFilter": three.LinearFilter,

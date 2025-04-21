@@ -34,6 +34,7 @@ class _State extends State<WebglPostprocessingUnrealBloom> {
        //autoClear: false,
         toneMapping: three.ReinhardToneMapping,
         useSourceTexture: true,
+        useOpenGL: useOpenGL
       )
     );
     super.initState();

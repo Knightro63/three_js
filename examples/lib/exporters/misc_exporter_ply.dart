@@ -31,6 +31,9 @@ class _State extends State<MiscExporterPly> {
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
       setup: setup,
+      settings: three.Settings(
+        useOpenGL: useOpenGL
+      )
     );
     gui = Gui((){setState(() {});});
     super.initState();

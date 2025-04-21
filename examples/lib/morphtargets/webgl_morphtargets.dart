@@ -27,7 +27,10 @@ class _State extends State<WebglMorphtargets> {
     });
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
-      setup: setup
+      setup: setup,
+      settings: three.Settings(
+        useOpenGL: true
+      )
     );
     super.initState();
   }

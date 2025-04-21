@@ -26,6 +26,9 @@ class _State extends State<WebglVolumeCloud> {
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
       setup: setup,
+      settings: three.Settings(
+        useOpenGL: useOpenGL
+      ),
       windowResizeUpdate: (newSize){
         threeJs.width = newSize.width;
         threeJs.height = newSize.height;

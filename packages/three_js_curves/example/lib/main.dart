@@ -41,6 +41,9 @@ class _State extends State<WebglGeometryExtrudeShapes> {
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
       setup: setup,
+      settings: three.Settings(
+        useOpenGL: true
+      )
     );
     super.initState();
   }

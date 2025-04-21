@@ -14,6 +14,7 @@ class Settings{
     this.autoClear = true,
     Map<String,dynamic>? renderOptions,
     this.animate = true,
+    this.useOpenGL = false,
     this.alpha = false,
     this.autoClearDepth = true,
     this.autoClearStencil = true,
@@ -35,6 +36,7 @@ class Settings{
   }
 
   bool animate;
+  bool useOpenGL;
   bool logarithmicDepthBuffer;
   bool useSourceTexture;
   bool enableShadowMap;
@@ -281,7 +283,7 @@ class ThreeJS {
     width = screenSize!.width;
     height = screenSize!.height;
     if(texture == null){
-      await angle.init(false,true);
+      await angle.init(false,!settings.useOpenGL);
       
       texture = await angle.createTexture(      
         AngleOptions(
@@ -291,6 +293,7 @@ class ThreeJS {
           alpha: settings.alpha,
           antialias: true,
           customRenderer: false,
+          useSurfaceProducer: true
         )
       );
     }

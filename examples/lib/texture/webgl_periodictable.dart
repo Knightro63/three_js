@@ -28,7 +28,7 @@ class _State extends State<WebglPeriodictable> {
       onSetupComplete: (){setState(() {});},
       setup: setup,
       settings: three.Settings(
-        //animate: false
+        useOpenGL: useOpenGL
       )
     );
     super.initState();

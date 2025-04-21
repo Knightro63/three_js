@@ -42,7 +42,8 @@ class _MyAppState extends State<WebglInstancingPerformance> {
           "magFilter": three.LinearFilter,
           "format": three.RGBAFormat,
           "samples": 4
-        }
+        },
+        useOpenGL: true
       )
     );
     super.initState();

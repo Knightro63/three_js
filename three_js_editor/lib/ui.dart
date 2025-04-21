@@ -11,15 +11,14 @@ import 'package:three_js_editor/src/navigation/right_click.dart';
 import 'package:three_js_editor/src/styles/savedWidgets.dart';
 
 import 'package:three_js/three_js.dart' as three;
-import 'package:three_js_editor/ui/camera_control.dart';
 import 'package:three_js_helpers/three_js_helpers.dart';
 import 'package:three_js_geometry/three_js_geometry.dart';
 import 'package:three_js_transform_controls/three_js_transform_controls.dart';
 import 'package:three_js_modifers/three_js_modifers.dart';
 import 'package:three_js_objects/three_js_objects.dart';
+import 'package:three_js_exporters/three_js_exporters.dart';
 
 import 'src/navigation/navigation.dart';
-import 'src/database/filePicker.dart';
 import 'src/styles/globals.dart';
 
 enum ShadingType{wireframe,solid,material}
@@ -73,6 +72,7 @@ class _UIPageState extends State<UIScreen> {
   three.Object3D? copy;
 
   late RightClick rightClick;
+  three.Scene scene = three.Scene();
 
   List<bool> expands = [false,false,false];
   List<TextEditingController> transfromControllers = [
@@ -127,6 +127,9 @@ class _UIPageState extends State<UIScreen> {
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
       setup: setup,
+      settings: three.Settings(
+        useOpenGL: true
+      )
     );
     rightClick = RightClick(
       context: context,
@@ -147,14 +150,14 @@ class _UIPageState extends State<UIScreen> {
     switch (options) {
       case RightClickOptions.delete:
         control.detach();
-        threeJs.scene.remove(intersected!);
+        scene.remove(intersected!);
         intersected = null;
         break;
       case RightClickOptions.copy:
         copy = intersected;
         break;
       case RightClickOptions.paste:
-        threeJs.scene.add(intersected);
+        scene.add(intersected);
         break;
       default:
     }
@@ -207,6 +210,8 @@ class _UIPageState extends State<UIScreen> {
     threeJs.scene.add(helper);
     threeJs.scene.add(editObject);
 
+    threeJs.scene.add(scene);
+
     threeJs.domElement.addEventListener(
       three.PeripheralType.resize, 
       threeJs.onWindowResize
@@ -242,7 +247,7 @@ class _UIPageState extends State<UIScreen> {
         case 'v':
           if(holdingControl){
             if(copy != null){
-              threeJs.scene.add(copy?.clone());
+              scene.add(copy?.clone());
             }
           }
           break;
@@ -297,8 +302,8 @@ class _UIPageState extends State<UIScreen> {
     });
     threeJs.domElement.addEventListener(three.PeripheralType.pointerdown, (details){
       mousePosition = three.Vector2(details.clientX, details.clientY);
-      if(threeJs.scene.children.length > avoid && !control.dragging){
-        checkIntersection(threeJs.scene.children.sublist(avoid));
+      if(!control.dragging){
+        checkIntersection(scene.children);
       }
     });
   }
@@ -323,20 +328,21 @@ class _UIPageState extends State<UIScreen> {
       ..computeLineDistances()
       ..scale.setValues(1,1,1)
     );
-    final cc = CameraControl(
-      size: 1.8,
+    
+    final viewHelper = ViewHelper(
+      //size: 1.8,
       offsetType: OffsetType.topRight,
-      offset: three.Vector2(10, 45),
+      offset: three.Vector2(-200, 10),
       screenSize: const Size(120, 120), 
       listenableKey: threeJs.globalKey,
-      rotationCamera: threeJs.camera,
-      threeJs: threeJs
+      camera: threeJs.camera,
+      //threeJs: threeJs
     );
 
     threeJs.renderer?.autoClear = false;
     threeJs.postProcessor = ([double? dt]){
-      threeJs.renderer!.render( threeJs.scene, threeJs.camera );
-      cc.postProcessor();
+      threeJs.renderer?.render( threeJs.scene, threeJs.camera );
+      viewHelper.render(threeJs.renderer!);
     };
   }
 
@@ -356,11 +362,8 @@ class _UIPageState extends State<UIScreen> {
       case LSICallbacks.clear:
         setState(() {
           resetNav = !resetNav;
-          if(threeJs.scene.children.length > avoid){
-            for(int i = avoid; i < threeJs.scene.children.length;i++){
-              threeJs.scene.children[i].dispose();
-            }
-            threeJs.scene.children.length = avoid;
+            for(final obj in scene.children){
+              obj.dispose();
           }
         });
         break;
@@ -384,6 +387,16 @@ class _UIPageState extends State<UIScreen> {
   }
   void materialWireframe(List<three.Object3D> objects){
     for(final o in objects){
+      if(o is! BoundingBoxHelper){
+        o.material?.wireframe = true;
+        o.material?.vertexColors = false;
+        o.material?.colorWrite = true;
+        materialWireframe(o.children);
+      }
+    }
+  }
+  void materialWireframeAll(){
+    for(final o in scene.children){
       if(o is! BoundingBoxHelper){
         o.material?.wireframe = true;
         o.material?.vertexColors = false;
@@ -896,8 +909,8 @@ class _UIPageState extends State<UIScreen> {
                               ),
                             ),
                           ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                          Wrap(
+                            runAlignment: WrapAlignment.spaceBetween,
                             children: [
                               const Text('Object: '),
                               Container(
@@ -1004,8 +1017,8 @@ class _UIPageState extends State<UIScreen> {
       ) 
     ];
 
-    for(int i = avoid; i < threeJs.scene.children.length; i++){
-      final child = threeJs.scene.children[i];
+    for(final obj in scene.children){
+      final child = obj;
       booleanSelector.add(DropdownMenuItem(
         value: '${child.name}|${child.id}',
         child: Text(
@@ -1154,7 +1167,7 @@ class _UIPageState extends State<UIScreen> {
                                 object.scale = three.Vector3(0.01,0.01,0.01);        
                                 BoundingBoxHelper h = BoundingBoxHelper(box)..visible = false;
                                 object.name = objs.files[i].name.split('.').first;
-                                threeJs.scene.add(object.add(h));
+                                scene.add(object.add(h));
                               }
                             }
                             setState(() {});
@@ -1173,7 +1186,7 @@ class _UIPageState extends State<UIScreen> {
                                   box.setFromObject(object!);
                                   BoundingBoxHelper h = BoundingBoxHelper(box)..visible = false;
                                   object.name = value.files[i].name.split('.').first;
-                                  threeJs.scene.add(object.add(h));
+                                  scene.add(object.add(h));
                                 }
                               }
                               setState(() {});
@@ -1195,7 +1208,7 @@ class _UIPageState extends State<UIScreen> {
                                   object.scale = three.Vector3(0.01,0.01,0.01);
                                   BoundingBoxHelper h = BoundingBoxHelper(box)..visible = false;
                                   object.name = value.files[i].name.split('.').first;
-                                  threeJs.scene.add(object.add(h));
+                                  scene.add(object.add(h));
                                 }
                               }
                               setState(() {});
@@ -1210,12 +1223,15 @@ class _UIPageState extends State<UIScreen> {
                             GetFilePicker.pickFiles(['glb','gltf']).then((value)async{
                               if(value != null){
                                 for(int i = 0; i < value.files.length;i++){
+                                  final loader = three.GLTFLoader();
+                                  final String path = value.files[i].path!;
+                                  loader.setPath(path.replaceAll(path.split('/').last, ''));
                                   final object = await three.GLTFLoader().fromPath(value.files[i].path!);
                                   final three.BoundingBox box = three.BoundingBox();
                                   box.setFromObject(object!.scene);
                                   BoundingBoxHelper h = BoundingBoxHelper(box)..visible = false;
                                   object.scene.name = value.files[i].name.split('.').first;
-                                  threeJs.scene.add(object.scene.add(h));
+                                  scene.add(object.scene.add(h));
                                 }
                               }
                               setState(() {});
@@ -1239,7 +1255,7 @@ class _UIPageState extends State<UIScreen> {
                                   BoundingBoxHelper h = BoundingBoxHelper(box)..visible = false;
                                   object.scale = three.Vector3(0.01,0.01,0.01);
                                   object.name = value.files[i].name;
-                                  threeJs.scene.add(object.add(h));
+                                  scene.add(object.add(h));
                                 }
                               }
                             });
@@ -1262,7 +1278,7 @@ class _UIPageState extends State<UIScreen> {
                                   BoundingBoxHelper h = BoundingBoxHelper(box)..visible = false;
                                   object.scale = three.Vector3(0.01,0.01,0.01);
                                   object.name = value.files[i].name;
-                                  threeJs.scene.add(object.add(h));
+                                  scene.add(object.add(h));
                                 }
                               }
                             });
@@ -1285,7 +1301,7 @@ class _UIPageState extends State<UIScreen> {
                                   box.setFromObject(object);
                                   BoundingBoxHelper h = BoundingBoxHelper(box)..visible = false;
                                   object.name = value.files[i].name;
-                                  threeJs.scene.add(object.add(h));
+                                  scene.add(object.add(h));
                                 }
                               }
                             });
@@ -1308,7 +1324,7 @@ class _UIPageState extends State<UIScreen> {
                                   box.setFromObject(object);
                                   BoundingBoxHelper h = BoundingBoxHelper(box)..visible = false;
                                   object.name = value.files[i].name;
-                                  threeJs.scene.add(object.add(h));
+                                  scene.add(object.add(h));
                                 }
                               }
                             });
@@ -1337,7 +1353,7 @@ class _UIPageState extends State<UIScreen> {
                                   box.setFromObject(object);
                                   BoundingBoxHelper h = BoundingBoxHelper(box)..visible = false;
                                   object.name = value.files[i].name;
-                                  threeJs.scene.add(object.add(h));
+                                  scene.add(object.add(h));
                                 }
                               }
                             });
@@ -1349,6 +1365,62 @@ class _UIPageState extends State<UIScreen> {
                       name: 'Export',
                       icon: Icons.file_upload_outlined,
                       subItems: [
+                        NavItems(
+                          name: 'stl',
+                          icon: Icons.file_upload_outlined,
+                          subItems: [
+                            NavItems(
+                              name: 'ascii',
+                              icon: Icons.file_copy_outlined,
+                              function: (data){
+                                callBacks(call: LSICallbacks.updatedNav);
+                                STLExporter.exportScene('untilted', scene);
+                              }
+                            ),
+                            NavItems(
+                              name: 'binary',
+                              icon: Icons.image,
+                              function: (data){
+                                setState(() {
+                                  callBacks(call: LSICallbacks.updatedNav);
+                                  STLBinaryExporter.exportScene('untilted', scene);
+                                });
+                              }
+                            )
+                          ]
+                        ),
+                        NavItems(
+                          name: 'ply',
+                          icon: Icons.file_upload_outlined,
+                          subItems: [
+                            NavItems(
+                              name: 'ascii',
+                              icon: Icons.file_copy_outlined,
+                              function: (data){
+                                callBacks(call: LSICallbacks.updatedNav);
+                                PLYExporter.exportScene('untilted', scene);
+                              }
+                            ),
+                            NavItems(
+                              name: 'binary',
+                              icon: Icons.image,
+                              function: (data){
+                                setState(() {
+                                  callBacks(call: LSICallbacks.updatedNav);
+                                  PLYExporter.exportScene('untilted', scene, PLYOptions(type: ExportTypes.binary));
+                                });
+                              }
+                            )
+                          ]
+                        ),
+                        NavItems(
+                          name: 'obj',
+                          icon: Icons.file_copy_outlined,
+                          function: (data){
+                            callBacks(call: LSICallbacks.updatedNav);
+                            OBJExporter.exportScene('untilted', scene);
+                          }
+                        ),
                         NavItems(
                           name: 'json',
                           icon: Icons.file_copy_outlined,
@@ -1413,7 +1485,7 @@ class _UIPageState extends State<UIScreen> {
                             box.setFromObject(object);     
                             BoundingBoxHelper h = BoundingBoxHelper(box)..visible = false;
                             object.name = 'Plane';
-                            threeJs.scene.add(object.add(h));
+                            scene.add(object.add(h));
                           },
                         ),
                         NavItems(
@@ -1427,7 +1499,7 @@ class _UIPageState extends State<UIScreen> {
                             BoundingBoxHelper h = BoundingBoxHelper(box)..visible = false;
                             object.receiveShadow = true;
                             object.name = 'Cube';
-                            threeJs.scene.add(object.add(h));
+                            scene.add(object.add(h));
                           },
                         ),
                         NavItems(
@@ -1440,7 +1512,7 @@ class _UIPageState extends State<UIScreen> {
                             box.setFromObject(object);     
                             BoundingBoxHelper h = BoundingBoxHelper(box)..visible = false;
                             object.name = 'Circle';
-                            threeJs.scene.add(object.add(h));
+                            scene.add(object.add(h));
                           },
                         ),
                         NavItems(
@@ -1453,7 +1525,7 @@ class _UIPageState extends State<UIScreen> {
                             box.setFromObject(object);     
                             BoundingBoxHelper h = BoundingBoxHelper(box)..visible = false;
                             object.name = 'Sphere';
-                            threeJs.scene.add(object.add(h));
+                            scene.add(object.add(h));
                           },
                         ),
                         NavItems(
@@ -1466,7 +1538,7 @@ class _UIPageState extends State<UIScreen> {
                             box.setFromObject(object);     
                             BoundingBoxHelper h = BoundingBoxHelper(box)..visible = false;
                             object.name = 'Ico Sphere';
-                            threeJs.scene.add(object.add(h));
+                            scene.add(object.add(h));
                           },
                         ),
                         NavItems(
@@ -1479,7 +1551,7 @@ class _UIPageState extends State<UIScreen> {
                             box.setFromObject(object);     
                             BoundingBoxHelper h = BoundingBoxHelper(box)..visible = false;
                             object.name = 'Cylinder';
-                            threeJs.scene.add(object.add(h));
+                            scene.add(object.add(h));
                           },
                         ),
                         NavItems(
@@ -1492,7 +1564,7 @@ class _UIPageState extends State<UIScreen> {
                             box.setFromObject(object);     
                             BoundingBoxHelper h = BoundingBoxHelper(box)..visible = false;
                             object.name = 'Cone';
-                            threeJs.scene.add(object.add(h));
+                            scene.add(object.add(h));
                           },
                         ),
                         NavItems(
@@ -1505,7 +1577,7 @@ class _UIPageState extends State<UIScreen> {
                             box.setFromObject(object);     
                             BoundingBoxHelper h = BoundingBoxHelper(box)..visible = false;
                             object.name = 'Torus';
-                            threeJs.scene.add(object.add(h));
+                            scene.add(object.add(h));
                           },
                         ),
                       ]
@@ -1516,15 +1588,15 @@ class _UIPageState extends State<UIScreen> {
                       function: (e){
                         if(effect == null){
                           effect = MarchingCubes(28, three.MeshStandardMaterial.fromMap({'flatShading': true}), true, true, 100000 );
-                          effect!.position.setValues( 0, 0, 0 );
+                          effect!.position.setValues( math.Random().nextDouble(), math.Random().nextDouble(),math.Random().nextDouble());
                           effect!.scale.setValues( 1, 1, 1 );
 
                           effect!.enableUvs = false;
                           effect!.enableColors = false;
                           effect!.name = 'MarchingCubes';
                           
-                          threeJs.scene.add(mp);
-                          threeJs.scene.add( effect! );
+                          scene.add(mp);
+                          scene.add( effect! );
                         }
                         final b = three.BufferGeometry();
                         List<double> v = [0.5,0.5,0.5];
@@ -1561,7 +1633,7 @@ class _UIPageState extends State<UIScreen> {
                         BoundingBoxHelper h = BoundingBoxHelper(box)..visible = false;
                         obj.name = 'Text';
                         obj.scale = three.Vector3(0.01,0.01,0.01);
-                        threeJs.scene.add(obj.add(h));
+                        scene.add(obj.add(h));
                         setState(() {});
                       }
                     ),
@@ -1681,7 +1753,7 @@ class _UIPageState extends State<UIScreen> {
                     children: [
                       InkWell(
                         onTap: (){
-                          materialWireframe(threeJs.scene.children.sublist(avoid));
+                          materialWireframeAll();
                           setState(() {
                             shading = ShadingType.wireframe;
                           });
@@ -1705,7 +1777,7 @@ class _UIPageState extends State<UIScreen> {
                       ),
                       InkWell(
                         onTap: (){
-                          materialReset(threeJs.scene.children.sublist(avoid));
+                          materialReset(scene.children);
                           setState(() {
                             shading = ShadingType.solid;
                           });
@@ -1726,7 +1798,7 @@ class _UIPageState extends State<UIScreen> {
                       ),
                       InkWell(
                         onTap: (){
-                          materialVertexMode(threeJs.scene.children.sublist(avoid));
+                          materialVertexMode(scene.children);
                           setState(() {
                             shading = ShadingType.material;
                           });

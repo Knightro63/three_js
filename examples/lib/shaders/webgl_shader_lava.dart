@@ -31,7 +31,8 @@ class _State extends State<WebglShaderLava> {
       setup: setup,
       settings: three.Settings(
         autoClear: false,
-        useSourceTexture: true
+        useSourceTexture: true,
+        useOpenGL: useOpenGL
       )
     );
     super.initState();

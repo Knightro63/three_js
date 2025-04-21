@@ -33,6 +33,7 @@ class _State extends State<WebglShaderOcean> {
       settings: three.Settings(
         toneMapping: three.ACESFilmicToneMapping,
         toneMappingExposure: 0.5,
+        useOpenGL: useOpenGL,
         //useSourceTexture: true
       )
     );

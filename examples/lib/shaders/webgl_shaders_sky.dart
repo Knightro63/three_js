@@ -32,7 +32,8 @@ class _State extends State<WebglShaderSky> {
       setup: setup,
       settings: three.Settings(
         toneMapping: three.ACESFilmicToneMapping,
-        toneMappingExposure: 0.5
+        toneMappingExposure: 0.5,
+        useOpenGL: useOpenGL
       )
     );
     super.initState();

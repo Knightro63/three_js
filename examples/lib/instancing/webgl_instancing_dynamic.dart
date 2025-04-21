@@ -29,6 +29,7 @@ class _State extends State<WebglInstancingDynamic> {
       onSetupComplete: (){setState(() {});},
       setup: setup,
       settings: three.Settings(
+        useOpenGL: useOpenGL,
         renderOptions: {
           "minFilter": three.LinearFilter,
           "magFilter": three.LinearFilter,

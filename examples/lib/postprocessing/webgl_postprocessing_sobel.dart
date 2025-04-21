@@ -30,6 +30,7 @@ class _State extends State<WebglPostprocessingSobel> {
       setup: setup,
       settings: three.Settings(
         useSourceTexture: true,
+        useOpenGL: useOpenGL
       )
     );
     super.initState();

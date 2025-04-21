@@ -4,7 +4,6 @@ import 'package:css/css.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Actions;
 import 'package:flutter/services.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:three_cad/src/cad/draw_types.dart';
 import 'package:three_cad/src/cad/sketch.dart';
 import 'package:three_cad/src/navigation/globals.dart';
@@ -70,6 +69,9 @@ class _UIPageState extends State<UIScreen> {
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
       setup: setup,
+      settings: three.Settings(
+        useOpenGL: true
+      )
     );
     super.initState();
   }

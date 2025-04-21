@@ -34,7 +34,8 @@ class _State extends State<WebglRandomUV> {
         toneMappingExposure: 0.7,
         enableShadowMap: true,
         shadowMapType: three.VSMShadowMap,
-        animate: false
+        animate: false,
+        useOpenGL: useOpenGL
       )
     );
     super.initState();

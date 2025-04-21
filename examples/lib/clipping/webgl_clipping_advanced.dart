@@ -32,6 +32,7 @@ class _State extends State<WebglClippingAdvanced> {
       settings: three.Settings(
         clippingPlanes: [],
         localClippingEnabled: true,
+        useOpenGL: true
       )
     );
     super.initState();

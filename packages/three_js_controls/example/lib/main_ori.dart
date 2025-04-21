@@ -46,7 +46,8 @@ class _MyAppState extends State<MiscControlsOrbit> {
           "magFilter": tmath.LinearFilter,
           "format": tmath.RGBAFormat,
           "samples": 4
-        }
+        },
+        useOpenGL: true
       )
     );
     super.initState();

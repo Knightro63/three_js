@@ -1,3 +1,7 @@
+## 0.1.1
+
+* Updated three_js_core to fix android bug.
+
 ## 0.1.0+1
 
 * Updated readme.

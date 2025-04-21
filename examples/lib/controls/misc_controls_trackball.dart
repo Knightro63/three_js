@@ -31,6 +31,7 @@ class _MyAppState extends State<MiscControlsTrackball> {
       onSetupComplete: (){setState(() {});},
       setup: setup,
       settings: three.Settings(
+        useOpenGL: true,
         renderOptions: {
           "minFilter": three.LinearFilter,
           "magFilter": three.LinearFilter,

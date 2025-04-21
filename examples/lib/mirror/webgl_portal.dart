@@ -34,6 +34,7 @@ class _State extends State<WebglPortal> {
       settings: three.Settings(
         localClippingEnabled: true,
         toneMapping: three.ACESFilmicToneMapping,
+        useOpenGL: useOpenGL
       )
     );
     super.initState();
