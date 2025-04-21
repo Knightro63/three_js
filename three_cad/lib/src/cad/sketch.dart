@@ -300,7 +300,7 @@ class Draw with EventDispatcher{
         break;
       case DrawType.box2Point:
         final v1 = sketch!.sketches.last.position;
-        Vector3 scale = point.clone().sub(v1);
+        Vector3 scale = point.clone().applyEuler(camera.rotation).sub(v1);
         sketch!.sketches.last.scale = scale;
         break;
       case DrawType.circle:
@@ -309,9 +309,15 @@ class Draw with EventDispatcher{
         sketch!.sketches.last.children.last.scale = Vector3(dist,dist,dist);
         break;
       case DrawType.boxCenter:
+        Vector3 preScale = Vector3(
+          camera.rotation.x.abs() == sketch!.meshPlane.rotation.x.abs() && sketch!.meshPlane.rotation.x.abs() != 0?-1:1,
+          camera.rotation.y.abs() == sketch!.meshPlane.rotation.y.abs() && sketch!.meshPlane.rotation.x.abs() != 0?-1:1,
+          camera.rotation.z.abs() == sketch!.meshPlane.rotation.z.abs() && sketch!.meshPlane.rotation.x.abs() != 0?-1:1,
+        );
+        print(preScale);
         final v1 = sketch!.sketches.last.position;
-        Vector3 scale = point.clone().sub(v1);
-        sketch!.sketches.last.scale = scale;
+        Vector3 scale = point.clone().applyEuler(sketch!.meshPlane.rotation).sub(v1);
+        sketch!.sketches.last.scale = scale.multiply(preScale);
         break;
       case DrawType.spline:
         sketch!.currentSketchPoint!.position.setFrom(point);
@@ -320,6 +326,7 @@ class Draw with EventDispatcher{
       default:
     }
   }
+
   void onPointerDown(WebPointerEvent event) {
     if(sketch != null){
       if(event.button == 0){
@@ -363,9 +370,8 @@ class Draw with EventDispatcher{
   }
   void drawBoxCenter(Vector3 mousePosition){
     if(_newSketch && !_newSketchDidStart){
-      print(sketch!.meshPlane.rotation.toArray());
       sketch?.sketches.add(
-        DrawType.createBoxCenter(mousePosition,sketch!.meshPlane.rotation)
+        DrawType.createBoxCenter(mousePosition, sketch!.meshPlane.rotation)
       );
       sketch?.render.add(sketch?.currentSketch);
       _newSketchDidStart = true;
@@ -389,7 +395,7 @@ class Draw with EventDispatcher{
   }
   void drawCircle(Vector3 mousePosition){
     if(_newSketch && !_newSketchDidStart){
-      sketch?.sketches.add(DrawType.createCircle(mousePosition));
+      sketch?.sketches.add(DrawType.createCircle(mousePosition, sketch!.meshPlane.rotation));
       sketch?.render.add(sketch?.currentSketch);
       _newSketchDidStart = true;
     }
@@ -400,7 +406,7 @@ class Draw with EventDispatcher{
   }
   void drawBox2P(Vector3 mousePosition){
     if(_newSketch && !_newSketchDidStart){
-      sketch?.sketches.add(DrawType.createBox2Point(mousePosition));
+      sketch?.sketches.add(DrawType.createBox2Point(mousePosition, sketch!.meshPlane.rotation));
       sketch?.render.add(sketch?.currentSketch);
       _newSketchDidStart = true;
     }

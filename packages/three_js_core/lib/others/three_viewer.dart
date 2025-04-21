@@ -293,6 +293,7 @@ class ThreeJS {
           alpha: settings.alpha,
           antialias: true,
           customRenderer: false,
+          useSurfaceProducer: true
         )
       );
     }

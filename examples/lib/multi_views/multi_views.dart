@@ -1,6 +1,5 @@
 import 'dart:async';
 import '../src/statistics.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Matrix4;
 import 'package:three_js/three_js.dart' as three;
 
@@ -14,20 +13,15 @@ class _MyAppState extends State<MultiViews> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      child: _build(context)
+      child: Column(
+        children: [
+          const MultiViews1(),
+          Container(height: 2, color: Colors.red,),
+          const MultiViews2()
+        ],
+      )
     );
   }
-
-  Widget _build(BuildContext context) {
-    return Column(
-      children: [
-        const MultiViews1(),
-        Container(height: 2, color: Colors.red,),
-        const MultiViews2()
-      ],
-    );
-  }
-
 }
 
 class MultiViews1 extends StatefulWidget {
@@ -55,9 +49,6 @@ class _MultiViews1State extends State<MultiViews1> {
         useOpenGL: useOpenGL
       ),
       size: const Size(300,300),
-      rendererUpdate: (){
-        if (!kIsWeb) threeJs.renderer!.setRenderTarget(threeJs.renderTarget);
-      }
     );
     super.initState();
   }
@@ -129,9 +120,6 @@ class _MultiViews2State extends State<MultiViews2> {
         useOpenGL: useOpenGL
       ),
       size: const Size(300,300),
-      rendererUpdate: (){
-        if (!kIsWeb) threeJs.renderer!.setRenderTarget(threeJs.renderTarget);
-      }
     );
     super.initState();
   }
