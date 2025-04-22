@@ -58,15 +58,19 @@ class SvgEdgeFinder{
           int k = j != temp.length-1?j+1:0;
           List<String> points2 = temp[k].split(',');
           String p1Loc = temp[j].replaceAll(' ', '');
-          points[p1Loc] = Point(
-            double.parse(points1[0]),
-            double.parse(points1[1])
-          );
+          double? x1 = double.tryParse(points1[0]);
+          double? y1 = double.tryParse(points1[1]);
+          if(x1 != null && y1 != null){
+            points[p1Loc] = Point( x1, y1 );
+          }
+          else{ points[p1Loc] = Point( 0, 0 ); }
           String p2Loc = temp[k].replaceAll(' ', '');
-          points[p2Loc] = Point(
-            double.parse(points2[0]),
-            double.parse(points2[1])
-          );
+          double? x2 = double.tryParse(points2[0]);
+          double? y2 = double.tryParse(points2[1]);
+          if(x2 != null && y2 != null){
+            points[p2Loc] = Point( x2, y2 );
+          }
+          else{ points[p2Loc] = Point( 0, 0 ); }
           String edgeLoc = sort([points[p1Loc]!.x,points[p1Loc]!.y,points[p2Loc]!.x,points[p2Loc]!.y]);
           if(edges[edgeLoc] != null){
             edgesToRemove.add(edgeLoc);

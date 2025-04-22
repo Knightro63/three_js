@@ -202,8 +202,8 @@ class SVGRenderer {
     svg.setAttribute('width', width.toString());
     svg.setAttribute('height', height.toString());
 
-    _clipBox.min.setValues(-widthHalf, -heightHalf );
-    _clipBox.max.setValues(widthHalf, heightHalf );
+    _clipBox.min.setValues(-widthHalf, -heightHalf, double.negativeInfinity);
+    _clipBox.max.setValues(widthHalf, heightHalf, double.infinity );
   }
   
   /// Sets the precision of the data used to create a path.
@@ -239,14 +239,14 @@ class SVGRenderer {
     RenderData renderData = RenderData();
     dynamic background = scene.background;
 
-    if(background != null && background.isColor){
+    if(background != null && background is Color){
       removeChildNodes();
       svg.style['background-color'] = background.getStyle();
     } 
     else if(autoClear) {
       clear();
     }
-
+    
     info.vertices = 0;
     info.faces = 0;
     _viewMatrix.setFrom( camera.matrixWorldInverse );
@@ -283,7 +283,7 @@ class SVGRenderer {
         v2.positionScreen.y *= -heightHalf;
 
         _elemBox.setFromPoints([v1.positionScreen.toVector3(), v2.positionScreen.toVector3()]);
-
+        
         if (_clipBox.intersectsBox(_elemBox)) {
           renderLine(v1, v2, material);
         }
@@ -401,21 +401,26 @@ class SVGRenderer {
     if ( material is SpriteMaterial || material is PointsMaterial ) {
       style = 'fill:${material.color.getStyle()};fill-opacity:${material.opacity}';
     }
-
     addPath(style, path);
   }
   void renderLine(RenderableVertex v1, RenderableVertex v2, Material material ) {
-    String path = 'M${convert(v1.positionScreen.x)},${convert( v1.positionScreen.y )}L${convert( v2.positionScreen.x )},${convert( v2.positionScreen.y )}';
-    if (material is LineBasicMaterial) {
-      String style = 'fill:none;stroke:${material.color.getStyle()};stroke-opacity:${material.opacity};stroke-width:${material.linewidth};stroke-linecap:${material.linecap}';
-      if ( material is LineDashedMaterial ) {
-        style = '$style;stroke-dasharray:${material.dashSize!},${material.gapSize!}';
+    try{
+      String path = 'M${convert(v1.positionScreen.x)},${convert( v1.positionScreen.y )}L${convert( v2.positionScreen.x )},${convert( v2.positionScreen.y )}';
+      if (material is LineBasicMaterial) {
+        String style = 'fill:none;stroke:${material.color.getStyle()};stroke-opacity:${material.opacity};stroke-width:${material.linewidth};stroke-linecap:${material.linecap}';
+        if ( material is LineDashedMaterial ) {
+          style = '$style;stroke-dasharray:${material.dashSize!},${material.gapSize!}';
+        }
+        addPath(style, path);
       }
-      addPath(style, path);
+    }
+    catch(e){
+      print('svg_renderer.dart -> renderLine -> Exception: $e');
     }
   }
 
   void renderFace3(RenderableVertex v1,RenderableVertex v2,RenderableVertex v3, RenderableFace element, Material material) {
+    try{
     info.vertices += 3;
     info.faces ++;
     String path = 'M${convert(v1.positionScreen.x)},${convert( v1.positionScreen.y )}L${convert( v2.positionScreen.x )},${convert( v2.positionScreen.y )}L${convert( v3.positionScreen.x )},${convert( v3.positionScreen.y )}z';
@@ -454,6 +459,10 @@ class SVGRenderer {
       style = 'fill:$colorStyle;fill-opacity:${material.opacity}';
     }
     addPath(style, path);
+    }
+    catch(e){
+      print('svg_renderer.dart -> renderFace3 -> Exception: $e');
+    }
   } // Hide anti-alias gaps
   void expand(Vector4 v1,Vector4 v2, double pixels) {
     num x = v2.x - v1.x;
@@ -469,16 +478,22 @@ class SVGRenderer {
     v1.y -= y;
   }
   void addPath(String style, String path) {
-    if(_currentStyle == style) {
-      _currentPath += path;
-    } 
-    else {
-      flushPath();
-      _currentStyle = style;
-      _currentPath = path;
+    try{
+      if(_currentStyle == style) {
+        _currentPath += path;
+      } 
+      else {
+        flushPath();
+        _currentStyle = style;
+        _currentPath = path;
+      }
+    }
+    catch(e){
+      print('svg_renderer.dart -> addPath -> Exception: $e');
     }
   }
   void flushPath() {
+    try{
     if(_currentPath != '') {
       //_pathCount++;
       _svgNode.setAttribute('d', _currentPath);
@@ -488,5 +503,9 @@ class SVGRenderer {
     }
     _currentPath = '';
     _currentStyle = '';
+    }
+    catch(e){
+      print('svg_renderer.dart -> flushPath -> Exception: $e');
+    }
   }
 }
