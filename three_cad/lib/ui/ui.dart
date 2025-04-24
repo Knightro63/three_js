@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:three_cad/src/cad/draw_types.dart';
 import 'package:three_cad/src/cad/sketch.dart';
 import 'package:three_cad/src/navigation/globals.dart';
+import 'package:three_cad/src/navigation/sketch_nav_icons.dart';
 
 import 'package:three_js/three_js.dart' as three;
 import 'package:three_js_helpers/three_js_helpers.dart';
@@ -453,6 +454,22 @@ class _UIPageState extends State<UIScreen> {
       ),
     );
   }
+  Widget selectionIcon2(Widget icon, bool selected,void Function() onTap){
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.all(5),
+        width: 45,
+        height: 45,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: (selected?Theme.of(context).secondaryHeaderColor:Theme.of(context).primaryColorLight))
+        ),
+        alignment: Alignment.center,
+        child: icon//Icon(icon, color: (selected?Theme.of(context).secondaryHeaderColor:Theme.of(context).primaryColorLight)),
+      ),
+    );
+  }
   Widget actionNav(){
     return Actions.sketch == action?sketchNav():Row(
       children: [
@@ -528,7 +545,7 @@ class _UIPageState extends State<UIScreen> {
   Widget sketchNav(){
     return Row(
       children: [
-        selectionIcon(Icons.timeline,draw.drawType == DrawType.line,
+        SketchIcons(DrawType.line,draw.drawType == DrawType.line,
           (){
             if(draw.drawType != DrawType.none){
               setState(() {
@@ -542,7 +559,7 @@ class _UIPageState extends State<UIScreen> {
             }
           },
         ),
-        selectionIcon(Icons.check_box_outline_blank_sharp,draw.drawType == DrawType.box2Point,
+        SketchIcons(DrawType.box2Point,draw.drawType == DrawType.box2Point,
           (){
             if(draw.drawType != DrawType.none){
               setState(() {
@@ -556,7 +573,7 @@ class _UIPageState extends State<UIScreen> {
             }
           },
         ),
-        selectionIcon(Icons.circle_outlined,draw.drawType == DrawType.circle,
+        SketchIcons(DrawType.circleCenter,draw.drawType == DrawType.circleCenter,
           (){
             if(draw.drawType != DrawType.none){
               setState(() {
@@ -565,12 +582,12 @@ class _UIPageState extends State<UIScreen> {
             }
             else{
               setState(() {
-                draw.startSketch(DrawType.circle);
+                draw.startSketch(DrawType.circleCenter);
               });
             }
           }
         ),
-        selectionIcon(Icons.check_box_outline_blank_sharp,draw.drawType == DrawType.boxCenter,
+        SketchIcons(DrawType.boxCenter,draw.drawType == DrawType.boxCenter,
           (){
             if(draw.drawType != DrawType.none){
               setState(() {
@@ -584,7 +601,7 @@ class _UIPageState extends State<UIScreen> {
             }
           }
         ),
-        selectionIcon(Icons.cable_rounded,draw.drawType == DrawType.spline,
+        SketchIcons(DrawType.spline,draw.drawType == DrawType.spline,
           (){
             if(draw.drawType != DrawType.none){
               setState(() {
@@ -616,6 +633,7 @@ class _UIPageState extends State<UIScreen> {
       ],
     );
   }
+  
   @override
   Widget build(BuildContext context) {
     double deviceWidth = MediaQuery.of(context).size.width;

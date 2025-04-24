@@ -1,10 +1,9 @@
 import 'package:three_js/three_js.dart';
 import 'dart:math' as math;
-import 'package:three_js_geometry/three_js_geometry.dart';
 import 'package:three_js_line/three_js_line.dart';
 
 enum DrawType{
-  none,point,line,arc,circle,spline,boxCenter,box2Point;
+  none,point,line,arc,circleCenter,spline,boxCenter,box2Point,circle2Point;
   
   static Group createSpline(Vector3 position){
     final g = Group();
@@ -49,9 +48,29 @@ enum DrawType{
     Group objects = Group()..name = 'circle';
     objects.add(creatPoint(position));
 
-    final edges = EdgesGeometry( CircleGeometry(radius: 1, segments: 64),math.pi/8 ); 
-    final line = LineSegments(edges, LineBasicMaterial.fromMap({'color': 0x06A7E2}))
-    ..scale.scale(0)
+    Group line = Group()..name = 'circle';
+    final int segments = 64;
+    final double radius = 1;
+    final double thetaStart = math.pi/8;
+    final Vector3 vertex = Vector3();
+    final previous = Vector3();
+    final firstVector = Vector3();
+    
+    for (int s = 0, i = 3; s <= segments; s++, i += 3) {
+      final segment = thetaStart + s / segments * math.pi * 2;
+      vertex.x = radius * math.cos(segment);
+      vertex.y = radius * math.sin(segment);
+      if(s == 0){
+        firstVector.setFrom(vertex);
+        previous.setFrom(vertex);
+      }
+      if(s > 0 ){
+        line.add(create2PointLine(previous,vertex));
+        previous.setFrom(vertex);
+      }
+    };
+
+    line..scale = Vector3()
     ..rotation.x = rotation.x
     ..rotation.y = rotation.y
     ..rotation.z = rotation.z
@@ -60,52 +79,39 @@ enum DrawType{
     ..position.z = position.z;
 
     objects.add(line);
+    
     return objects;
   }
   
   static Group createBoxCenter(Vector3 position, Euler rotation){
     Group objects = Group()..name = 'boxCenter';
-    objects.add(creatPoint(Vector3(-1,1,0)));
-    objects.add(create2PointLine(Vector3(-1,1,0),Vector3(1,1,0)));
-    objects.add(creatPoint(Vector3(1,1,0)));
-    objects.add(create2PointLine(Vector3(1,1,0),Vector3(1,-1,0)));
-    objects.add(creatPoint(Vector3(1,-1,0)));
-    objects.add(create2PointLine(Vector3(1,-1,0),Vector3(-1,-1,0)));
-    objects.add(creatPoint(Vector3(-1,-1,0)));
-    objects.add(create2PointLine(Vector3(-1,-1,0),Vector3(-1,1,0)));
-
-    objects.add(create2PointLine(Vector3(-1,1,0),Vector3(1,-1,0),true));
-    objects.add(create2PointLine(Vector3(1,1,0),Vector3(-1,-1,0),true));
-    objects.add(creatPoint(Vector3(0,0,0)));
-    return objects    
-      ..scale.scale(0)
-      ..rotation.x = rotation.x
-      ..rotation.y = rotation.y
-      ..rotation.z = rotation.z
-      ..position.x = position.x
-      ..position.y = position.y
-      ..position.z = position.z;
+    objects.add(creatPoint(Vector3.copy(position)));
+    objects.add(create2PointLine(Vector3.copy(position),Vector3.copy(position)));
+    objects.add(creatPoint(Vector3.copy(position)));
+    objects.add(create2PointLine(Vector3.copy(position),Vector3.copy(position)));
+    objects.add(creatPoint(Vector3.copy(position)));
+    objects.add(create2PointLine(Vector3.copy(position),Vector3.copy(position)));
+    objects.add(creatPoint(Vector3.copy(position)));
+    objects.add(create2PointLine(Vector3.copy(position),Vector3.copy(position)));
+    objects.add(creatPoint(Vector3.copy(position)));
+    objects.add(create2PointLine(Vector3.copy(position),Vector3.copy(position),true));
+    objects.add(create2PointLine(Vector3.copy(position),Vector3.copy(position),true));
+    
+    return objects;
   }
 
   static Group createBox2Point(Vector3 position, Euler rotation){
     Group objects = Group()..name = 'box2Point';
-    objects.add(creatPoint(Vector3(1,0,0)));
-    objects.add(create2PointLine(Vector3(1,0,0),Vector3(1,1,0)));
-    objects.add(creatPoint(Vector3(1,1,0)));
-    objects.add(create2PointLine(Vector3(1,1,0),Vector3(0,1,0)));
-    objects.add(creatPoint(Vector3(0,1,0)));
-    objects.add(create2PointLine(Vector3(0,1,0),Vector3(0,0,0)));
-    objects.add(creatPoint(Vector3(0,0,0)));
-    objects.add(create2PointLine(Vector3(0,0,0),Vector3(1,0,0)));
+    objects.add(creatPoint(Vector3.copy(position)));
+    objects.add(create2PointLine(Vector3.copy(position),Vector3.copy(position)));
+    objects.add(creatPoint(Vector3.copy(position)));
+    objects.add(create2PointLine(Vector3.copy(position),Vector3.copy(position)));
+    objects.add(creatPoint(Vector3.copy(position)));
+    objects.add(create2PointLine(Vector3.copy(position),Vector3.copy(position)));
+    objects.add(creatPoint(Vector3.copy(position)));
+    objects.add(create2PointLine(Vector3.copy(position),Vector3.copy(position)));
 
-    return objects    
-      ..scale.scale(0)
-      ..rotation.x = rotation.x
-      ..rotation.y = rotation.y
-      ..rotation.z = rotation.z
-      ..position.x = position.x
-      ..position.y = position.y
-      ..position.z = position.z;
+    return objects;
   }
 
   static Object3D creatPoint(Vector3 position, [int? color]){
@@ -147,14 +153,21 @@ enum DrawType{
       'position',
       Float32BufferAttribute.fromList(position.storage+position.storage,3)
     );
+    final constructionLine = LineDashedMaterial.fromMap( {
+      'color': 0xffff00,
+      'transparent': true,
+      'opacity': 0.5,
+      'linewidth': 5,
+      'gapSize': 1,
+      'dashSize': 0.5
+    });
+
     final matLine = LineBasicMaterial.fromMap( {
       'color': construction?0xffff00:0x06A7E2,
       'transparent': true,
-      'opacity': 0.5
-    })
-    ..scale = 2
-    ..dashSize = 0.0001
-    ..gapSize = 0.0001;
+      'opacity': 0.5,
+      'linewidth': 5
+    });
 
     return Line( geometry, matLine )
     ..name = 'line'
@@ -167,14 +180,21 @@ enum DrawType{
       'position',
       Float32BufferAttribute.fromList(position1.storage+position2.storage,3)
     );
+    final constructionLine = LineDashedMaterial.fromMap( {
+      'color': 0xffff00,
+      'transparent': true,
+      'opacity': 0.5,
+      'linewidth': 5,
+      'gapSize': 1,
+      'dashSize': 3
+    });
+
     final matLine = LineBasicMaterial.fromMap( {
       'color': construction?0xffff00:0x06A7E2,
       'transparent': true,
-      'opacity': 0.5
-    })
-    ..scale = 2
-    ..dashSize = 0.0001
-    ..gapSize = 0.0001;
+      'opacity': 0.5,
+      'linewidth': 5
+    });
 
     return Line( geometry, matLine )
     ..name = 'line'

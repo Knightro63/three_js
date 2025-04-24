@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart' hide Material;
+import 'package:flutter/material.dart' hide Material, Matrix4;
 import 'package:three_cad/src/cad/draw_types.dart';
 import 'package:three_js/three_js.dart';
 
@@ -84,6 +84,8 @@ class Sketch{
 
   List<Object3D> get allObjects => _allObjects();
   List<Object3D> get allPoints => _allPoints();
+  List<Object3D> get allLines => _allLines();
+  List<Object3D> get allSelectables => _allSelectables();
   List<Object3D> _allObjects(){
     List<Object3D> o = [];
     for(final g in sketches){
@@ -104,6 +106,44 @@ class Sketch{
     for(final gr in sketches){
       for(final g in gr.children){
         if(g.name == 'point'){
+          o.add(g);
+        }
+      }
+    }
+    if(o.isNotEmpty){
+      if(o.last == currentSketchPart){
+        o.removeLast();
+      }
+      else if(o.length-2 >= 0 && o[o.length-2] == currentSketchPoint){
+        o.removeAt(o.length-2);
+      }
+    }
+    return o;
+  }
+  List<Object3D> _allSelectables(){
+    List<Object3D> o = [];
+    for(final gr in sketches){
+      for(final g in gr.children){
+        if(g.name == 'line' || g.name == 'point'){
+          o.add(g);
+        }
+      }
+    }
+    if(o.isNotEmpty){
+      // if(o.last == currentSketchPart){
+      //   o.removeLast();
+      // }
+      // else if(o.length-2 >= 0 && o[o.length-2] == currentSketchPoint){
+      //   o.removeAt(o.length-2);
+      // }
+    }
+    return o;
+  }
+  List<Object3D> _allLines(){
+    List<Object3D> o = [];
+    for(final gr in sketches){
+      for(final g in gr.children){
+        if(g.name == 'line'){
           o.add(g);
         }
       }
@@ -146,7 +186,7 @@ class Draw with EventDispatcher{
   final _pointer = Vector2.zero();
   final Raycaster _raycaster = Raycaster()
       ..params['Points']['threshold'] = 0.05
-      ..params['Line']['threshold'] = 1.0;
+      ..params['Line']['threshold'] = 0.01;
 
   bool _newSketch = false;
   bool _newSketchDidStart = false;
@@ -252,7 +292,7 @@ class Draw with EventDispatcher{
   List<Intersection> _getAllIntersections(WebPointerEvent event){
     updatePointer(event);
     _raycaster.setFromCamera(_pointer, camera);
-    return _raycaster.intersectObjects([sketch!.meshPlane,origin]+sketch!.allPoints,false);
+    return _raycaster.intersectObjects([sketch!.meshPlane,origin]+sketch!.allSelectables,true);
   }
   List<Intersection> _getIntersections(){
     _raycaster.setFromCamera(_pointer, camera);
@@ -280,11 +320,13 @@ class Draw with EventDispatcher{
 
       if(_newSketchDidStart && sketch!.sketches.isNotEmpty ){
         if(intersections.isNotEmpty){
+          print('here1');
           _update(intersections[0].point!);
         }
       }
       else if(sketch!.sketches.isNotEmpty){
         if(intersections.isNotEmpty){
+          print('here2');
           _update(intersections[0].point!);
         }
       }
@@ -292,32 +334,67 @@ class Draw with EventDispatcher{
   }
 
   void _update(Vector3 point){
+    if(!_newSketchDidStart) return;
     switch (drawType) {
       case DrawType.line:
         sketch!.currentSketchPoint!.position.setFrom(point);
         final v = sketch!.previousSketchPoint!.position.clone();
-        sketch!.currentSketchLine!.geometry?.setFromPoints([v, point.clone()]);
+        setLineFromPoints(sketch!.currentSketchLine!.geometry!, v, point.clone());
         break;
       case DrawType.box2Point:
-        final v1 = sketch!.sketches.last.position;
-        Vector3 scale = point.clone().applyEuler(camera.rotation).sub(v1);
-        sketch!.sketches.last.scale = scale;
+        final p1 = sketch!.sketches.last.children[0].position.clone();
+
+        final forwardVector = Vector3();
+        final rightVector = Vector3();
+        camera.getWorldDirection(forwardVector);
+        rightVector.cross2(camera.up, forwardVector).normalize();
+        final upVector = Vector3(0, 1, 0).applyQuaternion(camera.quaternion);
+
+        final s1 = Plane().setFromNormalAndCoplanarPoint(upVector, p1).distanceToPoint(point);
+        final s2 = Plane().setFromNormalAndCoplanarPoint(rightVector, p1).distanceToPoint(point);
+
+        final p2 = sketch!.sketches.last.children[4].position.setFrom(p1).add(rightVector.clone().scale(s2));
+        final p3 = sketch!.sketches.last.children[2].position.setFrom(point);
+        final p4 = sketch!.sketches.last.children[6].position.setFrom(p1).add(upVector.clone().scale(s1));
+
+        setLineFromPoints(sketch!.sketches.last.children[1].geometry!, p1, p2);
+        setLineFromPoints(sketch!.sketches.last.children[3].geometry!, p2, p3);
+        setLineFromPoints(sketch!.sketches.last.children[5].geometry!, p3, p4);
+        setLineFromPoints(sketch!.sketches.last.children[7].geometry!, p4, p1);
+
         break;
-      case DrawType.circle:
+      case DrawType.circleCenter:
         final v1 = sketch!.currentSketchPoint!.position;
         final dist = point.distanceTo(v1);
         sketch!.sketches.last.children.last.scale = Vector3(dist,dist,dist);
         break;
       case DrawType.boxCenter:
-        Vector3 preScale = Vector3(
-          camera.rotation.x.abs() == sketch!.meshPlane.rotation.x.abs() && sketch!.meshPlane.rotation.x.abs() != 0?-1:1,
-          camera.rotation.y.abs() == sketch!.meshPlane.rotation.y.abs() && sketch!.meshPlane.rotation.x.abs() != 0?-1:1,
-          camera.rotation.z.abs() == sketch!.meshPlane.rotation.z.abs() && sketch!.meshPlane.rotation.x.abs() != 0?-1:1,
-        );
-        print(preScale);
-        final v1 = sketch!.sketches.last.position;
-        Vector3 scale = point.clone().applyEuler(sketch!.meshPlane.rotation).sub(v1);
-        sketch!.sketches.last.scale = scale.multiply(preScale);
+        final center = sketch!.sketches.last.children[8].position.clone();
+
+        final forwardVector = Vector3();
+        final rightVector = Vector3();
+        camera.getWorldDirection(forwardVector);
+        rightVector.cross2(camera.up, forwardVector).normalize();
+        final upVector = Vector3(0, 1, 0).applyQuaternion(camera.quaternion);
+
+        final s1 = Plane().setFromNormalAndCoplanarPoint(upVector, center).distanceToPoint(point);
+        final s2 = Plane().setFromNormalAndCoplanarPoint(rightVector, center).distanceToPoint(point);
+
+        final p1 = sketch!.sketches.last.children[0].position.setFrom(point).add(upVector.clone().scale(-s1 * 2));
+        final p2 = sketch!.sketches.last.children[2].position.setFrom(point);
+        final p3 = sketch!.sketches.last.children[4].position.setFrom(point).add(rightVector.clone().scale(-s2 * 2));
+        final p4 = sketch!.sketches.last.children[6].position.setFrom(sketch!.sketches.last.children[0].position).add(rightVector.clone().scale(-s2 * 2));
+
+        setLineFromPoints(sketch!.sketches.last.children[1].geometry!, p1, p2);
+        setLineFromPoints(sketch!.sketches.last.children[3].geometry!, p2, p3);
+        setLineFromPoints(sketch!.sketches.last.children[5].geometry!, p3, p4);
+        setLineFromPoints(sketch!.sketches.last.children[7].geometry!, p4, p1);
+
+        setLineFromPoints(sketch!.sketches.last.children[9].geometry!, p1, p3);
+        setLineFromPoints(sketch!.sketches.last.children[10].geometry!, p2, p4);
+
+        (sketch!.sketches.last.children[9] as Line).computeLineDistances();
+        (sketch!.sketches.last.children[10] as Line).computeLineDistances();
         break;
       case DrawType.spline:
         sketch!.currentSketchPoint!.position.setFrom(point);
@@ -325,6 +402,19 @@ class Draw with EventDispatcher{
         break;
       default:
     }
+  }
+
+  void setLineFromPoints(BufferGeometry geometry, Vector3 p1, Vector3 p2){
+    geometry.attributes["position"].array[0] = p1.x;
+    geometry.attributes["position"].array[1] = p1.y;
+    geometry.attributes["position"].array[2] = p1.z;
+    geometry.attributes["position"].array[3] = p2.x;
+    geometry.attributes["position"].array[4] = p2.y;
+    geometry.attributes["position"].array[5] = p2.z;
+
+    geometry.attributes["position"].needsUpdate = true;
+    geometry.computeBoundingSphere();
+    geometry.computeBoundingBox();
   }
 
   void onPointerDown(WebPointerEvent event) {
@@ -335,16 +425,25 @@ class Draw with EventDispatcher{
         if(intersections.isNotEmpty){
           for(final i in _hovered){
             if(i.name == 'o'){
+              print("At Origin");
               point = origin.position;
               break;
             }
             if(i.name == 'point'){
+              print("At Point");
               point = i.position;
               break;
             }
+            if(i.name == 'line'){
+              print("At Line");
+              //point = i.position;
+              break;
+            }
           }
-
+          print(point);
           point ??= intersections[0].point!;
+
+          print(point);
 
           switch (drawType) {
             case DrawType.line:
@@ -353,8 +452,8 @@ class Draw with EventDispatcher{
             case DrawType.box2Point:
               drawBox2P(point);
               break;
-            case DrawType.circle:
-              drawCircle(point);
+            case DrawType.circleCenter:
+              drawCircleCenter(point);
               break;
             case DrawType.boxCenter:
               drawBoxCenter(point);
@@ -393,7 +492,7 @@ class Draw with EventDispatcher{
       addPoint(mousePosition);
     }
   }
-  void drawCircle(Vector3 mousePosition){
+  void drawCircleCenter(Vector3 mousePosition){
     if(_newSketch && !_newSketchDidStart){
       sketch?.sketches.add(DrawType.createCircle(mousePosition, sketch!.meshPlane.rotation));
       sketch?.render.add(sketch?.currentSketch);
@@ -411,6 +510,7 @@ class Draw with EventDispatcher{
       _newSketchDidStart = true;
     }
     else{
+      print('here');
       _update(mousePosition);
       endSketch();
     }

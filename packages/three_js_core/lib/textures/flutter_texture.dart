@@ -94,7 +94,7 @@ class FlutterTexture extends Texture {
 
   /// Captures a widget-frame that is not build in a widget tree.
   /// Inspired by [screenshot plugin](https://github.com/SachinGanesh/screenshot)
-  static Future<ImageElement?> generateImageFromWidget(wid.BuildContext context, wid.Widget widget) async {
+  static Future<ImageElement?> generateImageFromWidget(wid.BuildContext context, wid.Widget widget, [ImageElement? imageElement]) async {
     try {
       /// boundary widget by GlobalKey
       rend.RenderRepaintBoundary? boundary = rend.RenderRepaintBoundary(); 
@@ -142,22 +142,33 @@ class FlutterTexture extends Texture {
 
       /// convert boundary to image
       final image = await boundary.toImageSync(pixelRatio: pixelRatio);
-
-      /// set ImageByteFormat
       final data = (await image.toByteData(format: ui.ImageByteFormat.rawRgba))?.buffer.asUint8List();
-      return data == null?null:ImageElement(
+      if(data == null){
+        return null;
+      }
+      else if(imageElement != null){
+        imageElement.width = image.width;
+        imageElement.height = image.height;
+        if(imageElement.data == null){
+          imageElement.data = Uint8Array.fromList(data);
+        }
+        else{
+          (imageElement.data as Uint8Array).set(data);
+        }
+        return imageElement;
+      }
+      return ImageElement(
         width: image.width,
         height: image.height,
-        data: Uint8Array.fromList(data)
+        data: data
       );
-
     } catch (e) {
       rethrow;
     }
   }
 
   /// to capture widget to image by GlobalKey in RenderRepaintBoundary
-  static Future<ImageElement?> generateImageFromGlobalKey(wid.GlobalKey globalKey) async {
+  static Future<ImageElement?> generateImageFromGlobalKey(wid.GlobalKey globalKey, [ImageElement? imageElement]) async {
     try {
       /// boundary widget by GlobalKey
       rend.RenderRepaintBoundary? boundary = globalKey.currentContext?.findRenderObject() as rend.RenderRepaintBoundary?; 
@@ -167,10 +178,24 @@ class FlutterTexture extends Texture {
 
       /// set ImageByteFormat
       final data = (await image.toByteData(format: ui.ImageByteFormat.rawRgba))?.buffer.asUint8List();
-      return data == null?null:ImageElement(
+      if(data == null){
+        return null;
+      }
+      else if(imageElement != null){
+        imageElement.width = image.width;
+        imageElement.height = image.height;
+        if(imageElement.data == null){
+          imageElement.data = Uint8Array.fromList(data);
+        }
+        else{
+          (imageElement.data as Uint8Array).set(data);
+        }
+        return imageElement;
+      }
+      return ImageElement(
         width: image.width,
         height: image.height,
-        data: Uint8Array.fromList(data)
+        data: data
       );
 
     } catch (e) {

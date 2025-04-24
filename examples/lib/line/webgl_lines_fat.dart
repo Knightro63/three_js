@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:example/src/geometry_utils.dart';
 import 'package:example/src/gui.dart';
 import 'package:flutter/material.dart';
 import 'package:example/src/statistics.dart';
@@ -87,7 +88,7 @@ class _State extends State<WebglLinesFat> {
     final List<double> positions = [];
     final List<double> colors = [];
 
-    final List<three.Vector> points = hilbert3D( three.Vector3( 0, 0, 0 ), 20.0, 1, 0, 1, 2, 3, 4, 5, 6, 7 );
+    final List<three.Vector> points = GeometryUtils.hilbert3D( three.Vector3( 0, 0, 0 ), 20.0, 1, 0, 1, 2, 3, 4, 5, 6, 7 );
 
     final spline = three.CatmullRomCurve3( points: points );
     final divisions = ( 12 * points.length ).round();
@@ -235,71 +236,4 @@ class _State extends State<WebglLinesFat> {
       }
     } );
   }
-}
-
-List<three.Vector3> hilbert3D([three.Vector3? center, double? size, int? iterations,int? v0,int? v1,int? v2,int? v3,int? v4,int? v5,int? v6,int? v7]) {
-  // Default Vars
-  center = center != null ? center : three.Vector3(0, 0, 0);
-  size = size != null ? size : 10;
-
-  var half = size / 2;
-  iterations = iterations != null ? iterations : 1;
-  v0 = v0 != null ? v0 : 0;
-  v1 = v1 != null ? v1 : 1;
-  v2 = v2 != null ? v2 : 2;
-  v3 = v3 != null ? v3 : 3;
-  v4 = v4 != null ? v4 : 4;
-  v5 = v5 != null ? v5 : 5;
-  v6 = v6 != null ? v6 : 6;
-  v7 = v7 != null ? v7 : 7;
-
-  var vec_s = [
-    three.Vector3(center.x - half, center.y + half, center.z - half),
-    three.Vector3(center.x - half, center.y + half, center.z + half),
-    three.Vector3(center.x - half, center.y - half, center.z + half),
-    three.Vector3(center.x - half, center.y - half, center.z - half),
-    three.Vector3(center.x + half, center.y - half, center.z - half),
-    three.Vector3(center.x + half, center.y - half, center.z + half),
-    three.Vector3(center.x + half, center.y + half, center.z + half),
-    three.Vector3(center.x + half, center.y + half, center.z - half)
-  ];
-
-  var vec = [
-    vec_s[v0],
-    vec_s[v1],
-    vec_s[v2],
-    vec_s[v3],
-    vec_s[v4],
-    vec_s[v5],
-    vec_s[v6],
-    vec_s[v7]
-  ];
-
-  // Recurse iterations
-  if (--iterations >= 0) {
-    List<three.Vector3> tmp = [];
-
-    tmp.addAll(hilbert3D(
-        vec[0], half, iterations, v0, v3, v4, v7, v6, v5, v2, v1));
-    tmp.addAll(hilbert3D(
-        vec[1], half, iterations, v0, v7, v6, v1, v2, v5, v4, v3));
-    tmp.addAll(hilbert3D(
-        vec[2], half, iterations, v0, v7, v6, v1, v2, v5, v4, v3));
-    tmp.addAll(hilbert3D(
-        vec[3], half, iterations, v2, v3, v0, v1, v6, v7, v4, v5));
-    tmp.addAll(hilbert3D(
-        vec[4], half, iterations, v2, v3, v0, v1, v6, v7, v4, v5));
-    tmp.addAll(hilbert3D(
-        vec[5], half, iterations, v4, v3, v2, v5, v6, v1, v0, v7));
-    tmp.addAll(hilbert3D(
-        vec[6], half, iterations, v4, v3, v2, v5, v6, v1, v0, v7));
-    tmp.addAll(hilbert3D(
-        vec[7], half, iterations, v6, v5, v2, v1, v0, v3, v4, v7));
-
-    // Return recursive call
-    return tmp;
-  }
-
-  // Return complete Hilbert Curve.
-  return vec;
 }

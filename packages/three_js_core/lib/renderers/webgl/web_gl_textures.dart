@@ -20,7 +20,7 @@ class WebGLTextures {
   bool supportsInvalidateFramenbuffer = false;
 
   //final _imageDimensions = Vector2();
-  final Map _videoTextures = {};
+  final WeakMap _videoTextures = WeakMap();
 
   final WeakMap _sources = WeakMap();
   // maps WebglTexture objects to instances of Source
@@ -225,7 +225,7 @@ class WebGLTextures {
     deallocateTexture(texture);
 
     if (texture is VideoTexture) {
-      _videoTextures.remove(texture);
+      _videoTextures.delete(texture);
     }
   }
 

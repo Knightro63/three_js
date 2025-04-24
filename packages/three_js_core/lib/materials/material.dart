@@ -528,7 +528,10 @@ class Material with EventDispatcher {
       refractionRatio = newValue.toDouble();
     }else if (key == "roughnessMap") {
       roughnessMap = newValue;
-    } else if (key == "shading") {
+    } 
+    else if(key == 'specularColorMap'){
+      specularColorMap = newValue;
+    }else if (key == "shading") {
       //   // for backward compatability if shading is set in the constructor
       throw ('THREE.$type: .shading has been removed. Use the boolean .flatShading instead.');
       //   this.flatShading = ( newValue == FlatShading ) ? true : false;

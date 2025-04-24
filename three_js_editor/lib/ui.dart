@@ -55,6 +55,11 @@ class _UIPageState extends State<UIScreen> {
   three.Raycaster raycaster = three.Raycaster();
   three.Vector2 mousePosition = three.Vector2.zero();
   three.Object3D? intersected;
+  three.AnimationMixer? mixer;
+  three.AnimationClip? currentAnimation;
+
+  Map<String,List> animationClips = {};
+
   bool didClick = false;
   bool usingMouse = false;
 
@@ -74,7 +79,7 @@ class _UIPageState extends State<UIScreen> {
   late RightClick rightClick;
   three.Scene scene = three.Scene();
 
-  List<bool> expands = [false,false,false];
+  List<bool> expands = [false,false,false,false];
   List<TextEditingController> transfromControllers = [
     TextEditingController(),
     TextEditingController(),
@@ -96,7 +101,7 @@ class _UIPageState extends State<UIScreen> {
   bool throughSelected = false;
   ShadingType shading = ShadingType.solid;
   MarchingCubes? effect;
-  three.Group mp = three.Group();
+  three.Group marchingCubes = three.Group();
   three.Group editObject = three.Group();
   three.TTFFont? font;
   double time = 0;
@@ -198,8 +203,6 @@ class _UIPageState extends State<UIScreen> {
     threeJs.scene.add( light );
 
     orbit = three.OrbitControls(threeJs.camera, threeJs.globalKey);
-    orbit.update();
-
     control = TransformControls(threeJs.camera, threeJs.globalKey);
 
     control.addEventListener( 'dragging-changed', (event) {
@@ -304,10 +307,45 @@ class _UIPageState extends State<UIScreen> {
       mousePosition = three.Vector2(details.clientX, details.clientY);
       if(!control.dragging){
         checkIntersection(scene.children);
+        mixer = null;
+        currentAnimation = null;
       }
     });
-  }
+    threeJs.domElement.addEventListener(three.PeripheralType.pointermove, (details){
+      mousePosition = three.Vector2(details.clientX, details.clientY);
+      if(control.dragging){
+        updateCubes();
+      }
+    });
 
+    threeJs.addAnimationEvent((dt){
+      mixer?.update(dt);
+      orbit.update();
+    });
+  }
+	// this controls content of marching cubes voxel field
+  void updateCubes([bool floor = false, bool wallx = false, bool wallz = false]) {
+    int numBlobs = marchingCubes.children.length;
+    effect?.reset();
+
+    const subtract = 12;
+
+    for (int i = 0; i < numBlobs; i ++ ) {
+      final ballx = marchingCubes.children[i].position.x;
+      final bally = marchingCubes.children[i].position.y; // dip into the floor
+      final ballz = marchingCubes.children[i].position.z;
+
+      final scale = math.max(math.max(marchingCubes.children[i].scale.x, marchingCubes.children[i].scale.y), marchingCubes.children[i].scale.z);
+
+      effect?.addBall( ballx, bally, ballz, scale, subtract);
+    }
+
+    if ( floor ) effect?.addPlaneY( 2, 12 );
+    if ( wallz ) effect?.addPlaneZ( 2, 12 );
+    if ( wallx ) effect?.addPlaneX( 2, 12 );
+
+    effect?.update();
+  }
   void creteHelpers(){
     List<double> vertices = [500,0,0,-500,0,0,0,0,500,0,0,-500];
     List<double> colors = [1,0,0,1,0,0,0,0,1,0,0,1];
@@ -377,7 +415,7 @@ class _UIPageState extends State<UIScreen> {
   }
   void materialReset(List<three.Object3D> objects){
     for(final o in objects){
-      if(o is! BoundingBoxHelper){
+      if(o is! BoundingBoxHelper && o is! SkeletonHelper){
         o.material?.vertexColors = false;
         o.material?.colorWrite = true;
         o.material?.wireframe = false;
@@ -387,7 +425,7 @@ class _UIPageState extends State<UIScreen> {
   }
   void materialWireframe(List<three.Object3D> objects){
     for(final o in objects){
-      if(o is! BoundingBoxHelper){
+      if(o is! BoundingBoxHelper && o is! SkeletonHelper){
         o.material?.wireframe = true;
         o.material?.vertexColors = false;
         o.material?.colorWrite = true;
@@ -397,7 +435,7 @@ class _UIPageState extends State<UIScreen> {
   }
   void materialWireframeAll(){
     for(final o in scene.children){
-      if(o is! BoundingBoxHelper){
+      if(o is! BoundingBoxHelper && o is! SkeletonHelper){
         o.material?.wireframe = true;
         o.material?.vertexColors = false;
         o.material?.colorWrite = true;
@@ -407,7 +445,7 @@ class _UIPageState extends State<UIScreen> {
   }
   void materialVertexMode(List<three.Object3D> objects){
     for(final o in objects){
-      if(o is! BoundingBoxHelper){
+      if(o is! BoundingBoxHelper && o is! SkeletonHelper){
         o.material?.wireframe = false;
         o.material?.vertexColors = true;
         o.material?.colorWrite = true;
@@ -417,7 +455,7 @@ class _UIPageState extends State<UIScreen> {
   }
   void editModes(List<three.Object3D> obj){
     for(final o in obj){
-      if(o is! BoundingBoxHelper){
+      if(o is! BoundingBoxHelper && o is! SkeletonHelper){
         o.material?.wireframe = true;
         o.material?.colorWrite = true;
         editModes(o.children);
@@ -452,14 +490,14 @@ class _UIPageState extends State<UIScreen> {
     if(!select){
       control.detach();
       for(final o in intersected!.children){
-        if(o is BoundingBoxHelper){
+        if(o is BoundingBoxHelper || o is SkeletonHelper){
           o.visible = false;
         }
       }
     }
     else{
       for(final o in intersected!.children){
-        if(o is BoundingBoxHelper){
+        if(o is BoundingBoxHelper || o is SkeletonHelper){
           o.visible = true;
         }
       }
@@ -996,9 +1034,75 @@ class _UIPageState extends State<UIScreen> {
               )
             ]
           )
-        )
+        ),
+        if(animationClips[intersected?.name] != null) Container(
+          //height: MediaQuery.of(context).size.height - MediaQuery.of(context).size.height/3 - 40,
+          margin: const EdgeInsets.fromLTRB(5,5,5,5),
+          decoration: BoxDecoration(
+            color: CSS.darkTheme.cardColor,
+            borderRadius: BorderRadius.circular(5)
+          ),
+          child: Column(
+            children: [
+              InkWell(
+                onTap: (){
+                  setState(() {
+                    expands[3] = !expands[3];
+                  });
+                },
+                child: Row(
+                  children: [
+                    Icon(!expands[3]?Icons.expand_more:Icons.expand_less, size: 15,),
+                    const Text('\t Animation'),
+                  ],
+                )
+              ),
+              if(expands[3]) Padding(
+                padding: const EdgeInsets.fromLTRB(25,10,5,5),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: getAnimations()
+                )
+              )
+            ]
+          )
+        ),
       ],
     );
+  }
+  List<Widget> getAnimations(){
+    List<Widget> widgets = [];
+    List animations = animationClips[intersected?.name]!;
+
+    for(final animation in animations){
+      widgets.add(
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text('${animation.name.toUpperCase()}:'),
+            InkWell(
+              onTap: (){
+                mixer = three.AnimationMixer(intersected!);
+                mixer?.clipAction(animation)?.play();
+                currentAnimation = animation;
+
+                setState(() {});
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  color: CSS.darkTheme.canvasColor,
+                  borderRadius: BorderRadius.circular(5)
+                ),
+                child: Text(mixer!=null && currentAnimation == animation?'STOP':'PLAY'),
+              ),
+            )
+          ],
+        )
+      );
+    }
+
+    return widgets;
   }
   Widget sceneCollection(){
     booleanSelector = booleanSelector.sublist(0,1);
@@ -1231,7 +1335,10 @@ class _UIPageState extends State<UIScreen> {
                                   box.setFromObject(object!.scene);
                                   BoundingBoxHelper h = BoundingBoxHelper(box)..visible = false;
                                   object.scene.name = value.files[i].name.split('.').first;
-                                  scene.add(object.scene.add(h));
+                                  if(object.animations != null) animationClips[object.scene.name] = object.animations!;
+                                  final skeleton = SkeletonHelper(object.scene);
+                                  skeleton.visible = false;
+                                  scene.add(object.scene..add(h)..add(skeleton));
                                 }
                               }
                               setState(() {});
@@ -1253,9 +1360,11 @@ class _UIPageState extends State<UIScreen> {
                                   final three.BoundingBox box = three.BoundingBox();
                                   box.setFromObject(object!);
                                   BoundingBoxHelper h = BoundingBoxHelper(box)..visible = false;
+                                  final skeleton = SkeletonHelper(object)..visible = false;
                                   object.scale = three.Vector3(0.01,0.01,0.01);
-                                  object.name = value.files[i].name;
-                                  scene.add(object.add(h));
+                                  object.name = value.files[i].name.split('.').first;
+                                  animationClips[object.name] = object.animations;
+                                  scene.add(object..add(h)..add(skeleton));
                                 }
                               }
                             });
@@ -1277,7 +1386,7 @@ class _UIPageState extends State<UIScreen> {
                                   box.setFromObject(object!);
                                   BoundingBoxHelper h = BoundingBoxHelper(box)..visible = false;
                                   object.scale = three.Vector3(0.01,0.01,0.01);
-                                  object.name = value.files[i].name;
+                                  object.name = value.files[i].name.split('.').first;
                                   scene.add(object.add(h));
                                 }
                               }
@@ -1300,7 +1409,7 @@ class _UIPageState extends State<UIScreen> {
                                   final three.BoundingBox box = three.BoundingBox();
                                   box.setFromObject(object);
                                   BoundingBoxHelper h = BoundingBoxHelper(box)..visible = false;
-                                  object.name = value.files[i].name;
+                                  object.name = value.files[i].name.split('.').first;
                                   scene.add(object.add(h));
                                 }
                               }
@@ -1323,7 +1432,7 @@ class _UIPageState extends State<UIScreen> {
                                   final three.BoundingBox box = three.BoundingBox();
                                   box.setFromObject(object);
                                   BoundingBoxHelper h = BoundingBoxHelper(box)..visible = false;
-                                  object.name = value.files[i].name;
+                                  object.name = value.files[i].name.split('.').first;
                                   scene.add(object.add(h));
                                 }
                               }
@@ -1352,7 +1461,7 @@ class _UIPageState extends State<UIScreen> {
                                   final three.BoundingBox box = three.BoundingBox();
                                   box.setFromObject(object);
                                   BoundingBoxHelper h = BoundingBoxHelper(box)..visible = false;
-                                  object.name = value.files[i].name;
+                                  object.name = value.files[i].name.split('.').first;
                                   scene.add(object.add(h));
                                 }
                               }
@@ -1587,24 +1696,29 @@ class _UIPageState extends State<UIScreen> {
                       icon: Icons.view_in_ar_rounded,
                       function: (e){
                         if(effect == null){
-                          effect = MarchingCubes(28, three.MeshStandardMaterial.fromMap({'flatShading': true}), true, true, 100000 );
-                          effect!.position.setValues( math.Random().nextDouble(), math.Random().nextDouble(),math.Random().nextDouble());
+                          effect = MarchingCubes(
+                            28, 
+                            three.MeshStandardMaterial.fromMap({'flatShading': true}), 
+                            true, 
+                            true, 
+                            100000 
+                          );
+                          effect!.position.setValues(0,0,0);
                           effect!.scale.setValues( 1, 1, 1 );
 
                           effect!.enableUvs = false;
                           effect!.enableColors = false;
                           effect!.name = 'MarchingCubes';
                           
-                          scene.add(mp);
                           scene.add( effect! );
                         }
-                        final b = three.BufferGeometry();
-                        List<double> v = [0.5,0.5,0.5];
-                        b.setAttributeFromString('position',three.Float32BufferAttribute.fromList(v, 3, false));
-
-                        mp.add(three.Points(b,three.MeshStandardMaterial())..name = 'Metaball');
-                        effect?.addBall(v[0],v[1],v[2], 1, 1);
-                        effect?.update();
+                        final mc = three.Mesh(three.SphereGeometry(1,4,4),three.MeshStandardMaterial())
+                          ..name = 'Metaball${marchingCubes.children.length}'
+                          ..visible = false
+                          ..position = three.Vector3(math.Random().nextDouble(), math.Random().nextDouble(),math.Random().nextDouble());
+                        marchingCubes.children.add(mc);
+                        scene.add(mc);
+                        updateCubes();
 
                         setState(() {});
                       }

@@ -46,7 +46,7 @@ class Texture with EventDispatcher {
   int wrapR = ClampToEdgeWrapping;
   int magFilter = LinearFilter;
   int minFilter = LinearMipmapLinearFilter;
-  late int anisotropy;
+  int anisotropy = 1;
   int format = RGBAFormat;
   late int? internalFormat;
   int type = UnsignedByteType;
