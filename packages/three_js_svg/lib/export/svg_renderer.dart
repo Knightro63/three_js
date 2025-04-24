@@ -63,12 +63,12 @@ class SVGDocument{
     tosend += '>';
 
     if(styleNodes.isNotEmpty){
-      tosend += '<style type="text/css">.st{stroke:#33333;stroke-width:1;}';
+      tosend += '<style type="text/css">.st{stroke:#000000;stroke-width:1;}';
       for(int i = 0; i < styleNodes.length; i++){
         tosend += '.st$i{';
         for(String key in styleNodes[i].keys){
           if(styleNodes[i][key] != 'null'){
-            tosend += '${styleNodes[i][key]}';
+            tosend += '${styleNodes[i][key].toString().replaceAll(RegExp(r'([.]\d*)'), '')}';
           }
         }
         tosend += '}';
@@ -202,8 +202,8 @@ class SVGRenderer {
     svg.setAttribute('width', width.toString());
     svg.setAttribute('height', height.toString());
 
-    _clipBox.min.setValues(-widthHalf, -heightHalf );
-    _clipBox.max.setValues(widthHalf, heightHalf );
+    _clipBox.min.setValues(-widthHalf, -heightHalf, double.negativeInfinity);
+    _clipBox.max.setValues(widthHalf, heightHalf, double.infinity );
   }
   
   /// Sets the precision of the data used to create a path.
@@ -239,14 +239,14 @@ class SVGRenderer {
     RenderData renderData = RenderData();
     dynamic background = scene.background;
 
-    if(background != null && background.isColor){
+    if(background != null && background is Color){
       removeChildNodes();
       svg.style['background-color'] = background.getStyle();
     } 
     else if(autoClear) {
       clear();
     }
-
+    
     info.vertices = 0;
     info.faces = 0;
     _viewMatrix.setFrom( camera.matrixWorldInverse );
@@ -283,7 +283,7 @@ class SVGRenderer {
         v2.positionScreen.y *= -heightHalf;
 
         _elemBox.setFromPoints([v1.positionScreen.toVector3(), v2.positionScreen.toVector3()]);
-
+        
         if (_clipBox.intersectsBox(_elemBox)) {
           renderLine(v1, v2, material);
         }
@@ -401,7 +401,6 @@ class SVGRenderer {
     if ( material is SpriteMaterial || material is PointsMaterial ) {
       style = 'fill:${material.color.getStyle()};fill-opacity:${material.opacity}';
     }
-
     addPath(style, path);
   }
   void renderLine(RenderableVertex v1, RenderableVertex v2, Material material ) {
