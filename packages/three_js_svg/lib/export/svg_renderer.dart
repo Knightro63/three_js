@@ -404,23 +404,17 @@ class SVGRenderer {
     addPath(style, path);
   }
   void renderLine(RenderableVertex v1, RenderableVertex v2, Material material ) {
-    try{
-      String path = 'M${convert(v1.positionScreen.x)},${convert( v1.positionScreen.y )}L${convert( v2.positionScreen.x )},${convert( v2.positionScreen.y )}';
-      if (material is LineBasicMaterial) {
-        String style = 'fill:none;stroke:${material.color.getStyle()};stroke-opacity:${material.opacity};stroke-width:${material.linewidth};stroke-linecap:${material.linecap}';
-        if ( material is LineDashedMaterial ) {
-          style = '$style;stroke-dasharray:${material.dashSize!},${material.gapSize!}';
-        }
-        addPath(style, path);
+    String path = 'M${convert(v1.positionScreen.x)},${convert( v1.positionScreen.y )}L${convert( v2.positionScreen.x )},${convert( v2.positionScreen.y )}';
+    if (material is LineBasicMaterial) {
+      String style = 'fill:none;stroke:${material.color.getStyle()};stroke-opacity:${material.opacity};stroke-width:${material.linewidth};stroke-linecap:${material.linecap}';
+      if ( material is LineDashedMaterial ) {
+        style = '$style;stroke-dasharray:${material.dashSize!},${material.gapSize!}';
       }
-    }
-    catch(e){
-      print('svg_renderer.dart -> renderLine -> Exception: $e');
+      addPath(style, path);
     }
   }
 
   void renderFace3(RenderableVertex v1,RenderableVertex v2,RenderableVertex v3, RenderableFace element, Material material) {
-    try{
     info.vertices += 3;
     info.faces ++;
     String path = 'M${convert(v1.positionScreen.x)},${convert( v1.positionScreen.y )}L${convert( v2.positionScreen.x )},${convert( v2.positionScreen.y )}L${convert( v3.positionScreen.x )},${convert( v3.positionScreen.y )}z';
@@ -459,10 +453,6 @@ class SVGRenderer {
       style = 'fill:$colorStyle;fill-opacity:${material.opacity}';
     }
     addPath(style, path);
-    }
-    catch(e){
-      print('svg_renderer.dart -> renderFace3 -> Exception: $e');
-    }
   } // Hide anti-alias gaps
   void expand(Vector4 v1,Vector4 v2, double pixels) {
     num x = v2.x - v1.x;
@@ -478,22 +468,16 @@ class SVGRenderer {
     v1.y -= y;
   }
   void addPath(String style, String path) {
-    try{
-      if(_currentStyle == style) {
-        _currentPath += path;
-      } 
-      else {
-        flushPath();
-        _currentStyle = style;
-        _currentPath = path;
-      }
-    }
-    catch(e){
-      print('svg_renderer.dart -> addPath -> Exception: $e');
+    if(_currentStyle == style) {
+      _currentPath += path;
+    } 
+    else {
+      flushPath();
+      _currentStyle = style;
+      _currentPath = path;
     }
   }
   void flushPath() {
-    try{
     if(_currentPath != '') {
       //_pathCount++;
       _svgNode.setAttribute('d', _currentPath);
@@ -503,9 +487,5 @@ class SVGRenderer {
     }
     _currentPath = '';
     _currentStyle = '';
-    }
-    catch(e){
-      print('svg_renderer.dart -> flushPath -> Exception: $e');
-    }
   }
 }

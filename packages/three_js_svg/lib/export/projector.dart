@@ -506,7 +506,6 @@ class Projector{
         }
       } 
       else if(object is Points){
-        print('c.3');
         _modelViewProjectionMatrix.multiply2( _viewProjectionMatrix, _modelMatrix );
         Map<String, dynamic> attributes = geometry!.attributes;
         if ( attributes['position'] != null ) {
