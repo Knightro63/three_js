@@ -63,12 +63,12 @@ class SVGDocument{
     tosend += '>';
 
     if(styleNodes.isNotEmpty){
-      tosend += '<style type="text/css">.st{stroke:#33333;stroke-width:1;}';
+      tosend += '<style type="text/css">.st{stroke:#000000;stroke-width:1;}';
       for(int i = 0; i < styleNodes.length; i++){
         tosend += '.st$i{';
         for(String key in styleNodes[i].keys){
           if(styleNodes[i][key] != 'null'){
-            tosend += '${styleNodes[i][key]}';
+            tosend += '${styleNodes[i][key].toString().replaceAll(RegExp(r'([.]\d*)'), '')}';
           }
         }
         tosend += '}';
