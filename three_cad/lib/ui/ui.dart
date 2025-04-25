@@ -220,6 +220,7 @@ class _UIPageState extends State<UIScreen> {
         case ' ':
           break;
         case 'escape':
+          draw.endSketch(true);
           break;
       }
     });
@@ -295,7 +296,7 @@ class _UIPageState extends State<UIScreen> {
     viewHelper = ViewHelper2(
       //size: 1.8,
       offsetType: OffsetType.topRight,
-      offset: three.Vector2(10, 10),
+      offset: three.Vector2(5,-70),
       screenSize: const Size(120, 120), 
       listenableKey: threeJs.globalKey,
       camera: threeJs.camera,
@@ -473,7 +474,7 @@ class _UIPageState extends State<UIScreen> {
   Widget actionNav(){
     return Actions.sketch == action?sketchNav():Row(
       children: [
-        selectionIcon(Icons.draw,action == Actions.prepareSketec,(){
+        SketchIcons(DrawType.none,action == Actions.prepareSketec,(){
             setState(() {
               if(action == Actions.prepareSketec){
                 action = Actions.none;
@@ -545,6 +546,20 @@ class _UIPageState extends State<UIScreen> {
   Widget sketchNav(){
     return Row(
       children: [
+        SketchIcons(DrawType.point,draw.drawType == DrawType.point,
+          (){
+            if(draw.drawType != DrawType.none){
+              setState(() {
+                draw.endSketch();
+              });
+            }
+            else{
+              setState(() {
+                draw.startSketch(DrawType.point);
+              });
+            }
+          },
+        ),
         SketchIcons(DrawType.line,draw.drawType == DrawType.line,
           (){
             if(draw.drawType != DrawType.none){
@@ -563,7 +578,7 @@ class _UIPageState extends State<UIScreen> {
           (){
             if(draw.drawType != DrawType.none){
               setState(() {
-                draw.endSketch();
+                draw.endSketch(true);
               });
             }
             else{
@@ -577,7 +592,7 @@ class _UIPageState extends State<UIScreen> {
           (){
             if(draw.drawType != DrawType.none){
               setState(() {
-                draw.endSketch();
+                draw.endSketch(true);
               });
             }
             else{
@@ -591,7 +606,7 @@ class _UIPageState extends State<UIScreen> {
           (){
             if(draw.drawType != DrawType.none){
               setState(() {
-                draw.endSketch();
+                draw.endSketch(true);
               });
             }
             else{
@@ -611,6 +626,34 @@ class _UIPageState extends State<UIScreen> {
             else{
               setState(() {
                 draw.startSketch(DrawType.spline);
+              });
+            }
+          }
+        ),
+        SketchIcons(DrawType.arc3Point,draw.drawType == DrawType.arc3Point,
+          (){
+            if(draw.drawType != DrawType.none){
+              setState(() {
+                draw.endSketch(true);
+              });
+            }
+            else{
+              setState(() {
+                draw.startSketch(DrawType.arc3Point);
+              });
+            }
+          }
+        ),
+        SketchIcons(DrawType.dimensions,draw.drawType == DrawType.dimensions,
+          (){
+            if(draw.drawType != DrawType.none){
+              setState(() {
+                draw.endSketch(true);
+              });
+            }
+            else{
+              setState(() {
+                draw.startSketch(DrawType.dimensions);
               });
             }
           }

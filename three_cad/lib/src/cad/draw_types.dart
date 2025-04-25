@@ -2,19 +2,42 @@ import 'package:three_js/three_js.dart';
 import 'dart:math' as math;
 import 'package:three_js_line/three_js_line.dart';
 
+enum Constraints{
+  coincident,
+  vertical,
+  horizontal,
+  parrallel,
+  tangent,
+  equal,
+  midpoint,
+  concentric,
+}
+
 enum DrawType{
-  none,point,line,arc,circleCenter,spline,boxCenter,box2Point,circle2Point;
+  none,
+  dimensions,
+  point,
+  line,
+  arc3Point,
+  arcCenterPoint,
+  circleCenter,
+  spline,
+  boxCenter,
+  box2Point,
+  circle2Point,
+  box3Point,
+  mirror,
+  circularPatern,
+  retangularPattern;
   
   static Group createSpline(Vector3 position){
-    final g = Group();
+    final g = Group()..name = 'spline';
     final geometry = BufferGeometry();
     geometry.setAttributeFromString('position',Float32BufferAttribute( Float32Array( 200 * 3 ), 3 ) );
     final line = Line(
       geometry, 
       LineBasicMaterial.fromMap( {
         'color': 0x06A7E2,
-        'transparent': true,
-        'opacity': 0.5
       })
     )..name = 'line';
 
@@ -26,29 +49,50 @@ enum DrawType{
 
     return g;
   }
-  static void updateSplineOutline(Line mesh, List<Vector3> positions){
+  static Group createCircleSpline(Vector3 position){
+    Group objects = Group()..name = 'circleSpline';
+    final geometry = BufferGeometry();
+    geometry.setAttributeFromString('position',Float32BufferAttribute( Float32Array( 64 * 3 ), 3 ) );
+
+    final line = Line(
+      geometry, 
+      LineBasicMaterial.fromMap( {
+        'color': 0x06A7E2,
+      })
+    )..name = 'line';
+    
+    objects.add(line);
+    objects.add(creatPoint(position));
+
+    updateSplineOutline(line, [position,position,position,position], true, 64);
+    
+    return objects;
+  } 
+  static void updateSplineOutline(Line mesh, List<Vector3> positions,[bool closed = false, int numLines = 200]){
     final point = Vector3();
     CatmullRomCurve3 curve = CatmullRomCurve3( points:positions );
     curve.curveType = 'catmullrom';
-    curve.closed = false;
+    curve.closed = closed;
     curve.tension = 0.8;
 
-    final splineMesh = mesh;
-    final position = splineMesh.geometry!.attributes['position'];
+    final position = mesh.geometry!.attributes['position'];
 
-    for (int i = 0; i < 200; i ++ ) {
-      final t = i / ( 200 - 1 );
+    for (int i = 0; i < numLines; i ++ ) {
+      final t = i / ( numLines - 1 );
       curve.getPoint( t, point );
       position.setXYZ( i, point.x, point.y, point.z );
     }
 
     position.needsUpdate = true;
+
+    mesh.geometry?.computeBoundingSphere();
+    mesh.geometry?.computeBoundingBox();
   }
   static Group createCircle(Vector3 position, Euler rotation){
     Group objects = Group()..name = 'circle';
     objects.add(creatPoint(position));
 
-    Group line = Group()..name = 'circle';
+    Group line = Group()..name = 'circleLines';
     final int segments = 64;
     final double radius = 1;
     final double thetaStart = math.pi/8;
@@ -121,10 +165,10 @@ enum DrawType{
           Float32BufferAttribute.fromList([0,0,0],3)
         ),
         PointsMaterial.fromMap({
-          'color': color ?? 0x06A7E2,
+          'color': 0x06A7E2,
           'size': 7.5, 
-          'transparent': color == null? true : false,
-          'opacity': color == null?0.5:1
+          // 'transparent': color == null? true : false,
+          // 'opacity': color == null?0.5:1
         })
       )
       ..name = 'point'
@@ -164,8 +208,7 @@ enum DrawType{
 
     final matLine = LineBasicMaterial.fromMap( {
       'color': construction?0xffff00:0x06A7E2,
-      'transparent': true,
-      'opacity': 0.5,
+      'transparent': false,
       'linewidth': 5
     });
 
@@ -191,8 +234,7 @@ enum DrawType{
 
     final matLine = LineBasicMaterial.fromMap( {
       'color': construction?0xffff00:0x06A7E2,
-      'transparent': true,
-      'opacity': 0.5,
+      'transparent': false,
       'linewidth': 5
     });
 
