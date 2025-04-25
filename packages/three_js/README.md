@@ -67,6 +67,7 @@ Find the example for this API [here](https://github.com/Knightro63/three_js/tree
  - Collada animations do not work
  - Collada kinnametics does not work
  - PMREM gives weird artifacts
+ - VideoTexture only works for web
 
 **MacOS**
  - Audio has a [bug](https://github.com/bluefireteam/audioplayers/issues/1296)

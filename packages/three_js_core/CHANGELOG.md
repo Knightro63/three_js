@@ -1,3 +1,7 @@
+## 0.1.3
+
+* Fixed material bug and added VideoTexture material for web only
+
 ## 0.1.2
 
 * Added surface producer in Angle options to fix android devices bug.

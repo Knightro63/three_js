@@ -1,3 +1,8 @@
+## 0.1.2
+
+* Updated three_js_core to fix material bug
+* Added VideoTexture for web only
+
 ## 0.1.1
 
 * Updated three_js_core to fix android bug.
