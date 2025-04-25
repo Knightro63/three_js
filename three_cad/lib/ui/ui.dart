@@ -107,7 +107,7 @@ class _UIPageState extends State<UIScreen> {
   }
 
   Future<void> setup() async{
-    threeJs.screenSize = Size(MediaQuery.of(context).size.width,MediaQuery.of(context).size.height-80);
+    //threeJs.screenSize = Size(MediaQuery.of(context).size.width,MediaQuery.of(context).size.height-150);
     const frustumSize = 1.0;
     final aspect = threeJs.width / threeJs.height;
     cameraPersp = three.PerspectiveCamera( 50, aspect, 0.1, 100 );
@@ -444,7 +444,7 @@ class _UIPageState extends State<UIScreen> {
       child: Container(
         margin: const EdgeInsets.all(5),
         width: 45,
-        height: 45,
+        height: 35,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
           border: Border.all(color: (selected?Theme.of(context).secondaryHeaderColor:Theme.of(context).primaryColorLight))
@@ -460,7 +460,7 @@ class _UIPageState extends State<UIScreen> {
       child: Container(
         margin: const EdgeInsets.all(5),
         width: 45,
-        height: 45,
+        height: 35,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
           border: Border.all(color: (selected?Theme.of(context).secondaryHeaderColor:Theme.of(context).primaryColorLight))
@@ -1066,7 +1066,11 @@ class _UIPageState extends State<UIScreen> {
                 actionNav(),
                 Stack(
                   children: [
-                    threeJs.build(),
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height-70,
+                      child: threeJs.build(),
+                    )
+                    ,
                     if(threeJs.mounted)Positioned(
                       top: 5,
                       left: 20,

@@ -37,7 +37,7 @@ class SketchIcons extends StatelessWidget{
       child: Container(
         margin: const EdgeInsets.all(5),
         width: 45,
-        height: 45,
+        height: 35,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
           border: Border.all(color: color)
