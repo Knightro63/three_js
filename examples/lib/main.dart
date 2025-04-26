@@ -14,6 +14,7 @@ import 'package:example/games/games_fps2.dart';
 import 'package:example/geometry/marching_cubes.dart';
 import 'package:example/geometry/webgl_buffergeometry_custom_attributes_particles.dart';
 import 'package:example/geometry/webgl_decals.dart';
+import 'package:example/geometry/webgl_geometries_parametric.dart';
 import 'package:example/geometry/webgl_geometry_convex.dart';
 import 'package:example/geometry/webgl_geometry_dynamic.dart';
 import 'package:example/geometry/webgl_geometry_extrude_shapes.dart';
@@ -347,6 +348,9 @@ class MyAppState extends State<MyApp> {
               },
               '/webgl_geometry_spline_editor':(BuildContext context) {
                 return const WebglGeometrySplineEditor();
+              },
+              '/webgl_geometries_parametric':(BuildContext context) {
+                return const WebglGeometriesParametric();
               },
               '/three_terrain':(BuildContext context) {
                 return const TerrainPage();

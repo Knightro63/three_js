@@ -160,7 +160,7 @@ class FlutterTexture extends Texture {
       return ImageElement(
         width: image.width,
         height: image.height,
-        data: data
+        data: Uint8Array.fromList(data)
       );
     } catch (e) {
       rethrow;
@@ -195,7 +195,7 @@ class FlutterTexture extends Texture {
       return ImageElement(
         width: image.width,
         height: image.height,
-        data: data
+        data: Uint8Array.fromList(data)
       );
 
     } catch (e) {

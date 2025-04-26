@@ -196,6 +196,7 @@ class Draw with EventDispatcher{
       ..params['Line']['threshold'] = 0.04;
 
   Sketch? sketch;
+  Object3D? dimensionSelected;
 
   void Function() update;
   
@@ -322,6 +323,33 @@ class Draw with EventDispatcher{
   void _update(Vector3 point){
     if(sketch?.newSketchDidStart == false) return;
     switch (drawType) {
+      case DrawType.dimensions:
+        if(dimensionSelected?.name == 'circleSpline'){
+          final p1 = dimensionSelected!.children[0].position;
+          final position = dimensionSelected!.children[0].geometry!.attributes['position'] as Float32BufferAttribute;
+          final dist = p1.distanceTo(Vector3(position.getX(0)!.toDouble(),position.getY(0)!.toDouble(),position.getZ(0)!.toDouble()));
+          print(dist);
+
+          final forwardVector = Vector3();
+          final rightVector = Vector3();
+          camera.getWorldDirection(forwardVector);
+          rightVector.cross2(camera.up, forwardVector).normalize();
+          final upVector = Vector3(0, 1, 0).applyQuaternion(camera.quaternion);
+
+          final s1 = Plane().setFromNormalAndCoplanarPoint(upVector, p1).distanceToPoint(point);
+          final s2 = Plane().setFromNormalAndCoplanarPoint(rightVector, p1).distanceToPoint(point);
+
+          final p2 = sketch!.sketches.last.children[4].position.setFrom(p1).add(rightVector.clone().scale(dist));
+          final p3 = sketch!.sketches.last.children[2].position.setFrom(point);
+          final p4 = sketch!.sketches.last.children[6].position.setFrom(p1).add(rightVector.clone().scale(dist));
+
+          sketch!.sketches.last.children[0].position.setFrom(p2);
+          sketch!.sketches.last.children[2].position.setFrom(p3);
+          setLineFromPoints(sketch!.sketches.last.children[1].geometry!, p1, p2);
+          setLineFromPoints(sketch!.sketches.last.children[3].geometry!, p1, p3);
+          setLineFromPoints(sketch!.sketches.last.children[4].geometry!, p3, p4);        
+        }
+        break;
       case DrawType.point:
         sketch!.currentSketchPoint!.position.setFrom(point);
         break;
@@ -427,6 +455,8 @@ class Draw with EventDispatcher{
       if(event.button == 0){
         final intersections = _getIntersections();
         final intersectObjects = _getObjectIntersections();
+        bool isLine = false;
+        Object3D? parent;
         Vector3? point;
         if(intersections.isNotEmpty){
           for(final i in intersectObjects){
@@ -440,8 +470,9 @@ class Draw with EventDispatcher{
               break;
             }
             if(o.name == 'line'){
-              print("At Line");
+              parent = o.parent;
               point = i.point;
+              isLine = true;
             }
           }
 
@@ -452,7 +483,7 @@ class Draw with EventDispatcher{
               drawPoint(point);
               break;
             case DrawType.dimensions:
-              drawDimension(point);
+              if(isLine) drawDimension(point,parent);
               break;
             case DrawType.line:
               drawLine(point);
@@ -542,18 +573,24 @@ class Draw with EventDispatcher{
       endSketch();
     }
   }
-  void drawDimension(Vector3 mousePosition){
+  void drawDimension(Vector3 mousePosition, Object3D? selected){
+    print(selected);
     if(sketch?.newSketch == true && sketch?.newSketchDidStart == false){
       sketch?.sketches.add(Group()..name = 'dimension');
+      addPoint(mousePosition);
       addLine(mousePosition);
+      addPoint(mousePosition);
       sketch?.render.add(sketch?.currentSketch);
       sketch?.newSketchDidStart = true;
     }
     else{
-      sketch!.currentSketchPoint!.position.setFrom(mousePosition);
-      _update(mousePosition);
-      addLine(mousePosition);
-      addPoint(mousePosition);
+      if(selected?.name == 'circleSpline'){
+        dimensionSelected = selected;
+        //sketch!.currentSketchPoint!.position.setFrom(mousePosition);
+        addLine(mousePosition);
+        addLine(mousePosition);
+        _update(mousePosition);
+      }
     }
   }
   void drawLine(Vector3 mousePosition){

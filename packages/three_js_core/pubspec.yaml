@@ -1,6 +1,6 @@
 name: three_js_core
 description: "Flutter three_js_core package converted from threejs and three_dart package made for three_js."
-version: 0.1.3
+version: 0.1.4
 homepage: https://github.com/Knightro63/three_js/tree/main/packages/three_js_core
 
 environment:

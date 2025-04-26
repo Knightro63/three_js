@@ -80,7 +80,7 @@ enum DrawType{
     for (int i = 0; i < numLines; i ++ ) {
       final t = i / ( numLines - 1 );
       curve.getPoint( t, point );
-      position.setXYZ( i, point.x, point.y, point.z );
+      (position as Float32BufferAttribute).setXYZ( i, point.x, point.y, point.z );
     }
 
     position.needsUpdate = true;

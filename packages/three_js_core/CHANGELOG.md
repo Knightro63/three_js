@@ -1,3 +1,7 @@
+## 0.1.4
+
+* Fixed flutter texture bug.
+
 ## 0.1.3
 
 * Fixed material bug and added VideoTexture material for web only
