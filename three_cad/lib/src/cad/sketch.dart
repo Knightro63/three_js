@@ -325,28 +325,41 @@ class Draw with EventDispatcher{
     switch (drawType) {
       case DrawType.dimensions:
         if(dimensionSelected?.name == 'circleSpline'){
-          final p1 = dimensionSelected!.children[0].position;
+          final p1 = dimensionSelected!.children.last.position;
           final position = dimensionSelected!.children[0].geometry!.attributes['position'] as Float32BufferAttribute;
           final dist = p1.distanceTo(Vector3(position.getX(0)!.toDouble(),position.getY(0)!.toDouble(),position.getZ(0)!.toDouble()));
-          print(dist);
 
           final forwardVector = Vector3();
           final rightVector = Vector3();
           camera.getWorldDirection(forwardVector);
           rightVector.cross2(camera.up, forwardVector).normalize();
+          double angle = -rightVector.angleTo(point);
+          
           final upVector = Vector3(0, 1, 0).applyQuaternion(camera.quaternion);
+          double angle2 = upVector.angleTo(point);
 
-          final s1 = Plane().setFromNormalAndCoplanarPoint(upVector, p1).distanceToPoint(point);
-          final s2 = Plane().setFromNormalAndCoplanarPoint(rightVector, p1).distanceToPoint(point);
+          if(angle < math.pi && angle2 < math.pi/2){
+            angle = -angle;
+          }
 
-          final p2 = sketch!.sketches.last.children[4].position.setFrom(p1).add(rightVector.clone().scale(dist));
-          final p3 = sketch!.sketches.last.children[2].position.setFrom(point);
-          final p4 = sketch!.sketches.last.children[6].position.setFrom(p1).add(rightVector.clone().scale(dist));
+          final rotation1 = Quaternion();
+          rotation1.setFromAxisAngle(forwardVector, angle);
+
+          final rotation2 = Quaternion();
+          rotation2.setFromAxisAngle(forwardVector, angle+math.pi/2);
+
+          rightVector.applyQuaternion(rotation1);//.applyEuler(Euler(0,angle));
+          upVector.applyQuaternion(rotation2);//.applyEuler(Euler(0,angle-math.pi/2));
+
+          final p2 = p1.clone().add(rightVector.clone().scale(dist));
+          final p3 = p1.clone().add(upVector.clone().scale(dist));
+          final p4 = p2.clone().add(rightVector.clone().scale(0.25));
 
           sketch!.sketches.last.children[0].position.setFrom(p2);
-          sketch!.sketches.last.children[2].position.setFrom(p3);
-          setLineFromPoints(sketch!.sketches.last.children[1].geometry!, p1, p2);
-          setLineFromPoints(sketch!.sketches.last.children[3].geometry!, p1, p3);
+          sketch!.sketches.last.children[1].position.setFrom(p3);
+          
+          setLineFromPoints(sketch!.sketches.last.children[2].geometry!, p1, p2);
+          setLineFromPoints(sketch!.sketches.last.children[3].geometry!, p2, p3);
           setLineFromPoints(sketch!.sketches.last.children[4].geometry!, p3, p4);        
         }
         break;
@@ -574,23 +587,21 @@ class Draw with EventDispatcher{
     }
   }
   void drawDimension(Vector3 mousePosition, Object3D? selected){
-    print(selected);
-    if(sketch?.newSketch == true && sketch?.newSketchDidStart == false){
-      sketch?.sketches.add(Group()..name = 'dimension');
+    if(sketch?.newSketch == true && sketch?.newSketchDidStart == false && selected?.name == 'circleSpline'){
+      final g = Group()..name = 'dimension';
+      
+      sketch?.sketches.add(g);
       addPoint(mousePosition);
+      addPoint(mousePosition);
+
       addLine(mousePosition);
-      addPoint(mousePosition);
-      sketch?.render.add(sketch?.currentSketch);
+      addLine(mousePosition);
+      addLine(mousePosition);
+      sketch?.render.add(g);
       sketch?.newSketchDidStart = true;
-    }
-    else{
-      if(selected?.name == 'circleSpline'){
-        dimensionSelected = selected;
-        //sketch!.currentSketchPoint!.position.setFrom(mousePosition);
-        addLine(mousePosition);
-        addLine(mousePosition);
-        _update(mousePosition);
-      }
+
+      dimensionSelected = selected;
+      _update(mousePosition);
     }
   }
   void drawLine(Vector3 mousePosition){
