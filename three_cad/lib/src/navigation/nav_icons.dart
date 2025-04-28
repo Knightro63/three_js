@@ -6,10 +6,12 @@ class SketchIcons extends StatelessWidget{
   final onTap;
   final selected;
   final DrawType drawType;
+  final ThemeData theme;
 
   SketchIcons(
     this.drawType,
     this.selected,
+    this.theme,
     this.onTap,
   );
 
@@ -38,7 +40,7 @@ class SketchIcons extends StatelessWidget{
 
   @override
   Widget build(BuildContext context) {
-    Color color = (selected?Theme.of(context).secondaryHeaderColor:Theme.of(context).primaryColorLight);
+    Color color = (selected?theme.secondaryHeaderColor:theme.hintColor);
     return InkWell(
       onTap: onTap,
       child: Container(
@@ -141,7 +143,7 @@ class LineIcon extends CustomPainter{
 
   @override
   bool shouldRepaint(LineIcon oldDelegate) {
-    return false;
+    return oldDelegate.color != color;
   }
 }
 
@@ -175,7 +177,7 @@ class SplineIcon extends CustomPainter{
 
   @override
   bool shouldRepaint(SplineIcon oldDelegate) {
-    return false;
+    return oldDelegate.color != color;
   }
 }
 
@@ -211,7 +213,7 @@ class Arc3PointIcon extends CustomPainter{
 
   @override
   bool shouldRepaint(Arc3PointIcon oldDelegate) {
-    return false;
+    return oldDelegate.color != color;
   }
 }
 
@@ -233,7 +235,7 @@ class Box2PointIcon extends CustomPainter{
 
   @override
   bool shouldRepaint(Box2PointIcon oldDelegate) {
-    return false;
+    return oldDelegate.color != color;
   }
 }
 
@@ -255,7 +257,7 @@ class BoxCenterIcon extends CustomPainter{
 
   @override
   bool shouldRepaint(BoxCenterIcon oldDelegate) {
-    return false;
+    return oldDelegate.color != color;
   }
 }
 
@@ -276,7 +278,7 @@ class CircleCenterIcon extends CustomPainter{
 
   @override
   bool shouldRepaint(CircleCenterIcon oldDelegate) {
-    return false;
+    return oldDelegate.color != color;
   }
 }
 
@@ -300,7 +302,7 @@ class PointIcon extends CustomPainter{
 
   @override
   bool shouldRepaint(PointIcon oldDelegate) {
-    return false;
+    return oldDelegate.color != color;
   }
 }
 
@@ -328,7 +330,7 @@ class DimensionsIcon extends CustomPainter{
 
   @override
   bool shouldRepaint(DimensionsIcon oldDelegate) {
-    return false;
+    return oldDelegate.color != color;
   }
 }
 
@@ -369,6 +371,6 @@ class SketchIcon extends CustomPainter{
 
   @override
   bool shouldRepaint(SketchIcon oldDelegate) {
-    return false;
+    return oldDelegate.color != color;
   }
 }

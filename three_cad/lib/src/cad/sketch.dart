@@ -1,7 +1,29 @@
 import 'dart:math' as math;
-import 'package:flutter/material.dart' hide Material, Matrix4;
+import 'package:css/css.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart' as mat;
 import 'package:three_cad/src/cad/draw_types.dart';
 import 'package:three_js/three_js.dart';
+
+extension on Color{
+  mat.Color toFlutterColor(){
+    return mat.Color(getHex());
+  }
+
+  Color darken([double amount = .1]) {
+    return CSS.darken(toFlutterColor(),amount).toThreeColor();
+  }
+
+  Color lighten([double amount = .1]) {
+    return CSS.lighten(toFlutterColor(),amount).toThreeColor();
+  }
+}
+
+extension on mat.Color{
+  Color toThreeColor(){
+    return Color.fromHex64(toARGB32());
+  }
+}
 
 class Sketch{
   Sketch(Object3D plane){
@@ -22,6 +44,7 @@ class Sketch{
   late Mesh meshPlane;
   Group render = Group();
   List<Group> sketches = [];
+  List<Object3D> scale = [];
   List<Object3D> toDispose = [];
 
   bool newSketch = false;
@@ -181,9 +204,12 @@ class Sketch{
 }
 
 class Draw with EventDispatcher{
+  double scale = 100;
+  final mat.ThemeData theme;
+  final mat.BuildContext context;
   Group drawScene = Group();
   Camera camera;
-  late GlobalKey<PeripheralsState> listenableKey;
+  late mat.GlobalKey<PeripheralsState> listenableKey;
   PeripheralsState get domElement => listenableKey.currentState!;
   DrawType _drawType = DrawType.none;
   DrawType get drawType => _drawType;
@@ -198,15 +224,18 @@ class Draw with EventDispatcher{
   Sketch? sketch;
   Object3D? dimensionSelected;
 
-  void Function() update;
+  late void Function() update;
   
   Draw(
     this.camera, 
     Object3D origin, 
     this.listenableKey,
+    this.theme,
+    this.context,
     this.update
   ){
-    this.origin = DrawType.creatPoint(Vector3(),0xffffff)..name = 'o';
+    final color = theme.brightness == mat.Brightness.light?0x000000:0xffffff;
+    this.origin = DrawType.creatPoint(Vector3(),color)..name = 'o';
     origin.visible = false;
     drawScene.add(this.origin);
     domElement.addEventListener(PeripheralType.pointerdown, onPointerDown);
@@ -215,6 +244,11 @@ class Draw with EventDispatcher{
   }
 
   void hide(){
+    for(int i = 0; i < (sketch?.sketches.length ?? 0);i++){
+      if(sketch?.sketches[i].name == 'dimension'){
+        sketch?.sketches[i].visible = false;
+      }
+    }
     drawScene.visible = false;
   }
   void show(){
@@ -227,7 +261,7 @@ class Draw with EventDispatcher{
   }
 
   void updatePointer(event) {
-    final box = listenableKey.currentContext?.findRenderObject() as RenderBox;
+    final box = listenableKey.currentContext?.findRenderObject() as mat.RenderBox;
     final size = box.size;
     _pointer.x = ((event.clientX) / size.width * 2 - 1);
     _pointer.y = (-(event.clientY) / size.height * 2 + 1);
@@ -276,9 +310,14 @@ class Draw with EventDispatcher{
       }
       else{
         if(i.object?.name != 'SketchPlane'){
-          i.object?.material?.userData['origionalColor'] = i.object?.material?.color.getHex() == 0xffffff?Color.fromHex32(0x06A7E2):i.object?.material?.color;
-          i.object?.material?.color = Color.fromHex32(0xffffff);
-          _hovered.add(i.object!);
+          if(i.object?.material?.userData['isHighlighted'] == null || i.object?.material?.userData['isHighlighted'] == false){
+            i.object?.material?.userData['isHighlighted'] = true;
+            i.object?.material?.userData['origionalColor'] = i.object?.parent?.name == 'dimension'? i.object?.material?.color:
+              i.object?.material?.color.getHex() == 0xffffff?Color.fromHex32(theme.secondaryHeaderColor.toARGB32()):i.object?.material?.color;
+            i.object?.material?.color = i.object?.parent?.name == 'dimension'?Color.fromHex32(theme.secondaryHeaderColor.toARGB32()):i.object!.material!.color.lighten(0.25);// = Color.fromHex32(0xffffff);
+            //print(i.object?.material?.color.getHex());
+            _hovered.add(i.object!);
+          }
         }
       }
     }
@@ -286,6 +325,7 @@ class Draw with EventDispatcher{
   void clearHighlight(){
     origin.visible = false;
     for(final o in _hovered){
+      o.material?.userData['isHighlighted'] = false;
       o.material?.color = o.material?.userData['origionalColor'] ?? o.material?.color;
     }
     _hovered = [];
@@ -331,6 +371,7 @@ class Draw with EventDispatcher{
 
           final forwardVector = Vector3();
           final rightVector = Vector3();
+          final rightVector2 = Vector3();
           camera.getWorldDirection(forwardVector);
           rightVector.cross2(camera.up, forwardVector).normalize();
           double angle = -rightVector.angleTo(point);
@@ -348,19 +389,27 @@ class Draw with EventDispatcher{
           final rotation2 = Quaternion();
           rotation2.setFromAxisAngle(forwardVector, angle+math.pi/2);
 
-          rightVector.applyQuaternion(rotation1);//.applyEuler(Euler(0,angle));
-          upVector.applyQuaternion(rotation2);//.applyEuler(Euler(0,angle-math.pi/2));
+          rightVector2.setFrom(rightVector).applyQuaternion(rotation1);
+          upVector.applyQuaternion(rotation2);
 
-          final p2 = p1.clone().add(rightVector.clone().scale(dist));
+          final p2 = p1.clone().add(rightVector2.clone().scale(dist));
           final p3 = p1.clone().add(upVector.clone().scale(dist));
-          final p4 = p2.clone().add(rightVector.clone().scale(0.25));
+          final p4 = point.clone();
+          final p5 = point.clone().add(rightVector.clone().scale(-0.2));
+          final p6 = point.clone().add(rightVector.clone().scale(-0.1));
 
           sketch!.sketches.last.children[0].position.setFrom(p2);
           sketch!.sketches.last.children[1].position.setFrom(p3);
           
           setLineFromPoints(sketch!.sketches.last.children[2].geometry!, p1, p2);
           setLineFromPoints(sketch!.sketches.last.children[3].geometry!, p2, p3);
-          setLineFromPoints(sketch!.sketches.last.children[4].geometry!, p3, p4);        
+          setLineFromPoints(sketch!.sketches.last.children[4].geometry!, p2, p4);
+          setLineFromPoints(sketch!.sketches.last.children[5].geometry!, p4, p5);
+
+          sketch!.sketches.last.children[6]
+            ..position.setFrom(p6);
+            //..lookAt(camera.position);
+            //..applyQuaternion(rotation2);
         }
         break;
       case DrawType.point:
@@ -497,6 +546,7 @@ class Draw with EventDispatcher{
               break;
             case DrawType.dimensions:
               if(isLine) drawDimension(point,parent);
+              else if(sketch?.newSketch == true && sketch?.newSketchDidStart == true) endSketch(); 
               break;
             case DrawType.line:
               drawLine(point);
@@ -522,7 +572,7 @@ class Draw with EventDispatcher{
   void drawBoxCenter(Vector3 mousePosition){
     if(sketch?.newSketch == true && sketch?.newSketchDidStart == false){
       sketch?.sketches.add(
-        DrawType.createBoxCenter(mousePosition, sketch!.meshPlane.rotation)
+        DrawType.createBoxCenter(mousePosition, theme.secondaryHeaderColor.toARGB32())
       );
       sketch?.render.add(sketch?.currentSketch);
       sketch?.newSketchDidStart = true;
@@ -534,7 +584,7 @@ class Draw with EventDispatcher{
   }
   void drawSpline(Vector3 mousePosition){
     if(sketch?.newSketch == true && sketch?.newSketchDidStart == false){
-      sketch?.sketches.add(DrawType.createSpline(mousePosition));
+      sketch?.sketches.add(DrawType.createSpline(mousePosition,theme.secondaryHeaderColor.toARGB32()));
       sketch?.render.add(sketch?.currentSketch);
       sketch?.newSketchDidStart = true;
     }
@@ -546,7 +596,7 @@ class Draw with EventDispatcher{
   }
   void drawCircleCenter(Vector3 mousePosition){
     if(sketch?.newSketch == true && sketch?.newSketchDidStart == false){
-      sketch?.sketches.add(DrawType.createCircleSpline(mousePosition));
+      sketch?.sketches.add(DrawType.createCircleSpline(mousePosition,theme.secondaryHeaderColor.toARGB32()));
       sketch?.render.add(sketch?.currentSketch);
       sketch?.newSketchDidStart = true;
     }
@@ -577,7 +627,7 @@ class Draw with EventDispatcher{
   }
   void drawBox2P(Vector3 mousePosition){
     if(sketch?.newSketch == true && sketch?.newSketchDidStart == false){
-      sketch?.sketches.add(DrawType.createBox2Point(mousePosition, sketch!.meshPlane.rotation));
+      sketch?.sketches.add(DrawType.createBox2Point(mousePosition, theme.secondaryHeaderColor.toARGB32()));
       sketch?.render.add(sketch?.currentSketch);
       sketch?.newSketchDidStart = true;
     }
@@ -589,19 +639,27 @@ class Draw with EventDispatcher{
   void drawDimension(Vector3 mousePosition, Object3D? selected){
     if(sketch?.newSketch == true && sketch?.newSketchDidStart == false && selected?.name == 'circleSpline'){
       final g = Group()..name = 'dimension';
-      
+      final color = theme.brightness == mat.Brightness.light?0x000000:0xffffff;
       sketch?.sketches.add(g);
-      addPoint(mousePosition);
-      addPoint(mousePosition);
+      addPoint(mousePosition,color);
+      addPoint(mousePosition,color);
 
-      addLine(mousePosition);
-      addLine(mousePosition);
-      addLine(mousePosition);
-      sketch?.render.add(g);
-      sketch?.newSketchDidStart = true;
+      addLine(mousePosition,color);
+      addLine(mousePosition,color);
+      addLine(mousePosition,color);
+      addLine(mousePosition,color);
 
-      dimensionSelected = selected;
-      _update(mousePosition);
+      final p1 = selected!.children.last.position;
+      final position = selected.children[0].geometry!.attributes['position'] as Float32BufferAttribute;
+      final dist = p1.distanceTo(Vector3(position.getX(0)!.toDouble(),position.getY(0)!.toDouble(),position.getZ(0)!.toDouble()));
+
+      addPlane('θ ${(dist*scale).toStringAsFixed(3)}',theme.brightness == mat.Brightness.light?0x00000000:0xffffffff).then((_){
+        sketch?.render.add(g);
+        sketch?.newSketchDidStart = true;
+
+        dimensionSelected = selected;
+        _update(mousePosition);
+      });
     }
   }
   void drawLine(Vector3 mousePosition){
@@ -634,11 +692,45 @@ class Draw with EventDispatcher{
       addPoint(mousePosition);
     }
   }
-  void addPoint(Vector3 mousePosition){
-    sketch?.currentSketch.add(DrawType.creatPoint(mousePosition));
+  void addPoint(Vector3 mousePosition, [int? color]){
+    sketch?.currentSketch.add(DrawType.creatPoint(mousePosition, color??theme.secondaryHeaderColor.toARGB32()));
   }
-  void addLine(Vector3 mousePosition,[bool construction = false]){
-    sketch?.currentSketch.add(DrawType.createLine(mousePosition,construction));
+  void addLine(Vector3 mousePosition,[int? color]){
+    sketch?.currentSketch.add(DrawType.createLine(mousePosition, color??theme.secondaryHeaderColor.toARGB32()));
+  }
+  Future<void> addPlane(String value, int color) async{
+    final texture = await FlutterTexture.fromWidget(
+      context,
+      mat.Transform.flip(
+        //flipX: !kIsWeb?true:false,
+        flipY: !kIsWeb?true:false,
+        child: mat.Container(
+          width: 250,
+          height: 100,
+          color: mat.Colors.transparent,
+          alignment: mat.Alignment.topCenter,
+          child: mat.Text(
+            value,
+            style: mat.TextStyle(
+              fontSize: 36,
+              color: mat.Color(0xffffffff)
+            ),
+          ),
+        ),
+      )
+    );
+    final geometry = PlaneGeometry(0.25,0.1);
+    final material = MeshBasicMaterial.fromMap( {
+      'map': texture,
+      'side': DoubleSide,
+      'transparent': true,
+    } )
+    ..depthWrite = true
+    ..depthTest = false;
+
+    final mesh = Mesh(geometry,material)..lookAt(camera.up);
+    sketch?.scale.add(mesh);
+    sketch?.currentSketch.add(mesh);
   }
 
   void start(Sketch sketch){
@@ -655,9 +747,15 @@ class Draw with EventDispatcher{
 
     drawScene.remove(sketch!.meshPlane);
     drawScene.remove(sketch!.render);
-
-    sketch = null;
+    
     hide();
+    sketch = null;
+  }
+  void updateScale(){
+    final scale = 1.5;
+    for(int i = 0; i < (sketch?.scale.length ?? 0); i++){
+      sketch?.scale[i].scale.setValues(scale/camera.zoom, scale/camera.zoom, scale/camera.zoom);
+    }
   }
   void cancel(){
     finish();

@@ -30,26 +30,26 @@ enum DrawType{
   circularPatern,
   retangularPattern;
   
-  static Group createSpline(Vector3 position){
+  static Group createSpline(Vector3 position, int color){
     final g = Group()..name = 'spline';
     final geometry = BufferGeometry();
     geometry.setAttributeFromString('position',Float32BufferAttribute( Float32Array( 200 * 3 ), 3 ) );
     final line = Line(
       geometry, 
       LineBasicMaterial.fromMap( {
-        'color': 0x06A7E2,
+        'color': color,
       })
     )..name = 'line';
 
     g.add(line);
-    g.add(creatPoint(position));
-    g.add(creatPoint(position));
+    g.add(creatPoint(position,color));
+    g.add(creatPoint(position,color));
 
     updateSplineOutline(line, [position,position]);
 
     return g;
   }
-  static Group createCircleSpline(Vector3 position){
+  static Group createCircleSpline(Vector3 position, int color){
     Group objects = Group()..name = 'circleSpline';
     final geometry = BufferGeometry();
     geometry.setAttributeFromString('position',Float32BufferAttribute( Float32Array( 64 * 3 ), 3 ) );
@@ -57,12 +57,12 @@ enum DrawType{
     final line = Line(
       geometry, 
       LineBasicMaterial.fromMap( {
-        'color': 0x06A7E2,
+        'color': color,
       })
     )..name = 'line';
     
     objects.add(line);
-    objects.add(creatPoint(position));
+    objects.add(creatPoint(position,color));
 
     updateSplineOutline(line, [position,position,position,position], true, 64);
     
@@ -90,7 +90,7 @@ enum DrawType{
   }
   static Group createCircle(Vector3 position, Euler rotation){
     Group objects = Group()..name = 'circle';
-    objects.add(creatPoint(position));
+    objects.add(creatPoint(position,0xff0000));
 
     Group line = Group()..name = 'circleLines';
     final int segments = 64;
@@ -109,7 +109,7 @@ enum DrawType{
         previous.setFrom(vertex);
       }
       if(s > 0 ){
-        line.add(create2PointLine(previous,vertex));
+        line.add(create2PointLine(previous,vertex,0xff0000));
         previous.setFrom(vertex);
       }
     };
@@ -127,45 +127,45 @@ enum DrawType{
     return objects;
   }
   
-  static Group createBoxCenter(Vector3 position, Euler rotation){
+  static Group createBoxCenter(Vector3 position, int color){
     Group objects = Group()..name = 'boxCenter';
-    objects.add(creatPoint(Vector3.copy(position)));
-    objects.add(create2PointLine(Vector3.copy(position),Vector3.copy(position)));
-    objects.add(creatPoint(Vector3.copy(position)));
-    objects.add(create2PointLine(Vector3.copy(position),Vector3.copy(position)));
-    objects.add(creatPoint(Vector3.copy(position)));
-    objects.add(create2PointLine(Vector3.copy(position),Vector3.copy(position)));
-    objects.add(creatPoint(Vector3.copy(position)));
-    objects.add(create2PointLine(Vector3.copy(position),Vector3.copy(position)));
-    objects.add(creatPoint(Vector3.copy(position)));
-    objects.add(create2PointLine(Vector3.copy(position),Vector3.copy(position),true));
-    objects.add(create2PointLine(Vector3.copy(position),Vector3.copy(position),true));
+    objects.add(creatPoint(Vector3.copy(position),color));
+    objects.add(create2PointLine(Vector3.copy(position),Vector3.copy(position),color));
+    objects.add(creatPoint(Vector3.copy(position),color));
+    objects.add(create2PointLine(Vector3.copy(position),Vector3.copy(position),color));
+    objects.add(creatPoint(Vector3.copy(position),color));
+    objects.add(create2PointLine(Vector3.copy(position),Vector3.copy(position),color));
+    objects.add(creatPoint(Vector3.copy(position),color));
+    objects.add(create2PointLine(Vector3.copy(position),Vector3.copy(position),color));
+    objects.add(creatPoint(Vector3.copy(position),color));
+    objects.add(create2PointLine(Vector3.copy(position),Vector3.copy(position),0xffff00));
+    objects.add(create2PointLine(Vector3.copy(position),Vector3.copy(position),0xffff00));
     
     return objects;
   }
 
-  static Group createBox2Point(Vector3 position, Euler rotation){
+  static Group createBox2Point(Vector3 position, int color){
     Group objects = Group()..name = 'box2Point';
-    objects.add(creatPoint(Vector3.copy(position)));
-    objects.add(create2PointLine(Vector3.copy(position),Vector3.copy(position)));
-    objects.add(creatPoint(Vector3.copy(position)));
-    objects.add(create2PointLine(Vector3.copy(position),Vector3.copy(position)));
-    objects.add(creatPoint(Vector3.copy(position)));
-    objects.add(create2PointLine(Vector3.copy(position),Vector3.copy(position)));
-    objects.add(creatPoint(Vector3.copy(position)));
-    objects.add(create2PointLine(Vector3.copy(position),Vector3.copy(position)));
+    objects.add(creatPoint(Vector3.copy(position),color));
+    objects.add(create2PointLine(Vector3.copy(position),Vector3.copy(position),color));
+    objects.add(creatPoint(Vector3.copy(position),color));
+    objects.add(create2PointLine(Vector3.copy(position),Vector3.copy(position),color));
+    objects.add(creatPoint(Vector3.copy(position),color));
+    objects.add(create2PointLine(Vector3.copy(position),Vector3.copy(position),color));
+    objects.add(creatPoint(Vector3.copy(position),color));
+    objects.add(create2PointLine(Vector3.copy(position),Vector3.copy(position),color));
 
     return objects;
   }
 
-  static Object3D creatPoint(Vector3 position, [int? color]){
+  static Object3D creatPoint(Vector3 position, int color){
     return Points(
         BufferGeometry()..setAttributeFromString(
           'position',
           Float32BufferAttribute.fromList([0,0,0],3)
         ),
         PointsMaterial.fromMap({
-          'color': 0x06A7E2,
+          'color': color,
           'size': 7.5, 
           // 'transparent': color == null? true : false,
           // 'opacity': color == null?0.5:1
@@ -176,11 +176,11 @@ enum DrawType{
       ..position.y = position.y
       ..position.z = position.z;
   }
-  static Line2 createFatLine(Vector3 mousePosition,[bool construction = false]){
+  static Line2 createFatLine(Vector3 mousePosition, int color){
     final geometry = LineGeometry();
     geometry.setPositions(Float32Array.fromList(mousePosition.storage+mousePosition.storage));
     final matLine = LineMaterial.fromMap( {
-      'color': 0x06A7E2,
+      'color': color,
       'linewidth': 5, // in world units with size attenuation, pixels otherwise
     })
     ..worldUnits = true;
@@ -188,10 +188,10 @@ enum DrawType{
 
     return Line2( geometry, matLine )
     ..name = 'line'
-    ..userData['construction'] = construction
+    ..userData['construction'] = color == 0xffff00
     ..computeLineDistances();
   }
-  static Line createLine(Vector3 position,[bool construction = false]){
+  static Line createLine(Vector3 position, int color){
     final geometry = BufferGeometry();
     geometry.setAttributeFromString(
       'position',
@@ -207,7 +207,7 @@ enum DrawType{
     });
 
     final matLine = LineBasicMaterial.fromMap( {
-      'color': construction?0xffff00:0x06A7E2,
+      'color': color,//construction?0xffff00:215910,
       'transparent': false,
       'linewidth': 5
     });
@@ -215,9 +215,9 @@ enum DrawType{
     return Line( geometry, matLine )
     ..name = 'line'
     ..computeLineDistances()
-    ..userData['construction'] = construction;
+    ..userData['construction'] = color == 0xffff00;
   }
-  static Line create2PointLine(Vector3 position1,Vector3 position2,[bool construction = false]){
+  static Line create2PointLine(Vector3 position1,Vector3 position2,int color){
     final geometry = BufferGeometry();
     geometry.setAttributeFromString(
       'position',
@@ -233,7 +233,7 @@ enum DrawType{
     });
 
     final matLine = LineBasicMaterial.fromMap( {
-      'color': construction?0xffff00:0x06A7E2,
+      'color': color,//construction?0xffff00:215910,
       'transparent': false,
       'linewidth': 5
     });
@@ -241,6 +241,6 @@ enum DrawType{
     return Line( geometry, matLine )
     ..name = 'line'
     ..computeLineDistances()
-    ..userData['construction'] = construction;
+    ..userData['construction'] = color == 0xffff00;
   }
 }

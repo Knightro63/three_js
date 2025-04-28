@@ -7,7 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:three_cad/src/cad/draw_types.dart';
 import 'package:three_cad/src/cad/sketch.dart';
 import 'package:three_cad/src/navigation/globals.dart';
-import 'package:three_cad/src/navigation/sketch_nav_icons.dart';
+import 'package:three_cad/src/navigation/nav_icons.dart';
 
 import 'package:three_js/three_js.dart' as three;
 import 'package:three_js_helpers/three_js_helpers.dart';
@@ -237,12 +237,18 @@ class _UIPageState extends State<UIScreen> {
           break;
       }
     });
+    threeJs.domElement.addEventListener(three.PeripheralType.pointerup, (details){
+      orbit.enableZoom = true;
+      planeSelected();
+    });
     threeJs.domElement.addEventListener(three.PeripheralType.pointerdown, (details){
+      orbit.enableZoom = false;
       planeSelected();
     });
 
     threeJs.addAnimationEvent((dt){
       origin.update();
+      draw.updateScale();
       orbit.update();
       if (viewHelper != null && viewHelper!.animating ) {
         viewHelper!.update( dt );
@@ -254,6 +260,8 @@ class _UIPageState extends State<UIScreen> {
       threeJs.camera,
       origin.childred.children[0].clone(),
       threeJs.globalKey,
+      CSS.changeTheme(theme),
+      context,
       (){
         setState(() {});
       }
@@ -448,10 +456,10 @@ class _UIPageState extends State<UIScreen> {
         height: 35,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: (selected?Theme.of(context).secondaryHeaderColor:Theme.of(context).primaryColorLight))
+          border: Border.all(color: (selected?CSS.changeTheme(theme).secondaryHeaderColor:CSS.changeTheme(theme).hintColor))
         ),
         alignment: Alignment.center,
-        child: Icon(icon, color: (selected?Theme.of(context).secondaryHeaderColor:Theme.of(context).primaryColorLight)),
+        child: Icon(icon, color: (selected?CSS.changeTheme(theme).secondaryHeaderColor:CSS.changeTheme(theme).hintColor)),
       ),
     );
   }
@@ -464,17 +472,18 @@ class _UIPageState extends State<UIScreen> {
         height: 35,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: (selected?Theme.of(context).secondaryHeaderColor:Theme.of(context).primaryColorLight))
+          border: Border.all(color: (selected?CSS.changeTheme(theme).secondaryHeaderColor:CSS.changeTheme(theme).hintColor))
         ),
         alignment: Alignment.center,
-        child: icon//Icon(icon, color: (selected?Theme.of(context).secondaryHeaderColor:Theme.of(context).primaryColorLight)),
+        child: icon//Icon(icon, color: (selected?CSS.changeTheme(theme).secondaryHeaderColor:CSS.changeTheme(theme).hintColor)),
       ),
     );
   }
   Widget actionNav(){
     return Actions.sketch == action?sketchNav():Row(
       children: [
-        SketchIcons(DrawType.none,action == Actions.prepareSketec,(){
+        SketchIcons(DrawType.none,action == Actions.prepareSketec,CSS.changeTheme(theme),
+          (){
             setState(() {
               if(action == Actions.prepareSketec){
                 action = Actions.none;
@@ -546,7 +555,7 @@ class _UIPageState extends State<UIScreen> {
   Widget sketchNav(){
     return Row(
       children: [
-        SketchIcons(DrawType.point,draw.drawType == DrawType.point,
+        SketchIcons(DrawType.point,draw.drawType == DrawType.point,CSS.changeTheme(theme),
           (){
             if(draw.drawType != DrawType.none){
               setState(() {
@@ -560,7 +569,7 @@ class _UIPageState extends State<UIScreen> {
             }
           },
         ),
-        SketchIcons(DrawType.line,draw.drawType == DrawType.line,
+        SketchIcons(DrawType.line,draw.drawType == DrawType.line,CSS.changeTheme(theme),
           (){
             if(draw.drawType != DrawType.none){
               setState(() {
@@ -574,7 +583,7 @@ class _UIPageState extends State<UIScreen> {
             }
           },
         ),
-        SketchIcons(DrawType.box2Point,draw.drawType == DrawType.box2Point,
+        SketchIcons(DrawType.box2Point,draw.drawType == DrawType.box2Point,CSS.changeTheme(theme),
           (){
             if(draw.drawType != DrawType.none){
               setState(() {
@@ -588,7 +597,7 @@ class _UIPageState extends State<UIScreen> {
             }
           },
         ),
-        SketchIcons(DrawType.circleCenter,draw.drawType == DrawType.circleCenter,
+        SketchIcons(DrawType.circleCenter,draw.drawType == DrawType.circleCenter,CSS.changeTheme(theme),
           (){
             if(draw.drawType != DrawType.none){
               setState(() {
@@ -602,7 +611,7 @@ class _UIPageState extends State<UIScreen> {
             }
           }
         ),
-        SketchIcons(DrawType.boxCenter,draw.drawType == DrawType.boxCenter,
+        SketchIcons(DrawType.boxCenter,draw.drawType == DrawType.boxCenter,CSS.changeTheme(theme),
           (){
             if(draw.drawType != DrawType.none){
               setState(() {
@@ -616,7 +625,7 @@ class _UIPageState extends State<UIScreen> {
             }
           }
         ),
-        SketchIcons(DrawType.spline,draw.drawType == DrawType.spline,
+        SketchIcons(DrawType.spline,draw.drawType == DrawType.spline,CSS.changeTheme(theme),
           (){
             if(draw.drawType != DrawType.none){
               setState(() {
@@ -630,7 +639,7 @@ class _UIPageState extends State<UIScreen> {
             }
           }
         ),
-        SketchIcons(DrawType.arc3Point,draw.drawType == DrawType.arc3Point,
+        SketchIcons(DrawType.arc3Point,draw.drawType == DrawType.arc3Point,CSS.changeTheme(theme),
           (){
             if(draw.drawType != DrawType.none){
               setState(() {
@@ -644,7 +653,7 @@ class _UIPageState extends State<UIScreen> {
             }
           }
         ),
-        SketchIcons(DrawType.dimensions,draw.drawType == DrawType.dimensions,
+        SketchIcons(DrawType.dimensions,draw.drawType == DrawType.dimensions,CSS.changeTheme(theme),
           (){
             if(draw.drawType != DrawType.none){
               setState(() {
