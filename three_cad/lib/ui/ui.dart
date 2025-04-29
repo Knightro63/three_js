@@ -4,6 +4,7 @@ import 'package:css/css.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Actions;
 import 'package:flutter/services.dart';
+import 'package:three_cad/src/cad/constraints.dart';
 import 'package:three_cad/src/cad/draw_types.dart';
 import 'package:three_cad/src/cad/sketch.dart';
 import 'package:three_cad/src/navigation/globals.dart';
@@ -452,7 +453,7 @@ class _UIPageState extends State<UIScreen> {
       onTap: onTap,
       child: Container(
         margin: const EdgeInsets.all(5),
-        width: 45,
+        width: 35,
         height: 35,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
@@ -460,22 +461,6 @@ class _UIPageState extends State<UIScreen> {
         ),
         alignment: Alignment.center,
         child: Icon(icon, color: (selected?CSS.changeTheme(theme).secondaryHeaderColor:CSS.changeTheme(theme).hintColor)),
-      ),
-    );
-  }
-  Widget selectionIcon2(Widget icon, bool selected,void Function() onTap){
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.all(5),
-        width: 45,
-        height: 35,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: (selected?CSS.changeTheme(theme).secondaryHeaderColor:CSS.changeTheme(theme).hintColor))
-        ),
-        alignment: Alignment.center,
-        child: icon//Icon(icon, color: (selected?CSS.changeTheme(theme).secondaryHeaderColor:CSS.changeTheme(theme).hintColor)),
       ),
     );
   }
@@ -666,6 +651,106 @@ class _UIPageState extends State<UIScreen> {
               });
             }
           }
+        ),
+        Container(
+          color: CSS.changeTheme(theme).dividerColor,
+          width: 2,
+          height: 35,
+        ),
+        ConstraintIcons(Constraints.horizontal,draw.constraintType == Constraints.horizontal,CSS.changeTheme(theme),
+          (){
+            setState(() {
+              if(draw.constraintType == Constraints.none){
+                draw.constraintType = Constraints.horizontal;
+                draw.endSketch(true);
+              }
+              else{
+                draw.constraintType = Constraints.none;
+              }
+            });
+          }
+        ),
+        ConstraintIcons(Constraints.equal,draw.constraintType == Constraints.equal,CSS.changeTheme(theme),(){
+            setState(() {
+              if(draw.constraintType == Constraints.none){
+                draw.constraintType = Constraints.equal;
+                draw.endSketch(true);
+              }
+              else{
+                draw.constraintType = Constraints.none;
+              }
+            });
+          }),
+        ConstraintIcons(Constraints.coincident,draw.constraintType == Constraints.coincident,CSS.changeTheme(theme),(){
+            setState(() {
+              if(draw.constraintType == Constraints.none){
+                draw.constraintType = Constraints.coincident;
+                draw.endSketch(true);
+              }
+              else{
+                draw.constraintType = Constraints.none;
+              }
+            });
+          }),
+        ConstraintIcons(Constraints.tangent,draw.constraintType == Constraints.tangent,CSS.changeTheme(theme),(){
+            setState(() {
+              if(draw.constraintType == Constraints.none){
+                draw.constraintType = Constraints.tangent;
+                draw.endSketch(true);
+              }
+              else{
+                draw.constraintType = Constraints.none;
+              }
+            });
+          }),
+        ConstraintIcons(Constraints.concentric,draw.constraintType == Constraints.concentric,CSS.changeTheme(theme),(){
+            setState(() {
+              if(draw.constraintType == Constraints.none){
+                draw.constraintType = Constraints.concentric;
+                draw.endSketch(true);
+              }
+              else{
+                draw.constraintType = Constraints.none;
+              }
+            });
+          }),
+        ConstraintIcons(Constraints.midpoint,draw.constraintType == Constraints.midpoint,CSS.changeTheme(theme),(){
+            setState(() {
+              if(draw.constraintType == Constraints.none){
+                draw.constraintType = Constraints.midpoint;
+                draw.endSketch(true);
+              }
+              else{
+                draw.constraintType = Constraints.none;
+              }
+            });
+          }),
+        ConstraintIcons(Constraints.parallel,draw.constraintType == Constraints.parallel,CSS.changeTheme(theme),(){
+            setState(() {
+              if(draw.constraintType == Constraints.none){
+                draw.constraintType = Constraints.parallel;
+                draw.endSketch(true);
+              }
+              else{
+                draw.constraintType = Constraints.none;
+              }
+            });
+          }),
+        ConstraintIcons(Constraints.perpendicular,draw.constraintType == Constraints.perpendicular,CSS.changeTheme(theme),(){
+            setState(() {
+              if(draw.constraintType == Constraints.none){
+                draw.constraintType = Constraints.perpendicular;
+                draw.endSketch(true);
+              }
+              else{
+                draw.constraintType = Constraints.none;
+              }
+            });
+          }),
+        Container(
+          color: CSS.changeTheme(theme).dividerColor,
+          width: 2,
+          height: 35,
         ),
         selectionIcon(Icons.check,false,
           (){

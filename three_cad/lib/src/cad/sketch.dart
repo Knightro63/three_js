@@ -2,8 +2,10 @@ import 'dart:math' as math;
 import 'package:css/css.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' as mat;
+import 'package:three_cad/src/cad/constraints.dart';
 import 'package:three_cad/src/cad/draw_types.dart';
 import 'package:three_js/three_js.dart';
+import 'package:three_js_line/three_js_line.dart';
 
 extension on Color{
   mat.Color toFlutterColor(){
@@ -212,6 +214,7 @@ class Draw with EventDispatcher{
   late mat.GlobalKey<PeripheralsState> listenableKey;
   PeripheralsState get domElement => listenableKey.currentState!;
   DrawType _drawType = DrawType.none;
+  Constraints constraintType = Constraints.none;
   DrawType get drawType => _drawType;
 
   late Object3D origin;
@@ -219,10 +222,11 @@ class Draw with EventDispatcher{
   final _pointer = Vector2.zero();
   final Raycaster _raycaster = Raycaster()
       ..params['Points']['threshold'] = 0.05
+      ..params['Line2'] = {'threshold':0.05}
       ..params['Line']['threshold'] = 0.04;
 
   Sketch? sketch;
-  Object3D? dimensionSelected;
+  List<Object3D> selected = [];
 
   late void Function() update;
   
@@ -288,7 +292,7 @@ class Draw with EventDispatcher{
         case DrawType.spline:
           sketch?.toDispose.add(sketch!.currentSketchPart!);
           sketch?.removeCurrent();
-          DrawType.updateSplineOutline(sketch!.currentSketchLine as Line, sketch!.pointPositions());
+          DrawType.updateSplineOutline(sketch!.currentSketchLine as dynamic, sketch!.pointPositions());
           break;
         default:
           if(cancel){
@@ -296,12 +300,48 @@ class Draw with EventDispatcher{
           }
       }
     }
+    clearSelected();
     _drawType = DrawType.none;
     sketch?.newSketch = false;
     sketch?.newSketchDidStart = false;
     update();
   }
 
+  void checkSelected(){
+    for(final o in selected){
+      if(o.name == 'o'){
+        origin.visible = true;
+      }
+      if(!selected.contains(o)){
+        if(o.material?.userData['isHighlighted'] == null || o.material?.userData['isHighlighted'] == false){
+          changeObjectColor(o);
+        }
+      }
+    }
+  }
+  void clearSelected(){
+    for(final o in selected){
+      o.material?.userData['isHighlighted'] = false;
+      o.material?.color = o.material?.userData['origionalColor'] ?? o.material?.color;
+    }
+    selected.clear();
+  }
+  void changeObjectColor(Object3D? newObject){
+    Object3D? object = newObject;
+    newObject?.material?.userData['isHighlighted'] = true;
+
+    if(newObject is Line && newObject.children.isNotEmpty && newObject.children[0] is Line2){
+      object = newObject.children[0];
+      object.material?.linewidth =  4;
+    }
+    else if(object is Points){
+      object.material?.size =  10;
+    }
+
+    object?.material?.userData['origionalColor'] = object.parent?.name == 'dimension'? object.material?.color:
+    object.material?.color.getHex() == 0xffffff?Color.fromHex32(theme.secondaryHeaderColor.toARGB32()):object.material?.color;
+    object?.material?.color = object.parent?.name == 'dimension'?Color.fromHex32(theme.secondaryHeaderColor.toARGB32()):object.material!.color.lighten(0.25);// = Color.fromHex32(0xffffff);
+  }
   void checkHighLight(List<Intersection> inter){
     for(final i in inter){
       if(i.object?.name == 'o'){
@@ -311,11 +351,7 @@ class Draw with EventDispatcher{
       else{
         if(i.object?.name != 'SketchPlane'){
           if(i.object?.material?.userData['isHighlighted'] == null || i.object?.material?.userData['isHighlighted'] == false){
-            i.object?.material?.userData['isHighlighted'] = true;
-            i.object?.material?.userData['origionalColor'] = i.object?.parent?.name == 'dimension'? i.object?.material?.color:
-              i.object?.material?.color.getHex() == 0xffffff?Color.fromHex32(theme.secondaryHeaderColor.toARGB32()):i.object?.material?.color;
-            i.object?.material?.color = i.object?.parent?.name == 'dimension'?Color.fromHex32(theme.secondaryHeaderColor.toARGB32()):i.object!.material!.color.lighten(0.25);// = Color.fromHex32(0xffffff);
-            //print(i.object?.material?.color.getHex());
+            changeObjectColor(i.object);
             _hovered.add(i.object!);
           }
         }
@@ -325,20 +361,31 @@ class Draw with EventDispatcher{
   void clearHighlight(){
     origin.visible = false;
     for(final o in _hovered){
-      o.material?.userData['isHighlighted'] = false;
-      o.material?.color = o.material?.userData['origionalColor'] ?? o.material?.color;
+      if(!selected.contains(o)){
+        o.material?.userData['isHighlighted'] = false;
+        if(o is Line && o.children.isNotEmpty && o.children[0] is Line2){
+          o.children[0].material?.color = o.children[0].material?.userData['origionalColor'] ?? o.children[0].material?.color;
+          o.children[0].material?.linewidth =  2;
+        }
+        else{
+          o.material?.color = o.material?.userData['origionalColor'] ?? o.material?.color;
+          if(o is Points){
+            o.material?.size =  7.5;
+          }
+        }
+      }
     }
     _hovered = [];
   }
 
   List<Intersection> _getObjectIntersections(){
     _raycaster.setFromCamera(_pointer, camera);
-    return _raycaster.intersectObjects([origin]+sketch!.allSelectables,true);
+    return _raycaster.intersectObjects([origin]+sketch!.allSelectables,false);
   }
   List<Intersection> _getAllIntersections(WebPointerEvent event){
     updatePointer(event);
     _raycaster.setFromCamera(_pointer, camera);
-    return _raycaster.intersectObjects([sketch!.meshPlane,origin]+sketch!.allSelectables,true);
+    return _raycaster.intersectObjects([sketch!.meshPlane,origin]+sketch!.allSelectables,false);
   }
   List<Intersection> _getIntersections(){
     _raycaster.setFromCamera(_pointer, camera);
@@ -349,24 +396,75 @@ class Draw with EventDispatcher{
       final intersections = _getAllIntersections(event);
       clearHighlight();
       checkHighLight(intersections);
+      checkSelected();
       if(intersections.isNotEmpty && sketch!.sketches.isNotEmpty){
         if(sketch?.newSketchDidStart == true){
-          _update(intersections[0].point!);
+          _updateDraw(intersections[0].point!);
         }
         else if(sketch!.sketches.isNotEmpty){
-          _update(intersections[0].point!);
+          _updateDraw(intersections[0].point!);
         }
       }
     }
   }
 
-  void _update(Vector3 point){
+  Vector3 getPointInBetweenByPerc(Vector3 p1, Vector3 p2, double percentage) {
+    Vector3 dir = p2.clone().sub(p1);
+    final len = dir.length;
+    dir = dir.normalize().scale(len*percentage);
+    return p1.clone().add(dir);
+  }
+
+  void _updateConstraint(){
+    if(selected.length < 2) return;
+
+    switch (constraintType) {
+      case Constraints.midpoint:
+        print(selected[0].name);
+        print(selected[1].name);
+        if(selected[0].name == 'line' && selected[1].name == 'line'){
+
+        }
+        else if(selected[0].name == 'line' && selected[1].name == 'point'){
+          final position = selected[0].geometry!.attributes['position'] as Float32BufferAttribute;
+          final p1 = Vector3(position.getX(0)!.toDouble(),position.getY(0)!.toDouble(),position.getZ(0)!.toDouble());
+          final p2 = Vector3(position.getX(1)!.toDouble(),position.getY(1)!.toDouble(),position.getZ(1)!.toDouble());
+
+          selected[1].position.setFrom(getPointInBetweenByPerc(p1, p2, 0.50));
+          clearSelected();
+        }
+        else if(selected[0].name == 'point' && selected[1].name == 'line'){
+          final position = selected[1].geometry!.attributes['position'] as Float32BufferAttribute;
+          final p1 = Vector3(position.getX(0)!.toDouble(),position.getY(0)!.toDouble(),position.getZ(0)!.toDouble());
+          final p2 = Vector3(position.getX(1)!.toDouble(),position.getY(1)!.toDouble(),position.getZ(1)!.toDouble());
+
+          selected[0].position.setFrom(getPointInBetweenByPerc(p1, p2, 0.50));
+
+          clearSelected();
+        }
+        else if((selected[0].name == 'line' && selected[1].name == 'origin') || (selected[0].name == 'origin' && selected[1].name == 'line')){
+
+        }
+        else if(selected[0].parent?.name == 'circleSpline'){
+          selected.removeAt(0);
+        }
+        else if(selected[1].parent?.name == 'circleSpline'){
+          selected.removeAt(1);
+        }
+        else{
+          clearSelected();
+        }
+        break;
+      default:
+    }
+  }
+  void _updateDraw(Vector3 point){
     if(sketch?.newSketchDidStart == false) return;
     switch (drawType) {
       case DrawType.dimensions:
-        if(dimensionSelected?.name == 'circleSpline'){
-          final p1 = dimensionSelected!.children.last.position;
-          final position = dimensionSelected!.children[0].geometry!.attributes['position'] as Float32BufferAttribute;
+        if(selected[0].name == 'circleSpline'){
+          final p1 = selected[0].children.last.position;
+          final position = selected[0].children[0].geometry!.attributes['position'] as Float32BufferAttribute;
           final dist = p1.distanceTo(Vector3(position.getX(0)!.toDouble(),position.getY(0)!.toDouble(),position.getZ(0)!.toDouble()));
 
           final forwardVector = Vector3();
@@ -401,10 +499,10 @@ class Draw with EventDispatcher{
           sketch!.sketches.last.children[0].position.setFrom(p2);
           sketch!.sketches.last.children[1].position.setFrom(p3);
           
-          setLineFromPoints(sketch!.sketches.last.children[2].geometry!, p1, p2);
-          setLineFromPoints(sketch!.sketches.last.children[3].geometry!, p2, p3);
-          setLineFromPoints(sketch!.sketches.last.children[4].geometry!, p2, p4);
-          setLineFromPoints(sketch!.sketches.last.children[5].geometry!, p4, p5);
+          setLineFromPoints(sketch!.sketches.last.children[2], p1, p2);
+          setLineFromPoints(sketch!.sketches.last.children[3], p2, p3);
+          setLineFromPoints(sketch!.sketches.last.children[4], p2, p4);
+          setLineFromPoints(sketch!.sketches.last.children[5], p4, p5);
 
           sketch!.sketches.last.children[6]
             ..position.setFrom(p6);
@@ -418,7 +516,7 @@ class Draw with EventDispatcher{
       case DrawType.line:
         sketch!.currentSketchPoint!.position.setFrom(point);
         final v = sketch!.previousSketchPoint!.position.clone();
-        setLineFromPoints(sketch!.currentSketchLine!.geometry!, v, point.clone());
+        setLineFromPoints(sketch!.currentSketchLine!, v, point.clone());
         break;
       case DrawType.box2Point:
         final p1 = sketch!.sketches.last.children[0].position.clone();
@@ -436,10 +534,10 @@ class Draw with EventDispatcher{
         final p3 = sketch!.sketches.last.children[2].position.setFrom(point);
         final p4 = sketch!.sketches.last.children[6].position.setFrom(p1).add(upVector.clone().scale(s1));
 
-        setLineFromPoints(sketch!.sketches.last.children[1].geometry!, p1, p2);
-        setLineFromPoints(sketch!.sketches.last.children[3].geometry!, p2, p3);
-        setLineFromPoints(sketch!.sketches.last.children[5].geometry!, p3, p4);
-        setLineFromPoints(sketch!.sketches.last.children[7].geometry!, p4, p1);
+        setLineFromPoints(sketch!.sketches.last.children[1], p1, p2);
+        setLineFromPoints(sketch!.sketches.last.children[3], p2, p3);
+        setLineFromPoints(sketch!.sketches.last.children[5], p3, p4);
+        setLineFromPoints(sketch!.sketches.last.children[7], p4, p1);
 
         break;
       case DrawType.circleCenter:
@@ -461,7 +559,7 @@ class Draw with EventDispatcher{
         final p3 = center.clone().add(upVector.clone().scale(s));
         final p4 = center.clone().add(rightVector.clone().scale(-s));
 
-        DrawType.updateSplineOutline(sketch!.sketches.last.children[0] as Line, [p1,p2,p3,p4], true, 64);
+        DrawType.updateSplineOutline(sketch!.sketches.last.children[0] as dynamic, [p1,p2,p3,p4], true, 64);
         break;
       case DrawType.boxCenter:
         final center = sketch!.sketches.last.children[8].position.clone();
@@ -480,26 +578,49 @@ class Draw with EventDispatcher{
         final p3 = sketch!.sketches.last.children[4].position.setFrom(point).add(rightVector.clone().scale(-s2 * 2));
         final p4 = sketch!.sketches.last.children[6].position.setFrom(sketch!.sketches.last.children[0].position).add(rightVector.clone().scale(-s2 * 2));
 
-        setLineFromPoints(sketch!.sketches.last.children[1].geometry!, p1, p2);
-        setLineFromPoints(sketch!.sketches.last.children[3].geometry!, p2, p3);
-        setLineFromPoints(sketch!.sketches.last.children[5].geometry!, p3, p4);
-        setLineFromPoints(sketch!.sketches.last.children[7].geometry!, p4, p1);
+        setLineFromPoints(sketch!.sketches.last.children[1], p1, p2);
+        setLineFromPoints(sketch!.sketches.last.children[3], p2, p3);
+        setLineFromPoints(sketch!.sketches.last.children[5], p3, p4);
+        setLineFromPoints(sketch!.sketches.last.children[7], p4, p1);
 
-        setLineFromPoints(sketch!.sketches.last.children[9].geometry!, p1, p3);
-        setLineFromPoints(sketch!.sketches.last.children[10].geometry!, p2, p4);
+        setLineFromPoints(sketch!.sketches.last.children[9], p1, p3);
+        setLineFromPoints(sketch!.sketches.last.children[10], p2, p4);
 
-        (sketch!.sketches.last.children[9] as Line).computeLineDistances();
-        (sketch!.sketches.last.children[10] as Line).computeLineDistances();
+        (sketch!.sketches.last.children[9] as dynamic).computeLineDistances();
+        (sketch!.sketches.last.children[10] as dynamic).computeLineDistances();
         break;
       case DrawType.spline:
         sketch!.currentSketchPoint!.position.setFrom(point);
-        DrawType.updateSplineOutline(sketch!.currentSketchLine as Line, sketch!.pointPositions());
+        DrawType.updateSplineOutline(sketch!.currentSketchLine as dynamic, sketch!.pointPositions());
         break;
       default:
     }
   }
 
-  void setLineFromPoints(BufferGeometry geometry, Vector3 p1, Vector3 p2){
+  void setLineFromPoints(Object3D object, Vector3 p1, Vector3 p2){
+    if(object is! Line2){
+      setSLineFromPoints(object.geometry!, p1, p2);
+      if(object.children[0] is Line2){
+        setFatLineFromPoints(object.children[0].geometry!, p1, p2);
+        (object.children[0] as Line2).computeLineDistances();
+      }
+    }
+    else{
+      setFatLineFromPoints(object.geometry!, p1, p2);
+      object.computeLineDistances();
+    }
+  }
+  void setFatLineFromPoints(BufferGeometry geometry, Vector3 p1, Vector3 p2){
+    geometry.attributes["instanceStart"].array[0] = p1.x;
+    geometry.attributes["instanceStart"].array[1] = p1.y;
+    geometry.attributes["instanceStart"].array[2] = p1.z;
+    geometry.attributes["instanceStart"].array[3] = p2.x;
+    geometry.attributes["instanceStart"].array[4] = p2.y;
+    geometry.attributes["instanceStart"].array[5] = p2.z;
+
+    geometry.attributes["instanceStart"].needsUpdate = true;
+  }
+  void setSLineFromPoints(BufferGeometry geometry, Vector3 p1, Vector3 p2){
     geometry.attributes["position"].array[0] = p1.x;
     geometry.attributes["position"].array[1] = p1.y;
     geometry.attributes["position"].array[2] = p1.z;
@@ -511,28 +632,34 @@ class Draw with EventDispatcher{
     geometry.computeBoundingSphere();
     geometry.computeBoundingBox();
   }
-
   void onPointerDown(WebPointerEvent event) {
     if(sketch != null){
       if(event.button == 0){
         final intersections = _getIntersections();
         final intersectObjects = _getObjectIntersections();
         bool isLine = false;
+        bool isPoint = false;
         Object3D? parent;
+        Object3D? didSelect;
         Vector3? point;
         if(intersections.isNotEmpty){
           for(final i in intersectObjects){
             final o = i.object!;
             if(o.name == 'o'){
+              didSelect = o.parent;
               point = origin.position;
               break;
             }
             if(o.name == 'point'){
               point = o.position;
+              didSelect = o;
+              parent = o.parent;
+              isPoint = true;
               break;
             }
             if(o.name == 'line'){
               parent = o.parent;
+              didSelect = o;
               point = i.point;
               isLine = true;
             }
@@ -545,7 +672,8 @@ class Draw with EventDispatcher{
               drawPoint(point);
               break;
             case DrawType.dimensions:
-              if(isLine) drawDimension(point,parent);
+              if(isLine) drawDimension(point,parent, true);
+              else if(isPoint) drawDimension(point,parent, false);
               else if(sketch?.newSketch == true && sketch?.newSketchDidStart == true) endSketch(); 
               break;
             case DrawType.line:
@@ -564,11 +692,19 @@ class Draw with EventDispatcher{
               drawSpline(point);
               break;
             default:
+              if(didSelect != null && constraintType != Constraints.none){
+                selected.add(didSelect);
+                _updateConstraint();
+              }
+              else if(parent?.name == 'lines'){
+                
+              }
           }
         }
       }
     }
   }
+
   void drawBoxCenter(Vector3 mousePosition){
     if(sketch?.newSketch == true && sketch?.newSketchDidStart == false){
       sketch?.sketches.add(
@@ -578,7 +714,7 @@ class Draw with EventDispatcher{
       sketch?.newSketchDidStart = true;
     }
     else{
-      _update(mousePosition);
+      _updateDraw(mousePosition);
       endSketch();
     }
   }
@@ -590,7 +726,7 @@ class Draw with EventDispatcher{
     }
     else{
       sketch!.currentSketchPoint!.position.setFrom(mousePosition);
-      _update(mousePosition);
+      _updateDraw(mousePosition);
       addPoint(mousePosition);
     }
   }
@@ -601,30 +737,30 @@ class Draw with EventDispatcher{
       sketch?.newSketchDidStart = true;
     }
     else{
-      _update(mousePosition);
+      _updateDraw(mousePosition);
       endSketch();
     }
   }
-  void drawCircleCenter2(Vector3 mousePosition){
-    if(sketch?.newSketch == true && sketch?.newSketchDidStart == false){
-      sketch?.sketches.add(DrawType.createCircle(mousePosition, sketch!.meshPlane.rotation));
-      sketch?.render.add(sketch?.currentSketch);
-      sketch?.newSketchDidStart = true;
-    }
-    else{
-      _update(mousePosition);
-      for(final o in sketch!.sketches.last.children){
-        if(o.name == 'circleLines'){
-          for(final l in o.children){
-            l.geometry?.attributes["position"].needsUpdate = true;
-            l.geometry?.computeBoundingSphere();
-            l.geometry?.computeBoundingBox();
-          }
-        }
-      }
-      endSketch();
-    }
-  }
+  // void drawCircleCenter2(Vector3 mousePosition){
+  //   if(sketch?.newSketch == true && sketch?.newSketchDidStart == false){
+  //     sketch?.sketches.add(DrawType.createCircle(mousePosition, sketch!.meshPlane.rotation));
+  //     sketch?.render.add(sketch?.currentSketch);
+  //     sketch?.newSketchDidStart = true;
+  //   }
+  //   else{
+  //     _updateDraw(mousePosition);
+  //     for(final o in sketch!.sketches.last.children){
+  //       if(o.name == 'circleLines'){
+  //         for(final l in o.children){
+  //           l.geometry?.attributes["position"].needsUpdate = true;
+  //           l.geometry?.computeBoundingSphere();
+  //           l.geometry?.computeBoundingBox();
+  //         }
+  //       }
+  //     }
+  //     endSketch();
+  //   }
+  // }
   void drawBox2P(Vector3 mousePosition){
     if(sketch?.newSketch == true && sketch?.newSketchDidStart == false){
       sketch?.sketches.add(DrawType.createBox2Point(mousePosition, theme.secondaryHeaderColor.toARGB32()));
@@ -632,14 +768,38 @@ class Draw with EventDispatcher{
       sketch?.newSketchDidStart = true;
     }
     else{
-      _update(mousePosition);
+      _updateDraw(mousePosition);
       endSketch();
     }
   }
-  void drawDimension(Vector3 mousePosition, Object3D? selected){
-    if(sketch?.newSketch == true && sketch?.newSketchDidStart == false && selected?.name == 'circleSpline'){
+  void drawDimension(Vector3 mousePosition, Object3D? select, bool fromLine){
+    final color = theme.brightness == mat.Brightness.light?0x000000:0xffffff;
+    if(fromLine && sketch?.newSketch == true && sketch?.newSketchDidStart == false && select?.name == 'circleSpline'){
       final g = Group()..name = 'dimension';
-      final color = theme.brightness == mat.Brightness.light?0x000000:0xffffff;
+      sketch?.sketches.add(g);
+      //selected.userData['constraints'] = ;
+      addPoint(mousePosition,color);
+      addPoint(mousePosition,color);
+
+      addLine(mousePosition,color);
+      addLine(mousePosition,color);
+      addLine(mousePosition,color);
+      addLine(mousePosition,color);
+
+      final p1 = select!.children.last.position;
+      final position = select.children[0].geometry!.attributes['position'] as Float32BufferAttribute;
+      final dist = p1.distanceTo(Vector3(position.getX(0)!.toDouble(),position.getY(0)!.toDouble(),position.getZ(0)!.toDouble()));
+
+      addPlane('θ ${(dist*scale).toStringAsFixed(3)}',theme.brightness == mat.Brightness.light?0x00000000:0xffffffff).then((_){
+        sketch?.render.add(g);
+        sketch?.newSketchDidStart = true;
+
+        selected.add(select);
+        _updateDraw(mousePosition);
+      });
+    }
+    else if(fromLine && sketch?.newSketch == true && sketch?.newSketchDidStart == false){
+      final g = Group()..name = 'dimension';
       sketch?.sketches.add(g);
       addPoint(mousePosition,color);
       addPoint(mousePosition,color);
@@ -647,18 +807,13 @@ class Draw with EventDispatcher{
       addLine(mousePosition,color);
       addLine(mousePosition,color);
       addLine(mousePosition,color);
-      addLine(mousePosition,color);
 
-      final p1 = selected!.children.last.position;
-      final position = selected.children[0].geometry!.attributes['position'] as Float32BufferAttribute;
-      final dist = p1.distanceTo(Vector3(position.getX(0)!.toDouble(),position.getY(0)!.toDouble(),position.getZ(0)!.toDouble()));
-
-      addPlane('θ ${(dist*scale).toStringAsFixed(3)}',theme.brightness == mat.Brightness.light?0x00000000:0xffffffff).then((_){
+      addPlane('0.00',theme.brightness == mat.Brightness.light?0x00000000:0xffffffff).then((_){
         sketch?.render.add(g);
         sketch?.newSketchDidStart = true;
 
-        dimensionSelected = selected;
-        _update(mousePosition);
+        selected.add(select!);
+        _updateDraw(mousePosition);
       });
     }
   }
@@ -673,7 +828,7 @@ class Draw with EventDispatcher{
     }
     else{
       sketch!.currentSketchPoint!.position.setFrom(mousePosition);
-      _update(mousePosition);
+      _updateDraw(mousePosition);
       addLine(mousePosition);
       addPoint(mousePosition);
     }
@@ -688,10 +843,11 @@ class Draw with EventDispatcher{
     }
     else{
       sketch!.currentSketchPoint!.position.setFrom(mousePosition);
-      _update(mousePosition);
+      _updateDraw(mousePosition);
       addPoint(mousePosition);
     }
   }
+  
   void addPoint(Vector3 mousePosition, [int? color]){
     sketch?.currentSketch.add(DrawType.creatPoint(mousePosition, color??theme.secondaryHeaderColor.toARGB32()));
   }
@@ -747,7 +903,7 @@ class Draw with EventDispatcher{
 
     drawScene.remove(sketch!.meshPlane);
     drawScene.remove(sketch!.render);
-    
+
     hide();
     sketch = null;
   }
