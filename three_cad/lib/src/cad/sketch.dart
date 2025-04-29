@@ -326,9 +326,15 @@ class Draw with EventDispatcher{
     }
     selected.clear();
   }
+  void clearSelectedHighlight(Object3D o){
+    o.material?.userData['isHighlighted'] = false;
+    o.material?.color = o.material?.userData['origionalColor'] ?? o.material?.color;
+    selected.remove(o);
+  }
   void changeObjectColor(Object3D? newObject){
     Object3D? object = newObject;
     newObject?.material?.userData['isHighlighted'] = true;
+    bool isDimension = newObject?.parent?.name == 'dimension';
 
     if(newObject is Line && newObject.children.isNotEmpty && newObject.children[0] is Line2){
       object = newObject.children[0];
@@ -338,9 +344,9 @@ class Draw with EventDispatcher{
       object.material?.size =  10;
     }
 
-    object?.material?.userData['origionalColor'] = object.parent?.name == 'dimension'? object.material?.color:
+    object?.material?.userData['origionalColor'] = isDimension? object.material?.color:
     object.material?.color.getHex() == 0xffffff?Color.fromHex32(theme.secondaryHeaderColor.toARGB32()):object.material?.color;
-    object?.material?.color = object.parent?.name == 'dimension'?Color.fromHex32(theme.secondaryHeaderColor.toARGB32()):object.material!.color.lighten(0.25);// = Color.fromHex32(0xffffff);
+    object?.material?.color = isDimension?Color.fromHex32(theme.secondaryHeaderColor.toARGB32()):object.material!.color.lighten(0.25);// = Color.fromHex32(0xffffff);
   }
   void checkHighLight(List<Intersection> inter){
     for(final i in inter){
@@ -419,10 +425,78 @@ class Draw with EventDispatcher{
     if(selected.length < 2) return;
 
     switch (constraintType) {
+      case Constraints.coincident:
+        if(selected[0].name != 'point'){
+          clearSelectedHighlight(selected[0]);
+        }
+        else if(selected[1].name != 'point'){
+          clearSelectedHighlight(selected[1]);
+        }
+        else{
+          if(selected[0].parent?.name != 'circleSpline'){
+            final center = selected[0].parent!.children.last.position.clone();
+          }
+          else if(selected[1].parent?.name != 'circleSpline'){
+            final center = selected[1].parent!.children.last.position.clone();
+          }
+
+          
+
+          clearSelected();
+        }
+        break;
+      case Constraints.concentric:
+        if(selected[0].parent?.name != 'circleSpline'){
+          clearSelectedHighlight(selected[0]);
+        }
+        else if(selected[1].parent?.name != 'circleSpline'){
+          clearSelectedHighlight(selected[1]);
+        }
+        else{
+          final c1 = selected[0].parent!;
+          final c2 = selected[1].parent!;
+
+          final center = c2.children.last.position.clone();
+
+          final temp = c1.children.last.position;
+          final position = c1.children[0].geometry!.attributes['position'] as Float32BufferAttribute;
+          final dist = temp.distanceTo(Vector3(position.getX(0)!.toDouble(),position.getY(0)!.toDouble(),position.getZ(0)!.toDouble()));
+
+          final forwardVector = Vector3();
+          final rightVector = Vector3();
+          camera.getWorldDirection(forwardVector);
+          rightVector.cross2(camera.up, forwardVector).normalize();
+          final upVector = Vector3(0, 1, 0).applyQuaternion(camera.quaternion);
+
+          final p1 = center.clone().add(upVector.clone().scale(-dist));
+          final p2 = center.clone().add(rightVector.clone().scale(dist));
+          final p3 = center.clone().add(upVector.clone().scale(dist));
+          final p4 = center.clone().add(rightVector.clone().scale(-dist));
+
+          c1.children.last.position.setFrom(center);
+
+          DrawType.updateSplineOutline(c1.children.first as dynamic, [p1,p2,p3,p4], true, 64);
+
+          clearSelected();
+        }
       case Constraints.midpoint:
-        print(selected[0].name);
-        print(selected[1].name);
-        if(selected[0].name == 'line' && selected[1].name == 'line'){
+       if(selected[0].parent?.name == 'circleSpline'){
+          clearSelectedHighlight(selected[0]);
+        }
+        else if(selected[1].parent?.name == 'circleSpline'){
+          clearSelectedHighlight(selected[1]);
+        }
+        else if(selected[0].name == 'line' && selected[1].name == 'line'){
+          final position = selected[0].geometry!.attributes['position'] as Float32BufferAttribute;
+          final p11 = Vector3(position.getX(0)!.toDouble(),position.getY(0)!.toDouble(),position.getZ(0)!.toDouble());
+          final p12 = Vector3(position.getX(1)!.toDouble(),position.getY(1)!.toDouble(),position.getZ(1)!.toDouble());
+          final midPoint = getPointInBetweenByPerc(p11, p12, 0.50);
+
+          final position2 = selected[1].geometry!.attributes['position'] as Float32BufferAttribute;
+          final p21 = Vector3(position2.getX(0)!.toDouble(),position2.getY(0)!.toDouble(),position2.getZ(0)!.toDouble());
+          final p22 = Vector3(position2.getX(1)!.toDouble(),position2.getY(1)!.toDouble(),position2.getZ(1)!.toDouble());
+          final midPoint2 = getPointInBetweenByPerc(p21, p22, 0.50);
+
 
         }
         else if(selected[0].name == 'line' && selected[1].name == 'point'){
@@ -443,13 +517,13 @@ class Draw with EventDispatcher{
           clearSelected();
         }
         else if((selected[0].name == 'line' && selected[1].name == 'origin') || (selected[0].name == 'origin' && selected[1].name == 'line')){
+          final position = selected[1].geometry!.attributes['position'] as Float32BufferAttribute;
+          final p1 = Vector3(position.getX(0)!.toDouble(),position.getY(0)!.toDouble(),position.getZ(0)!.toDouble());
+          final p2 = Vector3(position.getX(1)!.toDouble(),position.getY(1)!.toDouble(),position.getZ(1)!.toDouble());
 
-        }
-        else if(selected[0].parent?.name == 'circleSpline'){
-          selected.removeAt(0);
-        }
-        else if(selected[1].parent?.name == 'circleSpline'){
-          selected.removeAt(1);
+          selected[0].position.setFrom(getPointInBetweenByPerc(p1, p2, 0.50));
+
+          clearSelected();
         }
         else{
           clearSelected();
