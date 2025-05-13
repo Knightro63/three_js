@@ -752,6 +752,20 @@ class _UIPageState extends State<UIScreen> {
           width: 2,
           height: 35,
         ),
+        selectionIcon(Icons.open_with,draw.moveSketch,
+          (){
+            setState(() {
+              if(!draw.moveSketch){
+                draw.moveSketch = true;
+                draw.constraintType = Constraints.none;
+                draw.endSketch(true);
+              }
+              else{
+                draw.moveSketch = false;
+              }
+            });
+          },
+        ),
         selectionIcon(Icons.check,false,
           (){
             setState(() {

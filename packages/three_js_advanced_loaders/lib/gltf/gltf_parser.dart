@@ -849,8 +849,8 @@ class GLTFParser {
 
       if (materialDef["normalTexture"]["scale"] != null) {
         materialParams["normalScale"] = Vector2(
-            materialDef["normalTexture"].scale,
-            materialDef["normalTexture"].scale);
+            materialDef["normalTexture"]['scale'],
+            materialDef["normalTexture"]['scale']);
       }
     }
 

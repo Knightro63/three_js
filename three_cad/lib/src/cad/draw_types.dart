@@ -1,6 +1,50 @@
+import 'package:three_cad/src/cad/constraints.dart';
+import 'package:three_cad/src/cad/sketchTypes/sketch_point.dart';
+import 'package:three_cad/src/cad/sketchTypes/sketch_spline.dart';
 import 'package:three_js/three_js.dart';
-import 'dart:math' as math;
+//import 'dart:math' as math;
 import 'package:three_js_line/three_js_line.dart';
+import 'sketchTypes/sketch_line.dart';
+import 'sketchTypes/sketch_circle.dart';
+
+class SketchObjects extends Object3D{
+  Line? getLine(){
+    if(name == 'line' || name == 'circleSpline' || name == 'spline'){
+      return children.first as Line;
+    }
+    return null;
+  }
+
+  List<Object3D>? getPoints(){
+    if(name == 'line' || name == 'spline'){
+      return children.getRange(1, children.length).toList(); // TODO: -1
+    }
+    return null;
+  }
+
+  List<Vector3>? getPointsPositions(){
+    if(name == 'line' || name == 'spline'){
+      final List<Vector3> points = [];
+      for(int i = 1; i < children.length;i++){
+        points.add(children[i].position);
+      }
+      return points;
+    }
+    return null;
+  }
+
+  List<ObjectConstraint> getConstraints(){
+    throw{'Not implimented on ${runtimeType}!'};
+  }
+
+  void redraw(){}
+  void updateConstraint(){
+    throw{'Not implimented on ${runtimeType}!'};
+  }
+
+  void addConstraint(Constraints constraint,[SketchObjects? object]){}
+}
+
 
 enum DrawType{
   none,
@@ -19,18 +63,9 @@ enum DrawType{
   circularPatern,
   retangularPattern;
   
-  static Group createSpline(Vector3 position, int color){
-    final g = Group()..name = 'spline';
-    // final geometry = BufferGeometry();
-    // geometry.setAttributeFromString('position',Float32BufferAttribute( Float32Array( 200 * 3 ), 3 ) );
-    // final line = Line(
-    //   geometry, 
-    //   LineBasicMaterial.fromMap( {
-    //     'color': color,
-    //   })
-    // )..name = 'line';
-
-    final line = createLine(position, color, 200);
+  static SketchSpline createSpline(Vector3 position, int color){
+    final g = SketchSpline()..name = 'spline';
+    final line = createNoPointsLine(position, color,200);
     g.add(line);
     g.add(creatPoint(position,color));
     g.add(creatPoint(position,color));
@@ -39,20 +74,10 @@ enum DrawType{
 
     return g;
   }
-  static Group createCircleSpline(Vector3 position, int color){
-    Group objects = Group()..name = 'circleSpline';
-    // final geometry = BufferGeometry();
-    // geometry.setAttributeFromString('position',Float32BufferAttribute( Float32Array( 64 * 3 ), 3 ) );
-
-    // final line = Line(
-    //   geometry, 
-    //   LineBasicMaterial.fromMap( {
-    //     'color': color,
-    //   })
-    // )..name = 'line';
-    
-    final line = createLine(position, color, 64);
-    objects.add(line);
+  static SketchCircle createCircleSpline(Camera camera,Vector3 position, int color){
+    SketchCircle objects = SketchCircle(camera)..name = 'circleSpline';
+    final line = createNoPointsLine(position, color, 64);
+    objects.add(line..userData['constraints'] = CircleConstraint());
     objects.add(creatPoint(position,color));
 
     updateSplineOutline(line, [position,position,position,position], true, 64);
@@ -68,7 +93,6 @@ enum DrawType{
 
     final position = mesh.geometry!.attributes['position'];
     
-
     for (int i = 0; i < numLines; i ++ ) {
       final t = i / ( numLines - 1 );
       curve.getPoint( t, point );
@@ -82,100 +106,87 @@ enum DrawType{
     mesh.geometry?.computeBoundingSphere();
     mesh.geometry?.computeBoundingBox();
   }
-  // static Group createCircle(Vector3 position, Euler rotation){
-  //   Group objects = Group()..name = 'circle';
-  //   objects.add(creatPoint(position,0xff0000));
 
-  //   Group line = Group()..name = 'circleLines';
-  //   final int segments = 64;
-  //   final double radius = 1;
-  //   final double thetaStart = math.pi/8;
-  //   final Vector3 vertex = Vector3();
-  //   final previous = Vector3();
-  //   final firstVector = Vector3();
+  static List<SketchObjects> createBoxCenter(Camera camera, Vector3 position, int color){
+    final line1 = createLine(camera,Vector3.copy(position),color); //p1,p2
+    final line2 = createLine(camera,Vector3.copy(position),color); //p3,p4
+    final line3 = createLine(camera,Vector3.copy(position),color); //p5,p6
+    final line4 = createLine(camera,Vector3.copy(position),color); //p7,p8
     
-  //   for (int s = 0, i = 3; s <= segments; s++, i += 3) {
-  //     final segment = thetaStart + s / segments * math.pi * 2;
-  //     vertex.x = radius * math.cos(segment);
-  //     vertex.y = radius * math.sin(segment);
-  //     if(s == 0){
-  //       firstVector.setFrom(vertex);
-  //       previous.setFrom(vertex);
-  //     }
-  //     if(s > 0 ){
-  //       line.add(create2PointLine(previous,vertex,0xff0000));
-  //       previous.setFrom(vertex);
-  //     }
-  //   };
+    final line5 = createLine(camera,Vector3.copy(position),0xffff00);
+    final line6 = createLine(camera,Vector3.copy(position),0xffff00);
+    
+    (line1.userData['constraints'] as LineConstraint).isVertical = true;
+    (line1.children[1].userData['constraints'] as PointConstraint).coincidentTo = line2.children[0] as SketchPoint;
 
-  //   line..scale = Vector3()
-  //   ..rotation.x = rotation.x
-  //   ..rotation.y = rotation.y
-  //   ..rotation.z = rotation.z
-  //   ..position.x = position.x
-  //   ..position.y = position.y
-  //   ..position.z = position.z;
+    (line2.userData['constraints'] as LineConstraint).isHorizontal = true;
+    (line2.children[1].userData['constraints'] as PointConstraint).coincidentTo = line3.children[0] as SketchPoint;
 
-  //   objects.add(line);
-    
-  //   return objects;
-  // }
-  
-  static Group createBoxCenter(Vector3 position, int color){
-    Group objects = Group()..name = 'boxCenter';
-    objects.add(creatPoint(Vector3.copy(position),color));
-    objects.add(createLine(Vector3.copy(position),color));
-    objects.add(creatPoint(Vector3.copy(position),color));
-    objects.add(createLine(Vector3.copy(position),color));
-    objects.add(creatPoint(Vector3.copy(position),color));
-    objects.add(createLine(Vector3.copy(position),color));
-    objects.add(creatPoint(Vector3.copy(position),color));
-    objects.add(createLine(Vector3.copy(position),color));
-    objects.add(creatPoint(Vector3.copy(position),color));
-    objects.add(createLine(Vector3.copy(position),0xffff00));
-    objects.add(createLine(Vector3.copy(position),0xffff00));
-    
-    return objects;
+    (line3.userData['constraints'] as LineConstraint).isVertical = true;
+    (line3.children[1].userData['constraints'] as PointConstraint).coincidentTo = line4.children[0] as SketchPoint;
+
+    (line4.userData['constraints'] as LineConstraint).isHorizontal = true;
+    (line4.children[1].userData['constraints'] as PointConstraint).coincidentTo = line1.children[0] as SketchPoint;
+
+    return [line1,line2,line3,line4,line5,line6];
   }
 
-  static Group createBox2Point(Vector3 position, int color){
-    Group objects = Group()..name = 'box2Point';
-    objects.add(creatPoint(Vector3.copy(position),color));
-    objects.add(createLine(Vector3.copy(position),color));
-    objects.add(creatPoint(Vector3.copy(position),color));
-    objects.add(createLine(Vector3.copy(position),color));
-    objects.add(creatPoint(Vector3.copy(position),color));
-    objects.add(createLine(Vector3.copy(position),color));
-    objects.add(creatPoint(Vector3.copy(position),color));
-    objects.add(createLine(Vector3.copy(position),color));
+  static List<SketchObjects> createBox2Point(Camera camera, Vector3 position, int color){
+    final line1 = createLine(camera,Vector3.copy(position),color); //p1,p2
+    final line2 = createLine(camera,Vector3.copy(position),color); //p3,p4
+    final line3 = createLine(camera,Vector3.copy(position),color); //p5,p6
+    final line4 = createLine(camera,Vector3.copy(position),color); //p7,p8
 
-    return objects;
+    line1.lineConstraint.isHorizontal = true;
+    line1.point2Constraint.coincidentTo = line2.point1;
+
+    //line2.lineConstraint.isVertical = true;
+    line2.point2Constraint.coincidentTo = line3.point1;
+
+    line3.lineConstraint.isHorizontal = true;
+    line3.point2Constraint.coincidentTo = line4.point1;
+
+    //line4.lineConstraint.isVertical = true;
+    line4.point2Constraint.coincidentTo = line1.point2;
+
+    line1.createHVConstraint();
+    line2.createHVConstraint();
+    line3.createHVConstraint();
+    line4.createHVConstraint();
+
+    return [line1,line2,line3,line4];
   }
 
-  static Object3D creatPoint(Vector3 position, int color){
-    return Points(
-        BufferGeometry()..setAttributeFromString(
-          'position',
-          Float32BufferAttribute.fromList([0,0,0],3)
-        ),
-        PointsMaterial.fromMap({
+  static SketchPoint creatPoint(Vector3 position, int color,[String name = 'point']){
+    return SketchPoint(
+        SphereGeometry(0.01,8,8),
+        MeshBasicMaterial.fromMap({
           'color': color,
-          'size': 7.5, 
-          // 'transparent': color == null? true : false,
-          // 'opacity': color == null?0.5:1
         })
       )
-      ..name = 'point'
+      ..userData['constraints'] = PointConstraint()
+      ..name = name
       ..position.x = position.x
       ..position.y = position.y
       ..position.z = position.z;
   }
 
-  static Line createLine(Vector3 position, int color, [int segments = 0]){
-    final line = createSLine(position, color,segments);
-    return line..add(createFatLine(position, color,line));
+  static SketchLine createLine(Camera camera, Vector3 position, int color, [int segments = 0]){
+    SketchLine objects = SketchLine(camera)..name = 'line';
+    final line = createSLine(position, color, segments);
+    line.add(createFatLine(position, color, line))
+    ..userData['constraints'] = LineConstraint();
+    objects.add(line);
+    if(segments == 0){
+      objects.addAll([creatPoint(position, color,'linePoint'),creatPoint(position, color,'linePoint')]);
+    }
+    return objects;
   }
-
+  static Line createNoPointsLine(Vector3 position, int color, [int segments = 0]){
+    final line = createSLine(position, color,segments);
+    line.add(createFatLine(position, color, line));
+    return line;
+  }
   static Line2 createFatLine(Vector3 position, int color, Line line){
     final geometry = LineGeometry().fromLine(line);
     final constructionLine = LineMaterial.fromMap( {
@@ -199,57 +210,30 @@ enum DrawType{
     ..computeLineDistances();
   }
 
+  static LineDashedMaterial constructionLine = LineDashedMaterial.fromMap( {
+    'color': 0xffff00,
+    'transparent': true,
+    'opacity': 0.5,
+    'linewidth': 5,
+    'gapSize': 1,
+    'dashSize': 0.5
+  });
+  static LineBasicMaterial matLine = LineBasicMaterial.fromMap( {
+    'color': 0x000000,//construction?0xffff00:215910,
+    'visible': false,
+    'linewidth': 5
+  });
+
   static Line createSLine(Vector3 position, int color, [int segments = 0]){
     final geometry = BufferGeometry();
     geometry.setAttributeFromString(
       'position',
       segments == 0?Float32BufferAttribute.fromList(position.storage+position.storage,3):Float32BufferAttribute( Float32Array( segments * 3 ), 3 )
     );
-    final constructionLine = LineDashedMaterial.fromMap( {
-      'color': 0xffff00,
-      'transparent': true,
-      'opacity': 0.5,
-      'linewidth': 5,
-      'gapSize': 1,
-      'dashSize': 0.5
-    });
 
-    final matLine = LineBasicMaterial.fromMap( {
-      'color': color,//construction?0xffff00:215910,
-      'transparent': false,
-      'visible': false,
-      'linewidth': 5
-    });
-
-    return Line( geometry, matLine )
+    return Line( geometry, matLine..color.setFromHex32(color))
     ..name = 'line'
     ..computeLineDistances()
     ..userData['construction'] = color == 0xffff00;
   }
-  // static Line create2PointLine(Vector3 position1,Vector3 position2,int color){
-  //   final geometry = BufferGeometry();
-  //   geometry.setAttributeFromString(
-  //     'position',
-  //     Float32BufferAttribute.fromList(position1.storage+position2.storage,3)
-  //   );
-  //   final constructionLine = LineDashedMaterial.fromMap( {
-  //     'color': 0xffff00,
-  //     'transparent': true,
-  //     'opacity': 0.5,
-  //     'linewidth': 5,
-  //     'gapSize': 1,
-  //     'dashSize': 3
-  //   });
-
-  //   final matLine = LineBasicMaterial.fromMap( {
-  //     'color': color,//construction?0xffff00:215910,
-  //     'transparent': false,
-  //     'linewidth': 5
-  //   });
-
-  //   return Line( geometry, matLine )
-  //   ..name = 'line'
-  //   ..computeLineDistances()
-  //   ..userData['construction'] = color == 0xffff00;
-  // }
 }

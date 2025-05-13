@@ -54,12 +54,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/pingfang.ttf
-    - assets/kenpixel.ttf
     - assets/helvetiker_bold.typeface.json
-    - assets/winter.jpg
-    - assets/lut.cube
-    - assets/demo.png
-    - assets/KOMO-v5.cube
     - assets/screenshots/
     - assets/models/bvh/
     - assets/models/obj/cerberus/
@@ -68,7 +63,6 @@ flutter:
     - assets/models/json/
     - assets/models/gcode/
     - assets/models/ply/binary/
-    - assets/models/scn/
     - assets/models/ply/ascii/
     - assets/models/stl/binary/
     - assets/models/stl/ascii/
@@ -102,7 +96,6 @@ flutter:
     - assets/textures/lensflare/
     - assets/textures/equirectangular/
     - assets/textures/terrain/
-    - assets/textures/patterns/
     - assets/textures/sprites/
     - assets/textures/planets/
     - assets/textures/decal/
