@@ -1,3 +1,7 @@
+## 0.1.5
+
+* Added angle input to fix flutter multiview issue on web.
+
 ## 0.1.4
 
 * Fixed flutter texture bug.

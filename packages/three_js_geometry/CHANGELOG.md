@@ -1,3 +1,7 @@
+## 0.1.2
+
+* Fixed decal geometry bug.
+
 ## 0.1.1
 
 * Added Parametric Geometries.
