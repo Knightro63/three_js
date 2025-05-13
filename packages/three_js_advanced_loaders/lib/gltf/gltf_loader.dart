@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert' as convert;
 import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:three_js_advanced_loaders/ktx_loader.dart';
 import 'package:three_js_core/three_js_core.dart';
 import 'gltf_extensions.dart';
@@ -197,14 +198,59 @@ class GLTFLoader extends Loader {
   }
 
   Future<GLTFData> _parse(Uint8List data) async{
+    bool isGLB = String.fromCharCodes(data).toString().substring(0,4) == 'glTF';
     String cacheName = String.fromCharCodes(data).toString().substring(0,50);
     manager.itemStart(cacheName);
-    final didParse = await _parseAll(data);
+    final didParse = isGLB?await compute(
+      _parseAll,
+      {
+        'data': data,
+        'path': path,
+        'resourcePath': resourcePath,
+        'crossOrigin': crossOrigin,
+        'requestHeader': requestHeader,
+        'manager': manager,
+        'flipY': flipY,
+        '_ktx2Loader': _ktx2Loader,
+        '_meshoptDecoder': _meshoptDecoder,
+        'pluginCallbacks': pluginCallbacks,
+        '_dracoLoader': _dracoLoader,
+        '_ddsLoader': _ddsLoader,
+      },
+    ):await _parseAll(
+      {
+        'data': data,
+        'path': path,
+        'resourcePath': resourcePath,
+        'crossOrigin': crossOrigin,
+        'requestHeader': requestHeader,
+        'manager': manager,
+        'flipY': flipY,
+        '_ktx2Loader': _ktx2Loader,
+        '_meshoptDecoder': _meshoptDecoder,
+        'pluginCallbacks': pluginCallbacks,
+        '_dracoLoader': _dracoLoader,
+        '_ddsLoader': _ddsLoader,
+      }
+    );
     manager.itemEnd(cacheName);
     return didParse;
   }
 
-  Future<GLTFData> _parseAll(Uint8List data) {
+  Future<GLTFData> _parseAll(Map<String, dynamic> params) {
+    final data = params['data'];
+    final path = params['path'];
+    final resourcePath = params['resourcePath'];
+    final crossOrigin = params['crossOrigin'];
+    final requestHeader = params['requestHeader'];
+    final manager = params['manager'];
+    final flipY = params['flipY'];
+    final _ktx2Loader = params['_ktx2Loader'];
+    final _meshoptDecoder = params['_meshoptDecoder'];
+    final pluginCallbacks = params['pluginCallbacks'];
+    final _dracoLoader = params['_dracoLoader'];
+    final _ddsLoader = params['_ddsLoader'];
+    
     final String content;
     final extensions = {};
     final plugins = {};

@@ -68,15 +68,20 @@ class ThreeJS {
     required this.setup,
     Size? size,
     core.WebGLRenderer? renderer,
-    this.texture,
+    FlutterAngle? angle,
     this.loadingWidget,
   }){
+    if(angle != null && kIsWeb){
+      _isExernalAngle = true;
+      this.angle = angle;
+    }
+    else{
+      this.angle = FlutterAngle();
+    }
     this.settings = settings ?? Settings();
     _size = size;
-    lateRenderer = renderer;
   }
 
-  //bool _allowDeleteTexture = true;
   Widget? loadingWidget;
   Size? _size;
   late Settings settings;
@@ -88,7 +93,6 @@ class ThreeJS {
 
   core.WebGLRenderTarget? renderTarget;
   core.WebGLRenderer? renderer;
-  core.WebGLRenderer? lateRenderer;
   core.Clock clock = core.Clock();
 
   late core.Scene scene;
@@ -113,7 +117,8 @@ class ThreeJS {
   List<Function(double dt)> events = [];
   List<Function()> disposeEvents = [];
 
-  FlutterAngle angle = FlutterAngle();
+  bool _isExernalAngle = false;
+  late FlutterAngle angle;
 
   void addAnimationEvent(Function(double dt) event){
     events.add(event);
@@ -128,12 +133,10 @@ class ThreeJS {
     ticker?.dispose();
     renderer?.dispose();
     renderTarget?.dispose();
-    lateRenderer?.dispose();
     scene.dispose();
     for(final event in disposeEvents){
       event.call();
     }
-
     
     camera.dispose();
     events.clear();
@@ -196,39 +199,36 @@ class ThreeJS {
   }
   
   void initRenderer() {
-    renderer = lateRenderer;
-    if(renderer == null){
-      Map<String, dynamic> options = {
-        "width": width,
-        "height": height,
-        "gl": gl,
-        "stencil": settings.stencil,
-        "antialias": true,
-        "alpha": settings.alpha,
-        "clearColor": settings.clearColor,
-        "clearAlpha": settings.clearAlpha,
-        "logarithmicDepthBuffer": settings.logarithmicDepthBuffer
-      };
-      
-      renderer = lateRenderer ?? core.WebGLRenderer(options);
-      renderer!.setPixelRatio(dpr);
-      renderer!.setSize(width, height, false);
-      renderer!.alpha = settings.alpha;
-      renderer!.shadowMap.enabled = settings.enableShadowMap;
-      renderer!.shadowMap.type = settings.shadowMapType;
-      renderer!.autoClear = settings.autoClear;
-      renderer!.setClearColor(
-        Color.fromHex32(settings.clearColor), 
-        settings.clearAlpha
-      );
-      renderer!.autoClearDepth = settings.autoClearDepth;
-      renderer!.autoClearStencil = settings.autoClearStencil;
-      renderer!.outputEncoding = sRGBEncoding;
-      renderer!.localClippingEnabled = settings.localClippingEnabled;
-      renderer!.clippingPlanes = settings.clippingPlanes;
-      renderer!.toneMapping = settings.toneMapping;
-      renderer!.toneMappingExposure = settings.toneMappingExposure;
-    }
+    Map<String, dynamic> options = {
+      "width": width,
+      "height": height,
+      "gl": gl,
+      "stencil": settings.stencil,
+      "antialias": true,
+      "alpha": settings.alpha,
+      "clearColor": settings.clearColor,
+      "clearAlpha": settings.clearAlpha,
+      "logarithmicDepthBuffer": settings.logarithmicDepthBuffer
+    };
+    
+    renderer = core.WebGLRenderer(options);
+    renderer!.setPixelRatio(dpr);
+    renderer!.setSize(width, height, false);
+    renderer!.alpha = settings.alpha;
+    renderer!.shadowMap.enabled = settings.enableShadowMap;
+    renderer!.shadowMap.type = settings.shadowMapType;
+    renderer!.autoClear = settings.autoClear;
+    renderer!.setClearColor(
+      Color.fromHex32(settings.clearColor), 
+      settings.clearAlpha
+    );
+    renderer!.autoClearDepth = settings.autoClearDepth;
+    renderer!.autoClearStencil = settings.autoClearStencil;
+    renderer!.outputEncoding = sRGBEncoding;
+    renderer!.localClippingEnabled = settings.localClippingEnabled;
+    renderer!.clippingPlanes = settings.clippingPlanes;
+    renderer!.toneMapping = settings.toneMapping;
+    renderer!.toneMappingExposure = settings.toneMappingExposure;
 
     if(settings.useSourceTexture && !kIsWeb){
       final core.WebGLRenderTargetOptions pars = core.WebGLRenderTargetOptions(settings.renderOptions);
@@ -283,7 +283,7 @@ class ThreeJS {
     width = screenSize!.width;
     height = screenSize!.height;
     if(texture == null){
-      await angle.init(false,!settings.useOpenGL);
+      if(!_isExernalAngle) await angle.init(false,!settings.useOpenGL);
       
       texture = await angle.createTexture(      
         AngleOptions(
@@ -292,7 +292,7 @@ class ThreeJS {
           dpr: dpr,
           alpha: settings.alpha,
           antialias: true,
-          customRenderer: false,
+          customRenderer: !settings.useSourceTexture,
           useSurfaceProducer: true
         )
       );

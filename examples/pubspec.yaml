@@ -49,6 +49,11 @@ dependency_overrides:
     path: ../packages/three_js_core
   three_js_geometry:
     path: ../packages/three_js_geometry
+  three_js_advanced_loaders:
+    path: ../packages/three_js_advanced_loaders
+  three_js_core_loaders:
+    path: ../packages/three_js_core_loaders
+  file_picker: ^10.1.9
 
 flutter:
   uses-material-design: true

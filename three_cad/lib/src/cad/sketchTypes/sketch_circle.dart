@@ -49,6 +49,8 @@ class SketchCircle extends SketchObjects{
     DrawType.updateSplineOutline(getLine()!, [p1,p2,p3,p4], true, 64);
 
     allowRedraw = false;
+
+    circleConstraint.tempDia = _getDiameter();
   }
 
   @override

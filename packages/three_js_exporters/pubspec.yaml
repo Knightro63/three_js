@@ -10,7 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  file_picker: ^10.1.2
+  file_picker: ^10.1.9
   path_provider: ^2.1.5
   universal_html: ^2.2.4
   three_js_core: ^0.1.0

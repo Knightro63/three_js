@@ -431,7 +431,7 @@ class Draw with EventDispatcher{
           (selected[0].parent as SketchCircle).addConstraint(Constraints.coincident,(selected[1].parent as SketchCircle).center);
         }
       case Constraints.equal:
-        if(selected[0].parent is SketchCircle && selected[1].parent is SketchCircle){
+        if(selected.length > 1 && selected[0].parent is SketchCircle && selected[1].parent is SketchCircle){
           (selected[0].parent as SketchCircle).addConstraint(Constraints.equal,selected[1].parent);//.circleConstraint.equalTo = selected[1].parent;
           (selected[0].parent as SketchCircle).updateConstraint();
           (selected[0].parent as SketchCircle).redraw();
@@ -451,10 +451,10 @@ class Draw with EventDispatcher{
         if(selected[0].parent is! SketchCircle){
           clearSelectedHighlight(selected[0]);
         }
-        else if(selected[1].parent is! SketchCircle){
+        else if(selected.length > 1 && selected[1].parent is! SketchCircle){
           clearSelectedHighlight(selected[1]);
         }
-        else{
+        else if(selected.length > 1){
           (selected[0].parent as SketchCircle).addConstraint(Constraints.concentric,selected[1].parent);
           (selected[0].parent as SketchCircle).updateConstraint();
           (selected[0].parent as SketchCircle).redraw();
@@ -469,6 +469,8 @@ class Draw with EventDispatcher{
 
     if(selected.length >= 2){
       _updateSketchScene();
+      clearSelectedHighlight(selected[0]);
+      clearSelectedHighlight(selected[1]);
       clearSelected();
     }
   }
@@ -631,6 +633,7 @@ class Draw with EventDispatcher{
     }
     else{
       _updateDraw(mousePosition);
+      (sketch?.sketches.last as SketchCircle).circleConstraint.tempDia = (sketch?.sketches.last as SketchCircle).diameter;
       endSketch();
     }
   }

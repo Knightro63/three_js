@@ -124,8 +124,9 @@ class LineConstraint extends ObjectConstraint{
 }
 
 class CircleConstraint extends ObjectConstraint{
+  double? tempDia;
   double? _diameter;
-  double? get diameter => equalTo?.circleConstraint.diameter ?? _diameter;
+  double? get diameter => equalTo?.circleConstraint.diameter ?? _diameter ?? tempDia;
   set diameter(double? dia){
     _diameter = dia;
   }

@@ -25,12 +25,12 @@ class SketchPoint extends Mesh{
     }
     else if(constraint.horizontalTo != null){
       //double length = position.distanceTo(constraint.horizontalTo!.position);
-      final forwardVector = Vector3();
-      final rightVector = Vector3();
-      camera!.getWorldDirection(forwardVector);
-      rightVector.cross2(camera.up, forwardVector).normalize();
+      // final forwardVector = Vector3();
+      // final rightVector = Vector3();
+      // camera!.getWorldDirection(forwardVector);
+      // rightVector.cross2(camera.up, forwardVector).normalize();
 
-      position.setFrom(constraint.horizontalTo!.position).add(rightVector.clone());//.scale(length));
+      // position.setFrom(constraint.horizontalTo!.position).add(rightVector.clone());//.scale(length));
     }
   }
 

@@ -33,6 +33,7 @@ const List<String> filesJson = [
   'webgl_lines_fat_wireframe',
   'webgl_lines_fat_raycasting',
   "webgl_decals",
+  //"webgl_decals2",
   "webgl_materials_browser",
   'webgl_materials_subsurface_scattering',
   'webgl_materials_video',
