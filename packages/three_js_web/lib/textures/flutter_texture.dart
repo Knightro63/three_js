@@ -2,7 +2,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/rendering.dart' as rend;
 import 'package:flutter/widgets.dart' as wid;
 import './texture.dart';
-import 'package:three_js_math/three_js_math.dart';
+import '../math/index.dart';
 import 'image_element.dart';
 
 /// Creates a texture from a canvas element.

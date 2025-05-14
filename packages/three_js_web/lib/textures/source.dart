@@ -1,5 +1,5 @@
 import 'package:three_js_core/others/index.dart';
-import 'package:three_js_math/three_js_math.dart';
+import '../math/index.dart';
 import 'image_element.dart';
 
 /// Represents the data source of a texture.

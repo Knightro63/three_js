@@ -1,3 +1,4 @@
+@JS('THREE')
 import 'perspective_camera.dart';
 import 'dart:js_interop';
 

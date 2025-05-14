@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 import '../others/index.dart';
 import '../core/event_dispatcher.dart';
-import 'package:three_js_math/three_js_math.dart';
+import '../math/index.dart';
 import '../core/object_3d.dart';
 import '../core/morph_target.dart';
 import 'dart:math' as math;

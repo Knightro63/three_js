@@ -1,3 +1,4 @@
+@JS('THREE')
 import '../core/index.dart';
 import 'dart:js_interop';
 

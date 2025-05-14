@@ -1,31 +1,21 @@
+@JS('THREE')
 import 'buffer_geometry.dart';
 import '../core/object_3d.dart';
+import 'dart:js_interop';
 
-/// An instanced version of [BufferGeometry].
+@JS('InstancedBufferGeometry')
 class InstancedBufferGeometry extends BufferGeometry {
-  InstancedBufferGeometry() : super() {
-    type = 'InstancedBufferGeometry';
-    instanceCount = double.maxFinite.toInt();
-  }
-
-  /// Copies the given [name] to this instance.
-  @override
-  InstancedBufferGeometry copy(BufferGeometry source) {
-    super.copy(source);
-    instanceCount = source.instanceCount;
-    return this;
-  }
+  external InstancedBufferGeometry();
 
   @override
-  BufferGeometry clone() {
-    return InstancedBufferGeometry().copy(this);
-  }
+  external InstancedBufferGeometry copy(BufferGeometry source);
+  @override
+  external BufferGeometry clone();
 
   @override
   Map<String, dynamic> toJson({Object3dMeta? meta}) {
-    final data = super.toJson(meta: meta);
-    data['instanceCount'] = instanceCount;
-    data['isInstancedBufferGeometry'] = true;
-    return data;
+    return toJSON(meta?.toJson());
   }
+
+  external Map<String, dynamic> toJSON(Map? meta);
 }
