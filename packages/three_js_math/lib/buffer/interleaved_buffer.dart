@@ -20,6 +20,9 @@ class InterleavedBuffer {
   bool isInterleavedBuffer = true;
   Function? onUploadCallback;
 
+  List updateRanges = [];
+  int itemSize = 3;
+
   String type = "InterleavedBuffer";
 
   void dispose(){

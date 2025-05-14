@@ -1,6 +1,5 @@
 import 'dart:async';
 import '../src/statistics.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Matrix4;
 import 'package:three_js/three_js.dart' as three;
 
@@ -11,27 +10,43 @@ class MultiViews extends StatefulWidget {
 }
 
 class _MyAppState extends State<MultiViews> {
+  three.FlutterAngle angle = three.FlutterAngle();
+  List<three.FlutterAngleTexture> textures = [];
+  bool ready = false;
+
+  @override
+  void initState(){
+    super.initState();
+    angle.init(false,false).then((_) async{
+      setState(() {
+        ready = true;
+      });
+    });
+  }
+
+  @override
+  void dispose(){
+    super.dispose();
+    angle.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      child: _build(context)
+      child: !ready?Container():Column(
+        children: [
+          MultiViews1(angle: angle),
+          Container(height: 2, color: Colors.red),
+          MultiViews2(angle: angle),
+        ],
+      )
     );
   }
-
-  Widget _build(BuildContext context) {
-    return Column(
-      children: [
-        const MultiViews1(),
-        Container(height: 2, color: Colors.red,),
-        const MultiViews2()
-      ],
-    );
-  }
-
 }
 
 class MultiViews1 extends StatefulWidget {
-  const MultiViews1({super.key});
+  const MultiViews1({super.key, required this.angle});
+  final three.FlutterAngle angle;
   @override
   createState() => _MultiViews1State();
 }
@@ -55,9 +70,7 @@ class _MultiViews1State extends State<MultiViews1> {
         useOpenGL: useOpenGL
       ),
       size: const Size(300,300),
-      rendererUpdate: (){
-        if (!kIsWeb) threeJs.renderer!.setRenderTarget(threeJs.renderTarget);
-      }
+      angle: widget.angle
     );
     super.initState();
   }
@@ -105,7 +118,8 @@ class _MultiViews1State extends State<MultiViews1> {
 }
 
 class MultiViews2 extends StatefulWidget {
-  const MultiViews2({super.key});
+  const MultiViews2({super.key, required this.angle});
+  final three.FlutterAngle angle;
   @override
   createState() => _MultiViews2State();
 }
@@ -129,9 +143,7 @@ class _MultiViews2State extends State<MultiViews2> {
         useOpenGL: useOpenGL
       ),
       size: const Size(300,300),
-      rendererUpdate: (){
-        if (!kIsWeb) threeJs.renderer!.setRenderTarget(threeJs.renderTarget);
-      }
+      angle: widget.angle
     );
     super.initState();
   }
@@ -155,7 +167,6 @@ class _MultiViews2State extends State<MultiViews2> {
   Future<void> setup() async {
     threeJs.camera = three.PerspectiveCamera(45, threeJs.width / threeJs.height, 1, 2200);
     threeJs.camera.position.setValues(3, 6, 100);
-
 
     threeJs.scene = three.Scene();
     threeJs.scene.background = three.Color(1, 1, 0);

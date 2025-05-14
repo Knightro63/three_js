@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:js_interop';
 import 'dart:typed_data';
+import 'dart:ui' as ui;
 import 'package:web/web.dart' as html;
 import 'dart:convert';
 import 'package:three_js_core/three_js_core.dart';
@@ -65,6 +66,16 @@ html.HTMLImageElement setDimensions(html.HTMLImageElement imageElement, String? 
   return imageElement;
 }
 
+Future<List>? _getDimensions(Uint8List bytes) async{
+  final codec = await ui.instantiateImageCodec(bytes);
+  final frameInfo = await codec.getNextFrame();
+  final width = frameInfo.image.width;
+  final height = frameInfo.image.height;
+  frameInfo.image.dispose();
+
+  return [width, height];
+}
+
 List? _getJpegDimensions(Uint8List bytes) {
   // Verify the JPEG header (SOI marker)
   if (bytes.length < 4 || bytes[0] != 0xFF || bytes[1] != 0xD8) {
@@ -99,7 +110,7 @@ List? _getJpegDimensions(Uint8List bytes) {
   return null; // Dimensions not found
 }
 
-html.HTMLImageElement createImageElementFromBytes(Uint8List bytes, [String? dimensions]) {
+Future<html.HTMLImageElement> createImageElementFromBytes(Uint8List bytes, [String? dimensions]) async{
   // Convert bytes to a base64-encoded string
   final base64String = base64Encode(bytes);
 
@@ -107,9 +118,12 @@ html.HTMLImageElement createImageElementFromBytes(Uint8List bytes, [String? dime
   final dataUrl = 'data:image/jpg;base64,$base64String';
 
   // Create an ImageElement and set its source to the data URL
-  html.HTMLImageElement imageElement = html.ImageElement();
+  html.HTMLImageElement imageElement = html.HTMLImageElement();
   imageElement.src = dataUrl;
-  List? dimensions = _getJpegDimensions(bytes);
+  int start = DateTime.now().millisecondsSinceEpoch;
+  print(DateTime.now());
+  List? dimensions = _getJpegDimensions(bytes);//await _getDimensions(bytes);//
+  print(DateTime.now().millisecondsSinceEpoch-start);
   //imageElement = setDimensions(imageElement, dimensions);
   if (dimensions != null) {
     console.verbose("extracted dimension width ${dimensions[0]} and height ${dimensions[1]}");
@@ -123,10 +137,10 @@ html.HTMLImageElement createImageElementFromBytes(Uint8List bytes, [String? dime
 }
 
 // Fixed for web and bytes sent
-Future<ImageElement?> processImage(Uint8List? bytes, String? url, bool flipY) {
+Future<ImageElement?> processImage(Uint8List? bytes, String? url, bool flipY) async{
   final completer = Completer<ImageElement>();
   if(bytes != null){
-    html.HTMLImageElement imageElement = createImageElementFromBytes(bytes, url);
+    html.HTMLImageElement imageElement = await createImageElementFromBytes(bytes, url);
     //image = image?.convert(format:Format.uint8,numChannels: 4);
     completer.complete(
       ImageElement(

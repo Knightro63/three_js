@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
+import 'package:example/src/gui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:example/src/statistics.dart';
 import 'package:flutter/material.dart';
@@ -17,10 +18,12 @@ class WebglDecals extends StatefulWidget {
 class _State extends State<WebglDecals> {
   List<int> data = List.filled(60, 0, growable: true);
   late Timer timer;
+  late Gui panel;
   late three.ThreeJS threeJs;
 
   @override
   void initState() {
+    panel = Gui((){setState(() {});});
     timer = Timer.periodic(const Duration(seconds: 1), (t){
       setState(() {
         data.removeAt(0);
@@ -51,7 +54,16 @@ class _State extends State<WebglDecals> {
       body: Stack(
         children: [
           threeJs.build(),
-          Statistics(data: data)
+          Statistics(data: data),
+          if(threeJs.mounted)Positioned(
+            top: 20,
+            right: 20,
+            child: SizedBox(
+              height: threeJs.height,
+              width: 240,
+              child: panel.render()
+            )
+          )
         ],
       ) 
     );
@@ -148,6 +160,16 @@ class _State extends State<WebglDecals> {
     threeJs.addAnimationEvent((dt){
       controls.update();
     });
+
+    final gui = panel.addFolder('GUI')..open();
+
+    gui.addSlider( params, 'minScale', 1, 30 );
+    gui.addSlider( params, 'maxScale', 1, 30 );
+    gui.addButton( params, 'rotate' );
+    gui.addButton( params, 'clear' ).onChange((v){
+      removeDecals();
+    });
+    gui.open();
   }
 
   void onPointerMove( event ) {
@@ -169,8 +191,10 @@ class _State extends State<WebglDecals> {
       mouseHelper.position.setFrom( p );
       intersection['point'].setFrom( p );
 
+      final normalMatrix = three.Matrix3.identity().getNormalMatrix( mesh.matrixWorld );
+
       final n = intersects[ 0 ].face!.normal.clone();
-      n.transformDirection( mesh.matrixWorld );
+      n.applyNormalMatrix( normalMatrix );
       n.scale( 10 );
       n.add( intersects[ 0 ].point! );
 
@@ -193,9 +217,9 @@ class _State extends State<WebglDecals> {
 
   Future<void> loadLeePerrySmith() async{
     final map = await textureLoader.fromAsset( 'assets/models/gltf/LeePerrySmith/Map-COL.jpg');
-    //map.colorSpace = THREE.SRGBColorSpace;
+    map?.colorSpace = three.SRGBColorSpace;
     final specularMap = await textureLoader.fromAsset( 'assets/models/gltf/LeePerrySmith/Map-SPEC.jpg' );
-    //final normalMap = await textureLoader.fromAsset( 'assets/models/gltf/LeePerrySmith/Infinite-Level_02_Tangent_SmoothUV.jpg' );
+    final normalMap = await textureLoader.fromAsset( 'assets/models/gltf/LeePerrySmith/Infinite-Level_02_Tangent_SmoothUV.jpg' );
 
     final loader = three.GLTFLoader();
 
@@ -205,22 +229,28 @@ class _State extends State<WebglDecals> {
         'specular': 0x111111,
         'map': map,
         'specularMap': specularMap,
-        //'normalMap': normalMap,
+        'normalMap': normalMap,
         'shininess': 25
       });
 
       threeJs.scene.add( mesh );
-      mesh.scale.setValues( 10, 10, 10 );
+      mesh.scale.scale(10);
     });
   }
+  final params = <String,dynamic>{
+    'minScale': 10.0,
+    'maxScale': 20.0,
+    'rotate': true,
+    'clear': true,
+  };
 
   void shoot() {
     position.setFrom( intersection['point'] );
     orientation.copy( mouseHelper.rotation );
 
-    //orientation.z = math.Random().nextDouble() * 2 * math.pi;
+    if ( params['rotate'] == true) orientation.z = math.Random().nextDouble() * 2 * math.pi;
 
-    final scale = 2 + math.Random().nextDouble() * (5 - 2);
+    final scale = params['minScale'] + math.Random().nextDouble() * (params['maxScale'] - params['minScale']);
     size.setValues( scale, scale, scale );
 
     final material = decalMaterial.clone();
@@ -230,10 +260,14 @@ class _State extends State<WebglDecals> {
     m.renderOrder = decals.length; // give decals a fixed render order
 
     decals.add(m);
-    threeJs.scene.add( m );
+    mesh.attach( m );
   }
 
   void removeDecals() {
+    decals.forEach(( d ) {
+      mesh.remove( d );
+    });
+
     decals.clear();
   }
 }

@@ -244,14 +244,14 @@ class WebGLMaterials {
 
   void refreshUniformsStandard(Map<String, dynamic> uniforms, Material material) {
     uniforms["metalness"]["value"] = material.metalness;
-    if (material.roughnessMap != null) {
-      uniforms["roughnessMap"]["value"] = material.roughnessMap;
-      refreshTransformUniform( material.metalnessMap!, uniforms['metalnessMapTransform'] );
+    if (material.metalnessMap != null) {
+      uniforms["metalnessMap"]["value"] = material.metalnessMap;
+      refreshTransformUniform( material.metalnessMap, uniforms['metalnessMapTransform'] );
     }
 
     uniforms["roughness"]["value"] = material.roughness;
-    if (material.metalnessMap != null) {
-      uniforms["metalnessMap"]["value"] = material.metalnessMap;
+    if (material.roughnessMap != null) {
+      uniforms["roughnessMap"]["value"] = material.roughnessMap;
       refreshTransformUniform( material.roughnessMap, uniforms['roughnessMapTransform'] );
     }
 

@@ -1,3 +1,19 @@
+## 0.1.5
+
+* Added angle input to fix flutter multiview issue on web.
+
+## 0.1.4
+
+* Fixed flutter texture bug.
+
+## 0.1.3
+
+* Fixed material bug and added VideoTexture material for web only
+
+## 0.1.2
+
+* Added surface producer in Angle options to fix android devices bug.
+
 ## 0.1.1
 
 * Added the ability to change to opengl in ThreeJS viewer settings

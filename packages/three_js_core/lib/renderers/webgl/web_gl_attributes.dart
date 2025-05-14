@@ -67,7 +67,7 @@ class WebGLAttributes {
     };
   }
 
-  void updateBuffer(Buffer buffer, BufferAttribute attribute, int bufferType) {
+  void updateBuffer(Buffer buffer, attribute, int bufferType) {
     final updateRange = attribute.updateRange;
 
     gl.bindBuffer(bufferType, buffer);
@@ -83,7 +83,7 @@ class WebGLAttributes {
     }
   }
 
-  void updateBufferNew(Buffer buffer, BufferAttribute attribute, int bufferType) {
+  void updateBufferNew(Buffer buffer, attribute, int bufferType) {
     final array = attribute.array;
     final updateRange = attribute.updateRange;
     final updateRanges = attribute.updateRanges;
@@ -114,7 +114,7 @@ class WebGLAttributes {
 				// We add one here to merge adjacent ranges. This is safe because ranges
 				// operate over positive integers.
 				if ( range.start <= previousRange.start + previousRange.count + 1 ) {
-					previousRange.count = math.max(
+					previousRange.count = math.max<int>(
 						previousRange.count,
 						range.start + range.count - previousRange.start
 					);
@@ -170,7 +170,7 @@ class WebGLAttributes {
       final data = buffers.get(attribute.data);
 
       if (data != null) {
-        gl.deleteBuffer(data.buffer);
+        gl.deleteBuffer(data['buffer']);
         buffers.delete(attribute.data);
       }
     } else {

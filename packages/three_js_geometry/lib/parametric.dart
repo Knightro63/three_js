@@ -11,6 +11,9 @@ import 'package:three_js_math/three_js_math.dart';
 /// scene.add( klein );
 ///```
 class ParametricGeometry extends BufferGeometry {
+  Function(double,double,Vector3) func;
+ int slices; 
+ int stacks;
 
   /// [func] — A function that takes in a [u] and [v] value each between 0 and 1 and 
   /// modifies a third [Vector3] argument. Default is a function that generates a curved plane surface.
@@ -18,7 +21,7 @@ class ParametricGeometry extends BufferGeometry {
   /// [slices] — The count of slices to use for the parametric function. Default is *8*.
   /// 
   /// [stacks] — The count of stacks to use for the parametric function. Default is *8*.
-  ParametricGeometry(Function(double,double,Vector3) func, int slices, int stacks) : super() {
+  ParametricGeometry(this.func, this.slices, this.stacks) : super() {
     type = "ParametricGeometry";
     parameters = {"func": func, "slices": slices, "stacks": stacks};
 

@@ -11,7 +11,7 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.8
   flutter_svg: ^2.0.10+1
-  three_js: ^0.1.0
+  three_js: ^0.1.2
   three_js_helpers: ^0.1.0
   three_js_line: ^0.1.0
   three_js_bvh_csg: ^0.1.0
@@ -32,6 +32,8 @@ dependency_overrides:
     git:
       url: https://github.com/alex-melnyk/flutter-permission-handler.git 
       path: permission_handler_apple
+  three_js_core:
+    path: ../packages/three_js_core
 
 flutter:
   uses-material-design: true

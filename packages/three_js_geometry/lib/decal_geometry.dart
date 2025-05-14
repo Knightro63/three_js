@@ -19,7 +19,8 @@ class DecalGeometry extends BufferGeometry {
   /// [orientation] — Orientation of the decal projector.
   /// 
   /// [size] — Size of the decal projector.
-	DecalGeometry(Mesh mesh, Vector3 position, Euler orientation, Vector3 size ):super(){
+	DecalGeometry(Mesh mesh, Vector3 position, Euler orientation,[ Vector3? size ]):super(){
+    size ??= Vector3(1,1,1);
 
 		final List<double> vertices = [];
 		final List<double> normals = [];
@@ -27,24 +28,29 @@ class DecalGeometry extends BufferGeometry {
 
     final plane = Vector3();
 
+    final normalMatrix = Matrix3.identity().getNormalMatrix( mesh.matrixWorld );
+
 		// this matrix represents the transformation of the decal projector
 
 		final projectorMatrix = Matrix4.identity();
 		projectorMatrix.makeRotationFromEuler( orientation );
-		projectorMatrix.scaleByVector( position );
+		projectorMatrix.setPosition( position.x,position.y,position.z );
 
 		final projectorMatrixInverse = Matrix4.identity();
 		projectorMatrixInverse.setFrom( projectorMatrix ).invert();
 
-
-
-    void pushDecalVertex(List<DecalVertex> decalVertices,Vector3 vertex,Vector3 normal ) {
+    void pushDecalVertex(List<DecalVertex> decalVertices,Vector3 vertex,[Vector3? normal]) {
       // transform the vertex to world space, then to projector space
       vertex.applyMatrix4( mesh.matrixWorld );
       vertex.applyMatrix4( projectorMatrixInverse );
 
-      normal.transformDirection( mesh.matrixWorld );
-      decalVertices.add( DecalVertex( vertex.clone(), normal.clone() ) );
+			if ( normal != null) {
+				normal.applyNormalMatrix(normalMatrix);
+				decalVertices.add(DecalVertex(vertex.clone(), normal.clone()));
+			} 
+      else {
+				decalVertices.add(DecalVertex(vertex.clone()));
+			}    
     }
 
     DecalVertex clip(DecalVertex v0, DecalVertex v1, p, s ) {
@@ -53,28 +59,33 @@ class DecalGeometry extends BufferGeometry {
 
       final s0 = d0 / ( d0 - d1 );
 
-      final v = DecalVertex(
-        Vector3(
-          v0.position.x + s0 * ( v1.position.x - v0.position.x ),
-          v0.position.y + s0 * ( v1.position.y - v0.position.y ),
-          v0.position.z + s0 * ( v1.position.z - v0.position.z )
-        ),
-        Vector3(
-          v0.normal.x + s0 * ( v1.normal.x - v0.normal.x ),
-          v0.normal.y + s0 * ( v1.normal.y - v0.normal.y ),
-          v0.normal.z + s0 * ( v1.normal.z - v0.normal.z )
-        )
-      );
+			final position = Vector3(
+				v0.position.x + s0 * ( v1.position.x - v0.position.x ),
+				v0.position.y + s0 * ( v1.position.y - v0.position.y ),
+				v0.position.z + s0 * ( v1.position.z - v0.position.z )
+			);
 
-      // need to clip more values (texture coordinates)? do it this way:
-      // intersectpoint.value = a.value + s * ( b.value - a.value );
+			Vector3? normal;
 
-      return v;
+			if (v0.normal != null && v1.normal != null) {
+				normal = Vector3(
+					v0.normal!.x + s0 * ( v1.normal!.x - v0.normal!.x ),
+					v0.normal!.y + s0 * ( v1.normal!.y - v0.normal!.y ),
+					v0.normal!.z + s0 * ( v1.normal!.z - v0.normal!.z )
+				);
+			}
+
+			final v = DecalVertex( position, normal );
+
+			// need to clip more values (texture coordinates)? do it this way:
+			// intersectpoint.value = a.value + s * ( b.value - a.value );
+
+			return v;
     }
 
     List<DecalVertex> clipGeometry(List<DecalVertex> inVertices, plane ) {
       final List<DecalVertex> outVertices = [];
-      final s = 0.5 * size.dot( plane ).abs();
+      final s = 0.5 * size!.dot( plane ).abs();
 
       // a single iteration clips one face,
       // which consists of three consecutive 'DecalVertex' objects
@@ -211,16 +222,26 @@ class DecalGeometry extends BufferGeometry {
 
         for (int i = 0; i < index!.count; i ++ ) {
           vertex.fromBuffer( positionAttribute, index.getX( i )!.toInt() );
-          normal.fromBuffer( normalAttribute, index.getX( i )!.toInt() );
-          pushDecalVertex( decalVertices, vertex, normal );
+          if ( normalAttribute != null) {
+            normal.fromBuffer( normalAttribute, index.getX( i )!.toInt() );
+            pushDecalVertex( decalVertices, vertex, normal );
+          }
+          else{
+            pushDecalVertex( decalVertices, vertex );
+          }
         }
       } 
       else {
         // non-indexed BufferGeometry
         for (int i = 0; i < positionAttribute.count; i ++ ) {
           vertex.fromBuffer( positionAttribute, i );
-          normal.fromBuffer( normalAttribute, i );
-          pushDecalVertex( decalVertices, vertex, normal );
+					if ( normalAttribute != null) {
+						normal.fromBuffer( normalAttribute, i );
+						pushDecalVertex( decalVertices, vertex, normal );
+					} 
+          else {
+						pushDecalVertex( decalVertices, vertex );
+					}
         }
       }
 
@@ -240,7 +261,7 @@ class DecalGeometry extends BufferGeometry {
 
         // create texture coordinates (we are still in projector space)
         uvs.addAll([
-          0.5 + ( decalVertex.position.x / size.x ),
+          0.5 + ( decalVertex.position.x / size!.x ),
           0.5 + ( decalVertex.position.y / size.y )
         ]);
 
@@ -251,7 +272,9 @@ class DecalGeometry extends BufferGeometry {
         // now create vertex and normal buffer data
 
         vertices.addAll( [decalVertex.position.x, decalVertex.position.y, decalVertex.position.z] );
-        normals.addAll( [decalVertex.normal.x, decalVertex.normal.y, decalVertex.normal.z] );
+        if ( decalVertex.normal != null ) {
+          normals.addAll( [decalVertex.normal!.x, decalVertex.normal!.y, decalVertex.normal!.z] );
+        }
       }
     }
 		// generate buffers
@@ -267,10 +290,10 @@ class DecalGeometry extends BufferGeometry {
 
 class DecalVertex {
   Vector3 position;
-  Vector3 normal;
-	DecalVertex(this.position, this.normal);
+  Vector3? normal;
+	DecalVertex(this.position, [this.normal]);
 
 	DecalVertex clone() {
-		return DecalVertex(position.clone(), normal.clone() );
+		return DecalVertex(position.clone(), normal?.clone() );
 	}
 }

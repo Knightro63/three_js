@@ -286,7 +286,7 @@ class LineSegments2 extends Mesh {
 			console.error( 'LineSegments2: "Raycaster.camera" needs to be set in order to raycast against LineSegments2 while worldUnits is set to false.' );
 		}
 
-		final threshold = ( raycaster.params['Line2'] != null ) ? raycaster.params['Line2'].threshold ?? 0 : 0;
+		final threshold = ( raycaster.params['Line2'] != null ) ? raycaster.params['Line2']['threshold'] ?? 0 : 0;
 
 		_ray = raycaster.ray;
 

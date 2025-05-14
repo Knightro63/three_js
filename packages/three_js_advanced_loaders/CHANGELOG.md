@@ -1,3 +1,7 @@
+## 0.1.1
+
+* Updated gltf loader.
+
 ## 0.1.0
 
 * Updated gltf loader.

@@ -21,3 +21,4 @@ export 'ring.dart';
 export 'tube_geometry.dart';
 export 'capsule_geometry.dart';
 export 'decal_geometry.dart';
+export './parametric_gemoetries.dart';
