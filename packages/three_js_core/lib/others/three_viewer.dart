@@ -88,6 +88,8 @@ class ThreeJS {
   final GlobalKey<core.PeripheralsState> globalKey = GlobalKey<core.PeripheralsState>();
   core.PeripheralsState get domElement => globalKey.currentState!;
 
+  bool visible = true;
+
   FlutterAngleTexture? texture;
   late final RenderingContext gl;
 
@@ -310,8 +312,8 @@ class ThreeJS {
         key: globalKey,
         builder: (BuildContext context) {
           return Container(
-            width: width,
-            height: height,
+            width: !visible?0:width,
+            height: !visible?0:height,
             child: NotificationListener<SizeChangedLayoutNotification>(
             onNotification: (notification) {
               onWindowResize(context);

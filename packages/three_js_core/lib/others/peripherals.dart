@@ -87,7 +87,6 @@ class PeripheralsState extends State<Peripherals> {
     }
     ..onEnd = (event){
       _onDragEvent(context, PeripheralType.pointerup, event);
-
     }
     ..onUpdate = (event){
       _onDragEvent(context, PeripheralType.pointermove,event);
@@ -124,17 +123,21 @@ class PeripheralsState extends State<Peripherals> {
       },
       child:GestureDetector(
         onScaleUpdate: (event){
-          double s = event.scale-_prevScale < 0?1:-1;
-          _onScaleEvent(context, PeripheralType.wheel, {'scale':s});
-          _prevScale = event.scale;
+          if (event.pointerCount > 1) {
+            double s = event.scale-_prevScale < 0?1:-1;
+            _onScaleEvent(context, PeripheralType.wheel, {'scale':s});
+            _prevScale = event.scale;
+          } else {
+            // There's only 1 pointer on screen. This is not a scale event.
+          }
         },
         child: Listener(
           onPointerPanZoomStart: panGestureRecognizer.addPointerPanZoom,
-          onPointerSignal: (event) {
-            if (event is PointerScrollEvent) {
-              _onPointerEvent(context, PeripheralType.wheel, event);
-            }
-          },
+          // onPointerSignal: (event) {
+          //   if (event is PointerScrollEvent) {
+          //     _onPointerEvent(context, PeripheralType.wheel, event);
+          //   }
+          // },
           onPointerDown: (PointerDownEvent event) {
             _onPointerEvent(context, PeripheralType.pointerdown, event);
             FocusScope.of(context).requestFocus(focusNode);

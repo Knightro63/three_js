@@ -1,6 +1,7 @@
 ## 0.1.5
 
 * Added angle input to fix flutter multiview issue on web.
+* Fixed: PeripheralType.wheel triggered when dragging with 1 pointer
 
 ## 0.1.4
 

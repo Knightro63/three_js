@@ -1,3 +1,7 @@
+## 0.1.3
+
+* Updated three_js_core to fix bug
+
 ## 0.1.2
 
 * Updated three_js_core to fix material bug
