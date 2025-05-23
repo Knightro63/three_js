@@ -21,7 +21,7 @@ dependencies:
   three_js_advanced_loaders: ^0.1.0
   three_js_animations: ^0.1.0
   three_js_controls: ^0.1.0
-  three_js_core: ^0.1.6
+  three_js_core: ^0.1.5
   three_js_core_loaders: ^0.1.0
   three_js_curves: ^0.1.0
   three_js_simple_loaders: ^0.1.0
