@@ -134,11 +134,11 @@ class PeripheralsState extends State<Peripherals> {
         },
         child: Listener(
           onPointerPanZoomStart: panGestureRecognizer.addPointerPanZoom,
-          // onPointerSignal: (event) {
-          //   if (event is PointerScrollEvent) {
-          //     _onPointerEvent(context, PeripheralType.wheel, event);
-          //   }
-          // },
+          onPointerSignal: (event) {
+            if (event is PointerScrollEvent) {
+              _onPointerEvent(context, PeripheralType.wheel, event);
+            }
+          },
           onPointerDown: (PointerDownEvent event) {
             _pointers++;
             _onPointerEvent(context, PeripheralType.pointerdown, event);
