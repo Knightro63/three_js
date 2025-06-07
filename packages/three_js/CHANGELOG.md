@@ -1,3 +1,7 @@
+## 0.1.5
+
+* Fixed: Middle wheel bug
+
 ## 0.1.4
 
 * Fixed: Windows move and change size bug.

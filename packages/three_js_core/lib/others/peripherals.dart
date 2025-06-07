@@ -143,7 +143,7 @@ class PeripheralsState extends State<Peripherals> {
             double s = event.scale-_prevScale < 0?1:-1;
             _onScaleEvent(context, PeripheralType.wheel, {'scale':s});
             _prevScale = event.scale;
-          } else {
+          } else{
             // There's only 1 pointer on screen. This is not a scale event.
           }
         },
@@ -153,25 +153,35 @@ class PeripheralsState extends State<Peripherals> {
             if(kIsWeb){
               isSignal = true;
               if (event is PointerScrollEvent) {
-                if(!start){
-                  webPosition = Offset(0, 0);
-                  _onDragEvent(context, PeripheralType.pointerdown, event);
-                  start = true;
+                if(event.kind == PointerDeviceKind.trackpad){
+                  if(!start){
+                    webPosition = Offset(0, 0);
+                    _onDragEvent(context, PeripheralType.pointerdown, event);
+                    start = true;
+                  }
+                  else{
+                    webPosition-=event.scrollDelta;
+                    Map m = {
+                      'scrollDelta': webPosition,
+                      'position': event.position,
+                      'localPosition': event.localPosition
+                    };
+                    _onDragEvent(context, PeripheralType.pointermove, m);
+                  }
                 }
                 else{
-                  webPosition-=event.scrollDelta;
-                  Map m = {
-                    'scrollDelta': webPosition,
-                    'position': event.position,
-                    'localPosition': event.localPosition
-                  };
-                  _onDragEvent(context, PeripheralType.pointermove, m);
+                  _onPointerEvent(context, PeripheralType.wheel, event);
                 }
               }
               else if(event is PointerScaleEvent){
                 double s = event.scale>1?-1:1;
                 _onScaleEvent(context, PeripheralType.wheel, {'scale':s});
                 _prevScale = event.scale;
+              }
+            }
+            else{
+              if (event is PointerScrollEvent) {
+                _onPointerEvent(context, PeripheralType.wheel, event);
               }
             }
           },
@@ -296,7 +306,7 @@ class WebPointerEvent {
       // Left button takes precedence over other
       if (leftButtonPressed) return 0;
       // 2nd priority is the right button
-      if (rightButtonPressed) return 2;
+      if (rightButtonPressed || middleButtonPressed) return 2;
       // Lastly the middle button
       if (middleButtonPressed) return 1;
 
