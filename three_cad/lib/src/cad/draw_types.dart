@@ -140,18 +140,18 @@ enum DrawType{
     line1.lineConstraint.isHorizontal = true;
     line1.point2Constraint.coincidentTo = line2.point1;
 
-    //line2.lineConstraint.isVertical = true;
+    line2.lineConstraint.isVertical = true;
     line2.point2Constraint.coincidentTo = line3.point1;
 
-    line3.lineConstraint.isHorizontal = true;
-    line3.point2Constraint.coincidentTo = line4.point1;
+    // line3.lineConstraint.isHorizontal = true;
+    // line3.point2Constraint.coincidentTo = line4.point1;
 
-    //line4.lineConstraint.isVertical = true;
+    line4.lineConstraint.isVertical = true;
     line4.point2Constraint.coincidentTo = line1.point2;
 
     line1.createHVConstraint();
     line2.createHVConstraint();
-    line3.createHVConstraint();
+    //line3.createHVConstraint();
     line4.createHVConstraint();
 
     return [line1,line2,line3,line4];

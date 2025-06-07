@@ -1,3 +1,8 @@
+## 0.1.6
+
+* Fixed: Windows move and change size bug.
+* Added: Web track pad scale, rotate, and pan support.
+
 ## 0.1.5
 
 * Added angle input to fix flutter multiview issue on web.

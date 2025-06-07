@@ -1,3 +1,9 @@
+## 0.1.4
+
+* Fixed: Windows move and change size bug.
+* Added: Web track pad scale, rotate, and pan support.
+* Changed android minSdkVersion to 21.
+
 ## 0.1.3
 
 * Updated three_js_core to fix bug

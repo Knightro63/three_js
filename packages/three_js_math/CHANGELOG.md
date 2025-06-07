@@ -1,3 +1,7 @@
+## 0.1.1
+
+* Updated to newest version of flutter_angle: 0.2.3
+
 ## 0.1.0
 
 * Updated to newest version of flutter_angle: 0.2.1

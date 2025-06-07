@@ -12,25 +12,24 @@ class SketchPoint extends Mesh{
   }
 
   void updateConstraint([Camera? camera]){
+    final upVector = Vector3(0, 1, 0).applyQuaternion(camera!.quaternion);
+
     if(constraint.coincidentTo != null){
       position.setFrom(constraint.coincidentTo!.position);
     }
     else if(constraint.verticalTo != null){
-      // double length = position.distanceTo(constraint.verticalTo!.position);
-      // final forwardVector = Vector3();
-      // camera!.getWorldDirection(forwardVector);
-      // final upVector = Vector3(0, 1, 0).applyQuaternion(camera.quaternion);
-
-      // position.setFrom(this.position).add(upVector.clone());//.scale(0.1);
+      final s1 = Plane().setFromNormalAndCoplanarPoint(upVector, constraint.verticalTo!.position).distanceToPoint(this.position);
+      print(constraint.verticalTo!.position);
+      position.setFrom(Vector3(0.1,0.1,0.1));//.add(upVector.clone().scale(s1));//.setFrom(constraint.verticalTo!.position)
     }
     else if(constraint.horizontalTo != null){
-      //double length = position.distanceTo(constraint.horizontalTo!.position);
-      // final forwardVector = Vector3();
-      // final rightVector = Vector3();
-      // camera!.getWorldDirection(forwardVector);
-      // rightVector.cross2(camera.up, forwardVector).normalize();
+      final forwardVector = Vector3();
+      final rightVector = Vector3();
+      camera.getWorldDirection(forwardVector);
+      rightVector.cross2(upVector, forwardVector).normalize();
 
-      // position.setFrom(constraint.horizontalTo!.position).add(rightVector.clone());//.scale(length));
+      final s2 = Plane().setFromNormalAndCoplanarPoint(rightVector, constraint.horizontalTo!.position).distanceToPoint(this.position);
+      position.setFrom(constraint.horizontalTo!.position).add(rightVector.clone().scale(s2));
     }
   }
 

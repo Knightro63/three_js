@@ -4,9 +4,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:example/src/statistics.dart';
 import 'package:three_js/three_js.dart' as three;
-import 'package:three_js_postprocessing/post/bloom_pass.dart';
 import 'package:three_js_postprocessing/post/effect_composer.dart';
-import 'package:three_js_postprocessing/post/outpass.dart';
+// import 'package:three_js_postprocessing/post/outpass.dart';
+// import 'package:three_js_postprocessing/post/bloom_pass.dart';
 import 'package:three_js_postprocessing/post/render_pass.dart';
 
 class WebglMaterialsVideo extends StatefulWidget {
@@ -138,8 +138,8 @@ class _State extends State<WebglMaterialsVideo> {
     threeJs.domElement.addEventListener(three.PeripheralType.pointermove, onDocumentMouseMove );
 
     final renderPass = RenderPass( threeJs.scene, threeJs.camera );
-    final bloomPass = BloomPass( 1.3 );
-    final outputPass = OutputPass();
+    //final bloomPass = BloomPass( 1.3 );
+    //final outputPass = OutputPass();
     final composer = EffectComposer( threeJs.renderer!, threeJs.renderTarget );
 
     composer.addPass( renderPass );
