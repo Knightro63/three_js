@@ -197,6 +197,7 @@ class PeripheralsState extends State<Peripherals> {
 }
 
 class WebPointerEvent {
+  int pointerCount = 0;
   late int pointerId;
   late int button;
   String pointerType = 'touch';

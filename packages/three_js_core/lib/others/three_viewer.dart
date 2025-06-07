@@ -163,7 +163,7 @@ class ThreeJS {
    initPlatformState();
   }
   
-  void animate(Duration duration) {
+  Future<void> animate(Duration duration) async {
     if (!mounted || disposed || updating) {
       return;
     }
@@ -171,7 +171,7 @@ class ThreeJS {
     double dt = clock.getDelta();
     
     if(settings.animate){
-      render(dt);
+      await render(dt);
       if(!pause){
         for(int i = 0; i < events.length;i++){
           events[i].call(dt);
