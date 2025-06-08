@@ -1,3 +1,7 @@
+## 0.1.6
+
+* Updated to newest version of flutter_angle: 0.2.5
+
 ## 0.1.5
 
 * Fixed: Middle wheel bug
