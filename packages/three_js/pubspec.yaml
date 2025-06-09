@@ -18,7 +18,7 @@ dependencies:
   flutter:
     sdk: flutter
   three_js_math: ^0.1.2
-  three_js_advanced_loaders: ^0.1.0
+  three_js_advanced_loaders: ^0.1.1
   three_js_animations: ^0.1.0
   three_js_controls: ^0.1.0
   three_js_core: ^0.1.7
@@ -27,7 +27,7 @@ dependencies:
   three_js_simple_loaders: ^0.1.0
   three_js_text: ^0.1.0
   three_js_audio: ^0.1.0
-  three_js_geometry: ^0.1.0
+  three_js_geometry: ^0.1.2
 
 dev_dependencies:
   flutter_test:
