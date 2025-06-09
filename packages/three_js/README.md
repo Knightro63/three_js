@@ -30,11 +30,15 @@ This is a dart conversion of three.js and three_dart, originally created by [@mr
  - No longer supported due to IOSurface issue, please use override to flutter_angle: ^0.1.0 for testing on simulator.
 
 **Android**
+ - minSdkVersion: 21
  - compileSdkVersion: 34
  - OpenGL supported
  - Vulkan supported
 
- **Windows**
+**Android Emulator**
+ - Please set useOpenGL to true for a smooth experence.
+
+**Windows**
  - Intel supported.
  - AMD supported.
  - Direct3D 11 and OpenGL supported
@@ -80,6 +84,8 @@ Find the example for this API [here](https://github.com/Knightro63/three_js/tree
  - Some RGBELoaders cause app to crash
  
 **Windows**
+ - Transform controls causes app to crash
+ - Raycasting causes app to crash
 
 **Web**
  - Lens Flare not working correctly
