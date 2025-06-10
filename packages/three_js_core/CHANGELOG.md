@@ -1,3 +1,7 @@
+## 0.1.8
+
+* Fixed: Safari wheel bug
+
 ## 0.1.7
 
 * Fixed: Middle wheel bug

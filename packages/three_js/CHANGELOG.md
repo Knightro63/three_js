@@ -1,3 +1,8 @@
+## 0.1.7
+
+* Updated to newest version of flutter_angle: 0.2.8
+* Fixed Safari mouse wheel bug
+
 ## 0.1.6
 
 * Updated to newest version of flutter_angle: 0.2.5

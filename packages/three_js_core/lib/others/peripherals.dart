@@ -152,8 +152,10 @@ class PeripheralsState extends State<Peripherals> {
           onPointerSignal: (event) {
             if(kIsWeb){
               isSignal = true;
-              if (event is PointerScrollEvent) {
-                if(event.kind == PointerDeviceKind.trackpad){
+              if (event is PointerScrollEvent){
+                double dy = event.scrollDelta.dy.abs();
+                double trunk = dy.truncate()-dy;
+                if(event.kind == PointerDeviceKind.trackpad && trunk == 0){
                   if(!start){
                     webPosition = Offset(0, 0);
                     _onDragEvent(context, PeripheralType.pointerdown, event);
