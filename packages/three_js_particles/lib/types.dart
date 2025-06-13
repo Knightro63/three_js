@@ -30,6 +30,10 @@ class RandomBetweenTwoConstants extends CurveBase{
 class CurveBase{
   double? scale;
   late LifeTimeCurve type;
+
+  CurveBase({
+    this.scale,
+  });
 }
 
 /**
@@ -49,6 +53,12 @@ class BezierPoint{
   double x = 0; // Time (0 to 1)
   double y = 0; // Value
   double? percentage; // Optional normalized position
+
+  BezierPoint({
+    this.x = 0,
+    this.y = 0,
+    this.percentage
+  });
 }
 
 /**
@@ -67,7 +77,8 @@ class BezierPoint{
  * }
  */
 class BezierCurve extends CurveBase{
-  BezierCurve(){
+  BezierCurve({super.scale,List<BezierPoint>? bezierPoints}){
+    this.bezierPoints = bezierPoints ?? [];
     type = LifeTimeCurve.bezier;
   }
   List<BezierPoint> bezierPoints = [];
@@ -84,7 +95,7 @@ class BezierCurve extends CurveBase{
  * }
  */
 class EasingCurve extends CurveBase{
-  EasingCurve(){
+  EasingCurve({super.scale,this.curveFunction}){
     type = LifeTimeCurve.easing;
   }
   CurveFunction? curveFunction;
@@ -115,6 +126,12 @@ class Point3D{
   double x = 0;
   double y = 0;
   double z = 0;
+
+  Point3D({
+    this.x = 0,
+    this.y = 0,
+    this.z = 0
+  });
 }
 
 /**
@@ -147,17 +164,34 @@ class Transform{
   three.Vector3? position;
   three.Vector3? rotation;
   three.Vector3? scale;
+
+  Transform({
+    this.position,
+    this.rotation,
+    this.scale
+  });
 }
 
 class Rgb{
   double? r;
   double? g;
   double? b;
+
+  Rgb({
+    this.r,
+    this.g,
+    this.b
+  });
 }
 
 class MinMaxColor{
   Rgb? min;
   Rgb? max;
+
+  MinMaxColor({
+    this.min,
+    this.max
+  });
 }
 
 /**
@@ -202,6 +236,11 @@ class MinMaxColor{
 class Emission{
   CurveBase? rateOverTime;//?: Constant | RandomBetweenTwoConstants | LifetimeCurve;
   CurveBase? rateOverDistance;//?: Constant | RandomBetweenTwoConstants | LifetimeCurve;
+
+  Emission({
+    this.rateOverTime,
+    this.rateOverDistance
+  });
 }
 
 /**
@@ -222,6 +261,12 @@ class Sphere{
   double? radius;
   double? radiusThickness;
   double? arc;
+
+  Sphere({
+    this.radius,
+    this.radiusThickness,
+    this.arc
+  });
 }
 
 /**
@@ -245,6 +290,13 @@ class Cone{
   double? radius;
   double? radiusThickness;
   double? arc;
+
+  Cone({
+    this.angle,
+    this.radius,
+    this.radiusThickness,
+    this.arc
+  });
 }
 
 /**
@@ -265,6 +317,12 @@ class Circle{
   double? radius;
   double? radiusThickness;
   double? arc;
+
+  Circle({
+    this.radius,
+    this.radiusThickness,
+    this.arc
+  });
 }
 
 /**
@@ -282,6 +340,11 @@ class Circle{
 class Rectangle{
   Point3D? rotation;
   Point3D? scale;
+
+  Rectangle({
+    this.rotation,
+    this.scale
+  });
 }
 
 /**
@@ -299,6 +362,11 @@ class Rectangle{
 class Box{
   Point3D? scale;
   EmitFrom? emitFrom;
+
+  Box({
+    this.scale,
+    this.emitFrom
+  });
 }
 
 /**
@@ -329,6 +397,15 @@ class ShapeConfig{
   Circle? circle;
   Rectangle? rectangle;
   Box? box;
+
+  ShapeConfig({
+    this.shape,
+    this.sphere,
+    this.cone,
+    this.circle,
+    this.rectangle,
+    this.box
+  });
 }
 
 /**
@@ -363,6 +440,13 @@ class TextureSheetAnimation{
   TimeMode? timeMode;
   double? fps;
   double? startFrame;//?:  | RandomBetweenTwoConstants;
+
+  TextureSheetAnimation({
+    this.tiles,
+    this.timeMode,
+    this.fps,
+    this.startFrame
+  });
 }
 
 /**
@@ -408,6 +492,18 @@ class Renderer{
   bool transparent = false;
   bool depthTest = true;
   bool depthWrite = true;
+
+  Renderer({
+    this.blending = three.NormalBlending,
+    this.discardBackgroundColor = false,
+    this.backgroundColorTolerance = 1.0,
+    Rgb? backgroundColor,
+    this.transparent = false,
+    this.depthTest = true,
+    this.depthWrite = true
+  }){
+    this.backgroundColor = backgroundColor ?? Rgb();
+  }
 }
 
 /**
@@ -475,6 +571,17 @@ class NoiseConfig{
   double positionAmount = 0;
   double rotationAmount = 0;
   double sizeAmount = 0;
+
+  NoiseConfig({
+    this.isActive = false,
+    this.useRandomOffset = false,
+    this.strength = 0,
+    this.frequency = 0,
+    this.octaves = 0,
+    this.positionAmount = 0,
+    this.rotationAmount = 0,
+    this.sizeAmount = 0
+  });
 }
 
 /**
@@ -525,29 +632,61 @@ class VelocityOverLifetime{
   bool isActive = false;
   VOLVector3 linear = VOLVector3();
   VOLVector3 orbital = VOLVector3();
+
+  VelocityOverLifetime({
+    this.isActive = false,
+    VOLVector3? linear,
+    VOLVector3? orbital,
+  }){
+    this.linear = linear?? VOLVector3();
+    this.orbital = orbital ?? VOLVector3();
+  }
 }
 
 class VOLVector3{
   double? x;
   double? y;
   double? z;
+
+  VOLVector3({
+    this.x,
+    this.y,
+    this.z
+  });
 }
 
 class VOLCurveFunction{
   CurveFunction? x;
   CurveFunction? y;
   CurveFunction? z;
+
+  VOLCurveFunction({
+    this.x,
+    this.y,
+    this.z
+  });
 }
 
 class OverLifetime{
   bool isActive = false;
   LifetimeCurve? lifetimeCurve;
+
+  OverLifetime({
+    this.isActive = false,
+    this.lifetimeCurve
+  });
 }
 
 class VelocityData{
   three.Vector3? speed;
   three.Vector3? positionOffset;
   VOLCurveFunction? valueModifiers;
+
+  VelocityData({
+    this.speed,
+    this.positionOffset,
+    this.valueModifiers
+  });
 }
 
 /**
@@ -995,6 +1134,32 @@ class ParticleSystemConfig{
    * Called when the system completes an iteration.
    */
   void Function()? onComplete;
+
+  ParticleSystemConfig({
+    this.transform,
+    this.duration = 5.0,
+    this.looping,
+    this.startDelay = 0,
+    this.startLifetime,
+    this.startSpeed,
+    this.startSize,
+    this.startOpacity,
+    this.startRotation,
+    this.startColor,
+    this.gravity,
+    this.simulationSpace,
+    this.maxParticles,
+    this.emission,
+    this.shape,
+    this.map,
+    this.renderer,
+    this.velocityOverLifetime,
+    this.sizeOverLifetime,
+    this.opacityOverLifetime,
+    this.rotationOverLifetime,
+    this.noise,
+    this.textureSheetAnimation
+  });
 }
 
 typedef  NormalizedParticleSystemConfig = ParticleSystemConfig;
@@ -1046,8 +1211,8 @@ class ParticleSystemInstance{
   Gyroscope? wrapper;
   GeneralData? generalData;
 
-  late void Function({
-    three.Points particleSystem,
+  void Function({
+    three.Points? particleSystem,
     double delta,
     double elapsed,
     double lifetime,
@@ -1055,7 +1220,7 @@ class ParticleSystemInstance{
     int iterationCount
   })? onUpdate;
 
-  late void Function({three.Points particleSystem})? onComplete;
+  void Function({three.Points? particleSystem})? onComplete;
   double creationTime = 0;
   double lastEmissionTime = 0;
   double duration = 0;
@@ -1067,12 +1232,12 @@ class ParticleSystemInstance{
   int iterationCount = 0;
   List<three.Vector3>? velocities;
 
-  late void Function({int particleIndex})? deactivateParticle;
+  void Function(int particleIndex)? deactivateParticle;
 
-  late void Function({
-    double particleIndex,
-    double activationTime,
-    Point3D position
+  void Function({
+    required int particleIndex,
+    required double activationTime,
+    required Point3D position
   })? activateParticle;
 
   ParticleSystemInstance({

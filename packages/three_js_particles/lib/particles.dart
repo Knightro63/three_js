@@ -23,94 +23,92 @@ class Particles {
     'MultiplyBlending': three.MultiplyBlending,
   };
 
-  Map get getDefaultParticleSystemConfig => DEFAULT_PARTICLE_SYSTEM_CONFIG;
+  ParticleSystemConfig get getDefaultParticleSystemConfig => DEFAULT_PARTICLE_SYSTEM_CONFIG;
 
-  final Map DEFAULT_PARTICLE_SYSTEM_CONFIG = {
-    'transform': {
-      'position': three.Vector3(),
-      'rotation': three.Vector3(),
-      'scale': three.Vector3(1, 1, 1),
-    },
-    'duration': 5.0,
-    'looping': true,
-    'startDelay': 0,
-    'startLifetime': 5.0,
-    'startSpeed': 1.0,
-    'startSize': 1.0,
-    'startOpacity': 1.0,
-    'startRotation': 0.0,
-    'startColor': {
-      'min': { 'r': 1.0, 'g': 1.0, 'b': 1.0 },
-      'max': { 'r': 1.0, 'g': 1.0, 'b': 1.0 },
-    },
-    'gravity': 0.0,
-    'simulationSpace': SimulationSpace.local,
-    'maxParticles': 100.0,
-    'emission': {
-      'rateOverTime': 10.0,
-      'rateOverDistance': 0.0,
-    },
-    'shape': {
-      'shape': Shape.sphere,
-      'sphere': {
-        'radius': 1.0,
-        'radiusThickness': 1.0,
-        'arc': 360.0,
-      },
-      'cone': {
-        'angle': 25.0,
-        'radius': 1.0,
-        'radiusThickness': 1.0,
-        'arc': 360.0,
-      },
-      'circle': {
-        'radius': 1.0,
-        'radiusThickness': 1.0,
-        'arc': 360.0,
-      },
-      'rectangle': {
-        'rotation': { 'x': 0.0, 'y': 0.0 }, // TODO: add z rotation
-        'scale': { 'x': 1.0, 'y': 1.0 },
-      },
-      'box': {
-        'scale': { 'x': 1.0, 'y': 1.0, 'z': 1.0 },
-        'emitFrom': EmitFrom.volume,
-      },
-    },
-    'map': null,
-    'renderer': {
-      'blending': three.NormalBlending,
-      'discardBackgroundColor': false,
-      'backgroundColorTolerance': 1.0,
-      'backgroundColor': { 'r': 1.0, 'g': 1.0, 'b': 1.0 },
-      'transparent': true,
-      'depthTest': true,
-      'depthWrite': false,
-    },
-    'velocityOverLifetime': {
-      'isActive': false,
-      'linear': {
-        'x': 0,
-        'y': 0,
-        'z': 0,
-      },
-      'orbital': {
-        'x': 0,
-        'y': 0,
-        'z': 0,
-      },
-    },
-    'sizeOverLifetime': {
-      'isActive': false,
-      'lifetimeCurve': {
-        'type': LifeTimeCurve.bezier,
-        'scale': 1,
-        'bezierPoints': [
-          { 'x': 0, 'y': 0, 'percentage': 0 },
-          { 'x': 1, 'y': 1, 'percentage': 1 },
+  final ParticleSystemConfig DEFAULT_PARTICLE_SYSTEM_CONFIG = ParticleSystemConfig(
+    transform: Transform(
+      position: three.Vector3(),
+      rotation: three.Vector3(),
+      scale: three.Vector3(1, 1, 1),
+    ),
+    duration: 5.0,
+    looping: true,
+    startDelay: 0,
+    startLifetime: 5.0,
+    startSpeed: 1.0,
+    startSize: 1.0,
+    startOpacity: 1.0,
+    startRotation: 0.0,
+    startColor: MinMaxColor(
+      min: Rgb(r: 1.0, g: 1.0, b: 1.0 ),
+      max: Rgb(r: 1.0, g: 1.0, b: 1.0 ),
+    ),
+    gravity: 0.0,
+    simulationSpace: SimulationSpace.local,
+    maxParticles: 100,
+    emission: Emission(
+      rateOverTime: 10.0,
+      rateOverDistance: 0.0,
+    ),
+    shape: ShapeConfig(
+      shape: Shape.sphere,
+      sphere: Sphere(
+        radius: 1.0,
+        radiusThickness: 1.0,
+        arc: 360.0,
+      ),
+      cone: Cone(
+        angle: 25.0,
+        radius: 1.0,
+        radiusThickness: 1.0,
+        arc: 360.0,
+      ),
+      circle: Circle(
+        radius: 1.0,
+        radiusThickness: 1.0,
+        arc: 360.0,
+      ),
+      rectangle: Rectangle(
+        rotation: Point3D(x: 0.0, y: 0.0 ), // TODO: add z rotation
+        scale: Point3D(x: 1.0, y: 1.0 ),
+      ),
+      box: Box(
+        scale: Point3D( x: 1.0, y: 1.0, z: 1.0 ),
+        emitFrom: EmitFrom.volume,
+      ),
+    ),
+    renderer: Renderer(
+      blending: three.NormalBlending,
+      discardBackgroundColor: false,
+      backgroundColorTolerance: 1.0,
+      backgroundColor: Rgb(r: 1.0, g: 1.0, b: 1.0 ),
+      transparent: true,
+      depthTest: true,
+      depthWrite: false,
+    ),
+    velocityOverLifetime: VelocityOverLifetime(
+      isActive: false,
+      linear: VOLVector3(
+        x: 0,
+        y: 0,
+        z: 0,
+      ),
+      orbital: VOLVector3(
+        x: 0,
+        y: 0,
+        z: 0,
+      ),
+    ),
+    sizeOverLifetime: OverLifetime(
+      isActive: false,
+      lifetimeCurve: BezierCurve(
+        scale: 1,
+        bezierPoints: [
+          BezierPoint( x: 0, y: 0, percentage: 0 ),
+          BezierPoint( x: 1, y: 1, percentage: 1 ),
         ],
-      },
-    },
+      ),
+    ),
     /* colorOverLifetime: {
       isActive: false,
       lifetimeCurve: {
@@ -119,64 +117,53 @@ class Particles {
         curveFunction: CurveFunctionId.LINEAR,
       },
     }, */
-    'opacityOverLifetime': {
-      'isActive': false,
-      'lifetimeCurve': {
-        'type': LifeTimeCurve.bezier,
-        'scale': 1,
-        'bezierPoints': [
-          { 'x': 0, 'y': 0, 'percentage': 0 },
-          { 'x': 1, 'y': 1, 'percentage': 1 },
+    opacityOverLifetime: OverLifetime(
+      isActive: false,
+      lifetimeCurve: BezierCurve(
+        scale: 1,
+        bezierPoints: [
+          BezierPoint( x: 0, y: 0, percentage: 0 ),
+          BezierPoint( x: 1, y: 1, percentage: 1 ),
         ],
-      },
-    },
-    'rotationOverLifetime': {
-      'isActive': false,
-      'min': 0.0,
-      'max': 0.0,
-    },
-    'noise': {
-      'isActive': false,
-      'useRandomOffset': false,
-      'strength': 1.0,
-      'frequency': 0.5,
-      'octaves': 1,
-      'positionAmount': 1.0,
-      'rotationAmount': 0.0,
-      'sizeAmount': 0.0,
-    },
-    'textureSheetAnimation': {
-      'tiles': three.Vector2(1.0, 1.0),
-      'timeMode': TimeMode.lifetime,
-      'fps': 30.0,
-      'startFrame': 0,
-    },
-  };
+      ),
+    ),
+    rotationOverLifetime: OverLifetime(
+      isActive: false,
+      min: 0.0,
+      max: 0.0,
+    ),
+    noise: NoiseConfig(
+      isActive: false,
+      useRandomOffset: false,
+      strength: 1.0,
+      frequency: 0.5,
+      octaves: 1,
+      positionAmount: 1.0,
+      rotationAmount: 0.0,
+      sizeAmount: 0.0,
+    ),
+    textureSheetAnimation: TextureSheetAnimation(
+      tiles: three.Vector2(1.0, 1.0),
+      timeMode: TimeMode.lifetime,
+      fps: 30.0,
+      startFrame: 0,
+    ),
+  );
 
   void createFloat32Attributes({
-    three.BufferGeometry geometry,
-    String propertyName,
-    int maxParticles,
-    factory,
-  }: {
-    geometry: ;
-    propertyName: string;
-    maxParticles: number;
-    factory: ((value: never, index: number) => number) | number;
+    required three.BufferGeometry geometry,
+    required String propertyName,
+    required int maxParticles,
+    List<double>? factory,
   }){
-    geometry.setAttribute(
+    geometry.setAttributeFromString(
       propertyName,
-      three.BufferAttribute(
-        three.Float32Array(
-          Array.from(
-            { length: maxParticles },
-            typeof factory === 'function' ? factory : () => factory
-          )
-        ),
+      three.Float32BufferAttribute(
+        factory != null?three.Float32Array.fromList(factory):three.Float32Array(maxParticles),
         1
       )
     );
-  };
+  }
 
   void calculatePositionAndVelocity (
     GeneralData generalData,
@@ -250,12 +237,12 @@ class Particles {
   }
 
   bool destroyParticleSystem(three.Points particleSystem){
-    createdParticleSystems = createdParticleSystems.filter(
-      ({
-        particleSystem: savedParticleSystem,
-        wrapper,
-        generalData: { particleSystemId },
-      }){
+    createdParticleSystems = createdParticleSystems.where(
+      (ps){
+        three.Points? savedParticleSystem = ps.particleSystem;
+        var wrapper = ps.wrapper;
+        int particleSystemId = ps.generalData?.particleSystemId ?? 0;
+      
         if (
           savedParticleSystem != particleSystem &&
           wrapper != particleSystem
@@ -263,23 +250,30 @@ class Particles {
           return true;
         }
 
-        removeBezierCurveFunction(particleSystemId);
-        savedParticleSystem.geometry.dispose();
-        if (Array.isArray(savedParticleSystem.material))
-          savedParticleSystem.material.forEach((material) => material.dispose());
-        else savedParticleSystem.material.dispose();
+        Bezier.removeBezierCurveFunction(particleSystemId);
+        savedParticleSystem?.geometry?.dispose();
+        if (savedParticleSystem?.material is three.GroupMaterial){
+          (savedParticleSystem?.material as three.GroupMaterial).children.forEach((material) => material.dispose());
+        }
+        else{
+          savedParticleSystem?.material?.dispose();
+        }
 
-        if (savedParticleSystem.parent)
-          savedParticleSystem.parent.remove(savedParticleSystem);
+        if (savedParticleSystem?.parent != null){
+          savedParticleSystem?.parent?.remove(savedParticleSystem);
+        }
         return false;
       }
-    );
+    ).toList();
+
+    return false;
   }
 
   ParticleSystem createParticleSystem([
-    ParticleSystemConfig config = DEFAULT_PARTICLE_SYSTEM_CONFIG,
+    ParticleSystemConfig? config,
     double? externalNow
   ]){
+    config ??= DEFAULT_PARTICLE_SYSTEM_CONFIG;
     final now = externalNow ?? DateTime.now().millisecondsSinceEpoch;
     final GeneralData generalData = GeneralData(
       particleSystemId: _particleSystemId++,
@@ -306,150 +300,136 @@ class Particles {
       isEnabled: true,
     );
 
-    const normalizedConfig = ObjectUtils.deepMerge(
+    final normalizedConfig = ObjectUtils.deepMerge(
       DEFAULT_PARTICLE_SYSTEM_CONFIG as NormalizedParticleSystemConfig,
       config,
       { applyToFirstObject: false, skippedProperties: [] }
     ) as NormalizedParticleSystemConfig;
-    let particleMap: Texture | null =
-      normalizedConfig.map || createDefaultParticleTexture();
 
-    const {
-      transform,
-      duration,
-      looping,
-      startDelay,
-      startLifetime,
-      startSpeed,
-      startSize,
-      startRotation,
-      startColor,
-      startOpacity,
-      gravity,
-      simulationSpace,
-      maxParticles,
-      emission,
-      shape,
-      renderer,
-      noise,
-      velocityOverLifetime,
-      onUpdate,
-      onComplete,
-      textureSheetAnimation,
-    } = normalizedConfig;
+    three.Texture? particleMap = normalizedConfig.map ?? Utils.createDefaultParticleTexture();
 
-    if (typeof renderer?.blending == 'string')
-      renderer.blending = blendingMap[renderer.blending];
+    final transform = normalizedConfig.transform;
+    final duration = normalizedConfig.duration;
+    final looping = normalizedConfig.looping;
+    final startDelay = normalizedConfig.startDelay;
+    final startLifetime = normalizedConfig.startLifetime;
+    final startSpeed = normalizedConfig.startSpeed;
+    final startSize = normalizedConfig.startSize;
+    final startRotation = normalizedConfig.startRotation;
+    final startColor = normalizedConfig.startColor;
+    final startOpacity = normalizedConfig.startOpacity;
+    final gravity = normalizedConfig.gravity;
+    final simulationSpace = normalizedConfig.simulationSpace;
+    final maxParticles = normalizedConfig.maxParticles ?? 0;
+    final emission = normalizedConfig.emission;
+    final shape = normalizedConfig.shape;
+    final renderer = normalizedConfig.renderer;
+    final noise = normalizedConfig.noise!;
+    final velocityOverLifetime = normalizedConfig.velocityOverLifetime;
+    final onUpdate = normalizedConfig.onUpdate;
+    final onComplete = normalizedConfig.onComplete;
+    final textureSheetAnimation = normalizedConfig.textureSheetAnimation;
 
-    const startPositions = Array.from(
-      { length: maxParticles },
-      () => Vector3()
-    );
-    const velocities = Array.from(
-      { length: maxParticles },
-      () => Vector3()
-    );
+    final startPositions = List.filled(maxParticles,new three.Vector3());
+    final velocities = List.filled(maxParticles,new three.Vector3());
+    generalData.creationTimes = List.filled(maxParticles,0);
 
-    generalData.creationTimes = Array.from({ length: maxParticles }, () => 0);
-
-    if (velocityOverLifetime.isActive) {
-      generalData.linearVelocityData = Array.from(
-        { length: maxParticles },
-        () => ({
-          speed: Vector3(
-            velocityOverLifetime.linear.x
-              ? calculateValue(
+    if (velocityOverLifetime?.isActive == true) {
+      generalData.linearVelocityData = List.generate(maxParticles,
+        (i) => VelocityData(
+          speed: three.Vector3(
+            velocityOverLifetime?.linear.x != null
+              ? Utils.calculateValue(
                   generalData.particleSystemId,
-                  velocityOverLifetime.linear.x,
+                  velocityOverLifetime!.linear.x,
                   0
                 )
               : 0,
-            velocityOverLifetime.linear.y
-              ? calculateValue(
+            velocityOverLifetime?.linear.y != null
+              ? Utils.calculateValue(
                   generalData.particleSystemId,
-                  velocityOverLifetime.linear.y,
+                  velocityOverLifetime!.linear.y,
                   0
                 )
               : 0,
-            velocityOverLifetime.linear.z
-              ? calculateValue(
+            velocityOverLifetime?.linear.z != null
+              ? Utils.calculateValue(
                   generalData.particleSystemId,
-                  velocityOverLifetime.linear.z,
+                  velocityOverLifetime!.linear.z,
                   0
                 )
               : 0
           ),
-          valueModifiers: {
-            x: isLifeTimeCurve(velocityOverLifetime.linear.x || 0)
-              ? getCurveFunctionFromConfig(
+          valueModifiers: VOLCurveFunction(
+            x: Utils.isLifeTimeCurve(velocityOverLifetime?.linear.x ?? 0)
+              ? Utils.getCurveFunctionFromConfig(
                   generalData.particleSystemId,
                   velocityOverLifetime.linear.x as LifetimeCurve
                 )
-              : undefined,
-            y: isLifeTimeCurve(velocityOverLifetime.linear.y || 0)
-              ? getCurveFunctionFromConfig(
+              : null,
+            y: Utils.isLifeTimeCurve(velocityOverLifetime?.linear.y ?? 0)
+              ? Utils.getCurveFunctionFromConfig(
                   generalData.particleSystemId,
-                  velocityOverLifetime.linear.y as LifetimeCurve
+                  velocityOverLifetime?.linear.y as LifetimeCurve
                 )
-              : undefined,
-            z: isLifeTimeCurve(velocityOverLifetime.linear.z || 0)
-              ? getCurveFunctionFromConfig(
+              : null,
+            z: Utils.isLifeTimeCurve(velocityOverLifetime?.linear.z ?? 0)
+              ? Utils.getCurveFunctionFromConfig(
                   generalData.particleSystemId,
                   velocityOverLifetime.linear.z as LifetimeCurve
                 )
-              : undefined,
-          },
-        })
+              : null,
+          ),
+        )
       );
 
-      generalData.orbitalVelocityData = Array.from(
-        { length: maxParticles },
-        () => ({
-          speed: Vector3(
-            velocityOverLifetime.orbital.x
-              ? calculateValue(
+      generalData.orbitalVelocityData = List.generate(maxParticles,
+        (i) => VelocityData(
+          speed: three.Vector3(
+            velocityOverLifetime?.orbital.x != null
+              ? Utils.calculateValue(
                   generalData.particleSystemId,
-                  velocityOverLifetime.orbital.x,
+                  velocityOverLifetime!.orbital.x,
                   0
                 )
               : 0,
-            velocityOverLifetime.orbital.y
-              ? calculateValue(
+            velocityOverLifetime?.orbital.y != null
+              ? Utils.calculateValue(
                   generalData.particleSystemId,
-                  velocityOverLifetime.orbital.y,
+                  velocityOverLifetime!.orbital.y,
                   0
                 )
               : 0,
-            velocityOverLifetime.orbital.z
-              ? calculateValue(
+            velocityOverLifetime?.orbital.z != null
+              ? Utils.calculateValue(
                   generalData.particleSystemId,
-                  velocityOverLifetime.orbital.z,
+                  velocityOverLifetime!.orbital.z,
                   0
                 )
               : 0
           ),
-          valueModifiers: {
-            x: isLifeTimeCurve(velocityOverLifetime.orbital.x || 0)
-              ? getCurveFunctionFromConfig(
+          valueModifiers: VOLCurveFunction(
+            x: Utils.isLifeTimeCurve(velocityOverLifetime?.orbital.x ?? 0)
+              ? Utils.getCurveFunctionFromConfig(
                   generalData.particleSystemId,
                   velocityOverLifetime.orbital.x as LifetimeCurve
                 )
               : undefined,
-            y: isLifeTimeCurve(velocityOverLifetime.orbital.y || 0)
-              ? getCurveFunctionFromConfig(
+            y: Utils.isLifeTimeCurve(velocityOverLifetime?.orbital.y ?? 0)
+              ? Utils.getCurveFunctionFromConfig(
                   generalData.particleSystemId,
                   velocityOverLifetime.orbital.y as LifetimeCurve
                 )
               : undefined,
-            z: isLifeTimeCurve(velocityOverLifetime.orbital.z || 0)
-              ? getCurveFunctionFromConfig(
+            z: Utils.isLifeTimeCurve(velocityOverLifetime?.orbital.z ?? 0)
+              ? Utils.getCurveFunctionFromConfig(
                   generalData.particleSystemId,
                   velocityOverLifetime.orbital.z as LifetimeCurve
                 )
-              : undefined,
-          },
-          positionOffset: Vector3(),
-        })
+              : null,
+          ),
+          positionOffset: three.Vector3(),
+        )
       );
     }
 
@@ -470,7 +450,7 @@ class Particles {
       );
     });
 
-    const lifetimeValueKeys: Array<keyof NormalizedParticleSystemConfig> = [
+    final lifetimeValueKeys: Array<keyof NormalizedParticleSystemConfig> = [
       'rotationOverLifetime',
     ];
     lifetimeValueKeys.forEach((key) => {
@@ -492,13 +472,13 @@ class Particles {
       sizeAmount: noise.sizeAmount,
       sampler: noise.isActive
         ? new FBM({
-            seed: Math.random(),
+            seed: math.Random().nextDouble(),
             scale: noise.frequency,
             octaves: noise.octaves,
           })
         : null,
       offsets: noise.useRandomOffset
-        ? Array.from({ length: maxParticles }, () => Math.random() * 100)
+        ? List.generate(maxParticles, (i) => math.Random().nextDouble() * 100)// Array.from({ length: maxParticles }, () => Math.random() * 100)
         : null,
     );
 
@@ -511,30 +491,30 @@ class Particles {
           'value': particleMap,
         },
         'tiles': {
-          'value': textureSheetAnimation.tiles,
+          'value': textureSheetAnimation?.tiles,
         },
         'fps': {
-          'value': textureSheetAnimation.fps,
+          'value': textureSheetAnimation?.fps,
         },
         'useFPSForFrameIndex': {
-          'value': textureSheetAnimation.timeMode == TimeMode.fps,
+          'value': textureSheetAnimation?.timeMode == TimeMode.fps,
         },
         'backgroundColor': {
-          'value': renderer.backgroundColor,
+          'value': renderer?.backgroundColor,
         },
         'discardBackgroundColor': {
-          'value': renderer.discardBackgroundColor,
+          'value': renderer?.discardBackgroundColor,
         },
         'backgroundColorTolerance': {
-          'value': renderer.backgroundColorTolerance,
+          'value': renderer?.backgroundColorTolerance,
         },
       },
       'vertexShader': ParticleSystemVertexShader,
       'fragmentShader': ParticleSystemFragmentShader,
-      'transparent': renderer.transparent,
-      'blending': renderer.blending,
-      'depthTest': renderer.depthTest,
-      'depthWrite': renderer.depthWrite,
+      'transparent': renderer?.transparent,
+      'blending': renderer?.blending,
+      'depthTest': renderer?.depthTest,
+      'depthWrite': renderer?.depthWrite,
   });
 
     final geometry = three.BufferGeometry();
@@ -542,17 +522,13 @@ class Particles {
     for (int i = 0; i < maxParticles; i++)
       calculatePositionAndVelocity(
         generalData,
-        shape,
+        shape!,
         startSpeed,
         startPositions[i],
         velocities[i]
       );
 
-    geometry.setFromPoints(
-      Array.from({ length: maxParticles }, (_, index) =>
-        startPositions[index].clone()
-      )
-    );
+    geometry.setFromPoints( List.generate(maxParticles, (i) => startPositions[i].clone()));
 
     createFloat32AttributesRequest(
       String propertyName,
@@ -567,246 +543,241 @@ class Particles {
     };
 
     createFloat32AttributesRequest('isActive', 0);
-
     createFloat32AttributesRequest('lifetime', 0);
-
     createFloat32AttributesRequest(
       'startLifetime',
-      () => calculateValue(generalData.particleSystemId, startLifetime, 0) * 1000
+      () => Utils.calculateValue(generalData.particleSystemId, startLifetime, 0) * 1000
     );
 
     createFloat32AttributesRequest('startFrame', () =>
-      textureSheetAnimation.startFrame
-        ? calculateValue(
+      textureSheetAnimation?.startFrame != null
+        ? Utils.calculateValue(
             generalData.particleSystemId,
-            textureSheetAnimation.startFrame,
+            textureSheetAnimation!.startFrame,
             0
           )
         : 0
     );
 
     createFloat32AttributesRequest('opacity', () =>
-      calculateValue(generalData.particleSystemId, startOpacity, 0)
+      Utils.calculateValue(generalData.particleSystemId, startOpacity, 0)
     );
 
     createFloat32AttributesRequest('rotation', () =>
-      calculateValue(generalData.particleSystemId, startRotation, 0)
+      Utils.calculateValue(generalData.particleSystemId, startRotation, 0)
     );
 
     createFloat32AttributesRequest(
       'size',
-      (_, index) => generalData.startValues.startSize[index]
+      (_, index) => generalData.startValues?['startSize']?[index]
     );
 
     createFloat32AttributesRequest('rotation', 0);
 
-    const colorRandomRatio = Math.random();
+    final colorRandomRatio = math.Random().nextDouble();
     createFloat32AttributesRequest(
       'colorR',
       () =>
-        startColor.min!.r! +
+        startColor!.min!.r! +
         colorRandomRatio * (startColor.max!.r! - startColor.min!.r!)
     );
     createFloat32AttributesRequest(
       'colorG',
       () =>
-        startColor.min!.g! +
+        startColor!.min!.g! +
         colorRandomRatio * (startColor.max!.g! - startColor.min!.g!)
     );
     createFloat32AttributesRequest(
       'colorB',
       () =>
-        startColor.min!.b! +
+        startColor!.min!.b! +
         colorRandomRatio * (startColor.max!.b! - startColor.min!.b!)
     );
     createFloat32AttributesRequest('colorA', 0);
 
-    const deactivateParticle = (particleIndex: number) => {
-      geometry.attributes.isActive.array[particleIndex] = 0;
-      geometry.attributes.colorA.array[particleIndex] = 0;
-      geometry.attributes.colorA.needsUpdate = true;
+    final deactivateParticle = (int particleIndex){
+      geometry.attributes['isActive'].array[particleIndex] = 0;
+      geometry.attributes['colorA'].array[particleIndex] = 0;
+      geometry.attributes['colorA'].needsUpdate = true;
     };
 
-    const activateParticle = ({
-      particleIndex,
-      activationTime,
-      position,
-    }: {
-      particleIndex: number;
-      activationTime: number;
-      position: Required<Point3D>;
-    }) => {
-      geometry.attributes.isActive.array[particleIndex] = 1;
-      generalData.creationTimes[particleIndex] = activationTime;
+    activateParticle({
+      required int particleIndex,
+      required double activationTime,
+      required Point3D position,
+    }){
+      geometry.attributes['isActive'].array[particleIndex] = 1;
+      generalData.creationTimes?[particleIndex] = activationTime;
 
-      if (generalData.noise.offsets)
-        generalData.noise.offsets[particleIndex] = Math.random() * 100;
+      if (generalData.noise?.offsets != null){
+        generalData.noise!.offsets![particleIndex] = math.Random().nextDouble() * 100;
+      }
 
-      const colorRandomRatio = Math.random();
+      final colorRandomRatio = math.Random().nextDouble();
 
-      geometry.attributes.colorR.array[particleIndex] =
-        startColor.min!.r! +
+      geometry.attributes['colorR'].array[particleIndex] =
+        startColor!.min!.r! +
         colorRandomRatio * (startColor.max!.r! - startColor.min!.r!);
-      geometry.attributes.colorR.needsUpdate = true;
+      geometry.attributes['colorR'].needsUpdate = true;
 
-      geometry.attributes.colorG.array[particleIndex] =
+      geometry.attributes['colorG'].array[particleIndex] =
         startColor.min!.g! +
         colorRandomRatio * (startColor.max!.g! - startColor.min!.g!);
-      geometry.attributes.colorG.needsUpdate = true;
+      geometry.attributes['colorG'].needsUpdate = true;
 
-      geometry.attributes.colorB.array[particleIndex] =
+      geometry.attributes['colorB'].array[particleIndex] =
         startColor.min!.b! +
         colorRandomRatio * (startColor.max!.b! - startColor.min!.b!);
-      geometry.attributes.colorB.needsUpdate = true;
+      geometry.attributes['colorB'].needsUpdate = true;
 
-      geometry.attributes.startFrame.array[particleIndex] =
-        textureSheetAnimation.startFrame
-          ? calculateValue(
+      geometry.attributes['startFrame'].array[particleIndex] =
+        textureSheetAnimation?.startFrame != null
+          ? Utils.calculateValue(
               generalData.particleSystemId,
-              textureSheetAnimation.startFrame,
+              textureSheetAnimation!.startFrame,
               0
             )
           : 0;
-      geometry.attributes.startFrame.needsUpdate = true;
+      geometry.attributes['startFrame'].needsUpdate = true;
 
-      geometry.attributes.startLifetime.array[particleIndex] =
-        calculateValue(
+      geometry.attributes['startLifetime'].array[particleIndex] =
+        Utils.calculateValue(
           generalData.particleSystemId,
           startLifetime,
           generalData.normalizedLifetimePercentage
         ) * 1000;
-      geometry.attributes.startLifetime.needsUpdate = true;
+      geometry.attributes['startLifetime'].needsUpdate = true;
 
-      generalData.startValues.startSize[particleIndex] = calculateValue(
+      generalData.startValues?['startSize']?[particleIndex] = Utils.calculateValue(
         generalData.particleSystemId,
         startSize,
         generalData.normalizedLifetimePercentage
       );
-      geometry.attributes.size.array[particleIndex] =
-        generalData.startValues.startSize[particleIndex];
-      geometry.attributes.size.needsUpdate = true;
+      geometry.attributes['size'].array[particleIndex] =
+        generalData.startValues?['startSize']?[particleIndex];
+      geometry.attributes['size'].needsUpdate = true;
 
-      generalData.startValues.startOpacity[particleIndex] = calculateValue(
+      generalData.startValues?['startOpacity']?[particleIndex] = Utils.calculateValue(
         generalData.particleSystemId,
         startOpacity,
         generalData.normalizedLifetimePercentage
       );
-      geometry.attributes.colorA.array[particleIndex] =
-        generalData.startValues.startOpacity[particleIndex];
-      geometry.attributes.colorA.needsUpdate = true;
+      geometry.attributes['colorA'].array[particleIndex] =
+        generalData.startValues?['startOpacity']?[particleIndex];
+      geometry.attributes['colorA'].needsUpdate = true;
 
-      geometry.attributes.rotation.array[particleIndex] = calculateValue(
+      geometry.attributes['rotation'].array[particleIndex] = Utils.calculateValue(
         generalData.particleSystemId,
         startRotation,
         generalData.normalizedLifetimePercentage
       );
-      geometry.attributes.rotation.needsUpdate = true;
+      geometry.attributes['rotation'].needsUpdate = true;
 
-      if (normalizedConfig.rotationOverLifetime.isActive)
+      if (normalizedConfig.rotationOverLifetime?.isActive == true)
         generalData.lifetimeValues.rotationOverLifetime[particleIndex] =
-          MathUtils.randFloat(
+          three.MathUtils.randFloat(
             normalizedConfig.rotationOverLifetime.min!,
             normalizedConfig.rotationOverLifetime.max!
           );
 
       calculatePositionAndVelocity(
         generalData,
-        shape,
+        shape!,
         startSpeed,
         startPositions[particleIndex],
         velocities[particleIndex]
       );
-      const positionIndex = Math.floor(particleIndex * 3);
-      geometry.attributes.position.array[positionIndex] =
+      final positionIndex = (particleIndex * 3).floor();
+      geometry.attributes['position'].array[positionIndex] =
         position.x + startPositions[particleIndex].x;
-      geometry.attributes.position.array[positionIndex + 1] =
+      geometry.attributes['position'].array[positionIndex + 1] =
         position.y + startPositions[particleIndex].y;
-      geometry.attributes.position.array[positionIndex + 2] =
+      geometry.attributes['position'].array[positionIndex + 2] =
         position.z + startPositions[particleIndex].z;
-      geometry.attributes.position.needsUpdate = true;
+      geometry.attributes['position'].needsUpdate = true;
 
-      if (generalData.linearVelocityData) {
-        generalData.linearVelocityData[particleIndex].speed.set(
-          normalizedConfig.velocityOverLifetime.linear.x
-            ? calculateValue(
+      if (generalData.linearVelocityData != null) {
+        generalData.linearVelocityData![particleIndex].speed?.setValues(
+          normalizedConfig.velocityOverLifetime?.linear.x != null
+            ? Utils.calculateValue(
                 generalData.particleSystemId,
-                normalizedConfig.velocityOverLifetime.linear.x,
+                normalizedConfig.velocityOverLifetime!.linear.x,
                 0
               )
             : 0,
-          normalizedConfig.velocityOverLifetime.linear.y
-            ? calculateValue(
+          normalizedConfig.velocityOverLifetime?.linear.y != null
+            ? Utils.calculateValue(
                 generalData.particleSystemId,
-                normalizedConfig.velocityOverLifetime.linear.y,
+                normalizedConfig.velocityOverLifetime!.linear.y,
                 0
               )
             : 0,
-          normalizedConfig.velocityOverLifetime.linear.z
-            ? calculateValue(
+          normalizedConfig.velocityOverLifetime?.linear.z != null
+            ? Utils.calculateValue(
                 generalData.particleSystemId,
-                normalizedConfig.velocityOverLifetime.linear.z,
+                normalizedConfig.velocityOverLifetime!.linear.z,
                 0
               )
             : 0
         );
       }
 
-      if (generalData.orbitalVelocityData) {
-        generalData.orbitalVelocityData[particleIndex].speed.set(
-          normalizedConfig.velocityOverLifetime.orbital.x
-            ? calculateValue(
+      if (generalData.orbitalVelocityData != null) {
+        generalData.orbitalVelocityData![particleIndex].speed?.setValues(
+          normalizedConfig.velocityOverLifetime?.orbital.x != null
+            ? Utils.calculateValue(
                 generalData.particleSystemId,
-                normalizedConfig.velocityOverLifetime.orbital.x,
+                normalizedConfig.velocityOverLifetime!.orbital.x,
                 0
               )
             : 0,
-          normalizedConfig.velocityOverLifetime.orbital.y
-            ? calculateValue(
+          normalizedConfig.velocityOverLifetime?.orbital.y != null
+            ? Utils.calculateValue(
                 generalData.particleSystemId,
-                normalizedConfig.velocityOverLifetime.orbital.y,
+                normalizedConfig.velocityOverLifetime!.orbital.y,
                 0
               )
             : 0,
-          normalizedConfig.velocityOverLifetime.orbital.z
-            ? calculateValue(
+          normalizedConfig.velocityOverLifetime?.orbital.z != null
+            ? Utils.calculateValue(
                 generalData.particleSystemId,
-                normalizedConfig.velocityOverLifetime.orbital.z,
+                normalizedConfig.velocityOverLifetime!.orbital.z,
                 0
               )
             : 0
         );
-        generalData.orbitalVelocityData[particleIndex].positionOffset.set(
+        generalData.orbitalVelocityData?[particleIndex].positionOffset?.setValues(
           startPositions[particleIndex].x,
           startPositions[particleIndex].y,
           startPositions[particleIndex].z
         );
       }
 
-      geometry.attributes.lifetime.array[particleIndex] = 0;
-      geometry.attributes.lifetime.needsUpdate = true;
+      geometry.attributes['lifetime'].array[particleIndex] = 0;
+      geometry.attributes['lifetime'].needsUpdate = true;
 
-      applyModifiers({
+      Modifiers.applyModifiers(
         delta: 0,
-        generalData,
-        normalizedConfig,
-        attributes: particleSystem.geometry.attributes,
+        generalData: generalData,
+        normalizedConfig: normalizedConfig,
+        attributes: particleSystem.geometry!.attributes,
         particleLifetimePercentage: 0,
-        particleIndex,
-      });
+        particleIndex: particleIndex,
+      );
     };
 
-    let particleSystem = Points(geometry, material);
+    three.Points particleSystem = three.Points(geometry, material);
 
-    particleSystem.position.copy(transform!.position!);
+    particleSystem.position.setFrom(transform!.position!);
     particleSystem.rotation.x = three.MathUtils.degToRad(transform.rotation!.x);
     particleSystem.rotation.y = three.MathUtils.degToRad(transform.rotation!.y);
     particleSystem.rotation.z = three.MathUtils.degToRad(transform.rotation!.z);
-    particleSystem.scale.copy(transform.scale!);
+    particleSystem.scale.setFrom(transform.scale!);
 
-    const calculatedCreationTime =
-      now + calculateValue(generalData.particleSystemId, startDelay) * 1000;
+    final calculatedCreationTime =
+      now + Utils.calculateValue(generalData.particleSystemId, startDelay) * 1000;
 
-    let wrapper: Gyroscope | undefined;
+    Gyroscope? wrapper;
     if (normalizedConfig.simulationSpace == SimulationSpace.world) {
       wrapper = new Gyroscope();
       wrapper.add(particleSystem);
@@ -816,20 +787,20 @@ class Particles {
       particleSystem: particleSystem,
       wrapper: wrapper,
       generalData: generalData,
-      onUpdate:onUpdate,
+      onUpdate: onUpdate,
       onComplete: onComplete,
       creationTime: calculatedCreationTime,
       lastEmissionTime: calculatedCreationTime,
       duration:duration,
-      looping:looping,
+      looping: looping ?? false,
       simulationSpace:simulationSpace,
-      gravity:gravity,
+      gravity: gravity ?? 0,
       emission:emission,
       normalizedConfig:normalizedConfig,
       iterationCount: 0,
       velocities:velocities,
-      deactivateParticle:deactivateParticle,
-      activateParticle:activateParticle,
+      deactivateParticle: deactivateParticle,
+      activateParticle: activateParticle,
     ));
 
     final resumeEmitter = () => (generalData.isEnabled = true);
@@ -842,9 +813,9 @@ class Particles {
       pauseEmitter:pauseEmitter,
       dispose:dispose,
     );
-  };
+  }
 
-  CycleData updateParticleSystems({ now, delta, elapsed }){
+  void updateParticleSystems({ now, delta, elapsed }){
     createdParticleSystems.forEach((props){
       final onUpdate = props.onUpdate;
       final generalData = props.generalData;
@@ -881,76 +852,81 @@ class Particles {
       final gravityVelocity = generalData.gravityVelocity;
       final isEnabled = generalData.isEnabled;
 
-      if (wrapper?.parent)
+      if (wrapper?.parent != null){
         generalData.wrapperQuaternion?.setFrom(wrapper.parent.quaternion);
-
-      const lastWorldPositionSnapshot = { ...lastWorldPosition };
-
-      if (Array.isArray(particleSystem.material))
-        particleSystem.material.forEach((material) => {
-          if (material instanceof ShaderMaterial)
-            material.uniforms.elapsed.value = elapsed;
-        });
-      else {
-        if (particleSystem.material instanceof ShaderMaterial)
-          particleSystem.material.uniforms.elapsed.value = elapsed;
       }
 
-      particleSystem.getWorldPosition(currentWorldPosition);
-      if (lastWorldPosition.x !== -99999) {
-        worldPositionChange.set(
-          currentWorldPosition.x - lastWorldPosition.x,
+      final lastWorldPositionSnapshot = { ...lastWorldPosition };
+
+      if (particleSystem?.material is three.GroupMaterial){
+        (particleSystem!.material as three.GroupMaterial).children.forEach((material){
+          if (material is three.ShaderMaterial){
+            material.uniforms['elapsed']['value'] = elapsed;
+          }
+        });
+      }
+      else {
+        if (particleSystem?.material is three.ShaderMaterial){
+          particleSystem!.material?.uniforms['elapsed']['value'] = elapsed;
+        }
+      }
+
+      particleSystem?.getWorldPosition(currentWorldPosition);
+      if (lastWorldPosition?.x != -99999) {
+        worldPositionChange?.setValues(
+          currentWorldPosition!.x - lastWorldPosition!.x,
           currentWorldPosition.y - lastWorldPosition.y,
           currentWorldPosition.z - lastWorldPosition.z
         );
       }
-      generalData.distanceFromLastEmitByDistance += worldPositionChange.length();
-      particleSystem.getWorldPosition(lastWorldPosition);
-      particleSystem.getWorldQuaternion(worldQuaternion);
+      generalData.distanceFromLastEmitByDistance += worldPositionChange!.length;
+      particleSystem?.getWorldPosition(lastWorldPosition);
+      particleSystem?.getWorldQuaternion(worldQuaternion!);
       if (
-        lastWorldQuaternion.x === -99999 ||
-        lastWorldQuaternion.x !== worldQuaternion.x ||
-        lastWorldQuaternion.y !== worldQuaternion.y ||
-        lastWorldQuaternion.z !== worldQuaternion.z
+        lastWorldQuaternion?.x == -99999 ||
+        lastWorldQuaternion?.x != worldQuaternion?.x ||
+        lastWorldQuaternion?.y != worldQuaternion?.y ||
+        lastWorldQuaternion?.z != worldQuaternion?.z
       ) {
-        worldEuler.setFromQuaternion(worldQuaternion);
-        lastWorldQuaternion.copy(worldQuaternion);
-        gravityVelocity.set(
-          lastWorldPosition.x,
+        worldEuler?.setFromQuaternion(worldQuaternion!);
+        lastWorldQuaternion?.setFrom(worldQuaternion!);
+        gravityVelocity?.setValues(
+          lastWorldPosition!.x,
           lastWorldPosition.y + gravity,
           lastWorldPosition.z
         );
-        particleSystem.worldToLocal(gravityVelocity);
+        particleSystem?.worldToLocal(gravityVelocity!);
       }
 
-      generalData.creationTimes.forEach((entry, index) => {
-        if (particleSystem.geometry.attributes.isActive.array[index]) {
-          const particleLifetime = now - entry;
+      int index = 0;
+      generalData.creationTimes?.forEach((entry){
+        if (particleSystem?.geometry?.attributes['isActive'].array[index] != null) {
+          final particleLifetime = now - entry;
           if (
             particleLifetime >
-            particleSystem.geometry.attributes.startLifetime.array[index]
-          )
-            deactivateParticle(index);
+            (particleSystem?.geometry?.attributes['startLifetime'].array[index] ?? 0)
+          ){
+            deactivateParticle?.call(index);
+          }
           else {
-            const velocity = velocities[index];
-            velocity.x -= gravityVelocity.x * delta;
+            final velocity = velocities![index];
+            velocity.x -= gravityVelocity!.x * delta;
             velocity.y -= gravityVelocity.y * delta;
             velocity.z -= gravityVelocity.z * delta;
 
             if (
-              gravity !== 0 ||
-              velocity.x !== 0 ||
-              velocity.y !== 0 ||
-              velocity.z !== 0 ||
-              worldPositionChange.x !== 0 ||
-              worldPositionChange.y !== 0 ||
-              worldPositionChange.z !== 0
+              gravity != 0 ||
+              velocity.x != 0 ||
+              velocity.y != 0 ||
+              velocity.z != 0 ||
+              worldPositionChange.x != 0 ||
+              worldPositionChange.y != 0 ||
+              worldPositionChange.z != 0
             ) {
-              const positionIndex = index * 3;
-              const positionArr =
-                particleSystem.geometry.attributes.position.array;
+              final positionIndex = index * 3;
+              final positionArr = particleSystem!.geometry!.attributes['position'].array;
 
-              if (simulationSpace === SimulationSpace.WORLD) {
+              if (simulationSpace == SimulationSpace.world) {
                 positionArr[positionIndex] -= worldPositionChange.x;
                 positionArr[positionIndex + 1] -= worldPositionChange.y;
                 positionArr[positionIndex + 2] -= worldPositionChange.z;
@@ -959,60 +935,61 @@ class Particles {
               positionArr[positionIndex] += velocity.x * delta;
               positionArr[positionIndex + 1] += velocity.y * delta;
               positionArr[positionIndex + 2] += velocity.z * delta;
-              particleSystem.geometry.attributes.position.needsUpdate = true;
+              particleSystem!.geometry!.attributes['position'].needsUpdate = true;
             }
 
-            particleSystem.geometry.attributes.lifetime.array[index] =
-              particleLifetime;
-            particleSystem.geometry.attributes.lifetime.needsUpdate = true;
+            particleSystem!.geometry!.attributes['lifetime'].array[index] = particleLifetime;
+            particleSystem.geometry!.attributes['lifetime'].needsUpdate = true;
 
-            const particleLifetimePercentage =
+            final particleLifetimePercentage =
               particleLifetime /
-              particleSystem.geometry.attributes.startLifetime.array[index];
-            applyModifiers({
-              delta,
-              generalData,
-              normalizedConfig,
-              attributes: particleSystem.geometry.attributes,
-              particleLifetimePercentage,
+              particleSystem.geometry!.attributes['startLifetime'].array[index];
+              
+            Modifiers.applyModifiers(
+              delta: delta,
+              generalData: generalData,
+              normalizedConfig: normalizedConfig!,
+              attributes: particleSystem!.geometry!.attributes,
+              particleLifetimePercentage: particleLifetimePercentage,
               particleIndex: index,
-            });
+            );
           }
         }
+        index++;
       });
 
       if (isEnabled && (looping || lifetime < duration * 1000)) {
-        const emissionDelta = now - lastEmissionTime;
-        const neededParticlesByTime = emission.rateOverTime
-          ? Math.floor(
-              calculateValue(
+        final emissionDelta = now - lastEmissionTime;
+        final neededParticlesByTime = emission?.rateOverTime != null
+          ? (
+              Utils.calculateValue(
                 generalData.particleSystemId,
-                emission.rateOverTime,
+                emission!.rateOverTime,
                 generalData.normalizedLifetimePercentage
               ) *
                 (emissionDelta / 1000)
-            )
+            ).floor()
           : 0;
 
-        const rateOverDistance = emission.rateOverDistance
-          ? calculateValue(
+        final rateOverDistance = emission?.rateOverDistance != null
+          ? Utils.calculateValue(
               generalData.particleSystemId,
-              emission.rateOverDistance,
+              emission!.rateOverDistance,
               generalData.normalizedLifetimePercentage
             )
           : 0;
-        const neededParticlesByDistance =
+        final neededParticlesByDistance =
           rateOverDistance > 0 && generalData.distanceFromLastEmitByDistance > 0
-            ? Math.floor(
+            ? (
                 generalData.distanceFromLastEmitByDistance /
-                  (1 / rateOverDistance!)
-              )
+                  (1 / rateOverDistance)
+              ).floor()
             : 0;
-        const distanceStep =
+        final distanceStep =
           neededParticlesByDistance > 0
-            ? {
+            ? Point3D(
                 x:
-                  (currentWorldPosition.x - lastWorldPositionSnapshot.x) /
+                  (currentWorldPosition!.x - lastWorldPositionSnapshot.x) /
                   neededParticlesByDistance,
                 y:
                   (currentWorldPosition.y - lastWorldPositionSnapshot.y) /
@@ -1020,20 +997,20 @@ class Particles {
                 z:
                   (currentWorldPosition.z - lastWorldPositionSnapshot.z) /
                   neededParticlesByDistance,
-              }
+            )
             : null;
-        const neededParticles = neededParticlesByTime + neededParticlesByDistance;
+        final neededParticles = neededParticlesByTime + neededParticlesByDistance;
 
         if (rateOverDistance > 0 && neededParticlesByDistance >= 1) {
           generalData.distanceFromLastEmitByDistance = 0;
         }
 
         if (neededParticles > 0) {
-          let generatedParticlesByDistanceNeeds = 0;
-          for (let i = 0; i < neededParticles; i++) {
-            let particleIndex = -1;
-            particleSystem.geometry.attributes.isActive.array.find(
-              (isActive, index) => {
+          int generatedParticlesByDistanceNeeds = 0;
+          for (int i = 0; i < neededParticles; i++) {
+            int particleIndex = -1;
+            particleSystem?.geometry?.attributes['isActive'].array,.find(
+              (isActive, index){
                 if (!isActive) {
                   particleIndex = index;
                   return true;
@@ -1043,45 +1020,45 @@ class Particles {
             );
 
             if (
-              particleIndex !== -1 &&
+              particleIndex != -1 &&
               particleIndex <
-                particleSystem.geometry.attributes.isActive.array.length
+                (particleSystem?.geometry?.attributes['isActive'].array.length ?? 0)
             ) {
-              let position: Required<Point3D> = { x: 0, y: 0, z: 0 };
+              Point3D position = Point3D();
               if (
-                distanceStep &&
+                distanceStep != null &&
                 generatedParticlesByDistanceNeeds < neededParticlesByDistance
               ) {
-                position = {
+                position = Point3D(
                   x: distanceStep.x * generatedParticlesByDistanceNeeds,
                   y: distanceStep.y * generatedParticlesByDistanceNeeds,
                   z: distanceStep.z * generatedParticlesByDistanceNeeds,
-                };
+                );
                 generatedParticlesByDistanceNeeds++;
               }
-              activateParticle({
-                particleIndex,
+              activateParticle?.call(
+                particleIndex: particleIndex,
                 activationTime: now,
-                position,
-              });
+                position: position,
+              );
               props.lastEmissionTime = now;
             }
           }
         }
 
-        if (onUpdate)
-          onUpdate({
-            particleSystem,
-            delta,
-            elapsed,
-            lifetime,
-            normalizedLifetime,
+        if (onUpdate != null)
+          onUpdate(
+            particleSystem: particleSystem,
+            delta: delta,
+            elapsed: elapsed,
+            lifetime: lifetime,
+            normalizedLifetime: normalizedLifetime,
             iterationCount: iterationCount + 1,
-          });
-      } else if (onComplete)
-        onComplete({
-          particleSystem,
-        });
+          );
+      } else if (onComplete!= null)
+        onComplete(
+          particleSystem: particleSystem,
+        );
     });
-  };
+  }
 }

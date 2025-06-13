@@ -56,7 +56,7 @@ import 'package:example/loaders/webgl_loader_vox.dart';
 import 'package:example/loaders/webgl_loader_xyz.dart';
 import 'package:example/material/webgl_materials_video.dart';
 import 'package:example/src/statistics.dart';
-//import 'package:example/temp/temp.dart';
+import 'package:example/temp/temp.dart';
 import 'package:example/texture/webgl_video_texture.dart';
 import 'package:example/material/webgl_materials_car.dart';
 import 'package:example/material/webgl_materials_physical_transmission.dart';
@@ -210,9 +210,9 @@ class MyAppState extends State<MyApp> {
                   prevLocation: pageLocation,
                 );
               },
-              // '/temp':(BuildContext context) {
-              //   return const Temp();
-              // },
+              '/temp':(BuildContext context) {
+                return const Temp();
+              },
               '/webgl_periodictable':(BuildContext context) {
                 return const WebglPeriodictable();
               },

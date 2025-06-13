@@ -240,7 +240,7 @@ class Utils{
     }
   }
 
-  bool isLifeTimeCurve(
+  static bool isLifeTimeCurve(
     value,//: finalant | RandomBetweenTwofinalants | LifetimeCurve
   ){
     return (value !is num && value !is int && value !is double) && value is CurveBase;//typeof value !== 'number' && 'type' in value;

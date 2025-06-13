@@ -1,5 +1,5 @@
 const List<String> filesJson = [
-  //'temp',
+  'temp',
   'webgl_periodictable',
   'timing',
   'orientation',

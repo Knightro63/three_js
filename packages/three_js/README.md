@@ -80,7 +80,7 @@ Find the example for this API [here](https://github.com/Knightro63/three_js/tree
  - Protoplanets does not function correctly
 
 **Android**
- - Morphtargets dones not work
+ - Morphtargets does not work on some devices
  - Some RGBELoaders cause app to crash
  
 **Windows**

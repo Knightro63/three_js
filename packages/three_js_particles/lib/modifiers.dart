@@ -5,8 +5,8 @@ import 'types.dart';
 final noiseInput = three.Vector3(0, 0, 0);
 final orbitalEuler = three.Euler();
 
-class Modifers{
-  void applyModifiers({
+class Modifiers{
+  static void applyModifiers({
     required double delta,
     required GeneralData generalData,
     required NormalizedParticleSystemConfig normalizedConfig,
