@@ -53,6 +53,8 @@ dependency_overrides:
     path: ../packages/three_js_advanced_loaders
   three_js_core_loaders:
     path: ../packages/three_js_core_loaders
+  flutter_angle:
+    path: ../../flutter_angle/flutter_angle
   file_picker: ^10.1.9
 
 flutter:
