@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:js_interop';
 import 'dart:typed_data';
-import 'dart:ui' as ui;
+//import 'dart:ui' as ui;
 import 'package:web/web.dart' as html;
 import 'dart:convert';
 import 'package:three_js_core/three_js_core.dart';
@@ -66,15 +66,15 @@ html.HTMLImageElement setDimensions(html.HTMLImageElement imageElement, String? 
   return imageElement;
 }
 
-Future<List>? _getDimensions(Uint8List bytes) async{
-  final codec = await ui.instantiateImageCodec(bytes);
-  final frameInfo = await codec.getNextFrame();
-  final width = frameInfo.image.width;
-  final height = frameInfo.image.height;
-  frameInfo.image.dispose();
+// Future<List>? _getDimensions(Uint8List bytes) async{
+//   final codec = await ui.instantiateImageCodec(bytes);
+//   final frameInfo = await codec.getNextFrame();
+//   final width = frameInfo.image.width;
+//   final height = frameInfo.image.height;
+//   frameInfo.image.dispose();
 
-  return [width, height];
-}
+//   return [width, height];
+// }
 
 List? _getJpegDimensions(Uint8List bytes) {
   // Verify the JPEG header (SOI marker)
@@ -134,6 +134,11 @@ Future<html.HTMLImageElement> createImageElementFromBytes(Uint8List bytes, [Stri
   }
 
   return imageElement;
+}
+
+Future<ImageElement?> processImageBlob(Blob blob, bool flipY) async{
+  final hblob = html.Blob([blob.data.buffer].jsify() as JSArray<JSAny>);
+  return await processImage(null, html.URL.createObjectURL(hblob),flipY);
 }
 
 // Fixed for web and bytes sent

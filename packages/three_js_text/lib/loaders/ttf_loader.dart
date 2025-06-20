@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'dart:io';
 import 'package:three_js_core_loaders/three_js_core_loaders.dart';
-import 'package:opentype_dart/index.dart' as opentype;
 import 'package:three_js_text/three_js_text.dart';
 
 ///

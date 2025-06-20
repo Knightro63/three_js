@@ -3,7 +3,6 @@
  * Texture parameters for an auto-generated target texture
  * depthBuffer/stencilBuffer: Booleans to indicate if we should generate these buffers
 */
-// import "package:universal_html/html.dart";
 
 part of three_renderers;
 

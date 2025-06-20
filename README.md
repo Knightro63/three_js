@@ -27,27 +27,34 @@ This is a dart conversion of three.js and three_dart, originally created by [@mr
  - Metal supported
 
 **iOS-Simulator**
- - No longer supported due to IOSurface issue, please use override to flutter_angle: ^0.1.0 for testing on simulator.
+ - Minimum os Deployment Target: 12.0
+ - Xcode 13 or newer
+ - Swift 5
+ - Metal supported
 
 **Android**
- - minSdkVersion: 21
  - compileSdkVersion: 34
+ - minSdk: 21
  - OpenGL supported
  - Vulkan supported
 
 **Android Emulator**
- - Please set useOpenGL to true for a smooth experence.
+ - compileSdkVersion: 34
+ - minSdk: 21
+ - OpenGL supported
 
 **Windows**
- - Intel supported.
- - AMD supported.
- - Direct3D 11 and OpenGL supported
+ - Intel supported
+ - AMD supported
+ - Qualcom supported
+ - Direct3D 11 supported
+ - OpenGL supported
 
 **Web**
  - WebGL2 supported
 
 **WASM**
- - Currently not supported due to WebGL2RenderingContext conversion issue.
+ - WebGL2 supported; please add `<script src="https://cdn.jsdelivr.net/gh/Knightro63/flutter_angle/assets/gles_bindings.js"></script>` to your index.html to load the js_interop file.
 
 **Linux**
  - Unsupported
@@ -72,6 +79,7 @@ Find the example for this API [here](https://github.com/Knightro63/three_js/tree
  - Collada kinnametics does not work
  - PMREM gives weird artifacts
  - VideoTexture only works for web
+ - Change screen size does not function currently
 
 **MacOS**
  - Audio has a [bug](https://github.com/bluefireteam/audioplayers/issues/1296)

@@ -1,3 +1,10 @@
+## 0.2.0
+
+* Updated: flutter_angle: 0.3.0
+* Added: WASM Support.
+* Added: iOS Simulator Support.
+* Removed: three_js_text due to WASM support
+
 ## 0.1.7
 
 * Updated to newest version of flutter_angle: 0.2.8

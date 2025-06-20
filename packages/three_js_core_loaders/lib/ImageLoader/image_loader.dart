@@ -6,9 +6,8 @@ import 'package:flutter/services.dart';
 import '../loaders/loader.dart';
 import '../utils/cache.dart';
 import 'package:http/http.dart' as http;
-import 'package:universal_html/html.dart' as uhtml;
 import 'package:three_js_core/three_js_core.dart';
-import 'image_loader_app.dart' if (dart.library.js) 'image_loader_web.dart';
+import 'image_loader_app.dart' if (dart.library.js_interop) 'image_loader_web.dart';
 
 /// A loader for loading an [Image]. This is used internally by the
 /// [CubeTextureLoader], [ObjectLoader] and [TextureLoader].
@@ -51,8 +50,7 @@ class ImageLoader extends Loader {
   @override
   Future<ImageElement?> fromBlob(Blob blob) async{
     if(kIsWeb){
-      final hblob = uhtml.Blob([blob.data.buffer], blob.options["type"]);
-      return await processImage(null, uhtml.Url.createObjectUrl(hblob),flipY);
+      return await processImageBlob(blob,flipY);
     }
     return await fromBytes(blob.data);
   }

@@ -1,6 +1,6 @@
 name: three_js
 description: "Flutter package converted from threejs and three_dart to allow users to view, edit, and control 3D models."
-version: 0.1.7
+version: 0.2.0
 homepage: https://github.com/Knightro63/three_js/tree/main/packages/three_js
 
 topics:
@@ -25,7 +25,7 @@ dependencies:
   three_js_core_loaders: ^0.1.0
   three_js_curves: ^0.1.0
   three_js_simple_loaders: ^0.1.0
-  three_js_text: ^0.1.0
+  #three_js_text: ^0.1.0
   three_js_audio: ^0.1.0
   three_js_geometry: ^0.1.2
 

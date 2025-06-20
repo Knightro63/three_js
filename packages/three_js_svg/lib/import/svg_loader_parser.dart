@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'package:three_js_curves/three_js_curves.dart';
+import 'package:xml/xml.dart' as xmld;
 import 'package:universal_html/parsing.dart';
 import 'package:universal_html/html.dart' as uhtml;
 import '../utils/color_utils.dart';
@@ -14,13 +15,14 @@ class SVGData{
     this.xml
   });
 
-  final uhtml.Element? xml;
+  final xmld.XmlName? xml;
   final List<ShapePath> paths;
 }
 
 class SVGLoaderParser {
   SVGLoaderParser(String text, {this.defaultDPI = 90, this.defaultUnit = SVGUnits.px}) {
-    xml = parseXmlDocument(text);
+    xmlN = xmld.XmlDocument.parse(text);
+    xmlD = parseXmlDocument(text);
   }
 
   SVGLoaderParser.parser();
@@ -42,7 +44,8 @@ class SVGLoaderParser {
   SVGUnits defaultUnit = SVGUnits.px;
   num defaultDPI = 90;
 
-  late uhtml.XmlDocument xml;
+  late final xmld.XmlDocument? xmlN;
+  late final uhtml.XmlDocument xmlD;
 
   // Units
 
@@ -88,7 +91,7 @@ class SVGLoaderParser {
 
   // Function parse =========== start
   SVGData parse(text) {
-    parseNode(xml.documentElement, {
+    parseNode(xmlN?.firstElementChild, {
       "fill": '#000',
       "fillOpacity": 1,
       "strokeOpacity": 1,
@@ -98,7 +101,7 @@ class SVGLoaderParser {
       "strokeMiterLimit": 4
     });
 
-    return SVGData(paths: paths, xml: xml.documentElement);
+    return SVGData(paths: paths, xml: xmlN?.firstElementChild?.name);
   }
 
   double parseFloatWithUnits([String? string]) {
@@ -449,10 +452,9 @@ class SVGLoaderParser {
 
   // Transforms
 
-  Matrix3? getNodeTransform(node) {
+  Matrix3? getNodeTransform(xmld.XmlElement node) {
     if (!(node.hasAttribute('transform') ||
-        (node.nodeName == 'use' &&
-            (node.hasAttribute('x') || node.hasAttribute('y'))))) {
+        (node.name.local == 'use' && (node.hasAttribute('x') || node.hasAttribute('y'))))) {
       return Matrix3.identity();
     }
 
@@ -1262,16 +1264,16 @@ class SVGLoaderParser {
     }
   }
 
-  void parseNode(node, style) {
-    if (node.nodeType != 1) return;
+  void parseNode(xmld.XmlElement? node, style) {
+    if (node == null) return;
+    print(node.name.local);
 
     final transform = getNodeTransform(node);
-
     bool traverseChildNodes = true;
 
     dynamic path;
-
-    switch (node.nodeName) {
+    print(node.name.local);
+    switch (node.name.local) {
       case 'svg':
         break;
 
@@ -1285,9 +1287,9 @@ class SVGLoaderParser {
 
       case 'path':
         style = parseStyle(node, style);
-        if (node.hasAttribute('d')) {
-          path = parsePathNode(node);
-        }
+        // if (node.hasAttribute('d')) {
+        //   path = parsePathNode(node);
+        // }
         break;
 
       case 'rect':
@@ -1326,14 +1328,14 @@ class SVGLoaderParser {
 
       case 'use':
         style = parseStyle(node, style);
-        final usedNodeId = node.href.baseVal.substring(1);
-        final usedNode = node.viewportElement.getElementById(usedNodeId);
-        if (usedNode != null) {
-          parseNode(usedNode, style);
-        } 
-        else {
-          console.info("SVGLoader: 'use node' references non-existent node id: $usedNodeId");
-        }
+        // final usedNodeId = node.href.baseVal.substring(1);
+        // final usedNode = node.viewportElement.getElementById(usedNodeId);
+        // if (usedNode != null) {
+        //   parseNode(usedNode, style);
+        // } 
+        // else {
+        //   console.info("SVGLoader: 'use node' references non-existent node id: $usedNodeId");
+        // }
 
         break;
 
@@ -1355,11 +1357,10 @@ class SVGLoaderParser {
     }
 
     if (traverseChildNodes) {
-      final nodes = node.childNodes;
-
-      for (int i = 0; i < nodes.length; i++) {
-        parseNode(nodes[i], style);
-      }
+      final nodes = node.childElements;
+      nodes.forEach((action){
+        parseNode(action, style);
+      });
     }
 
     if (transform != null) {

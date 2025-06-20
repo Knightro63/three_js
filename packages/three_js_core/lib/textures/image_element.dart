@@ -8,7 +8,7 @@ class ImageElement {
   String? src;
   bool complete = true;
 
-  // NativeArray or ImageElement from dart:html
+  // NativeArray or ImageElement
   dynamic data;
   int depth;
 

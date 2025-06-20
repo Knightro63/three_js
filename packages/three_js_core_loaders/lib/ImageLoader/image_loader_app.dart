@@ -78,6 +78,9 @@ Image imageProcess(DecodeParam param) {
 
   return image;
 }
+Future<ImageElement?> processImageBlob(Blob blob, bool flipY) async{
+  throw('processImageBlob not implimented.');
+}
 
 Future<ImageElement?> processImage(Uint8List? bytes, String? url, bool flipY) async{
   Image? image = bytes == null? null:decodeImage(bytes);

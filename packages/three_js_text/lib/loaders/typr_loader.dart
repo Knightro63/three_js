@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'dart:io';
 import 'package:three_js_core_loaders/three_js_core_loaders.dart';
-import 'package:typr_dart/typr_dart.dart' as typr_dart;
 import 'package:three_js_text/three_js_text.dart';
 
 /// Requires opentype.js to be included in the project.
@@ -68,37 +67,6 @@ class TYPRLoader extends Loader {
 
   TYPRFont _parse(Uint8List arraybuffer) {
     TYPRFont convert(typr_dart.Font font, bool reversed) {
-      // final round = Math.round;
-
-      // final glyphs = {};
-      // final scale = (100000) / ((font.head["unitsPerEm"] ?? 2048) * 72);
-
-      // final numGlyphs = font.maxp["numGlyphs"];
-
-      // for ( final i = 0; i < numGlyphs; i ++ ) {
-
-      // 	final path = font.glyphToPath(i);
-
-      // 	if ( path != null ) {
-      //     final aWidths = font.hmtx["aWidth"];
-
-      //     path["ha"] = round( aWidths[i] * scale );
-
-      //     final crds = path["crds"];
-      //     List<num> _scaledCrds = [];
-
-      //     crds.forEach((nrd) {
-      //       _scaledCrds.add(nrd * scale);
-      //     });
-
-      //     path["crds"] = _scaledCrds;
-
-      // 		glyphs[i ] = path;
-
-      // 	}
-
-      // }
-
       return TYPRFont({
         "font": font,
         "familyName": font.getFamilyName(),
