@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/gestures.dart';
@@ -35,8 +36,6 @@ class Peripherals extends StatefulWidget{
     return PeripheralsState();
   }
 }
-
-
 
 class PeripheralsState extends State<Peripherals> {
   final Map<PeripheralType, List<Function>> _listeners = {};
@@ -95,6 +94,8 @@ class PeripheralsState extends State<Peripherals> {
     ..onUpdate = (event){
       _onDragEvent(context, PeripheralType.pointermove,event);
     };
+
+    isWindows = !kIsWeb && Platform.isWindows;
   }
 
   void removeAllListeners() {
@@ -114,6 +115,7 @@ class PeripheralsState extends State<Peripherals> {
   }
 
   bool isSignal = false;
+  bool isWindows = false;
   bool start = false;
   Offset webPosition = Offset(0,0);
 
@@ -139,16 +141,43 @@ class PeripheralsState extends State<Peripherals> {
       },
       child:GestureDetector(
         onScaleUpdate: (event){
-          if (event.pointerCount > 1) {
-            double s = event.scale-_prevScale < 0?1:-1;
+          final scale = event.scale;
+          if(isWindows && scale != 1.0){
+            Map m = {
+              'scrollDelta': event.focalPoint,
+              'position': event.focalPoint,
+              'localPosition': event.focalPoint
+            };
+            _onDragEvent(context, PeripheralType.pointerup, m);
+            start = false;
+          }
+          if (event.pointerCount > 1 && scale != 1.0) {
+            double s = scale-_prevScale < 0?1:-1;
             _onScaleEvent(context, PeripheralType.wheel, {'scale':s});
-            _prevScale = event.scale;
-          } else{
-            // There's only 1 pointer on screen. This is not a scale event.
+            _prevScale = scale;
+          } 
+          else if(isWindows && event.pointerCount > 1 && scale == 1.0){
+            if(!start){
+              Map m = {
+                'scrollDelta': event.focalPoint,
+                'position': event.focalPoint,
+                'localPosition': event.focalPoint
+              };
+              webPosition = event.focalPoint;
+              _onDragEvent(context, PeripheralType.pointerdown, m);
+              start = true;
+            }
+            webPosition-=event.focalPointDelta;
+            Map m = {
+              'scrollDelta': webPosition,
+              'position': event.localFocalPoint,
+              'localPosition': event.localFocalPoint
+            };
+            _onDragEvent(context, PeripheralType.pointermove,m);
           }
         },
         child: Listener(
-          onPointerPanZoomStart: panGestureRecognizer.addPointerPanZoom,
+          onPointerPanZoomStart: isWindows?null:panGestureRecognizer.addPointerPanZoom,
           onPointerSignal: (event) {
             if(kIsWeb){
               isSignal = true;
@@ -181,6 +210,10 @@ class PeripheralsState extends State<Peripherals> {
                 _prevScale = event.scale;
               }
             }
+            else if(isWindows){
+              _onPointerEvent(context, PeripheralType.pointerup, event);
+              start = false;
+            }
             else{
               if (event is PointerScrollEvent) {
                 _onPointerEvent(context, PeripheralType.wheel, event);
@@ -211,7 +244,7 @@ class PeripheralsState extends State<Peripherals> {
                 start = false;
               }
               else{
-                _onPointerEvent(context, PeripheralType.pointerHover , event);
+                _onPointerEvent(context, PeripheralType.pointerHover, event);
               }
             }
             isSignal = false;
@@ -373,8 +406,19 @@ class WebPointerEvent {
     wpe.pointerType = 'touch_pad';
     wpe.button = 0;
     wpe.pointerCount = pointerCount;
-    
-    if(!kIsWeb){
+
+    if(event is Map){
+      final local = event['scrollDelta'];
+      wpe.clientX = local.dx;
+      wpe.clientY = local.dy;
+
+      wpe.pageX = event['position'].dx;
+      wpe.pageY = event['position'].dy;
+
+      wpe.deltaX = local.dx;
+      wpe.deltaY = local.dy;
+    }
+    else if(!kIsWeb){
       final position = event.globalPosition;
       RenderBox getBox = context.findRenderObject() as RenderBox;
       final local = getBox.globalToLocal(position);
@@ -392,17 +436,6 @@ class WebPointerEvent {
 
       touch.clientX = event.localPosition.dx;
       touch.clientY = event.localPosition.dy;
-    }
-    else if(event is Map){
-      final local = event['scrollDelta'];
-      wpe.clientX = local.dx;
-      wpe.clientY = local.dy;
-
-      wpe.pageX = event['position'].dx;
-      wpe.pageY = event['position'].dy;
-
-      wpe.deltaX = local.dx;
-      wpe.deltaY = local.dy;
     }
 
     wpe.touches.add(touch);

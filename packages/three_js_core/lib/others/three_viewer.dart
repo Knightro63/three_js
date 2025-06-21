@@ -316,7 +316,7 @@ class ThreeJS {
             height: !visible?0:height,
             child: NotificationListener<SizeChangedLayoutNotification>(
             onNotification: (notification) {
-              //onWindowResize(context);
+              onWindowResize(context);
               return true;
             },
             child: SizeChangedLayoutNotifier(
