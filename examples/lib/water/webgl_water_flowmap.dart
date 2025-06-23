@@ -103,7 +103,9 @@ class _State extends State<WebglWaterFlowmap> {
       scale: 2,
       textureWidth: 1024,
       textureHeight: 1024,
-      flowMap: flowMap
+      flowMap: flowMap,
+      normalMap0: await textureLoader.fromAsset( 'assets/textures/water/Water_1_M_Normal.jpg'),
+      normalMap1: await textureLoader.fromAsset( 'assets/textures/water/Water_2_M_Normal.jpg')
     ));
 
     water.position.y = 1;

@@ -480,7 +480,7 @@ class WebGLTextures {
 
 			if ( texture.anisotropy > 1 || properties.get( texture )['__currentAnisotropy'] != null) {
 				final extension = extensions.get( 'EXT_texture_filter_anisotropic' );
-        if (kIsWeb) {
+        if (kIsWeb && !kIsWasm) {
           gl.texParameterf(textureType, extension.TEXTURE_MAX_ANISOTROPY_EXT,math.min(texture.anisotropy, capabilities.getMaxAnisotropy()).toDouble());
         } 
         else {

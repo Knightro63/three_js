@@ -17,7 +17,8 @@ dependencies:
   css:
     git:
       url: https://github.com/Knightro63/css.git
-  three_js: ^0.1.6
+  three_js:
+    path: ../packages/three_js
   three_js_helpers: ^0.1.0
   three_js_transform_controls: ^0.1.0
   three_js_svg: ^0.1.0
@@ -49,14 +50,22 @@ dependency_overrides:
     path: ../packages/three_js_core
   three_js_svg:
     path: ../packages/three_js_svg
+  three_js_text:
+    path: ../packages/three_js_text
   three_js_exporters:
     path: ../packages/three_js_exporters
+  three_js_objects:
+    path: ../packages/three_js_objects
   # three_js_geometry:
   #   path: ../packages/three_js_geometry
-  # three_js_advanced_loaders:
-  #   path: ../packages/three_js_advanced_loaders
+  three_js_advanced_loaders:
+    path: ../packages/three_js_advanced_loaders
+  three_js_transform_controls:
+    path: ../packages/three_js_transform_controls
   three_js_core_loaders:
     path: ../packages/three_js_core_loaders
+  flutter_angle:
+    path: ../../flutter_angle/flutter_angle
   file_picker: ^10.1.9
 
 flutter:

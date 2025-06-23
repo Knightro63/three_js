@@ -369,7 +369,7 @@ class GLTFParser {
     final buffer = await getDependency('buffer', bufferViewDef["buffer"]);
     final byteLength = bufferViewDef["byteLength"] ?? 0;
     final byteOffset = bufferViewDef["byteOffset"] ?? 0;
-
+    print(bufferViewDef);
     // use sublist(0) clone list, if not when load texture decode image will fail ? and with no error, return null image
     ByteBuffer? otherBuffer;
     if (buffer is Uint8List) {

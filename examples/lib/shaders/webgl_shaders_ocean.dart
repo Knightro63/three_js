@@ -115,12 +115,16 @@ class _State extends State<WebglShaderOcean> {
     // water.rotation.x = - math.pi / 2;
     // threeJs.scene.add( water );
 
+    final textureLoader = three.TextureLoader();
+
     final water = Water( waterGeometry, WaterOptions(
       color: params['color'],
       scale: params['scale'],
       flowDirection: three.Vector2( params['flowX'], params['flowY'] ),
       textureWidth: 1024,
-      textureHeight: 1024
+      textureHeight: 1024,
+      normalMap0: await textureLoader.fromAsset( 'assets/textures/water/Water_1_M_Normal.jpg'),
+      normalMap1: await textureLoader.fromAsset( 'assets/textures/water/Water_2_M_Normal.jpg')
     ));
 
     water.rotation.x = math.pi * - 0.5;

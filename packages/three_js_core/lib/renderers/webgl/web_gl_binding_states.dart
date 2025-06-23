@@ -380,15 +380,12 @@ class WebGLBindingStates {
               case 2:
                 gl.vertexAttrib2fv(programAttribute.location.id, value);
                 break;
-
               case 3:
                 gl.vertexAttrib3fv(programAttribute.location.id, value);
                 break;
-
               case 4:
                 gl.vertexAttrib4fv(programAttribute.location.id, value);
                 break;
-
               default:
                 gl.vertexAttrib1fv(programAttribute.location.id, value);
             }

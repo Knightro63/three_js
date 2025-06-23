@@ -72,7 +72,7 @@ class _State extends State<MiscExporterOBJ> {
 
   Future<void> setup() async {
     threeJs.camera = three.PerspectiveCamera( 70, threeJs.width / threeJs.height, 1, 1000 );
-    threeJs.camera.position.setValues( 0,0,400 );
+    threeJs.camera.position.setValues( 0,0,4 );
 
     threeJs.scene = three.Scene();
 

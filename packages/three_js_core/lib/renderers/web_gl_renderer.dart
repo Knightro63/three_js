@@ -559,7 +559,7 @@ class WebGLRenderer {
     if (material.wireframe) {
       index = geometries.getWireframeAttribute(geometry);
       if (index == null) return;
-      if(kIsWeb){
+      if(kIsWeb && !kIsWasm){
         rangeFactor = 2;
       }
     }

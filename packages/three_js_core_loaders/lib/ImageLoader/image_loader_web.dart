@@ -166,8 +166,8 @@ Future<ImageElement?> processImage(Uint8List? bytes, String? url, bool flipY) as
         ImageElement(
           url: url,
           data: imageDom,
-          width: imageDom.width.toDouble(),
-          height: imageDom.height.toDouble()
+          width: imageDom.width.toInt(),
+          height: imageDom.height.toInt()
         )
       );
     });
