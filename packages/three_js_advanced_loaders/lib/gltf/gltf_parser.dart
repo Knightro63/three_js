@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
+
 import 'gltf_mesh_standard_sg_material.dart';
 import 'gltf_helper.dart';
 import 'gltf_cubic_spline_interpolant.dart';
@@ -364,21 +366,29 @@ class GLTFParser {
   /// @param {number} bufferViewIndex
   /// @return {Promise<ArrayBuffer>}
   ///
+  int i = 0;
   Future<ByteBuffer?> loadBufferView2(int bufferViewIndex) async {
     final bufferViewDef = json["bufferViews"][bufferViewIndex];
     final buffer = await getDependency('buffer', bufferViewDef["buffer"]);
     final byteLength = bufferViewDef["byteLength"] ?? 0;
     final byteOffset = bufferViewDef["byteOffset"] ?? 0;
-    print(bufferViewDef);
     // use sublist(0) clone list, if not when load texture decode image will fail ? and with no error, return null image
     ByteBuffer? otherBuffer;
     if (buffer is Uint8List) {
       otherBuffer = Uint8List.view(buffer.buffer, byteOffset, byteLength).sublist(0).buffer;
     } 
     else if(buffer != null){
+      if(i == 0){
+        print({
+          "lengthinbytes":buffer.lengthInBytes,
+          'offset': byteOffset,
+          'byteLength': byteLength
+        });
+        print((buffer as ByteBuffer).asByteData());
+      }
+      i++;
       otherBuffer = Uint8List.view(buffer, byteOffset, byteLength).sublist(0).buffer;
     }
-
     return otherBuffer;
   }
 
@@ -390,22 +400,22 @@ class GLTFParser {
   loadAccessor(accessorIndex) async {
     final parser = this;
     final json = this.json;
-
+    //print('here');
     Map<String, dynamic> accessorDef = this.json["accessors"][accessorIndex];
 
     if (accessorDef["bufferView"] == null && accessorDef["sparse"] == null) {
-      // Ignore empty accessors, which may be used to declare runtime
-      // information about attributes coming from another source (e.g. Draco
-      // compression extension).
       return null;
     }
+    //print('here1');
 
     dynamic bufferView;
     if (accessorDef["bufferView"] != null) {
       bufferView = await getDependency('bufferView', accessorDef["bufferView"]);
-    } else {
+    } 
+    else {
       bufferView = null;
     }
+    //print('here2');
 
     dynamic sparseIndicesBufferView;
     dynamic sparseValuesBufferView;
@@ -415,6 +425,7 @@ class GLTFParser {
       sparseIndicesBufferView = await getDependency('bufferView', sparse["indices"]["bufferView"]);
       sparseValuesBufferView = await getDependency('bufferView', sparse["values"]["bufferView"]);
     }
+    //print('here3');
 
     int itemSize = webglTypeSize[accessorDef["type"]]!;
     final typedArray = GLTypeData(accessorDef["componentType"]);
@@ -429,50 +440,59 @@ class GLTFParser {
     final normalized = accessorDef["normalized"] == true;
     dynamic array;
     dynamic bufferAttribute;
+    //print('here4');
 
     // The buffer is not interleaved if the stride is the item size in bytes.
     if (byteStride != null && byteStride != itemBytes) {
+      //print('la1');
       // Each "slice" of the buffer, as defined by 'count' elements of 'byteStride' bytes, gets its own InterleavedBuffer
       // This makes sure that IBA.count reflects accessor.count properly
-      final ibSlice = (byteOffset / byteStride).floor();
-      final ibCacheKey =
-          'InterleavedBuffer:${accessorDef["bufferView"]}:${accessorDef["componentType"]}:$ibSlice:${accessorDef["count"]}';
+      final ibSlice = byteOffset ~/ byteStride;
+      final ibCacheKey = 'InterleavedBuffer:${accessorDef["bufferView"]}:${accessorDef["componentType"]}:$ibSlice:${accessorDef["count"]}';
       dynamic ib = parser.cache.get(ibCacheKey);
-
-      if (ib == null && bufferView != null) {
-        // array = TypedArray.view( bufferView, ibSlice * byteStride, accessorDef.count * byteStride / elementBytes );
+      //print('la2');
+      if (ib == null) {
+        //print('la3');
         array = typedArray.view(
           bufferView, 
           ibSlice * byteStride,
-          accessorDef["count"] * byteStride / elementBytes
+          accessorDef["count"] * byteStride ~/ elementBytes
         );
+        //print('la4');
 
         // Integer parameters to IB/IBA are in array elements, not bytes.
-        ib = InterleavedBuffer.fromList(Float32List.fromList(array), byteStride ~/ elementBytes);
+        ib = InterleavedBuffer.fromList(array, byteStride ~/ elementBytes);
 
+        //print('la5');
         parser.cache.add(ibCacheKey, ib);
+        //print('la6');
       }
 
       bufferAttribute = InterleavedBufferAttribute(ib, itemSize, (byteOffset % byteStride) ~/ elementBytes, normalized);
+      //print('la7');
     } else {
+      //print('la8');
       if (bufferView == null) {
+        //print('la9');
         array = typedArray.createList(accessorDef["count"] * itemSize);
-        bufferAttribute = GLTypeData.createBufferAttribute(array, itemSize, normalized);
+        //print('la10');
       } 
       else {
-        final array = typedArray.view(bufferView, byteOffset, accessorDef["count"] * itemSize);
-        bufferAttribute = GLTypeData.createBufferAttribute(array, itemSize, normalized);
+        //print('la11: $bufferView, $byteOffset, ${accessorDef["count"]}, $itemSize, ${accessorDef["count"] * itemSize}');
+        array = typedArray.view(bufferView, byteOffset, accessorDef["count"] * itemSize);
+        //print('la13');
       }
+      bufferAttribute = GLTypeData.createBufferAttribute(array, itemSize, normalized);
     }
+
+    //print('here5');
 
     // https://github.com/KhronosGroup/glTF/blob/master/specification/2.0/README.md#sparse-accessors
     if (accessorDef["sparse"] != null) {
       final itemSizeIndices = webglTypeSize["SCALAR"]!;
-      final typedArrayIndices =
-          GLTypeData(accessorDef["sparse"]["indices"]["componentType"]);
+      final typedArrayIndices = GLTypeData(accessorDef["sparse"]["indices"]["componentType"]);
 
-      final byteOffsetIndices =
-          accessorDef["sparse"]["indices"]["byteOffset"] ?? 0;
+      final byteOffsetIndices = accessorDef["sparse"]["indices"]["byteOffset"] ?? 0;
       final byteOffsetValues = accessorDef["sparse"]["values"]["byteOffset"] ?? 0;
 
       final sparseIndices = typedArrayIndices.view(sparseIndicesBufferView,
@@ -504,6 +524,7 @@ class GLTFParser {
         }
       }
     }
+    //print('here6');
 
     return bufferAttribute;
   }
@@ -547,7 +568,6 @@ class GLTFParser {
       // See https://github.com/mrdoob/three.js/issues/21559.
       return textureCache[cacheKey];
     }
-
 
     loader.flipY = false;
     Texture? texture = await loadImageSource(sourceIndex, loader);
