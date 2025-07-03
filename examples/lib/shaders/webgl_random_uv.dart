@@ -28,14 +28,13 @@ class _State extends State<WebglRandomUV> {
     });
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
-      setup: setup,
-      settings: three.Settings(
+      setup: setup,      settings: three.Settings(
         toneMapping: three.ACESFilmicToneMapping,
         toneMappingExposure: 0.7,
         enableShadowMap: true,
         shadowMapType: three.VSMShadowMap,
         animate: false,
-        useOpenGL: useOpenGL
+        
       )
     );
     super.initState();

@@ -132,9 +132,6 @@ class _UIPageState extends State<UIScreen> {
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
       setup: setup,
-      settings: three.Settings(
-        useOpenGL: true
-      )
     );
     rightClick = RightClick(
       context: context,

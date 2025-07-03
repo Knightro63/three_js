@@ -27,10 +27,9 @@ class _State extends State<WebglMirror> {
     });
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
-      setup: setup,
-      settings: three.Settings(
+      setup: setup,      settings: three.Settings(
         toneMapping: three.ACESFilmicToneMapping,
-        useOpenGL: useOpenGL
+        
       )
     );
     super.initState();

@@ -33,12 +33,11 @@ class _MyAppState extends State<WebglShadowContact> {
       settings: three.Settings(
         //alpha: true,
         useSourceTexture: true,
-        useOpenGL: true
+        
       ),
       
       onSetupComplete: (){setState(() {});},
-      setup: setup,
-      rendererUpdate: renderUpdate
+      setup: setup,      rendererUpdate: renderUpdate
     );
     super.initState();
   }

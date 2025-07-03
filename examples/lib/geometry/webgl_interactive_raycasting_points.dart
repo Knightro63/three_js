@@ -26,9 +26,6 @@ class _State extends State<WebglInteractiveRaycastingPoints> {
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
       setup: setup,
-      settings: three.Settings(
-        useOpenGL: useOpenGL
-      )
     );
     super.initState();
   }

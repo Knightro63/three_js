@@ -30,9 +30,8 @@ class _MyAppState extends State<WebglShadowmapViewer> {
     threeJs = three.ThreeJS(
       
       onSetupComplete: (){setState(() {});},
-      setup: setup,
-      settings: three.Settings(
-        useOpenGL: true,
+      setup: setup,      settings: three.Settings(
+
         enableShadowMap: true,
         shadowMapType: three.BasicShadowMap,
         // renderOptions: {

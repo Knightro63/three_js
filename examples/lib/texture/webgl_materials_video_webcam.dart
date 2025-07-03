@@ -40,9 +40,8 @@ class _State extends State<WebglMaterialsVideoWebcam> {
           image = three.Uint8Array((imageSize.width*imageSize.height*4).toInt());
           threeJs = three.ThreeJS(
             onSetupComplete: (){setState(() {});},
-            setup: setup,
-            settings: three.Settings(
-              useOpenGL: true
+            setup: setup,            settings: three.Settings(
+              
             )
           );
           timer = Timer.periodic(const Duration(seconds: 1), (t){

@@ -185,6 +185,7 @@ class WebGLRenderer {
     _scissor = Vector4(0, 0, width, height);
 
     _gl = this.parameters["gl"];
+    xr = this.parameters["xr"] ?? WebXRManager(this, _gl);
 
     initGLContext();
   }
@@ -229,9 +230,9 @@ class WebGLRenderer {
 
     info.programs = programCache.programs;
 
-    xr = WebXRManager(this, _gl);
-		// xr.addEventListener( 'sessionstart', onXRSessionStart );
-		// xr.addEventListener( 'sessionend', onXRSessionEnd );
+    xr.init();// = WebXRManager(this, _gl);
+		xr.addEventListener( 'sessionstart', onXRSessionStart );
+		xr.addEventListener( 'sessionend', onXRSessionEnd );
   }
 
   // API

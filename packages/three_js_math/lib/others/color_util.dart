@@ -55,7 +55,7 @@ class Color{
     storage = Float32List.fromList(list);
   }
   Color.fromHex64(int hex){
-    int alpha = (0xff000000 & hex) >> 32;
+    int alpha = (0xff000000 & hex) >> 24;
     int red = (0x00ff0000 & hex) >> 16;
     int green = (0x0000ff00 & hex) >> 8;
     int blue = (0x000000ff & hex) >> 0;

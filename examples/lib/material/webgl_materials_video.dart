@@ -30,9 +30,8 @@ class _State extends State<WebglMaterialsVideo> {
     });
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
-      setup: setup,
-      settings: three.Settings(
-        useOpenGL: useOpenGL,
+      setup: setup,      settings: three.Settings(
+
         autoClear: false
       )
     );

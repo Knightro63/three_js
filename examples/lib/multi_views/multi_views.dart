@@ -1,5 +1,4 @@
 import 'dart:async';
-import '../src/statistics.dart';
 import 'package:flutter/material.dart' hide Matrix4;
 import 'package:three_js/three_js.dart' as three;
 
@@ -66,9 +65,6 @@ class _MultiViews1State extends State<MultiViews1> {
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
       setup: setup,
-      settings: three.Settings(
-        useOpenGL: useOpenGL
-      ),
       size: const Size(300,300),
       angle: widget.angle
     );
@@ -139,9 +135,6 @@ class _MultiViews2State extends State<MultiViews2> {
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
       setup: setup,
-      settings: three.Settings(
-        useOpenGL: useOpenGL
-      ),
       size: const Size(300,300),
       angle: widget.angle
     );

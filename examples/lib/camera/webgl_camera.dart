@@ -27,10 +27,9 @@ class _MyAppState extends State<WebglCamera> {
     });
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
-      setup: setup,
-      postProcessor: postProcessor,
+      setup: setup,      postProcessor: postProcessor,
       settings: three.Settings(
-        useOpenGL: useOpenGL,
+
         renderOptions: {
         "minFilter": three.LinearFilter,
         "magFilter": three.LinearFilter,

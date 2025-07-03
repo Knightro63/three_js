@@ -10,7 +10,8 @@ class Event {
     this.loopDelta = 0,
     this.object,
     this.value,
-    this.data
+    this.data,
+    this.handedness
   });
 
   late String? type;
@@ -18,6 +19,7 @@ class Event {
   dynamic attachment;
   dynamic action;
   dynamic value;
+  dynamic handedness;
   late int direction;
   dynamic data;
   late Object3D? object;

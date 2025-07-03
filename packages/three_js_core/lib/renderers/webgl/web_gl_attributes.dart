@@ -159,7 +159,7 @@ class WebGLAttributes {
         remove(len[i]);
       }
       else if(len[i] is NativeArray){
-        (len[i] as NativeArray).dispose();
+        //(len[i] as NativeArray).dispose();
         remove(len[i]);
       }
     }

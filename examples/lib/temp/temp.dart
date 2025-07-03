@@ -20,7 +20,7 @@ class MyAppState extends State<MyApp> {
       onSetupComplete: (){setState(() {});},
       setup: initThree,
       settings: three.Settings(
-        useOpenGL: true,
+
       )
     );
     super.initState();

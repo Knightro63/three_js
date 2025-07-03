@@ -18,8 +18,6 @@ import '../renderers/webgl/index.dart';
 import '../renderers/shaders/index.dart';
 import '../math/frustum.dart';
 import '../lights/index.dart';
-import 'webxr/web_xr_controller.dart';
-import 'webxr/web_xr_depth_sensing.dart';
 
 part 'web_gl_cube_render_target.dart';
 part 'web_gl_renderer.dart';

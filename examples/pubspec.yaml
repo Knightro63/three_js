@@ -56,8 +56,8 @@ dependency_overrides:
     path: ../packages/three_js_exporters
   three_js_objects:
     path: ../packages/three_js_objects
-  # three_js_geometry:
-  #   path: ../packages/three_js_geometry
+  three_js_math:
+    path: ../packages/three_js_math
   three_js_advanced_loaders:
     path: ../packages/three_js_advanced_loaders
   three_js_transform_controls:

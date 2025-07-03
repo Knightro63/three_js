@@ -30,10 +30,9 @@ class _State extends State<WebglLoaderMd2> {
     });
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
-      setup: setup,
-      settings: three.Settings(
+      setup: setup,      settings: three.Settings(
         enableShadowMap: true,
-        useOpenGL: useOpenGL
+        
       )
     );
     super.initState();

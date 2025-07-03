@@ -1,4 +1,5 @@
 import 'package:three_js_core/three_js_core.dart';
+import 'package:three_js_xr/app/web/wrapper.dart';
 
 const occlusionVertex = '''
 void main() {
@@ -37,7 +38,7 @@ class WebXRDepthSensing {
 
 	WebXRDepthSensing();
 
-	void init( renderer, depthData, renderState ) {
+	void init(WebGLRenderer renderer, XRWebGLDepthInformation depthData, XRRenderState renderState ) {
 		if (texture == null ) {
 			final texture = Texture();
 
@@ -53,7 +54,7 @@ class WebXRDepthSensing {
 		}
 	}
 
-	void render( renderer, cameraXR ) {
+	void render(WebGLRenderer renderer, cameraXR ) {
 		if ( texture != null ) {
 			if ( mesh == null ) {
 				final viewport = cameraXR.cameras[ 0 ].viewport;
@@ -70,29 +71,29 @@ class WebXRDepthSensing {
 				mesh = Mesh(PlaneGeometry( 20, 20 ), material );
 			}
 
-			renderer.render(mesh, cameraXR );
+			renderer.render(mesh!, cameraXR );
 		}
 	}
 
 	Mesh? getMesh(ArrayCamera cameraXR ) {
-		if ( this.texture != null ) {
-			if ( this.mesh == null ) {
+		if ( texture != null ) {
+			if ( mesh == null ) {
 				final viewport = cameraXR.cameras[ 0 ].viewport;
-				final material = new ShaderMaterial.fromMap( {
+				final material = ShaderMaterial.fromMap( {
 					'vertexShader': occlusionVertex,
 					'fragmentShader': occlusionFragment,
 					'uniforms': {
-						'depthColor': { 'value': this.texture },
+						'depthColor': { 'value': texture },
 						'depthWidth': { 'value': viewport?.z },
 						'depthHeight': { 'value': viewport?.w }
 					}
 				} );
 
-				this.mesh = new Mesh( new PlaneGeometry( 20, 20 ), material );
+				mesh = Mesh(PlaneGeometry( 20, 20 ), material);
 			}
 		}
 
-		return this.mesh;
+		return mesh;
 	}
 
 

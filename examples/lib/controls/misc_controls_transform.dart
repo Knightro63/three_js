@@ -32,9 +32,6 @@ class _MyAppState extends State<MiscControlsTransform> {
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
       setup: setup,
-      settings: three.Settings(
-        useOpenGL: useOpenGL
-      ),
       windowResizeUpdate: (newSize){
         final aspect = newSize.width / newSize.height;
 

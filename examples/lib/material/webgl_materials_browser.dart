@@ -26,11 +26,8 @@ class _MyAppState extends State<WebglMaterialsBrowser> {
       });
     });
     threeJs = three.ThreeJS(
-      
       onSetupComplete: (){setState(() {});},
-      setup: setup,
-      settings: three.Settings(
-        useOpenGL: true
+      setup: setup,      settings: three.Settings(
       )
     );
     super.initState();

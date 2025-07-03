@@ -32,9 +32,6 @@ class _MyAppState extends State<WebglLoaderSvg> {
       
       onSetupComplete: (){setState(() {});},
       setup: setup,
-      settings: three.Settings(
-        useOpenGL: true
-      )
     );
     super.initState();
   }

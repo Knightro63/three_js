@@ -30,11 +30,10 @@ class _State extends State<WebglPortal> {
     });
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
-      setup: setup,
-      settings: three.Settings(
+      setup: setup,      settings: three.Settings(
         localClippingEnabled: true,
         toneMapping: three.ACESFilmicToneMapping,
-        useOpenGL: useOpenGL
+        
       )
     );
     super.initState();

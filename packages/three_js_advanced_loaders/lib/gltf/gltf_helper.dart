@@ -45,7 +45,7 @@ class GLTypeData {
     return webglCTBPE[type];
   }
 
-  TypedData view(ByteBuffer buffer, int offset, int length) {
+  dynamic view(ByteBuffer buffer, int offset, int length) {
     if (type == 5120) {
       return Int8List.view(buffer, offset, length);
     } else if (type == 5121) {
@@ -63,7 +63,7 @@ class GLTypeData {
     }
   }
 
-  TypedData createList(int len) {
+  dynamic createList(int len) {
     if (type == 5120) {
       return Int8List(len);
     } else if (type == 5121) {

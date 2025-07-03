@@ -28,9 +28,6 @@ class _State extends State<WebglVolumePerlin> {
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
       setup: setup,
-      settings: three.Settings(
-        useOpenGL: useOpenGL
-      ),
       windowResizeUpdate: (newSize){
 				threeJs.camera.aspect = newSize.width / newSize.height;
 				threeJs.camera.updateProjectionMatrix();

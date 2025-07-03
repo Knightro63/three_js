@@ -40,8 +40,7 @@ class _MyAppState extends State<WebglGeometryText> {
     threeJs = three.ThreeJS(
       
       onSetupComplete: (){setState(() {});},
-      setup: setup,
-      settings: three.Settings(
+      setup: setup,      settings: three.Settings(
         renderOptions: {
           "minFilter": tmath.LinearFilter,
           "magFilter": tmath.LinearFilter,

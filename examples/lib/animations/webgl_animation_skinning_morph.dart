@@ -29,9 +29,6 @@ class _State extends State<WebglAnimationSkinningMorph> {
       
       onSetupComplete: (){setState(() {});},
       setup: setup,
-      settings: three.Settings(
-        useOpenGL: true
-      )
     );
     super.initState();
   }

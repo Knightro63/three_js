@@ -14,7 +14,6 @@ class Settings{
     this.autoClear = true,
     Map<String,dynamic>? renderOptions,
     this.animate = true,
-    this.useOpenGL = false,
     this.alpha = false,
     this.autoClearDepth = true,
     this.autoClearStencil = true,
@@ -27,7 +26,8 @@ class Settings{
     this.shadowMapType = PCFShadowMap,
     this.toneMappingExposure = 1.0,
     this.logarithmicDepthBuffer = false,
-    this.stencil = true
+    this.stencil = true,
+    this.xr = false
   }){
     this.renderOptions = renderOptions ?? {
       "format": RGBAFormat,
@@ -35,8 +35,8 @@ class Settings{
     };
   }
 
+  bool xr;
   bool animate;
-  bool useOpenGL;
   bool logarithmicDepthBuffer;
   bool useSourceTexture;
   bool enableShadowMap;
@@ -57,7 +57,7 @@ class Settings{
 }
 
 /// threeJs utility class. If you want to learn how to connect cannon.js with js, please look at the examples/threejs_* instead.
-class ThreeJS {
+class ThreeJS with WidgetsBindingObserver{
   void Function() onSetupComplete;
   ThreeJS({
     Settings? settings,
@@ -81,6 +81,9 @@ class ThreeJS {
     this.settings = settings ?? Settings();
     _size = size;
   }
+
+  late final BuildContext _context;
+  Timer? _debounceTimer;
 
   Widget? loadingWidget;
   Size? _size;
@@ -129,9 +132,20 @@ class ThreeJS {
     disposeEvents.add(event);
   }
 
+  @override
+  void didChangeMetrics() {
+    _debounceTimer?.cancel(); // Clear existing timer
+    _debounceTimer = Timer(const Duration(milliseconds: 300), () { // Set a new timer
+      onWindowResize(_context);
+    });
+  }
+
   void dispose(){
     if(disposed) return;
     disposed = true;
+    _debounceTimer?.cancel(); // Cancel timer if active
+    WidgetsBinding.instance.removeObserver(this);
+
     ticker?.dispose();
     renderer?.dispose();
     renderTarget?.dispose();
@@ -154,7 +168,8 @@ class ThreeJS {
     if (screenSize != null) {
       return;
     }
-
+    _context = context;
+    WidgetsBinding.instance.addObserver(this);
     final mqd = MediaQuery.of(context);
 
     screenSize = _size ?? mqd.size;
@@ -240,30 +255,29 @@ class ThreeJS {
     }
   }
   
-  void onWindowResize(BuildContext context){
+  Future<void> onWindowResize(BuildContext context) async{
     double dt = clock.getDelta();
     final mqd = MediaQuery.of(context);
-    if(_size == null && screenSize != mqd.size){
+    if(_size == null && screenSize != mqd.size && texture != null){
+      print('SIZES: ${mqd.size}, ${screenSize}');
       screenSize = mqd.size;
       width = screenSize!.width;
       height = screenSize!.height;
       dpr = mqd.devicePixelRatio;
 
-      camera.aspect = width / height;
+      final options = AngleOptions(
+        width: width.toInt(),
+        height: height.toInt(),
+        dpr: dpr,
+      );
+
+      await angle.resize(texture!, options);
+
+      camera.aspect = width/height;
       camera.updateProjectionMatrix();
 
-      if(settings.useSourceTexture && !kIsWeb){
-        renderTarget?.width = (width * dpr).toInt(); 
-        renderTarget?.height = (height * dpr).toInt();
-      }
-      else if(kIsWeb){
-        texture?.element?.width = (width * dpr).toInt();
-        texture?.element?.height = (height * dpr).toInt();
-      }
-
       windowResizeUpdate?.call(screenSize!);
-      renderer!.setPixelRatio(dpr);
-      renderer!.setSize(width, height, true);
+      renderer!.setSize(width, height, false);
 
       if(postProcessor != null){
         postProcessor?.call(dt);
@@ -285,7 +299,7 @@ class ThreeJS {
     width = screenSize!.width;
     height = screenSize!.height;
     if(texture == null){
-      if(!_isExernalAngle) await angle.init(false,!settings.useOpenGL);
+      if(!_isExernalAngle) await angle.init();
       
       texture = await angle.createTexture(      
         AngleOptions(
@@ -314,37 +328,31 @@ class ThreeJS {
           return Container(
             width: !visible?0:width,
             height: !visible?0:height,
-            child: NotificationListener<SizeChangedLayoutNotification>(
-            onNotification: (notification) {
-              onWindowResize(context);
-              return true;
-            },
             child: SizeChangedLayoutNotifier(
               child: Builder(builder: (BuildContext context) {
-                  if (kIsWeb) {
-                    return texture != null && mounted? HtmlElementView(viewType:texture!.textureId.toString()):loadingWidget ?? Container(
+                if (kIsWeb) {
+                  return texture != null && mounted? HtmlElementView(viewType:texture!.textureId.toString()):loadingWidget ?? Container(
+                    width: MediaQuery.of(context).size.width,
+                    height: MediaQuery.of(context).size.height,
+                    color: Theme.of(context).canvasColor,
+                    alignment: Alignment.center,
+                    child: const CircularProgressIndicator()
+                  );
+                } 
+                else {
+                  return texture != null && mounted?
+                    Transform.scale(
+                      scaleY: sourceTexture != null || Platform.isAndroid?1:-1,
+                      child:Texture(textureId: texture!.textureId)
+                    ):loadingWidget ?? Container(
                       width: MediaQuery.of(context).size.width,
                       height: MediaQuery.of(context).size.height,
                       color: Theme.of(context).canvasColor,
                       alignment: Alignment.center,
                       child: const CircularProgressIndicator()
                     );
-                  } 
-                  else {
-                    return texture != null && mounted?
-                      Transform.scale(
-                        scaleY: sourceTexture != null || Platform.isAndroid?1:-1,
-                        child:Texture(textureId: texture!.textureId)
-                      ):loadingWidget ?? Container(
-                        width: MediaQuery.of(context).size.width,
-                        height: MediaQuery.of(context).size.height,
-                        color: Theme.of(context).canvasColor,
-                        alignment: Alignment.center,
-                        child: const CircularProgressIndicator()
-                      );
-                  }
-                })
-              )
+                }
+              })
             )
           );
         }

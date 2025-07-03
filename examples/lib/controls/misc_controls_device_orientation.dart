@@ -28,9 +28,8 @@ class _MyAppState extends State<MiscControlsDeviceOrientation> {
     threeJs = three.ThreeJS(
       
       onSetupComplete: (){setState(() {});},
-      setup: setup,
-      settings: three.Settings(
-        useOpenGL: true,
+      setup: setup,      settings: three.Settings(
+
         renderOptions: {
           "minFilter": three.LinearFilter,
           "magFilter": three.LinearFilter,

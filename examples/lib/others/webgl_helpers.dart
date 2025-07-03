@@ -31,9 +31,6 @@ class _State extends State<WebglHelpers> {
       
       onSetupComplete: (){setState(() {});},
       setup: setup,
-      settings: three.Settings(
-        useOpenGL: true
-      )
     );
     super.initState();
   }

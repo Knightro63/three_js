@@ -71,9 +71,6 @@ class _UIPageState extends State<UIScreen> {
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
       setup: setup,
-      settings: three.Settings(
-        useOpenGL: true
-      )
     );
     super.initState();
   }
@@ -1221,7 +1218,7 @@ class _UIPageState extends State<UIScreen> {
                       height: MediaQuery.of(context).size.height-70,
                       child: threeJs.build(),
                     )
-                    ,
+            
                     if(threeJs.mounted)Positioned(
                       top: 5,
                       left: 20,

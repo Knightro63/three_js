@@ -828,8 +828,14 @@ class Matrix4 {
 
     return this;
   }
-
+  Matrix4 decomposeEuler(Vector3 position, Euler euler, Vector3 scale) {
+    return _decompose(position, euler, scale);
+  }
   Matrix4 decompose(Vector3 position, Quaternion quaternion, Vector3 scale) {
+    return _decompose(position, quaternion, scale);
+  }
+
+  Matrix4 _decompose(Vector3 position, dynamic quaternion, Vector3 scale) {
     final te = storage;
 
     double sx = (_matrix4v1.setValues(te[0], te[1], te[2])).length;

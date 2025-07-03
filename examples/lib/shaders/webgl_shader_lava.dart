@@ -28,11 +28,10 @@ class _State extends State<WebglShaderLava> {
     });
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
-      setup: setup,
-      settings: three.Settings(
+      setup: setup,      settings: three.Settings(
         autoClear: false,
         useSourceTexture: true,
-        useOpenGL: useOpenGL
+        
       )
     );
     super.initState();
