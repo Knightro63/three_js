@@ -364,7 +364,7 @@ class Particles {
             x: Utils.isLifeTimeCurve(velocityOverLifetime?.linear.x ?? 0)
               ? Utils.getCurveFunctionFromConfig(
                   generalData.particleSystemId,
-                  velocityOverLifetime.linear.x as LifetimeCurve
+                  velocityOverLifetime?.linear.x as LifetimeCurve
                 )
               : null,
             y: Utils.isLifeTimeCurve(velocityOverLifetime?.linear.y ?? 0)
@@ -376,7 +376,7 @@ class Particles {
             z: Utils.isLifeTimeCurve(velocityOverLifetime?.linear.z ?? 0)
               ? Utils.getCurveFunctionFromConfig(
                   generalData.particleSystemId,
-                  velocityOverLifetime.linear.z as LifetimeCurve
+                  velocityOverLifetime?.linear.z as LifetimeCurve
                 )
               : null,
           ),
@@ -412,19 +412,19 @@ class Particles {
             x: Utils.isLifeTimeCurve(velocityOverLifetime?.orbital.x ?? 0)
               ? Utils.getCurveFunctionFromConfig(
                   generalData.particleSystemId,
-                  velocityOverLifetime.orbital.x as LifetimeCurve
+                  velocityOverLifetime?.orbital.x as LifetimeCurve
                 )
-              : undefined,
+              : null,
             y: Utils.isLifeTimeCurve(velocityOverLifetime?.orbital.y ?? 0)
               ? Utils.getCurveFunctionFromConfig(
                   generalData.particleSystemId,
-                  velocityOverLifetime.orbital.y as LifetimeCurve
+                  velocityOverLifetime?.orbital.y as LifetimeCurve
                 )
-              : undefined,
+              : null,
             z: Utils.isLifeTimeCurve(velocityOverLifetime?.orbital.z ?? 0)
               ? Utils.getCurveFunctionFromConfig(
                   generalData.particleSystemId,
-                  velocityOverLifetime.orbital.z as LifetimeCurve
+                  velocityOverLifetime?.orbital.z as LifetimeCurve
                 )
               : null,
           ),
@@ -433,11 +433,12 @@ class Particles {
       );
     }
 
-    const startValueKeys: Array<keyof NormalizedParticleSystemConfig> = [
+    final List<String> startValueKeys = [
       'startSize',
       'startOpacity',
     ];
-    startValueKeys.forEach((key) => {
+
+    startValueKeys.forEach((key){
       generalData.startValues[key] = Array.from({ length: maxParticles }, () =>
         calculateValue(
           generalData.particleSystemId,
@@ -450,11 +451,11 @@ class Particles {
       );
     });
 
-    final lifetimeValueKeys: Array<keyof NormalizedParticleSystemConfig> = [
+    final List<String> lifetimeValueKeys = [
       'rotationOverLifetime',
     ];
-    lifetimeValueKeys.forEach((key) => {
-      const value = normalizedConfig[key] as {
+    lifetimeValueKeys.forEach((key){
+      final value = normalizedConfig[key] as {
         isActive: boolean;
       } & RandomBetweenTwoConstants;
       if (value.isActive)

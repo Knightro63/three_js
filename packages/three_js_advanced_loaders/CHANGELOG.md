@@ -1,3 +1,8 @@
+## 0.1.2
+
+* Fixed wasm loading issue.
+* Fixed bug changing double to int.
+
 ## 0.1.1
 
 * Updated gltf loader.

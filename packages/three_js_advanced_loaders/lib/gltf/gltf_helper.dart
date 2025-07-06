@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:typed_data';
 import 'dart:math' as math;
+import 'package:flutter/foundation.dart';
+
 import 'gltf_registry.dart';
 import 'gltf_parser.dart';
 
@@ -45,22 +47,47 @@ class GLTypeData {
     return webglCTBPE[type];
   }
 
+  /// Creates an [TypedData] view of the specified region in [buffer].
+  ///
+  /// Changes in the [TypedData] will be visible in the byte buffer and vice versa. If the [offset] index of the region is not specified, it defaults to zero (the first byte in the byte buffer). If the length is not provided, the view extends to the end of the byte buffer.
+  ///
+  /// The [offset] and [length] must be non-negative, and [offset] + ([length] * [bytesPerElement]) must be less than or equal to the length of [buffer].
   dynamic view(ByteBuffer buffer, int offset, int length) {
-    if (type == 5120) {
-      return Int8List.view(buffer, offset, length);
-    } else if (type == 5121) {
-      return Uint8List.view(buffer, offset, length);
-    } else if (type == 5122) {
-      return Int16List.view(buffer, offset, length);
-    } else if (type == 5123) {
-      return Uint16List.view(buffer, offset, length);
-    } else if (type == 5125) {
-      return Uint32List.view(buffer, offset, length);
-    } else if (type == 5126) {
-      return Float32List.view(buffer, offset, length);
-    } else {
-      throw (" GLTFHelper GLTypeData view type: $type is not support ...");
-    }
+    //TODO: Fix this for wasm
+    // if(kIsWasm){
+    //   if (type == 5120) {
+    //     return Int8List.fromList(buffer.asInt8List().sublist(offset, offset + length));
+    //   } else if (type == 5121) {
+    //     return Uint8List.fromList(buffer.asUint8List().sublist(offset, offset + length));
+    //   } else if (type == 5122) {
+    //     return Int16List.fromList(buffer.asInt16List().sublist(offset, offset + length));
+    //   } else if (type == 5123) {
+    //     return Uint16List.fromList(buffer.asUint16List().sublist(offset, offset + length));
+    //   } else if (type == 5125) {
+    //     return Uint32List.fromList(buffer.asUint32List().sublist(offset, offset + length));
+    //   } else if (type == 5126) {
+    //     return Float32List.fromList(buffer.asFloat32List().sublist(offset, offset + length));
+    //   } else {
+    //     throw (" GLTFHelper GLTypeData view type: $type is not support ...");
+    //   }
+    // }
+    // else{
+      if (type == 5120) {
+        return Int8List.view(buffer, offset, length);
+      } else if (type == 5121) {
+        return Uint8List.view(buffer, offset, length);
+      } else if (type == 5122) {
+        return Int16List.view(buffer, offset, length);
+      } else if (type == 5123) {
+        return Uint16List.view(buffer, offset, length);
+      } else if (type == 5125) {
+        return Uint32List.view(buffer, offset, length);
+      } else if (type == 5126) {
+        return Float32List.view(buffer, offset, length);
+      } else {
+        throw (" GLTFHelper GLTypeData view type: $type is not support ...");
+      }
+    //}
   }
 
   dynamic createList(int len) {
@@ -100,13 +127,13 @@ class GLTypeData {
   }
 }
 
-final webglComponentTypes = {
-  5120: Int8List,
-  5121: Uint8List,
-  5122: Int16List,
-  5123: Uint16List,
-  5125: Uint32List,
-  5126: Float32List
+final Map<int,NativeArray Function(int)>webglComponentTypes = {
+  5120: (int s){return Int8Array(s);},
+  5121: (int s){return Uint8Array(s);},
+  5122: (int s){return Int16Array(s);},
+  5123: (int s){return Uint16Array(s);},
+  5125: (int s){return Uint32Array(s);},
+  5126: (int s){return Float32Array(s);}
 };
 
 final webglCTBPE = {

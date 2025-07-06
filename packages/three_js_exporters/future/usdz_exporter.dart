@@ -30,11 +30,18 @@ class USDZExporter {
 		this.textureUtils = utils;
 	}
 
-	parse(Scene scene, onDone, onError, options ) {
-		this.parseAsync( scene, options ).then( onDone ).catch( onError );
+	parse(Scene scene, Function onDone, Function onError, options ) {
+    try{
+		  this.parseAsync( scene, options ).then((v,{e}){
+        onDone.call(v);
+      });
+    }
+    catch( e ){
+      onError.call();
+    }
 	}
 
-	parseAsync(Scene scene, [USDZOptions? options ]) async{
+	Future parseAsync(Scene scene, [USDZOptions? options ]) async{
     options ??= USDZOptions();
 
 		final files = {};
@@ -75,7 +82,7 @@ class USDZExporter {
 					console.warning( 'THREE.USDZExporter: Unsupported material type (USDZ only supports MeshStandardMaterial) $object');
 				}
 			} 
-      else if ( object is Camera ) {
+      else if ( object is PerspectiveCamera ) {
 				output += buildCamera( object );
 			}
 		} );
@@ -100,8 +107,8 @@ class USDZExporter {
 				}
 			}
 
-			//final canvas = imageToCanvas( texture!.image, texture.flipY ?? false, options.maxTextureSize );
-			final blob = texture.image;//await new Promise( resolve => canvas.toBlob( resolve, 'image/png', 1 ) );
+			final canvas = imageToCanvas( texture!.image, texture.flipY, options.maxTextureSize );
+			final blob = texture?.image;//await new Promise( resolve => canvas.toBlob( resolve, 'image/png', 1 ) );
 
 			files[ '''textures/Texture_${ id }.png''' ] = new Uint8Array( await blob.arrayBuffer() );
 		}
@@ -125,22 +132,22 @@ class USDZExporter {
 				final padLength = 64 - offsetMod64;
 				final padding = new Uint8Array( padLength );
 
-				files[ filename ] = [ file, { extra: { 12345: padding } } ];
+				files[ filename ] = [ file, { 'extra': { 12345: padding } } ];
 			}
 
 			offset = file.length;
 		}
 
-		return zipSync( files, { level: 0 } );
+		return zipSync( files, { 'level': 0 } );
 	}
 }
 
 imageToCanvas( image, bool flipY, int maxTextureSize ) {
-
 	if ( ( typeof HTMLImageElement != 'null' && image instanceof HTMLImageElement ) ||
 		( typeof HTMLCanvasElement != 'null' && image instanceof HTMLCanvasElement ) ||
 		( typeof OffscreenCanvas != 'null' && image instanceof OffscreenCanvas ) ||
-		( typeof ImageBitmap != 'null' && image instanceof ImageBitmap ) ) {
+		( typeof ImageBitmap != 'null' && image instanceof ImageBitmap ) 
+  ) {
 
 		final scale = maxTextureSize / math.max( image.width, image.height );
 
@@ -165,9 +172,8 @@ imageToCanvas( image, bool flipY, int maxTextureSize ) {
 
 	} 
   else {
-		throw ( 'THREE.USDZExporter: No valid image data found. Unable to process texture.' );
+		throw ( 'USDZExporter: No valid image data found. Unable to process texture.' );
 	}
-
 }
 
 //
@@ -406,7 +412,7 @@ String buildMaterial(Material material, Map<String,Texture> textures, [bool quic
 	String buildTexture(Texture texture, mapType, [Color? color]) {
 		final id = '${texture.source.uuid}_${texture.flipY}';
 		textures[ id ] = texture;
-		final uv = texture.channel > 0 ? 'st' + texture.channel : 'st';
+		final uv = texture.channel > 0 ? 'st${texture.channel}' : 'st';
 
 		final WRAPPINGS = {
 			1000: 'repeat', // RepeatWrapping
@@ -597,7 +603,7 @@ String buildVector2(Vector vector ) {
 }
 
 
-String buildCamera(Camera camera ) {
+String buildCamera(PerspectiveCamera camera ) {
 	final name = camera.name;// ?? 'Camera_${camera.id}';
 	final transform = buildMatrix( camera.matrixWorld );
 

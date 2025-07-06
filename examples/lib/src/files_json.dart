@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 const List<String> filesJson = [
   'webgl_periodictable',
   'timing',
@@ -15,8 +17,8 @@ const List<String> filesJson = [
   'webgl_lights_spotlight',
   'webgl_lightprobe_cube_camera',
   'webgl_lightprobe',
-  "webgl_geometry_text",
-  "webgl_geometry_shapes",
+  if(!kIsWasm)"webgl_geometry_text",
+  if(!kIsWasm)"webgl_geometry_shapes",
   "webgl_geometry_extrude_shapes",
   "webgl_geometry_dynamic",
   "webgl_geometry_extrude_splines",

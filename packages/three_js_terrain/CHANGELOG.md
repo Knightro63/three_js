@@ -1,3 +1,7 @@
+## 0.1.1
+
+* Added wasm support.
+
 ## 0.1.0
 
 * Fixed bug in web.

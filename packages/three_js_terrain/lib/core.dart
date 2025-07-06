@@ -1512,7 +1512,7 @@ class Terrain{
   static Material generateBlendedMaterial(List<TerrainTextures> textures, [Material? material]) {
     // Convert numbers to strings of floats so GLSL doesn't barf on "1" instead of "1.0"
     String glslifyNumber(num n) {
-      return n == n.toInt() && kIsWeb? '$n.0' : n.toString();
+      return n == n.toInt() && (kIsWeb && !kIsWasm)? '$n.0' : n.toString();
     }
 
     String declare = '',

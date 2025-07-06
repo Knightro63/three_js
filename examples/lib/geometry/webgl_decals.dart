@@ -141,7 +141,7 @@ class _State extends State<WebglDecals> {
 
     bool moved = false;
 
-    threeJs.domElement.addEventListener(three.PeripheralType.pointerdown, () {
+    threeJs.domElement.addEventListener(three.PeripheralType.pointerdown, ( event ) {
       moved = false;
     });
 

@@ -5,8 +5,7 @@ import 'package:three_js_core_loaders/three_js_core_loaders.dart';
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_curves/three_js_curves.dart';
 import 'package:three_js_math/three_js_math.dart';
-import 'svg_loader_parser_wasm.dart'
-  if(dart.library.js) 'svg_loader_parser.dart';
+import 'svg_loader_parser.dart';
 import 'svg_loader_points_to_stroke.dart';
 
 /// [Scalable Vector Graphics](https://en.wikipedia.org/wiki/Scalable_Vector_Graphics) is an XML-based vector image format for two-dimensional graphics with support for interactivity and animation.
@@ -505,9 +504,9 @@ class SVGLoader extends Loader{
 
     final List<Shape> shapesToReturn = [];
     for (final p in simplePaths) {
-      final amIAHole = isAHole[p["identifier"]]!;
+      final amIAHole = isAHole[p["identifier"]];
 
-      if (!amIAHole["isHole"]) {
+      if (amIAHole?["isHole"] == false) {
         final shape = Shape(null);
         shape.curves = p["curves"];
         final holes = isAHole

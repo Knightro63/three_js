@@ -1,3 +1,9 @@
+## 0.1.9
+
+* Fixed: Windows track pad scale, rotate, and pan support.
+* Fixed: Change size for windows, and mac
+* Added: WASM support
+
 ## 0.1.8
 
 * Fixed: Safari wheel bug
