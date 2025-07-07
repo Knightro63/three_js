@@ -4,7 +4,7 @@ class WebXRManager with EventDispatcher {
   bool enabled = false;
   bool cameraAutoUpdate = true;
   final WebGLRenderer renderer;
-  dynamic gl;
+  RenderingContext gl;
   bool isPresenting = false;
 
   WebXRManager(this.renderer, this.gl) : super();

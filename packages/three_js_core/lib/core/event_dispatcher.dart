@@ -26,6 +26,9 @@ class Event {
   int loopDelta = 0;
   String? mode;
 
+  List added = [];
+  List removed = [];
+
   Event.fromJson(Map<String, dynamic> json) {
     type = json["type"];
     target = json["target"];

@@ -209,35 +209,45 @@ class Utils{
    * @returns {CanvasTexture | null} The generated texture or null if context fails.
    */
   static CanvasTexture? createDefaultParticleTexture(){
-    try {
-      final canvas = document.createElement('canvas');
-      final size = 64;
-      canvas.width = size;
-      canvas.height = size;
-      final context = canvas.getContext('2d');
-      if (context) {
-        final centerX = size / 2;
-        final centerY = size / 2;
-        final radius = size / 2 - 2; // Small padding
+    int width = 12;
+    int height = 12;
+    Uint8Array rgbaData = Uint8Array(width * height * 4);
+    double radius = 6;
+    double centerX = (width - 1) / 2;
+    double centerY = (height - 1) / 2;
 
-        context.beginPath();
-        context.arc(centerX, centerY, radius, 0, 2 * math.pi, false);
-        context.fillStyle = 'white';
-        context.fill();
-        final texture = new CanvasTexture(canvas);
-        texture.needsUpdate = true;
-        return texture;
+    for (int i = 0; i < width * height; i++) {
+      // Calculate the x and y coordinates for the current pixel.
+      int x = i % width;
+      int y = i ~/ width; // Integer division to get the row (y)
+
+      // Calculate the distance of the pixel from the center.
+      double distance = math.sqrt(math.pow(x - centerX, 2) + math.pow(y - centerY, 2));
+
+      // Determine if the pixel is inside or outside the circle.
+      if (distance <= radius) {
+        // Inside the circle: set to red (R=255, G=0, B=0) with full opacity (A=255).
+        int rgbaIndex = i * 4;
+        rgbaData[rgbaIndex] = 255; // Red
+        rgbaData[rgbaIndex + 1] = 255;   // Green
+        rgbaData[rgbaIndex + 2] = 255;   // Blue
+        rgbaData[rgbaIndex + 3] = 255; // Alpha (fully opaque)
       } else {
-        console.warning(
-          'Could not get 2D context to generate default particle texture.'
-        );
-        return null;
+        // Outside the circle: set to fully transparent (A=0).
+        int rgbaIndex = i * 4;
+        rgbaData[rgbaIndex] = 0;   // Red
+        rgbaData[rgbaIndex + 1] = 0;   // Green
+        rgbaData[rgbaIndex + 2] = 0;   // Blue
+        rgbaData[rgbaIndex + 3] = 0;   // Alpha (fully transparent)
       }
-    } catch (error) {
-      // Handle potential errors (e.g., document not available in non-browser env)
-      console.warning('Error creating default particle texture: $error');
-      return null;
     }
+
+    final temp = ImageElement(
+      width: 2,
+      height: 2,
+      data: rgbaData
+    );
+    return CanvasTexture(temp);
   }
 
   static bool isLifeTimeCurve(

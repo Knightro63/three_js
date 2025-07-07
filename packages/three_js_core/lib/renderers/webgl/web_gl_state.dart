@@ -17,7 +17,7 @@ class WebGLState {
   Map<String, dynamic> get buffers => {"color": colorBuffer, "depth": depthBuffer, "stencil": stencilBuffer};
   Map<int, bool> enabledCapabilities = <int, bool>{};
 
-  dynamic xrFramebuffer;
+  Framebuffer? xrFramebuffer;
   Map currentBoundFramebuffers = {};
 	final uboBindings = WeakMap();
 	final uboProgramMap = WeakMap();
@@ -161,7 +161,6 @@ class WebGLState {
   void bindXRFramebuffer(Framebuffer? framebuffer) {
     if (framebuffer != xrFramebuffer) {
       gl.bindFramebuffer(WebGL.FRAMEBUFFER, framebuffer);
-
       xrFramebuffer = framebuffer;
     }
   }
@@ -177,7 +176,6 @@ class WebGLState {
       currentBoundFramebuffers[target] = framebuffer;
 
       // gl.DRAW_FRAMEBUFFER is equivalent to gl.FRAMEBUFFER
-
       if (target == WebGL.DRAW_FRAMEBUFFER) {
         currentBoundFramebuffers[WebGL.FRAMEBUFFER] = framebuffer;
       }

@@ -1,13 +1,13 @@
 import 'package:three_js_math/three_js_math.dart';
 import './p.dart';
 class Perlin {
-  late num _seed;
   late List<Vector3> _offsetMatrix;
-  late num _perm;
+  late List<int> _perm;
   late List<Vector3>  _gradP;
   // _three: { Vector2: any; Vector3: any };
 
-  Perlin([double seedNum = 1]) {
+  Perlin([double? seedNum]) {
+    seedNum ??= 1;
     final _gradientVecs = [
       // 2D Vecs
       Vector3(1, 1, 0),
@@ -25,8 +25,8 @@ class Perlin {
       Vector3(0, -1, -1),
     ];
 
-    List perm = Array(512);
-    List gradP = Array(512);
+    List<int> perm = List<int>.filled(512, 0);
+    List<Vector3> gradP = List<Vector3>.filled(512, new Vector3());
 
     seedNum *= 65536;
 
@@ -48,7 +48,7 @@ class Perlin {
       gradP[i] = gradP[i + 256] = _gradientVecs[v % 12];
     }
 
-    this._seed = seed;
+    //this._seed = seed;
 
     this._offsetMatrix = [
       Vector3(0, 0, 0),
@@ -73,13 +73,13 @@ class Perlin {
     return (1 - t) * a + t * b;
   }
 
-  _gradient(Vector posInCell) {
+  int _gradient(Vector posInCell) {
     final perm = this._perm;
     if (posInCell is Vector3) {
-      return posInCell.x + perm[posInCell.y + perm[posInCell.z]];
+      return (posInCell.x + perm[(posInCell.y + perm[posInCell.z.toInt()]).toInt()]).toInt();
     } 
     else {
-      return posInCell.x + perm[posInCell.y];
+      return (posInCell.x + perm[posInCell.y.toInt()]).toInt();
     }
   }
 
@@ -101,8 +101,7 @@ class Perlin {
       final s3 = this._offsetMatrix[i * 2];
       final s = Vector2(s3.x, s3.y);
 
-      final grad3 =
-        this._gradP[this._gradient(Vector2().add2(Vector2(cell[0].toDouble(),cell[1].toDouble()), s))];
+      final grad3 = this._gradP[this._gradient(Vector2().add2(Vector2(cell[0].toDouble(),cell[1].toDouble()), s))];
       final grad2 = Vector2(grad3.x, grad3.y);
       final dist2 = Vector2().sub2(input, s);
 

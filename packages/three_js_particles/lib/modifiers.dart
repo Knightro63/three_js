@@ -117,7 +117,7 @@ class Modifiers{
       final positionAmount = noise.positionAmount;
       final rotationAmount = noise.rotationAmount;
       final sizeAmount = noise.sizeAmount;
-      int noiseOnPosition;
+      double noiseOnPosition;
 
       final noisePosition =
         (particleLifetimePercentage + (offsets != null? offsets[particleIndex] : 0)) *
@@ -142,12 +142,12 @@ class Modifiers{
       }
 
       noiseInput.setValues(noisePosition, noisePosition, 0);
-      noiseOnPosition = sampler!.get3(noiseInput);
+      noiseOnPosition = sampler.get3(noiseInput);
       positionArr[positionIndex + 1] +=
         noiseOnPosition * noisePower * positionAmount;
 
       noiseInput.setValues(noisePosition, noisePosition, noisePosition);
-      noiseOnPosition = sampler!.get3(noiseInput);
+      noiseOnPosition = sampler.get3(noiseInput);
       positionArr[positionIndex + 2] +=
         noiseOnPosition * noisePower * positionAmount;
 

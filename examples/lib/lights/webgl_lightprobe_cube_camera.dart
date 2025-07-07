@@ -6,9 +6,7 @@ import 'package:three_js_helpers/three_js_helpers.dart';
 import 'package:three_js_objects/three_js_objects.dart';
 
 class WebglLightprobeCubeCamera extends StatefulWidget {
-  
   const WebglLightprobeCubeCamera({super.key});
-
   @override
   createState() => _State();
 }

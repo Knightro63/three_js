@@ -13,7 +13,6 @@ dependencies:
   logger: ^2.5.0
   three_js_math: ^0.1.4
   web: ^1.1.1
-  video_player: ^2.9.5
 
 dev_dependencies:
   flutter_test:

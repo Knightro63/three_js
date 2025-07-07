@@ -1,6 +1,6 @@
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
-import '../../app/web/wrapper.dart';
+import '../../app/web/xr_webgl_bindings.dart';
 
 final Event _moveEvent = Event(type: 'move');
 
@@ -71,7 +71,7 @@ class WebXRController extends Object3D{
 		return this;
 	}
 
-	WebXRController disconnect(XRInputSource inputSource ) {
+	WebXRController disconnect(inputSource ) {
 		dispatchEvent(Event(type: 'disconnected', data: inputSource));
 		_targetRay?.visible = false;
 		_grip?.visible = false;
@@ -81,8 +81,8 @@ class WebXRController extends Object3D{
 	}
 
 	WebXRController update(XRInputSource? inputSource, XRFrame frame, XRReferenceSpace referenceSpace ) {
-		dynamic inputPose;
-		dynamic gripPose;
+		XRPose? inputPose;
+		XRPose? gripPose;
 		bool handPose = false;
 
 		final WebXRController? targetRay = _targetRay;
@@ -97,17 +97,17 @@ class WebXRController extends Object3D{
 					targetRay.matrix.copyFromUnknown( inputPose.transform.matrix );
 					targetRay.matrix.decomposeEuler( targetRay.position, targetRay.rotation, targetRay.scale );
 
-					if ( inputPose.linearVelocity ) {
+					if ( inputPose.linearVelocity != null) {
 						targetRay.hasLinearVelocity = true;
-						targetRay.linearVelocity.setFrom( inputPose.linearVelocity );
+						targetRay.linearVelocity.copyFromUnknown( inputPose.linearVelocity );
 					} 
           else {
 						targetRay.hasLinearVelocity = false;
 					}
 
-					if ( inputPose.angularVelocity ) {
+					if ( inputPose.angularVelocity != null) {
 						targetRay.hasAngularVelocity = true;
-						targetRay.angularVelocity.setFrom( inputPose.angularVelocity );
+						targetRay.angularVelocity.copyFromUnknown( inputPose.angularVelocity );
 					} 
           else {
 						targetRay.hasAngularVelocity = false;
@@ -117,10 +117,10 @@ class WebXRController extends Object3D{
 				}
 			}
 
-			if ( hand != null && inputSource.hand ) {
+			if ( hand != null && inputSource.hand != null) {
 				handPose = true;
 
-				for ( final inputjoint in inputSource.hand.values() ) {
+				for ( final inputjoint in inputSource.hand!.map().values) {
 					// Update the joints groups with the XRJoint poses
 					final jointPose = frame.getJointPose( inputjoint, referenceSpace );
 
@@ -175,23 +175,23 @@ class WebXRController extends Object3D{
 			} 
       else {
 				if ( grip != null && inputSource.gripSpace != null) {
-					gripPose = frame.getPose( inputSource.gripSpace, referenceSpace );
+					gripPose = frame.getPose( inputSource.gripSpace!, referenceSpace );
 
 					if ( gripPose != null ) {
 						grip.matrix.copyFromUnknown( gripPose.transform.matrix );
 						grip.matrix.decomposeEuler( grip.position, grip.rotation, grip.scale );
 
-						if ( gripPose.linearVelocity ) {
+						if ( gripPose.linearVelocity != null) {
 							grip.hasLinearVelocity = true;
-							grip.linearVelocity.setFrom( gripPose.linearVelocity );
+							grip.linearVelocity.copyFromUnknown( gripPose.linearVelocity );
 						} 
             else {
 							grip.hasLinearVelocity = false;
 						}
 
-						if ( gripPose.angularVelocity ) {
+						if ( gripPose.angularVelocity != null) {
 							grip.hasAngularVelocity = true;
-							grip.angularVelocity.setFrom( gripPose.angularVelocity );
+							grip.angularVelocity.copyFromUnknown( gripPose.angularVelocity );
 						} 
             else {
 							grip.hasAngularVelocity = false;

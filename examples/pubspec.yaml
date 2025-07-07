@@ -31,6 +31,9 @@ dependencies:
   three_js_line: ^0.1.0
   three_js_bvh_csg: ^0.1.0
 
+  three_js_xr:
+    path: ../packages/three_js_xr
+
   permission_handler: ^11.3.1
   camera: ^0.10.6
   camera_macos: ^0.0.8

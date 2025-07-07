@@ -45,11 +45,13 @@ class Bezier{
 
         int start = 0;
         int stop = bezierPoints.length - 1;
+        int index = 0;
 
-        bezierPoints.find((point, index){
+        bezierPoints.firstWhere((point){
           final result = percentage < (point.percentage ?? 0);
           if (result) stop = index;
           else if (point.percentage != null) start = index;
+          index++;
           return result;
         });
 

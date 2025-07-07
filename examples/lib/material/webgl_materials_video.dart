@@ -4,9 +4,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:example/src/statistics.dart';
 import 'package:three_js/three_js.dart' as three;
+import 'package:three_js_postprocessing/post/bloom_pass.dart';
 import 'package:three_js_postprocessing/post/effect_composer.dart';
-// import 'package:three_js_postprocessing/post/outpass.dart';
-// import 'package:three_js_postprocessing/post/bloom_pass.dart';
+import 'package:three_js_postprocessing/post/outpass.dart';
 import 'package:three_js_postprocessing/post/render_pass.dart';
 
 class WebglMaterialsVideo extends StatefulWidget {
@@ -30,8 +30,8 @@ class _State extends State<WebglMaterialsVideo> {
     });
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
-      setup: setup,      settings: three.Settings(
-
+      setup: setup,
+      settings: three.Settings(
         autoClear: false
       )
     );
@@ -60,7 +60,7 @@ class _State extends State<WebglMaterialsVideo> {
 
   final meshes = [];
   final materials = [];
-  late final three.VideoTexture2 texture;
+  late final three.VideoTexture texture;
   double mouseX = 0;
   double mouseY = 0;
 
@@ -74,7 +74,7 @@ class _State extends State<WebglMaterialsVideo> {
     light.position.setValues( 0.5, 1, 1 ).normalize();
     threeJs.scene.add( light );
 
-    texture = three.VideoTexture2.fromOptions(
+    texture = three.VideoTexture.fromOptions(
       three.VideoTextureOptions(
         asset: 'assets/textures/sintel.mp4',
         context: context
@@ -137,14 +137,14 @@ class _State extends State<WebglMaterialsVideo> {
     threeJs.domElement.addEventListener(three.PeripheralType.pointermove, onDocumentMouseMove );
 
     final renderPass = RenderPass( threeJs.scene, threeJs.camera );
-    //final bloomPass = BloomPass( 1.3 );
-    //final outputPass = OutputPass();
+    final bloomPass = BloomPass( 1.3 );
+    final outputPass = OutputPass();
     final composer = EffectComposer( threeJs.renderer!, threeJs.renderTarget );
 
     composer.addPass( renderPass );
     if(!kIsWeb){
-      //composer.addPass( bloomPass );
-      //composer.addPass( outputPass );
+      composer.addPass( bloomPass );
+      composer.addPass( outputPass );
     }
 
     int counter = 0;

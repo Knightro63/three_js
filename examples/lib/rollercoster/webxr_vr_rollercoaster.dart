@@ -5,21 +5,19 @@ import 'package:flutter/material.dart';
 import 'package:example/src/statistics.dart';
 import 'package:three_js/three_js.dart' as three;
 import 'package:three_js_geometry/three_js_geometry.dart';
+import 'package:three_js_xr/three_js_xr.dart';
 
 extension on three.Vector3{
   three.Float32Array toNativeArray(three.Float32Array array, [int offset = 0]) {
     array[offset] = storage[0];
     array[offset + 1] = storage[1];
     array[offset + 2] = storage[2];
-
     return array;
   }
 }
 
 class WebXRVRRollercoaster extends StatefulWidget {
-  
   const WebXRVRRollercoaster({super.key});
-
   @override
   createState() => _State();
 }
@@ -38,10 +36,10 @@ class _State extends State<WebXRVRRollercoaster> {
       });
     });
     threeJs = three.ThreeJS(
-      onSetupComplete: (){setState(() {});},
+      onSetupComplete: () async{setState(() {});},
       setup: setup,
       settings: three.Settings(
-        //xr: true
+        xr: xrSetup
       )
     );
     super.initState();
@@ -60,7 +58,8 @@ class _State extends State<WebXRVRRollercoaster> {
       body: Stack(
         children: [
           threeJs.build(),
-          Statistics(data: data)
+          Statistics(data: data),
+          if(threeJs.mounted) VRButton(threeJs: threeJs)
         ],
       ) 
     );
@@ -78,11 +77,18 @@ class _State extends State<WebXRVRRollercoaster> {
   double progress = 0;
   int prevTime = DateTime.now().millisecond;
 
+  WebXRWorker xrSetup(three.WebGLRenderer renderer, dynamic gl){
+    return WebXRWorker(renderer,gl);
+  }
+
   Future<void> setup() async {
+    threeJs.renderer?.xr.enabled = true;
+    (threeJs.renderer?.xr as WebXRWorker).setReferenceSpaceType( 'local' );
+
     threeJs.scene = three.Scene();
     threeJs.scene.background = three.Color.fromHex32( 0xf0f0ff );
 
-    final light = three.HemisphereLight( 0xfff0f0, 0x60606, .3 );
+    final light = three.HemisphereLight( 0xfff0f0, 0x60606, 0.3 );
     light.position.setValues( 1, 1, 1 );
     threeJs.scene.add( light );
 
@@ -93,7 +99,6 @@ class _State extends State<WebXRVRRollercoaster> {
     train.add( threeJs.camera );
 
     // environment
-
     geometry = three.PlaneGeometry( 500, 500, 15, 15 );
     geometry.rotateX( - math.pi / 2 );
 
@@ -101,7 +106,6 @@ class _State extends State<WebXRVRRollercoaster> {
     final vertex = three.Vector3();
 
     for (int i = 0; i < positions.length; i += 3 ) {
-
       vertex.fromNativeArray( positions, i );
 
       vertex.x += math.Random().nextDouble() * 10 - 5;
@@ -135,8 +139,7 @@ class _State extends State<WebXRVRRollercoaster> {
     threeJs.scene.add( mesh );
 
     //
-
-    final PI2 = math.pi * 2;
+    const pi2 = math.pi * 2;
 
     RollerCoasterCurve rcc() {
       final vector = three.Vector3();
@@ -144,7 +147,7 @@ class _State extends State<WebXRVRRollercoaster> {
 
       final rcc = RollerCoasterCurve(
         getPointAt:  (double t ) {
-          t = t * PI2;
+          t = t * pi2;
 
           final x = math.sin( t * 3 ) * math.cos( t * 4 ) * 50;
           final y = math.sin( t * 10 ) * 2 + math.cos( t * 17 ) * 2 + 5;
@@ -155,7 +158,7 @@ class _State extends State<WebXRVRRollercoaster> {
       );
 
       rcc.getTangentAt = (double t ) {
-        final delta = 0.0001;
+        const delta = 0.0001;
         final t1 = math.max( 0.0, t - delta );
         final t2 = math.min( 1.0, t + delta );
 
@@ -164,7 +167,7 @@ class _State extends State<WebXRVRRollercoaster> {
       };
 
       return rcc;
-    };
+    }
 
     final curve = rcc();
 

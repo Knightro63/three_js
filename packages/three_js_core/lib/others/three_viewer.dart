@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:three_js_core/others/index.dart';
+import 'package:three_js_core/renderers/index.dart';
 import 'package:three_js_core/three_js_core.dart' as core;
 import 'package:three_js_math/three_js_math.dart';
 
@@ -27,7 +28,7 @@ class Settings{
     this.toneMappingExposure = 1.0,
     this.logarithmicDepthBuffer = false,
     this.stencil = true,
-    this.xr = false
+    this.xr
   }){
     this.renderOptions = renderOptions ?? {
       "format": RGBAFormat,
@@ -35,7 +36,7 @@ class Settings{
     };
   }
 
-  bool xr;
+  WebXRManager Function(WebGLRenderer renderer, dynamic gl)? xr;
   bool animate;
   bool logarithmicDepthBuffer;
   bool useSourceTexture;
@@ -225,7 +226,8 @@ class ThreeJS with WidgetsBindingObserver{
       "alpha": settings.alpha,
       "clearColor": settings.clearColor,
       "clearAlpha": settings.clearAlpha,
-      "logarithmicDepthBuffer": settings.logarithmicDepthBuffer
+      "logarithmicDepthBuffer": settings.logarithmicDepthBuffer,
+      'xr': settings.xr
     };
     
     renderer = core.WebGLRenderer(options);

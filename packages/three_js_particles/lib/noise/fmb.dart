@@ -2,6 +2,8 @@
 import 'package:three_js_math/three_js_math.dart';
 import 'dart:math' as math;
 
+import 'package:three_js_particles/noise/perlin.dart';
+
 class FBMOpts{
   double? seed;
   double? scale;
@@ -50,7 +52,7 @@ class FBM {
     double frequency = 1;
     double max = amplitude;
 
-    double noiseFunction = this._noise.get2.bind(this._noise);
+    double Function(Vector2) noiseFunction = this._noise.get2;//.bind(this._noise);
 
     for (int i = 0; i < this._octaves; i++) {
       final position = Vector2(
@@ -76,7 +78,7 @@ class FBM {
     double frequency = 1;
     double max = amplitude;
 
-    double noiseFunction = this._noise.get3.bind(this._noise);
+    double Function(Vector3)  noiseFunction = this._noise.get3;//.bind(this._noise);
 
     for (int i = 0; i < this._octaves; i++) {
       final position = new Vector3(

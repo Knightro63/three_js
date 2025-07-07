@@ -2,12 +2,11 @@ import 'package:flutter/material.dart' as wid;
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 import './texture.dart';
-import 'package:video_player/video_player.dart';
 
 class VideoTexture extends Texture {
   ImageElement? get video => image;
-  VideoPlayerController? _controller;
-  wid.BuildContext? _context;
+  // VideoPlayerController? _controller;
+  // wid.BuildContext? _context;
   bool _didDispose = false;
 
   /// [video] - The video element to use as the texture.
@@ -66,8 +65,8 @@ class VideoTexture extends Texture {
 
     generateMipmaps = false;
 
-    _controller = video?['controller'];
-    _context = video?['context'];
+    // _controller = video?['controller'];
+    // _context = video?['context'];
   }
 
   factory VideoTexture.fromOptions(
@@ -81,24 +80,25 @@ class VideoTexture extends Texture {
     int? type,
     int? anisotropy
   ]){
-    final _controller = VideoPlayerController.networkUrl(Uri.parse('https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4'))..initialize().then((_) {});
-    final image = ImageElement(url: _controller);
+    throw('Web Only.');
+    // final _controller = VideoPlayerController.networkUrl(Uri.parse('https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4'))..initialize().then((_) {});
+    // final image = ImageElement(url: _controller);
 
-    return VideoTexture(
-      {
-        'imageElement':image,
-        'context': options.context,
-        'controller': _controller
-      },
-      mapping, 
-      wrapS, 
-      wrapT, 
-      magFilter, 
-      minFilter, 
-      format, 
-      type,
-      anisotropy
-    );
+    // return VideoTexture(
+    //   {
+    //     'imageElement':image,
+    //     'context': options.context,
+    //     'controller': _controller
+    //   },
+    //   mapping, 
+    //   wrapS, 
+    //   wrapT, 
+    //   magFilter, 
+    //   minFilter, 
+    //   format, 
+    //   type,
+    //   anisotropy
+    // );
   }
 
 
@@ -110,32 +110,37 @@ class VideoTexture extends Texture {
   /// This is called automatically and sets [needsUpdate] 
   /// to `true` every time a new frame is available.
   void update(){
-    //print('here');
-    if(video?.complete == true && _context != null && _controller != null && _controller!.value.isInitialized){
-      //print('here2');
-      video?.complete = false;
-      FlutterTexture.generateImageFromWidget(
-        _context!,
-        wid.Container(
-          color: wid.Colors.red,
-          width: 1000,
-          height: 1000,
-          child: VideoPlayer(_controller!)
-        ),
-        video
-      ).then((value){
-        video?.complete = true;
-        needsUpdate = true;
-      });
-    }
+    throw('Web Only.');
   }
+    
+  //   //print('here');
+  //   if(video?.complete == true && _context != null && _controller != null && _controller!.value.isInitialized){
+  //     //print('here2');
+  //     video?.complete = false;
+  //     FlutterTexture.generateImageFromWidget(
+  //       _context!,
+  //       wid.Container(
+  //         color: wid.Colors.red,
+  //         width: 1000,
+  //         height: 1000,
+  //         child: VideoPlayer(_controller!)
+  //       ),
+  //       video
+  //     ).then((value){
+  //       video?.complete = true;
+  //       needsUpdate = true;
+  //     });
+  //   }
+  // }
 
   void play(){
-    _controller?.play();
+    throw('Web Only.');
+    //_controller?.play();
   }
   
   void pause(){
-    _controller?.pause();
+    throw('Web Only.');
+    //_controller?.pause();
   }
 
   void updateVideo() {
@@ -144,9 +149,10 @@ class VideoTexture extends Texture {
 
   void dispose(){
     if(_didDispose) return;
-    _controller?.pause();
-    _controller?.dispose();
+    // _controller?.pause();
+    // _controller?.dispose();
     image = null;
     _didDispose = true;
+    throw('Web Only.');
   }
 }

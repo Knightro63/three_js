@@ -157,6 +157,7 @@ class WebGLRenderer {
   late WebGLBindingStates bindingStates;
 
   late WebXRManager xr;
+  late WebXRManager Function(WebGLRenderer renderer, dynamic gl)? _setXR;
   late WebGLUniformsGroups uniformsGroups;
   late WebGLShadowMap shadowMap;
 
@@ -185,7 +186,7 @@ class WebGLRenderer {
     _scissor = Vector4(0, 0, width, height);
 
     _gl = this.parameters["gl"];
-    xr = this.parameters["xr"] ?? WebXRManager(this, _gl);
+    _setXR = this.parameters["xr"];
 
     initGLContext();
   }
@@ -229,8 +230,9 @@ class WebGLRenderer {
     indexedBufferRenderer = WebGLIndexedBufferRenderer(_gl, extensions, info);
 
     info.programs = programCache.programs;
-
-    xr.init();// = WebXRManager(this, _gl);
+  
+    xr = _setXR?.call(this,gl) ?? WebXRManager(this, _gl);
+    xr.init();
 		xr.addEventListener( 'sessionstart', onXRSessionStart );
 		xr.addEventListener( 'sessionend', onXRSessionEnd );
   }
@@ -754,11 +756,11 @@ class WebGLRenderer {
     if (onAnimationFrameCallback != null) onAnimationFrameCallback!(time);
   }
 
-  void onXRSessionStart() {
+  void onXRSessionStart(event) {
     animation.stop();
   }
 
-  void onXRSessionEnd() {
+  void onXRSessionEnd(event) {
     animation.start();
   }
 

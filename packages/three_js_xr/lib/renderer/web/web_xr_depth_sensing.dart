@@ -1,5 +1,5 @@
 import 'package:three_js_core/three_js_core.dart';
-import 'package:three_js_xr/app/web/wrapper.dart';
+import '../../app/web/xr_webgl_bindings.dart';
 
 const occlusionVertex = '''
 void main() {

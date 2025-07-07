@@ -1,64 +1,52 @@
+import 'dart:js_interop';
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'package:three_js_core/renderers/webgl/index.dart';
-import 'package:web/web.dart' hide WebGL, Event, console;
+import '../../app/web/xr_webgl_bindings.dart';
 import 'web_xr_controller.dart';
 import 'web_xr_depth_sensing.dart';
-
-// class XRWebGLLayer extends XRWebGLBinding{
-//   Map<String,dynamic> layerInit;
-//   XRWebGLLayer(super.session, super.gl, this.layerInit );
-// }
-
-// class XRWebGLBinding{
-//   dynamic session;
-//   dynamic gl;
-//   int textureWidth = 0;
-//   int textureHeight = 0;
-//   double fixedFoveation = 0;
-
-//   XRWebGLBinding( this.session, this.gl );
-// }
 
 class WebXRWorker extends WebXRManager{
   late final WebGLState state;
   final WebXRDepthSensing depthSensing = WebXRDepthSensing();
   late final ArrayCamera cameraXR = ArrayCamera([]);
   
-  var session = null;
+  XRSession? session;
   double framebufferScaleFactor = 1.0;
 
-  var referenceSpace;
+  XRReferenceSpace? referenceSpace;
   var onAnimationFrameCallback;
   String referenceSpaceType = 'local-floor';
 
-  var pose;
-  var glBinding;
-  var glFramebuffer;
-  XRWebGLBinding? glProjLayer;
-  var glBaseLayer ;
+  XRViewerPose? pose;
+  XRWebGLBinding? glBinding;
+  Framebuffer? glFramebuffer;
+  XRProjetionLayer? glProjLayer;
+  XRWebGLLayer? glBaseLayer;
   bool isMultisample = false;
-  var glMultisampledFramebuffer;
-  var glColorRenderbuffer;
-  var glDepthRenderbuffer;
-  var xrFrame;
-  var depthStyle;
-  var clearStyle;
+  Framebuffer? glMultisampledFramebuffer;
+  Renderbuffer? glColorRenderbuffer;
+  Renderbuffer? glDepthRenderbuffer;
+  XRFrame? xrFrame;
+  int depthStyle = 0;
+  int clearStyle = 0;
 
   final List<WebXRController> controllers = [];
-  final Map<String,WebXRController> inputSourcesMap = {};
+  final Map<XRInputSource,WebXRController> inputSourcesMap = {};
 
-  var _currentDepthNear;
-  var _currentDepthFar;
+  double? _currentDepthNear;
+  double? _currentDepthFar;
 
   final WebGLAnimation animation = WebGLAnimation();
   late final ArrayCamera cameraVR;
   final PerspectiveCamera cameraL = PerspectiveCamera();
   final PerspectiveCamera cameraR = PerspectiveCamera();
 
-  final cameras = [];
+  late final List<Camera> cameras;
 
-  WebXRWorker(super.renderer, super.gl);
+  WebXRWorker(super.renderer, super.gl){
+    cameras = [cameraL,cameraR];
+  }
 
   @override
   void init(){
@@ -127,7 +115,7 @@ class WebXRWorker extends WebXRManager{
 
   void onSessionEnd() {
     inputSourcesMap.forEach((inputSource,controller) {
-      controller.disconnect(inputSource);
+      controller.disconnect(controller);
     });
 
     inputSourcesMap.clear();
@@ -140,10 +128,10 @@ class WebXRWorker extends WebXRManager{
     state.bindXRFramebuffer( null );
     renderer.setRenderTarget( renderer.getRenderTarget() );
 
-    if ( glFramebuffer ) gl.deleteFramebuffer( glFramebuffer );
-    if ( glMultisampledFramebuffer ) gl.deleteFramebuffer( glMultisampledFramebuffer );
-    if ( glColorRenderbuffer ) gl.deleteRenderbuffer( glColorRenderbuffer );
-    if ( glDepthRenderbuffer ) gl.deleteRenderbuffer( glDepthRenderbuffer );
+    if ( glFramebuffer != null) gl.deleteFramebuffer( glFramebuffer );
+    if ( glMultisampledFramebuffer != null) gl.deleteFramebuffer( glMultisampledFramebuffer );
+    if ( glColorRenderbuffer != null) gl.deleteRenderbuffer( glColorRenderbuffer! );
+    if ( glDepthRenderbuffer != null) gl.deleteRenderbuffer( glDepthRenderbuffer! );
     glFramebuffer = null;
     glMultisampledFramebuffer = null;
     glColorRenderbuffer = null;
@@ -173,7 +161,7 @@ class WebXRWorker extends WebXRManager{
     }
   }
 
-  getReferenceSpace () {
+  XRReferenceSpace? getReferenceSpace () {
     return referenceSpace;
   }
 
@@ -181,90 +169,88 @@ class WebXRWorker extends WebXRManager{
     return glProjLayer ?? glBaseLayer;
   }
 
-  getBinding () {
+  XRWebGLBinding? getBinding () {
     return glBinding;
   }
 
-  getFrame () {
+  XRFrame? getFrame () {
     return xrFrame;
   }
 
-  getSession () {
+  XRSession? getSession () {
     return session;
   }
 
-  Future<void> setSession ( value ) async{
+  Future<void> setSession (XRSession? value ) async{
     session = value;
 
     if ( session != null ) {
-      session.addEventListener( 'select', onSessionEvent );
-      session.addEventListener( 'selectstart', onSessionEvent );
-      session.addEventListener( 'selectend', onSessionEvent );
-      session.addEventListener( 'squeeze', onSessionEvent );
-      session.addEventListener( 'squeezestart', onSessionEvent );
-      session.addEventListener( 'squeezeend', onSessionEvent );
-      session.addEventListener( 'end', onSessionEnd );
-      session.addEventListener( 'inputsourceschange', onInputSourcesChange );
+      session?.addEventListener( 'select', onSessionEvent.jsify() );
+      session?.addEventListener( 'selectstart', onSessionEvent.jsify() );
+      session?.addEventListener( 'selectend', onSessionEvent.jsify() );
+      session?.addEventListener( 'squeeze', onSessionEvent.jsify() );
+      session?.addEventListener( 'squeezestart', onSessionEvent.jsify() );
+      session?.addEventListener( 'squeezeend', onSessionEvent.jsify() );
+      session?.addEventListener( 'end', onSessionEnd.jsify() );
+      session?.addEventListener( 'inputsourceschange', onInputSourcesChange.jsify() );
 
-      final attributes = gl.getContextAttributes();
-
-      if ( attributes.xrCompatible != true ) {
+      final attributes = (gl.getContextAttributes() as JSAny).dartify() as Map;
+      if ( attributes['xrCompatible'] != true ) {
         await gl.makeXRCompatible();
       }
 
-      if ( session.renderState.layers == null ) {
+      if ( session?.renderState.layers == null ) {
         final layerInit = {
-          'antialias': attributes.antialias,
-          'alpha': attributes.alpha,
-          'depth': attributes.depth,
-          'stencil': attributes.stencil,
+          'antialias': attributes['antialias'],
+          'alpha': attributes['alpha'],
+          'depth': attributes['depth'],
+          'stencil': attributes['stencil'],
           'framebufferScaleFactor': framebufferScaleFactor
         };
 
-        glBaseLayer = XRWebGLLayer( session, gl, layerInit );
+        glBaseLayer = XRWebGLLayer( session!, gl.gl.gl, layerInit.jsify() );
 
-        session.updateRenderState( {'baseLayer': glBaseLayer } );
+        session?.updateRenderState( {'baseLayer': glBaseLayer }.jsify() );
 
       } 
-      else if ( gl is WebGLRenderingContext ) {
+      else if (false) {
         // Use old style webgl layer because we can't use MSAA
         // WebGL2 support.
 
         final layerInit = {
           'antialias': true,
-          'alpha': attributes.alpha,
-          'depth': attributes.depth,
-          'stencil': attributes.stencil,
+          'alpha': attributes['alpha'],
+          'depth': attributes['depth'],
+          'stencil': attributes['stencil'],
           'framebufferScaleFactor': framebufferScaleFactor
         };
 
-        glBaseLayer = XRWebGLLayer( session, gl, layerInit );
+        glBaseLayer = XRWebGLLayer( session!, gl.gl.gl, layerInit.jsify() );
 
-        session.updateRenderState( { 'layers': [ glBaseLayer ] } );
-
+        session?.updateRenderState( { 'layers': [ glBaseLayer ] }.jsify() );
       } 
       else {
-        isMultisample = attributes.antialias;
+        isMultisample = attributes['antialias'];
         dynamic depthFormat;
 
-        if (attributes.depth ) {
+        if (attributes['depth'] != null) {
           clearStyle = WebGL.DEPTH_BUFFER_BIT;
-          if ( attributes.stencil ) clearStyle |= WebGL.STENCIL_BUFFER_BIT;
-          depthStyle = attributes.stencil ? WebGL.DEPTH_STENCIL_ATTACHMENT : WebGL.DEPTH_ATTACHMENT;
-          depthFormat = attributes.stencil ? WebGL.DEPTH24_STENCIL8 : WebGL.DEPTH_COMPONENT24;
+          if ( attributes['stencil'] != null) clearStyle |= WebGL.STENCIL_BUFFER_BIT;
+          depthStyle = attributes['stencil'] != null? WebGL.DEPTH_STENCIL_ATTACHMENT : WebGL.DEPTH_ATTACHMENT;
+          depthFormat = attributes['stencil'] != null? WebGL.DEPTH24_STENCIL8 : WebGL.DEPTH_COMPONENT24;
         }
 
         final projectionlayerInit = {
-          'colorFormat': attributes.alpha ? WebGL.RGBA8 : WebGL.RGB8,
+          'colorFormat': attributes['alpha'] ? WebGL.RGBA8 : WebGL.RGB8,
           'depthFormat': depthFormat,
           'scaleFactor': framebufferScaleFactor
         };
 
-        glBinding = XRWebGLBinding( session, gl );
-        glProjLayer = glBinding.createProjectionLayer( projectionlayerInit );
+        glBinding = XRWebGLBinding( session!, gl.gl.gl );
+        glProjLayer = glBinding?.createProjectionLayer( projectionlayerInit.jsify() );
         glFramebuffer = gl.createFramebuffer();
 
-        session.updateRenderState( { 'layers': [ glProjLayer ] } );
+        session?.updateRenderState( { 'layers': [ glProjLayer ] }.jsify() );
 
         if ( isMultisample ) {
           glMultisampledFramebuffer = gl.createFramebuffer();
@@ -293,7 +279,7 @@ class WebXRWorker extends WebXRManager{
         }
       }
 
-      referenceSpace = await session.requestReferenceSpace( referenceSpaceType );
+      referenceSpace = (await (session?.requestReferenceSpace( referenceSpaceType ).toDart)) as XRReferenceSpace;
 
       animation.setContext( session );
       animation.start();
@@ -303,8 +289,8 @@ class WebXRWorker extends WebXRManager{
     }
   }
 
-  void onInputSourcesChange( event ) {
-    final inputSources = session.inputSources;
+  void onInputSourcesChange(Event event ) {
+    final inputSources = session!.inputSources!.toDart;
 
     // Assign inputSources to available controllers
     for (int i = 0; i < controllers.length; i ++ ) {
@@ -404,10 +390,10 @@ class WebXRWorker extends WebXRManager{
 
     if ( _currentDepthNear != cameraVR.near || _currentDepthFar != cameraVR.far ) {
       // Note that the renderState won't apply until the next frame. See #18320
-      session.updateRenderState( {
+      session?.updateRenderState( {
         'depthNear': cameraVR.near,
         'depthFar': cameraVR.far
-      } );
+      }.jsify() );
 
       _currentDepthNear = cameraVR.near;
       _currentDepthFar = cameraVR.far;
@@ -439,10 +425,10 @@ class WebXRWorker extends WebXRManager{
     }
 
     // update projection matrix for proper view frustum culling
-
     if ( cameras.length == 2 ) {
       setProjectionFromUnion( cameraVR, cameraL, cameraR );
-    } else {
+    } 
+    else {
       cameraVR.projectionMatrix.setFrom( cameraL.projectionMatrix );
     }
   }
@@ -452,13 +438,13 @@ class WebXRWorker extends WebXRManager{
     return cameraVR;
   }
 
-  getFoveation () {
+  double? getFoveation () {
     if ( glProjLayer != null ) {
       return glProjLayer?.fixedFoveation;
     }
 
     if ( glBaseLayer != null ) {
-      return glBaseLayer.fixedFoveation;
+      return glBaseLayer?.fixedFoveation;
     }
 
     return null;
@@ -472,15 +458,15 @@ class WebXRWorker extends WebXRManager{
       glProjLayer?.fixedFoveation = foveation;
     }
 
-    if ( glBaseLayer != null && glBaseLayer.fixedFoveation != null ) {
-      glBaseLayer.fixedFoveation = foveation;
+    if ( glBaseLayer != null && glBaseLayer?.fixedFoveation != null ) {
+      glBaseLayer?.fixedFoveation = foveation;
     }
   }
 
   @override
   String? getEnvironmentBlendMode () {
     if ( session != null ) {
-      return session.environmentBlendMode;
+      return session?.environmentBlendMode;
     }
 
     return null;
@@ -497,14 +483,14 @@ class WebXRWorker extends WebXRManager{
   }
 
   // Animation Loop
-  void onAnimationFrame(double time, frame ) {
-    pose = frame.getViewerPose( referenceSpace );
+  void onAnimationFrame(double time, XRFrame frame ) {
+    pose = frame.getViewerPose( referenceSpace! );
     xrFrame = frame;
 
     if ( pose != null ) {
-      final views = pose.views;
+      final views = pose!.views;
       if ( glBaseLayer != null ) {
-        state.bindXRFramebuffer( glBaseLayer.framebuffer );
+        state.bindXRFramebuffer( Framebuffer(glBaseLayer!.framebuffer) );
       }
 
       bool cameraVRNeedsUpdate = false;
@@ -517,27 +503,39 @@ class WebXRWorker extends WebXRManager{
 
       for (int i = 0; i < views.length; i ++ ) {
         final view = views[ i ];
-        dynamic viewport;
+        XRViewport? viewport;
 
         if ( glBaseLayer != null ) {
-          viewport = glBaseLayer.getViewport( view );
-        } else {
-          final glSubImage = glBinding.getViewSubImage( glProjLayer, view );
+          viewport = glBaseLayer?.getViewport( view );
+        } 
+        else {
+          final glSubImage = glBinding?.getViewSubImage( glProjLayer!, view );
           state.bindXRFramebuffer( glFramebuffer );
 
-          if ( glSubImage.depthStencilTexture != null ) {
-            gl.framebufferTexture2D( WebGL.FRAMEBUFFER, depthStyle, WebGL.TEXTURE_2D, glSubImage.depthStencilTexture, 0 );
+          if ( glSubImage?.depthStencilTexture != null ) {
+            gl.framebufferTexture2D( 
+              WebGL.FRAMEBUFFER, 
+              depthStyle, 
+              WebGL.TEXTURE_2D, 
+              WebGLTexture(glSubImage!.depthStencilTexture), 
+              0 
+            );
           }
 
-          gl.framebufferTexture2D( WebGL.FRAMEBUFFER, WebGL.COLOR_ATTACHMENT0, WebGL.TEXTURE_2D, glSubImage.colorTexture, 0 );
+          gl.framebufferTexture2D( 
+            WebGL.FRAMEBUFFER, 
+            WebGL.COLOR_ATTACHMENT0, 
+            WebGL.TEXTURE_2D, 
+            WebGLTexture(glSubImage!.colorTexture), 
+            0 
+          );
           viewport = glSubImage.viewport;
         }
-
+        
         final camera = cameras[ i ];
-
-        camera.matrix.fromArray( view.transform.matrix );
-        camera.projectionMatrix.fromArray( view.projectionMatrix );
-        camera.viewport.set( viewport.x, viewport.y, viewport.width, viewport.height );
+        camera.matrix.copyFromUnknown( view.transform.matrix.dartify());
+        camera.projectionMatrix.copyFromUnknown( view.projectionMatrix.dartify()  );
+        camera.viewport?.setValues( viewport!.x, viewport.y, viewport.width, viewport.height);
 
         if ( i == 0 ) {
           cameraVR.matrix.setFrom( camera.matrix );
@@ -550,21 +548,20 @@ class WebXRWorker extends WebXRManager{
 
       if ( isMultisample ) {
         state.bindXRFramebuffer( glMultisampledFramebuffer );
-        if ( clearStyle != null ) gl.clear( clearStyle );
+        if ( clearStyle != 0) gl.clear( clearStyle );
       }
     }
 
     //
-
-    final inputSources = session.inputSources;
+    final inputSources = session!.inputSources!;
 
     for (int i = 0; i < controllers.length; i ++ ) {
       final controller = controllers[ i ];
       final inputSource = inputSources[ i ];
-      controller.update( inputSource, frame, referenceSpace );
+      controller.update( inputSource, frame, referenceSpace! );
     }
 
-    if ( onAnimationFrameCallback ) onAnimationFrameCallback( time, frame );
+    if ( onAnimationFrameCallback != null) onAnimationFrameCallback( time, frame );
 
     if ( isMultisample ) {
       final width = glProjLayer!.textureWidth;

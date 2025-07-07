@@ -1,7 +1,7 @@
 import 'package:three_js/three_js.dart' as three;
 import 'package:three_js_particles/Gyroscope.dart';
+import 'package:three_js_particles/noise/fmb.dart';
 import 'enums.dart';
-import 'dart:math' as math;
 
 // import { Gyroscope } from 'three/examples/jsm/misc/Gyroscope.js';
 // import { FBM } from 'three-noise/build/three-noise.module.js';
@@ -1154,6 +1154,9 @@ class ParticleSystemConfig{
    */
   void Function({three.Points? particleSystem,})? onComplete;
 
+  bool applyToFirstObject = false;
+  List skippedProperties = [];
+
   ParticleSystemConfig({
     this.transform,
     this.duration = 5.0,
@@ -1179,6 +1182,60 @@ class ParticleSystemConfig{
     this.noise,
     this.textureSheetAnimation
   });
+
+  // operator []=(String key,value) => _fromValue(key);
+
+  // _fromValue(String key){
+  //   switch (key) {
+  //     case 'transform':
+  //       return transform;
+  //     case 'duration':
+  //       return duration;
+  //     case 'looping':
+  //       return looping;
+  //     case 'startDelay':
+  //       return startDelay;
+  //     case 'startLifetime':
+  //       return startLifetime;
+  //     case 'startSpeed':
+  //       return startSpeed;
+  //     case 'startSize':
+  //       return startSize;
+  //     case 'startOpacity':
+  //       return startOpacity;
+  //     case 'startRotation':
+  //       return startRotation;
+  //     case 'startColor':
+  //       return startColor;
+  //     case 'gravity':
+  //       return gravity;
+  //     case 'simulationSpace':
+  //       return simulationSpace;
+  //     case 'maxParticles':
+  //       return maxParticles;
+  //     case 'emission':
+  //       return emission;
+  //     case 'shape':
+  //       return shape;
+  //     case 'map':
+  //       return map;
+  //     case 'renderer':
+  //       return renderer;
+  //     case 'velocityOverLifetime':
+  //       return velocityOverLifetime;
+  //     case 'sizeOverLifetime':
+  //       return sizeOverLifetime;
+  //     case 'opacityOverLifetime':
+  //       return opacityOverLifetime;
+  //     case 'rotationOverLifetime':
+  //       return rotationOverLifetime;
+  //     case 'noise':
+  //       return noise;
+  //     case 'textureSheetAnimation':
+  //       return textureSheetAnimation;
+  //     default:
+  //   }
+  // }
 }
 
 typedef  NormalizedParticleSystemConfig = ParticleSystemConfig;

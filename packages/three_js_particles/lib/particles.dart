@@ -1,11 +1,9 @@
-import 'dart:convert';
 import 'dart:math' as math;
 import 'package:three_js_particles/Gyroscope.dart';
+import 'package:three_js_particles/noise/fmb.dart';
 
 import 'utils.dart';
 import 'package:three_js/three_js.dart' as three;
-// import { Gyroscope } from 'three/examples/jsm/misc/Gyroscope.js';
-// import { FBM } from 'three-noise/build/three-noise.module.js';
 import './shaders/particle-system-fragment-shader.glsl.dart';
 import './shaders/particle-system-vertex-shader.glsl.dart';
 import 'bezier.dart';
@@ -152,20 +150,20 @@ class Particles {
     ),
   );
 
-  void createFloat32Attributes({
+  three.Float32BufferAttribute createFloat32Attributes({
     required three.BufferGeometry geometry,
     required String propertyName,
     required int maxParticles,
     List<double>? factory,
   }){
-    geometry.setAttributeFromString(
-      propertyName,
-      three.Float32BufferAttribute(
-        factory != null?three.Float32Array.fromList(factory):three.Float32Array(maxParticles),
-        1
-      )
+    final ba = three.Float32BufferAttribute(
+      factory != null?three.Float32Array.fromList(factory):three.Float32Array(maxParticles),
+      1
     );
+    geometry.setAttributeFromString(propertyName,ba);
+    return ba;
   }
+  
 
   void calculatePositionAndVelocity (
     GeneralData generalData,
@@ -302,11 +300,12 @@ class Particles {
       isEnabled: true,
     );
 
-    final normalizedConfig = ObjectUtils.deepMerge(
-      DEFAULT_PARTICLE_SYSTEM_CONFIG as NormalizedParticleSystemConfig,
-      config,
-      { applyToFirstObject: false, skippedProperties: [] }
-    ) as NormalizedParticleSystemConfig;
+    final normalizedConfig = DEFAULT_PARTICLE_SYSTEM_CONFIG;
+    // ObjectUtils.deepMerge(
+    //   DEFAULT_PARTICLE_SYSTEM_CONFIG as NormalizedParticleSystemConfig,
+    //   config,
+    //   { applyToFirstObject: false, skippedProperties: [] }
+    // ) as NormalizedParticleSystemConfig;
 
     three.Texture? particleMap = normalizedConfig.map ?? Utils.createDefaultParticleTexture();
 
@@ -435,31 +434,27 @@ class Particles {
       );
     }
 
-    final List<String> startValueKeys = [
-      'startSize',
-      'startOpacity',
-    ];
+    generalData.startValues?['startSize'] = List.generate(maxParticles, (i) =>
+      Utils.calculateValue(
+        generalData.particleSystemId,
+        normalizedConfig.startSize,
+        0
+      ) as num
+    );
 
-    startValueKeys.forEach((key){
-      generalData.startValues?[key] = List.generate(maxParticles, (i) =>
-        Utils.calculateValue(
-          generalData.particleSystemId,
-          normalizedConfig[key],
-          0
-        ) as num
-      );
-    });
+    generalData.startValues?['startOpacity'] = List.generate(maxParticles, (i) =>
+      Utils.calculateValue(
+        generalData.particleSystemId,
+        normalizedConfig.startOpacity,
+        0
+      ) as num
+    );
 
-    final List<String> lifetimeValueKeys = [
-      'rotationOverLifetime',
-    ];
-    lifetimeValueKeys.forEach((key){
-      final value = normalizedConfig[key];// as {isActive: boolean;} & RandomBetweenTwoConstants;
-      
-      if (value.isActive){
-        generalData.lifetimeValues?[key] = List.generate(maxParticles, (i){return value.min! + math.Random().nextDouble() * ( value.max! - value.min! );});
-      }
-    });
+    final value = normalizedConfig.rotationOverLifetime;
+    
+    if (value?.isActive == true){
+      generalData.lifetimeValues?['rotationOverLifetime'] = List.generate(maxParticles, (i){return value!.min + math.Random().nextDouble() * ( value.max - value.min);});
+    }
 
     generalData.noise = Noise(
       isActive: noise.isActive,
@@ -467,13 +462,11 @@ class Particles {
       positionAmount: noise.positionAmount,
       rotationAmount: noise.rotationAmount,
       sizeAmount: noise.sizeAmount,
-      sampler: noise.isActive
-        ? new FBM({
-            seed: math.Random().nextDouble(),
-            scale: noise.frequency,
-            octaves: noise.octaves,
-          })
-        : null,
+      sampler: noise.isActive? FBM(FBMOpts(
+        seed: math.Random().nextDouble(),
+        scale: noise.frequency,
+        octaves: noise.octaves,
+      )):null,
       offsets: noise.useRandomOffset
         ? List.generate(maxParticles, (i) => math.Random().nextDouble() * 100)// Array.from({ length: maxParticles }, () => Math.random() * 100)
         : null,
@@ -527,17 +520,16 @@ class Particles {
 
     geometry.setFromPoints( List.generate(maxParticles, (i) => startPositions[i].clone()));
 
-    createFloat32AttributesRequest(
+    three.Float32BufferAttribute createFloat32AttributesRequest(
       String propertyName,
       dynamic factory,//: ((value: never, index: number) => number) | number
-    ){
+    ) =>
       createFloat32Attributes(
         geometry: geometry,
         propertyName: propertyName,
         maxParticles: maxParticles,
         factory: factory,
       );
-    };
 
     createFloat32AttributesRequest('isActive', 0);
     createFloat32AttributesRequest('lifetime', 0);
@@ -1005,15 +997,13 @@ class Particles {
           int generatedParticlesByDistanceNeeds = 0;
           for (int i = 0; i < neededParticles; i++) {
             int particleIndex = -1;
-            particleSystem?.geometry?.attributes['isActive'].array,.find(
-              (isActive, index){
-                if (!isActive) {
-                  particleIndex = index;
-                  return true;
-                }
-                return false;
+            final isActive = (particleSystem?.geometry?.attributes['isActive'] as three.Float32BufferAttribute).array;
+            for(int j = 0; j < isActive.length; j++){
+              if (isActive != 0) {
+                particleIndex = j;
+                break;
               }
-            );
+            }
 
             if (
               particleIndex != -1 &&
