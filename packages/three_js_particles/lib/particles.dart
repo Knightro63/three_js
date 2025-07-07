@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'dart:math' as math;
+import 'package:three_js_particles/Gyroscope.dart';
+
 import 'utils.dart';
 import 'package:three_js/three_js.dart' as three;
 // import { Gyroscope } from 'three/examples/jsm/misc/Gyroscope.js';
@@ -439,15 +441,12 @@ class Particles {
     ];
 
     startValueKeys.forEach((key){
-      generalData.startValues[key] = Array.from({ length: maxParticles }, () =>
-        calculateValue(
+      generalData.startValues?[key] = List.generate(maxParticles, (i) =>
+        Utils.calculateValue(
           generalData.particleSystemId,
-          normalizedConfig[key] as
-            | Constant
-            | RandomBetweenTwoConstants
-            | LifetimeCurve,
+          normalizedConfig[key],
           0
-        )
+        ) as num
       );
     });
 
@@ -455,14 +454,11 @@ class Particles {
       'rotationOverLifetime',
     ];
     lifetimeValueKeys.forEach((key){
-      final value = normalizedConfig[key] as {
-        isActive: boolean;
-      } & RandomBetweenTwoConstants;
-      if (value.isActive)
-        generalData.lifetimeValues[key] = Array.from(
-          { length: maxParticles },
-          () => MathUtils.randFloat(value.min!, value.max!)
-        );
+      final value = normalizedConfig[key];// as {isActive: boolean;} & RandomBetweenTwoConstants;
+      
+      if (value.isActive){
+        generalData.lifetimeValues?[key] = List.generate(maxParticles, (i){return value.min! + math.Random().nextDouble() * ( value.max! - value.min! );});
+      }
     });
 
     generalData.noise = Noise(
@@ -602,6 +598,14 @@ class Particles {
       geometry.attributes['colorA'].needsUpdate = true;
     };
 
+    three.Points particleSystem = three.Points(geometry, material);
+
+    particleSystem.position.setFrom(transform!.position!);
+    particleSystem.rotation.x = three.MathUtils.degToRad(transform.rotation!.x);
+    particleSystem.rotation.y = three.MathUtils.degToRad(transform.rotation!.y);
+    particleSystem.rotation.z = three.MathUtils.degToRad(transform.rotation!.z);
+    particleSystem.scale.setFrom(transform.scale!);
+
     activateParticle({
       required int particleIndex,
       required double activationTime,
@@ -674,12 +678,11 @@ class Particles {
       );
       geometry.attributes['rotation'].needsUpdate = true;
 
-      if (normalizedConfig.rotationOverLifetime?.isActive == true)
-        generalData.lifetimeValues.rotationOverLifetime[particleIndex] =
-          three.MathUtils.randFloat(
-            normalizedConfig.rotationOverLifetime.min!,
-            normalizedConfig.rotationOverLifetime.max!
-          );
+      if (normalizedConfig.rotationOverLifetime?.isActive == true){
+        final low = normalizedConfig.rotationOverLifetime!.min;
+        final high = normalizedConfig.rotationOverLifetime!.max;
+        generalData.lifetimeValues?['rotationOverLifetime']?[particleIndex] = low + math.Random().nextDouble() * ( high - low );
+      }
 
       calculatePositionAndVelocity(
         generalData,
@@ -767,14 +770,6 @@ class Particles {
       );
     };
 
-    three.Points particleSystem = three.Points(geometry, material);
-
-    particleSystem.position.setFrom(transform!.position!);
-    particleSystem.rotation.x = three.MathUtils.degToRad(transform.rotation!.x);
-    particleSystem.rotation.y = three.MathUtils.degToRad(transform.rotation!.y);
-    particleSystem.rotation.z = three.MathUtils.degToRad(transform.rotation!.z);
-    particleSystem.scale.setFrom(transform.scale!);
-
     final calculatedCreationTime =
       now + Utils.calculateValue(generalData.particleSystemId, startDelay) * 1000;
 
@@ -854,10 +849,10 @@ class Particles {
       final isEnabled = generalData.isEnabled;
 
       if (wrapper?.parent != null){
-        generalData.wrapperQuaternion?.setFrom(wrapper.parent.quaternion);
+        generalData.wrapperQuaternion?.setFrom(wrapper!.parent!.quaternion);
       }
 
-      final lastWorldPositionSnapshot = { ...lastWorldPosition };
+      final lastWorldPositionSnapshot = lastWorldPosition!.clone();
 
       if (particleSystem?.material is three.GroupMaterial){
         (particleSystem!.material as three.GroupMaterial).children.forEach((material){
@@ -873,9 +868,9 @@ class Particles {
       }
 
       particleSystem?.getWorldPosition(currentWorldPosition);
-      if (lastWorldPosition?.x != -99999) {
+      if (lastWorldPosition.x != -99999) {
         worldPositionChange?.setValues(
-          currentWorldPosition!.x - lastWorldPosition!.x,
+          currentWorldPosition!.x - lastWorldPosition.x,
           currentWorldPosition.y - lastWorldPosition.y,
           currentWorldPosition.z - lastWorldPosition.z
         );
@@ -892,7 +887,7 @@ class Particles {
         worldEuler?.setFromQuaternion(worldQuaternion!);
         lastWorldQuaternion?.setFrom(worldQuaternion!);
         gravityVelocity?.setValues(
-          lastWorldPosition!.x,
+          lastWorldPosition.x,
           lastWorldPosition.y + gravity,
           lastWorldPosition.z
         );
@@ -936,7 +931,7 @@ class Particles {
               positionArr[positionIndex] += velocity.x * delta;
               positionArr[positionIndex + 1] += velocity.y * delta;
               positionArr[positionIndex + 2] += velocity.z * delta;
-              particleSystem!.geometry!.attributes['position'].needsUpdate = true;
+              particleSystem.geometry!.attributes['position'].needsUpdate = true;
             }
 
             particleSystem!.geometry!.attributes['lifetime'].array[index] = particleLifetime;
@@ -950,7 +945,7 @@ class Particles {
               delta: delta,
               generalData: generalData,
               normalizedConfig: normalizedConfig!,
-              attributes: particleSystem!.geometry!.attributes,
+              attributes: particleSystem.geometry!.attributes,
               particleLifetimePercentage: particleLifetimePercentage,
               particleIndex: index,
             );

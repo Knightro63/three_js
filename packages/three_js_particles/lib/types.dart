@@ -1,4 +1,5 @@
 import 'package:three_js/three_js.dart' as three;
+import 'package:three_js_particles/Gyroscope.dart';
 import 'enums.dart';
 import 'dart:math' as math;
 
@@ -21,6 +22,16 @@ import 'dart:math' as math;
 class RandomBetweenTwoConstants extends CurveBase{
   double? min;
   double? max;
+
+  RandomBetweenTwoConstants({this.min,this.max});
+}
+
+mixin Activable {
+  bool isActive = true; // Or abstract bool get isActive;
+}
+
+class RandomBetweenTwoConstantsWithActive extends RandomBetweenTwoConstants with Activable {
+  RandomBetweenTwoConstantsWithActive({required super.min, required super.max});
 }
 
 /**
@@ -234,14 +245,16 @@ class MinMaxColor{
  * };
  */
 class Emission{
-  CurveBase? rateOverTime;//?: Constant | RandomBetweenTwoConstants | LifetimeCurve;
-  CurveBase? rateOverDistance;//?: Constant | RandomBetweenTwoConstants | LifetimeCurve;
+  dynamic rateOverTime;//?: Constant | RandomBetweenTwoConstants | LifetimeCurve;
+  dynamic rateOverDistance;//?: Constant | RandomBetweenTwoConstants | LifetimeCurve;
 
   Emission({
     this.rateOverTime,
     this.rateOverDistance
   });
 }
+
+
 
 /**
  * Configuration for a sphere shape used in particle systems.
@@ -671,9 +684,14 @@ class OverLifetime{
   bool isActive = false;
   LifetimeCurve? lifetimeCurve;
 
+  double min;
+  double max;
+
   OverLifetime({
     this.isActive = false,
-    this.lifetimeCurve
+    this.lifetimeCurve,
+    this.min = 0,
+    this.max = 0
   });
 }
 
@@ -1123,17 +1141,18 @@ class ParticleSystemConfig{
    * Called on every update frame with particle system data.
    */
   void Function({
-    three.Points particleSystem,
+    three.Points? particleSystem,
     double delta,
     double elapsed,
     double lifetime,
+    double normalizedLifetime,
     int iterationCount
   })? onUpdate;
 
   /**
    * Called when the system completes an iteration.
    */
-  void Function()? onComplete;
+  void Function({three.Points? particleSystem,})? onComplete;
 
   ParticleSystemConfig({
     this.transform,

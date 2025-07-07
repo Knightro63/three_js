@@ -208,7 +208,7 @@ class Utils{
    * Creates a default white circle texture using CanvasTexture.
    * @returns {CanvasTexture | null} The generated texture or null if context fails.
    */
-  CanvasTexture? createDefaultParticleTexture(){
+  static CanvasTexture? createDefaultParticleTexture(){
     try {
       final canvas = document.createElement('canvas');
       final size = 64;
@@ -277,7 +277,9 @@ class Utils{
       if (value.min == value.max) {
         return value.min ?? 0; // finalant value
       }
-      return MathUtils.randFloat(value.min ?? 0, value.max ?? 1); // Random range
+      final low = value.min ?? 0;
+      final high = value.max ?? 0;
+      return low + math.Random().nextDouble() * ( high - low );
     }
 
     final lifetimeCurve = value as LifetimeCurve;

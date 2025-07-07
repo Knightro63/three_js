@@ -14,7 +14,7 @@ class CacheArray{
 }
 
 class Bezier{
-  static final List<CacheArray> cache = [];
+  static final List<CacheArray?> cache = [];
 
   static double nCr(int n, int k){
     double z = 1;
@@ -28,11 +28,11 @@ class Bezier{
     num particleSystemId,
     List<BezierPoint> bezierPoints
   ) {
-    final cacheEntry = cache.find((item) => item.bezierPoints == bezierPoints);
+    final CacheArray? cacheEntry = cache.firstWhere((item) => item?.bezierPoints == bezierPoints, orElse: () => null);
 
-    if (cacheEntry) {
-      if (!cacheEntry.referencedBy.includes(particleSystemId))
-        cacheEntry.referencedBy.push(particleSystemId);
+    if (cacheEntry != null) {
+      if (!cacheEntry.referencedBy.contains(particleSystemId))
+        cacheEntry.referencedBy.add(particleSystemId);
       return cacheEntry.curveFunction;
     }
 
@@ -78,14 +78,12 @@ class Bezier{
 
   static void removeBezierCurveFunction(num particleSystemId){
     while (true) {
-      final index = cache.findIndex((item) =>
-        item.referencedBy.includes(particleSystemId)
+      final index = cache.indexWhere((item) =>
+        item!.referencedBy.contains(particleSystemId)
       );
       if (index == -1) break;
       final entry = cache[index];
-      entry.referencedBy = entry.referencedBy.filter(
-        (id) => id != particleSystemId
-      );
+      entry!.referencedBy = entry.referencedBy.where((id) => id != particleSystemId).toList();
       if (entry.referencedBy.length == 0) cache.removeAt(index);
     }
   }
