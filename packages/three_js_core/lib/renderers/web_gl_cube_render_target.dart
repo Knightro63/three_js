@@ -22,7 +22,7 @@ class WebGLCubeRenderTarget extends WebGLRenderTarget {
       this.options.format, 
       this.options.type, 
       this.options.anisotropy, 
-      this.options.encoding
+      this.options.colorSpace
     );
     texture.isRenderTargetTexture = true;
 
@@ -32,7 +32,7 @@ class WebGLCubeRenderTarget extends WebGLRenderTarget {
 
   WebGLCubeRenderTarget fromEquirectangularTexture(WebGLRenderer renderer, Texture texture) {
     this.texture.type = texture.type;
-    this.texture.encoding = texture.encoding;
+    this.texture.colorSpace = texture.colorSpace;
 
     this.texture.generateMipmaps = texture.generateMipmaps;
     this.texture.minFilter = texture.minFilter;

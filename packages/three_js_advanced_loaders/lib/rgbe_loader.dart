@@ -81,23 +81,9 @@ class RGBELoader extends DataTextureLoader {
     if(texture == null) return null;
     switch (texture.type) {
       case UnsignedByteType:
-        texture.encoding = RGBEEncoding;
-        texture.minFilter = NearestFilter;
-        texture.magFilter = NearestFilter;
-        texture.generateMipmaps = false;
-        texture.flipY = flipY;
-        break;
-
       case FloatType:
-        texture.encoding = LinearEncoding;
-        texture.minFilter = LinearFilter;
-        texture.magFilter = LinearFilter;
-        texture.generateMipmaps = false;
-        texture.flipY = flipY;
-        break;
-
       case HalfFloatType:
-        texture.encoding = LinearEncoding;
+        texture.colorSpace = LinearSRGBColorSpace;
         texture.minFilter = LinearFilter;
         texture.magFilter = LinearFilter;
         texture.generateMipmaps = false;

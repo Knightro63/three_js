@@ -66,36 +66,63 @@ class WebXRWorker extends WebXRManager{
     animation.setAnimationLoop( onAnimationFrame );
   }
 
+  ///
+  /// Returns a group representing the `target ray` space of the XR controller.
+  /// Use this space for visualizing 3D objects that support the user in pointing
+  /// tasks like UI interaction.
+  ///
+  /// @param {number} index - The index of the controller.
+  /// @return {Group} A group representing the `target ray` space.
+  ////
   WebXRController? getController (int index ) {
-    late WebXRController controller;
-
-    if(controllers.isEmpty) {
-      controller = WebXRController();
-      controllers.add(controller);
-    }
-    else{
-      controller = controllers[index];
-    }
-
-    return controller.getTargetRaySpace();
+    WebXRController? controller = _getController( index );
+    return controller?.getTargetRaySpace();
   }
+
+  ///
+  /// Returns a group representing the `grip` space of the XR controller.
+  /// Use this space for visualizing 3D objects that support the user in pointing
+  /// tasks like UI interaction.
+  ///
+  /// Note: If you want to show something in the user's hand AND offer a
+  /// pointing ray at the same time, you'll want to attached the handheld object
+  /// to the group returned by `getControllerGrip()` and the ray to the
+  /// group returned by `getController()`. The idea is to have two
+  /// different groups in two different coordinate spaces for the same WebXR
+  /// controller.
+  ///
+  /// @param {number} index - The index of the controller.
+  /// @return {Group} A group representing the `grip` space.
+  ////
   WebXRController? getControllerGrip(int index ) {
-    late WebXRController controller;
-
-    if(controllers.isEmpty) {
-      controller = WebXRController();
-      controllers.add(controller);
-    }
-    else{
-      controller = controllers[index];
-    }
-
-    return controller.getGripSpace();
+    WebXRController? controller = _getController( index );
+    return controller?.getGripSpace();
   }
+
+  ///
+  /// Returns a group representing the `hand` space of the XR controller.
+  /// Use this space for visualizing 3D objects that support the user in pointing
+  /// tasks like UI interaction.
+  ///
+  /// @param {number} index - The index of the controller.
+  /// @return {Group} A group representing the `hand` space.
+  ////
   WebXRController? getHand(int index ) {
-    late WebXRController controller;
+    WebXRController? controller = _getController( index );
+    return controller?.getHandSpace();
+  }
 
-    if(controllers.isEmpty) {
+	///
+	/// Returns a WebXR controller for the given controller index.
+	///
+	/// @private
+	/// @param {number} index - The controller index.
+	/// @return {WebXRController} The XR controller.
+	///
+	WebXRController? _getController(int index ) {
+    late WebXRController? controller;
+
+    if(controllers.isEmpty || controllers.length <= index) {
       controller = WebXRController();
       controllers.add(controller);
     }
@@ -103,10 +130,10 @@ class WebXRWorker extends WebXRManager{
       controller = controllers[index];
     }
 
-    return controller.getHandSpace();
-  }
+		return controller;
+	}
 
-  void onSessionEvent( event ) {
+  void onSessionEvent(Event event ) {
     final WebXRController? controller = inputSourcesMap[event.inputSource];
     if(controller != null) {
       controller.dispatchEvent(Event(type: event.type, data: event.inputSource));
@@ -212,23 +239,7 @@ class WebXRWorker extends WebXRManager{
 
         session?.updateRenderState( {'baseLayer': glBaseLayer }.jsify() );
 
-      } 
-      else if (false) {
-        // Use old style webgl layer because we can't use MSAA
-        // WebGL2 support.
-
-        final layerInit = {
-          'antialias': true,
-          'alpha': attributes['alpha'],
-          'depth': attributes['depth'],
-          'stencil': attributes['stencil'],
-          'framebufferScaleFactor': framebufferScaleFactor
-        };
-
-        glBaseLayer = XRWebGLLayer( session!, gl.gl.gl, layerInit.jsify() );
-
-        session?.updateRenderState( { 'layers': [ glBaseLayer ] }.jsify() );
-      } 
+      }
       else {
         isMultisample = attributes['antialias'];
         dynamic depthFormat;
@@ -553,12 +564,14 @@ class WebXRWorker extends WebXRManager{
     }
 
     //
-    final inputSources = session!.inputSources!;
+    final inputSources = session!.inputSources!.toDart;
 
     for (int i = 0; i < controllers.length; i ++ ) {
       final controller = controllers[ i ];
-      final inputSource = inputSources[ i ];
-      controller.update( inputSource, frame, referenceSpace! );
+      final inputSource = inputSources.isNotEmpty?inputSources[ i ]:null;
+      if ( inputSource != null) {
+        controller.update( inputSource, frame, referenceSpace! );
+      }
     }
 
     if ( onAnimationFrameCallback != null) onAnimationFrameCallback( time, frame );

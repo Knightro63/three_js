@@ -154,6 +154,41 @@ class GLTFLoader extends Loader {
     ThreeFile tf = await _loader.fromBytes(bytes);
     return _parse(tf.data);
   }
+  @override
+  Future<GLTFData?> unknown(dynamic url) async{
+    if(url is File){
+      return fromFile(url);
+    }
+    else if(url is Blob){
+      return fromBlob(url);
+    }
+    else if(url is Uri){
+      return fromNetwork(url);
+    }
+    else if(url is Uint8List){
+      return fromBytes(url);
+    }
+    else if(url is String){
+      RegExp dataUriRegex = RegExp(r"^data:(.*?)(;base64)?,(.*)$");
+      if(url.contains('http://') || url.contains('https://')){  
+        return fromNetwork(Uri.parse(url));
+      }
+      else if(url.contains('assets')){
+        return fromAsset(url);
+      }
+      else if(dataUriRegex.hasMatch(url)){
+        RegExpMatch? dataUriRegexResult = dataUriRegex.firstMatch(url);
+        String? data = dataUriRegexResult!.group(3)!;
+
+        return fromBytes(convert.base64.decode(data));
+      }
+      else{
+        return fromPath(url);
+      }
+    }
+
+    return null;
+  }
 
   @override
   GLTFLoader setPath(String path) {

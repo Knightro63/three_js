@@ -101,4 +101,8 @@ class WebXRDepthSensing {
 	  texture = null;
 		mesh = null;
 	}
+
+	Texture? getDepthTexture() {
+		return texture;
+	}
 }

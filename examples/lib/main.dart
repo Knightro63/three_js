@@ -86,8 +86,7 @@ import 'package:example/others/webgl_interactive_voxelpainter.dart';
 import 'package:example/others/webgl_lod.dart';
 import 'package:example/texture/webgl_opengl_texture.dart';
 import 'package:example/mirror/webgl_portal.dart';
-// import 'package:example/rollercoster/webxr_vr_rollercoaster.dart';
-// import 'package:example/vr/webxr_vr_panorama.dart';
+import 'package:example/rollercoster/webxr_vr_rollercoaster.dart';
 import 'package:example/shaders/webgl_shader.dart';
 import 'package:example/src/files_json.dart';
 import 'package:example/terrain/three_terrain.dart';
@@ -639,12 +638,9 @@ class MyAppState extends State<MyApp> {
               '/webgl_ubo_arrays':(BuildContext context) {
                 return const WebglUboArrays();
               },
-              // '/webxr_vr_rollercoaster':(BuildContext context) {
-              //   return const WebXRVRRollercoaster();
-              // },
-              // '/webxr_vr_panorama':(BuildContext context) {
-              //   return const WebXRVRPanorama();
-              // },
+              '/webxr_vr_rollercoaster':(BuildContext context) {
+                return const WebXRVRRollercoaster();
+              },
               '/webgl2_multiple_rendertargets':(BuildContext context) {
                 return const Webgl2MultipleRendertargets();
               },

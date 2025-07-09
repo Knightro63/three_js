@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:web/web.dart' as html;
 import 'package:flutter/material.dart';
-import 'package:example/src/statistics.dart';
 import 'package:three_js/three_js.dart' as three;
 import 'package:three_js_xr/three_js_xr.dart';
 
@@ -47,7 +46,6 @@ class _State extends State<WebXRVRPanorama> {
       body: Stack(
         children: [
           threeJs.build(),
-          Statistics(data: data),
           if(threeJs.mounted) VRButton(threeJs: threeJs)
         ],
       ) 
@@ -82,7 +80,7 @@ class _State extends State<WebXRVRPanorama> {
     final geometry = three.BoxGeometry( 100, 100, 100 );
     geometry.scale( 1, 1, - 1 );
 
-    final textures = getTexturesFromAtlasFile( 'assets/textures/cube/sun_temple_stripe_stereo.jpg', 12 );
+    final textures = getTexturesFromAtlasFile( 'assets/textures/sun_temple_stripe_stereo.jpg', 12 );
     final materials = three.GroupMaterial();
 
     for (int i = 0; i < 6; i ++ ) {
@@ -123,16 +121,11 @@ class _State extends State<WebXRVRPanorama> {
         context = canvas.getContext( '2d' ) as html.CanvasRenderingContext2D;
         canvas.height = tileWidth.toInt();
         canvas.width = tileWidth.toInt();
-        // context.drawImage( imageObj.data, tileWidth * i, 0, tileWidth, tileWidth, 0, 0, tileWidth, tileWidth );
-        
-        // final imageData = context.getImageData( 0, 0, width, height );
-        // final data = imageData.data.toDart;
-        // final imageWidth = imageData.width; // assumed to be square
-        // final pixelSize = 2 / imageWidth;
+        context.drawImage( imageObj.data, tileWidth * i, 0, tileWidth, tileWidth, 0, 0, tileWidth, tileWidth );
         
         textures[ i ].colorSpace = three.SRGBColorSpace;
         textures[ i ].image = three.ImageElement(
-          data: imageObj.data,
+          data: canvas,
           width: tileWidth.toInt(),
           height: tileWidth.toInt()
         );

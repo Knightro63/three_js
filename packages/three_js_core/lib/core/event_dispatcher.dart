@@ -20,6 +20,8 @@ class Event {
   dynamic action;
   dynamic value;
   dynamic handedness;
+  dynamic inputSource;
+  dynamic frame;
   late int direction;
   dynamic data;
   late Object3D? object;
@@ -39,6 +41,23 @@ class Event {
     object = json["object"];
     value = json['value'];
     data = json['data'];
+  }
+
+  @override
+  String toString(){
+    return{
+      'type': type,
+      'target': target,
+      'attachment': attachment,
+      'action': action,
+      'direction': direction,
+      'mode': mode,
+      'object': object,
+      'value': value,
+      'data': data,
+      'loopDelta': loopDelta,
+      'handedness': handedness
+    }.toString();
   }
 
   void dispose(){

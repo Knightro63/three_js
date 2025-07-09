@@ -79,6 +79,7 @@ Find the example for this API [here](https://github.com/Knightro63/three_js/tree
  - Collada kinnametics does not work
  - PMREM gives weird artifacts
  - VideoTexture only works for web
+ - Change screen size does not function currently
 
 **MacOS**
  - Audio has a [bug](https://github.com/bluefireteam/audioplayers/issues/1296)
@@ -102,9 +103,10 @@ Find the example for this API [here](https://github.com/Knightro63/three_js/tree
 ## Librarues and Plugins
 
 **ADD-ONS**
- - [Omio](https://github.com/Knightro63/oimo_physics) a physics engine for three_js
- - [Cannon](https://github.com/Knightro63/cannon_physics) a physics engine for three_js
- - [Terrain](https://github.com/Knightro63/three_js/tree/main/packages/three_js_terrain) a map generator for three_js
+ - [Omio](https://github.com/Knightro63/oimo_physics) a physics engine for three_js.
+ - [Cannon](https://github.com/Knightro63/cannon_physics) a physics engine for three_js.
+ - [Terrain](https://github.com/Knightro63/three_js/tree/main/packages/three_js_terrain) a map generator for three_js.
+ - [XR](https://github.com/Knightro63/three_js/tree/main/packages/three_js_xr) a VR/AR/MR sdk for three_js. (web only)
 
 ## Contributing
 

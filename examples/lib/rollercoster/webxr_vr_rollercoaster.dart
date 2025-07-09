@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:example/src/statistics.dart';
 import 'package:three_js/three_js.dart' as three;
 import 'package:three_js_geometry/three_js_geometry.dart';
-import 'package:three_js_xr/three_js_xr.dart';
 
 extension on three.Vector3{
   three.Float32Array toNativeArray(three.Float32Array array, [int offset = 0]) {
@@ -38,9 +37,6 @@ class _State extends State<WebXRVRRollercoaster> {
     threeJs = three.ThreeJS(
       onSetupComplete: () async{setState(() {});},
       setup: setup,
-      settings: three.Settings(
-        xr: xrSetup
-      )
     );
     super.initState();
   }
@@ -59,7 +55,6 @@ class _State extends State<WebXRVRRollercoaster> {
         children: [
           threeJs.build(),
           Statistics(data: data),
-          if(threeJs.mounted) VRButton(threeJs: threeJs)
         ],
       ) 
     );
@@ -77,14 +72,7 @@ class _State extends State<WebXRVRRollercoaster> {
   double progress = 0;
   int prevTime = DateTime.now().millisecond;
 
-  WebXRWorker xrSetup(three.WebGLRenderer renderer, dynamic gl){
-    return WebXRWorker(renderer,gl);
-  }
-
   Future<void> setup() async {
-    threeJs.renderer?.xr.enabled = true;
-    (threeJs.renderer?.xr as WebXRWorker).setReferenceSpaceType( 'local' );
-
     threeJs.scene = three.Scene();
     threeJs.scene.background = three.Color.fromHex32( 0xf0f0ff );
 

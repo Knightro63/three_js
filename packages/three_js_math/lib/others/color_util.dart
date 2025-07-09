@@ -483,7 +483,8 @@ class ColorManagement {
 		return convert(color, sourceColorSpace, workingColorSpace);
 	}
 
-	static String getPrimaries(ColorSpace colorSpace ) {
+	static String? getPrimaries(ColorSpace colorSpace ) {
+    //if(colorSpace == ColorSpace.no) return null;
 		return fn[colorSpace]['primaries'];
 	}
 

@@ -630,9 +630,14 @@ class Material with EventDispatcher {
       }
     } else if(key == 'glslVersion'){
       glslVersion = newValue;
-    }else if(key == ''){
+    }
+    else if(key == ''){
 
-    }else if (key == 'emissiveIntensity') {
+    }
+    else if (key == 'displacementScale') {
+      displacementScale = newValue.toDouble();
+    }
+    else if (key == 'emissiveIntensity') {
       emissiveIntensity = newValue.toDouble();
     }
     else {

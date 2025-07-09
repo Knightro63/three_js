@@ -16,7 +16,7 @@ extension type XRSystem._(JSObject _) implements JSObject {
 
 @JS('XRSession')
 extension type XRSession._(JSObject _) implements JSObject {
-  external String get visibilityState;
+  external String? get visibilityState;
   external XRRenderState get renderState;
   external void updateRenderState(JSAny? state);
   external JSPromise<JSAny?> requestReferenceSpace(String type);
@@ -24,10 +24,14 @@ extension type XRSession._(JSObject _) implements JSObject {
   external String get environmentBlendMode;
   external void addEventListener(String name,JSAny? event);
   external void removeEventListener(String name,JSAny? event);
+  external String depthUsage;
+  external JSArray? enabledFeatures;
 }
 
 @JS('XRReferenceSpace')
-extension type XRReferenceSpace._(JSObject _) implements JSObject {}
+extension type XRReferenceSpace._(JSObject _) implements JSObject {
+  external XRReferenceSpace getOffsetReferenceSpace(XRRigidTransform originOffset);
+}
 
 @JS('XRViewport')
 extension type XRViewport._(JSObject _) implements JSObject {
@@ -55,6 +59,7 @@ extension type XRWebGLLayer._(JSObject _) implements JSObject {
 
 @JS('XRRigidTransform')
 extension type XRRigidTransform._(JSObject _) implements JSObject {
+  external XRRigidTransform(JSAny? position, JSAny? rotation);
   external JSObject position;
   external JSObject orientation;
   external JSAny matrix;
@@ -68,6 +73,7 @@ extension type XRWebGLBinding._(JSObject _) implements JSObject {
   external int textureWidth;
   external int textureHeight;
   external double fixedFoveation;
+  external XRWebGLDepthInformation? getDepthInformation(XRView view);
   external XRProjetionLayer createProjectionLayer(JSAny? map);
   external XRWebGLSubImage getViewSubImage(XRProjetionLayer layer, XRView view);
 }
@@ -77,6 +83,7 @@ extension type XRWebGLDepthInformation._(JSObject _) implements JSObject {
   external JSObject texture;
   external double depthNear;
   external double depthFar;
+  external bool isValid;
 }
 @JS('XRWebGLSubImage')
 extension type XRWebGLSubImage._(JSObject _) implements JSObject {
@@ -89,6 +96,7 @@ extension type XRProjetionLayer._(JSObject _) implements JSObject {
   external int textureWidth;
   external int textureHeight;
   external double fixedFoveation;
+  external bool get ignoreDepthValues;
 }
 @JS('XRLayer')
 extension type XRLayer._(JSObject _) implements JSObject {
@@ -104,27 +112,6 @@ extension type XRRenderState._(JSObject _) implements JSObject {
 @JS('XRHand')
 extension type XRHand._(JSObject _) implements JSObject{
   external JSObject values();
-  Map<String, dynamic> map() {
-    Map<String, dynamic> dartMap = {};
-
-    // Get the JSObject from the XRHand's values.
-    JSObject jsValues = values();
-
-  //   // Get the keys (property names) of the JSObject using js_util.
-  //   // Object.keys is a static method in JS.
-  // JSArray<JSString> keys = (globalThis as JSObject)
-  //     .getProperty('Object'.toJS)
-  //     .callMethod('keys'.toJS, [jsValues]).toDart as JSArray<JSString>;
-
-  //   // Iterate through the keys and populate the Dart Map.
-  //   for (int i = 0; i < keys.length; i++) {
-  //     String key = keys[i].toDart;
-  //     dynamic value = getProperty(jsValues, key.toJS).toDart; // Get the value for each key and convert it to Dart.
-  //     dartMap[key] = value;
-  //   }
-
-    return dartMap;
-  }
 }
 
 @JS('XRInputSource')
@@ -132,8 +119,11 @@ extension type XRInputSource._(JSObject _) implements JSObject {
   external XRSpace targetRaySpace;
   external double depthFar;
   external XRHand? hand;
-  external JSObject handedness;
+  external String? handedness;
   external XRSpace? gripSpace;
+  external String? targetRayMode;
+  external JSObject? gamepad;
+  external JSObject? profiles;
 }
 
 @JS('XRSpace')
@@ -168,9 +158,15 @@ extension type XRViewerPose._(JSObject _) implements JSObject {
 
 @JS('XRFrame')
 extension type XRFrame._(JSObject _) implements JSObject {
-  external XRPose? getPose(XRSpace space, XRReferenceSpace baseSpace);
+  external XRPose? getPose(XRSpace space, XRReferenceSpace? baseSpace);
   external double depthFar;
-  external XRJointPose? getJointPose(XRJointSpace space,XRReferenceSpace baseSpace);
+  external XRJointPose? getJointPose(XRJointSpace space,XRReferenceSpace? baseSpace);
   external XRSession session;
-  external XRViewerPose getViewerPose(XRReferenceSpace baseSpace);
+  external XRViewerPose getViewerPose(XRReferenceSpace? baseSpace);
+  external JSObject? detectedPlanes;
+}
+
+@JS('XRHandedness')
+extension type XRHandedness._(JSObject _) implements JSObject {
+
 }

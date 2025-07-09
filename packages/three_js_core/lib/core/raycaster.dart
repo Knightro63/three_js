@@ -149,7 +149,7 @@ class Raycaster {
   /// the descendants. Intersections are returned sorted by distance, closest
   /// first. Intersections are of the same form as those returned by
   /// [intersectObject].
-  List<Intersection> intersectObjects(List<Object3D> objects, bool recursive, [List<Intersection>? intersects]) {
+  List<Intersection> intersectObjects(List<Object3D> objects,[bool recursive = false, List<Intersection>? intersects]) {
     intersects ??= List<Intersection>.from([]);
 
     for (int i = 0, l = objects.length; i < l; i++) {

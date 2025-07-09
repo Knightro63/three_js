@@ -55,6 +55,15 @@ class Quaternion {
     return [_x, _y, _z, _w];
   }
 
+  Map<String,double> toMap() {
+    return {
+      'x': _x, 
+      'y': _y, 
+      'z': _z, 
+      'w':_w
+    };
+  }
+
   @Deprecated(' Static .slerp() has been deprecated. Use is now qm.slerpQuaternions( qa, qb, t ) instead.')
   static Quaternion staticSlerp(Quaternion qa, Quaternion qb, Quaternion qm, double t) {
     return qm.slerpQuaternions(qa, qb, t);

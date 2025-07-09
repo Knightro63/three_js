@@ -95,7 +95,7 @@ class GLTFMaterialsAnisotropyExtension extends GLTFExtension {
           Color(colorArray[0], colorArray[1], colorArray[2]);
 
       if (extension['anisotropyTexture'] != null) {
-        final texture = parser.assignTexture(materialParams, 'anisotropyMap', extension['anisotropyTexture'], sRGBEncoding);
+        final texture = parser.assignTexture(materialParams, 'anisotropyMap', extension['anisotropyTexture'], LinearSRGBColorSpace);
         pending.add(texture);
       }
 
@@ -151,7 +151,7 @@ class GLTFMaterialsSpecularExtension extends GLTFExtension {
           Color(colorArray[0].toDouble(), colorArray[1].toDouble(), colorArray[2].toDouble());
 
       if (extension['specularColorTexture'] != null) {
-        final texture = parser.assignTexture(materialParams, 'specularColorMap', extension['specularColorTexture'], sRGBEncoding);
+        final texture = parser.assignTexture(materialParams, 'specularColorMap', extension['specularColorTexture'], LinearSRGBColorSpace);
         pending.add(texture);
       }
 
@@ -473,7 +473,7 @@ class GLTFMaterialsSheenExtension extends GLTFExtension {
 
       if (extension["sheenColorTexture"] != null) {
         pending.add(parser.assignTexture(
-            materialParams, 'sheenColorMap', extension["sheenColorTexture"], sRGBEncoding));
+            materialParams, 'sheenColorMap', extension["sheenColorTexture"], LinearSRGBColorSpace));
       }
 
       if (extension["sheenRoughnessTexture"] != null) {
@@ -991,7 +991,7 @@ class GLTFMaterialsPbrSpecularGlossinessExtension extends GLTFExtension {
 
     if (pbrSpecularGlossiness.diffuseTexture != null) {
       pending.add(parser.assignTexture(
-          materialParams, 'map', pbrSpecularGlossiness.diffuseTexture, sRGBEncoding));
+          materialParams, 'map', pbrSpecularGlossiness.diffuseTexture, LinearSRGBColorSpace));
     }
 
     materialParams.emissive = Color(0.0, 0.0, 0.0);
@@ -1007,7 +1007,7 @@ class GLTFMaterialsPbrSpecularGlossinessExtension extends GLTFExtension {
       pending.add(parser.assignTexture(
           materialParams, 'glossinessMap', specGlossMapDef));
       pending.add(
-          parser.assignTexture(materialParams, 'specularMap', specGlossMapDef, sRGBEncoding));
+          parser.assignTexture(materialParams, 'specularMap', specGlossMapDef, LinearSRGBColorSpace));
     }
 
     return Future.wait(pending);

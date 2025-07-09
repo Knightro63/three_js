@@ -68,7 +68,7 @@ class Texture with EventDispatcher {
   //
   // Also changing the encoding after already used by a Material will not automatically make the Material
   // update. You need to explicitly call Material.needsUpdate to trigger it to recompile.
-  int encoding = LinearEncoding;
+  //int encoding = LinearEncoding;
   Map userData = {};
   int version = 0;
   Function? onUpdate;
@@ -86,7 +86,7 @@ class Texture with EventDispatcher {
     int? format, 
     int? type, 
     int? anisotropy, 
-    int? encoding
+    String? colorSpace
   ]) {
     source = Source(image);
     this.mapping = mapping ?? Texture.defaultMapping;
@@ -102,7 +102,7 @@ class Texture with EventDispatcher {
     this.format = format ?? RGBAFormat;
     internalFormat = null;
     this.type = type ?? UnsignedByteType;
-    this.encoding = encoding ?? LinearEncoding;
+    this.colorSpace = colorSpace ?? NoColorSpace;
   }
 
   get image => source.data;
@@ -154,7 +154,7 @@ class Texture with EventDispatcher {
     premultiplyAlpha = source.premultiplyAlpha;
     flipY = source.flipY;
     unpackAlignment = source.unpackAlignment;
-    encoding = source.encoding;
+    colorSpace = source.colorSpace;
 
     userData = json.decode(json.encode(source.userData));
 
@@ -185,7 +185,7 @@ class Texture with EventDispatcher {
       "wrap": [wrapS, wrapT],
       "format": format,
       "type": type,
-      "encoding": encoding,
+      "colorSpace": colorSpace,
       "minFilter": minFilter,
       "magFilter": magFilter,
       "anisotropy": anisotropy,

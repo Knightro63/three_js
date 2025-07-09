@@ -1,3 +1,5 @@
+import 'dart:js_interop';
+
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 import '../../app/web/xr_webgl_bindings.dart';
@@ -71,6 +73,22 @@ class WebXRController extends Object3D{
 		return this;
 	}
 
+	WebXRController connect(inputSource ) {
+		if ( inputSource != null && inputSource.hand != null) {
+			final hand = _hand;
+
+			if ( hand != null) {
+				for (final inputjoint in (inputSource.hand!.values().dartify() as Map).keys ) {
+					// Initialize hand with joints when connected
+					_getHandJoint( hand, inputjoint );
+				}
+			}
+		}
+
+		dispatchEvent( Event( type: 'connected', data: inputSource ));
+		return this;
+	}
+
 	WebXRController disconnect(inputSource ) {
 		dispatchEvent(Event(type: 'disconnected', data: inputSource));
 		_targetRay?.visible = false;
@@ -80,7 +98,7 @@ class WebXRController extends Object3D{
 		return this;
 	}
 
-	WebXRController update(XRInputSource? inputSource, XRFrame frame, XRReferenceSpace referenceSpace ) {
+	WebXRController update(XRInputSource? inputSource, XRFrame frame, XRReferenceSpace? referenceSpace ) {
 		XRPose? inputPose;
 		XRPose? gripPose;
 		bool handPose = false;
@@ -120,26 +138,28 @@ class WebXRController extends Object3D{
 			if ( hand != null && inputSource.hand != null) {
 				handPose = true;
 
-				for ( final inputjoint in inputSource.hand!.map().values) {
+        final map = inputSource.hand!.dartify() as Map;
+
+				for ( final inputjoint in map.keys) {
 					// Update the joints groups with the XRJoint poses
 					final jointPose = frame.getJointPose( inputjoint, referenceSpace );
 
-					if ( hand.joints[ inputjoint.jointName ] == null ) {
+					if ( hand.joints[ inputjoint['jointName'] ] == null ) {
 						// The transform of this joint will be updated with the joint pose on each frame
 						final joint = Group();
 						joint.matrixAutoUpdate = false;
 						joint.visible = false;
-						hand.joints[ inputjoint.jointName ] = joint;
+						hand.joints[ inputjoint['jointName'] ] = joint;
 						// ??
 						hand.add( joint );
 					}
 
-					final joint = hand.joints[ inputjoint.jointName ];
+					final joint = hand.joints[ inputjoint['jointName'] ] as Object3D;
 
 					if ( jointPose != null ) {
-						joint.matrix.fromArray( jointPose.transform.matrix );
-						joint.matrix.decompose( joint.position, joint.rotation, joint.scale );
-						joint.jointRadius = jointPose.radius;
+						joint.matrix.copyFromUnknown( jointPose.transform.matrix.dartify() );
+						joint.matrix.decomposeEuler( joint.position, joint.rotation, joint.scale );
+						joint.userData['jointRadius'] = jointPose.radius;
 					}
 
 					joint.visible = jointPose != null;
@@ -214,5 +234,17 @@ class WebXRController extends Object3D{
 		}
 
 		return this;
+	}
+
+	_getHandJoint( hand, inputjoint ) {
+		if ( hand.joints[ inputjoint.jointName ] == null ) {
+			final joint = Group();
+			joint.matrixAutoUpdate = false;
+			joint.visible = false;
+			hand.joints[ inputjoint.jointName ] = joint;
+			hand.add( joint );
+		}
+
+		return hand.joints[ inputjoint.jointName ];
 	}
 }

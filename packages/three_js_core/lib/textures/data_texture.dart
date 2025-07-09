@@ -62,8 +62,8 @@ class DataTexture extends Texture {
     int? magFilter,
     int? minFilter,
     int? anisotropy,
-    int? encoding
-  ]):super(null, mapping, wrapS, wrapT, magFilter, minFilter, format, type, anisotropy, encoding) {
+    String? colorSpace
+  ]):super(null, mapping, wrapS, wrapT, magFilter, minFilter, format, type, anisotropy, colorSpace) {
     image = ImageElement(data: data, width: width ?? 1, height: height ?? 1);
 
     generateMipmaps = false;
@@ -84,7 +84,7 @@ class DataTexture extends Texture {
       map['magFilter'],
       map['minFilter'],
       map['anisotropy'],
-      map['encoding']
+      map['colorSpace']
     );
   }
 }

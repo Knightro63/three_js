@@ -617,7 +617,7 @@ class GLTFParser {
   /// @param {Object} mapDef
   /// @return {Promise}
   ///
-  Future<Texture?> assignTexture(materialParams, mapName, Map<String, dynamic> mapDef, [int? encoding]) async {
+  Future<Texture?> assignTexture(materialParams, mapName, Map<String, dynamic> mapDef, [String? colorSpace]) async {
     final parser = this;
 
     Texture? texture = await getDependency('texture', mapDef["index"]);
@@ -643,8 +643,8 @@ class GLTFParser {
     }
 
 
-    if ( encoding != null ) {
-      texture?.encoding = encoding;
+    if ( colorSpace != null ) {
+      texture?.colorSpace = colorSpace;
     }
 
     materialParams[mapName] = texture;
@@ -798,7 +798,7 @@ class GLTFParser {
 
       if (metallicRoughness["baseColorTexture"] != null) {
         pending.add(await parser.assignTexture(
-            materialParams, 'map', metallicRoughness["baseColorTexture"], sRGBEncoding));
+            materialParams, 'map', metallicRoughness["baseColorTexture"], LinearSRGBColorSpace));
       }
 
       materialParams["metalness"] = metallicRoughness["metallicFactor"] ?? 1.0;
@@ -877,7 +877,7 @@ class GLTFParser {
     if (materialDef["emissiveTexture"] != null &&
         materialType != MeshBasicMaterial) {
       pending.add(await parser.assignTexture(
-          materialParams, 'emissiveMap', materialDef["emissiveTexture"], sRGBEncoding));
+          materialParams, 'emissiveMap', materialDef["emissiveTexture"], LinearSRGBColorSpace));
     }
 
     // await Future.wait(pending);
