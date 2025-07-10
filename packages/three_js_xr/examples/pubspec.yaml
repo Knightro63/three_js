@@ -4,7 +4,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.8.1
+  sdk: '>=3.3.4 <4.0.0'
 
 dependencies:
   flutter:
@@ -17,6 +17,8 @@ dependencies:
     path: ../../three_js
   three_js_xr:
     path: ../
+  three_js_helpers: ^0.1.0
+  three_js_objects: ^0.1.0
 
 dev_dependencies:
   flutter_test:
@@ -38,6 +40,8 @@ dependency_overrides:
     path: ../../three_js_core_loaders
   three_js_geometry:
     path: ../../three_js_geometry
+  three_js_objects:
+    path: ../../three_js_objects
   flutter_angle:
     path: ../../../../flutter_angle/flutter_angle
 

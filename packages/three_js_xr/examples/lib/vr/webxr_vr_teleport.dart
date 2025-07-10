@@ -101,12 +101,12 @@ class _State extends State<WebXRVRTeleport> {
 
     void onSelectEnd() {
       if ( intersection != null) {
+        print('jediou32hio');
         final offsetPosition = { 'x': - intersection!.x, 'y': - intersection!.y, 'z': - intersection!.z, 'w': 1 };
         final offsetRotation = three.Quaternion();
         final transform = XRRigidTransform( offsetPosition.jsify(), offsetRotation.toMap().jsify());
         final teleportSpaceOffset = baseReferenceSpace?.getOffsetReferenceSpace( transform );
-
-        //(threeJs.renderer!.xr as WebXRWorker).setReferenceSpace( teleportSpaceOffset );
+        (threeJs.renderer!.xr as WebXRWorker).setReferenceSpace( teleportSpaceOffset );
       }
     }
 

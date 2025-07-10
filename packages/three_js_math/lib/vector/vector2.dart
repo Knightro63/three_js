@@ -331,6 +331,13 @@ class Vector2 extends Vector{
     return array;
   }
   @override
+  NativeArray copyIntoNativeArray(NativeArray array, [int offset = 0]) {
+    array[offset] = storage[0];
+    array[offset + 1] = storage[1];
+
+    return array;
+  }
+  @override
   Vector2 copyFromArray(List<double> array, [int offset = 0]) {
     x = array[offset];
     y = array[offset + 1];

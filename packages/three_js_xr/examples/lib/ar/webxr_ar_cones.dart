@@ -27,6 +27,8 @@ class _State extends State<WebXRARCones> {
       onSetupComplete: () async{setState(() {});},
       setup: setup,
       settings: three.Settings(
+        alpha: true,
+        clearAlpha: 0.0,
         xr: xrSetup
       )
     );
@@ -72,7 +74,7 @@ class _State extends State<WebXRARCones> {
 
     final geometry = three.CylinderGeometry( 0, 0.05, 0.2, 32 ).rotateX( math.pi / 2 );
 
-    void onSelect() {
+    void onSelect(three.Event event) {
       final material = three.MeshPhongMaterial.fromMap( { 'color': (0xffffff * math.Random().nextDouble()).toInt() } );
       final mesh = three.Mesh( geometry, material );
       mesh.position.setValues( 0, 0, - 0.3 ).applyMatrix4( controller!.matrixWorld );

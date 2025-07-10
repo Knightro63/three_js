@@ -14,7 +14,10 @@ class WebXRWorker extends WebXRManager{
   XRSession? session;
   double framebufferScaleFactor = 1.0;
 
+  double foveation = 1.0;
   XRReferenceSpace? referenceSpace;
+  XRReferenceSpace? customReferenceSpace;
+
   var onAnimationFrameCallback;
   String referenceSpaceType = 'local-floor';
 
@@ -23,10 +26,13 @@ class WebXRWorker extends WebXRManager{
   Framebuffer? glFramebuffer;
   XRProjetionLayer? glProjLayer;
   XRWebGLLayer? glBaseLayer;
+
   bool isMultisample = false;
+  
   Framebuffer? glMultisampledFramebuffer;
   Renderbuffer? glColorRenderbuffer;
   Renderbuffer? glDepthRenderbuffer;
+
   XRFrame? xrFrame;
   int depthStyle = 0;
   int clearStyle = 0;
@@ -136,6 +142,7 @@ class WebXRWorker extends WebXRManager{
   void onSessionEvent(Event event ) {
     final WebXRController? controller = inputSourcesMap[event.inputSource];
     if(controller != null) {
+      controller.update( event.inputSource, event.frame, customReferenceSpace ?? referenceSpace );
       controller.dispatchEvent(Event(type: event.type, data: event.inputSource));
     }
   }
@@ -189,7 +196,11 @@ class WebXRWorker extends WebXRManager{
   }
 
   XRReferenceSpace? getReferenceSpace () {
-    return referenceSpace;
+    return customReferenceSpace ?? referenceSpace;
+  }
+
+  void setReferenceSpace(XRReferenceSpace? space ) {
+    customReferenceSpace = space;
   }
 
   getBaseLayer () {
@@ -289,6 +300,9 @@ class WebXRWorker extends WebXRManager{
           state.bindFramebuffer( WebGL.FRAMEBUFFER, null );
         }
       }
+
+      setFoveation( foveation  );
+      customReferenceSpace = null;
 
       referenceSpace = (await (session?.requestReferenceSpace( referenceSpaceType ).toDart)) as XRReferenceSpace;
 
@@ -449,29 +463,20 @@ class WebXRWorker extends WebXRManager{
     return cameraVR;
   }
 
-  double? getFoveation () {
-    if ( glProjLayer != null ) {
-      return glProjLayer?.fixedFoveation;
+  double? getFoveation() {
+    if ( glProjLayer == null && glBaseLayer == null ) {
+      return null;
     }
-
-    if ( glBaseLayer != null ) {
-      return glBaseLayer?.fixedFoveation;
-    }
-
-    return null;
+    return foveation;
   }
 
   void setFoveation(double foveation ) {
     // 0 = no foveation = full resolution
     // 1 = maximum foveation = the edges render at lower resolution
+    glProjLayer?.fixedFoveation = foveation;
+    glBaseLayer?.fixedFoveation = foveation;
 
-    if ( glProjLayer != null ) {
-      glProjLayer?.fixedFoveation = foveation;
-    }
-
-    if ( glBaseLayer != null && glBaseLayer?.fixedFoveation != null ) {
-      glBaseLayer?.fixedFoveation = foveation;
-    }
+    this.foveation = foveation;
   }
 
   @override
@@ -495,7 +500,7 @@ class WebXRWorker extends WebXRManager{
 
   // Animation Loop
   void onAnimationFrame(double time, XRFrame frame ) {
-    pose = frame.getViewerPose( referenceSpace! );
+    pose = frame.getViewerPose( customReferenceSpace ?? referenceSpace);
     xrFrame = frame;
 
     if ( pose != null ) {
@@ -570,7 +575,7 @@ class WebXRWorker extends WebXRManager{
       final controller = controllers[ i ];
       final inputSource = inputSources.isNotEmpty?inputSources[ i ]:null;
       if ( inputSource != null) {
-        controller.update( inputSource, frame, referenceSpace! );
+        controller.update( inputSource, frame, customReferenceSpace ?? referenceSpace );
       }
     }
 

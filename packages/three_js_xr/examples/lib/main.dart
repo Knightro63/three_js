@@ -1,6 +1,10 @@
 import 'package:examples/ar/webxr_ar_cones.dart';
 import 'package:examples/vr/webxr_vr_panorama_depth.dart';
 import 'package:examples/vr/webxr_vr_teleport.dart';
+import 'package:examples/vr/webxr_vr_video.dart';
+import 'package:examples/xr/webxr_xr_cubes.dart';
+import 'package:examples/xr/webxr_xr_paint.dart';
+import 'package:examples/xr/webxr_xr_sculpt.dart';
 
 import 'vr/webxr_vr_rollercoaster.dart';
 import 'vr/webxr_vr_panorama.dart';
@@ -75,6 +79,18 @@ class MyAppState extends State<MyApp> {
               },
               '/webxr_vr_teleport':(BuildContext context) {
                 return const WebXRVRTeleport();
+              },
+              '/webxr_vr_video':(BuildContext context) {
+                return const WebXRVRVideo();
+              },
+              '/webxr_xr_cubes':(BuildContext context) {
+                return const WebXRXRCubes();
+              },
+              '/webxr_xr_paint':(BuildContext context) {
+                return const WebXRXRPaint();
+              },
+              '/webxr_xr_sculpt':(BuildContext context) {
+                return const WebXRXRSculpt();
               },
             }
           ),

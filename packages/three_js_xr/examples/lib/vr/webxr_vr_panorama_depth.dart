@@ -75,7 +75,7 @@ class _State extends State<WebXRVRPanoramaDepth> {
     threeJs.scene = three.Scene();
     threeJs.scene.background = three.Color.fromHex32( 0x101010 );
 
-    final light = three.AmbientLight( 0xffffff, 0.3 );
+    final light = three.AmbientLight( 0xffffff, 3 );
     threeJs.scene.add( light );
 
     threeJs.camera = three.PerspectiveCamera( 70, threeJs.width / threeJs.height, 1, 2000 );
@@ -86,7 +86,7 @@ class _State extends State<WebXRVRPanoramaDepth> {
 
     // Create the panoramic sphere material
     final panoSphereMat = three.MeshStandardMaterial.fromMap( {
-      'side': three.FrontSide,
+      'side': three.BackSide,
       'displacementScale': - 4.0
     } );
 
@@ -94,8 +94,7 @@ class _State extends State<WebXRVRPanoramaDepth> {
     final sphere = three.Mesh( panoSphereGeo, panoSphereMat );
 
     // Load and assign the texture and depth map
-    final manager = three.LoadingManager();
-    final loader = three.TextureLoader( manager: manager );
+    final loader = three.TextureLoader();
 
     await loader.fromAsset( 'assets/textures/kandao3.jpg').then(( texture ) {
       texture?.colorSpace = three.SRGBColorSpace;
@@ -110,12 +109,8 @@ class _State extends State<WebXRVRPanoramaDepth> {
       sphere.material?.displacementMap = depth;
     });
 
-    // On load complete add the panoramic sphere to the scene
-    // manager.onLoad = () {
-    //   print('here');
-      threeJs.scene.add( sphere );
-    //};
-
+    threeJs.scene.add( sphere );
+    
     threeJs.addAnimationEvent((dt){
       if (threeJs.renderer?.xr.isPresenting == false ) {
         final time = threeJs.clock.getElapsedTime();
