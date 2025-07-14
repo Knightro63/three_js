@@ -10,13 +10,13 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  typr_dart: ^0.0.2
   opentype_dart: ^0.0.1
-
+  
   three_js_core: ^0.1.0
   three_js_math: ^0.1.0
   three_js_curves: ^0.1.0
   three_js_core_loaders: ^0.1.0
+  xml: ^6.5.0
 
 dev_dependencies:
   flutter_test:

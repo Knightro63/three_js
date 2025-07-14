@@ -53,41 +53,21 @@ class GLTypeData {
   ///
   /// The [offset] and [length] must be non-negative, and [offset] + ([length] * [bytesPerElement]) must be less than or equal to the length of [buffer].
   dynamic view(ByteBuffer buffer, int offset, int length) {
-    //TODO: Fix this for wasm
-    // if(kIsWasm){
-    //   if (type == 5120) {
-    //     return Int8List.fromList(buffer.asInt8List().sublist(offset, offset + length));
-    //   } else if (type == 5121) {
-    //     return Uint8List.fromList(buffer.asUint8List().sublist(offset, offset + length));
-    //   } else if (type == 5122) {
-    //     return Int16List.fromList(buffer.asInt16List().sublist(offset, offset + length));
-    //   } else if (type == 5123) {
-    //     return Uint16List.fromList(buffer.asUint16List().sublist(offset, offset + length));
-    //   } else if (type == 5125) {
-    //     return Uint32List.fromList(buffer.asUint32List().sublist(offset, offset + length));
-    //   } else if (type == 5126) {
-    //     return Float32List.fromList(buffer.asFloat32List().sublist(offset, offset + length));
-    //   } else {
-    //     throw (" GLTFHelper GLTypeData view type: $type is not support ...");
-    //   }
-    // }
-    // else{
-      if (type == 5120) {
-        return Int8List.view(buffer, offset, length);
-      } else if (type == 5121) {
-        return Uint8List.view(buffer, offset, length);
-      } else if (type == 5122) {
-        return Int16List.view(buffer, offset, length);
-      } else if (type == 5123) {
-        return Uint16List.view(buffer, offset, length);
-      } else if (type == 5125) {
-        return Uint32List.view(buffer, offset, length);
-      } else if (type == 5126) {
-        return Float32List.view(buffer, offset, length);
-      } else {
-        throw (" GLTFHelper GLTypeData view type: $type is not support ...");
-      }
-    //}
+    if (type == 5120) {
+      return Int8List.view(buffer, offset, length);
+    } else if (type == 5121) {
+      return Uint8List.view(buffer, offset, length);
+    } else if (type == 5122) {
+      return Int16List.view(buffer, offset, length);
+    } else if (type == 5123) {
+      return Uint16List.view(buffer, offset, length);
+    } else if (type == 5125) {
+      return Uint32List.view(buffer, offset, length);
+    } else if (type == 5126) {
+      return Float32List.view(buffer, offset, length);
+    } else {
+      throw (" GLTFHelper GLTypeData view type: $type is not support ...");
+    }
   }
 
   dynamic createList(int len) {

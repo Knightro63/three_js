@@ -290,7 +290,14 @@ class GLTFLoader extends Loader {
     final extensions = {};
     final plugins = {};
 
-    final magic = LoaderUtils.decodeText(Uint8List.view(data.buffer, 0, 4));
+    late final String magic;
+    if(kIsWasm){
+      final list = data.buffer.asUint8List().sublist(0, 4);
+      magic = LoaderUtils.decodeText(list);
+    }
+    else{
+      magic = LoaderUtils.decodeText(Uint8List.view(data.buffer, 0, 4));
+    }
     if (magic == behm) {
       extensions[extensions["KHR_BINARY_GLTF"]] = GLTFBinaryExtension(data.buffer);
       content = extensions[extensions["KHR_BINARY_GLTF"]].content;

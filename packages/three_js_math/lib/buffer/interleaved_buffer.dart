@@ -13,9 +13,9 @@ class InterleavedBuffer {
   int stride;
   late int meshPerAttribute;
   late int count;
-  late int usage;
-  late Map<String, dynamic> updateRange;
-  late int version;
+  int usage = StaticDrawUsage;
+  //late Map<String, dynamic> updateRange;
+  int version = 0;
   late String uuid;
   bool isInterleavedBuffer = true;
   Function? onUploadCallback;
@@ -35,20 +35,16 @@ class InterleavedBuffer {
   /// [stride] -- The number of typed-array elements per vertex.
   InterleavedBuffer(this.array, this.stride) {
     count = array.length ~/ stride;
-
-    usage = StaticDrawUsage;
-    updateRange = {"offset": 0, "count": -1};
-
-    version = 0;
-
     uuid = MathUtils.generateUUID();
   }
+
   /// [array] -- A typed array with a shared buffer. Stores the
   /// geometry data.
   /// 
   /// [stride] -- The number of typed-array elements per vertex.
   factory InterleavedBuffer.fromList(TypedData array, int stride) {
-    return InterleavedBuffer(Float32Array.fromList(array.buffer.asFloat32List()), stride);  
+    final totalLen = array.lengthInBytes;
+    return InterleavedBuffer(Float32Array(totalLen).set(array.buffer.asFloat32List()), stride);
   }
 
   set needsUpdate(bool value) {
@@ -56,6 +52,15 @@ class InterleavedBuffer {
       version++;
     }
   }
+
+	void addUpdateRange(int start, int count ) {
+		this.updateRanges.add({"start": start, "count": count});
+	}
+
+	///Clears the update ranges.
+	void clearUpdateRanges() {
+		this.updateRanges.clear();
+	}
 
   InterleavedBuffer setUsage(int value) {
     usage = value;

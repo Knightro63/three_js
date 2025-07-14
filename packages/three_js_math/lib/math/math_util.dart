@@ -1,3 +1,4 @@
+import 'package:flutter_angle/flutter_angle.dart';
 import 'package:uuid/uuid.dart';
 import 'dart:typed_data';
 import 'dart:math' as math;
@@ -203,6 +204,61 @@ class MathUtils{
     return uint32View.buffer.asFloat32List();
   }
 
+  ///
+  /// Denormalizes the given value according to the given typed array.
+  ///
+  /// @param {number} value - The value to denormalize.
+  /// @param {TypedArray} array - The typed array that defines the data type of the value.
+  /// @return {number} The denormalize (float) value in the range `[0,1]`.
+  ///
+  static double denormalize(num value, NativeArray array ) {
+    switch (array.runtimeType) {
+      case Float32Array:
+        return value*1.0;
+      case Uint32Array:
+        return value / 4294967295.0;
+      case Uint16Array:
+        return value / 65535.0;
+      case Uint8Array:
+        return value / 255.0;
+      case Int32Array:
+        return math.max( value / 2147483647.0, - 1.0 );
+      case Int16Array:
+        return math.max( value / 32767.0, - 1.0 );
+      case Int8Array:
+        return math.max( value / 127.0, - 1.0 );
+      default:
+        throw( 'Invalid component type.' );
+    }
+  }
+
+  ///
+  /// Normalizes the given value according to the given typed array.
+  ///
+  /// @param {number} value - The float value in the range `[0,1]` to normalize.
+  /// @param {TypedArray} array - The typed array that defines the data type of the value.
+  /// @return {number} The normalize value.
+  ///
+  static double normalize( num value, NativeArray array ) {
+    switch ( array.runtimeType ) {
+      case Float32Array:
+        return value.toDouble();
+      case Uint32Array:
+        return ( value * 4294967295.0 ).roundToDouble();
+      case Uint16Array:
+        return ( value * 65535.0 ).roundToDouble();
+      case Uint8Array:
+        return ( value * 255.0 ).roundToDouble();
+      case Int32Array:
+        return ( value * 2147483647.0 ).roundToDouble();
+      case Int16Array:
+        return ( value * 32767.0 ).roundToDouble();
+      case Int8Array:
+        return ( value * 127.0 ).roundToDouble();
+      default:
+        throw( 'Invalid component type.' );
+    }
+  }
   // static void listSetter<T>(List<T> list, int idx, dynamic value) {
   //   if (list.length > idx) {
   //     list[idx] = value;

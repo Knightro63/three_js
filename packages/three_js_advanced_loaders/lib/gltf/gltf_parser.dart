@@ -373,7 +373,7 @@ class GLTFParser {
     ByteBuffer? otherBuffer;
     if (buffer is TypedData) {
       if(kIsWasm){
-        otherBuffer = Uint8List.fromList(buffer.buffer.asUint8List().sublist(byteOffset, byteOffset + byteLength)).buffer;
+        otherBuffer = buffer.buffer.asUint8List().sublist(byteOffset, byteOffset + byteLength).buffer;
       }
       else{
         otherBuffer = Uint8List.view(buffer.buffer, byteOffset, byteLength).sublist(0).buffer;
@@ -381,7 +381,7 @@ class GLTFParser {
     } 
     else if(buffer != null){
       if(kIsWasm){
-        otherBuffer = Uint8List.fromList(buffer.asUint8List().sublist(byteOffset, byteOffset + byteLength)).buffer;
+        otherBuffer = buffer.asUint8List().sublist(byteOffset, byteOffset + byteLength).buffer;
       }
       else{
         otherBuffer = Uint8List.view(buffer, byteOffset, byteLength).sublist(0).buffer;
@@ -454,8 +454,10 @@ class GLTFParser {
           (accessorDef["count"] * byteStride) ~/ elementBytes
         );
 
-        // Integer parameters to IB/IBA are in array elements, not bytes.
-        ib = InterleavedBuffer.fromList(array,byteStride ~/ elementBytes);
+        final int stride = byteStride ~/ elementBytes;
+        int totalLen = array.lengthInBytes;
+
+        ib = InterleavedBuffer(Float32Array(totalLen).set(array.buffer.asFloat32List()), stride);
         parser.cache.add(ibCacheKey, ib);
       }
 
@@ -667,6 +669,7 @@ class GLTFParser {
     bool useVertexTangents = geometry?.attributes["tangent"] != null;
     bool useVertexColors = geometry?.attributes["color"] != null;
     bool useFlatShading = geometry?.attributes["normal"] == null;
+    mesh.frustumCulled = false;
 
     if (mesh is Points) {
       final cacheKey = 'PointsMaterial:${material.uuid}';
