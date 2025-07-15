@@ -1,8 +1,6 @@
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
-import 'package:three_js_xr/app/web/xr_webgl_bindings.dart';
-import 'package:three_js_xr/models/controller/motion_controllers_modle.dart';
-import 'package:three_js_xr/models/hand/xr_hand_modle.dart';
+import 'package:three_js_xr/three_js_xr.dart';
 
 final _matrix = Matrix4();
 final _vector = Vector3();
@@ -16,7 +14,7 @@ final _vector = Vector3();
 ///
 class XRHandPrimitiveModel extends MotionController{
   XRHandModel handModel;
-  Group controller;
+  WebXRController controller;
   String? path;
   String? handedness;
   Texture? envMap;

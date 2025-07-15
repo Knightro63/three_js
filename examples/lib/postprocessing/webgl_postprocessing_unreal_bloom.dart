@@ -125,14 +125,9 @@ class _State extends State<WebglPostprocessingUnrealBloom> {
     mixer.clipAction( clip.optimize() )!.play();
 
     threeJs.postProcessor = ([double? dt]){
-      //threeJs.renderer!.clear();
       threeJs.renderer!.setRenderTarget(null);
-      threeJs.renderer!.render(threeJs.scene, threeJs.camera);
-      //threeJs.renderer!.setRenderTarget(threeJs.renderTarget);
       composer.render(dt);
-      threeJs.renderer!.setRenderTarget(threeJs.renderTarget);
-      //threeJs.renderer!.render(threeJs.scene, threeJs.camera);
-      //threeJs.renderer!.render(threeJs.scene, threeJs.camera);
+      threeJs.renderer!.render(threeJs.scene, threeJs.camera);
     };
     threeJs.addAnimationEvent((dt){
       animate(dt);

@@ -60,6 +60,10 @@ dependency_overrides:
     path: ../packages/three_js_math
   three_js_advanced_loaders:
     path: ../packages/three_js_advanced_loaders
+  three_js_audio:
+    path: ../packages/three_js_audio
+  three_js_postprocessing:
+    path: ../packages/three_js_postprocessing
   three_js_transform_controls:
     path: ../packages/three_js_transform_controls
   three_js_core_loaders:

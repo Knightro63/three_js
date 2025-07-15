@@ -10,7 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  audioplayers: ^6.2.0
+  flutter_soloud: ^3.2.1
   three_js_core: ^0.1.0
   three_js_math: ^0.1.0
   three_js_core_loaders: ^0.1.0

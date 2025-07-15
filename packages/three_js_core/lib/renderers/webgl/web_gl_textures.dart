@@ -312,7 +312,7 @@ class WebGLTextures {
       }
       if (renderTargetProperties["__webglColorRenderbuffer"] != null) {
 				for (int i = 0; i < renderTargetProperties['__webglColorRenderbuffer'].length; i ++ ) {
-					if ( renderTargetProperties['__webglColorRenderbuffer'][ i ] ) _gl.deleteRenderbuffer( renderTargetProperties['__webglColorRenderbuffer'][ i ] );
+					if ( renderTargetProperties['__webglColorRenderbuffer'][ i ] != null) _gl.deleteRenderbuffer( renderTargetProperties['__webglColorRenderbuffer'][ i ] );
 				}
       }
       if (renderTargetProperties["__webglDepthRenderbuffer"] != null) {
@@ -393,13 +393,8 @@ class WebGLTextures {
         return;
       }
     }
-    if(kIsWeb){
-      state.bindTexture(WebGL.TEXTURE_2D, textureProperties["__webglTexture"], WebGL.TEXTURE0 + slot);
-    }
-    else{
-      state.activeTexture(WebGL.TEXTURE0 + slot);
-      state.bindTexture(WebGL.TEXTURE_2D, textureProperties["__webglTexture"]);
-    }
+    state.activeTexture(WebGL.TEXTURE0 + slot);
+    state.bindTexture(WebGL.TEXTURE_2D, textureProperties["__webglTexture"]);
   }
 
   void setTexture2DArray(Texture texture, int slot) {
@@ -409,13 +404,8 @@ class WebGLTextures {
       uploadTexture(textureProperties, texture, slot);
       return;
     }
-    if(kIsWeb){
-      state.bindTexture(WebGL.TEXTURE_2D_ARRAY, textureProperties["__webglTexture"],WebGL.TEXTURE0 + slot);
-    }
-    else{
-      state.activeTexture(WebGL.TEXTURE0 + slot);
-      state.bindTexture(WebGL.TEXTURE_2D_ARRAY, textureProperties["__webglTexture"]);
-    }
+    state.activeTexture(WebGL.TEXTURE0 + slot);
+    state.bindTexture(WebGL.TEXTURE_2D_ARRAY, textureProperties["__webglTexture"]);
   }
 
   void setTexture3D(Texture texture, int slot) {
@@ -425,12 +415,8 @@ class WebGLTextures {
       uploadTexture(textureProperties, texture, slot);
       return;
     }
-    if(kIsWeb){
-      state.bindTexture(WebGL.TEXTURE_3D, textureProperties["__webglTexture"], WebGL.TEXTURE0 + slot);
-    }else{
-      state.activeTexture(WebGL.TEXTURE0 + slot);
-      state.bindTexture(WebGL.TEXTURE_3D, textureProperties["__webglTexture"]);
-    }
+    state.activeTexture(WebGL.TEXTURE0 + slot);
+    state.bindTexture(WebGL.TEXTURE_3D, textureProperties["__webglTexture"]);
   }
 
   void setTextureCube(Texture texture, int slot) {
@@ -440,13 +426,9 @@ class WebGLTextures {
       uploadCubeTexture(textureProperties, texture, slot);
       return;
     }
-    if(kIsWeb){
-      state.bindTexture(WebGL.TEXTURE_CUBE_MAP, textureProperties["__webglTexture"], WebGL.TEXTURE0 + slot);
-    }
-    else{
-      state.activeTexture(WebGL.TEXTURE0 + slot);
-      state.bindTexture(WebGL.TEXTURE_CUBE_MAP, textureProperties["__webglTexture"]);
-    }
+
+    state.activeTexture(WebGL.TEXTURE0 + slot);
+    state.bindTexture(WebGL.TEXTURE_CUBE_MAP, textureProperties["__webglTexture"]);
   }
 
   void setTextureParameters(textureType, Texture texture, [supportsMips]) {
@@ -902,7 +884,7 @@ class WebGLTextures {
         for (int i = 0; i < 6; i++) {
           if (isDataTexture || isCubeTexture) {
             if (useTexStorage) {
-              if(kIsWeb){
+              if( kIsWeb ){
                 state.texSubImage2DNoSize(WebGL.TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, 0, 0, glFormat, glType, cubeImage[i].data);
               }
               else{
@@ -910,7 +892,7 @@ class WebGLTextures {
               }
             } 
             else {
-              if(kIsWeb){
+              if( kIsWeb ){
                 state.texImage2DNoSize(WebGL.TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, glInternalFormat, glFormat, glType, cubeImage[i].data);
               }
               else{
@@ -1508,7 +1490,7 @@ class WebGLTextures {
 
     state.activeTexture(WebGL.TEXTURE0 + slot);
     state.bindTexture(textureType, textureProperties["__webglTexture"]);
-    if(kIsWeb){
+    if( kIsWeb ){
       gl.pixelStorei(WebGL.UNPACK_FLIP_Y_WEBGL, texture.flipY ? 1 : 0);
       gl.pixelStorei(WebGL.UNPACK_PREMULTIPLY_ALPHA_WEBGL, texture.premultiplyAlpha ? 1 : 0);
     }

@@ -170,8 +170,8 @@ Map<String, dynamic> shaderLib = {
 		'uniforms': {
 			'envMap': <String,dynamic>{ 'value': null },
 			'flipEnvMap': { 'value': - 1 },
-			'backgroundBlurriness': { 'value': 0 },
-			'backgroundIntensity': { 'value': 1 },
+			'backgroundBlurriness': { 'value': 0.0 },
+			'backgroundIntensity': { 'value': 1.0 },
 			'backgroundRotation': { 'value': Matrix3.identity() }
 		},
 

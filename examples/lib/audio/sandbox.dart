@@ -83,13 +83,13 @@ class _State extends State<AudioSandbox> {
     threeJs.scene.add( mesh1 );
 
     final sound1 = PositionalAudio(
-      path: 'sounds/358232_j_s_song.mp3',
+      path: 'assets/sounds/358232_j_s_song.mp3',
       listner: threeJs.camera,
       refDistance: 20,
       maxDistance: 250
     );
 
-    sound1.play();
+    await sound1.play();
     mesh1.add( sound1 );
 
     if(showHelpers){
@@ -105,13 +105,13 @@ class _State extends State<AudioSandbox> {
     threeJs.scene.add( mesh2 );
 
     final sound2 = PositionalAudio(
-      path: 'sounds/376737_Skullbeatz___Bad_Cat_Maste.mp3',
+      path: 'assets/sounds/376737_Skullbeatz___Bad_Cat_Maste.mp3',
       listner: threeJs.camera,
       refDistance: 20,
       maxDistance: 250
     );
 
-    sound2.play();
+    await sound2.play();
     mesh2.add( sound2 );
 
     if(showHelpers){
@@ -126,7 +126,7 @@ class _State extends State<AudioSandbox> {
     threeJs.scene.add( mesh3 );
 
     final sound3 = PositionalAudio(
-      path: 'sounds/Project_Utopia.mp3',
+      path: 'assets/sounds/Project_Utopia.mp3',
       listner: threeJs.camera,
       refDistance: 20,
       maxDistance: 250
@@ -134,7 +134,7 @@ class _State extends State<AudioSandbox> {
     //final oscillator = await loader.fromAsset('assets/sounds/Project_Utopia.mp3');
     sound3.loop = true;
     //sound3.setBuffer( oscillator! );
-    sound3.play();
+    await sound3.play();
     mesh3.add( sound3 );
 
     if(showHelpers){

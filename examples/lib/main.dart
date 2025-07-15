@@ -55,6 +55,7 @@ import 'package:example/loaders/webgl_loader_usdz.dart';
 import 'package:example/loaders/webgl_loader_vox.dart';
 import 'package:example/loaders/webgl_loader_xyz.dart';
 import 'package:example/material/webgl_materials_video.dart';
+import 'package:example/material/webgl_tonemapping.dart';
 import 'package:example/src/statistics.dart';
 import 'package:example/texture/webgl_video_texture.dart';
 import 'package:example/material/webgl_materials_car.dart';
@@ -307,6 +308,9 @@ class MyAppState extends State<MyApp> {
               },
               '/webgl_sprites':(BuildContext context) {
                 return const WebglSprites();
+              },
+              '/webgl_tonemapping':(BuildContext context) {
+                return const WebglTonemapping();
               },
               '/webgl_points_sprites':(BuildContext context) {
                 return const WebglPointsSprites();

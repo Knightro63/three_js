@@ -19,6 +19,8 @@ dependencies:
     path: ../
   three_js_helpers: ^0.1.0
   three_js_objects: ^0.1.0
+  three_js_geometry: ^0.1.0
+  oimo_physics: ^0.0.4
 
 dev_dependencies:
   flutter_test:

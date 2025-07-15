@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:audioplayers/audioplayers.dart';
+import 'package:three_js_audio/three_js_audio.dart';
 import 'package:three_js_core/three_js_core.dart';
 
 /// This utility class holds static references to some global audio objects.
@@ -10,9 +10,10 @@ class Audio extends Object3D{
   bool autoplay;
   bool loop;
   bool hasPlaybackControl;
-  bool _isPlaying = false;
 
-  AudioPlayer? source;
+  SoundHandle? source;
+  AudioSource? _audioSource;
+  
   //Uint8List? _buffer;
 
   int loopEnd = 0;
@@ -22,9 +23,11 @@ class Audio extends Object3D{
 
   late double _volume;
   late double _balance;
+  AudioLoader _loader = AudioLoader();
 
   Timer? _delay;
-  bool get isPlaying => _isPlaying;
+  bool get isPlaying => source != null?soloud!.getPause(source!):false;
+  bool _hasStarted = false;
 
   String path;
 
@@ -52,25 +55,28 @@ class Audio extends Object3D{
   @override
   void dispose(){
     _delay?.cancel();
-    source?.dispose();
+    soloud?.deinit();
     super.dispose();
   }
 
   /// Plays a single run of the given [file], with a given [volume].
   Future<void> play([int delay = 0]) async{
-		if (_isPlaying) {
+		if (_hasStarted && isPlaying) {
 			console.warning( 'Audio: Audio is already playing.' );
 			return;
 		}
+
+    _hasStarted = true;
 
 		if(!hasPlaybackControl){
 			console.warning( 'Audio: this Audio has no playback control.' );
 			return;
 		}
 
-    _isPlaying = true;
-
     if(source == null){
+      soloud = SoLoud.instance;
+      await soloud?.init();
+
       if(delay != 0){
         _delay = Timer(Duration(milliseconds: delay), (){
           _play();
@@ -89,21 +95,17 @@ class Audio extends Object3D{
 
   /// Plays a single run of the given [file], with a given [volume].
   Future<void> _play() async{
-    final src = AudioPlayer();
-    src.onPlayerComplete.listen((event) {
-      _isPlaying = false;
-    });
-    //await src.setReleaseMode(loop?ReleaseMode.loop:ReleaseMode.stop);
-    //await src.setPlaybackRate(playbackRate);
-    await src.play(
-      AssetSource(path),
+    _loader.unknown(path);
+    _audioSource = await _loader.unknown(path);
+
+    source = _audioSource == null?null: await soloud?.play(
+      _audioSource!,
       volume: _volume,
-      mode: PlayerMode.lowLatency,
-      position: Duration(milliseconds: loopStart),
-      balance: _balance
+      loopingStartAt: Duration(milliseconds: loopStart),
+      looping: loop
     );
-    
-    source = src;
+
+    setBalance(_balance);
   }
 
   /// Stops the currently playing background music track (if any).
@@ -115,14 +117,20 @@ class Audio extends Object3D{
 
     _delay?.cancel();
     _delay = null;
-    _isPlaying = false;
-    await source?.stop();
+    if(source != null)await soloud?.stop(source!);
   }
 
   /// Resumes the currently played (but resumed) background music.
   Future<void> resume() async {
-    _isPlaying = true;
-    await source?.resume();
+    if(source != null){
+      final pos = soloud!.getPosition(source!);
+      if(pos.inMilliseconds == 0){
+        soloud?.play(_audioSource!);
+      }
+      else{
+        soloud?.setPause(source!, false);
+      }
+    }
   }
 
   /// Pauses the background music without unloading or resetting the audio
@@ -133,9 +141,8 @@ class Audio extends Object3D{
 			return;
 		}
 
-		if(_isPlaying) {
-      _isPlaying = false;
-      await source?.pause();
+		if(isPlaying) {
+      if(source != null)soloud?.setPause(source!, true);
     }
 
     _delay?.cancel();
@@ -143,18 +150,18 @@ class Audio extends Object3D{
   }
 
 	double? getPlaybackRate() {
-		return source?.playbackRate;
+		return source == null?null:soloud?.getRelativePlaySpeed(source!);
 	}
 
-	Future<void>? setPlaybackRate(double value) async{
+	void setPlaybackRate(double value){
 		if (!hasPlaybackControl) {
 			console.warning( 'Audio: this Audio has no playback control.' );
 			return;
 		}
 
-		if (_isPlaying) {
+		if (isPlaying) {
       playbackRate = value;
-			await source?.setPlaybackRate(value);
+			source == null?null:soloud?.setRelativePlaySpeed(source!,value);
 		}
 	}
 
@@ -164,10 +171,10 @@ class Audio extends Object3D{
 			return false;
 		}
 
-		return source?.releaseMode == ReleaseMode.loop;
+		return source == null?false:soloud!.getLooping(source!);
 	}
 
-	Future<void> setLoop( value ) async{
+	void setLoop(bool value ){
 		if (!hasPlaybackControl) {
 			console.warning( 'Audio: this Audio has no playback control.' );
 			return;
@@ -175,8 +182,8 @@ class Audio extends Object3D{
 
 		loop = value;
 
-		if (_isPlaying ) {
-			await source?.setReleaseMode(loop?ReleaseMode.loop:ReleaseMode.stop);
+		if (isPlaying ) {
+			if(source != null) soloud?.setLooping(source!, value);
 		}
 	}
 
@@ -189,20 +196,20 @@ class Audio extends Object3D{
 	}
 
 	double? getBalance() {
-		return source?.balance;
+		return source != null?soloud?.getPan(source!):0;
 	}
 
-	Future<void> setBalance(double value ) async{
+	void setBalance(double value ){
     _balance = value;
-		await source?.setBalance(value);
+		if(source != null)soloud?.setPan(source!,value);
 	}
 
 	double? getVolume() {
-		return source?.volume;
+		return source == null? 0:soloud?.getVolume(source!);
 	}
 
-	Future<void> setVolume(double value ) async{
+	void setVolume(double value ){
     _volume = value;
-		await source?.setVolume(value);
+    if(source != null) soloud?.setVolume(source!,value);
 	}
 }

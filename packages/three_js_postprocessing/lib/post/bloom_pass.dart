@@ -1,7 +1,6 @@
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'package:three_js_postprocessing/shaders/convolution_shader.dart';
-import 'package:three_js_postprocessing/shaders/copy_shader.dart';
 import "pass.dart";
 
 class BloomPass extends Pass {
@@ -22,7 +21,8 @@ class BloomPass extends Pass {
     final pars = {
       "minFilter": LinearFilter,
       "magFilter": LinearFilter,
-      "format": RGBAFormat
+      "format": RGBAFormat,
+      'type': HalfFloatType
     };
 
     renderTargetX = WebGLRenderTarget(resolution, resolution, WebGLRenderTargetOptions(pars));
@@ -30,16 +30,14 @@ class BloomPass extends Pass {
     renderTargetY = WebGLRenderTarget(resolution, resolution, WebGLRenderTargetOptions(pars));
     renderTargetY.texture.name = 'BloomPass.y';
 
-    final postCopyShader = copyShader;
-
-    uniforms = UniformsUtils.clone(postCopyShader["uniforms"]);
-
-    uniforms['opacity']["value"] = strength;
+    uniforms = UniformsUtils.clone(CombineShader["uniforms"]);
+    uniforms[ 'strength' ]['value'] = strength;
 
     materialCopy = ShaderMaterial.fromMap({
+      'name': CombineShader['name'],
       "uniforms": uniforms,
-      "vertexShader": postCopyShader["vertexShader"],
-      "fragmentShader": postCopyShader["fragmentShader"],
+      "vertexShader": CombineShader["vertexShader"],
+      "fragmentShader": CombineShader["fragmentShader"],
       "blending": AdditiveBlending,
       "transparent": true
     });
@@ -103,6 +101,52 @@ class BloomPass extends Pass {
     fsQuad.render(renderer);
   }
 
+  final Map<String,dynamic> CombineShader = {
+    'name': 'CombineShader',
+
+    'uniforms': {
+
+      'tDiffuse': { 'value': null },
+      'strength': { 'value': 1.0 }
+
+    },
+
+    'vertexShader': /* glsl */'''
+
+      varying vec2 vUv;
+
+      void main() {
+
+        vUv = uv;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+
+      }''',
+    'fragmentShader': /* glsl */'''
+
+      uniform float strength;
+
+      uniform sampler2D tDiffuse;
+
+      varying vec2 vUv;
+
+      void main() {
+
+        vec4 texel = texture2D( tDiffuse, vUv );
+        gl_FragColor = strength * texel;
+
+      }'''
+  };
+
   static Vector2 blurX = Vector2(0.001953125, 0.0);
   static Vector2 blurY = Vector2(0.0, 0.001953125);
+
+	void dispose() {
+		renderTargetX.dispose();
+		renderTargetY.dispose();
+
+		this.materialCopy.dispose();
+		this.materialConvolution.dispose();
+
+		fsQuad.dispose();
+	}
 }

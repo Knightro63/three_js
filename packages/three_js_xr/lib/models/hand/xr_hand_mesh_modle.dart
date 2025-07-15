@@ -1,8 +1,6 @@
 import 'package:three_js_advanced_loaders/gltf/gltf_loader.dart';
 import 'package:three_js_core/three_js_core.dart';
-import 'package:three_js_xr/app/web/xr_webgl_bindings.dart';
-import 'package:three_js_xr/models/controller/motion_controllers_modle.dart';
-import 'package:three_js_xr/models/hand/xr_hand_modle.dart';
+import 'package:three_js_xr/three_js_xr.dart';
 
 const DEFAULT_HAND_PROFILE_PATH = 'https://cdn.jsdelivr.net/npm/@webxr-input-profiles/assets@1.0/dist/profiles/generic-hand/';
 
@@ -16,7 +14,7 @@ const DEFAULT_HAND_PROFILE_PATH = 'https://cdn.jsdelivr.net/npm/@webxr-input-pro
 class XRHandMeshModel extends MotionController{
   GLTFLoader? loader;
   Function? onLoad;
-  Group controller;
+  WebXRController controller;
   XRHandModel handModel;
   List<Object3D?>? bones;
   String? path;

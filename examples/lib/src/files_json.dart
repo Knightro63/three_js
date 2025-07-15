@@ -50,6 +50,7 @@ const List<String> filesJson = [
   "webgl_shadowmap_pointlight",
   "webgl_loader_texture_basis",
   "webgl_sprites",
+  'webgl_tonemapping',
   "webgl_points_sprites",
   "webgl_geometry_terrain",
   "webgl_geometry_terrain_raycast",

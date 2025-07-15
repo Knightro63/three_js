@@ -16,7 +16,6 @@ import 'package:image/image.dart' as img;
 import 'dart:math' as math;
 import 'dart:async';
 import 'package:three_js_terrain/three_js_terrain.dart' as terrain;
-import '../src/statistics.dart';
 
 class TerrainPage extends StatefulWidget {
   const TerrainPage({super.key});

@@ -23,6 +23,22 @@ enum ColorSpace{
       return ColorSpace.linear;
     }
   }
+
+  @override
+  String toString(){
+    switch (this) {
+      case ColorSpace.no:
+        return NoColorSpace;
+      case ColorSpace.srgb:
+        return SRGBColorSpace;
+      case ColorSpace.ldp3:
+        return LinearDisplayP3ColorSpace;
+      case ColorSpace.dp3:
+        return DisplayP3ColorSpace ;
+      default:
+      return LinearSRGBColorSpace;
+    }
+  }
 }
 
 final Color _color = Color();

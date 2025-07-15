@@ -1,8 +1,11 @@
 import 'package:examples/ar/webxr_ar_cones.dart';
+import 'package:examples/vr/webxr_vr_handinput_cubes.dart';
 import 'package:examples/vr/webxr_vr_panorama_depth.dart';
 import 'package:examples/vr/webxr_vr_teleport.dart';
 import 'package:examples/vr/webxr_vr_video.dart';
+import 'package:examples/xr/webxr_xr_ballshooter.dart';
 import 'package:examples/xr/webxr_xr_cubes.dart';
+import 'package:examples/xr/webxr_xr_dragging.dart';
 import 'package:examples/xr/webxr_xr_paint.dart';
 import 'package:examples/xr/webxr_xr_sculpt.dart';
 
@@ -68,6 +71,9 @@ class MyAppState extends State<MyApp> {
               '/webxr_ar_cones':(BuildContext context) {
                 return const WebXRARCones();
               },
+              '/webxr_vr_handinput_cubes':(BuildContext context) {
+                return const WebXRVRHandInputCubes();
+              },
               '/webxr_vr_rollercoaster':(BuildContext context) {
                 return const WebXRVRRollercoaster();
               },
@@ -83,8 +89,14 @@ class MyAppState extends State<MyApp> {
               '/webxr_vr_video':(BuildContext context) {
                 return const WebXRVRVideo();
               },
+              '/webxr_xr_ballshooter':(BuildContext context) {
+                return const WebXRXRBallShooter();
+              },
               '/webxr_xr_cubes':(BuildContext context) {
                 return const WebXRXRCubes();
+              },
+              '/webxr_xr_dragging':(BuildContext context) {
+                return const WebXRXRDragging();
               },
               '/webxr_xr_paint':(BuildContext context) {
                 return const WebXRXRPaint();

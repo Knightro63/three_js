@@ -159,14 +159,10 @@ class Lensflare extends Mesh {
 			final type = ( renderTarget != null ) ? renderTarget.texture.type : UnsignedByteType;
 
 			if ( currentType != type ) {
-
 				tempMap.dispose();
 				occlusionMap.dispose();
-
 				tempMap.type = occlusionMap.type = type;
-
 				currentType = type;
-
 			}
 
 			final invAspect = viewport.w / viewport.z;
@@ -219,7 +215,7 @@ class Lensflare extends Mesh {
 				uniforms['scale'] = <String, dynamic>{'value' : scale};
 				uniforms['screenPosition'] = <String, dynamic>{'value': positionScreen};
 
-				renderer.renderBufferDirect( camera, null, geometry, material1b, mesh1, null );
+				//renderer.renderBufferDirect( camera, null, geometry, material1b, mesh1, null );
 
 				// render elements
 
@@ -356,7 +352,6 @@ const _shader = {
 };
 
 BufferGeometry _geometry(){
-
 	final geometry = BufferGeometry();
 
 	final float32Array = Float32List.fromList( [

@@ -366,15 +366,6 @@ mixin WebGLUniformsHelper {
 
       copyArray(cache, v);
     } 
-    else if(kIsWeb){
-      final element = elements.sublist(0);
-      if (arraysEqual(cache, element)) {
-        return;
-      }
-
-      gl.uniformMatrix3fv(addr, false, element);
-      copyArray(cache, elements);
-    }
     else {
       if (arraysEqual(cache, elements)) {
         return;

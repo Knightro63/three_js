@@ -116,7 +116,7 @@ class _State extends State<AudioTiming> {
       ball.position.x = radius * math.cos( s );
       ball.position.z = radius * math.sin( s );
 
-      final audio = Audio(path: 'sounds/ping_pong.mp3');
+      final audio = Audio(path: 'assets/sounds/ping_pong.mp3');
       ball.add( audio );
 
       threeJs.scene.add( ball );

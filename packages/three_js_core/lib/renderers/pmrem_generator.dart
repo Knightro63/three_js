@@ -191,7 +191,7 @@ class PMREMGenerator {
   // private interface
 
   void _setSize(int cubeSize) {
-    _lodMax = (MathUtils.log2(cubeSize.toDouble())).floor();
+    _lodMax = MathUtils.log2(cubeSize.toDouble()).floor();
     _cubeSize = math.pow(2, _lodMax).toInt();
   }
 
@@ -211,15 +211,13 @@ class PMREMGenerator {
     _setViewport(outputTarget, 0, 0, outputTarget.width.toDouble(), outputTarget.height.toDouble());
   }
 
-  RenderTarget _fromTexture(texture, [RenderTarget? renderTarget]) {
+  RenderTarget _fromTexture(Texture texture, [RenderTarget? renderTarget]) {
     if (texture.mapping == CubeReflectionMapping ||
-        texture.mapping == CubeRefractionMapping) {
-      _setSize(texture.image.length == 0
-          ? 16
-          : (texture.image[0].width ?? texture.image[0].image.width));
-    } else {
-      // Equirectangular
-
+        texture.mapping == CubeRefractionMapping
+    ) {
+      _setSize(texture.image.length == 0? 16: (texture.image[0].width ?? texture.image[0].image.width));
+    } 
+    else {// Equirectangular
       _setSize(texture.image.width ~/ 4);
     }
 
@@ -323,17 +321,17 @@ class PMREMGenerator {
       if (col == 0) {
         cubeCamera.up.setValues(0, upSign[i], 0);
         cubeCamera.position.setValues( position.x, position.y, position.z );
-        cubeCamera.lookAt(Vector3(forwardSign[i], 0, 0));
+        cubeCamera.lookAt(Vector3(position.x + forwardSign[ i ], position.y, position.z));
       } 
       else if (col == 1) {
         cubeCamera.up.setValues(0, 0, upSign[i]);
         cubeCamera.position.setValues( position.x, position.y, position.z );
-        cubeCamera.lookAt(Vector3(0, forwardSign[i], 0));
+        cubeCamera.lookAt(Vector3(position.x, position.y + forwardSign[ i ], position.z));
       } 
       else {
         cubeCamera.up.setValues(0, upSign[i], 0);
         cubeCamera.position.setValues( position.x, position.y, position.z );
-        cubeCamera.lookAt(Vector3(0, 0, forwardSign[i]));
+        cubeCamera.lookAt(Vector3(position.x, position.y, position.z + forwardSign[ i ]));
       }
       final size = _cubeSize.toDouble();
       _setViewport(cubeUVRenderTarget, col * size, i > 2 ? size : 0, size, size);

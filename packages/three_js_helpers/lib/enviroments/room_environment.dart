@@ -90,6 +90,21 @@ class RoomEnvironment extends Scene {
     light6.scale.setValues(1.0, 0.1, 1.0);
     add(light6);
   }
+
+	void dispose() {
+		final resources = new Set();
+
+		this.traverse( ( object ){
+			if ( object is Mesh ) {
+				resources.add( object.geometry );
+				resources.add( object.material );
+			}
+		} );
+
+		for (final resource in resources ) {
+			resource.dispose();
+		}
+	}
 }
 
 Function createAreaLightMaterial = (num intensity) {

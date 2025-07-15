@@ -14,8 +14,8 @@ class EffectComposer {
   bool renderToScreen = true;
 
   double _pixelRatio = 1.0;
-  late int _width;
-  late int _height;
+  late double _width;
+  late double _height;
 
   List<Pass> passes = [];
 
@@ -29,12 +29,13 @@ class EffectComposer {
         "minFilter": LinearFilter,
         "magFilter": LinearFilter,
         "format": RGBAFormat,
+        "type": HalfFloatType
       };
 
       final size = renderer.getSize(Vector2());
       _pixelRatio = renderer.getPixelRatio();
-      _width = size.width.toInt();
-      _height = size.height.toInt();
+      _width = size.width;
+      _height = size.height;
 
       renderTarget = WebGLRenderTarget(
           (_width * _pixelRatio).toInt(),
@@ -43,8 +44,8 @@ class EffectComposer {
     } 
     else {
       _pixelRatio = 1;
-      _width = renderTarget.width;
-      _height = renderTarget.height;
+      _width = renderTarget.width*1.0;
+      _height = renderTarget.height*1.0;
     }
 
     renderTarget1 = renderTarget;
@@ -61,7 +62,7 @@ class EffectComposer {
     copyPass = ShaderPass.fromJson(copyShader);
     copyPass.material.blending = NoBlending;
 
-    clock = Clock(false);
+    clock = Clock();
   }
 
   void swapBuffers() {
@@ -149,8 +150,8 @@ class EffectComposer {
     if (renderTarget == null) {
       final size = renderer.getSize(Vector2());
       _pixelRatio = renderer.getPixelRatio();
-      _width = size.width.toInt();
-      _height = size.height.toInt();
+      _width = size.width;
+      _height = size.height;
 
       renderTarget = renderTarget1.clone();
       renderTarget.setSize((_width * _pixelRatio).toInt(), (_height * _pixelRatio).toInt());
@@ -165,7 +166,7 @@ class EffectComposer {
     readBuffer = renderTarget2;
   }
 
-  void setSize(int width, int height) {
+  void setSize(double width, double height) {
     _width = width;
     _height = height;
 

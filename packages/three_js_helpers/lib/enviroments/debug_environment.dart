@@ -34,6 +34,20 @@ class DebugEnvironment extends Scene {
 		light3.position.setValues( 2, 1, 5 );
 		light3.scale.setValues( 1.5, 2, 0.1 );
 		add( light3 );
+	}
 
+	void dispose() {
+		final resources = new Set();
+
+		this.traverse( ( object ){
+			if ( object is Mesh ) {
+				resources.add( object.geometry );
+				resources.add( object.material );
+			}
+		} );
+
+		for ( final resource in resources ) {
+			resource.dispose();
+		}
 	}
 }

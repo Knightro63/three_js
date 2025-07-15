@@ -1,9 +1,7 @@
-import 'package:three_js_core/three_js_core.dart';
-import 'package:three_js_xr/app/web/xr_webgl_bindings.dart';
-import 'package:three_js_xr/models/hand/xr_hand_mesh_modle.dart';
-import 'package:three_js_xr/models/hand/xr_hand_modle.dart';
-import 'package:three_js_xr/models/hand/xr_hand_primitive_modle.dart';
 import 'package:three_js_advanced_loaders/three_js_advanced_loaders.dart';
+import 'package:three_js_xr/three_js_xr.dart';
+
+enum XRProfiles{spheres,boxes,mesh}
 
 class XRHandModelFactory {
   GLTFLoader? gltfLoader;
@@ -17,7 +15,7 @@ class XRHandModelFactory {
 		return this;
 	}
 
-	XRHandModel createHandModel(Group controller, profile ) {
+	XRHandModel createHandModel(WebXRController controller, [XRProfiles? profile] ) {
 		final handModel = XRHandModel( controller );
 
 		controller.addEventListener( 'connected', ( event ){
@@ -28,13 +26,13 @@ class XRHandModelFactory {
 				handModel.xrInputSource = xrInputSource;
 
 				// @todo Detect profile if not provided
-				if ( profile == null || profile == 'spheres' ) {
+				if ( profile == null || profile == XRProfiles.spheres ) {
 					handModel.motionController = XRHandPrimitiveModel( handModel, controller, path, xrInputSource?.handedness, { 'primitive': 'sphere' } );
 				} 
-        else if ( profile == 'boxes' ) {
+        else if ( profile == XRProfiles.boxes ) {
 					handModel.motionController = XRHandPrimitiveModel( handModel, controller, path, xrInputSource?.handedness, { 'primitive': 'box' } );
 				} 
-        else if ( profile == 'mesh' ) {
+        else if ( profile == XRProfiles.mesh ) {
 					handModel.motionController = XRHandMeshModel( handModel, controller, path, xrInputSource?.handedness, gltfLoader, onLoad );
 				}
 			}

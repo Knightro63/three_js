@@ -250,7 +250,7 @@ class WebGLBindingStates {
   }
 
   void vertexAttribPointer(int index, int size, int type, bool normalized, int stride, int offset, bool integer) {
-    if (integer){//(type == WebGL.INT || type == WebGL.UNSIGNED_INT) && !kIsWeb) {
+    if (integer){
       gl.vertexAttribIPointer(index, size, type, stride, offset);
     } else {
       gl.vertexAttribPointer(index, size, type, normalized, stride, offset);

@@ -1034,7 +1034,6 @@ class WebGLRenderer {
 			}
 
 			if ( currentRenderState?.state.transmissionRenderTarget[ camera.id ] == null ) {
-
 				currentRenderState?.state.transmissionRenderTarget[ camera.id ] = WebGLRenderTarget( 1, 1, WebGLRenderTargetOptions({
 					'generateMipmaps': true,
 					'type': ( extensions.has( 'EXT_color_buffer_half_float' ) || extensions.has( 'EXT_color_buffer_float' ) ) ? HalfFloatType : UnsignedByteType,
@@ -1043,7 +1042,7 @@ class WebGLRenderer {
 					'stencilBuffer': stencil,
 					'resolveDepthBuffer': false,
 					'resolveStencilBuffer': false,
-          'colorSpace': ColorManagement.workingColorSpace,
+          'colorSpace': ColorManagement.workingColorSpace.toString(),
         }));
 			}
 
