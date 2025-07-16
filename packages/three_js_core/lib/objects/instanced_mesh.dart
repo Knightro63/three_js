@@ -33,8 +33,6 @@ class InstancedMesh extends Mesh {
     instanceColor = null;
 
     this.count = count;
-
-    frustumCulled = false;
   }
 
   void dispsoe(){

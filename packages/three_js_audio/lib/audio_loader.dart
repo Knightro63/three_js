@@ -5,8 +5,6 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
-SoLoud? soloud;
-
 class AudioLoader extends Loader {
   late final FileLoader _loader;
 
@@ -29,20 +27,20 @@ class AudioLoader extends Loader {
 
   @override
   Future<AudioSource?> fromNetwork(Uri uri) async{
-    return await soloud?.loadUrl(uri.path);
+    return await SoLoud.instance.loadUrl(uri.path);
   }
   @override
   Future<AudioSource?> fromFile(File file) async{
-    return await soloud?.loadFile(file.path);
+    return await SoLoud.instance.loadFile(file.path);
   }
   @override
   Future<AudioSource?> fromPath(String filePath) async{
-    return await soloud?.loadFile(filePath);
+    return await SoLoud.instance.loadFile(filePath);
   }
   @override
   Future<AudioSource?> fromAsset(String asset, {String? package}) async{
     asset = package != null?'packages/$package/${path+asset}':path+asset;
-    return await soloud?.loadAsset(asset);
+    return await SoLoud.instance.loadAsset(asset);
   }
   @override
   Future<Uint8List> fromBytes(Uint8List bytes) async{

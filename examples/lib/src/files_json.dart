@@ -1,5 +1,3 @@
-import 'package:flutter/foundation.dart';
-
 const List<String> filesJson = [
   'webgl_periodictable',
   'timing',

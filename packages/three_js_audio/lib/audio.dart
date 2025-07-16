@@ -26,7 +26,7 @@ class Audio extends Object3D{
   AudioLoader _loader = AudioLoader();
 
   Timer? _delay;
-  bool get isPlaying => source != null?soloud!.getPause(source!):false;
+  bool get isPlaying => source != null?SoLoud.instance.getPause(source!):false;
   bool _hasStarted = false;
 
   String path;
@@ -55,7 +55,7 @@ class Audio extends Object3D{
   @override
   void dispose(){
     _delay?.cancel();
-    soloud?.deinit();
+    SoLoud.instance.deinit();
     super.dispose();
   }
 
@@ -74,8 +74,7 @@ class Audio extends Object3D{
 		}
 
     if(source == null){
-      soloud = SoLoud.instance;
-      await soloud?.init();
+      await SoLoud.instance.init();
 
       if(delay != 0){
         _delay = Timer(Duration(milliseconds: delay), (){
@@ -98,7 +97,7 @@ class Audio extends Object3D{
     _loader.unknown(path);
     _audioSource = await _loader.unknown(path);
 
-    source = _audioSource == null?null: await soloud?.play(
+    source = _audioSource == null?null: await SoLoud.instance.play(
       _audioSource!,
       volume: _volume,
       loopingStartAt: Duration(milliseconds: loopStart),
@@ -117,18 +116,18 @@ class Audio extends Object3D{
 
     _delay?.cancel();
     _delay = null;
-    if(source != null)await soloud?.stop(source!);
+    if(source != null)await SoLoud.instance.stop(source!);
   }
 
   /// Resumes the currently played (but resumed) background music.
   Future<void> resume() async {
     if(source != null){
-      final pos = soloud!.getPosition(source!);
+      final pos = SoLoud.instance.getPosition(source!);
       if(pos.inMilliseconds == 0){
-        soloud?.play(_audioSource!);
+        SoLoud.instance.play(_audioSource!);
       }
       else{
-        soloud?.setPause(source!, false);
+        SoLoud.instance.setPause(source!, false);
       }
     }
   }
@@ -142,7 +141,7 @@ class Audio extends Object3D{
 		}
 
 		if(isPlaying) {
-      if(source != null)soloud?.setPause(source!, true);
+      if(source != null)SoLoud.instance.setPause(source!, true);
     }
 
     _delay?.cancel();
@@ -150,7 +149,7 @@ class Audio extends Object3D{
   }
 
 	double? getPlaybackRate() {
-		return source == null?null:soloud?.getRelativePlaySpeed(source!);
+		return source == null?null:SoLoud.instance.getRelativePlaySpeed(source!);
 	}
 
 	void setPlaybackRate(double value){
@@ -161,7 +160,7 @@ class Audio extends Object3D{
 
 		if (isPlaying) {
       playbackRate = value;
-			source == null?null:soloud?.setRelativePlaySpeed(source!,value);
+			source == null?null:SoLoud.instance.setRelativePlaySpeed(source!,value);
 		}
 	}
 
@@ -171,7 +170,7 @@ class Audio extends Object3D{
 			return false;
 		}
 
-		return source == null?false:soloud!.getLooping(source!);
+		return source == null?false:SoLoud.instance.getLooping(source!);
 	}
 
 	void setLoop(bool value ){
@@ -183,7 +182,7 @@ class Audio extends Object3D{
 		loop = value;
 
 		if (isPlaying ) {
-			if(source != null) soloud?.setLooping(source!, value);
+			if(source != null) SoLoud.instance.setLooping(source!, value);
 		}
 	}
 
@@ -196,20 +195,20 @@ class Audio extends Object3D{
 	}
 
 	double? getBalance() {
-		return source != null?soloud?.getPan(source!):0;
+		return source != null?SoLoud.instance.getPan(source!):0;
 	}
 
 	void setBalance(double value ){
     _balance = value;
-		if(source != null)soloud?.setPan(source!,value);
+		if(source != null)SoLoud.instance.setPan(source!,value);
 	}
 
 	double? getVolume() {
-		return source == null? 0:soloud?.getVolume(source!);
+		return source == null? 0:SoLoud.instance.getVolume(source!);
 	}
 
 	void setVolume(double value ){
     _volume = value;
-    if(source != null) soloud?.setVolume(source!,value);
+    if(source != null) SoLoud.instance.setVolume(source!,value);
 	}
 }

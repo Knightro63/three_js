@@ -42,12 +42,15 @@ class GLTFExtension {
   Function? markDefs;
   Function? loadMesh;
   Function? loadMaterial;
+  Function? loadAnimation;
   Function? getMaterialType;
   Function? createNodeAttachment;
   Function? extendMaterialParams;
   Function? loadBufferView;
   Function? loadTexture;
   Function? createNodeMesh;
+  Function? loadNode;
+  Function? getDependency;
 }
 
 ///
@@ -147,11 +150,10 @@ class GLTFMaterialsSpecularExtension extends GLTFExtension {
       }
 
       final colorArray = extension['specularColorFactor'] ?? <double>[1.0, 1.0, 1.0];
-      materialParams['specularColor'] =
-          Color(colorArray[0].toDouble(), colorArray[1].toDouble(), colorArray[2].toDouble());
+      materialParams['specularColor'] = Color().setRGB(colorArray[0].toDouble(), colorArray[1].toDouble(), colorArray[2].toDouble());
 
       if (extension['specularColorTexture'] != null) {
-        final texture = parser.assignTexture(materialParams, 'specularColorMap', extension['specularColorTexture'], LinearSRGBColorSpace);
+        final texture = parser.assignTexture(materialParams, 'specularColorMap', extension['specularColorTexture'], SRGBColorSpace);
         pending.add(texture);
       }
 
@@ -464,7 +466,8 @@ class GLTFMaterialsSheenExtension extends GLTFExtension {
       Map extension = materialDef["extensions"][name];
 
       if (extension["sheenColorFactor"] != null) {
-        materialParams['sheenColor']?.fromList(extension["sheenColorFactor"]);
+        final colorFactor = List<double>.from(extension['sheenColorFactor'].map((e) => e.toDouble()));
+			  materialParams['sheenColor'].setRGB( colorFactor[ 0 ], colorFactor[ 1 ], colorFactor[ 2 ]);
       }
 
       if (extension["sheenRoughnessFactor"] != null) {
@@ -472,13 +475,11 @@ class GLTFMaterialsSheenExtension extends GLTFExtension {
       }
 
       if (extension["sheenColorTexture"] != null) {
-        pending.add(parser.assignTexture(
-            materialParams, 'sheenColorMap', extension["sheenColorTexture"], LinearSRGBColorSpace));
+        pending.add(parser.assignTexture(materialParams, 'sheenColorMap', extension["sheenColorTexture"], SRGBColorSpace));
       }
 
       if (extension["sheenRoughnessTexture"] != null) {
-        pending.add(parser.assignTexture(materialParams, 'sheenRoughnessMap',
-            extension["sheenRoughnessTexture"]));
+        pending.add(parser.assignTexture(materialParams, 'sheenRoughnessMap',extension["sheenRoughnessTexture"]));
       }
 
       return Future.wait(pending);
@@ -990,8 +991,7 @@ class GLTFMaterialsPbrSpecularGlossinessExtension extends GLTFExtension {
     }
 
     if (pbrSpecularGlossiness.diffuseTexture != null) {
-      pending.add(parser.assignTexture(
-          materialParams, 'map', pbrSpecularGlossiness.diffuseTexture, LinearSRGBColorSpace));
+      pending.add(parser.assignTexture(materialParams, 'map', pbrSpecularGlossiness.diffuseTexture, LinearSRGBColorSpace));
     }
 
     materialParams.emissive = Color(0.0, 0.0, 0.0);
@@ -1004,10 +1004,8 @@ class GLTFMaterialsPbrSpecularGlossinessExtension extends GLTFExtension {
 
     if (pbrSpecularGlossiness.specularGlossinessTexture != null) {
       final specGlossMapDef = pbrSpecularGlossiness.specularGlossinessTexture;
-      pending.add(parser.assignTexture(
-          materialParams, 'glossinessMap', specGlossMapDef));
-      pending.add(
-          parser.assignTexture(materialParams, 'specularMap', specGlossMapDef, LinearSRGBColorSpace));
+      pending.add(parser.assignTexture(materialParams, 'glossinessMap', specGlossMapDef));
+      pending.add(parser.assignTexture(materialParams, 'specularMap', specGlossMapDef, LinearSRGBColorSpace));
     }
 
     return Future.wait(pending);

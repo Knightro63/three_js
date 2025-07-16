@@ -394,7 +394,7 @@ double getNormalizedComponentScale(constructor) {
 /// @param {GLTF.Primitive} primitiveDef
 /// @param {GLTFParser} parser
 ///
-Function computeBounds = (BufferGeometry geometry, Map<String, dynamic> primitiveDef, GLTFParser parser) {
+void computeBounds(BufferGeometry geometry, Map<String, dynamic> primitiveDef, GLTFParser parser) {
   Map<String, dynamic> attributes = primitiveDef["attributes"];
 
   final box = BoundingBox();
@@ -480,7 +480,7 @@ Function computeBounds = (BufferGeometry geometry, Map<String, dynamic> primitiv
   sphere.radius = box.min.distanceTo(box.max) / 2;
 
   geometry.boundingSphere = sphere;
-};
+}
 
 ///
 /// @param {BufferGeometry} geometry
@@ -510,8 +510,7 @@ Function addPrimitiveAttributes = (BufferGeometry geometry, Map<String, dynamic>
       // skip
     } 
     else {
-      await assignAttributeAccessor(
-          attributes[gltfAttributeName], threeAttributeName);
+      await assignAttributeAccessor(attributes[gltfAttributeName], threeAttributeName);
       pending.add(geometry);
     }
   }
