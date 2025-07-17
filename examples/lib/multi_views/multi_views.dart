@@ -9,34 +9,26 @@ class MultiViews extends StatefulWidget {
 }
 
 class _MyAppState extends State<MultiViews> {
-  three.FlutterAngle angle = three.FlutterAngle();
   List<three.FlutterAngleTexture> textures = [];
-  bool ready = false;
 
   @override
   void initState(){
     super.initState();
-    angle.init(false,false).then((_) async{
-      setState(() {
-        ready = true;
-      });
-    });
   }
 
   @override
   void dispose(){
     super.dispose();
-    angle.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      child: !ready?Container():Column(
+      child: Column(
         children: [
-          MultiViews1(angle: angle),
+          const MultiViews1(),
           Container(height: 2, color: Colors.red),
-          MultiViews2(angle: angle),
+          const MultiViews2(),
         ],
       )
     );
@@ -44,8 +36,7 @@ class _MyAppState extends State<MultiViews> {
 }
 
 class MultiViews1 extends StatefulWidget {
-  const MultiViews1({super.key, required this.angle});
-  final three.FlutterAngle angle;
+  const MultiViews1({super.key});
   @override
   createState() => _MultiViews1State();
 }
@@ -66,7 +57,6 @@ class _MultiViews1State extends State<MultiViews1> {
       onSetupComplete: (){setState(() {});},
       setup: setup,
       size: const Size(300,300),
-      angle: widget.angle
     );
     super.initState();
   }
@@ -114,8 +104,7 @@ class _MultiViews1State extends State<MultiViews1> {
 }
 
 class MultiViews2 extends StatefulWidget {
-  const MultiViews2({super.key, required this.angle});
-  final three.FlutterAngle angle;
+  const MultiViews2({super.key});
   @override
   createState() => _MultiViews2State();
 }
@@ -136,7 +125,7 @@ class _MultiViews2State extends State<MultiViews2> {
       onSetupComplete: (){setState(() {});},
       setup: setup,
       size: const Size(300,300),
-      angle: widget.angle
+      renderNumber: 1
     );
     super.initState();
   }

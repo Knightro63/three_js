@@ -69,19 +69,15 @@ class ThreeJS with WidgetsBindingObserver{
     required this.setup,
     Size? size,
     core.WebGLRenderer? renderer,
-    FlutterAngle? angle,
+    this.renderNumber = 0,
     this.loadingWidget,
   }){
-    if(angle != null && kIsWeb){
-      _isExernalAngle = true;
-      this.angle = angle;
-    }
-    else{
-      this.angle = FlutterAngle();
-    }
+    this.angle = FlutterAngle();
     this.settings = settings ?? Settings();
     _size = size;
   }
+
+  int renderNumber;
 
   late final BuildContext _context;
   Timer? _debounceTimer;
@@ -123,7 +119,6 @@ class ThreeJS with WidgetsBindingObserver{
   List<Function(double dt)> events = [];
   List<Function()> disposeEvents = [];
 
-  bool _isExernalAngle = false;
   late FlutterAngle angle;
 
   void addAnimationEvent(Function(double dt) event){
@@ -176,7 +171,12 @@ class ThreeJS with WidgetsBindingObserver{
     screenSize = _size ?? mqd.size;
     dpr = mqd.devicePixelRatio;
 
-   initPlatformState();
+    width = screenSize!.width;
+    height = screenSize!.height;
+    
+    Future.delayed(Duration(milliseconds: renderNumber*100), () async{
+      await initPlatformState();
+    });
   }
   
   Future<void> animate(Duration duration) async {
@@ -298,10 +298,8 @@ class ThreeJS with WidgetsBindingObserver{
   }
 
   Future<void> initPlatformState() async {
-    width = screenSize!.width;
-    height = screenSize!.height;
     if(texture == null){
-      if(!_isExernalAngle) await angle.init();
+      await angle.init();
       
       texture = await angle.createTexture(      
         AngleOptions(
