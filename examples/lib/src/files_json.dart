@@ -7,6 +7,7 @@ const List<String> filesJson = [
   'misc_exporter_ply',
   'misc_exporter_stl',
   'misc_exporter_obj',
+  'misc_exporter_usdz',
   "webgl_camera",
   "webgl_camera_array",
   "webgl_shadow_contact",

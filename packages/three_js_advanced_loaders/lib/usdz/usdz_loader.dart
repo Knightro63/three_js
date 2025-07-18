@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:typed_data';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
@@ -156,8 +155,7 @@ class USDZLoader extends Loader {
 			loader.setResponseType( 'arraybuffer' );
 			for (final String filename in zip.keys) {
 				if ( filename.endsWith( 'png' ) ) {
-					//final blob =  Blob( zip[ filename ], { 'type': { 'type': 'image/png' } } );
-					data[ filename ] = zip[ filename ];//createObjectURL( blob );
+					data[ filename ] = zip[ filename ];
 				}
 				else if ( filename.endsWith( 'usd' ) || filename.endsWith( 'usda' ) ) {
 					if (isCrateFile(zip[filename])){

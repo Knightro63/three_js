@@ -224,8 +224,8 @@ equalArray( array1, array2 ) {
  * @param  {string} text
  * @return {ArrayBuffer}
  */
-stringToArrayBuffer( text ) {
-	return new TextEncoder().encode( text ).buffer;
+ByteBuffer stringToArrayBuffer(String text ) {
+	return Uint8List.fromList(text.codeUnits).buffer;//new TextEncoder().encode( text ).buffer;
 }
 
 /**
@@ -955,9 +955,9 @@ class GLTFWriter {
 			final options = writer.options;
 			final pending = writer.pending;
 
-			if (cache['images']?.containsValue( image ) ?? false) cache.images.set( image, {} );
+			if (cache['images']?.containsValue( image ) ?? false) cache['images'].set( image, {} );
 
-			final cachedImages = cache.images.get( image );
+			final cachedImages = cache['images'].get( image );
 
 			final key = mimeType + ':flipY/' + flipY.toString();
 
