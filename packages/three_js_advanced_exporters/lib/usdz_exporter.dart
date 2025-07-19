@@ -3,7 +3,6 @@ import 'dart:typed_data';
 import 'package:three_js_advanced_exporters/usdz/zip.dart';
 
 import './usdz/image_export.dart';
-import 'package:archive/archive_io.dart';
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_exporters/saveFile/saveFile.dart';
 import 'package:three_js_math/three_js_math.dart';
@@ -132,7 +131,6 @@ class _USDZExporter {
 		// 64 byte alignment
 		// https://github.com/101arrowz/fflate/issues/39#issuecomment-777263109
 		int offset = 0;
-    Archive archive = Archive();
 		for ( final filename in files.keys ) {
 			final file = files[ filename ];
 			final headerSize = 34 + filename.length;
@@ -146,67 +144,38 @@ class _USDZExporter {
 				final padding = Uint8List( padLength );
 
         files[ filename ] = [ file, { 'extra': { 12345: padding } } ];
-
-        // if(file != null){
-        //   archive.addFile(ArchiveFile(filename,file.length, file));
-        // }
 			}
 
 			offset = file?.length ?? 0;
 		}
 
-		return zipSync(files, { 'level': 0 } );//createZipFile(archive,path);
+		return zipSync(files, { 'level': 0 } );
 	}
 
 
-  static Uint8List createZipFile(Archive archive, String? path){
-    console.verbose("Archivng File!");
+  // static Uint8List createZipFile(Archive archive, String? path){
+  //   console.verbose("Archivng File!");
     
-    ZipEncoder encoder = ZipEncoder();
-    OutputStream outputStream;
-    if(path != null){
-      outputStream = OutputFileStream(
-        path,
-        byteOrder: ByteOrder.littleEndian,
-      );
-    }
-    else{
-      outputStream = OutputMemoryStream(
-        byteOrder: ByteOrder.littleEndian,
-      );
-    }
-    List<int>? bytes = encoder.encode(
-      archive,
-      level: DeflateLevel.none, 
-      output: outputStream
-    );
-    return Uint8List.fromList(bytes);
-  }
-
-
-
-  // imageToCanvas(ImageElement image, bool flipY, int maxTextureSize ) {
-  //   final scale = maxTextureSize / math.max( image.width, image.height );
-
-  //   final canvas = document.createElement( 'canvas' );
-  //   canvas.width = image.width * math.min( 1, scale );
-  //   canvas.height = image.height * math.min( 1, scale );
-
-  //   final context = canvas.getContext( '2d' );
-
-  //   // TODO: We should be able to do this in the UsdTransform2d?
-
-  //   if ( flipY == true ) {
-  //     context.translate( 0, canvas.height );
-  //     context.scale( 1, - 1 );
+  //   ZipEncoder encoder = ZipEncoder();
+  //   OutputStream outputStream;
+  //   if(path != null){
+  //     outputStream = OutputFileStream(
+  //       path,
+  //       byteOrder: ByteOrder.littleEndian,
+  //     );
   //   }
-
-  //   context.drawImage( image, 0, 0, canvas.width, canvas.height );
-
-  //   return canvas;
+  //   else{
+  //     outputStream = OutputMemoryStream(
+  //       byteOrder: ByteOrder.littleEndian,
+  //     );
+  //   }
+  //   List<int>? bytes = encoder.encode(
+  //     archive,
+  //     level: DeflateLevel.none, 
+  //     output: outputStream
+  //   );
+  //   return Uint8List.fromList(bytes);
   // }
-
-  //
 
   final PRECISION = 7;
 
@@ -370,7 +339,7 @@ ${ buildPrimvars( attributes ) }
       final y = attribute.getY( i );
       final z = attribute.getZ( i );
 
-      array.add( '(${ x!.toStringAsPrecision( PRECISION ) }, ${ y!.toStringAsPrecision( PRECISION ) }, ${ z!.toStringAsPrecision( PRECISION ) })' );
+      array.add( '(${ x!.toStringAsFixed( PRECISION ) }, ${ y!.toStringAsFixed( PRECISION ) }, ${ z!.toStringAsFixed( PRECISION ) })' );
     }
 
     return array.join( ', ' );
@@ -383,7 +352,7 @@ ${ buildPrimvars( attributes ) }
       final x = attribute.getX( i );
       final y = attribute.getY( i );
 
-      array.add( '(${ x!.toStringAsPrecision( PRECISION ) }, ${ (1 - y!).toStringAsPrecision( PRECISION ) })' );
+      array.add( '(${ x!.toStringAsFixed( PRECISION ) }, ${ (1 - y!).toStringAsFixed( PRECISION ) })' );
     }
 
     return array.join( ', ' );
@@ -500,7 +469,7 @@ ${ array.join( '' ) }
     {
       uniform token info:id = "UsdTransform2d"
       token inputs:in.connect = </Materials/Material_${ material.id }/PrimvarReader_${ mapType }.outputs:result>
-      float inputs:rotation = ${ ( rotation * ( 180 / math.pi ) ).toStringAsPrecision( PRECISION ) }
+      float inputs:rotation = ${ ( rotation * ( 180 / math.pi ) ).toStringAsFixed( PRECISION ) }
       float2 inputs:scale = ${ buildVector2( repeat ) }
       float2 inputs:translation = ${ buildVector2( offset ) }
       float2 outputs:result
@@ -653,9 +622,9 @@ ${ samplers.join( '\n' ) }
       matrix4d xformOp:transform = ${ transform }
       uniform token[] xformOpOrder = ["xformOp:transform"]
 
-      float2 clippingRange = (${ camera.near.toStringAsPrecision( PRECISION ) }, ${ camera.far.toStringAsPrecision( PRECISION ) })
-      float horizontalAperture = ${ (( camera.left.abs()  + camera.right.abs() ) * 10 ).toStringAsPrecision( PRECISION ) }
-      float verticalAperture = ${ ( ( camera.top.abs()  + camera.bottom.abs() ) * 10 ).toStringAsPrecision( PRECISION ) }
+      float2 clippingRange = (${ camera.near.toStringAsFixed( PRECISION ) }, ${ camera.far.toStringAsFixed( PRECISION ) })
+      float horizontalAperture = ${ (( camera.left.abs()  + camera.right.abs() ) * 10 ).toStringAsFixed( PRECISION ) }
+      float verticalAperture = ${ ( ( camera.top.abs()  + camera.bottom.abs() ) * 10 ).toStringAsFixed( PRECISION ) }
       token projection = "orthographic"
     }
       ''';
@@ -666,12 +635,12 @@ ${ samplers.join( '\n' ) }
       matrix4d xformOp:transform = ${ transform }
       uniform token[] xformOpOrder = ["xformOp:transform"]
 
-      float2 clippingRange = (${ camera.near.toStringAsPrecision( PRECISION ) }, ${ camera.far.toStringAsPrecision( PRECISION ) })
-      float focalLength = ${ camera.getFocalLength().toStringAsPrecision( PRECISION ) }
+      float2 clippingRange = (${ camera.near.toStringAsFixed( PRECISION ) }, ${ camera.far.toStringAsFixed( PRECISION ) })
+      float focalLength = ${ camera.getFocalLength().toStringAsFixed( PRECISION ) }
       float focusDistance = ${ camera.focus.toStringAsFixed( PRECISION ) }
-      float horizontalAperture = ${ camera.getFilmWidth().toStringAsPrecision( PRECISION ) }
+      float horizontalAperture = ${ camera.getFilmWidth().toStringAsFixed( PRECISION ) }
       token projection = "perspective"
-      float verticalAperture = ${ camera.getFilmHeight().toStringAsPrecision( PRECISION ) }
+      float verticalAperture = ${ camera.getFilmHeight().toStringAsFixed( PRECISION ) }
     }
       ''';
     }

@@ -6,7 +6,7 @@
 
 A type of three_js api that allows users to add particles to their projects.
 
-This is a TS to dart conversion of three-particles, originally created by [@NewKork](https://github.com/NewKork).
+This is a TS to dart conversion of three-particles, originally created by [@NewKrok](https://github.com/NewKrok).
 
 ## Usage
 

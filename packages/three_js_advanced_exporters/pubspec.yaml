@@ -12,7 +12,6 @@ dependencies:
     sdk: flutter
   file_picker: ^10.1.9
   path_provider: ^2.1.5
-  archive: ^4.0.7
   image: ^4.5.4
   web: ^1.1.1
   three_js_exporters: ^0.1.0

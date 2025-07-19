@@ -12,7 +12,7 @@ class ImageExport{
       height: element.height.toInt(), 
       bytes: bytes,
       numChannels: 4
-    );//decodeImage(bytes);
+    );
 
     if(flipY) {
       image = flipVertical(image);

@@ -100,7 +100,7 @@ class GLTFExporter {
 
 	GLTFExporter unregister( callback ) {
 		if ( this.pluginCallbacks.indexOf( callback ) != - 1 ) {
-			this.pluginCallbacks.removeLast( this.pluginCallbacks.indexOf( callback ));
+			this.pluginCallbacks.removeAt( this.pluginCallbacks.indexOf( callback ));
 		}
 		return this;
 	}
@@ -112,7 +112,7 @@ class GLTFExporter {
 	 * @param  {Function} onError  Callback on errors
 	 * @param  {Object} options options
 	 */
-	parse( input, onDone, onError, options ) {
+	Future parse( input, onDone, onError, options ) async{
 		final writer = new GLTFWriter();
 		final plugins = [];
 
@@ -121,13 +121,12 @@ class GLTFExporter {
 		}
 
 		writer.setPlugins( plugins );
-		writer.write( input, onDone, options ).catch( onError );
-
+		writer.write( input, onDone, options ).catchError( onError );
 	}
 
-	Future parseAsync( input, options ) async{
-		return await parse( input, resolve, reject, options );
-	}
+	// Future parseAsync( input, options ) async{
+	// 	return await parse( input, resolve, reject, options );
+	// }
 }
 
 //------------------------------------------------------------------------------
@@ -412,7 +411,7 @@ class GLTFWriter {
 
 		this.processInput( [input] );
 
-		await Promise.all( this.pending );
+		await this.pending;
 
 		final writer = this;
 		final buffers = writer.buffers;
@@ -1152,9 +1151,7 @@ class GLTFWriter {
 		final color = material.color.toNumArray([]).concat( [ material.opacity ] );
 
 		if ( ! equalArray( color, [ 1, 1, 1, 1 ] ) ) {
-
 			materialDef['pbrMetallicRoughness']['baseColorFactor'] = color;
-
 		}
 
 		if ( material is MeshStandardMaterial ) {

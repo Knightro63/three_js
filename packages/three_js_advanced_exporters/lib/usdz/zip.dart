@@ -28,7 +28,7 @@ var rev = new u16.fromList(List.generate(32768, (int i){
   return (((x & 0xFF00) >> 8) | ((x & 0x00FF) << 8)) >> 1;
 }));
 
-zipSync(Map<String,dynamic> data, [Map<String,dynamic>? opts]) {
+Uint8List zipSync(Map<String,dynamic> data, [Map<String,dynamic>? opts]) {
   opts ??= {};
   final Map<String,dynamic> r = {};
   List files = [];
@@ -63,16 +63,18 @@ zipSync(Map<String,dynamic> data, [Map<String,dynamic>? opts]) {
       'compression': compression
     }));
     o += 30 + s + exl + l;
-    tot += 76 + 2 * (s + exl) + (ms ?? 0) + l;
+    tot += 76 + 2 * (s + exl) + ms + l;
   }
-  var out = new u8(tot + 22), oe = o, cdl = tot - o;
+  Uint8List out = new u8(tot + 22);
+  int oe = o, cdl = tot - o;
   for (int i = 0; i < files.length; ++i) {
     Map f = files[i];
     wzh(out, f['o'], f, f['f'], f['u'], f['c'].length);
     var badd = 30 + f['f'].length + exfl(f['extra']);
-    out[f['c']] = f['o'] + badd;
-    wzh(out, o, f, f['f'], f['u'], f['c'].length, f['o'], f['m']);
-    o += 16 + badd + (f['m'] != null? f['m'].length : 0) as int;
+    out.setAll(f['o'] + badd,f['c']);//out[f['c']] = f['o'] + badd;
+    wzh(out, o, f, f['f'], f['u'], f['c'].length, f['o'], 
+    f['m']);
+    o += 16 + badd + (f['m'] is int? (f['m'] as int):(f['m'].length) as int) as int;//(f['m'] != null? f['m'].length : 0) as int;
   }
   wzf(out, o, files.length, cdl, oe);
   return out;
@@ -216,19 +218,22 @@ Map<String,dynamic> mrg( a, b) {
   return o;
 }
 
-wzh(List<int> d, b, Map f, fn, u, c, [ce, co]) {
-  var fl = fn.length, ex = f['extra'], col = (co != 0 && co?.length != 0) ? (co?.length ?? 0) : co;//co && co.length;
+wzh(List<int> d, int b, Map f, List<int> fn, bool u, int c, [int? ce, co]) {
+  int col = co is List? co.length: (co ?? 0);
+  int fl = fn.length;
+  Map? ex = f['extra'];
+  //int col = co.length;//(co != 0 && co?.length != 0) ? (co?.length ?? 0) : co;//co && co.length;
   var exl = exfl(ex);
   wbytes(d, b, ce != null ? 0x2014B50 : 0x4034B50);
   b += 4;
   if (ce != null){
     d[b++] = 20;
-    d[b++] = f['os'];
+    d[b++] = f['os'] ?? 0;
   }
   d[b] = 20;
   b += 2; // spec compliance? what's that?
   d[b++] = ((f['flag'] ?? 0) << 1) | (c < 0 ? 8 : 0);//(c < 0 && 8);
-  d[b++] = u != 0? 8 : u;//u && 8;
+  d[b++] = !u ? 8 : 0;//u && 8;
   d[b++] = f['compression'] & 255;
   d[b++] = f['compression'] >> 8;
   var dt = new DateTime.fromMillisecondsSinceEpoch(f['mtime'] == null ? DateTime.now().millisecondsSinceEpoch : f['mtime']), y = dt.year - 1980;
@@ -247,23 +252,24 @@ wzh(List<int> d, b, Map f, fn, u, c, [ce, co]) {
   b += 16;
   if (ce != null) {
     wbytes(d, b, col);
-    wbytes(d, b + 6, f['attrs']);
+    wbytes(d, b + 6, f['attrs'] ?? 0);
     wbytes(d, b + 10, ce);
     b += 14;
   }
-  d[fn] = b;
+  d.setAll(b, fn);//[fn] = b;
   b += fl;
   if (exl != 0) {
-    for (final k in ex) {
-      var exf = ex[k], l = exf.length;
+    for (final k in ex?.keys ?? []) {
+      var exf = ex![k];
+      int l = exf.length;
       wbytes(d, b, k);
       wbytes(d, b + 2, l);
-      d[exf] = b + 4;
+      d.setAll(b+4,exf);//[exf] = b + 4;
       b += 4 + l;
     }
   }
   if (col != 0){
-    d[co] = b; 
+    d.setAll(b, co);//[co] = b; 
     b += col;
   }
   return b;
@@ -291,7 +297,7 @@ slc(v, s, e) {
     e = v.length;
   }
   // can't use .constructor in case user-supplied
-  return new u8(v.subarray(s, e));
+  return new u8.fromList(v.sublist(s, e));
 }
 
 var crct = (() {
@@ -307,37 +313,37 @@ var crct = (() {
   return t;
 })();
 
-dopt(dat, Map opt, pre, post, [st]) {
+dopt(dat, Map opt, pre, post, [Map? st]) {
   if (st == null) {
     st = { 'l': 1 };
-    if (opt['dictionary']) {
-      var dict = opt['dictionary'].subarray(-32768);
+    if (opt['dictionary'] != null) {
+      var dict = opt['dictionary'].sublist(-32768);
       var newDat = new u8(dict.length + dat.length);
       newDat.setAll(0,dict);
       newDat[dat] = dict.length;
       dat = newDat;
-      st.w = dict.length;
+      st['w'] = dict.length;
     }
   }
-  return dflt(dat, opt['level'] == null ? 6 : opt['level'], opt['mem'] == null ? (st.l ? (math.max(8, math.min(13, math.log(dat.length))) * 1.5).ceil() : 20) : (12 + opt['mem']), pre, post, st);
+  return dflt(dat, opt['level'] == null ? 6 : opt['level'], opt['mem'] == null ? (st['l'] != 0? (math.max(8, math.min(13, math.log(dat.length))) * 1.5).ceil() : 20) : (12 + opt['mem']), pre, post, st);
 }
 
-dflt(dat, lvl, plvl, pre, int post, st) {
-  var s = st.z ?? dat.length;
+dflt(dat, int lvl, plvl, pre, int post, Map st) {
+  var s = st['z'] ?? dat.length;
   var o = new u8(pre + s + 5 * (1 + (s / 7000)).ceil() + post);
   // writing to this writes to the output buffer
   var w = o.sublist(pre, o.length - post);
-  var lst = st.l;
-  var pos = (st.r ?? 0) & 7;
-  if (lvl) {
-    if (pos){
-      w[0] = st.r >> 3;
+  var lst = st['l'];
+  int pos = (st['r'] ?? 0) & 7;
+  if (lvl != 0) {
+    if (pos != 0){
+      w[0] = st['r'] >> 3;
     }
     var opt = deo[lvl - 1];
     var n = opt >> 13, c = opt & 8191;
     var msk_1 = (1 << plvl) - 1;
     //    prev 2-byte val map    curr 2-byte val map
-    var prev = st.p ?? new u16(32768), head = st.h ?? new u16(msk_1 + 1);
+    var prev = st['p'] ?? new u16(32768), head = st['h'] ?? new u16(msk_1 + 1);
     var bs1_1 = (plvl / 3).ceil(), bs2_1 = 2 * bs1_1;
     var hsh = (i) { return (dat[i] ^ (dat[i + 1] << bs1_1) ^ (dat[i + 2] << bs2_1)) & msk_1; };
     // 24576 is an arbitrary number of maximum symbols per block
@@ -346,7 +352,7 @@ dflt(dat, lvl, plvl, pre, int post, st) {
     // length/literal freq   distance freq
     var lf = new u16(288), df = new u16(32);
     //  l/lcnt  exbits  index          l/lind  waitdx          blkpos
-    var lc_1 = 0, eb = 0, i = st.i ?? 0, li = 0, wi = st.w ?? 0, bs = 0;
+    var lc_1 = 0, eb = 0, i = st['i'] ?? 0, li = 0, wi = st['w'] ?? 0, bs = 0;
     for (; i + 2 < s; ++i) {
       // hash value
       var hv = hsh(i);
@@ -433,27 +439,27 @@ dflt(dat, lvl, plvl, pre, int post, st) {
     }
     pos = wblk(dat, w, lst, syms, lf, df, eb, li, bs, i - bs, pos);
     if (!lst) {
-      st.r = (pos & 7) | w[(pos / 8) | 0] << 3;
+      st['r'] = (pos & 7) | w[(pos ~/ 8) | 0] << 3;
       // shft(pos) now 1 less if pos & 7 != 0
       pos -= 7;
-      st.h = head;
-      st.p = prev;
-      st.i = i;
-      st.w = wi;
+      st['h'] = head;
+      st['p'] = prev;
+      st['i'] = i;
+      st['w'] = wi;
     }
   }
   else {
-    for (var i = st.w ?? 0; i < s + lst; i += 65535) {
+    for (var i = st['w'] ?? 0; i < s + lst; i += 65535) {
       // end
       var e = i + 65535;
       if (e >= s) {
         // write final block
-        w[(pos / 8) | 0] = lst;
+        w[(pos ~/ 8) | 0] = lst;
         e = s;
       }
-      pos = wfblk(w, pos + 1, dat.subarray(i, e));
+      pos = wfblk(w, pos + 1, dat.sublist(i, e));
     }
-    st.i = s;
+    st['i'] = s;
   }
   return slc(o, 0, pre + shft(pos) + post);
 }

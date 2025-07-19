@@ -581,6 +581,9 @@ class Material with EventDispatcher {
     } else if (key == "shadowSide") {
       shadowSide = newValue;
     }
+    else if(key == "aoMapIntensity" ){
+      aoMapIntensity = newValue*1.0;
+    }
     else if(key == "bumpMap"){
       bumpMap = newValue;
     }
