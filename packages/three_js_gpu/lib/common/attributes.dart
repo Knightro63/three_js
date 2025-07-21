@@ -1,16 +1,19 @@
-import 'package:three_js_math/three_js_math.dart';
+import 'package:three_js_gpu/gpu_backend.dart';
 
+import './backend.dart';
+import 'package:three_js_math/three_js_math.dart';
 import './data_map.dart';
 import './constants.dart';
-
-import '../../constants.js';
 
 class Attributes extends DataMap {
   Backend backend;
 
 	Attributes(this.backend ):super();
 
-	Map<dynamic, dynamic>? delete(BufferAttribute attribute ) {
+	Map? delete(dynamic attribute ) {
+    if(attribute is! BufferAttribute ){
+      throw('Attribute must be BufferAttribute');
+    }
 		final attributeData = super.delete( attribute );
 
 		if ( attributeData != null ) {
@@ -20,7 +23,7 @@ class Attributes extends DataMap {
 		return attributeData;
 	}
 
-	update(BufferAttribute attribute, int type ) {
+	void update(BufferAttribute attribute, int type ) {
 		final data = get( attribute );
 
 		if ( data.version == null ) {
@@ -31,7 +34,7 @@ class Attributes extends DataMap {
 			} else if ( type == AttributeType.storage.index ) {
 				backend.createStorageAttribute( attribute );
 			} else if ( type == AttributeType.indirect.index ) {
-				backend.createIndirectStorageAttribute( attribute );
+				(backend as WebGPUBackend).createIndirectStorageAttribute( attribute );
 			}
 
 			data.version =_getBufferAttribute( attribute ).version;

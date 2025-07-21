@@ -1,13 +1,15 @@
 
 
 import 'package:three_js_core/three_js_core.dart';
+import 'package:three_js_gpu/common/data_map.dart';
+import 'package:three_js_math/three_js_math.dart';
 
-final _clearColor = /*@__PURE__*/ new Color4();
+final _clearColor = /*@__PURE__*/ new Color();
 
 
 class Background extends DataMap {
   Renderer renderer;
-  Nodes node;
+  Nodes nodes;
 
 	Background(this.renderer, this.nodes ):super();
 
@@ -28,25 +30,22 @@ class Background extends DataMap {
 		bool forceClear = false;
 
 		if ( background == null ) {
-
 			// no background settings, use clear color configuration from the renderer
 
 			renderer._clearColor.getRGB( _clearColor );
-			_clearColor.a = renderer._clearColor.a;
-
-		} else if ( background is Color) {
-
+			_clearColor.alpha = renderer._clearColor.a;
+		} 
+    else if ( background is Color) {
 			// background is an opaque color
 
 			background.getRGB( _clearColor );
-			_clearColor.a = 1;
-
+			_clearColor.alpha = 1;
 			forceClear = true;
+		} 
+    else if ( background is Node ) {
 
-		} else if ( background is Node ) {
-
-			const sceneData = this.get( scene );
-			const backgroundNode = background;
+			final sceneData = this.get( scene );
+			final backgroundNode = background;
 
 			_clearColor.copy( renderer._clearColor );
 
@@ -54,7 +53,7 @@ class Background extends DataMap {
 
 			if ( backgroundMesh == undefined ) {
 
-				const backgroundMeshNode = context( vec4( backgroundNode ).mul( backgroundIntensity ), {
+				final backgroundMeshNode = context( vec4( backgroundNode ).mul( backgroundIntensity ), {
 					// @TODO: Add Texture2D support using node context
 					getUV: () => backgroundRotation.mul( normalWorldGeometry ),
 					getTextureLevel: () => backgroundBlurriness
@@ -63,7 +62,7 @@ class Background extends DataMap {
 				let viewProj = modelViewProjection;
 				viewProj = viewProj.setZ( viewProj.w );
 
-				const nodeMaterial = new NodeMaterial();
+				final nodeMaterial = new NodeMaterial();
 				nodeMaterial.name = 'Background.material';
 				nodeMaterial.side = BackSide;
 				nodeMaterial.depthTest = false;
@@ -79,65 +78,52 @@ class Background extends DataMap {
 				backgroundMesh.frustumCulled = false;
 				backgroundMesh.name = 'Background.mesh';
 
-				backgroundMesh.onBeforeRender = function ( renderer, scene, camera ) {
-
+				backgroundMesh.onBeforeRender = ( renderer, scene, camera ) {
 					this.matrixWorld.copyPosition( camera.matrixWorld );
-
 				};
 
-				function onBackgroundDispose() {
-
+				void onBackgroundDispose() {
 					background.removeEventListener( 'dispose', onBackgroundDispose );
 
 					backgroundMesh.material.dispose();
 					backgroundMesh.geometry.dispose();
-
 				}
 
 				background.addEventListener( 'dispose', onBackgroundDispose );
-
 			}
 
-			const backgroundCacheKey = backgroundNode.getCacheKey();
+			final backgroundCacheKey = backgroundNode.getCacheKey();
 
-			if ( sceneData.backgroundCacheKey !== backgroundCacheKey ) {
-
+			if ( sceneData.backgroundCacheKey != backgroundCacheKey ) {
 				sceneData.backgroundMeshNode.node = vec4( backgroundNode ).mul( backgroundIntensity );
 				sceneData.backgroundMeshNode.needsUpdate = true;
 
 				backgroundMesh.material.needsUpdate = true;
 
 				sceneData.backgroundCacheKey = backgroundCacheKey;
-
 			}
 
 			renderList.unshift( backgroundMesh, backgroundMesh.geometry, backgroundMesh.material, 0, 0, null, null );
-
-		} else {
-
-			console.error( 'THREE.Renderer: Unsupported background configuration.', background );
-
+		}
+     else {
+			console.error( 'THREE.Renderer: Unsupported background configuration. $background');
 		}
 
 		//
 
-		const environmentBlendMode = renderer.xr.getEnvironmentBlendMode();
+		final environmentBlendMode = renderer.xr.getEnvironmentBlendMode();
 
 		if ( environmentBlendMode == 'additive' ) {
-
-			_clearColor.set( 0, 0, 0, 1 );
-
-		} else if ( environmentBlendMode == 'alpha-blend' ) {
-
-			_clearColor.set( 0, 0, 0, 0 );
-
+			_clearColor.setValues( 0, 0, 0, 1 );
+		} 
+    else if ( environmentBlendMode == 'alpha-blend' ) {
+			_clearColor.setValues( 0, 0, 0, 0 );
 		}
 
 		//
 
 		if ( renderer.autoClear == true || forceClear == true ) {
-
-			const clearColorValue = renderContext.clearColorValue;
+			final clearColorValue = renderContext.clearColorValue;
 
 			clearColorValue.r = _clearColor.r;
 			clearColorValue.g = _clearColor.g;
@@ -146,31 +132,24 @@ class Background extends DataMap {
 
 			// premultiply alpha
 
-			if ( renderer.backend.isWebGLBackend == true || renderer.alpha == true ) {
-
+			if ( renderer.backend is WebGLBackend == true || renderer.alpha == true ) {
 				clearColorValue.r *= clearColorValue.a;
 				clearColorValue.g *= clearColorValue.a;
 				clearColorValue.b *= clearColorValue.a;
-
 			}
 
 			//
-
 			renderContext.depthClearValue = renderer._clearDepth;
 			renderContext.stencilClearValue = renderer._clearStencil;
 
 			renderContext.clearColor = renderer.autoClearColor == true;
 			renderContext.clearDepth = renderer.autoClearDepth == true;
 			renderContext.clearStencil = renderer.autoClearStencil == true;
-
-		} else {
-
+		} 
+    else {
 			renderContext.clearColor = false;
 			renderContext.clearDepth = false;
 			renderContext.clearStencil = false;
-
 		}
-
 	}
-
 }

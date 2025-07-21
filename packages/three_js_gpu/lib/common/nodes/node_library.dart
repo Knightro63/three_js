@@ -1,3 +1,5 @@
+import 'package:three_js_core/three_js_core.dart';
+
 /**
  * The purpose of a node library is to assign node implementations
  * to existing library features. In `WebGPURenderer` lights, materials
@@ -7,35 +9,11 @@
  * @private
  */
 class NodeLibrary {
+  WeakMap lightNodes = new WeakMap();
+  Map<String,Type> materialNodes = new Map();
+  Map<int,Function> toneMappingNodes = new Map();
 
-	/**
-	 * Constructs a new node library.
-	 */
-	constructor() {
-
-		/**
-		 * A weak map that maps lights to light nodes.
-		 *
-		 * @type {WeakMap<Light.constructor,AnalyticLightNode.constructor>}
-		 */
-		this.lightNodes = new WeakMap();
-
-		/**
-		 * A map that maps materials to node materials.
-		 *
-		 * @type {Map<string,NodeMaterial.constructor>}
-		 */
-		this.materialNodes = new Map();
-
-		/**
-		 * A map that maps tone mapping techniques (constants)
-		 * to tone mapping node functions.
-		 *
-		 * @type {Map<number,Function>}
-		 */
-		this.toneMappingNodes = new Map();
-
-	}
+	NodeLibrary();
 
 	/**
 	 * Returns a matching node material instance for the given material object.
@@ -47,28 +25,21 @@ class NodeLibrary {
 	 * @param {Material} material - A material.
 	 * @return {NodeMaterial} The corresponding node material.
 	 */
-	fromMaterial( material ) {
+	NodeMaterial fromMaterial(Material material ) {
+		if ( material is NodeMaterial ) return material;
 
-		if ( material.isNodeMaterial ) return material;
+		dynamic nodeMaterial;
+		final nodeMaterialClass = this.getMaterialNodeClass( material.type );
+		
+    if ( nodeMaterialClass != null ) {
+			nodeMaterial = nodeMaterialClass();
 
-		let nodeMaterial = null;
-
-		const nodeMaterialClass = this.getMaterialNodeClass( material.type );
-
-		if ( nodeMaterialClass !== null ) {
-
-			nodeMaterial = new nodeMaterialClass();
-
-			for ( const key in material ) {
-
+			for ( final key in material ) {
 				nodeMaterial[ key ] = material[ key ];
-
 			}
-
 		}
 
 		return nodeMaterial;
-
 	}
 
 	/**
@@ -77,22 +48,12 @@ class NodeLibrary {
 	 * @param {Function} toneMappingNode - The tone mapping node function.
 	 * @param {number} toneMapping - The tone mapping.
 	 */
-	addToneMapping( toneMappingNode, toneMapping ) {
-
+	void addToneMapping(Function toneMappingNode, int toneMapping ) {
 		this.addType( toneMappingNode, toneMapping, this.toneMappingNodes );
-
 	}
 
-	/**
-	 * Returns a tone mapping node function for a tone mapping technique (constant).
-	 *
-	 * @param {number} toneMapping - The tone mapping.
-	 * @return {?Function} The tone mapping node function. Returns `null` if no node function is found.
-	 */
-	getToneMappingFunction( toneMapping ) {
-
-		return this.toneMappingNodes.get( toneMapping ) || null;
-
+	Function? getToneMappingFunction(int toneMapping ) {
+		return this.toneMappingNodes[toneMapping];
 	}
 
 	/**
@@ -101,10 +62,8 @@ class NodeLibrary {
 	 * @param {string} materialType - The material type.
 	 * @return {?NodeMaterial.constructor} The node material class definition. Returns `null` if no node material is found.
 	 */
-	getMaterialNodeClass( materialType ) {
-
-		return this.materialNodes.get( materialType ) || null;
-
+	Type? getMaterialNodeClass(String materialType ) {
+		return this.materialNodes[materialType];
 	}
 
 	/**
@@ -113,10 +72,8 @@ class NodeLibrary {
 	 * @param {NodeMaterial.constructor} materialNodeClass - The node material class definition.
 	 * @param {string} materialClassType - The material type.
 	 */
-	addMaterial( materialNodeClass, materialClassType ) {
-
+	void addMaterial(Type materialNodeClass,String materialClassType ) {
 		this.addType( materialNodeClass, materialClassType, this.materialNodes );
-
 	}
 
 	/**
@@ -125,10 +82,8 @@ class NodeLibrary {
 	 * @param {Light.constructor} light - The light class definition.
 	 * @return {?AnalyticLightNode.constructor} The light node class definition. Returns `null` if no light node is found.
 	 */
-	getLightNodeClass( light ) {
-
-		return this.lightNodes.get( light ) || null;
-
+	Type? getLightNodeClass(Type light ) {
+		return this.lightNodes[light];
 	}
 
 	/**
@@ -137,10 +92,8 @@ class NodeLibrary {
 	 * @param {AnalyticLightNode.constructor} lightNodeClass - The light node class definition.
 	 * @param {Light.constructor} lightClass - The light class definition.
 	 */
-	addLight( lightNodeClass, lightClass ) {
-
+	void addLight(Type lightNodeClass, Type lightClass ) {
 		this.addClass( lightNodeClass, lightClass, this.lightNodes );
-
 	}
 
 	/**
@@ -150,20 +103,16 @@ class NodeLibrary {
 	 * @param {number|string} type - The object type.
 	 * @param {Map} library - The type library.
 	 */
-	addType( nodeClass, type, library ) {
-
-		if ( library.has( type ) ) {
-
-			console.warn( `Redefinition of node ${ type }` );
+	void addType(dynamic nodeClass, type, Map library ) {
+		if ( library.containsKey( type ) ) {
+			console.warning( 'Redefinition of node ${ type }' );
 			return;
-
 		}
 
-		if ( typeof nodeClass !== 'function' ) throw new Error( `Node class ${ nodeClass.name } is not a class.` );
-		if ( typeof type === 'function' || typeof type === 'object' ) throw new Error( `Base class ${ type } is not a class.` );
+		if (nodeClass is! Function ) throw( 'Node class ${ nodeClass.name } is not a class.' );
+		if (type is Function || typeof type === 'object' ) throw( 'Base class ${ type } is not a class.' );
 
 		library.set( type, nodeClass );
-
 	}
 
 	/**
@@ -173,22 +122,17 @@ class NodeLibrary {
 	 * @param {any} baseClass - The class definition.
 	 * @param {WeakMap} library - The type library.
 	 */
-	addClass( nodeClass, baseClass, library ) {
-
+	void addClass( nodeClass, baseClass, WeakMap library ) {
 		if ( library.has( baseClass ) ) {
-
-			console.warn( `Redefinition of node ${ baseClass.name }` );
+			console.warning( 'Redefinition of node ${ baseClass.name }' );
 			return;
-
 		}
 
-		if ( typeof nodeClass !== 'function' ) throw new Error( `Node class ${ nodeClass.name } is not a class.` );
-		if ( typeof baseClass !== 'function' ) throw new Error( `Base class ${ baseClass.name } is not a class.` );
+		if (nodeClass is! Function ) throw( 'Node class ${ nodeClass.name } is not a class.' );
+		if (baseClass is! Function ) throw ( 'Base class ${ baseClass.name } is not a class.' );
 
 		library.set( baseClass, nodeClass );
-
 	}
-
 }
 
-export default NodeLibrary;
+

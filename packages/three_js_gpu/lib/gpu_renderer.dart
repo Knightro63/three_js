@@ -24,6 +24,8 @@ const debugHandler = {
  * @augments Renderer
  */
 class WebGPURenderer extends Renderer{
+  bool isWebGPURenderer = true;
+  StandardNodeLibrary library = StandardNodeLibrary();
 
   WebGPURenderer(super.backend, super.parameters);
 
@@ -33,7 +35,7 @@ class WebGPURenderer extends Renderer{
 	 * @param {WebGPURenderer~Options} [parameters] - The configuration parameter.
 	 */
 	factory WebGPURenderer.create( parameters) {
-		let BackendClass;
+		Type BackendClass;
 
 		if ( parameters.forceWebGL ) {
 			BackendClass = WebGLBackend;
@@ -46,31 +48,12 @@ class WebGPURenderer extends Renderer{
 			};
 		}
 
-		const backend = new BackendClass( parameters );
-
-		/**
-		 * The generic default value is overwritten with the
-		 * standard node library for type mapping.
-		 *
-		 * @type {StandardNodeLibrary}
-		 */
-		this.library = new StandardNodeLibrary();
-
-		/**
-		 * This flag can be used for type testing.
-		 *
-		 * @type {boolean}
-		 * @readonly
-		 * @default true
-		 */
-		this.isWebGPURenderer = true;
+		final backend = new BackendClass( parameters );
 
 		if ( typeof __THREE_DEVTOOLS__ !== 'undefined' ) {
 			__THREE_DEVTOOLS__.dispatchEvent( new CustomEvent( 'observe', { detail: this } ) );
 		}
 
     return WebGPURenderer(backend,parameters);
-
 	}
-
 }

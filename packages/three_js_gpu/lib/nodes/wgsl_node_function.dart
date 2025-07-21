@@ -1,10 +1,9 @@
-import NodeFunction from '../../../nodes/core/NodeFunction.js';
-import NodeFunctionInput from '../../../nodes/core/NodeFunctionInput.js';
 
-const declarationRegexp = /^[fn]*\s*([a-z_0-9]+)?\s*\(([\s\S]*?)\)\s*[\-\>]*\s*([a-z_0-9]+(?:<[\s\S]+?>)?)/i;
-const propertiesRegexp = /([a-z_0-9]+)\s*:\s*([a-z_0-9]+(?:<[\s\S]+?>)?)/ig;
 
-const wgslTypeLib = {
+final declarationRegexp = '/^[fn]*\s*([a-z_0-9]+)?\s*\(([\s\S]*?)\)\s*[\-\>]*\s*([a-z_0-9]+(?:<[\s\S]+?>)?)/i';
+final propertiesRegexp = '/([a-z_0-9]+)\s*:\s*([a-z_0-9]+(?:<[\s\S]+?>)?)/ig';
+
+final Map<String,String> wgslTypeLib = {
 	'f32': 'float',
 	'i32': 'int',
 	'u32': 'uint',
@@ -75,74 +74,63 @@ const wgslTypeLib = {
 
 };
 
-const parse = ( source ) => {
-
+Map<String,dynamic> parse(String source ){
 	source = source.trim();
 
-	const declaration = source.match( declarationRegexp );
+	final declaration = source.match( declarationRegexp );
 
-	if ( declaration !== null && declaration.length === 4 ) {
+	if ( declaration != null && declaration.length == 4 ) {
 
-		const inputsCode = declaration[ 2 ];
-		const propsMatches = [];
-		let match = null;
+		final inputsCode = declaration[ 2 ];
+		final propsMatches = [];
+		dynamic match = null;
 
-		while ( ( match = propertiesRegexp.exec( inputsCode ) ) !== null ) {
-
-			propsMatches.push( { name: match[ 1 ], type: match[ 2 ] } );
-
+		while ( ( match = propertiesRegexp.exec( inputsCode ) ) != null ) {
+			propsMatches.add( { 'name': match[ 1 ], 'type': match[ 2 ] } );
 		}
 
 		// Process matches to correctly pair names and types
-		const inputs = [];
-		for ( let i = 0; i < propsMatches.length; i ++ ) {
+		final inputs = [];
+		for (int i = 0; i < propsMatches.length; i ++ ) {
 
-			const { name, type } = propsMatches[ i ];
+			final name = propsMatches[ i ]['name'];
+      final type = propsMatches[ i ]['type'];
 
-			let resolvedType = type;
+			dynamic resolvedType = type;
 
 			if ( resolvedType.startsWith( 'ptr' ) ) {
-
 				resolvedType = 'pointer';
-
 			} else {
-
 				if ( resolvedType.startsWith( 'texture' ) ) {
-
 					resolvedType = type.split( '<' )[ 0 ];
-
 				}
 
 				resolvedType = wgslTypeLib[ resolvedType ];
-
 			}
 
-			inputs.push( new NodeFunctionInput( resolvedType, name ) );
-
+			inputs.add( new NodeFunctionInput( resolvedType, name ) );
 		}
 
-		const blockCode = source.substring( declaration[ 0 ].length );
-		const outputType = declaration[ 3 ] || 'void';
+		final blockCode = source.substring( declaration[ 0 ].length );
+		final outputType = declaration[ 3 ] ?? 'void';
 
-		const name = declaration[ 1 ] !== undefined ? declaration[ 1 ] : '';
-		const type = wgslTypeLib[ outputType ] || outputType;
+		final name = declaration[ 1 ] != null ? declaration[ 1 ] : '';
+		final type = wgslTypeLib[ outputType ] ?? outputType;
 
 		return {
-			type,
-			inputs,
-			name,
-			inputsCode,
-			blockCode,
-			outputType
+			'type':type,
+			"inputs":inputs,
+			'name':name,
+			'inputsCode':inputsCode,
+			'blockCode':blockCode,
+			'outputType':outputType
 		};
 
-	} else {
-
-		throw new Error( 'FunctionNode: Function is not a WGSL code.' );
-
+	} 
+  else {
+		throw ( 'FunctionNode: Function is not a WGSL code.' );
 	}
-
-};
+}
 
 /**
  * This class represents a WSL node function.
@@ -150,22 +138,27 @@ const parse = ( source ) => {
  * @augments NodeFunction
  */
 class WGSLNodeFunction extends NodeFunction {
+  dynamic inputsCode;
+  dynamic blockCode;
+  dynamic outputType;
 
+  WGSLNodeFunction(super.type, super.inputs, super.name, this.inputsCode, this.blockCode, this.outputType );
 	/**
 	 * Constructs a new WGSL node function.
 	 *
 	 * @param {string} source - The WGSL source.
 	 */
-	constructor( source ) {
+	factory WGSLNodeFunction.create(String source ) {
+    final Map prse = parse( source );
 
-		const { type, inputs, name, inputsCode, blockCode, outputType } = parse( source );
+		final type = prse['type'];
+    final inputs = prse['inputs'];
+    final name = prse['name'];
+    final inputsCode = prse['inputsCode'];
+    final blockCode = prse['blockCode'];
+    final outputType = prse['outputType'];
 
-		super( type, inputs, name );
-
-		this.inputsCode = inputsCode;
-		this.blockCode = blockCode;
-		this.outputType = outputType;
-
+    return WGSLNodeFunction(type, inputs, name, inputsCode, blockCode, outputType);
 	}
 
 	/**
@@ -174,14 +167,10 @@ class WGSLNodeFunction extends NodeFunction {
 	 * @param {string} [name=this.name] - The function's name.
 	 * @return {string} The shader code.
 	 */
-	getCode( name = this.name ) {
+	String getCode([String? name]) {
+    name = this.name;
+		final outputType = this.outputType != 'void' ? '-> ${this.outputType} ': '';
 
-		const outputType = this.outputType !== 'void' ? '-> ' + this.outputType : '';
-
-		return `fn ${ name } ( ${ this.inputsCode.trim() } ) ${ outputType }` + this.blockCode;
-
+		return 'fn ${ name } ( ${ this.inputsCode.trim() } ) ${ outputType } ${this.blockCode}';
 	}
-
 }
-
-export default WGSLNodeFunction;

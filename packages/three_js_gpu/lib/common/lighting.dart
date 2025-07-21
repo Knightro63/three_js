@@ -1,6 +1,7 @@
 
 
 import 'package:three_js_core/three_js_core.dart';
+import 'package:three_js_gpu/common/quad_mesh.dart';
 
 import './chain_map.dart';
 
@@ -18,10 +19,9 @@ const _chainKeys = [];
  * @augments ChainMap
  */
 class Lighting extends ChainMap {
-
 	Lighting():super();
 
-	LightsNode createNode(List<Light>? lights) {
+	LightsNode createNode([List<Light>? lights]) {
     lights ??= [];
 		return LightsNode().setLights( lights );
 	}
@@ -32,7 +32,7 @@ class Lighting extends ChainMap {
 		_chainKeys[ 0 ] = scene;
 		_chainKeys[ 1 ] = camera;
 
-		let node = get( _chainKeys );
+		dynamic node = get( _chainKeys );
 
 		if ( node == null ) {
 			node = createNode();

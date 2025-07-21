@@ -1,5 +1,9 @@
 
 
+import 'package:three_js_core/three_js_core.dart';
+import 'package:three_js_gpu/common/nodes/node_library.dart';
+import 'package:three_js_math/three_js_math.dart';
+
 /**
  * This version of a node library represents a basic version
  * just focusing on lights and tone mapping techniques.

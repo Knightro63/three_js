@@ -12,11 +12,6 @@ class Binding {
   String name;
   int visibility = 0;
 
-	/**
-	 * Constructs a new binding.
-	 *
-	 * @param {string} [name=''] - The binding's name.
-	 */
 	Binding([ this.name = '' ]);
 
 	void setVisibility(int visibility ) {
@@ -24,6 +19,7 @@ class Binding {
 	}
 
 	Binding clone() {
-		return Object.assign( new this.constructor(), this );
+    throw("Not implimented.");
+		//return Object.assign( new this.constructor(), this );
 	}
 }

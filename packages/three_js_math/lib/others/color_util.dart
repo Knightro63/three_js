@@ -106,6 +106,9 @@ class Color{
     storage[2] = b;
   }
   double get alpha => storage[3];
+  set alpha(double a){
+    storage[3] = a;
+  }
 
   int getHex() {
     return (red * 255).toInt() << 16 ^
@@ -407,6 +410,17 @@ class Color{
 		storage[2] = e[ 2 ] * r + e[ 5 ] * g + e[ 8 ] * b;
 
 		return this;
+	}
+
+	Color getRGB(Color target, [ColorSpace? colorSpace ] ) {
+    colorSpace ??= ColorManagement.workingColorSpace;
+		ColorManagement.fromWorkingColorSpace( Color.copy( this ), colorSpace );
+
+		target.red = _color.red;
+		target.green = _color.green;
+		target.blue = _color.blue;
+
+		return target;
 	}
 }
 

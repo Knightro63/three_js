@@ -77,25 +77,25 @@ class DRACOLoader extends Loader {
 		loader.setRequestHeader( this.requestHeader );
 		loader.setWithCredentials( this.withCredentials );
 
-		loader.load( url, ( buffer ) => {
+		loader.unknown( url, ( buffer ){
 			this.parse( buffer, onLoad, onError );
 		}, onProgress, onError );
 	}
 
 
-	parse( buffer, onLoad, onError = ()=>{} ) {
+	parse( buffer, onLoad, onError = (){} ) {
 		this.decodeDracoFile( buffer, onLoad, null, null, SRGBColorSpace, onError ).catch( onError );
 	}
 
-	decodeDracoFile( buffer, callback, attributeIDs, attributeTypes, vertexColorSpace = LinearSRGBColorSpace, onError = () => {} ) {
+	decodeDracoFile( buffer, callback, attributeIDs, attributeTypes, [String vertexColorSpace = LinearSRGBColorSpace, onError = (){} ]) {
 		final taskConfig = {
-			attributeIDs: attributeIDs ?? this.defaultAttributeIDs,
-			attributeTypes: attributeTypes ?? this.defaultAttributeTypes,
-			useUniqueIDs: !! attributeIDs,
-			vertexColorSpace: vertexColorSpace,
+			'attributeIDs': attributeIDs ?? this.defaultAttributeIDs,
+			'attributeTypes': attributeTypes ?? this.defaultAttributeTypes,
+			'useUniqueIDs': !! attributeIDs,
+			'vertexColorSpace': vertexColorSpace,
 		};
 
-		return this.decodeGeometry( buffer, taskConfig ).then( callback ).catch( onError );
+		return this.decodeGeometry( buffer, taskConfig ).then( callback ).catchError( onError );
 	}
 
 	decodeGeometry( buffer, taskConfig ) {
@@ -131,20 +131,13 @@ class DRACOLoader extends Loader {
 		// Obtain a worker and assign a task, and finalruct a geometry instance
 		// when the task completes.
 		final geometryPending = this._getWorker( taskID, taskCost )
-			.then( ( _worker ) => {
-
+			.then( ( _worker ){
 				worker = _worker;
 
-				return new Promise( ( resolve, reject ) => {
-
+				return new Promise( ( resolve, reject ){
 					worker._callbacks[ taskID ] = { resolve, reject };
-
-					worker.postMessage( { type: 'decode', id: taskID, taskConfig, buffer }, [ buffer ] );
-
-					// this.debug();
-
+					worker.postMessage( { 'type': 'decode', 'id': taskID, taskConfig, buffer }, [ buffer ] );
 				} );
-
 			} )
 			.then( ( message ) => this._createGeometry( message.geometry ) );
 
@@ -161,8 +154,8 @@ class DRACOLoader extends Loader {
 
 		// Cache the task result.
 		_taskCache.set( buffer, {
-			key: taskKey,
-			promise: geometryPending
+			'key': taskKey,
+			'promise': geometryPending
 		} );
 
 		return geometryPending;
@@ -206,9 +199,9 @@ class DRACOLoader extends Loader {
 		final _color = new Color();
 
 		for (int i = 0, il = attribute.count; i < il; i ++ ) {
-			_color.fromBufferAttribute( attribute, i );
-			ColorManagement.toWorkingColorSpace( _color, SRGBColorSpace );
-			attribute.setXYZ( i, _color.r, _color.g, _color.b );
+			_color.fromBuffer( attribute, i );
+			ColorManagement.toWorkingColorSpace( _color, ColorSpace.srgb );
+			attribute.setXYZ( i, _color.red, _color.green, _color.blue );
 		}
 	}
 
@@ -218,7 +211,7 @@ class DRACOLoader extends Loader {
 		loader.setResponseType( responseType );
 		loader.setWithCredentials( this.withCredentials );
 
-		return new Promise( ( resolve, reject ) => {
+		return new Promise( ( resolve, reject ){
 			loader.load( url, resolve, undefined, reject );
 		} );
 	}
@@ -266,7 +259,7 @@ class DRACOLoader extends Loader {
 
 	_getWorker( taskID, taskCost ) {
 
-		return this._initDecoder().then( () => {
+		return this._initDecoder().then( (){
 
 			if ( this.workerPool.length < this.workerLimit ) {
 
@@ -299,16 +292,13 @@ class DRACOLoader extends Loader {
 
 				};
 
-				this.workerPool.push( worker );
+				this.workerPool.add( worker );
 
-			} else {
-
-				this.workerPool.sort( function ( a, b ) {
-
+			} 
+      else {
+				this.workerPool.sort( ( a, b ) {
 					return a._taskLoad > b._taskLoad ? - 1 : 1;
-
-				} );
-
+				});
 			}
 
 			final worker = this.workerPool[ this.workerPool.length - 1 ];
@@ -329,37 +319,26 @@ class DRACOLoader extends Loader {
 	}
 
 	debug() {
-
-		console.log( 'Task load: ', this.workerPool.map( ( worker ) => worker._taskLoad ) );
-
+		console.verbose( 'Task load: ', this.workerPool.map( ( worker ) => worker._taskLoad ) );
 	}
 
-	dispose() {
-
-		for ( let i = 0; i < this.workerPool.length; ++ i ) {
-
+	void dispose() {
+		for (int i = 0; i < this.workerPool.length; ++ i ) {
 			this.workerPool[ i ].terminate();
-
 		}
 
 		this.workerPool.length = 0;
-
-		if ( this.workerSourceURL !== '' ) {
-
+		if ( this.workerSourceURL != '' ) {
 			URL.revokeObjectURL( this.workerSourceURL );
-
 		}
 
 		return this;
-
 	}
-
 }
 
 /* WEB WORKER */
 
-function DRACOWorker() {
-
+DRACOWorker() {
 	let decoderConfig;
 	let decoderPending;
 
@@ -502,25 +481,6 @@ function DRACOWorker() {
 
 	}
 
-	Map<String,dynamic> decodeAttribute( draco, decoder, dracoGeometry, attributeName, attributeType, attribute ) {
-		final numComponents = attribute.num_components();
-		final numPoints = dracoGeometry.num_points();
-		final numValues = numPoints * numComponents;
-		final byteLength = numValues * attributeType.BYTES_PER_ELEMENT;
-		final dataType = getDracoDataType( draco, attributeType );
-
-		final ptr = draco._malloc( byteLength );
-		decoder.GetAttributeDataArrayForAllPoints( dracoGeometry, attribute, dataType, byteLength, ptr );
-		final array = new attributeType( draco.HEAPF32.buffer, ptr, numValues ).slice();
-		draco._free( ptr );
-
-		return {
-			'name': attributeName,
-			'array': array,
-			'itemSize': numComponents
-		};
-	}
-
 	getDracoDataType( draco, attributeType ) {
 		switch ( attributeType ) {
 			case Float32Array: return draco.DT_FLOAT32;
@@ -531,5 +491,24 @@ function DRACOWorker() {
 			case Uint16Array: return draco.DT_UINT16;
 			case Uint32Array: return draco.DT_UINT32;
 		}
+	}
+
+	Map<String,dynamic> decodeAttribute( draco, decoder, dracoGeometry, attributeName, attributeType, attribute ) {
+		final numComponents = attribute.num_components();
+		final numPoints = dracoGeometry.num_points();
+		final numValues = numPoints * numComponents;
+		final byteLength = numValues * attributeType.BYTES_PER_ELEMENT;
+		final dataType = getDracoDataType( draco, attributeType );
+
+		final ptr = draco._malloc( byteLength );
+		decoder.GetAttributeDataArrayForAllPoints( dracoGeometry, attribute, dataType, byteLength, ptr );
+		final array = attributeType( draco.HEAPF32.buffer, ptr, numValues ).slice();
+		draco._free( ptr );
+
+		return {
+			'name': attributeName,
+			'array': array,
+			'itemSize': numComponents
+		};
 	}
 }

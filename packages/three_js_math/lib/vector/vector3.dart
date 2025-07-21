@@ -37,7 +37,7 @@ class Vector3 extends Vector{
     z = v.z;
   }
 
-  Vector3.fromJson(Map<String,num>? json) {
+  Vector3.fromJson([Map<String,num>? json]) {
     storage = Float32List(3);
     if (json != null) {
       List<num> data = json.values.toList();

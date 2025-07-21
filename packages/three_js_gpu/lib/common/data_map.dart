@@ -16,7 +16,7 @@ class DataMap {
 		return map;
 	}
 
-	Map? delete( object ) {
+	Map? delete(dynamic object ) {
 		Map? map;
 		if ( data.has( object ) ) {
 			map = data.get( object );

@@ -1,4 +1,4 @@
-import Sampler from '../Sampler.js';
+import "package:three_js_gpu/common/sampler.dart";
 
 /**
  * A special form of sampler binding type.
@@ -8,7 +8,7 @@ import Sampler from '../Sampler.js';
  * @augments Sampler
  */
 class NodeSampler extends Sampler {
-
+  UniformGroupNode groupNode;
 	/**
 	 * Constructs a new node-based sampler.
 	 *
@@ -16,35 +16,12 @@ class NodeSampler extends Sampler {
 	 * @param {TextureNode} textureNode - The texture node.
 	 * @param {UniformGroupNode} groupNode - The uniform group node.
 	 */
-	constructor( name, textureNode, groupNode ) {
-
-		super( name, textureNode ? textureNode.value : null );
-
-		/**
-		 * The texture node.
-		 *
-		 * @type {TextureNode}
-		 */
-		this.textureNode = textureNode;
-
-		/**
-		 * The uniform group node.
-		 *
-		 * @type {UniformGroupNode}
-		 */
-		this.groupNode = groupNode;
-
-	}
+	NodeSampler(String name, TextureNode? textureNode, this.groupNode ):super( name, textureNode != null? textureNode.value : null );
 
 	/**
 	 * Updates the texture value of this sampler.
 	 */
-	update() {
-
+	void update() {
 		this.texture = this.textureNode.value;
-
 	}
-
 }
-
-export default NodeSampler;

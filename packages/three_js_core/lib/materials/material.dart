@@ -109,6 +109,8 @@ class Material with EventDispatcher {
   dynamic roughnessNode;
   dynamic normalNode;
 
+  bool isShadowPassMaterial = false;
+
   int id = materialId++;
   String uuid = MathUtils.generateUUID();
   String name = "";

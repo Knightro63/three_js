@@ -40,7 +40,7 @@ class Vector4 extends Vector{
     this.w = w;
   }
 
-  Vector4.fromJson(Map<String,num>? json) {
+  Vector4.fromJson([Map<String,num>? json]) {
     storage = Float32List(4);
     if (json != null) {
       List<num> data = json.values.toList();

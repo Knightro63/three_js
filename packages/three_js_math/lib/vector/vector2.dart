@@ -17,7 +17,7 @@ class Vector2 extends Vector{
     this.y = y ?? 0;
   }
 
-  Vector2.fromJson(Map<String,num>? json) {
+  Vector2.fromJson([Map<String,num>? json]) {
     if (json != null) {
       List<num> data = json.values.toList();
       x = data[0].toDouble();

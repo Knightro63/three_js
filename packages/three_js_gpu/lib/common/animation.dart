@@ -1,4 +1,6 @@
 
+import 'package:three_js_gpu/common/info.dart';
+
 /**
  * This module manages the internal animation loop of the renderer.
  *

@@ -1,4 +1,6 @@
-import { Color } from '../../math/Color.js';
+
+
+import 'package:three_js_core/three_js_core.dart';
 
 /**
  * Saves the state of the given renderer and stores it into the given state object.
@@ -10,7 +12,7 @@ import { Color } from '../../math/Color.js';
  * @param {Object} [state={}] - The state.
  * @return {Object} The state.
  */
-export function saveRendererState( renderer, state = {} ) {
+saveRendererState( renderer, state = {} ) {
 
 	state.toneMapping = renderer.toneMapping;
 	state.toneMappingExposure = renderer.toneMappingExposure;
@@ -41,7 +43,7 @@ export function saveRendererState( renderer, state = {} ) {
  * @param {Object} [state={}] - The state.
  * @return {Object} The state.
  */
-export function resetRendererState( renderer, state ) {
+resetRendererState( renderer, state ) {
 
 	state = saveRendererState( renderer, state );
 
@@ -61,7 +63,7 @@ export function resetRendererState( renderer, state ) {
  * @param {Renderer} renderer - The renderer.
  * @param {Object} state - The state to restore.
  */
-export function restoreRendererState( renderer, state ) {
+restoreRendererState( renderer, state ) {
 
 	renderer.toneMapping = state.toneMapping;
 	renderer.toneMappingExposure = state.toneMappingExposure;
@@ -86,7 +88,7 @@ export function restoreRendererState( renderer, state ) {
  * @param {Object} [state={}] - The state.
  * @return {Object} The state.
  */
-export function saveSceneState( scene, state = {} ) {
+saveSceneState( scene, state = {} ) {
 
 	state.background = scene.background;
 	state.backgroundNode = scene.backgroundNode;
@@ -107,8 +109,7 @@ export function saveSceneState( scene, state = {} ) {
  * @param {Object} [state={}] - The state.
  * @return {Object} The state.
  */
-export function resetSceneState( scene, state ) {
-
+resetSceneState(Scene scene, state ) {
 	state = saveSceneState( scene, state );
 
 	scene.background = null;
@@ -116,7 +117,6 @@ export function resetSceneState( scene, state ) {
 	scene.overrideMaterial = null;
 
 	return state;
-
 }
 
 /**
@@ -126,12 +126,10 @@ export function resetSceneState( scene, state ) {
  * @param {Scene} scene - The scene.
  * @param {Object} state - The state to restore.
  */
-export function restoreSceneState( scene, state ) {
-
+void restoreSceneState(Scene scene, state ) {
 	scene.background = state.background;
 	scene.backgroundNode = state.backgroundNode;
 	scene.overrideMaterial = state.overrideMaterial;
-
 }
 
 /**
@@ -145,13 +143,11 @@ export function restoreSceneState( scene, state ) {
  * @param {Object} [state={}] - The state.
  * @return {Object} The state.
  */
-export function saveRendererAndSceneState( renderer, scene, state = {} ) {
-
+saveRendererAndSceneState(Renderer renderer, Scene scene, state = {} ) {
 	state = saveRendererState( renderer, state );
 	state = saveSceneState( scene, state );
 
 	return state;
-
 }
 
 /**
@@ -166,13 +162,10 @@ export function saveRendererAndSceneState( renderer, scene, state = {} ) {
  * @param {Object} [state={}] - The state.
  * @return {Object} The state.
  */
-export function resetRendererAndSceneState( renderer, scene, state ) {
-
+resetRendererAndSceneState( renderer, scene, state ) {
 	state = resetRendererState( renderer, state );
 	state = resetSceneState( scene, state );
-
 	return state;
-
 }
 
 /**
@@ -183,9 +176,7 @@ export function resetRendererAndSceneState( renderer, scene, state ) {
  * @param {Scene} scene - The scene.
  * @param {Object} state - The state to restore.
  */
-export function restoreRendererAndSceneState( renderer, scene, state ) {
-
+void restoreRendererAndSceneState( renderer, scene, state ) {
 	restoreRendererState( renderer, state );
 	restoreSceneState( scene, state );
-
 }
