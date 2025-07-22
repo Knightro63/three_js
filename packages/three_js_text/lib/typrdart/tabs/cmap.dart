@@ -1,4 +1,6 @@
 import 'dart:typed_data';
+import 'package:three_js_core/three_js_core.dart';
+
 import '../bin.dart';
 
 class Typr_CMAP {
@@ -44,8 +46,7 @@ class Typr_CMAP {
         else if (format == 12)
           subt = parse12(data, noffset);
         else
-          print(
-              "unknown format: ${format} platformID: ${platformID} encodingID: ${encodingID} noffset: ${noffset}");
+          console.warning("unknown format: ${format} platformID: ${platformID} encodingID: ${encodingID} noffset: ${noffset}");
         obj["tables"].add(subt);
       }
 

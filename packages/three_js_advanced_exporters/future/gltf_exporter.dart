@@ -43,51 +43,51 @@ class GLTFExporter {
 
 	GLTFExporter() {
 		this.register(( writer ) {
-			return new GLTFLightExtension( writer );
+			return GLTFLightExtension( writer );
 		} );
 
 		this.register(( writer ) {
-			return new GLTFMaterialsUnlitExtension( writer );
+			return GLTFMaterialsUnlitExtension( writer );
 		} );
 
 		this.register(( writer ) {
-			return new GLTFMaterialsTransmissionExtension( writer );
+			return GLTFMaterialsTransmissionExtension( writer );
 		} );
 
 		this.register(( writer ) {
-			return new GLTFMaterialsVolumeExtension( writer );
+			return GLTFMaterialsVolumeExtension( writer );
 		} );
 
 		this.register(( writer ) {
-			return new GLTFMaterialsIorExtension( writer );
+			return GLTFMaterialsIorExtension( writer );
 		} );
 
 		this.register(( writer ) {
-			return new GLTFMaterialsSpecularExtension( writer );
+			return GLTFMaterialsSpecularExtension( writer );
 		} );
 
 		this.register(( writer ) {
-			return new GLTFMaterialsClearcoatExtension( writer );
+			return GLTFMaterialsClearcoatExtension( writer );
 		} );
 
 		this.register(( writer ) {
-			return new GLTFMaterialsIridescenceExtension( writer );
+			return GLTFMaterialsIridescenceExtension( writer );
 		} );
 
 		this.register(( writer ) {
-			return new GLTFMaterialsSheenExtension( writer );
+			return GLTFMaterialsSheenExtension( writer );
 		} );
 
 		this.register(( writer ) {
-			return new GLTFMaterialsAnisotropyExtension( writer );
+			return GLTFMaterialsAnisotropyExtension( writer );
 		} );
 
 		this.register(( writer ) {
-			return new GLTFMaterialsEmissiveStrengthExtension( writer );
+			return GLTFMaterialsEmissiveStrengthExtension( writer );
 		} );
 
 		this.register(( writer ) {
-			return new GLTFMeshGpuInstancing( writer );
+			return GLTFMeshGpuInstancing( writer );
 		} );
 	}
 
@@ -113,7 +113,7 @@ class GLTFExporter {
 	 * @param  {Object} options options
 	 */
 	Future parse( input, onDone, onError, options ) async{
-		final writer = new GLTFWriter();
+		final writer = GLTFWriter();
 		final plugins = [];
 
 		for (int i = 0, il = this.pluginCallbacks.length; i < il; i ++ ) {
@@ -189,7 +189,7 @@ final Map<String,String> PATH_PROPERTIES = {
 	'morphTargetInfluences': 'weights'
 };
 
-final DEFAULT_SPECULAR_COLOR = new Color();
+final DEFAULT_SPECULAR_COLOR = Color();
 
 // GLB finalants
 // https://github.com/KhronosGroup/glTF/blob/master/specification/2.0/README.md#glb-file-format-specification
@@ -224,7 +224,7 @@ equalArray( array1, array2 ) {
  * @return {ArrayBuffer}
  */
 ByteBuffer stringToArrayBuffer(String text ) {
-	return Uint8List.fromList(text.codeUnits).buffer;//new TextEncoder().encode( text ).buffer;
+	return Uint8List.fromList(text.codeUnits).buffer;//TextEncoder().encode( text ).buffer;
 }
 
 /**
@@ -247,8 +247,8 @@ isIdentityMatrix( matrix ) {
 Map<String,List<double>> getMinMax(BufferAttribute attribute, int start, int count ) {
 
 	final Map<String,List<double>> output = {
-		'min': List.filled(attribute.itemSize, double.infinity),// new Array( attribute.itemSize ).fill( Number.POSITIVE_INFINITY ),
-		'max': List.filled(attribute.itemSize, -double.infinity),//new Array( attribute.itemSize ).fill( Number.NEGATIVE_INFINITY )
+		'min': List.filled(attribute.itemSize, double.infinity),// Array( attribute.itemSize ).fill( Number.POSITIVE_INFINITY ),
+		'max': List.filled(attribute.itemSize, -double.infinity),//Array( attribute.itemSize ).fill( Number.NEGATIVE_INFINITY )
 	};
 
 	for (int i = start; i < start + count; i ++ ) {
@@ -284,7 +284,7 @@ Map<String,List<double>> getMinMax(BufferAttribute attribute, int start, int cou
  * https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#data-alignment
  *
  * @param {Integer} bufferSize The size the original buffer.
- * @returns {Integer} new buffer size with required padding.
+ * @returns {Integer} buffer size with required padding.
  *
  */
 int getPaddedBufferSize(num bufferSize ) {
@@ -296,15 +296,15 @@ int getPaddedBufferSize(num bufferSize ) {
  *
  * @param {ArrayBuffer} arrayBuffer Buffer to pad
  * @param {Integer} paddingByte (Optional)
- * @returns {ArrayBuffer} The same buffer if it's already aligned to 4-byte boundary or a new buffer
+ * @returns {ArrayBuffer} The same buffer if it's already aligned to 4-byte boundary or a buffer
  */
 getPaddedArrayBuffer( arrayBuffer,[int paddingByte = 0 ]) {
 	final paddedLength = getPaddedBufferSize( arrayBuffer.byteLength );
 
 	if ( paddedLength != arrayBuffer.byteLength ) {
 
-		final array = new Uint8List( paddedLength );
-		array.set( new Uint8List( arrayBuffer ) );
+		final array = Uint8List( paddedLength );
+		array.set( Uint8List( arrayBuffer ) );
 
 		if ( paddingByte != 0 ) {
 			for (int i = arrayBuffer.byteLength; i < paddedLength; i ++ ) {
@@ -319,14 +319,14 @@ getPaddedArrayBuffer( arrayBuffer,[int paddingByte = 0 ]) {
 }
 getCanvas() {
 	if ( typeof document == 'null' && typeof OffscreenCanvas != 'null' ) {
-		return new OffscreenCanvas( 1, 1 );
+		return OffscreenCanvas( 1, 1 );
 	}
 
 	return document.createElement( 'canvas' );
 }
 getToBlobPromise( canvas, mimeType ) {
 	if ( canvas.toBlob != null ) {
-		return new Promise( ( resolve ) => canvas.toBlob( resolve, mimeType ) );
+		return Promise( ( resolve ) => canvas.toBlob( resolve, mimeType ) );
 	}
 
 	var quality;
@@ -356,13 +356,13 @@ class GLTFWriter {
   List buffers = [];
 
   int byteOffset = 0;
-  Map nodeMap = new Map();
+  Map nodeMap = Map();
   List skins = [];
 
   Map extensionsUsed = {};
   Map extensionsRequired = {};
 
-  Map uids = new Map();
+  Map uids = Map();
   int uid = 0;
 
   Map<String,dynamic> json = {
@@ -373,12 +373,12 @@ class GLTFWriter {
   };
 
   Map<String,Map> cache = {
-    'meshes': new Map(),
-    'attributes': new Map(),
-    'attributesNormalized': new Map(),
-    'materials': new Map(),
-    'textures': new Map(),
-    'images': new Map()
+    'meshes': Map(),
+    'attributes': Map(),
+    'attributesNormalized': Map(),
+    'materials': Map(),
+    'textures': Map(),
+    'images': Map()
   };
 
 	setPlugins( plugins ) {
@@ -422,41 +422,41 @@ class GLTFWriter {
 		final extensionsRequired = writer.extensionsRequired;
 
 		// Merge buffers.
-		final blob = new Blob( buffers, { type: 'application/octet-stream' } );
+		final blob = Blob( buffers, { 'type': 'application/octet-stream' } );
 
 		// Declare extensions.
-		final extensionsUsedList = Object.keys( extensionsUsed );
-		final extensionsRequiredList = Object.keys( extensionsRequired );
+		final extensionsUsedList = extensionsUsed.keys;
+		final extensionsRequiredList = extensionsRequired.keys;
 
-		if ( extensionsUsedList.length > 0 ) json.extensionsUsed = extensionsUsedList;
-		if ( extensionsRequiredList.length > 0 ) json.extensionsRequired = extensionsRequiredList;
+		if ( extensionsUsedList.length > 0 ) json['extensionsUsed'] = extensionsUsedList;
+		if ( extensionsRequiredList.length > 0 ) json['extensionsRequired'] = extensionsRequiredList;
 
 		// Update bytelength of the single buffer.
-		if ( json.buffers && json.buffers.length > 0 ) json.buffers[ 0 ].byteLength = blob.size;
+		if ( json['buffers'] && json['buffers'].length > 0 ) json['buffers'][ 0 ].byteLength = blob.size;
 
-		if ( options.binary == true ) {
+		if ( options['binary'] == true ) {
 
 			// https://github.com/KhronosGroup/glTF/blob/master/specification/2.0/README.md#glb-file-format-specification
 
-			final reader = new FileReader();
+			final reader = FileReader();
 			reader.readAsArrayBuffer( blob );
 			reader.onloadend =() {
 
 				// Binary chunk.
 				final binaryChunk = getPaddedArrayBuffer( reader.result );
-				final binaryChunkPrefix = new DataView( new ArrayBuffer( GLB_CHUNK_PREFIX_BYTES ) );
+				final binaryChunkPrefix = DataView( ArrayBuffer( GLB_CHUNK_PREFIX_BYTES ) );
 				binaryChunkPrefix.setUint32( 0, binaryChunk.byteLength, true );
 				binaryChunkPrefix.setUint32( 4, GLB_CHUNK_TYPE_BIN, true );
 
 				// JSON chunk.
 				final jsonChunk = getPaddedArrayBuffer( stringToArrayBuffer( JSON.stringify( json ) ), 0x20 );
-				final jsonChunkPrefix = new DataView( new ArrayBuffer( GLB_CHUNK_PREFIX_BYTES ) );
+				final jsonChunkPrefix = DataView( ArrayBuffer( GLB_CHUNK_PREFIX_BYTES ) );
 				jsonChunkPrefix.setUint32( 0, jsonChunk.byteLength, true );
 				jsonChunkPrefix.setUint32( 4, GLB_CHUNK_TYPE_JSON, true );
 
 				// GLB header.
-				final header = new ArrayBuffer( GLB_HEADER_BYTES );
-				final headerView = new DataView( header );
+				final header = ArrayBuffer( GLB_HEADER_BYTES );
+				final headerView = DataView( header );
 				headerView.setUint32( 0, GLB_HEADER_MAGIC, true );
 				headerView.setUint32( 4, GLB_VERSION, true );
 				final totalByteLength = GLB_HEADER_BYTES
@@ -464,7 +464,7 @@ class GLTFWriter {
 					+ binaryChunkPrefix.byteLength + binaryChunk.byteLength;
 				headerView.setUint32( 8, totalByteLength, true );
 
-				final glbBlob = new Blob( [
+				final glbBlob = Blob( [
 					header,
 					jsonChunkPrefix,
 					jsonChunk,
@@ -472,7 +472,7 @@ class GLTFWriter {
 					binaryChunk
 				], { type: 'application/octet-stream' } );
 
-				final glbReader = new FileReader();
+				final glbReader = FileReader();
 				glbReader.readAsArrayBuffer( glbBlob );
 				glbReader.onloadend =() {
 					onDone( glbReader.result );
@@ -481,7 +481,7 @@ class GLTFWriter {
 		} 
     else {
 			if ( json.buffers && json.buffers.length > 0 ) {
-				final reader = new FileReader();
+				final reader = FileReader();
 				reader.readAsDataURL( blob );
 				reader.onloadend =() {
 					final base64data = reader.result;
@@ -535,7 +535,7 @@ class GLTFWriter {
 	 */
 	getUID( attribute, [bool isRelativeCopy = false ]) {
 		if ( this.uids.containsKey( attribute ) == false ) {
-			final uids = new Map();
+			final uids = Map();
 
 			uids[this.uid ++] = true;//.set( true, this.uid ++ );
 			uids[this.uid ++] = false;//.set( false, this.uid ++ );
@@ -559,7 +559,7 @@ class GLTFWriter {
 
 		if ( cache['attributesNormalized']?.containsValue( normal ) ?? false) return false;
 
-		final v = new Vector3();
+		final v = Vector3();
 
 		for (int i = 0, il = normal.count; i < il; i ++ ) {
 			// 0.0005 is from glTF-validator
@@ -582,7 +582,7 @@ class GLTFWriter {
 		if ( cache['attributesNormalized']?.containsValue( normal ) ?? false)	return cache['attributesNormalized']?[normal];//CHECK
 
 		final BufferAttribute attribute = normal.clone();
-		final v = new Vector3();
+		final v = Vector3();
 
 		for (int i = 0, il = attribute.count; i < il; i ++ ) {
 			v.fromBuffer( attribute, i );
@@ -707,7 +707,7 @@ class GLTFWriter {
 		final reference = metalnessMap ?? roughnessMap;
 		final Texture? texture = reference?.clone();
 
-		texture?.source = new Source( canvas );
+		texture?.source = Source( canvas );
 		texture?.colorSpace = NoColorSpace;
 		texture?.channel =  metalnessMap?.channel ?? roughnessMap?.channel ?? 0;
 
@@ -749,7 +749,7 @@ class GLTFWriter {
 
 		if (json['bufferViews'] == null) json['bufferViews'] = [];
 
-		// Create a new dataview and dump the attribute's array into it
+		// Create a dataview and dump the attribute's array into it
 
 		int componentSize;
 
@@ -847,7 +847,7 @@ class GLTFWriter {
 
 		if (json['bufferViews'] == null) json['bufferViews'] = [];
 
-    final reader = new FileReader();
+    final reader = FileReader();
     reader.readAsArrayBuffer( blob );
     reader.onloadend = () {
       final buffer = getPaddedArrayBuffer( reader.result );
@@ -994,7 +994,7 @@ class GLTFWriter {
 
 				}
 
-				final data = new Uint8ClampedArray( image.height * image.width * 4 );
+				final data = Uint8ClampedArray( image.height * image.width * 4 );
 
 				for (int i = 0; i < data.length; i += 4 ) {
 
@@ -1005,7 +1005,7 @@ class GLTFWriter {
 
 				}
 
-				ctx.putImageData( new ImageData( data, image.width, image.height ), 0, 0 );
+				ctx.putImageData( ImageData( data, image.width, image.height ), 0, 0 );
 
 			} else {
 
@@ -1038,7 +1038,7 @@ class GLTFWriter {
 					pending.add(
 
 						getToBlobPromise( canvas, mimeType )
-							.then( blob => new FileReader().readAsDataURL( blob ) )
+							.then( blob => FileReader().readAsDataURL( blob ) )
 							.then( dataURL => {
 
 								imageDef.uri = dataURL;
@@ -1057,7 +1057,7 @@ class GLTFWriter {
 
 		} else {
 
-			throw new Error( 'THREE.GLTFExporter: No valid image data found. Unable to process texture.' );
+			throw Error( 'THREE.GLTFExporter: No valid image data found. Unable to process texture.' );
 
 		}
 
@@ -1098,7 +1098,7 @@ class GLTFWriter {
 
 		if (json['textures'] == null) json['textures'] = [];
 
-		// make non-readable textures (e.g. CompressedTexture) readable by blitting them into a new texture
+		// make non-readable textures (e.g. CompressedTexture) readable by blitting them into a texture
 		if ( map is CompressedTexture ) {
 			map = decompress( map, options['maxTextureSize'] );
 		}
@@ -1132,7 +1132,7 @@ class GLTFWriter {
 		final cache = this.cache;
 		final json = this.json;
 
-		if ( cache['materials'].has( material ) ) return cache.materials.get( material );
+		if ( cache['materials']?.containsKey( material ) == true) return cache['materials']?[material];
 
 		if ( material is ShaderMaterial ) {
 			console.warning( 'GLTFExporter: THREE.ShaderMaterial not supported.' );
@@ -1344,11 +1344,11 @@ class GLTFWriter {
 
 			// Prefix all geometry attributes except the ones specifically
 			// listed in the spec; non-spec attributes are considered custom.
-			final validVertexAttributes = /^(POSITION|NORMAL|TANGENT|TEXCOORD_\d+|COLOR_\d+|JOINTS_\d+|WEIGHTS_\d+)$/;
+			final validVertexAttributes = '/^(POSITION|NORMAL|TANGENT|TEXCOORD_\d+|COLOR_\d+|JOINTS_\d+|WEIGHTS_\d+)$/';
 
 			if ( ! validVertexAttributes.test( attributeName ) ) attributeName = '_$attributeName';
 
-			if ( cache['attributes'].containsKey( this.getUID( attribute ) ) ) {
+			if ( cache['attributes']?.containsKey( this.getUID( attribute ) ) == true) {
 
 				attributes[ attributeName ] = cache['attributes']?[this.getUID( attribute )];
 				continue;
@@ -1364,7 +1364,7 @@ class GLTFWriter {
 				! ( array is Uint8Array ) ) {
 
 				console.warning( 'GLTFExporter: Attribute "skinIndex" converted to type UNSIGNED_SHORT.' );
-				modifiedAttribute = Uint16BufferAttribute( new Uint16Array( array ), attribute.itemSize, attribute.normalized );
+				modifiedAttribute = Uint16BufferAttribute( Uint16Array( array ), attribute.itemSize, attribute.normalized );
 
 			}
 
@@ -1667,8 +1667,8 @@ class GLTFWriter {
 			}
 
 			samplers.add( {
-				'input': this.processAccessor( new BufferAttribute( track.times, inputItemSize ) ),
-				'output': this.processAccessor( new BufferAttribute( track.values, outputItemSize ) ),
+				'input': this.processAccessor( BufferAttribute( track.times, inputItemSize ) ),
+				'output': this.processAccessor( BufferAttribute( track.values, outputItemSize ) ),
 				'interpolation': interpolation
 			} );
 
@@ -1710,8 +1710,8 @@ class GLTFWriter {
 		if ( rootJoint == null ) return null;
 
 		final joints = [];
-		final inverseBindMatrices = new Float32Array( skeleton.bones.length * 16 );
-		final temporaryBoneInverse = new Matrix4();
+		final inverseBindMatrices = Float32Array( skeleton.bones.length * 16 );
+		final temporaryBoneInverse = Matrix4();
 
 		for (int i = 0; i < skeleton.bones.length; ++ i ) {
 			joints.add( nodeMap[skeleton.bones[ i ]]);
@@ -1850,7 +1850,7 @@ class GLTFWriter {
 	 * @param  {Array} objects List of objects to process
 	 */
 	void processObjects(List objects ) {
-		final scene = new Scene();
+		final scene = Scene();
 		scene.name = 'AuxScene';
 
 		for (int i = 0; i < objects.length; i ++ ) {
@@ -2396,14 +2396,14 @@ class GLTFMeshGpuInstancing extends GLTFExtension{
 		final writer = this.writer;
 		final mesh = object;
 
-		final translationAttr = new Float32Array( mesh.count * 3 );
-		final rotationAttr = new Float32Array( mesh.count * 4 );
-		final scaleAttr = new Float32Array( mesh.count * 3 );
+		final translationAttr = Float32Array( mesh.count * 3 );
+		final rotationAttr = Float32Array( mesh.count * 4 );
+		final scaleAttr = Float32Array( mesh.count * 3 );
 
-		final matrix = new Matrix4();
-		final position = new Vector3();
-		final quaternion = new Quaternion();
-		final scale = new Vector3();
+		final matrix = Matrix4();
+		final position = Vector3();
+		final quaternion = Quaternion();
+		final scale = Vector3();
 
 		for (int i = 0; i < (mesh.count ?? 0); i ++ ) {
 			mesh.getMatrixAt( i, matrix );

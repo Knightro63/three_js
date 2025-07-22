@@ -265,7 +265,7 @@ class Projector{
     }
     }
     catch(e){
-      print('projector.dart -> pushLine -> Exception: $e');
+      console.warning('projector.dart -> pushLine -> Exception: $e');
     }
   }
 
@@ -529,7 +529,7 @@ class Projector{
     }
     }
     catch(e){
-      print('projector.dart -> projectScene pt 3 -> Exception: $e');
+      console.warning('projector.dart -> projectScene pt 3 -> Exception: $e');
     }
 
     return _renderData;
@@ -595,7 +595,7 @@ class Projector{
     return _linePool[ _lineCount ++ ];
     }
     catch(e){
-      print('projector.dart -> getNextLineInPool -> Exception:$e');
+      console.warning('projector.dart -> getNextLineInPool -> Exception:$e');
       return null;
     }
   }
@@ -670,7 +670,7 @@ class Projector{
     }
     }
     catch(e){
-      print('projector.dart -> pushLine -> Exception: $e');
+      console.warning('projector.dart -> pushLine -> Exception: $e');
       return false;
     }
   }

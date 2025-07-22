@@ -11,7 +11,7 @@ class USDZOptions{
   bool includeAnchoringProperties;
   bool quickLookCompatible;
   int maxTextureSize;
-  late Map<String,dynamic> ar;
+  Map<String,dynamic> ar = {};
 
   USDZOptions({
     this.includeAnchoringProperties = true,
@@ -83,16 +83,17 @@ class _USDZExporter {
 
 					final geometryFileName = 'geometries/Geometry_${geometry?.id}.usda';
 
-					if(!files.containsKey(geometryFileName) ){//! ( geometryFileName in files ) ) {
-						final meshObject = buildMeshObject( geometry! );
+					if(!files.containsKey(geometryFileName) && geometry != null){
+						final meshObject = buildMeshObject( geometry );
 						files[ geometryFileName ] = buildUSDFileAsString( meshObject );
 					}
 
-					if (!materials.containsKey( material.uuid) ){//! ( material.uuid in materials ) ) {
+					if (!materials.containsKey( material.uuid) ){
 						materials[ material.uuid ] = material;
 					}
-
-					output += buildXform( object, geometry!, material );
+          if(geometry != null){
+					  output += buildXform( object, geometry, material );
+          }
 
 				} 
         else {
@@ -149,7 +150,7 @@ class _USDZExporter {
 			offset = file?.length ?? 0;
 		}
 
-		return zipSync(files, { 'level': 0 } );
+		return USDZip().zip(files, { 'level': 0 } );
 	}
 
 
@@ -313,7 +314,7 @@ ${ buildPrimvars( attributes ) }
 
     if ( index != null ) {
       for ( int i = 0; i < index.count; i ++ ) {
-        array.add( index.getX( i )!.toInt() );
+        array.add( index.getX( i )?.toInt() );
       }
     }
     else {
@@ -339,7 +340,7 @@ ${ buildPrimvars( attributes ) }
       final y = attribute.getY( i );
       final z = attribute.getZ( i );
 
-      array.add( '(${ x!.toStringAsFixed( PRECISION ) }, ${ y!.toStringAsFixed( PRECISION ) }, ${ z!.toStringAsFixed( PRECISION ) })' );
+      array.add( '(${ x?.toStringAsFixed( PRECISION ) }, ${ y?.toStringAsFixed( PRECISION ) }, ${ z?.toStringAsFixed( PRECISION ) })' );
     }
 
     return array.join( ', ' );
@@ -352,7 +353,7 @@ ${ buildPrimvars( attributes ) }
       final x = attribute.getX( i );
       final y = attribute.getY( i );
 
-      array.add( '(${ x!.toStringAsFixed( PRECISION ) }, ${ (1 - y!).toStringAsFixed( PRECISION ) })' );
+      array.add( '(${ x?.toStringAsFixed( PRECISION ) }, ${ (1 - (y ?? 0)).toStringAsFixed( PRECISION ) })' );
     }
 
     return array.join( ', ' );
@@ -399,7 +400,7 @@ ${ buildPrimvars( attributes ) }
 
     for ( final uuid in materials.keys ) {
       final material = materials[ uuid ];
-      array.add( buildMaterial( material!, textures, quickLookCompatible ) );
+      if(material != null) array.add( buildMaterial( material, textures, quickLookCompatible ) );
     }
 
     return '''
@@ -516,25 +517,25 @@ ${ array.join( '' ) }
     }
 
     if ( material.emissiveMap != null ) {
-      inputs.add( '${ pad }color3f inputs:emissiveColor.connect = </Materials/Material_${ material.id }/Texture_${ material.emissiveMap!.id }_emissive.outputs:rgb>' );
-      samplers.add( buildTexture( material.emissiveMap!, 'emissive', new Color( material.emissive!.red * material.emissiveIntensity, material.emissive!.green * material.emissiveIntensity, material.emissive!.blue * material.emissiveIntensity ) ) );
+      inputs.add( '${ pad }color3f inputs:emissiveColor.connect = </Materials/Material_${ material.id }/Texture_${ material.emissiveMap?.id }_emissive.outputs:rgb>' );
+      samplers.add( buildTexture( material.emissiveMap!, 'emissive', new Color( (material.emissive?.red ?? 0) * material.emissiveIntensity, (material.emissive?.green ?? 0) * material.emissiveIntensity, (material.emissive?.blue ?? 0) * material.emissiveIntensity ) ) );
     }
     else if ( (material.emissive?.getHex() ?? 0) > 0 ) {
       inputs.add( '${ pad }color3f inputs:emissiveColor = ${ buildColor( material.emissive! ) }''' );
     }
 
     if ( material.normalMap != null ) {
-      inputs.add( '${ pad }normal3f inputs:normal.connect = </Materials/Material_${ material.id }/Texture_${ material.normalMap!.id }_normal.outputs:rgb>' );
+      inputs.add( '${ pad }normal3f inputs:normal.connect = </Materials/Material_${ material.id }/Texture_${ material.normalMap?.id }_normal.outputs:rgb>' );
       samplers.add( buildTexture( material.normalMap!, 'normal' ) );
     }
 
     if ( material.aoMap != null ) {
-      inputs.add( '${ pad }float inputs:occlusion.connect = </Materials/Material_${ material.id }/Texture_${ material.aoMap!.id }_occlusion.outputs:r>' );
-      samplers.add( buildTexture( material.aoMap!, 'occlusion', new Color( material.aoMapIntensity!, material.aoMapIntensity!, material.aoMapIntensity! ) ) );
+      inputs.add( '${ pad }float inputs:occlusion.connect = </Materials/Material_${ material.id }/Texture_${ material.aoMap?.id }_occlusion.outputs:r>' );
+      samplers.add( buildTexture( material.aoMap!, 'occlusion', new Color( material.aoMapIntensity ?? 0, material.aoMapIntensity ?? 0, material.aoMapIntensity ?? 0 ) ) );
     }
 
     if ( material.roughnessMap != null ) {
-      inputs.add( '${ pad }float inputs:roughness.connect = </Materials/Material_${ material.id }/Texture_${ material.roughnessMap!.id }_roughness.outputs:g>' );
+      inputs.add( '${ pad }float inputs:roughness.connect = </Materials/Material_${ material.id }/Texture_${ material.roughnessMap?.id }_roughness.outputs:g>' );
       samplers.add( buildTexture( material.roughnessMap!, 'roughness', new Color( material.roughness, material.roughness, material.roughness ) ) );
     } 
     else {
@@ -542,7 +543,7 @@ ${ array.join( '' ) }
     }
 
     if ( material.metalnessMap != null ) {
-      inputs.add( '${ pad }float inputs:metallic.connect = </Materials/Material_${ material.id }/Texture_${ material.metalnessMap!.id }_metallic.outputs:b>' );
+      inputs.add( '${ pad }float inputs:metallic.connect = </Materials/Material_${ material.id }/Texture_${ material.metalnessMap?.id }_metallic.outputs:b>' );
       samplers.add( buildTexture( material.metalnessMap!, 'metallic', new Color( material.metalness, material.metalness, material.metalness ) ) );
     } 
     else {
@@ -550,7 +551,7 @@ ${ array.join( '' ) }
     }
 
     if ( material.alphaMap != null ) {
-      inputs.add( '${pad}float inputs:opacity.connect = </Materials/Material_${material.id}/Texture_${material.alphaMap!.id}_opacity.outputs:r>' );
+      inputs.add( '${pad}float inputs:opacity.connect = </Materials/Material_${material.id}/Texture_${material.alphaMap?.id}_opacity.outputs:r>' );
       inputs.add( '${pad}float inputs:opacityThreshold = 0.0001' );
       samplers.add( buildTexture( material.alphaMap!, 'opacity' ) );
     } 
@@ -560,7 +561,7 @@ ${ array.join( '' ) }
 
     if ( material is MeshPhysicalMaterial ) {
       if ( material.clearcoatMap != null ) {
-        inputs.add( '${pad}float inputs:clearcoat.connect = </Materials/Material_${material.id}/Texture_${material.clearcoatMap!.id}_clearcoat.outputs:r>' );
+        inputs.add( '${pad}float inputs:clearcoat.connect = </Materials/Material_${material.id}/Texture_${material.clearcoatMap?.id}_clearcoat.outputs:r>' );
         samplers.add( buildTexture( material.clearcoatMap!, 'clearcoat', new Color( material.clearcoat, material.clearcoat, material.clearcoat ) ) );
       } 
       else {
@@ -568,8 +569,8 @@ ${ array.join( '' ) }
       }
 
       if ( material.clearcoatRoughnessMap != null ) {
-        inputs.add( '${pad}float inputs:clearcoatRoughness.connect = </Materials/Material_${material.id}/Texture_${material.clearcoatRoughnessMap!.id}_clearcoatRoughness.outputs:g>' );
-        samplers.add( buildTexture( material.clearcoatRoughnessMap!, 'clearcoatRoughness', new Color( material.clearcoatRoughness!, material.clearcoatRoughness!, material.clearcoatRoughness! ) ) );
+        inputs.add( '${pad}float inputs:clearcoatRoughness.connect = </Materials/Material_${material.id}/Texture_${material.clearcoatRoughnessMap?.id}_clearcoatRoughness.outputs:g>' );
+        samplers.add( buildTexture( material.clearcoatRoughnessMap!, 'clearcoatRoughness', new Color( material.clearcoatRoughness ?? 0, material.clearcoatRoughness ?? 0, material.clearcoatRoughness ?? 0) ) );
       } 
       else {
         inputs.add( '${pad}float inputs:clearcoatRoughness = ${material.clearcoatRoughness}' );

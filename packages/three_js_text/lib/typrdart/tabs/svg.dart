@@ -1,5 +1,7 @@
 import 'dart:math' as math;
 import 'dart:typed_data';
+import 'package:three_js_core/three_js_core.dart';
+
 import '../bin.dart';
 import 'package:xml/xml.dart';
 
@@ -85,7 +87,7 @@ class Typr_SVG {
       } 
       else if (tn == "defs") {} 
       else
-        print(" tn, nd: ${tn}  ${nd}");
+        console.warning(" tn, nd: ${tn}  ${nd}");
     }
   }
 
@@ -194,7 +196,7 @@ class Typr_SVG {
             x = x3;
             y = y3;
           } else {
-            print("Unknown SVG command " + cmd);
+            console.warning("Unknown SVG command " + cmd);
           }
         }
       }

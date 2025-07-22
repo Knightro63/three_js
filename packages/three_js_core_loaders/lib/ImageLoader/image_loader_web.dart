@@ -120,10 +120,10 @@ Future<html.HTMLImageElement> createImageElementFromBytes(Uint8List bytes, [Stri
   // Create an ImageElement and set its source to the data URL
   html.HTMLImageElement imageElement = html.HTMLImageElement();
   imageElement.src = dataUrl;
-  int start = DateTime.now().millisecondsSinceEpoch;
-  print(DateTime.now());
+  //int start = DateTime.now().millisecondsSinceEpoch;
+  //print(DateTime.now());
   List? dimensions = _getJpegDimensions(bytes);//await _getDimensions(bytes);//
-  print(DateTime.now().millisecondsSinceEpoch-start);
+  //print(DateTime.now().millisecondsSinceEpoch-start);
   //imageElement = setDimensions(imageElement, dimensions);
   if (dimensions != null) {
     console.verbose("extracted dimension width ${dimensions[0]} and height ${dimensions[1]}");

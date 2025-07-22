@@ -1,3 +1,5 @@
+import 'package:three_js_core/three_js_core.dart';
+
 import 'font.dart';
 import './lctf.dart';
 import './tabs/svg.dart';
@@ -818,7 +820,7 @@ class Typr_U {
       {
         var obj = (v == "o10" ? pdct : font);
         if (stack.length == 0) {
-          print("error: empty stack");
+          console.warning("error: empty stack");
         } else {
           var ind = stack.removeLast();
           var subr = obj["Subrs"][ind + obj["Bias"]];

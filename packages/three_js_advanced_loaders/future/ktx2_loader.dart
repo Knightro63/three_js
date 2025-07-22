@@ -27,11 +27,10 @@ class KTX2Loader extends Loader {
   Map<String,dynamic> workerConfig = {};
   String workerSourceURL = '';
   WorkerPool workerPool = new WorkerPool();
+  dynamic transcoderBinary;
+  dynamic transcoderPending;
 
 	KTX2Loader([LoadingManager? manager]):super( manager ) {
-		this.transcoderBinary = null;
-		this.transcoderPending = null;
-
 		if ( typeof MSC_TRANSCODER != 'undefined' ) {
 			console.warning(
 				'THREE.KTX2Loader: Please update to latest "basis_transcoder".'

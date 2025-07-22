@@ -1,4 +1,6 @@
 import 'dart:typed_data';
+import 'package:three_js_core/others/console.dart';
+
 import '../bin.dart';
 
 class Typr_NAME {
@@ -75,7 +77,7 @@ class Typr_NAME {
         str = TyprBin.readUnicode(data, soff, slen ~/ 2);
       else if (platformID == 1) {
         str = TyprBin.readASCII(data, soff, slen);
-        print("reading unknown MAC encoding ${encodingID} as ASCII");
+        console.warning("reading unknown MAC encoding ${encodingID} as ASCII");
       } else {
         throw "unknown encoding ${encodingID}, platformID: ${platformID}";
       }
@@ -113,7 +115,7 @@ class Typr_NAME {
       break;
     }
 
-    print("returning name table with languageID " + obj[tname]._lang);
+    console.verbose("returning name table with languageID " + obj[tname]._lang);
 
     return obj[tname];
   }

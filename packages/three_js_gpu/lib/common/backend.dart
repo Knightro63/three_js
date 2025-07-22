@@ -224,7 +224,7 @@ abstract class Backend {
 	 * @param {Renderer} renderer - The renderer.
 	 * @return {NodeBuilder} The node builder.
 	 */
-	createNodeBuilder( /*renderObject, renderer*/ ) { }
+	NodeBuilder createNodeBuilder(RenderObject renderObject, Renderer renderer ) { }
 
 	// textures
 

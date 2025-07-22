@@ -41,6 +41,7 @@ class GLTFData{
 class GLTFLoader extends Loader {
   late final FileLoader _loader;
   late List<Function> pluginCallbacks;
+  
   late dynamic _dracoLoader;
   late KTXLoader? _ktx2Loader;
   late dynamic _ddsLoader;
@@ -206,10 +207,10 @@ class GLTFLoader extends Loader {
   //   return this;
   // }
 
-  GLTFLoader setKTX2Loader(ktx2Loader) {
-    _ktx2Loader = ktx2Loader;
-    return this;
-  }
+  // GLTFLoader setKTX2Loader(ktx2Loader) {
+  //   _ktx2Loader = ktx2Loader;
+  //   return this;
+  // }
 
   GLTFLoader setMeshoptDecoder(meshoptDecoder) {
     _meshoptDecoder = meshoptDecoder;

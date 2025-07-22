@@ -65,13 +65,12 @@ class _State extends State<MiscExporterUSDZ> {
   }
 
   late final three.OrbitControls controls;
-  late final three.Mesh mesh;
 
   Future<void> setup() async {
     threeJs.camera =three.PerspectiveCamera( 45, threeJs.width / threeJs.height, 0.25, 20 );
     threeJs.camera.position.setValues( - 2.5, 0.6, 3.0 );
 
-    final pmremGenerator =three.PMREMGenerator( threeJs.renderer! );
+    final pmremGenerator = three.PMREMGenerator( threeJs.renderer! );
 
     threeJs.scene =three.Scene();
     threeJs.scene.background =three.Color.fromHex32( 0xf0f0f0 );
@@ -80,7 +79,7 @@ class _State extends State<MiscExporterUSDZ> {
     final loader = three.GLTFLoader().setPath( 'assets/models/gltf/DamagedHelmet/glTF/' );
     final gltf = await loader.fromAsset( 'DamagedHelmet.gltf');
 
-    threeJs.scene.add( gltf!.scene );
+    threeJs.scene.add( gltf?.scene );
     
     final shadowMesh = createSpotShadowMesh();
     shadowMesh.position.y = - 1.1;
@@ -104,27 +103,12 @@ class _State extends State<MiscExporterUSDZ> {
     final folder2 = gui.addFolder('Export')..open();
     folder2.addButton( params, 'exportUSDZ' ).onChange(( val ) {
       exporter.exportScene('TEST', threeJs.scene);
-    });//.name( 'Export OBJ' );
+    });
   }
 
   three.Mesh createSpotShadowMesh() {
-    // const canvas = document.createElement( 'canvas' );
-    // canvas.width = 128;
-    // canvas.height = 128;
-
-    // const context = canvas.getContext( '2d' );
-    // const gradient = context.createRadialGradient( canvas.width / 2, canvas.height / 2, 0, canvas.width / 2, canvas.height / 2, canvas.width / 2 );
-    // gradient.addColorStop( 0.1, 'rgba(130,130,130,1)' );
-    // gradient.addColorStop( 1, 'rgba(255,255,255,1)' );
-
-    // context.fillStyle = gradient;
-    // context.fillRect( 0, 0, canvas.width, canvas.height );
-
-    // const shadowTexture = new THREE.CanvasTexture( canvas );
-
     final geometry = three.PlaneGeometry();
     final material = three.MeshBasicMaterial.fromMap( {
-      //'map': shadowTexture, 
       'blending': three.MultiplyBlending, 
       'toneMapped': false
     } );

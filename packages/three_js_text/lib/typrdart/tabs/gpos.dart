@@ -1,5 +1,7 @@
 import 'dart:typed_data';
 
+import 'package:three_js_core/three_js_core.dart';
+
 import '../bin.dart';
 import '../lctf.dart';
 
@@ -112,8 +114,7 @@ class Typr_GPOS {
       }
       return subt(data, ltable.ltype, offset0 + extOffset, null);
     } else {
-      print(
-          "unsupported GPOS table LookupType: ${ltype} format: ${tab["fmt"]}");
+      console.warning("unsupported GPOS table LookupType: ${ltype} format: ${tab["fmt"]}");
     }
     /*else if(ltype==4) {
       

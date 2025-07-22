@@ -24,7 +24,6 @@ class SaveFile{
     }
 
     await File(path!).writeAsBytes(bytes);
-    print('Save file to $path ...');
   }
 
   static Future<void> saveString({
@@ -45,6 +44,5 @@ class SaveFile{
     }
 
     await File(path!).writeAsString(data);
-    print('Save file to $path ...');
   }
 }
