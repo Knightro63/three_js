@@ -77,8 +77,6 @@ class WebGLState {
     emptyTextures[WebGL.TEXTURE_2D] = createTexture(WebGL.TEXTURE_2D, WebGL.TEXTURE_2D, 1);
     emptyTextures[WebGL.TEXTURE_CUBE_MAP] = createTexture(WebGL.TEXTURE_CUBE_MAP, WebGL.TEXTURE_CUBE_MAP_POSITIVE_X, 6);
 
-    // init
-
     colorBuffer.setClear(0, 0, 0, 1, false);
     depthBuffer.setClear(1);
     stencilBuffer.setClear(0);

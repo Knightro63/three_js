@@ -1888,11 +1888,11 @@ class WebGLRenderer {
       textures.setTexture2D( dstTexture, 0 );
       glTarget = WebGL.TEXTURE_2D;
     }
-    if(kIsWeb){
-      _gl.pixelStorei( WebGL.UNPACK_FLIP_Y_WEBGL, dstTexture.flipY?1:0 );
-      _gl.pixelStorei( WebGL.UNPACK_PREMULTIPLY_ALPHA_WEBGL, dstTexture.premultiplyAlpha?1:0 );
-      _gl.pixelStorei( WebGL.UNPACK_ALIGNMENT, dstTexture.unpackAlignment );
-    }
+    // if(kIsWeb){
+    //   _gl.pixelStorei( WebGL.UNPACK_FLIP_Y_WEBGL, dstTexture.flipY?1:0 );
+    //   _gl.pixelStorei( WebGL.UNPACK_PREMULTIPLY_ALPHA_WEBGL, dstTexture.premultiplyAlpha?1:0 );
+    //   _gl.pixelStorei( WebGL.UNPACK_ALIGNMENT, dstTexture.unpackAlignment );
+    // }
 
     // used for copying data from cpu
     final currentUnpackRowLen = _gl.getParameter( WebGL.UNPACK_ROW_LENGTH );

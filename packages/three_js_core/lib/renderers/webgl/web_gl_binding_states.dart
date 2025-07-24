@@ -42,7 +42,6 @@ class WebGLBindingStates {
     }
 
     updateBuffers = needsUpdate(object, geometry, program, index);
-    // print("WebGLBindingStates.dart setup object: ${object}  updateBuffers: ${updateBuffers}  ");
 
     if (updateBuffers) saveCache(object, geometry, program, index);
 
@@ -215,11 +214,11 @@ class WebGLBindingStates {
     }
   }
 
-  void enableAttribute(attribute) {
+  void enableAttribute(int attribute) {
     enableAttributeAndDivisor(attribute, 0);
   }
 
-  void enableAttributeAndDivisor(attribute, meshPerAttribute) {
+  void enableAttributeAndDivisor(int attribute, int meshPerAttribute) {
     final newAttributes = currentState["newAttributes"];
     final enabledAttributes = currentState["enabledAttributes"];
     final attributeDivisors = currentState["attributeDivisors"];
@@ -275,7 +274,6 @@ class WebGLBindingStates {
       final programAttribute = programAttributes[name];
 
       if (programAttribute!.location.id >= 0) {
-        // final geometryAttribute = geometryAttributes[ name ];
         BufferAttribute? geometryAttribute = geometryAttributes[name];
 
         if (geometryAttribute == null) {
@@ -304,7 +302,7 @@ class WebGLBindingStates {
           final type = attribute["type"];
           final bytesPerElement = attribute["bytesPerElement"];
 
-          final integer = ( type == WebGL.INT || type == WebGL.UNSIGNED_INT) && geometryAttribute.gpuType == IntType;
+          final integer = type == WebGL.INT || type == WebGL.UNSIGNED_INT || geometryAttribute.gpuType == IntType;
 
           if (geometryAttribute is InterleavedBufferAttribute) {
             final data = geometryAttribute.data;
@@ -312,7 +310,6 @@ class WebGLBindingStates {
             final offset = geometryAttribute.offset;
 
             if (data != null && data is InstancedInterleavedBuffer) {
-              // enableAttributeAndDivisor( programAttribute, data.meshPerAttribute );
               for (int i = 0; i < programAttribute.locationSize; i++) {
                 enableAttributeAndDivisor(programAttribute.location.id + i, data.meshPerAttribute);
               }
@@ -320,8 +317,8 @@ class WebGLBindingStates {
               if (object is! InstancedMesh && geometry.maxInstanceCount == null) {
                 geometry.maxInstanceCount = data.meshPerAttribute * data.count;
               }
-            } else {
-              // enableAttribute( programAttribute );
+            } 
+            else {
               for (int i = 0; i < programAttribute.locationSize; i++) {
                 enableAttribute(programAttribute.location.id + i);
               }
@@ -329,7 +326,6 @@ class WebGLBindingStates {
 
             gl.bindBuffer(WebGL.ARRAY_BUFFER, buffer);
 
-            // vertexAttribPointer( programAttribute, size, type, normalized, stride * bytesPerElement, offset * bytesPerElement );
             for (int i = 0; i < programAttribute.locationSize; i++) {
               vertexAttribPointer(
                 programAttribute.location.id + i,
@@ -344,21 +340,18 @@ class WebGLBindingStates {
           } 
           else {
             if (geometryAttribute is InstancedBufferAttribute) {
-              // enableAttributeAndDivisor( programAttribute, geometryAttribute.meshPerAttribute );
               for (int i = 0; i < programAttribute.locationSize; i++) {
                 enableAttributeAndDivisor(programAttribute.location.id + i, geometryAttribute.meshPerAttribute);
               }
               geometry.maxInstanceCount ??= geometryAttribute.meshPerAttribute * geometryAttribute.count;
             } 
             else {
-              // enableAttribute( programAttribute );
               for (int i = 0; i < programAttribute.locationSize; i++) {
                 enableAttribute(programAttribute.location.id + i);
               }
             }
 
             gl.bindBuffer(WebGL.ARRAY_BUFFER, buffer);
-            //vertexAttribPointer( programAttribute, size, type, normalized, 0, 0 );
             for (int i = 0; i < programAttribute.locationSize; i++) {
               vertexAttribPointer(
                 programAttribute.location.id + i, 
@@ -450,7 +443,7 @@ class WebGLBindingStates {
     		deleteVertexArrayObject( stateMap[ wireframe ]['object'] );
     	}
       (stateMap as Map).clear();
-    	(programMap as Map).remove(program.id);//delete programMap[ program.id ];
+    	(programMap as Map).remove(program.id);
     }
   }
 

@@ -20,3 +20,4 @@ export 'mesh_toon_material.dart';
 export 'mesh_matcap_material.dart';
 export 'shadow_material.dart';
 export 'mesh_gouraund_material.dart';
+export 'projected_material.dart';

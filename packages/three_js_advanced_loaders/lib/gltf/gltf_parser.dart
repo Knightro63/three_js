@@ -410,7 +410,7 @@ class GLTFParser {
         otherBuffer = Uint8List.view(buffer.buffer, byteOffset, byteLength).sublist(0).buffer;
       }
     } 
-    else if(buffer != null){
+    else if(buffer != null && buffer is ByteBuffer){
       if(kIsWasm){
         otherBuffer = buffer.asUint8List().sublist(byteOffset, byteOffset + byteLength).buffer;
       }
@@ -486,7 +486,7 @@ class GLTFParser {
         );
 
         final int stride = byteStride ~/ elementBytes;
-        int totalLen = array.lengthInBytes;
+        int totalLen = array.length;
 
         ib = InterleavedBuffer(Float32Array(totalLen).set(array.buffer.asFloat32List()), stride);
         parser.cache.add(ibCacheKey, ib);

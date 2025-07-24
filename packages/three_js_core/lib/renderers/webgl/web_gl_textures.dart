@@ -240,8 +240,6 @@ class WebGLTextures {
 
     if (textureProperties["__webglInit"] == null) return;
 
-    // check if it's necessary to remove the WebGLTexture object
-
     final source = texture.source;
     final webglTextures = _sources.get(source);
 
@@ -249,13 +247,9 @@ class WebGLTextures {
       Map webglTexture = webglTextures[textureProperties["__cacheKey"]];
       webglTexture["usedTimes"]--;
 
-      // the WebGLTexture object is not used anymore, remove it
-
       if (webglTexture["usedTimes"] == 0) {
         deleteTexture(texture);
       }
-
-      // remove the weak map entry if no WebGLTexture uses the source anymore
 
       if (webglTextures.keys.length == 0) {
         _sources.delete(source);
@@ -442,9 +436,7 @@ class WebGLTextures {
 		_gl.texParameteri( textureType, WebGL.TEXTURE_WRAP_T, wrappingToGL[ texture.wrapT ]! );
 
 		if ( textureType == WebGL.TEXTURE_3D || textureType == WebGL.TEXTURE_2D_ARRAY ) {
-
 			_gl.texParameteri( textureType, WebGL.TEXTURE_WRAP_R, wrappingToGL[ texture.wrapR ]! );
-
 		}
 
 		_gl.texParameteri( textureType, WebGL.TEXTURE_MAG_FILTER, filterToGL[ texture.magFilter ]! );
@@ -1239,14 +1231,12 @@ class WebGLTextures {
 			}
 
 			if ( ( renderTarget.samples > 0 ) && useMultisampledRTT( renderTarget ) == false ) {
-
 				renderTargetProperties['__webglMultisampledFramebuffer'] = _gl.createFramebuffer();
 				renderTargetProperties['__webglColorRenderbuffer'] = [];
 
 				state.bindFramebuffer( WebGL.FRAMEBUFFER, renderTargetProperties['__webglMultisampledFramebuffer'] );
 
 				for ( int i = 0; i < textures.length; i ++ ) {
-
 					final texture = textures[ i ];
 					(renderTargetProperties['__webglColorRenderbuffer'] as List).listSetter(i, _gl.createRenderbuffer());
 
@@ -1256,25 +1246,20 @@ class WebGLTextures {
 					final glType = utils.convert( texture.type );
 					final glInternalFormat = getInternalFormat( texture.internalFormat, glFormat, glType, texture.colorSpace, renderTarget.isXRRenderTarget == true );
 					final samples = getRenderTargetSamples( renderTarget );
+
 					_gl.renderbufferStorageMultisample( WebGL.RENDERBUFFER, samples, glInternalFormat, renderTarget.width, renderTarget.height );
-
 					_gl.framebufferRenderbuffer( WebGL.FRAMEBUFFER, WebGL.COLOR_ATTACHMENT0 + i, WebGL.RENDERBUFFER, renderTargetProperties['__webglColorRenderbuffer'][ i ] );
-
 				}
 
 				_gl.bindRenderbuffer( WebGL.RENDERBUFFER, null );
 
 				if ( renderTarget.depthBuffer ) {
-
 					renderTargetProperties['__webglDepthRenderbuffer'] = _gl.createRenderbuffer();
 					setupRenderBufferStorage( renderTargetProperties['__webglDepthRenderbuffer'], renderTarget, true );
-
 				}
 
 				state.bindFramebuffer( WebGL.FRAMEBUFFER, null );
-
 			}
-
 		}
 
 		// Setup color buffer

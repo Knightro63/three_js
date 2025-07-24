@@ -57,7 +57,9 @@ This is a dart conversion of three.js and three_dart, originally created by [@mr
  - WebGL2 supported; please add `<script src="https://cdn.jsdelivr.net/gh/Knightro63/flutter_angle/assets/gles_bindings.js"></script>` to your index.html to load the js_interop file.
 
 **Linux**
- - Unsupported
+ - Ubuntu supported (Tested on Linux Mint)
+ - OpenGL supported
+ - Please install `sudo apt install libglew-dev`
 
 ## Getting started
 
@@ -79,7 +81,6 @@ Find the example for this API [here](https://github.com/Knightro63/three_js/tree
  - Collada kinnametics does not work
  - PMREM gives weird artifacts
  - VideoTexture only works for web
- - Change screen size does not function currently
 
 **MacOS**
  - Audio has a [bug](https://github.com/bluefireteam/audioplayers/issues/1296)
@@ -92,13 +93,22 @@ Find the example for this API [here](https://github.com/Knightro63/three_js/tree
  - Some RGBELoaders cause app to crash
  
 **Windows**
- - Transform controls causes app to crash
- - Raycasting causes app to crash
+ - Tonemapping truns screen black
+ - Some RGBELoaders cause app to crash
 
 **Web**
  - Lens Flare not working correctly
+
+ **WASM**
+ - Export usdz wont allow app to compile
+
+**Linux**
+ - Tonemapping truns screen black
+ - Change screen size does not function currently
+ - Lens Flare not working correctly
  - Postprocessing does not work
  - Track pad has some bugs
+ - Some RGBELoaders cause app to crash
 
 ## Librarues and Plugins
 

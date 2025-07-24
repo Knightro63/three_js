@@ -27,7 +27,8 @@ class _MyAppState extends State<WebglLoaderSCN> {
     threeJs = three.ThreeJS(
       
       onSetupComplete: (){setState(() {});},
-      setup: setup,      // postProcessor: ([dt]){
+      setup: setup,      
+      // postProcessor: ([dt]){
       //   threeJs.renderer!.clear(true, true, true);
       // },
       settings: three.Settings(
@@ -80,17 +81,17 @@ class _MyAppState extends State<WebglLoaderSCN> {
 
     threeJs.camera.lookAt(threeJs.scene.position);
 
-    //three.SCNLoader loader = three.SCNLoader().setPath('assets/models/scn/');
-    //dynamic result = await loader.fromAsset( 'scene.scn' );
+    // three.SCNLoader loader = three.SCNLoader().setPath('assets/models/scn/');
+    // three.AnimationObject? result = await loader.fromAsset( 'drag_helment.scn' );
 
     // final object = result!.scene;
     // threeJs.scene.add(object);
     // mixer = three.AnimationMixer(object);
     // mixer.clipAction(result.animations![4], null, null)!.play();
     
-    threeJs.addAnimationEvent((dt){
-      mixer.update(dt);
-      controls.update();
-    });
+    // threeJs.addAnimationEvent((dt){
+    //   mixer.update(dt);
+    //   controls.update();
+    // });
   }
 }
