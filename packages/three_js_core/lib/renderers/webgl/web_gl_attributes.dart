@@ -85,12 +85,11 @@ class WebGLAttributes {
 
   void updateBufferNew(Buffer buffer, attribute, int bufferType) {
     final array = attribute.array;
-    final updateRange = attribute.updateRange;
     final updateRanges = attribute.updateRanges;
 
     gl.bindBuffer(bufferType, buffer);
 
-    if (updateRange!["count"] == -1) {
+    if (updateRanges!["length"] == 0) {
       // Not using update ranges
       gl.bufferSubData(bufferType, 0, attribute.array);
     } 
@@ -124,7 +123,7 @@ class WebGLAttributes {
 					updateRanges[ mergeIndex ] = range;
 				}
 			}
-
+      updateRanges.length = mergeIndex + 1;
 			for (int i = 0, l = updateRanges.length; i < l; i ++ ) {
 				final range = updateRanges[i];
         Float32Array f = Float32Array.fromList(attribute.array.sublist(range.start,range.count) as List<double>);

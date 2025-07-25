@@ -29,12 +29,15 @@ class ProjectedMaterial extends MeshPhysicalMaterial {
     this.uniforms['isTextureLoaded']['value'] = texture?.image != null;
 
     if (this.uniforms['isTextureLoaded']['value'] == null) {
+      print('Texture not loaded');
       ProjectedMaterialUtils.addLoadListener(texture!, (t){
         this.uniforms['isTextureLoaded']['value'] = true;
         this.dispatchEvent(Event(type: 'textureload'));
         _saveDimensions();
       });
-    } else {
+    } 
+    else {
+      print('Texture loaded');
       _saveDimensions();
     }
   }
@@ -68,10 +71,10 @@ class ProjectedMaterial extends MeshPhysicalMaterial {
   ProjectedMaterial({
     Camera? camera,
     required Texture texture,
-    textureScale = 1,
+    double textureScale = 1,
     Vector2? textureOffset,
-    backgroundOpacity = 1,
-    cover = false,
+    double backgroundOpacity = 1,
+    bool cover = false,
     Map<String,dynamic>? options
   }):super.fromMap(options){
     if (backgroundOpacity < 1 && options?['transparent'] == false) {
@@ -84,6 +87,7 @@ class ProjectedMaterial extends MeshPhysicalMaterial {
     _camera = camera ?? PerspectiveCamera();
     _cover = cover;
     _textureScale = textureScale;
+    textureOffset ??= Vector2();
 
     // scale to keep the image proportions and apply textureScale
     final [widthScaled, heightScaled] = ProjectedMaterialUtils.computeScaledDimensions(
@@ -95,27 +99,20 @@ class ProjectedMaterial extends MeshPhysicalMaterial {
 
     this.uniforms = {
       'projectedTexture': { 'value': texture },
-      // this avoids rendering black if the texture
-      // hasn't loaded yet
       'isTextureLoaded': { 'value': texture.image != null},
-      // don't show the texture if we haven't called project()
       'isTextureProjected': { 'value': false },
-      // if we have multiple materials we want to show the
-      // background only of the first material
       'backgroundOpacity': { 'value': backgroundOpacity },
-      // these will be set on project()
-      'viewMatrixCamera': { 'value': Matrix4() },
-      'projectionMatrixCamera': { 'value': Matrix4() },
+      'viewMatrixCamera': { 'value': Matrix4.identity() },
+      'projectionMatrixCamera': { 'value': Matrix4.identity() },
       'projPosition': { 'value': Vector3() },
       'projDirection': { 'value': Vector3(0, 0, -1) },
-      // we will set this later when we will have positioned the object
-      'savedModelMatrix': { 'value': Matrix4() },
+      'savedModelMatrix': { 'value': Matrix4.identity() },
       'widthScaled': { 'value': widthScaled },
       'heightScaled': { 'value': heightScaled },
       'textureOffset': { 'value': textureOffset },
     };
 
-    this.onBeforeCompile = (ShaderMaterial shader){
+    this.onBeforeCompile = (shader,t){
       // expose also the material's uniforms
       this.uniforms.addAll(shader.uniforms);
       shader.uniforms = this.uniforms;
@@ -124,8 +121,8 @@ class ProjectedMaterial extends MeshPhysicalMaterial {
         shader.defines?['ORTHOGRAPHIC'] = '';
       }
 
-      shader.vertexShader = ProjectedMaterialUtils.monkeyPatch(shader.vertexShader!,
-        header: /* glsl */ '''
+      shader.vertexShader = ProjectedMaterialUtils.monkeyPatch(shader.vertexShader,
+        header: '''
           uniform mat4 viewMatrixCamera;
           uniform mat4 projectionMatrixCamera;
 
@@ -144,7 +141,7 @@ class ProjectedMaterial extends MeshPhysicalMaterial {
           varying vec4 vWorldPosition;
           #endif
         ''',
-        main: /* glsl */ '''
+        main: '''
           #ifdef USE_INSTANCING
           mat4 savedModelMatrix = mat4(
             savedModelMatrix0,
@@ -162,8 +159,8 @@ class ProjectedMaterial extends MeshPhysicalMaterial {
         '''
       );
 
-      shader.fragmentShader = ProjectedMaterialUtils.monkeyPatch(shader.fragmentShader!,
-        header: /* glsl */ '''
+      shader.fragmentShader = ProjectedMaterialUtils.monkeyPatch(shader.fragmentShader,
+        header: '''
           uniform sampler2D projectedTexture;
           uniform bool isTextureLoaded;
           uniform bool isTextureProjected;
@@ -185,7 +182,7 @@ class ProjectedMaterial extends MeshPhysicalMaterial {
           }
         ''',
         replaces: {
-          'vec4 diffuseColor = vec4( diffuse, opacity );': /* glsl */ '''
+          'vec4 diffuseColor = vec4( diffuse, opacity );': '''
             // clamp the w to make sure we don't project behind
             float w = max(vTexCoords.w, 0.0);
 
@@ -224,6 +221,8 @@ class ProjectedMaterial extends MeshPhysicalMaterial {
           '''
         }
       );
+
+      userData['shader'] = shader;
     };
 
     // Listen on resize if the camera used for the projection
@@ -235,11 +234,11 @@ class ProjectedMaterial extends MeshPhysicalMaterial {
     // If the image texture passed hasn't loaded yet,
     // wait for it to load and compute the correct proportions.
     // This avoids rendering black while the texture is loading
-    ProjectedMaterialUtils.addLoadListener(texture, (t){
-      this.uniforms['isTextureLoaded']['value'] = true;
-      this.dispatchEvent(Event( type: 'textureload'));
-      _saveDimensions();
-    });
+    // ProjectedMaterialUtils.addLoadListener(texture, (t){
+    //   this.uniforms['isTextureLoaded']['value'] = true;
+    //   this.dispatchEvent(Event( type: 'textureload'));
+    //   _saveDimensions();
+    // });
   }
 
   void _saveCameraProjectionMatrix(){
@@ -274,9 +273,7 @@ class ProjectedMaterial extends MeshPhysicalMaterial {
     this.uniforms['viewMatrixCamera']['value'].setFrom(viewMatrixCamera);
     this.uniforms['projectionMatrixCamera']['value'].setFrom(projectionMatrixCamera);
     this.uniforms['projPosition']['value'].setFromMatrixPosition(modelMatrixCamera);
-    this.uniforms['projDirection']['value'].setValues(0, 0, 1).applyMatrix4(modelMatrixCamera);
-
-    // tell the shader we've projected
+    this.uniforms['projDirection']['value'].setValues(0.0, 0.0, 1.0).applyMatrix4(modelMatrixCamera);
     this.uniforms['isTextureProjected']['value'] = true;
   }
 
@@ -319,7 +316,7 @@ class ProjectedMaterial extends MeshPhysicalMaterial {
     _saveCameraMatrices();
   }
 
-  projectInstanceAt(int index, InstancedMesh instancedMesh, Matrix4 matrixWorld, { bool forceCameraSave = false }) {
+  void projectInstanceAt(int index, InstancedMesh instancedMesh, Matrix4 matrixWorld, { bool forceCameraSave = false }) {
     if (
       !(instancedMesh.material is GroupMaterial
         ? (instancedMesh.material as GroupMaterial).children.every((m) => m is ProjectedMaterial)
@@ -432,7 +429,7 @@ class ProjectedMaterialUtils{
 
     final stringDefines = defines?.keys
       .map((d) => '''#define ${d} ${defines[d]}''')
-      .join('\n');
+      .join('\n') ?? '';
 
     return '''
       ${stringDefines}
@@ -478,7 +475,7 @@ class ProjectedMaterialUtils{
   // scale to keep the image proportions and apply textureScale
   static List<double> computeScaledDimensions(Texture texture, Camera camera, double textureScale, bool cover) {
     // return some default values if the image hasn't loaded yet
-    if (!texture.image) {
+    if (texture.image == null) {
       return [1, 1];
     }
 

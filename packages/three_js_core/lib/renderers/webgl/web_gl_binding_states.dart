@@ -116,11 +116,11 @@ class WebGLBindingStates {
     final enabledAttributes = List<int>.filled(maxVertexAttributes, 0);
     final attributeDivisors = List<int>.filled(maxVertexAttributes, 0);
 
-    for (int i = 0; i < maxVertexAttributes; i++) {
-      newAttributes[i] = 0;
-      enabledAttributes[i] = 0;
-      attributeDivisors[i] = 0;
-    }
+    // for (int i = 0; i < maxVertexAttributes; i++) {
+    //   newAttributes[i] = 0;
+    //   enabledAttributes[i] = 0;
+    //   attributeDivisors[i] = 0;
+    // }
 
     return {
       // for backward compatibility on non-VAO support browser
@@ -302,8 +302,7 @@ class WebGLBindingStates {
           final type = attribute["type"];
           final bytesPerElement = attribute["bytesPerElement"];
 
-          final integer = type == WebGL.INT || type == WebGL.UNSIGNED_INT || geometryAttribute.gpuType == IntType;
-
+          final integer = ( type == WebGL.INT || type == WebGL.UNSIGNED_INT) && geometryAttribute.gpuType == IntType;
           if (geometryAttribute is InterleavedBufferAttribute) {
             final data = geometryAttribute.data;
             final stride = data?.stride;

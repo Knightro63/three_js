@@ -57,6 +57,8 @@ import 'package:example/loaders/webgl_loader_vox.dart';
 import 'package:example/loaders/webgl_loader_xyz.dart';
 import 'package:example/material/webgl_materials_video.dart';
 import 'package:example/material/webgl_tonemapping.dart';
+import 'package:example/projected/webgl_projected_3d_model.dart';
+import 'package:example/projected/webgl_projected_basic.dart';
 import 'package:example/src/statistics.dart';
 import 'package:example/texture/webgl_video_texture.dart';
 import 'package:example/material/webgl_materials_car.dart';
@@ -477,6 +479,12 @@ class MyAppState extends State<MyApp> {
               },
               '/webgl_materials_video':(BuildContext context) {
                 return const WebglMaterialsVideo();
+              },
+              '/webgl_projected_basic':(BuildContext context) {
+                return const WebglProjectedBasic();
+              },
+              '/webgl_projected_3d_model':(BuildContext context) {
+                return const WebglProjected3DModel();
               },
               '/webgl_materials_car':(BuildContext context) {
                 return const WebglMaterialsCar();
