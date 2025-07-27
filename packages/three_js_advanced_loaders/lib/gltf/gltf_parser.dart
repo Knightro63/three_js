@@ -198,14 +198,13 @@ class GLTFParser {
     if (cache["refs"][index] == null || cache["refs"][index] <= 1) return object;
     final ref = object.clone();
 
-		void updateMappings( original, clone ){
+		void updateMappings(Object3D original, Object3D clone ){
 			final mappings = this.associations[original];
 			if ( mappings != null ) {
 				this.associations[clone] = mappings;
 			}
 
-			for ( final i in original.children.entries() ) {
-        final child = original.children[i];
+			for ( final child in original.children) {
 				updateMappings( child, clone.children[ i ] );
 			}
 		};
