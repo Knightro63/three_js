@@ -486,8 +486,16 @@ class GLTFParser {
 
         final int stride = byteStride ~/ elementBytes;
         int totalLen = array.length;
+        if(array is Uint8List){
+          ib = InterleavedBuffer(Uint8Array(totalLen).set(array.buffer.asUint8List()), 1);
+        }
+        else if(array is Int8List){
+          ib = InterleavedBuffer(Int8Array(totalLen).set(array.buffer.asInt8List()), 1);
+        }
+        else{
+          ib = InterleavedBuffer(Float32Array(totalLen).set(array.buffer.asFloat32List()), stride);
+        }
 
-        ib = InterleavedBuffer(Float32Array(totalLen).set(array.buffer.asFloat32List()), stride);
         parser.cache.add(ibCacheKey, ib);
       }
 

@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 import 'dart:math' as math;
 import 'dart:convert'; 
+import 'package:three_js_math/three_js_math.dart'; 
 
 // aliases for shorter compressed code (most minifers don't do this)
 typedef u8 = Uint8List;
@@ -10,21 +11,21 @@ typedef i32 = Int32List;
 class USDZip{
   USDZip();
 
-  Uint8List fleb = u8.fromList([0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 0, 0, 0, 0]);
+  final Uint8List fleb = u8.fromList([0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 0, 0, 0, 0]);
   // fixed distance extra bits
-  Uint8List fdeb = u8.fromList([0, 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13, 0, 0]);
-  Int32List deo = i32.fromList([65540, 131080, 131088, 131104, 262176, 1048704, 1048832, 2114560, 2117632]);
-  Uint8List clim = u8.fromList([16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15]);
+  final Uint8List fdeb = u8.fromList([0, 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13, 0, 0]);
+  final Int32List deo = i32.fromList([65540, 131080, 131088, 131104, 262176, 1048704, 1048832, 2114560, 2117632]);
+  final Uint8List clim = u8.fromList([16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15]);
   late final _a = freb(fleb, 2), fl = _a['b']..[28] = 258, revfl = _a['r']..[258] = 28;
   late final _b = freb(fdeb, 0), fd = _b['b'], revfd = _b['r'];
 
   final et = u8(0);
-  final flt = u8.fromList(List.filled(144, 8)+List.filled(256-144, 9)+List.filled(280-256, 7)+List.filled(288-280, 8));
-  final fdt = u8.fromList(List.filled(32, 5));
+  late final flt = u8.fromList(List.filled(144, 8)+List.filled(256-144, 9)+List.filled(280-256, 7)+List.filled(288-280, 8));
+  late final fdt = u8.fromList(List.filled(32, 5));
   late final flm = hMap(flt, 9, 0);
   late final fdm = hMap(fdt, 5, 0);
 
-  final rev = u16.fromList(List.generate(32768, (int i){
+  late final rev = u16.fromList(List.generate(32768, (int i){
     int x = ((i & 0xAAAA) >> 1) | ((i & 0x5555) << 1);
     x = ((x & 0xCCCC) >> 2) | ((x & 0x3333) << 2);
     x = ((x & 0xF0F0) >> 4) | ((x & 0x0F0F) << 4);
@@ -83,7 +84,7 @@ class USDZip{
     return out;
   }
 
-  fltn (dynamic d, String p, Map<String,dynamic> t, Map<String,dynamic> o) {
+  void fltn (dynamic d, String p, Map<String,dynamic> t, Map<String,dynamic> o) {
     final List keys = d is Map?d.keys.toList():(d as List<int>).toList();
     for (final k in keys) {
       var val = d[k];
@@ -318,14 +319,14 @@ class USDZip{
     return t;
   })();
 
-  dopt(dynamic dat, Map opt, pre, post, [Map? st]) {
+  dopt(List<int> dat, Map opt, pre, post, [Map? st]) {
     if (st == null) {
       st = { 'l': 1 };
       if (opt['dictionary'] != null) {
         var dict = opt['dictionary'].sublist(-32768);
         u8 newDat = u8(dict.length + dat.length);
         newDat.setAll(0,dict);
-        newDat[dat] = dict.length;
+        newDat.setAll(dict.length, dat);//[dat] = dict.length;
         dat = newDat;
         st['w'] = dict.length;
       }
@@ -333,7 +334,7 @@ class USDZip{
     return dflt(dat, opt['level'] == null ? 6 : opt['level'], opt['mem'] == null ? (st['l'] != 0? (math.max(8, math.min(13, math.log(dat.length))) * 1.5).ceil() : 20) : (12 + opt['mem']), pre, post, st);
   }
 
-  dflt(List dat, int lvl, plvl, pre, int post, Map st) {
+  dflt(List<int> dat, int lvl, plvl, pre, int post, Map st) {
     int s = st['z'] ?? dat.length;
     u8 o = u8(pre + s + 5 * (1 + (s / 7000)).ceil() + post);
     // writing to this writes to the output buffer
@@ -470,7 +471,7 @@ class USDZip{
     return slc(o, 0, pre + shft(pos) + post);
   }
 
-  wblk(List dat, List<int> out, int fineL, List syms, List<int> lf, List<int> df, int eb, int li,int bs, int bl, p) {
+  wblk(List<int> dat, List<int> out, int fineL, List syms, List<int> lf, List<int> df, int eb, int li,int bs, int bl, p) {
     wbits(out, p++, fineL);
     ++lf[256];
     var _a = hTree(lf, 15), dlt = _a['t'], mlb = _a['l'];
@@ -654,7 +655,7 @@ class USDZip{
     return l;
   }
 
-  u16 hMap(List cd, int mb, int r) {
+  u16 hMap(List<int> cd, int mb, int r) {
     int s = cd.length;
     // index
     int i = 0;
@@ -662,9 +663,7 @@ class USDZip{
     u16 l = u16(mb);
     // length of cd must be 288 (total # of codes)
     for (; i < s; ++i) {
-      if (cd[i] != null){
-        ++l[cd[i] - 1];
-      }
+      ++l[cd[i] - 1];
     }
     // u16 "map": index -> minimum code for bit length = index
     u16 le = u16(mb);
@@ -679,11 +678,11 @@ class USDZip{
       int rvb = 15 - mb;
       for (i = 0; i < s; ++i) {
         // ignore 0 lengths
-        if (cd[i] != null) {
+        if (cd[i] != 0) {
           // num encoding both symbol and bits read
           int sv = (i << 4) | cd[i];
           // free bits
-          int r_1 = mb - (cd[i] as int);
+          int r_1 = mb - cd[i];
           // start value
           int v = le[cd[i] - 1]++ << r_1;
           // m is end value
@@ -698,7 +697,7 @@ class USDZip{
       co = u16(s);
       for (i = 0; i < s; ++i) {
         if (cd[i] != 0) {
-          co[i] = rev[le[cd[i] - 1]++] >> (15 - (cd[i] as int));
+          co[i] = rev[le[cd[i] - 1]++] >> (15 - cd[i]);
         }
       }
     }
@@ -759,11 +758,11 @@ class USDZip{
         int lft = mbt - mb;
         int cst = 1 << lft;
         //t2.sort((a, b) { return tr[b['s']] - tr[a['s']] ?? a['f'] - b['f']; });
-        {
+        //{
           List<MapEntry<String,dynamic>> sortedEntries = t2.entries.toList();
           sortedEntries.sort((a, b) { final i = tr[b.value['s']] - tr[a.value['s']]; return i != 0 ?i:a.value['f'] - b.value['f']; });
-        t2 = Map.fromEntries(sortedEntries);
-        }
+          t2 = Map.fromEntries(sortedEntries);
+        //}
         for (; i < s; ++i) {
           int i2_1 = t2[i]['s'];
           if (tr[i2_1] > mb) {
