@@ -1,11 +1,17 @@
-import 'package:three_js_core/textures/index.dart';
-import 'package:three_js_math/three_js_math.dart';
-import 'dart:math' as math;
-import 'package:web/web.dart' as html;
+import 'dart:io';
 
-class VideoTexture extends Texture {
-  html.HTMLVideoElement? get video => image.data;
+import 'package:media_kit_video/media_kit_video.dart';
+import 'package:three_js_core/three_js_core.dart';
+import 'package:three_js_math/three_js_math.dart';
+import 'package:media_kit/media_kit.dart';
+
+class VideoTextureWorker extends VideoTexture {
+  ImageElement? get video => image;
+  Player? _player;
+  VideoController? _controller;
   bool _didDispose = false;
+  bool _updating = false;
+  bool _isPlaying = false;
 
   /// [video] - The video element to use as the texture.
   ///
@@ -46,8 +52,8 @@ class VideoTexture extends Texture {
   /// power of 2.
   /// 
   /// 
-  VideoTexture([
-    video, 
+  VideoTextureWorker([
+    ImageElement? video, 
     int? mapping, 
     int? wrapS, 
     int? wrapT, 
@@ -57,14 +63,46 @@ class VideoTexture extends Texture {
     int? type,
     int? anisotropy
   ]):super(video, mapping, wrapS, wrapT, magFilter, minFilter, format, type, anisotropy) {
+    MediaKit.ensureInitialized();
     isVideoTexture = true;
     this.minFilter = minFilter ?? LinearFilter;
     this.magFilter = magFilter ?? LinearFilter;
 
     generateMipmaps = false;
+
+    _player = Player();
+    _controller = VideoController(_player!,configuration: VideoControllerConfiguration(
+      width: image!.height.toInt(),
+      height: image.width.toInt()
+    ));
+    _player!.open(Media(_convert(image.src!))).then((_){
+      if((image.url as VideoTextureOptions).loop){
+        _player!.setPlaylistMode(PlaylistMode.single);
+        _isPlaying = true;
+      }
+    });
   }
 
-  factory VideoTexture.fromOptions(
+  static String _convert(dynamic url){
+    if(url is File){
+      return 'file:///${url.path}';
+    }
+    else if(url is Uri){
+      return url.path;
+    }
+    else if(url is String){
+      if(url.contains('http://') || url.contains('https://')){  
+        return url;
+      }
+      else if(url.contains('assets')){
+        return 'asset:///$url';
+      }
+    }
+
+    throw('File type not allowed. Must be a path, asset, or url string.');
+  }
+
+  factory VideoTextureWorker.fromOptions(
     VideoTextureOptions options,[
     int? mapping, 
     int? wrapS, 
@@ -75,19 +113,15 @@ class VideoTexture extends Texture {
     int? type,
     int? anisotropy
   ]){
-    final videoElement = html.HTMLVideoElement()
-    ..id = 'video-id${math.Random().nextInt(100)}'
-    ..src = options.asset
-    ..loop = options.loop
-    ..crossOrigin = "anonymous";
-
     final image = ImageElement(
-      url: options.asset,
+      url: options,
+      //data: Uint8Array(391680),//((options.width ?? 0)*(options.height ?? 0)*4).toInt()),
       src: options.asset,
-      data: videoElement
+      width: options.width?.toInt() ?? 0,
+      height: options.height?.toInt() ?? 0
     );
 
-    return VideoTexture(
+    return VideoTextureWorker(
       image,
       mapping, 
       wrapS, 
@@ -101,40 +135,58 @@ class VideoTexture extends Texture {
   }
 
   @override
-  VideoTexture clone() {
-    return VideoTexture(image)..copy(this);
+  VideoTextureWorker clone() {
+    return VideoTextureWorker(image)..copy(this);
   }
 
   /// This is called automatically and sets [needsUpdate] 
   /// to `true` every time a new frame is available.
-  void update() {
-    //final video = image.data;
-    final hasVideoFrameCallback = video is html.HTMLVideoElement;//'requestVideoFrameCallback' in video.requestVideoFrameCallback(callback);
-    if (hasVideoFrameCallback && (video?.readyState ?? 0) >= 4 ) {
-      needsUpdate = true;
+  void update(){
+    if(!_updating && _isPlaying){
+      _updating = true;
+      _player?.screenshot(format: null).then((v){//format: null
+        _updating = false;
+        if(image != null && v != null){
+          if(image?.data == null || image?.data?.length != v.length){
+            print('getyweduwb');
+            image!.data = Uint8Array.fromList(v);
+            image!.width = _player?.state.width;
+            image!.height = _player?.state.height;
+          }
+          else{
+            (image!.data as Uint8Array).set(v);
+          }
+        }
+        needsUpdate = true;
+      });
     }
   }
 
-  html.VideoFrameRequestCallback updateVideo() => _updateVideo();
-  _updateVideo(){
-    needsUpdate = true;
-    video?.requestVideoFrameCallback( updateVideo() );
-  }
-
   void play(){
-    video?.play();
+    _player?.play().then((_){
+      _isPlaying = true;
+      _updating = false;
+    });
   }
   
   void pause(){
-    video?.pause();
+    _player?.pause().then((_){
+      _isPlaying = false;
+      _updating = false;
+    });
+  }
+
+  void updateVideo() {
+    needsUpdate = true;
   }
 
   @override
   void dispose(){
     if(_didDispose) return;
-    video?.pause();
-    video?.removeAttribute('src'); // empty source
-    //video.load();
+    super.dispose();
+    _player?.dispose();
+    _player = null;
+    _controller = null;
     image = null;
     _didDispose = true;
   }

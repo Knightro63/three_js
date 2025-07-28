@@ -1487,7 +1487,7 @@ class WebGLTextures {
 		final format = texture.format;
 		final type = texture.type;
 
-		if ( texture.isCompressedTexture || texture.isVideoTexture ) return image;
+		if ( texture.isCompressedTexture || texture is VideoTexture ) return image;
 
 		if ( colorSpace != LinearSRGBColorSpace && colorSpace != NoColorSpace ) {
 

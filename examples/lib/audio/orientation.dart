@@ -93,6 +93,7 @@ class _State extends State<AudioOrientation> {
       coneOuterGain: 0.1,
       maxDistance: 2,
     );
+    positionalAudio.setVolume(0);
     positionalAudio.play();
 
     final helper = PositionalAudioHelper( positionalAudio, 0.1 );

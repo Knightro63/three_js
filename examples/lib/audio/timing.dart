@@ -127,13 +127,13 @@ class _State extends State<AudioTiming> {
     controls.minDistance = 1;
     controls.maxDistance = 25;
 
-    threeJs.addAnimationEvent((dt){
+    threeJs.addAnimationEvent((dt) async{
       controls.update();
-      animate();
+      await animate();
     });
   }
 
-  void animate() {
+  Future<void> animate() async{
   	const speed = 2.5;
 		const height = 3;
 		const offset = 0.5;
@@ -152,7 +152,7 @@ class _State extends State<AudioTiming> {
         if ( ball.userData['down'] == true ) {
           // ball changed direction from down to up
           final audio = ball.children[0] as Audio;
-          audio.play(); // play audio with perfect timing when ball hits the surface
+          await audio.play(); // play audio with perfect timing when ball hits the surface
           ball.userData['down'] = false;
         }
       }

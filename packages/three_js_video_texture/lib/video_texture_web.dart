@@ -1,10 +1,10 @@
-import 'package:three_js_core/three_js_core.dart';
+import 'package:three_js_core/textures/index.dart';
 import 'package:three_js_math/three_js_math.dart';
+import 'dart:math' as math;
+import 'package:web/web.dart' as html;
 
-class VideoTexture extends Texture {
-  ImageElement? get video => image;
-  // VideoPlayerController? _controller;
-  // wid.BuildContext? _context;
+class VideoTextureWorker extends VideoTexture {
+  html.HTMLVideoElement? get video => image.data;
   bool _didDispose = false;
 
   /// [video] - The video element to use as the texture.
@@ -46,8 +46,8 @@ class VideoTexture extends Texture {
   /// power of 2.
   /// 
   /// 
-  VideoTexture([
-    Map? video, 
+  VideoTextureWorker([
+    video, 
     int? mapping, 
     int? wrapS, 
     int? wrapT, 
@@ -56,18 +56,15 @@ class VideoTexture extends Texture {
     int? format, 
     int? type,
     int? anisotropy
-  ]):super(video?['imageElement'], mapping, wrapS, wrapT, magFilter, minFilter, format, type, anisotropy) {
+  ]):super(video, mapping, wrapS, wrapT, magFilter, minFilter, format, type, anisotropy) {
     isVideoTexture = true;
     this.minFilter = minFilter ?? LinearFilter;
     this.magFilter = magFilter ?? LinearFilter;
 
     generateMipmaps = false;
-
-    // _controller = video?['controller'];
-    // _context = video?['context'];
   }
 
-  factory VideoTexture.fromOptions(
+  factory VideoTextureWorker.fromOptions(
     VideoTextureOptions options,[
     int? mapping, 
     int? wrapS, 
@@ -78,79 +75,67 @@ class VideoTexture extends Texture {
     int? type,
     int? anisotropy
   ]){
-    throw('Web Only.');
-    // final _controller = VideoPlayerController.networkUrl(Uri.parse('https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4'))..initialize().then((_) {});
-    // final image = ImageElement(url: _controller);
+    final videoElement = html.HTMLVideoElement()
+    ..id = 'video-id${math.Random().nextInt(100)}'
+    ..src = options.asset
+    ..loop = options.loop
+    ..crossOrigin = "anonymous";
 
-    // return VideoTexture(
-    //   {
-    //     'imageElement':image,
-    //     'context': options.context,
-    //     'controller': _controller
-    //   },
-    //   mapping, 
-    //   wrapS, 
-    //   wrapT, 
-    //   magFilter, 
-    //   minFilter, 
-    //   format, 
-    //   type,
-    //   anisotropy
-    // );
+    final image = ImageElement(
+      url: options.asset,
+      src: options.asset,
+      data: videoElement
+    );
+
+    return VideoTextureWorker(
+      image,
+      mapping, 
+      wrapS, 
+      wrapT, 
+      magFilter, 
+      minFilter, 
+      format, 
+      type,
+      anisotropy
+    );
   }
 
-
   @override
-  VideoTexture clone() {
-    return VideoTexture(image)..copy(this);
+  VideoTextureWorker clone() {
+    return VideoTextureWorker(image)..copy(this);
   }
 
   /// This is called automatically and sets [needsUpdate] 
   /// to `true` every time a new frame is available.
-  void update(){
-    throw('Web Only.');
+  void update() {
+    //final video = image.data;
+    final hasVideoFrameCallback = video is html.HTMLVideoElement;//'requestVideoFrameCallback' in video.requestVideoFrameCallback(callback);
+    if (hasVideoFrameCallback && (video?.readyState ?? 0) >= 4 ) {
+      needsUpdate = true;
+    }
   }
-    
-  //   //print('here');
-  //   if(video?.complete == true && _context != null && _controller != null && _controller!.value.isInitialized){
-  //     //print('here2');
-  //     video?.complete = false;
-  //     FlutterTexture.generateImageFromWidget(
-  //       _context!,
-  //       wid.Container(
-  //         color: wid.Colors.red,
-  //         width: 1000,
-  //         height: 1000,
-  //         child: VideoPlayer(_controller!)
-  //       ),
-  //       video
-  //     ).then((value){
-  //       video?.complete = true;
-  //       needsUpdate = true;
-  //     });
-  //   }
-  // }
+
+  html.VideoFrameRequestCallback updateVideo() => _updateVideo();
+  _updateVideo(){
+    needsUpdate = true;
+    video?.requestVideoFrameCallback( updateVideo() );
+  }
 
   void play(){
-    throw('Web Only.');
-    //_controller?.play();
+    video?.play();
   }
   
   void pause(){
-    throw('Web Only.');
-    //_controller?.pause();
+    video?.pause();
   }
 
-  void updateVideo() {
-    needsUpdate = true;
-  }
-
+  @override
   void dispose(){
     if(_didDispose) return;
-    // _controller?.pause();
-    // _controller?.dispose();
+    video?.pause();
+    video?.removeAttribute('src'); // empty source
+    //video.load();
     image = null;
     _didDispose = true;
-    throw('Web Only.');
   }
 }

@@ -655,11 +655,11 @@ class GLTFWriter {
 		console.warning( 'THREE.GLTFExporter: Merged metalnessMap and roughnessMap textures.' );
 
 		if ( metalnessMap is CompressedTexture ) {
-			metalnessMap = decompress( metalnessMap );
+			metalnessMap = MathUtils.decompress( metalnessMap );
 		}
 
 		if ( roughnessMap is CompressedTexture ) {
-			roughnessMap = decompress( roughnessMap );
+			roughnessMap = MathUtils.decompress( roughnessMap );
 		}
 
 		final metalness = metalnessMap != null? metalnessMap.image : null;
@@ -956,111 +956,83 @@ class GLTFWriter {
 
 			if (cache['images']?.containsValue( image ) ?? false) cache['images'].set( image, {} );
 
-			final cachedImages = cache['images'].get( image );
+			final cachedImages = cache['images']?[image];
 
 			final key = mimeType + ':flipY/' + flipY.toString();
 
 			if ( cachedImages[ key ] != null ) return cachedImages[ key ];
 
-			if ( ! json.images ) json.images = [];
+			if (json['images'] == null) json['images'] = [];
 
 			final imageDef = { mimeType: mimeType };
 
 			final canvas = getCanvas();
 
-			canvas.width = math.min( image.width, options.maxTextureSize );
-			canvas.height = math.min( image.height, options.maxTextureSize );
+			canvas.width = math.min<int>( image.width, options.maxTextureSize );
+			canvas.height = math.min<int>( image.height, options.maxTextureSize );
 
 			final ctx = canvas.getContext( '2d' );
 
 			if ( flipY == true ) {
-
 				ctx.translate( 0, canvas.height );
 				ctx.scale( 1, - 1 );
-
 			}
 
 			if ( image.data != null ) { // THREE.DataTexture
-
 				if ( format != RGBAFormat ) {
-
 					console.error( 'GLTFExporter: Only RGBAFormat is supported.', format );
-
 				}
 
 				if ( image.width > options.maxTextureSize || image.height > options.maxTextureSize ) {
-
 					console.warning( 'GLTFExporter: Image size is bigger than maxTextureSize', image );
-
 				}
 
 				final data = Uint8ClampedArray( image.height * image.width * 4 );
 
 				for (int i = 0; i < data.length; i += 4 ) {
-
 					data[ i + 0 ] = image.data[ i + 0 ];
 					data[ i + 1 ] = image.data[ i + 1 ];
 					data[ i + 2 ] = image.data[ i + 2 ];
 					data[ i + 3 ] = image.data[ i + 3 ];
-
 				}
-
 				ctx.putImageData( ImageData( data, image.width, image.height ), 0, 0 );
-
-			} else {
-
+			}
+      else {
 				ctx.drawImage( image, 0, 0, canvas.width, canvas.height );
-
 			}
 
 			if ( options.binary == true ) {
-
 				pending.add(
-
 					getToBlobPromise( canvas, mimeType )
 						.then( blob => writer.processBufferViewImage( blob ) )
 						.then( bufferViewIndex => {
-
 							imageDef.bufferView = bufferViewIndex;
-
 						} )
-
 				);
 
-			} else {
-
+			}
+      else {
 				if ( canvas.toDataURL != null ) {
-
 					imageDef.uri = canvas.toDataURL( mimeType );
-
-				} else {
-
+				} 
+        else {
 					pending.add(
 
 						getToBlobPromise( canvas, mimeType )
 							.then( blob => FileReader().readAsDataURL( blob ) )
 							.then( dataURL => {
-
 								imageDef.uri = dataURL;
-
 							} )
-
 					);
-
 				}
-
 			}
 
 			final index = json.images.add( imageDef ) - 1;
 			cachedImages[ key ] = index;
 			return index;
-
 		} else {
-
-			throw Error( 'THREE.GLTFExporter: No valid image data found. Unable to process texture.' );
-
+			throw( 'THREE.GLTFExporter: No valid image data found. Unable to process texture.' );
 		}
-
 	}
 
 	/**

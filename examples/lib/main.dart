@@ -60,7 +60,6 @@ import 'package:example/material/webgl_tonemapping.dart';
 import 'package:example/projected/webgl_projected_3d_model.dart';
 import 'package:example/projected/webgl_projected_basic.dart';
 import 'package:example/src/statistics.dart';
-import 'package:example/texture/webgl_video_texture.dart';
 import 'package:example/material/webgl_materials_car.dart';
 import 'package:example/material/webgl_materials_physical_transmission.dart';
 import 'package:example/multi_views/webgl2_multiple_rendertargets.dart';
@@ -473,9 +472,6 @@ class MyAppState extends State<MyApp> {
               },
               '/webgl_materials':(BuildContext context) {
                 return const WebglMaterials();
-              },
-              '/flutter_material':(BuildContext context) {
-                return const WebglVideoTexture();
               },
               '/webgl_materials_video':(BuildContext context) {
                 return const WebglMaterialsVideo();

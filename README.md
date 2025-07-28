@@ -79,11 +79,10 @@ Find the example for this API [here](https://github.com/Knightro63/three_js/tree
  - MD2 annimations do not work
  - Collada animations do not work
  - Collada kinnametics does not work
- - PMREM gives weird artifacts
- - VideoTexture only works for web
+ - PMREM gives weird artifacts or is completely black
 
 **MacOS**
- - Audio has a [bug](https://github.com/bluefireteam/audioplayers/issues/1296)
+ - N/A
 
 **iOS**
  - Protoplanets does not function correctly
@@ -98,19 +97,35 @@ Find the example for this API [here](https://github.com/Knightro63/three_js/tree
 
 **Web**
  - Lens Flare not working correctly
+ - Simplify modifer has weird artifacts
 
  **WASM**
- - Export usdz wont allow app to compile
+ - Simple GI does not work
+ - Simplify modifer has weird artifacts
 
 **Linux**
  - Tonemapping truns screen black
  - Change screen size does not function currently
- - Lens Flare not working correctly
  - Postprocessing does not work
- - Track pad has some bugs
+ - Track pad does not zoom out
  - Some RGBELoaders cause app to crash
 
-## Librarues and Plugins
+## Libraries and Plugins
+
+**Other Libs**
+ - [Advanced Exporters](https://pub.dev/packages/three_js_advanced_exporters) a USDZ exporter to your three_js project.
+ - [Audio](https://pub.dev/packages/three_js_audio) a audio api for three_js.
+ - [BVH CSG](https://pub.dev/packages/three_js_bvh_csg) a bvh csg api for three_js.
+ - [Exporters](https://pub.dev/packages/three_js_exporters) an api to add STL, OBJ or PLY exporter for three_js.
+ - [Geometry](https://pub.dev/packages/three_js_geometry) an api to add complex geometries to three_js.
+ - [Line](https://pub.dev/packages/three_js_line) an api to add more line types to three_js.
+ - [Helpers](https://pub.dev/packages/three_js_helpers) an api to add helpers to three_js.
+ - [Modifers](https://pub.dev/packages/three_js_modifers) an api to add simplify or subdivision to three_js.
+ - [Post Processing](https://pub.dev/packages/three_js_postprocessing) a post processor to three_js.
+ - [SVG](https://pub.dev/packages/three_js_svg) an api to add a svg importer and exporter to three_js.
+ - [Three JS Loader](https://pub.dev/packages/three_js_tjs_loader) a loader to add three js json files to three_js.
+ - [Transfrom Controls](https://pub.dev/packages/three_js_transform_controls) a transfor controller for 3d objects for three_js.
+ - [Video Texture](https://pub.dev/packages/three_js_video_texture) an api to add videos to three_js.
 
 **ADD-ONS**
  - [Omio](https://github.com/Knightro63/oimo_physics) a physics engine for three_js.

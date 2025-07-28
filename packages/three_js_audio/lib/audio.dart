@@ -1,5 +1,6 @@
 import 'dart:async';
-import 'package:three_js_audio/three_js_audio.dart';
+import 'dart:io';
+import 'package:media_kit/media_kit.dart';
 import 'package:three_js_core/three_js_core.dart';
 
 /// This utility class holds static references to some global audio objects.
@@ -11,8 +12,7 @@ class Audio extends Object3D{
   bool loop;
   bool hasPlaybackControl;
 
-  SoundHandle? source;
-  AudioSource? _audioSource;
+  Player? _player;
   
   //Uint8List? _buffer;
 
@@ -23,10 +23,10 @@ class Audio extends Object3D{
 
   late double _volume;
   late double _balance;
-  AudioLoader _loader = AudioLoader();
+  //AudioLoader _loader = AudioLoader();
 
   Timer? _delay;
-  bool get isPlaying => source != null?SoLoud.instance.getPause(source!):false;
+  bool get isPlaying => _player?.state.playing ?? false;
   bool _hasStarted = false;
 
   String path;
@@ -40,12 +40,19 @@ class Audio extends Object3D{
     this.autoplay = false,
     this.loop = false
   }){
+    MediaKit.ensureInitialized();
     _balance = balance;
     _volume = volume;
 
-    if(autoplay){
-      play();
-    }
+    _player ??= Player();
+    setVolume(_volume);
+    setBalance(_balance);
+    setPlaybackRate(playbackRate);
+    _player!.open(Media(_convert(path),start: Duration(milliseconds: loopStart)),play: autoplay).then((_){
+      if(loop){
+        _player!.setPlaylistMode(PlaylistMode.single);
+      }
+    });
   }
 
   // void setBuffer(Uint8List buffer){
@@ -55,7 +62,7 @@ class Audio extends Object3D{
   @override
   void dispose(){
     _delay?.cancel();
-    SoLoud.instance.deinit();
+    _player?.dispose();
     super.dispose();
   }
 
@@ -72,39 +79,36 @@ class Audio extends Object3D{
 			console.warning( 'Audio: this Audio has no playback control.' );
 			return;
 		}
-
-    if(source == null){
-      await SoLoud.instance.init();
-
-      if(delay != 0){
-        _delay = Timer(Duration(milliseconds: delay), (){
-          _play();
-          _delay?.cancel();
-          _delay = null;
-        });
-      }
-      else{
-        _play();
-      }
+    if(delay == 0){
+      replay();
     }
     else{
-      resume();
+      Future.delayed(Duration(milliseconds: delay),replay);
     }
   }
 
-  /// Plays a single run of the given [file], with a given [volume].
-  Future<void> _play() async{
-    _loader.unknown(path);
-    _audioSource = await _loader.unknown(path);
+  Future<void> replay() async{
+    await _player?.seek(Duration.zero);
+    await _player?.play();
+  }
 
-    source = _audioSource == null?null: await SoLoud.instance.play(
-      _audioSource!,
-      volume: _volume,
-      loopingStartAt: Duration(milliseconds: loopStart),
-      looping: loop
-    );
+  static String _convert(dynamic url){
+    if(url is File){
+      return 'file:///${url.path}';
+    }
+    else if(url is Uri){
+      return url.path;
+    }
+    else if(url is String){
+      if(url.contains('http://') || url.contains('https://')){  
+        return url;
+      }
+      else if(url.contains('assets')){
+        return 'asset:///$url';
+      }
+    }
 
-    setBalance(_balance);
+    throw('File type not allowed. Must be a path, asset, or url string.');
   }
 
   /// Stops the currently playing background music track (if any).
@@ -116,20 +120,12 @@ class Audio extends Object3D{
 
     _delay?.cancel();
     _delay = null;
-    if(source != null)await SoLoud.instance.stop(source!);
+    _player?.stop();
   }
 
   /// Resumes the currently played (but resumed) background music.
   Future<void> resume() async {
-    if(source != null){
-      final pos = SoLoud.instance.getPosition(source!);
-      if(pos.inMilliseconds == 0){
-        SoLoud.instance.play(_audioSource!);
-      }
-      else{
-        SoLoud.instance.setPause(source!, false);
-      }
-    }
+    await _player?.play();
   }
 
   /// Pauses the background music without unloading or resetting the audio
@@ -141,7 +137,7 @@ class Audio extends Object3D{
 		}
 
 		if(isPlaying) {
-      if(source != null)SoLoud.instance.setPause(source!, true);
+      _player?.pause();
     }
 
     _delay?.cancel();
@@ -149,7 +145,7 @@ class Audio extends Object3D{
   }
 
 	double? getPlaybackRate() {
-		return source == null?null:SoLoud.instance.getRelativePlaySpeed(source!);
+		return _player?.state.rate;
 	}
 
 	void setPlaybackRate(double value){
@@ -160,7 +156,7 @@ class Audio extends Object3D{
 
 		if (isPlaying) {
       playbackRate = value;
-			source == null?null:SoLoud.instance.setRelativePlaySpeed(source!,value);
+      _player?.setRate(value);
 		}
 	}
 
@@ -170,7 +166,7 @@ class Audio extends Object3D{
 			return false;
 		}
 
-		return source == null?false:SoLoud.instance.getLooping(source!);
+		return _player?.state.playlist == PlaylistMode.single;
 	}
 
 	void setLoop(bool value ){
@@ -181,9 +177,12 @@ class Audio extends Object3D{
 
 		loop = value;
 
-		if (isPlaying ) {
-			if(source != null) SoLoud.instance.setLooping(source!, value);
+		if (isPlaying && value) {
+			_player?.setPlaylistMode(PlaylistMode.single);
 		}
+    else if(isPlaying){
+      _player?.setPlaylistMode(PlaylistMode.none);
+    }
 	}
 
 	void setLoopStart(int value ) {
@@ -195,20 +194,20 @@ class Audio extends Object3D{
 	}
 
 	double? getBalance() {
-		return source != null?SoLoud.instance.getPan(source!):0;
+		return 0;//_player != null?_player?.state.audioParams. getPan(source!):0;
 	}
 
 	void setBalance(double value ){
     _balance = value;
-		if(source != null)SoLoud.instance.setPan(source!,value);
+    //_player?.se
 	}
 
 	double? getVolume() {
-		return source == null? 0:SoLoud.instance.getVolume(source!);
+		return _player?.state.volume;
 	}
 
 	void setVolume(double value ){
     _volume = value;
-    if(source != null) SoLoud.instance.setVolume(source!,value);
+    _player?.setVolume(value*100);
 	}
 }
