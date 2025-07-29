@@ -19,21 +19,20 @@ dependencies:
       url: https://github.com/Knightro63/css.git
   three_js:
     path: ../packages/three_js
-  three_js_helpers: ^0.1.0
-  three_js_transform_controls: ^0.1.0
-  three_js_svg: ^0.1.0
-  three_js_objects: ^0.1.0
-  three_js_tjs_loader: ^0.1.0
-  three_js_postprocessing: ^0.1.0
-  three_js_modifers: ^0.1.0
-  three_js_terrain: ^0.1.0
-  three_js_exporters: ^0.1.0
-  three_js_line: ^0.1.0
-  three_js_bvh_csg: ^0.1.0
+  three_js_helpers: ^0.2.0
+  three_js_transform_controls: ^0.2.0
+  three_js_svg: ^0.2.0
+  three_js_objects: ^0.2.0
+  three_js_tjs_loader: ^0.2.0
+  three_js_postprocessing: ^0.2.0
+  three_js_modifers: ^0.2.0
+  three_js_terrain: ^0.2.0
+  three_js_exporters: ^0.2.0
+  three_js_line: ^0.2.0
+  three_js_bvh_csg: ^0.2.0
   three_js_video_texture:
     path: ../packages/three_js_video_texture
-  three_js_advanced_exporters:
-    path: ../packages/three_js_advanced_exporters
+  three_js_advanced_exporters: ^0.0.1
   
   permission_handler: ^11.3.1
   camera: ^0.10.6
@@ -51,30 +50,6 @@ dependency_overrides:
     git:
       url: https://github.com/alex-melnyk/flutter-permission-handler.git 
       path: permission_handler_apple
-  three_js_svg:
-    path: ../packages/three_js_svg
-  three_js_text:
-    path: ../packages/three_js_text
-  three_js_exporters:
-    path: ../packages/three_js_exporters
-  three_js_objects:
-    path: ../packages/three_js_objects
-  three_js_math:
-    path: ../packages/three_js_math
-  three_js_advanced_loaders:
-    path: ../packages/three_js_advanced_loaders
-  three_js_audio:
-    path: ../packages/three_js_audio
-  three_js_postprocessing:
-    path: ../packages/three_js_postprocessing
-  three_js_transform_controls:
-    path: ../packages/three_js_transform_controls
-  three_js_core_loaders:
-    path: ../packages/three_js_core_loaders
-  three_js_terrain:
-    path: ../packages/three_js_terrain
-  three_js_video_texture:
-    path: ../packages/three_js_video_texture
   file_picker: ^10.1.9
 
 flutter:
