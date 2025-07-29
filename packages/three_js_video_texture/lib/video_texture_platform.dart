@@ -170,6 +170,7 @@ class VideoTextureWorker extends VideoTexture {
   }
   
   void pause(){
+    _controller?.id;
     _player?.pause().then((_){
       _isPlaying = false;
       _updating = false;
