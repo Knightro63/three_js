@@ -4,7 +4,7 @@
 [![analysis](https://github.com/Knightro63/three_js/actions/workflows/flutter.yml/badge.svg)](https://github.com/Knightro63/three_js/actions/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-purple.svg)](https://opensource.org/licenses/MIT)
 
-A type of three_js model exporter that allows users to export either obj, ply, or stl files from thier projects.
+A type of three_js model exporter that allows users to export either usdz files from thier projects.
 
 This is a dart conversion of three.js and three_dart, originally created by [@mrdoob](https://github.com/mrdoob) and has a coverted dart fork by [@wasabia](https://github.com/wasabia).
 
@@ -14,6 +14,7 @@ To get started add this to your pubspec.yaml file along with the other portions 
 
 ```dart
   void init() {
+    final exporter = USDZExporter();
     exporter.exportScene('scene', threeJs.scene);
   }
 ```

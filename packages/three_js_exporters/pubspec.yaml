@@ -1,6 +1,6 @@
 name: three_js_exporters
 description: "Flutter three_js_exporters package exports objs and stls from three_js, converted from threejs and three_dart package."
-version: 0.1.0
+version: 0.2.0
 homepage: https://github.com/Knightro63/three_js/tree/main/packages/three_js_exporters
 
 environment:
@@ -12,8 +12,8 @@ dependencies:
     sdk: flutter
   file_picker: ^10.1.9
   path_provider: ^2.1.5
-  three_js_core: ^0.1.0
-  three_js_math: ^0.1.0
+  three_js_core: ^0.2.0
+  three_js_math: ^0.2.0
 
 dev_dependencies:
   flutter_test:

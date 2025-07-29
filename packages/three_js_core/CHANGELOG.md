@@ -1,4 +1,4 @@
-## 0.1.9
+## 0.2.0
 
 * Fixed: Windows track pad scale, rotate, and pan support.
 * Fixed: Change size for windows, and mac

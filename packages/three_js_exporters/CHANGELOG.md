@@ -1,3 +1,7 @@
+## 0.2.0
+
+* Updated to the newest version of three_js_math package.
+
 ## 0.1.0
 
 * Updated to the newest version of three_js packages;
