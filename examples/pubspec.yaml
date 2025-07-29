@@ -77,8 +77,6 @@ dependency_overrides:
     path: ../packages/three_js_terrain
   three_js_video_texture:
     path: ../packages/three_js_video_texture
-  flutter_angle:
-    path: ../../flutter_angle/flutter_angle
   file_picker: ^10.1.9
 
 flutter:

@@ -10,8 +10,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  three_js_core: ^0.1.0
-  three_js_math: ^0.1.0
+  three_js_core: ^0.2.0
+  three_js_math: ^0.2.0
   media_kit: ^1.2.0
   media_kit_video: ^1.2.5
   media_kit_libs_video: ^1.0.5
