@@ -709,7 +709,7 @@ class WebXRWorker extends WebXRManager {
     xrFrame = frame;
 
     if ( pose != null ) {
-      final views = pose?.views;
+      final views = pose?.views.toDart;
 
       if ( glBaseLayer != null) {
         renderer.setRenderTargetFramebuffer( newRenderTarget!, Framebuffer(glBaseLayer!.framebuffer));
