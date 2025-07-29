@@ -14,7 +14,7 @@ dependencies:
   path_provider: ^2.1.5
   image: ^4.5.4
   web: ^1.1.1
-  three_js_exporters: ^0.1.0
+  three_js_exporters: ^0.2.0
   three_js_core: ^0.2.0
   three_js_math: ^0.2.0
 

@@ -1,4 +1,4 @@
-## 0.1.2
+## 0.2.0
 
 * Fixed wasm loading issue.
 * Fixed bug changing double to int.

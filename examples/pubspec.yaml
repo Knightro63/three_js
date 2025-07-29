@@ -51,8 +51,6 @@ dependency_overrides:
     git:
       url: https://github.com/alex-melnyk/flutter-permission-handler.git 
       path: permission_handler_apple
-  three_js_core:
-    path: ../packages/three_js_core
   three_js_svg:
     path: ../packages/three_js_svg
   three_js_text:

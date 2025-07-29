@@ -387,7 +387,7 @@ class ObjectLoader extends Loader {
 
         if (data["format"] != null) texture.format = data["format"];
         if (data["type"] != null) texture.type = data["type"];
-        if (data["encoding"] != null) texture.encoding = data["encoding"];
+        if (data["colorSpace"] != null) texture.colorSpace = data["colorSpace"];
 
         if (data["minFilter"] != null) {
           texture.minFilter = parseConstant(data["minFilter"], textureFilter);
