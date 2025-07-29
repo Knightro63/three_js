@@ -15,7 +15,7 @@ dependencies:
   three_js_math: ^0.2.0
   three_js_geometry: ^0.2.0
   three_js_curves: ^0.2.0
-  three_js_sensors: ^0.2.0
+  three_js_sensors: ^0.1.1
 
 dev_dependencies:
   flutter_test:
