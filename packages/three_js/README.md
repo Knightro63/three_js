@@ -63,7 +63,42 @@ This is a dart conversion of three.js and three_dart, originally created by [@mr
 
 ## Getting started
 
-To get started add three_js to your pubspec.yaml file.
+To get started add three_js to your pubspec.yaml file. Adding permissions for audio and video is required if using either item.
+Please use [Permission Handler](https://pub.dev/packages/permission_handler) package to help with this.
+
+**Android**
+ - Add the following to your AndroidManifest.
+
+```xml
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.example.app">
+    <application
+      ...
+      />
+    </application>
+    <!-- Internet access permissions. If using web assets -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!--
+      Media access permissions.
+      Android 13 or higher.
+      https://developer.android.com/about/versions/13/behavior-changes-13#granular-media-permissions
+      -->
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+    <!--
+      Storage access permissions.
+      Android 12 or lower.
+      -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+</manifest>
+```
+
+**MacOS and iOS**
+ - Please add some permissions to have this work. User Selected File "Read/Write"
+ - If using web assets please add: Incoming Connections (Server)
+
+**Linux**
+ - The folling is required for audio and video `sudo apt install libmpv-dev mpv`
 
 ## Usage
 
@@ -92,7 +127,7 @@ Find the example for this API [here](https://github.com/Knightro63/three_js/tree
  - Some RGBELoaders cause app to crash
  
 **Windows**
- - Tonemapping truns screen black
+ - Tonemapping turns screen black
  - Some RGBELoaders cause app to crash
 
 **Web**
@@ -104,7 +139,7 @@ Find the example for this API [here](https://github.com/Knightro63/three_js/tree
  - Simplify modifer has weird artifacts
 
 **Linux**
- - Tonemapping truns screen black
+ - Tonemapping turns screen black
  - Change screen size does not function currently
  - Postprocessing does not work
  - Track pad does not zoom out
@@ -114,7 +149,6 @@ Find the example for this API [here](https://github.com/Knightro63/three_js/tree
 
 **Other Libs**
  - [Advanced Exporters](https://pub.dev/packages/three_js_advanced_exporters) a USDZ exporter to your three_js project.
- - [Audio](https://pub.dev/packages/three_js_audio) a audio api for three_js.
  - [BVH CSG](https://pub.dev/packages/three_js_bvh_csg) a bvh csg api for three_js.
  - [Exporters](https://pub.dev/packages/three_js_exporters) an api to add STL, OBJ or PLY exporter for three_js.
  - [Geometry](https://pub.dev/packages/three_js_geometry) an api to add complex geometries to three_js.
@@ -128,10 +162,10 @@ Find the example for this API [here](https://github.com/Knightro63/three_js/tree
  - [Video Texture](https://pub.dev/packages/three_js_video_texture) an api to add videos to three_js.
 
 **ADD-ONS**
- - [Omio](https://github.com/Knightro63/oimo_physics) a physics engine for three_js.
- - [Cannon](https://github.com/Knightro63/cannon_physics) a physics engine for three_js.
- - [Terrain](https://github.com/Knightro63/three_js/tree/main/packages/three_js_terrain) a map generator for three_js.
- - [XR](https://github.com/Knightro63/three_js/tree/main/packages/three_js_xr) a VR/AR/MR sdk for three_js. (web only)
+ - [Omio](https://pub.dev/packages/oimo_physics) a physics engine for three_js.
+ - [Cannon](https://pub.dev/packages/cannon_physics) a physics engine for three_js.
+ - [Terrain](https://pub.dev/packages/three_js_terrain) a map generator for three_js.
+ - [XR](https://pub.dev/packages/three_js_xr) a VR/AR/MR sdk for three_js. (web only)
 
 ## Contributing
 

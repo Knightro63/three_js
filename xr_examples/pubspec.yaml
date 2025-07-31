@@ -1,0 +1,35 @@
+name: examples
+description: "A new Flutter project."
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.3.4 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  css:
+    git:
+      url: https://github.com/Knightro63/css.git
+  three_js: ^0.2.0
+  three_js_helpers: ^0.2.0
+  three_js_objects: ^0.2.0
+  three_js_geometry: ^0.2.0
+  three_js_video_texture: ^0.0.1
+  oimo_physics: ^0.0.4
+
+  three_js_xr:
+    path: ../packages/three_js_xr
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/textures/
+    - assets/screenshots/

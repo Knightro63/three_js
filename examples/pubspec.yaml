@@ -17,8 +17,8 @@ dependencies:
   css:
     git:
       url: https://github.com/Knightro63/css.git
-  three_js:
-    path: ../packages/three_js
+  three_js: ^0.2.0
+    #path: ../packages/three_js
   three_js_helpers: ^0.2.0
   three_js_transform_controls: ^0.2.0
   three_js_svg: ^0.2.0

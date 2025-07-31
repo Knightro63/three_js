@@ -1,3 +1,7 @@
+## 0.2.1
+
+* Fixed: WASM not being supported on pub.dev
+
 ## 0.2.0
 
 * Fixed: Windows track pad scale, rotate, and pan support.

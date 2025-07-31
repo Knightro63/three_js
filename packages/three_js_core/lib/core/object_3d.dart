@@ -1,16 +1,5 @@
-import '../others/console.dart';
+import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
-import '../materials/index.dart';
-import '../textures/index.dart';
-import '../objects/index.dart';
-import '../cameras/index.dart';
-import '../lights/index.dart';
-import '../scenes/index.dart';
-import '../renderers/index.dart';
-import '../geometries/buffer_geometry.dart';
-import 'event_dispatcher.dart';
-import './layers.dart';
-import './raycaster.dart';
 
 typedef OnRender = void Function({
   WebGLRenderer? renderer,

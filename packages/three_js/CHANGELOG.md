@@ -1,3 +1,9 @@
+## 0.2.1
+
+* Updated: console logger for wasm
+* Added linux to platfroms
+* Updated README
+
 ## 0.2.0
 
 * Updated: flutter_angle: 0.3.0
