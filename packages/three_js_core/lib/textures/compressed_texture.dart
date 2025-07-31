@@ -51,7 +51,7 @@ class CompressedTexture extends Texture {
   /// renderer.getMaxAnisotropy() to find the maximum valid anisotropy value for
   /// the GPU; this value is usually a power of 2.
   /// 
-  /// [encoding] - The default is [NoColorSpace]. 
+  /// [colorSpace] - The default is [NoColorSpace]. 
   /// See [color space constants] for other
   /// choices.
   /// 
@@ -68,8 +68,8 @@ class CompressedTexture extends Texture {
     int? magFilter, 
     int? minFilter, 
     int? anisotropy, 
-    int? encoding
-  ]):super(null, mapping, wrapS, wrapT, magFilter, minFilter, format, type, anisotropy, encoding) {
+    String? colorSpace
+  ]):super(null, mapping, wrapS, wrapT, magFilter, minFilter, format, type, anisotropy, colorSpace) {
     // this.image = ImageDataInfo(null, width, height, null);
     isCompressedTexture = true;
     console.info(" CompressedTexture todo ============ ");

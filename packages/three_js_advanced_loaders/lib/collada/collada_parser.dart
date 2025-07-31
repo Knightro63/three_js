@@ -1535,8 +1535,6 @@ class ColladaParser{
       }
     }
 
-    print(data);
-
     return data;
   }
 
@@ -2513,7 +2511,7 @@ class ColladaParser{
 
   Map<String, dynamic> buildSkin(Map<String, dynamic> data ) {
     int descending( a, b ) {
-      return ((b['weight'] - a['weight'])).toInt();
+      return (b['weight'] - a['weight']).toInt();
     }
 
     const BONE_LIMIT = 4;
@@ -2564,11 +2562,24 @@ class ColladaParser{
 
       vertexSkinData.sort( descending );
 
+      conv(List list, int index) {
+        if(index <= 0){
+          return list[0];
+        }
+        if(index >= list.length){
+          if((index-list.length) >= list.length){
+            final o = (index/list.length).floor();
+            return list[index-o];
+          }
+          return list[index-list.length];
+        }
+        return list[index];
+      }
       // now we provide for each vertex a set of four index and weight values.
       // the order of the skin data matches the order of vertices
       for (int j = 0; j < BONE_LIMIT; j ++ ) {
-        final d = vertexSkinData.length > j ? vertexSkinData[ j ]:null;
-
+        //final d = vertexSkinData.length > j ? vertexSkinData[ j ]:null;
+        final d = conv(vertexSkinData,j);
         if ( d != null ) {
           build['indices']['array'].add( d['index'] );
           build['weights']['array'].add( d['weight']);
@@ -2620,7 +2631,6 @@ class ColladaParser{
       }
     }
 
-    print(data);
     return data;
   }
 
@@ -2710,7 +2720,7 @@ class ColladaParser{
     final array = parseFloats( xml.innerText );
     switch (data['type']) {
       case 'matrix':
-        data['obj'] = Matrix4().copyFromArray( array ).transpose();
+        data['obj'] = Matrix4.identity().copyFromArray( array ).transpose();
         break;
       case 'translate':
         data['obj'] = Vector3().copyFromArray( array );

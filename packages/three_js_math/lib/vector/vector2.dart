@@ -17,7 +17,7 @@ class Vector2 extends Vector{
     this.y = y ?? 0;
   }
 
-  Vector2.fromJson(Map<String,num>? json) {
+  Vector2.fromJson([Map<String,num>? json]) {
     if (json != null) {
       List<num> data = json.values.toList();
       x = data[0].toDouble();
@@ -325,6 +325,13 @@ class Vector2 extends Vector{
   }
   @override
   List<num> toNumArray(List<num> array, [int offset = 0]) {
+    array[offset] = storage[0];
+    array[offset + 1] = storage[1];
+
+    return array;
+  }
+  @override
+  NativeArray copyIntoNativeArray(NativeArray array, [int offset = 0]) {
     array[offset] = storage[0];
     array[offset + 1] = storage[1];
 

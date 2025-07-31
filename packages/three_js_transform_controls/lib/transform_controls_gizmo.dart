@@ -115,15 +115,15 @@ class TransformControlsGizmo extends Object3D {
     // Gizmo definitions - custom hierarchy definitions for setupGizmo() function
 
     // Gizmo creation
-    gizmo[GizmoType.translate] = setupGizmo(gizmoInfo(GizmoType.translate,ContorlsMode.gizmo));
-    gizmo[GizmoType.rotate] = setupGizmo(gizmoInfo(GizmoType.rotate,ContorlsMode.gizmo));
-    gizmo[GizmoType.scale] = setupGizmo(gizmoInfo(GizmoType.scale,ContorlsMode.gizmo));
-    picker[GizmoType.translate] = setupGizmo(gizmoInfo(GizmoType.translate,ContorlsMode.picker));
-    picker[GizmoType.rotate] = setupGizmo(gizmoInfo(GizmoType.rotate,ContorlsMode.picker));
-    picker[GizmoType.scale] = setupGizmo(gizmoInfo(GizmoType.scale,ContorlsMode.picker));
-    helper[GizmoType.translate] = setupGizmo(gizmoInfo(GizmoType.translate,ContorlsMode.helper));
-    helper[GizmoType.rotate] = setupGizmo(gizmoInfo(GizmoType.rotate,ContorlsMode.helper));
-    helper[GizmoType.scale] = setupGizmo(gizmoInfo(GizmoType.scale,ContorlsMode.helper));
+    gizmo[GizmoType.translate] = setupGizmo(gizmoInfo(GizmoType.translate,ContorlsMode.gizmo)!);
+    gizmo[GizmoType.rotate] = setupGizmo(gizmoInfo(GizmoType.rotate,ContorlsMode.gizmo)!);
+    gizmo[GizmoType.scale] = setupGizmo(gizmoInfo(GizmoType.scale,ContorlsMode.gizmo)!);
+    picker[GizmoType.translate] = setupGizmo(gizmoInfo(GizmoType.translate,ContorlsMode.picker)!);
+    picker[GizmoType.rotate] = setupGizmo(gizmoInfo(GizmoType.rotate,ContorlsMode.picker)!);
+    picker[GizmoType.scale] = setupGizmo(gizmoInfo(GizmoType.scale,ContorlsMode.picker)!);
+    helper[GizmoType.translate] = setupGizmo(gizmoInfo(GizmoType.translate,ContorlsMode.helper)!);
+    helper[GizmoType.rotate] = setupGizmo(gizmoInfo(GizmoType.rotate,ContorlsMode.helper)!);
+    helper[GizmoType.scale] = setupGizmo(gizmoInfo(GizmoType.scale,ContorlsMode.helper)!);
 
     add(gizmo[GizmoType.translate]);
     add(gizmo[GizmoType.rotate]);
@@ -851,7 +851,7 @@ class TransformControlsGizmo extends Object3D {
   }
 
   // Creates an Object3D with gizmos described in custom hierarchy definition.
-  static Mesh setupGizmo(gizmoMap) {
+  static Mesh setupGizmo(Map<String,dynamic> gizmoMap) {
     final gizmo = Mesh();
 
     for (final name in gizmoMap.keys) {
@@ -862,7 +862,7 @@ class TransformControlsGizmo extends Object3D {
 
         late Object3D object;
         if (gi.length > 0) {
-          object = gi[0].clone();
+          object = gi[0];
         }
 
         List<num>? position;

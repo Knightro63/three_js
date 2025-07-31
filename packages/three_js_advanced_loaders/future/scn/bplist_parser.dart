@@ -4,7 +4,7 @@ import 'package:three_js_core/three_js_core.dart';
 import 'binary_reader.dart';
 
 const debug = false;
-final Map<String,dynamic> _classForKey = {};
+//final Map<String,dynamic> _classForKey = {};
 
 class BPlist{
   static late int uid;

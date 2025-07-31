@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'package:three_js_math/math/index.dart';
+
 import '../core/index.dart';
 import 'camera.dart';
 import 'dart:math' as math;
@@ -82,18 +84,22 @@ class PerspectiveCamera extends Camera {
     return filmGauge / math.max(aspect, 1);
   }
 
+  /// Calculates the focal length from the current .fov and .filmGauge.
+	double getFocalLength() {
+		final vExtentSlope = math.tan(0.5 * this.fov ).toRad();
+		return 0.5 * this.getFilmHeight() / vExtentSlope;
+	}
+
   /// Sets the FOV by focal length in respect to the current
   /// [.filmGauge].
   /// 
   /// By default, the focal length is specified for a 35mm (full frame) camera.
 	void setFocalLength(double focalLength){
-
 		// see http://www.bobatkins.com/photography/technical/field_of_view.html
 		final vExtentSlope = 0.5 * getFilmHeight() / focalLength;
 
 		fov = (180.0 / math.pi) * 2 * math.atan( vExtentSlope );
 		updateProjectionMatrix();
-
 	}
 
   /// [fullWidth] — full width of multiview setup

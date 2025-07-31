@@ -157,6 +157,7 @@ class WebGLRenderer {
   late WebGLBindingStates bindingStates;
 
   late WebXRManager xr;
+  late WebXRManager Function(WebGLRenderer renderer, dynamic gl)? _setXR;
   late WebGLUniformsGroups uniformsGroups;
   late WebGLShadowMap shadowMap;
 
@@ -185,6 +186,7 @@ class WebGLRenderer {
     _scissor = Vector4(0, 0, width, height);
 
     _gl = this.parameters["gl"];
+    _setXR = this.parameters["xr"];
 
     initGLContext();
   }
@@ -228,10 +230,11 @@ class WebGLRenderer {
     indexedBufferRenderer = WebGLIndexedBufferRenderer(_gl, extensions, info);
 
     info.programs = programCache.programs;
-
-    xr = WebXRManager(this, _gl);
-		// xr.addEventListener( 'sessionstart', onXRSessionStart );
-		// xr.addEventListener( 'sessionend', onXRSessionEnd );
+  
+    xr = _setXR?.call(this,gl) ?? WebXRManager(this, _gl);
+    xr.init();
+		xr.addEventListener( 'sessionstart', onXRSessionStart );
+		xr.addEventListener( 'sessionend', onXRSessionEnd );
   }
 
   // API
@@ -559,7 +562,7 @@ class WebGLRenderer {
     if (material.wireframe) {
       index = geometries.getWireframeAttribute(geometry);
       if (index == null) return;
-      if(kIsWeb){
+      if(kIsWeb && !kIsWasm){
         rangeFactor = 2;
       }
     }
@@ -753,11 +756,11 @@ class WebGLRenderer {
     if (onAnimationFrameCallback != null) onAnimationFrameCallback!(time);
   }
 
-  void onXRSessionStart() {
+  void onXRSessionStart(event) {
     animation.stop();
   }
 
-  void onXRSessionEnd() {
+  void onXRSessionEnd(event) {
     animation.start();
   }
 
@@ -1031,7 +1034,6 @@ class WebGLRenderer {
 			}
 
 			if ( currentRenderState?.state.transmissionRenderTarget[ camera.id ] == null ) {
-
 				currentRenderState?.state.transmissionRenderTarget[ camera.id ] = WebGLRenderTarget( 1, 1, WebGLRenderTargetOptions({
 					'generateMipmaps': true,
 					'type': ( extensions.has( 'EXT_color_buffer_half_float' ) || extensions.has( 'EXT_color_buffer_float' ) ) ? HalfFloatType : UnsignedByteType,
@@ -1040,7 +1042,7 @@ class WebGLRenderer {
 					'stencilBuffer': stencil,
 					'resolveDepthBuffer': false,
 					'resolveStencilBuffer': false,
-          'colorSpace': ColorManagement.workingColorSpace,
+          'colorSpace': ColorManagement.workingColorSpace.toString(),
         }));
 			}
 
@@ -1627,7 +1629,7 @@ class WebGLRenderer {
     //}
   }
 
-  void setRenderTargetFramebuffer(RenderTarget renderTarget, defaultFramebuffer) {
+  void setRenderTargetFramebuffer(RenderTarget renderTarget, Framebuffer? defaultFramebuffer) {
     final renderTargetProperties = properties.get(renderTarget);
     renderTargetProperties["__webglFramebuffer"] = defaultFramebuffer;
     renderTargetProperties["__useDefaultFramebuffer"] = defaultFramebuffer == null;
@@ -1886,11 +1888,11 @@ class WebGLRenderer {
       textures.setTexture2D( dstTexture, 0 );
       glTarget = WebGL.TEXTURE_2D;
     }
-    if(kIsWeb){
-      _gl.pixelStorei( WebGL.UNPACK_FLIP_Y_WEBGL, dstTexture.flipY?1:0 );
-      _gl.pixelStorei( WebGL.UNPACK_PREMULTIPLY_ALPHA_WEBGL, dstTexture.premultiplyAlpha?1:0 );
-      _gl.pixelStorei( WebGL.UNPACK_ALIGNMENT, dstTexture.unpackAlignment );
-    }
+    // if(kIsWeb){
+    //   _gl.pixelStorei( WebGL.UNPACK_FLIP_Y_WEBGL, dstTexture.flipY?1:0 );
+    //   _gl.pixelStorei( WebGL.UNPACK_PREMULTIPLY_ALPHA_WEBGL, dstTexture.premultiplyAlpha?1:0 );
+    //   _gl.pixelStorei( WebGL.UNPACK_ALIGNMENT, dstTexture.unpackAlignment );
+    // }
 
     // used for copying data from cpu
     final currentUnpackRowLen = _gl.getParameter( WebGL.UNPACK_ROW_LENGTH );

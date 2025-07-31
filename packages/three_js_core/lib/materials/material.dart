@@ -109,6 +109,8 @@ class Material with EventDispatcher {
   dynamic roughnessNode;
   dynamic normalNode;
 
+  bool isShadowPassMaterial = false;
+
   int id = materialId++;
   String uuid = MathUtils.generateUUID();
   String name = "";
@@ -528,7 +530,10 @@ class Material with EventDispatcher {
       refractionRatio = newValue.toDouble();
     }else if (key == "roughnessMap") {
       roughnessMap = newValue;
-    } else if (key == "shading") {
+    } 
+    else if(key == 'specularColorMap'){
+      specularColorMap = newValue;
+    }else if (key == "shading") {
       //   // for backward compatability if shading is set in the constructor
       throw ('THREE.$type: .shading has been removed. Use the boolean .flatShading instead.');
       //   this.flatShading = ( newValue == FlatShading ) ? true : false;
@@ -577,6 +582,9 @@ class Material with EventDispatcher {
       wireframeLinewidth = newValue.toDouble();
     } else if (key == "shadowSide") {
       shadowSide = newValue;
+    }
+    else if(key == "aoMapIntensity" ){
+      aoMapIntensity = newValue*1.0;
     }
     else if(key == "bumpMap"){
       bumpMap = newValue;
@@ -627,9 +635,14 @@ class Material with EventDispatcher {
       }
     } else if(key == 'glslVersion'){
       glslVersion = newValue;
-    }else if(key == ''){
+    }
+    else if(key == ''){
 
-    }else if (key == 'emissiveIntensity') {
+    }
+    else if (key == 'displacementScale') {
+      displacementScale = newValue.toDouble();
+    }
+    else if (key == 'emissiveIntensity') {
       emissiveIntensity = newValue.toDouble();
     }
     else {

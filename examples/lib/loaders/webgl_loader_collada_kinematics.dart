@@ -29,9 +29,6 @@ class _MyAppState extends State<WebglLoaderColladaKinematics> {
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
       setup: setup,
-      settings: three.Settings(
-        useOpenGL: useOpenGL
-      )
     );
     super.initState();
   }
@@ -55,6 +52,7 @@ class _MyAppState extends State<WebglLoaderColladaKinematics> {
     );
   }
 
+  late three.OrbitControls controls;
   three.Object3D? dae;
   three.KinematicsData? kinematics;
   final tweenParameters = {};
@@ -63,11 +61,10 @@ class _MyAppState extends State<WebglLoaderColladaKinematics> {
   Future<void> setup() async {
     threeJs.camera = three.PerspectiveCamera( 45, threeJs.width / threeJs.height, 1, 2000 );
     threeJs.camera.position.setValues( 2, 2, 3 );
-
+    controls = three.OrbitControls(threeJs.camera, threeJs.globalKey);
     threeJs.scene = three.Scene();
 
     // Grid
-
     final grid = GridHelper( 20, 20, 0xc1c1c1, 0x8d8d8d );
     threeJs.scene.add( grid );
 
@@ -77,6 +74,7 @@ class _MyAppState extends State<WebglLoaderColladaKinematics> {
       dae = collada?.scene;
 
       dae?.traverse(( child ) {
+        print(child.name);
         if ( child is three.Mesh ) {
           // model does not have normals
           child.material?.flatShading = true;
@@ -103,20 +101,20 @@ class _MyAppState extends State<WebglLoaderColladaKinematics> {
     threeJs.addAnimationEvent((dt){
       kinematicsTween.update();
 
-      final timer = DateTime.now().millisecondsSinceEpoch * 0.0001;
+      // final timer = DateTime.now().millisecondsSinceEpoch * 0.0001;
 
-      threeJs.camera.position.x = math.cos( timer ) * 20;
-      threeJs.camera.position.y = 10;
-      threeJs.camera.position.z = math.sin( timer ) * 20;
+      // threeJs.camera.position.x = math.cos( timer ) * 20;
+      // threeJs.camera.position.y = 10;
+      // threeJs.camera.position.z = math.sin( timer ) * 20;
 
-      threeJs.camera.lookAt(three.Vector3( 0, 5, 0 ));
+      // threeJs.camera.lookAt(three.Vector3( 0, 5, 0 ));
 
     });
   }
 
   void setupTween() {
     if(kinematics != null){
-      final duration = math.Random().nextInt(4000)+1000;//three.MathUtils.randInt( 1000, 5000 );
+      final duration = math.Random().nextInt(4000)+1000;
       final target = {};
 
       for ( final prop in kinematics!.joints.keys) {

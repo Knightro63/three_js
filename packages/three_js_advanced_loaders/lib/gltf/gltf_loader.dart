@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert' as convert;
 import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:three_js_advanced_loaders/ktx_loader.dart';
 import 'package:three_js_core/three_js_core.dart';
 import 'gltf_extensions.dart';
@@ -40,6 +41,7 @@ class GLTFData{
 class GLTFLoader extends Loader {
   late final FileLoader _loader;
   late List<Function> pluginCallbacks;
+  
   late dynamic _dracoLoader;
   late KTXLoader? _ktx2Loader;
   late dynamic _ddsLoader;
@@ -153,6 +155,41 @@ class GLTFLoader extends Loader {
     ThreeFile tf = await _loader.fromBytes(bytes);
     return _parse(tf.data);
   }
+  @override
+  Future<GLTFData?> unknown(dynamic url) async{
+    if(url is File){
+      return fromFile(url);
+    }
+    else if(url is Blob){
+      return fromBlob(url);
+    }
+    else if(url is Uri){
+      return fromNetwork(url);
+    }
+    else if(url is Uint8List){
+      return fromBytes(url);
+    }
+    else if(url is String){
+      RegExp dataUriRegex = RegExp(r"^data:(.*?)(;base64)?,(.*)$");
+      if(url.contains('http://') || url.contains('https://')){  
+        return fromNetwork(Uri.parse(url));
+      }
+      else if(url.contains('assets')){
+        return fromAsset(url);
+      }
+      else if(dataUriRegex.hasMatch(url)){
+        RegExpMatch? dataUriRegexResult = dataUriRegex.firstMatch(url);
+        String? data = dataUriRegexResult!.group(3)!;
+
+        return fromBytes(convert.base64.decode(data));
+      }
+      else{
+        return fromPath(url);
+      }
+    }
+
+    return null;
+  }
 
   @override
   GLTFLoader setPath(String path) {
@@ -170,10 +207,10 @@ class GLTFLoader extends Loader {
   //   return this;
   // }
 
-  GLTFLoader setKTX2Loader(ktx2Loader) {
-    _ktx2Loader = ktx2Loader;
-    return this;
-  }
+  // GLTFLoader setKTX2Loader(ktx2Loader) {
+  //   _ktx2Loader = ktx2Loader;
+  //   return this;
+  // }
 
   GLTFLoader setMeshoptDecoder(meshoptDecoder) {
     _meshoptDecoder = meshoptDecoder;
@@ -197,19 +234,71 @@ class GLTFLoader extends Loader {
   }
 
   Future<GLTFData> _parse(Uint8List data) async{
+    bool isGLB = String.fromCharCodes(data).toString().substring(0,4) == 'glTF';
     String cacheName = String.fromCharCodes(data).toString().substring(0,50);
     manager.itemStart(cacheName);
-    final didParse = await _parseAll(data);
+    final didParse = isGLB?await compute(
+      _parseAll,
+      {
+        'data': data,
+        'path': path,
+        'resourcePath': resourcePath,
+        'crossOrigin': crossOrigin,
+        'requestHeader': requestHeader,
+        'manager': manager,
+        'flipY': flipY,
+        '_ktx2Loader': _ktx2Loader,
+        '_meshoptDecoder': _meshoptDecoder,
+        'pluginCallbacks': pluginCallbacks,
+        '_dracoLoader': _dracoLoader,
+        '_ddsLoader': _ddsLoader,
+      },
+    ):await _parseAll(
+      {
+        'data': data,
+        'path': path,
+        'resourcePath': resourcePath,
+        'crossOrigin': crossOrigin,
+        'requestHeader': requestHeader,
+        'manager': manager,
+        'flipY': flipY,
+        '_ktx2Loader': _ktx2Loader,
+        '_meshoptDecoder': _meshoptDecoder,
+        'pluginCallbacks': pluginCallbacks,
+        '_dracoLoader': _dracoLoader,
+        '_ddsLoader': _ddsLoader,
+      }
+    );
     manager.itemEnd(cacheName);
     return didParse;
   }
 
-  Future<GLTFData> _parseAll(Uint8List data) {
+  Future<GLTFData> _parseAll(Map<String, dynamic> params) {
+    final data = params['data'];
+    final path = params['path'];
+    final resourcePath = params['resourcePath'];
+    final crossOrigin = params['crossOrigin'];
+    final requestHeader = params['requestHeader'];
+    final manager = params['manager'];
+    final flipY = params['flipY'];
+    final _ktx2Loader = params['_ktx2Loader'];
+    final _meshoptDecoder = params['_meshoptDecoder'];
+    final pluginCallbacks = params['pluginCallbacks'];
+    final _dracoLoader = params['_dracoLoader'];
+    final _ddsLoader = params['_ddsLoader'];
+    
     final String content;
     final extensions = {};
     final plugins = {};
 
-    final magic = LoaderUtils.decodeText(Uint8List.view(data.buffer, 0, 4));
+    late final String magic;
+    if(kIsWasm){
+      final list = data.buffer.asUint8List().sublist(0, 4);
+      magic = LoaderUtils.decodeText(list);
+    }
+    else{
+      magic = LoaderUtils.decodeText(Uint8List.view(data.buffer, 0, 4));
+    }
     if (magic == behm) {
       extensions[extensions["KHR_BINARY_GLTF"]] = GLTFBinaryExtension(data.buffer);
       content = extensions[extensions["KHR_BINARY_GLTF"]].content;

@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
+
 import 'gltf_mesh_standard_sg_material.dart';
 import 'gltf_helper.dart';
 import 'gltf_cubic_spline_interpolant.dart';
@@ -121,6 +123,10 @@ class GLTFParser {
 
     assignExtrasToUserData(result, json);
 
+    for (final scene in result.scenes ) {
+      scene.updateMatrixWorld();
+    }
+
     return result;
   }
 
@@ -188,13 +194,24 @@ class GLTFParser {
   }
 
   /// Returns a reference to a shared resource, cloning it if necessary.
-  getNodeRef(Map<String,dynamic> cache, int index, object) {
+  Object3D getNodeRef(Map<String,dynamic> cache, int index, Object3D object) {
     if (cache["refs"][index] == null || cache["refs"][index] <= 1) return object;
-
     final ref = object.clone();
 
-    ref.name += '_instance_${(cache["uses"][index]++)}';
+		void updateMappings(Object3D original, Object3D clone ){
+			final mappings = this.associations[original];
+			if ( mappings != null ) {
+				this.associations[clone] = mappings;
+			}
 
+			for ( final child in original.children) {
+				updateMappings( child, clone.children[ i ] );
+			}
+		};
+
+		updateMappings( object, ref );
+
+    ref.name += '_instance_${(cache["uses"][index]++)}';
     return ref;
   }
 
@@ -228,7 +245,7 @@ class GLTFParser {
   /// @param {number} index
   /// @return {Promise<Object3D|Material|THREE.Texture|AnimationClip|ArrayBuffer|Object>}
   ///
-  getDependency(String type, int index) async {
+  Future getDependency(String type, int index) async {
     final cacheKey = '$type:$index';
     dynamic dependency = cache.get(cacheKey);
 
@@ -239,7 +256,10 @@ class GLTFParser {
           break;
 
         case 'node':
-          dependency = await loadNode(index);
+					dependency = await _invokeOne(( ext ) async{
+						return ext?.loadNode != null ? await ext!.loadNode(index) : null;
+					});
+          //dependency = await loadNode(index);
           break;
 
         case 'mesh':
@@ -254,11 +274,8 @@ class GLTFParser {
 
         case 'bufferView':
           dependency = await _invokeOne((ext) async {
-            return ext?.loadBufferView != null
-                ? await ext?.loadBufferView?.call(index)
-                : null;
+            return ext?.loadBufferView != null? await ext?.loadBufferView?.call(index): null;
           });
-
           break;
 
         case 'buffer':
@@ -286,7 +303,10 @@ class GLTFParser {
           break;
 
         case 'animation':
-          dependency = await loadAnimation(index);
+          dependency = await _invokeOne((ext) async {
+            return ext?.loadAnimation != null? await ext?.loadAnimation?.call(index): null;
+          });
+          //dependency = await loadAnimation(index);
           break;
 
         case 'camera':
@@ -294,7 +314,16 @@ class GLTFParser {
           break;
 
         default:
-          throw ('GLTFParser getDependency Unknown type: $type');
+					dependency = this._invokeOne(( ext ) {
+						return ext != this && ext.getDependency && ext.getDependency( type, index );
+					} );
+
+					if ( !dependency ) {
+						throw ('GLTFParser getDependency Unknown type: $type');
+					}
+
+					break;
+          
       }
 
       cache.add(cacheKey, dependency);
@@ -364,21 +393,30 @@ class GLTFParser {
   /// @param {number} bufferViewIndex
   /// @return {Promise<ArrayBuffer>}
   ///
+  int i = 0;
   Future<ByteBuffer?> loadBufferView2(int bufferViewIndex) async {
     final bufferViewDef = json["bufferViews"][bufferViewIndex];
     final buffer = await getDependency('buffer', bufferViewDef["buffer"]);
     final byteLength = bufferViewDef["byteLength"] ?? 0;
     final byteOffset = bufferViewDef["byteOffset"] ?? 0;
-
     // use sublist(0) clone list, if not when load texture decode image will fail ? and with no error, return null image
     ByteBuffer? otherBuffer;
-    if (buffer is Uint8List) {
-      otherBuffer = Uint8List.view(buffer.buffer, byteOffset, byteLength).sublist(0).buffer;
+    if (buffer is TypedData) {
+      if(kIsWasm){
+        otherBuffer = buffer.buffer.asUint8List().sublist(byteOffset, byteOffset + byteLength).buffer;
+      }
+      else{
+        otherBuffer = Uint8List.view(buffer.buffer, byteOffset, byteLength).sublist(0).buffer;
+      }
     } 
-    else if(buffer != null){
-      otherBuffer = Uint8List.view(buffer, byteOffset, byteLength).sublist(0).buffer;
+    else if(buffer != null && buffer is ByteBuffer){
+      if(kIsWasm){
+        otherBuffer = buffer.asUint8List().sublist(byteOffset, byteOffset + byteLength).buffer;
+      }
+      else{
+        otherBuffer = Uint8List.view(buffer, byteOffset, byteLength).sublist(0).buffer;
+      }
     }
-
     return otherBuffer;
   }
 
@@ -390,20 +428,22 @@ class GLTFParser {
   loadAccessor(accessorIndex) async {
     final parser = this;
     final json = this.json;
-
     Map<String, dynamic> accessorDef = this.json["accessors"][accessorIndex];
 
     if (accessorDef["bufferView"] == null && accessorDef["sparse"] == null) {
-      // Ignore empty accessors, which may be used to declare runtime
-      // information about attributes coming from another source (e.g. Draco
-      // compression extension).
-      return null;
+			final itemSize = webglTypeSize[ accessorDef['type'] ];
+			final TypedArray = webglComponentTypes[ accessorDef['componentType'] ]!;
+			final normalized = accessorDef['normalized'] == true;
+
+			final array = TypedArray( accessorDef['count'] * itemSize );
+			return BufferAttribute.fromUnknown(array, itemSize!, normalized );
     }
 
     dynamic bufferView;
     if (accessorDef["bufferView"] != null) {
       bufferView = await getDependency('bufferView', accessorDef["bufferView"]);
-    } else {
+    } 
+    else {
       bufferView = null;
     }
 
@@ -435,44 +475,48 @@ class GLTFParser {
       // Each "slice" of the buffer, as defined by 'count' elements of 'byteStride' bytes, gets its own InterleavedBuffer
       // This makes sure that IBA.count reflects accessor.count properly
       final ibSlice = (byteOffset / byteStride).floor();
-      final ibCacheKey =
-          'InterleavedBuffer:${accessorDef["bufferView"]}:${accessorDef["componentType"]}:$ibSlice:${accessorDef["count"]}';
+      final ibCacheKey = 'InterleavedBuffer:${accessorDef["bufferView"]}:${accessorDef["componentType"]}:$ibSlice:${accessorDef["count"]}';
       dynamic ib = parser.cache.get(ibCacheKey);
-
-      if (ib == null && bufferView != null) {
-        // array = TypedArray.view( bufferView, ibSlice * byteStride, accessorDef.count * byteStride / elementBytes );
+      if (ib == null) {
         array = typedArray.view(
           bufferView, 
           ibSlice * byteStride,
-          accessorDef["count"] * byteStride / elementBytes
+          (accessorDef["count"] * byteStride) ~/ elementBytes
         );
 
-        // Integer parameters to IB/IBA are in array elements, not bytes.
-        ib = InterleavedBuffer.fromList(Float32List.fromList(array), byteStride ~/ elementBytes);
+        final int stride = byteStride ~/ elementBytes;
+        int totalLen = array.length;
+        if(array is Uint8List){
+          ib = InterleavedBuffer(Uint8Array(totalLen).set(array.buffer.asUint8List()), 1);
+        }
+        else if(array is Int8List){
+          ib = InterleavedBuffer(Int8Array(totalLen).set(array.buffer.asInt8List()), 1);
+        }
+        else{
+          ib = InterleavedBuffer(Float32Array(totalLen).set(array.buffer.asFloat32List()), stride);
+        }
 
         parser.cache.add(ibCacheKey, ib);
       }
 
       bufferAttribute = InterleavedBufferAttribute(ib, itemSize, (byteOffset % byteStride) ~/ elementBytes, normalized);
-    } else {
+    } 
+    else {
       if (bufferView == null) {
         array = typedArray.createList(accessorDef["count"] * itemSize);
-        bufferAttribute = GLTypeData.createBufferAttribute(array, itemSize, normalized);
       } 
       else {
-        final array = typedArray.view(bufferView, byteOffset, accessorDef["count"] * itemSize);
-        bufferAttribute = GLTypeData.createBufferAttribute(array, itemSize, normalized);
+        array = typedArray.view(bufferView, byteOffset, accessorDef["count"] * itemSize);
       }
+      bufferAttribute = GLTypeData.createBufferAttribute(array, itemSize, normalized);
     }
 
     // https://github.com/KhronosGroup/glTF/blob/master/specification/2.0/README.md#sparse-accessors
     if (accessorDef["sparse"] != null) {
       final itemSizeIndices = webglTypeSize["SCALAR"]!;
-      final typedArrayIndices =
-          GLTypeData(accessorDef["sparse"]["indices"]["componentType"]);
+      final typedArrayIndices = GLTypeData(accessorDef["sparse"]["indices"]["componentType"]);
 
-      final byteOffsetIndices =
-          accessorDef["sparse"]["indices"]["byteOffset"] ?? 0;
+      final byteOffsetIndices = accessorDef["sparse"]["indices"]["byteOffset"] ?? 0;
       final byteOffsetValues = accessorDef["sparse"]["values"]["byteOffset"] ?? 0;
 
       final sparseIndices = typedArrayIndices.view(sparseIndicesBufferView,
@@ -548,7 +592,6 @@ class GLTFParser {
       return textureCache[cacheKey];
     }
 
-
     loader.flipY = false;
     Texture? texture = await loadImageSource(sourceIndex, loader);
 
@@ -614,7 +657,7 @@ class GLTFParser {
   /// @param {Object} mapDef
   /// @return {Promise}
   ///
-  Future<Texture?> assignTexture(materialParams, mapName, Map<String, dynamic> mapDef, [int? encoding]) async {
+  Future<Texture?> assignTexture(materialParams, mapName, Map<String, dynamic> mapDef, [String? colorSpace]) async {
     final parser = this;
 
     Texture? texture = await getDependency('texture', mapDef["index"]);
@@ -640,8 +683,8 @@ class GLTFParser {
     }
 
 
-    if ( encoding != null ) {
-      texture?.encoding = encoding;
+    if ( colorSpace != null ) {
+      texture?.colorSpace = colorSpace;
     }
 
     materialParams[mapName] = texture;
@@ -681,7 +724,8 @@ class GLTFParser {
       }
 
       material = pointsMaterial;
-    } else if (mesh is Line) {
+    } 
+    else if (mesh is Line) {
       final cacheKey = 'LineBasicMaterial:${material.uuid}';
 
       LineBasicMaterial? lineMaterial = cache.get(cacheKey);
@@ -789,13 +833,12 @@ class GLTFParser {
       if (metallicRoughness["baseColorFactor"] is List) {
         List<double> array = List<double>.from(metallicRoughness["baseColorFactor"].map((e) => e.toDouble()));
 
-        materialParams["color"].copyFromArray(array);
+        (materialParams["color"] as Color).setRGB( array[0], array[1], array[2]);
         materialParams["opacity"] = array[3];
       }
 
       if (metallicRoughness["baseColorTexture"] != null) {
-        pending.add(await parser.assignTexture(
-            materialParams, 'map', metallicRoughness["baseColorTexture"], sRGBEncoding));
+        pending.add(await parser.assignTexture(materialParams, 'map', metallicRoughness["baseColorTexture"], SRGBColorSpace));
       }
 
       materialParams["metalness"] = metallicRoughness["metallicFactor"] ?? 1.0;
@@ -849,8 +892,8 @@ class GLTFParser {
 
       if (materialDef["normalTexture"]["scale"] != null) {
         materialParams["normalScale"] = Vector2(
-            materialDef["normalTexture"].scale,
-            materialDef["normalTexture"].scale);
+            materialDef["normalTexture"]['scale'],
+            materialDef["normalTexture"]['scale']);
       }
     }
 
@@ -865,16 +908,15 @@ class GLTFParser {
       }
     }
 
-    if (materialDef["emissiveFactor"] != null &&
-        materialType != MeshBasicMaterial) {
-      materialParams["emissive"] =
-          Color.fromList(List<double>.from(materialDef["emissiveFactor"].map((e) => e.toDouble())));
+    if (materialDef["emissiveFactor"] != null &&materialType != MeshBasicMaterial) {
+      final emissiveFactor = List<double>.from(materialDef["emissiveFactor"].map((e) => e.toDouble()));
+      materialParams["emissive"] = new Color().setRGB( emissiveFactor[0], emissiveFactor[1], emissiveFactor[2]);
     }
 
     if (materialDef["emissiveTexture"] != null &&
-        materialType != MeshBasicMaterial) {
-      pending.add(await parser.assignTexture(
-          materialParams, 'emissiveMap', materialDef["emissiveTexture"], sRGBEncoding));
+        materialType != MeshBasicMaterial
+    ) {
+      pending.add(await parser.assignTexture(materialParams, 'emissiveMap', materialDef["emissiveTexture"], SRGBColorSpace));
     }
 
     // await Future.wait(pending);
@@ -893,7 +935,8 @@ class GLTFParser {
 
     parser.associations[material] = {
       "type": 'materials',
-      "index": materialIndex
+      "index": materialIndex,
+      "materials": materialIndex
     };
 
     if (materialDef["extensions"] != null){
@@ -1035,7 +1078,7 @@ class GLTFParser {
         // .isSkinnedMesh isn't in glTF spec. See ._markDefs()
         mesh = meshDef["isSkinnedMesh"] == true? SkinnedMesh(geometry, material): Mesh(geometry, material);
 
-        if (mesh is SkinnedMesh && !mesh.geometry!.attributes["skinWeight"].normalized) {
+        if (mesh is SkinnedMesh ) {//&& !mesh.geometry!.attributes["skinWeight"].normalized
           // we normalize floating point skin weight array to fix malformed assets (see #15319)
           // it's important to skip this for non-float32 data since normalizeSkinWeights assumes non-normalized inputs
           mesh.normalizeSkinWeights();
@@ -1079,6 +1122,13 @@ class GLTFParser {
       meshes.add(mesh);
     }
     
+			for (int i = 0, il = meshes.length; i < il; i ++ ) {
+				parser.associations[meshes[ i ]] = {
+					'meshes': meshIndex,
+					'primitives': i
+				};
+			}
+
     if (meshes.length == 1) {
       return meshes[0];
     }
@@ -1138,6 +1188,50 @@ class GLTFParser {
   /// @param {number} skinIndex
   /// @return {Promise<Object>}
   ///
+  Future loadSkin_new(skinIndex) async {
+		final skinDef = this.json['skins'][ skinIndex ];
+		final pending = [];
+
+		for (int i = 0, il = skinDef['joints'].length; i < il; i ++ ) {
+			pending.add( await loadNodeShallow( skinDef['joints'][ i ] ) );
+		}
+
+		if ( skinDef['inverseBindMatrices'] != null ) {
+			pending.add( await getDependency( 'accessor', skinDef['inverseBindMatrices'] ) );
+		} else {
+			pending.add( null );
+		}
+
+    final inverseBindMatrices = pending.removeLast();
+    final jointNodes = pending;
+
+    // Note that bones (joint nodes) may or may not be in the
+    // scene graph at this time.
+
+    final List<Bone> bones = [];
+    final List<Matrix4> boneInverses = [];
+
+    for (int i = 0, il = jointNodes.length; i < il; i ++ ) {
+      final jointNode = jointNodes[ i ];
+
+      if ( jointNode != null) {
+        bones.add( jointNode );
+
+        final mat = Matrix4.identity();
+
+        if ( inverseBindMatrices != null ) {
+          mat.copyFromUnknown( inverseBindMatrices.array, i * 16 );
+        }
+
+        boneInverses.add( mat );
+      } 
+      else {
+        console.warning( 'THREE.GLTFLoader: Joint "%s" could not be found. ${skinDef['joints'][ i ]}', );
+      }
+    }
+
+    return Skeleton( bones, boneInverses );
+  }
   loadSkin(skinIndex) async {
     final skinDef = json["skins"][skinIndex];
 
@@ -1152,7 +1246,6 @@ class GLTFParser {
     skinEntry["inverseBindMatrices"] = accessor;
     return skinEntry;
   }
-
   ///
   /// Specification: https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#animations
   /// @param {number} animationIndex
@@ -1284,7 +1377,7 @@ class GLTFParser {
     return AnimationClip(name, -1, tracks);
   }
 
-  createNodeMesh(int nodeIndex) async {
+  Future<Object3D?> createNodeMesh(int nodeIndex) async {
     final json = this.json;
     final parser = this;
     Map<String, dynamic> nodeDef = json["nodes"][nodeIndex];
@@ -1298,8 +1391,7 @@ class GLTFParser {
     // if weights are provided on the node, override weights on the mesh.
     if (nodeDef["weights"] != null) {
       node.traverse((o) {
-        if (!o.isMesh) return;
-
+        if (o is! Mesh) return;//!o.isMesh
         for (int i = 0, il = nodeDef["weights"].length; i < il; i++) {
           o.morphTargetInfluences[i] = nodeDef["weights"][i];
         }
@@ -1309,12 +1401,46 @@ class GLTFParser {
     return node;
   }
 
+  Future<Object3D> loadNode(int nodeIndex) async {
+    return await loadNodeShallow( nodeIndex );
+		// final json = this.json;
+		// final parser = this;
+
+		// final nodeDef = json['nodes'][ nodeIndex ];
+
+		// final nodePending = await loadNodeShallow( nodeIndex );
+
+		// final List<Object3D> childPending = [];
+		// final childrenDef = nodeDef['children'] ?? [];
+
+		// for (int i = 0, il = childrenDef.length; i < il; i ++ ) {
+		// 	childPending.add( await parser.getDependency( 'node', childrenDef[ i ] ) );
+		// }
+		// final skeletonPending = nodeDef['skin'] == null? null : await parser.getDependency( 'skin', nodeDef['skin'] );
+    
+    // if ( skeletonPending != null ) {
+    //   // This full traverse should be fine because
+    //   // child glTF nodes have not been added to this node yet.
+    //   nodePending.traverse(( mesh ) {
+    //     if (mesh is! SkinnedMesh ) return;
+    //     mesh.bind( skeletonPending, Matrix4.identity() );
+    //   } );
+
+    // }
+
+    // for ( int i = 0, il = childPending.length; i < il; i ++ ) {
+    //   nodePending.add( childPending[ i ] );
+    // }
+
+    // return nodePending;
+  }
+
   ///
   /// Specification: https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#nodes-and-hierarchy
   /// @param {number} nodeIndex
   /// @return {Promise<Object3D>}
   ///
-  Future<Object3D> loadNode(int nodeIndex) async {
+  Future<Object3D> loadNodeShallow(int nodeIndex) async {
     final json = this.json;
     final extensions = this.extensions;
 
@@ -1332,20 +1458,6 @@ class GLTFParser {
     if (meshPromise != null) {
       pending.add(meshPromise);
     }
-    // if ( nodeDef["mesh"] != null ) {
-    //   final mesh = await getDependency( 'mesh', nodeDef["mesh"] );
-    //   final Object3D? node = await getNodeRef( meshCache, nodeDef["mesh"], mesh );
-    //   // if weights are provided on the node, override weights on the mesh.
-    //   if ( nodeDef["weights"] != null ) {
-    //     node?.traverse( ( o ) {
-    //       if (o is! Mesh ) return;
-    //       for ( int i = 0, il = nodeDef["weights"].length; i < il; i ++ ) {
-    //         o.morphTargetInfluences![ i ] = nodeDef["weights"][ i ];
-    //       }
-    //     } );
-    //   }
-    //   pending.add(node);
-    // }
 
     if (nodeDef["camera"] != null) {
       final camera = await getDependency('camera', nodeDef["camera"]);
@@ -1452,6 +1564,7 @@ class GLTFParser {
         if(mesh is SkinnedMesh) {
           List<Bone> bones = [];
           List<Matrix4> boneInverses = [];
+          mesh.frustumCulled = false;
 
           for (int j = 0, jl = jointNodes.length; j < jl; j++) {
             final jointNode = jointNodes[j];
@@ -1514,7 +1627,56 @@ class GLTFParser {
 
     return scene;
   }
+
+	Future loadScene_new(int sceneIndex ) async{
+		final extensions = this.extensions;
+		final sceneDef = this.json['scenes'][ sceneIndex ] as Map;
+
+		// Loader returns Group, not Scene.
+		// See: https://github.com/mrdoob/three.js/issues/18342#issuecomment-578981172
+		final scene = new Group();
+
+		if ( sceneDef['name'] != null) scene.name = createUniqueName( sceneDef['name'] );
+		assignExtrasToUserData( scene, sceneDef );
+
+		if ( sceneDef['extensions'] != null) addUnknownExtensionsToUserData( extensions, scene, sceneDef );
+		final nodeIds = sceneDef['nodes'] ?? [];
+		final pending = [];
+
+		for (int i = 0, il = nodeIds.length; i < il; i ++ ) {
+			pending.add( await getDependency( 'node', nodeIds[ i ] ) );
+		}
+
+    for ( int i = 0, il = pending.length; i < il; i ++ ) {
+      scene.add( pending[ i ] );
+    }
+
+    // Removes dangling associations, associations that reference a node that
+    // didn't make it into the scene.
+    final reduceAssociations = ( node ){
+      final reducedAssociations = new Map();
+      for ( final key in associations.keys) {
+        if ( key is Material || key is Texture ) {
+          reducedAssociations[key] =  associations[key];
+        }
+      }
+
+      node.traverse(( node ){
+        final mappings = parser.associations[node];
+        if ( mappings != null ) {
+          reducedAssociations[node] =  mappings;
+        }
+      } );
+
+      return reducedAssociations;
+    };
+
+    parser.associations = reduceAssociations( scene );
+
+    return scene;
+	}
 }
+
 //class GLTFParser end...
 
 class _TypedKeyframeTrack {

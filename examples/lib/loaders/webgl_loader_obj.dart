@@ -28,7 +28,7 @@ class _MyAppState extends State<WebglLoaderObj> {
     threeJs = three.ThreeJS(
       settings: three.Settings(
         enableShadowMap: false,
-        useOpenGL: true
+        
       ),
       
       onSetupComplete: (){setState(() {});},

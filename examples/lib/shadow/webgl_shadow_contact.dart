@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'package:example/src/gui.dart';
 import 'package:example/src/statistics.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
 import 'package:three_js_helpers/three_js_helpers.dart';
@@ -32,13 +33,12 @@ class _MyAppState extends State<WebglShadowContact> {
     threeJs = three.ThreeJS(
       settings: three.Settings(
         //alpha: true,
-        useSourceTexture: true,
-        useOpenGL: true
+        useSourceTexture: kIsWeb?false:true,
+        
       ),
       
       onSetupComplete: (){setState(() {});},
-      setup: setup,
-      rendererUpdate: renderUpdate
+      setup: setup,      rendererUpdate: renderUpdate
     );
     super.initState();
   }

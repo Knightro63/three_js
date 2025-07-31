@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -56,6 +58,7 @@ class PeripheralsState extends State<Peripherals> {
   late final PanGestureRecognizer panGestureRecognizer;
 
   double _prevScale = 0;
+  int _pointers = 0;
 
   @override
   void initState() {
@@ -87,11 +90,12 @@ class PeripheralsState extends State<Peripherals> {
     }
     ..onEnd = (event){
       _onDragEvent(context, PeripheralType.pointerup, event);
-
     }
     ..onUpdate = (event){
       _onDragEvent(context, PeripheralType.pointermove,event);
     };
+
+    isWindows = !kIsWeb && Platform.isWindows;
   }
 
   void removeAllListeners() {
@@ -110,32 +114,115 @@ class PeripheralsState extends State<Peripherals> {
     _listeners[name] = cls;
   }
 
+  bool isSignal = false;
+  bool isWindows = false;
+  bool start = false;
+  Offset webPosition = Offset(0,0);
+
   @override
   Widget build(BuildContext context) {
     return KeyboardListener(
       focusNode: focusNode,
       onKeyEvent: (event){
         if(event is KeyDownEvent){
+          if(kIsWeb && start){
+            _onDragEvent(context, PeripheralType.pointerup, event);
+            start = false;
+          }
           _onKeyDownEvent(context, event.logicalKey);
         }
         else if(event is KeyUpEvent){
+          if(kIsWeb && start){
+            _onDragEvent(context, PeripheralType.pointerup, event);
+            start = false;
+          }
           _onKeyUpEvent(context, event.logicalKey);
         }
       },
       child:GestureDetector(
         onScaleUpdate: (event){
-          double s = event.scale-_prevScale < 0?1:-1;
-          _onScaleEvent(context, PeripheralType.wheel, {'scale':s});
-          _prevScale = event.scale;
+          final scale = event.scale;
+          if(isWindows && scale != 1.0){
+            Map m = {
+              'scrollDelta': event.focalPoint,
+              'position': event.focalPoint,
+              'localPosition': event.focalPoint
+            };
+            _onDragEvent(context, PeripheralType.pointerup, m);
+            start = false;
+          }
+          if (event.pointerCount > 1 && scale != 1.0) {
+            double s = scale-_prevScale < 0?1:-1;
+            _onScaleEvent(context, PeripheralType.wheel, {'scale':s});
+            _prevScale = scale;
+          } 
+          else if(isWindows && event.pointerCount > 1 && scale == 1.0){
+            if(!start){
+              Map m = {
+                'scrollDelta': event.focalPoint,
+                'position': event.focalPoint,
+                'localPosition': event.focalPoint
+              };
+              webPosition = event.focalPoint;
+              _onDragEvent(context, PeripheralType.pointerdown, m);
+              start = true;
+            }
+            webPosition-=event.focalPointDelta;
+            Map m = {
+              'scrollDelta': webPosition,
+              'position': event.localFocalPoint,
+              'localPosition': event.localFocalPoint
+            };
+            _onDragEvent(context, PeripheralType.pointermove,m);
+          }
         },
         child: Listener(
-          onPointerPanZoomStart: panGestureRecognizer.addPointerPanZoom,
+          onPointerPanZoomStart: isWindows?null:panGestureRecognizer.addPointerPanZoom,
           onPointerSignal: (event) {
-            if (event is PointerScrollEvent) {
-              _onPointerEvent(context, PeripheralType.wheel, event);
+            if(kIsWeb){
+              isSignal = true;
+              if (event is PointerScrollEvent){
+                double dy = event.scrollDelta.dy.abs();
+                double trunk = dy.truncate()-dy;
+                if(event.kind == PointerDeviceKind.trackpad && trunk == 0){
+                  if(!start){
+                    webPosition = Offset(0, 0);
+                    _onDragEvent(context, PeripheralType.pointerdown, event);
+                    start = true;
+                  }
+                  else{
+                    webPosition-=event.scrollDelta;
+                    Map m = {
+                      'scrollDelta': webPosition,
+                      'position': event.position,
+                      'localPosition': event.localPosition
+                    };
+                    _onDragEvent(context, PeripheralType.pointermove, m);
+                  }
+                }
+                else{
+                  _onPointerEvent(context, PeripheralType.wheel, event);
+                }
+              }
+              else if(event is PointerScaleEvent){
+                double s = event.scale>1?-1:1;
+                _onScaleEvent(context, PeripheralType.wheel, {'scale':s});
+                _prevScale = event.scale;
+              }
+            }
+            else if(isWindows){
+              _onPointerEvent(context, PeripheralType.pointerup, event);
+              start = false;
+            }
+            else{
+              if (event is PointerScrollEvent) {
+                _onPointerEvent(context, PeripheralType.wheel, event);
+              }
             }
           },
           onPointerDown: (PointerDownEvent event) {
+            start = false;
+            _pointers++;
             _onPointerEvent(context, PeripheralType.pointerdown, event);
             FocusScope.of(context).requestFocus(focusNode);
           },
@@ -143,10 +230,24 @@ class PeripheralsState extends State<Peripherals> {
             _onPointerEvent(context, PeripheralType.pointermove, event);
           },
           onPointerUp: (PointerUpEvent event) {
+            _pointers--;
             _onPointerEvent(context, PeripheralType.pointerup, event);
           },
+          onPointerCancel: (PointerCancelEvent event) {
+            _pointers--;
+            _onPointerEvent(context, PeripheralType.pointercancel, event);
+          },
           onPointerHover: (PointerHoverEvent event){
-            _onPointerEvent(context, PeripheralType.pointerHover , event);
+            if(!isSignal){
+              if(kIsWeb && start){
+                _onDragEvent(context, PeripheralType.pointerup, event);
+                start = false;
+              }
+              else{
+                _onPointerEvent(context, PeripheralType.pointerHover, event);
+              }
+            }
+            isSignal = false;
           },
           child: widget.builder(context),
         )
@@ -163,15 +264,15 @@ class PeripheralsState extends State<Peripherals> {
   }
 
   void _onScaleEvent(BuildContext context, PeripheralType type, event) {
-    final wpe = WebPointerEvent.fromScaleEvent(context, event);
+    final wpe = WebPointerEvent.fromScaleEvent(context, event, _pointers);
     _emit(type, wpe);
   }
   void _onDragEvent(BuildContext context, PeripheralType type, event) {
-    final wpe = WebPointerEvent.fromDragEvent(context, event);
+    final wpe = WebPointerEvent.fromDragEvent(context, event, _pointers);
     _emit(type, wpe);
   }
   void _onPointerEvent(BuildContext context, PeripheralType type, PointerEvent event) {
-    final wpe = WebPointerEvent.fromPointerEvent(context, event);
+    final wpe = WebPointerEvent.fromPointerEvent(context, event, _pointers);
     _emit(type, wpe);
   }
 
@@ -187,16 +288,17 @@ class PeripheralsState extends State<Peripherals> {
 }
 
 class WebPointerEvent {
+  int pointerCount = 0;
   late int pointerId;
   late int button;
   String pointerType = 'touch';
-  late double clientX;
-  late double clientY;
-  late double pageX;
-  late double pageY;
+  double clientX = 0;
+  double clientY = 0;
+  double pageX = 0;
+  double pageY = 0;
 
-  late double movementX;
-  late double movementY;
+  double movementX = 0;
+  double movementY = 0;
 
   bool ctrlKey = false;
   bool metaKey = false;
@@ -236,11 +338,10 @@ class WebPointerEvent {
       final leftButtonPressed = event.buttons & 1 > 0;
       final rightButtonPressed = event.buttons & 2 > 0;
       final middleButtonPressed = event.buttons & 4 > 0;
-
       // Left button takes precedence over other
       if (leftButtonPressed) return 0;
       // 2nd priority is the right button
-      if (rightButtonPressed) return 2;
+      if (rightButtonPressed || middleButtonPressed) return 2;
       // Lastly the middle button
       if (middleButtonPressed) return 1;
 
@@ -249,12 +350,13 @@ class WebPointerEvent {
     }
   }
 
-  static WebPointerEvent convertPointerEvent(BuildContext context, PointerEvent event) {
+  static WebPointerEvent convertPointerEvent(BuildContext context, PointerEvent event, int pointerCount) {
     final wpe = WebPointerEvent();
 
     wpe.pointerId = event.pointer;
     wpe.pointerType = getPointerType(event);
     wpe.button = getButton(event);
+    wpe.pointerCount = pointerCount;
 
     RenderBox getBox = context.findRenderObject() as RenderBox;
     final local = getBox.globalToLocal(event.position);
@@ -262,6 +364,7 @@ class WebPointerEvent {
     wpe.clientY = local.dy;
     wpe.pageX = event.position.dx;
     wpe.pageY = event.position.dy;
+    wpe.pointerCount = pointerCount;
 
     //if(event is PointerMoveEvent || event is PointerHoverEvent) {
       wpe.movementX = event.delta.dx;
@@ -293,49 +396,60 @@ class WebPointerEvent {
     return wpe;
   }
 
-  static WebPointerEvent convertDragEvent(BuildContext context, event) {
+  static WebPointerEvent convertDragEvent(BuildContext context, event, int pointerCount) {
     final wpe = WebPointerEvent();
-
-    wpe.pointerId = 512;
-    wpe.pointerType = 'touch_pad';
-    wpe.button = 0;
-
-    RenderBox getBox = context.findRenderObject() as RenderBox;
-    final local = getBox.globalToLocal(event.globalPosition);
-    wpe.clientX = local.dx;
-    wpe.clientY = local.dy;
-
-    wpe.pageX = event.globalPosition.dx;
-    wpe.pageY = event.globalPosition.dy;
-    if(event is! DragStartDetails && event is! DragEndDetails){
-      wpe.movementX = event.delta.dx;
-      wpe.movementY = event.delta.dy;
-    }
-
-    wpe.deltaX = event.globalPosition.dx;
-    wpe.deltaY = event.globalPosition.dy;
-    wpe.clientX = event.globalPosition.dx;
-    wpe.clientY = event.globalPosition.dy;
-
     final EventTouch touch = EventTouch();
 
+    wpe.pointerId = 512;
     touch.pointer = 512;
-    touch.pageX = event.localPosition.dx;
-    touch.pageY = event.localPosition.dy;
-    touch.clientX = event.localPosition.dx;
-    touch.clientY = event.localPosition.dy;
+
+    wpe.pointerType = 'touch_pad';
+    wpe.button = 0;
+    wpe.pointerCount = pointerCount;
+
+    if(event is Map){
+      final local = event['scrollDelta'];
+      wpe.clientX = local.dx;
+      wpe.clientY = local.dy;
+
+      wpe.pageX = event['position'].dx;
+      wpe.pageY = event['position'].dy;
+
+      wpe.deltaX = local.dx;
+      wpe.deltaY = local.dy;
+    }
+    else if(!kIsWeb){
+      final position = event.globalPosition;
+      RenderBox getBox = context.findRenderObject() as RenderBox;
+      final local = getBox.globalToLocal(position);
+      wpe.clientX = local.dx;
+      wpe.clientY = local.dy;
+
+      wpe.pageX = position.dx;
+      wpe.pageY = position.dy;
+
+      wpe.deltaX = local.dx;
+      wpe.deltaY = local.dy;
+
+      touch.pageX = event.localPosition.dx;
+      touch.pageY = event.localPosition.dy;
+
+      touch.clientX = event.localPosition.dx;
+      touch.clientY = event.localPosition.dy;
+    }
 
     wpe.touches.add(touch);
     wpe.changedTouches = [touch];
 
     return wpe;
   }
-  static WebPointerEvent convertScaleEvent(BuildContext context, event) {
+  static WebPointerEvent convertScaleEvent(BuildContext context, event, int pointerCount) {
     final wpe = WebPointerEvent();
 
     wpe.pointerId = 522;
     wpe.pointerType = 'mouse';
     wpe.button = 4;
+    wpe.pointerCount = pointerCount;
 
     wpe.clientX = event['scale'];
     wpe.clientY = event['scale'];
@@ -366,14 +480,14 @@ class WebPointerEvent {
     return wpe;
   }
 
-  factory WebPointerEvent.fromPointerEvent(BuildContext context, PointerEvent event) {
-    return convertPointerEvent(context, event);
+  factory WebPointerEvent.fromPointerEvent(BuildContext context, PointerEvent event, int pointerCount) {
+    return convertPointerEvent(context, event, pointerCount);
   }
-  factory WebPointerEvent.fromDragEvent(BuildContext context, event) {
-    return convertDragEvent(context, event);
+  factory WebPointerEvent.fromDragEvent(BuildContext context, event, int pointerCount) {
+    return convertDragEvent(context, event, pointerCount);
   }
-  factory WebPointerEvent.fromScaleEvent(BuildContext context, event) {
-    return convertScaleEvent(context, event);
+  factory WebPointerEvent.fromScaleEvent(BuildContext context, event, int pointerCount) {
+    return convertScaleEvent(context, event, pointerCount);
   }
   @override
   String toString() {

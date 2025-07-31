@@ -17,23 +17,27 @@ dependencies:
   css:
     git:
       url: https://github.com/Knightro63/css.git
-  three_js: ^0.1.0
-  three_js_helpers: ^0.1.0
-  three_js_transform_controls: ^0.1.0
-  three_js_svg: ^0.1.0
-  three_js_objects: ^0.1.0
-  three_js_tjs_loader: ^0.1.0
-  three_js_postprocessing: ^0.1.0
-  three_js_modifers: ^0.1.0
-  three_js_terrain: ^0.1.0
-  three_js_exporters: ^0.1.0
-  three_js_line: ^0.1.0
-  three_js_bvh_csg: ^0.1.0
-
+  three_js: ^0.2.0
+    #path: ../packages/three_js
+  three_js_helpers: ^0.2.0
+  three_js_transform_controls: ^0.2.0
+  three_js_svg: ^0.2.0
+  three_js_objects: ^0.2.0
+  three_js_tjs_loader: ^0.2.0
+  three_js_postprocessing: ^0.2.0
+  three_js_modifers: ^0.2.0
+  three_js_terrain: ^0.2.0
+  three_js_exporters: ^0.2.0
+  three_js_line: ^0.2.0
+  three_js_bvh_csg: ^0.2.0
+  three_js_video_texture: ^0.0.1
+  three_js_advanced_exporters: ^0.0.1
+  
   permission_handler: ^11.3.1
   camera: ^0.10.6
-  camera_macos: ^0.0.8
-  camera_windows: ^0.2.5
+  camera_macos: ^0.0.9
+  # camera_linux: ^0.0.8
+  # camera_windows: ^0.2.5
 
 dev_dependencies:
   flutter_test:
@@ -45,19 +49,13 @@ dependency_overrides:
     git:
       url: https://github.com/alex-melnyk/flutter-permission-handler.git 
       path: permission_handler_apple
-  three_js_core:
-    path: ../packages/three_js_core
+  file_picker: ^10.1.9
 
 flutter:
   uses-material-design: true
   assets:
     - assets/pingfang.ttf
-    - assets/kenpixel.ttf
     - assets/helvetiker_bold.typeface.json
-    - assets/winter.jpg
-    - assets/lut.cube
-    - assets/demo.png
-    - assets/KOMO-v5.cube
     - assets/screenshots/
     - assets/models/bvh/
     - assets/models/obj/cerberus/
@@ -66,7 +64,6 @@ flutter:
     - assets/models/json/
     - assets/models/gcode/
     - assets/models/ply/binary/
-    - assets/models/scn/
     - assets/models/ply/ascii/
     - assets/models/stl/binary/
     - assets/models/stl/ascii/
@@ -100,7 +97,6 @@ flutter:
     - assets/textures/lensflare/
     - assets/textures/equirectangular/
     - assets/textures/terrain/
-    - assets/textures/patterns/
     - assets/textures/sprites/
     - assets/textures/planets/
     - assets/textures/decal/

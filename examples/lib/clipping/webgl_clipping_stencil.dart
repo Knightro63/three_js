@@ -30,14 +30,13 @@ class _State extends State<WebglClippingStencil> {
     threeJs = three.ThreeJS(
       
       onSetupComplete: (){setState(() {});},
-      setup: setup,
-      settings: three.Settings(
+      setup: setup,      settings: three.Settings(
         stencil: true,
         enableShadowMap: true,
         localClippingEnabled: true,
         clearColor: 0x263238,
         clearAlpha: 1.0,
-        useOpenGL: true
+        
       )
     );
     super.initState();

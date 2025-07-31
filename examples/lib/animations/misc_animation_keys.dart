@@ -29,9 +29,6 @@ class _State extends State<MiscAnimationKeys> {
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
       setup: setup,
-      settings: three.Settings(
-        useOpenGL: true
-      )
     );
     super.initState();
   }

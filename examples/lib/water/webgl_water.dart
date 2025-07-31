@@ -33,9 +33,6 @@ class _State extends State<WebglWater> {
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
       setup: setup,
-      settings: three.Settings(
-        useOpenGL: useOpenGL
-      )
     );
     super.initState();
   }
@@ -121,7 +118,9 @@ class _State extends State<WebglWater> {
       scale: params['scale'],
       flowDirection: three.Vector2( params['flowX'], params['flowY'] ),
       textureWidth: 1024,
-      textureHeight: 1024
+      textureHeight: 1024,
+      normalMap0: await textureLoader.fromAsset( 'assets/textures/water/Water_1_M_Normal.jpg'),
+      normalMap1: await textureLoader.fromAsset( 'assets/textures/water/Water_2_M_Normal.jpg')
     ));
 
     water.position.y = 1;

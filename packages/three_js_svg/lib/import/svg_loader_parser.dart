@@ -2,8 +2,7 @@ import 'dart:math' as math;
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'package:three_js_curves/three_js_curves.dart';
-import 'package:universal_html/parsing.dart';
-import 'package:universal_html/html.dart' as uhtml;
+import 'package:xml/xml.dart';
 import '../utils/color_utils.dart';
 
 enum SVGUnits{mm,cm,inch,pt,pc,px}
@@ -14,13 +13,13 @@ class SVGData{
     this.xml
   });
 
-  final uhtml.Element? xml;
+  final XmlElement? xml;
   final List<ShapePath> paths;
 }
 
 class SVGLoaderParser {
   SVGLoaderParser(String text, {this.defaultDPI = 90, this.defaultUnit = SVGUnits.px}) {
-    xml = parseXmlDocument(text);
+    xml = XmlDocument.parse(text);
   }
 
   SVGLoaderParser.parser();
@@ -42,14 +41,14 @@ class SVGLoaderParser {
   SVGUnits defaultUnit = SVGUnits.px;
   num defaultDPI = 90;
 
-  late uhtml.XmlDocument xml;
+  late final XmlDocument xml;
 
   // Units
 
-  final units = ['mm', 'cm', 'in', 'pt', 'pc', 'px'];
+  final List<String> units = ['mm', 'cm', 'in', 'pt', 'pc', 'px'];
 
   // Conversion: [ fromUnit ][ toUnit ] (-1 means dpi dependent)
-  final unitConversion = {
+  final Map<String,dynamic> unitConversion = {
     "mm": {
       'mm': 1,
       'cm': 0.1,
@@ -87,8 +86,8 @@ class SVGLoaderParser {
   };
 
   // Function parse =========== start
-  SVGData parse(text) {
-    parseNode(xml.documentElement, {
+  SVGData parse(String text) {
+    parseNode(xml.rootElement, {
       "fill": '#000',
       "fillOpacity": 1,
       "strokeOpacity": 1,
@@ -97,8 +96,7 @@ class SVGLoaderParser {
       "strokeLineCap": 'butt',
       "strokeMiterLimit": 4
     });
-
-    return SVGData(paths: paths, xml: xml.documentElement);
+    return SVGData(paths: paths, xml: xml.rootElement);
   }
 
   double parseFloatWithUnits([String? string]) {
@@ -134,25 +132,19 @@ class SVGLoaderParser {
     }
 
     String str = "$string";
-    // if(_str.startsWith("-.")) {
-    //   _str = _str.replaceFirst("-.", "-0.");
-    // }
-
     List<String> strs = str.split(".");
 
     if (strs.length >= 3) {
       strs = strs.sublist(0, 2);
       str = strs.join(".");
     }
-    return scale * num.parse(str);
+
+    return scale * (str.contains('#')?int.parse(str.replaceAll('#', ''),radix: 16 ):num.parse(str));
   }
 
   // from https://github.com/ppvg/svg-numbers (MIT License)
-  List<double> parseFloats(input, [flags, stride]) {
-    if (input is! String) {
-      throw ('Invalid input: ${input.runtimeType} ');
-    }
-
+  List<double> parseFloats(String input, [List? flags, int stride = 1]) {
+    flags ??= [];
     // Character groups
     Map<String, dynamic> re = {
       "SEPARATOR": RegExp(r"[ \t\r\n\,.\-+]"),
@@ -201,9 +193,7 @@ class SVGLoaderParser {
       current = input[i];
 
       // check for flags
-      if (flags is List &&
-          flags.contains(result.length % stride) &&
-          re["FLAGS"].hasMatch(current)) {
+      if (flags.contains(result.length % stride) && re["FLAGS"].hasMatch(current)) {
         state = int_;
         number = current;
         newNumber();
@@ -331,19 +321,20 @@ class SVGLoaderParser {
     return result;
   }
 
-  Matrix3 parseNodeTransform(node) {
+  Matrix3 parseNodeTransform(XmlElement node) {
     final transform = Matrix3.identity();
     final currentTransform = tempTransform0;
 
-    if (node.nodeName == 'use' && (node.hasAttribute('x') || node.hasAttribute('y'))) {
+    if (node.name.local == 'use'){//} && (node.hasAttribute('x') || node.hasAttribute('y'))) {
       final tx = parseFloatWithUnits(node.getAttribute('x'));
       final ty = parseFloatWithUnits(node.getAttribute('y'));
 
       transform.translate(tx, ty);
     }
 
-    if (node.hasAttribute('transform')) {
-      final transformsTexts = node.getAttribute('transform').split(')');
+    final nagt = node.getAttribute('transform');
+    if (nagt != null) {
+      final transformsTexts = nagt.split(')');
 
       for (int tIndex = transformsTexts.length - 1; tIndex >= 0; tIndex--) {
         final transformText = transformsTexts[tIndex].trim();
@@ -449,10 +440,12 @@ class SVGLoaderParser {
 
   // Transforms
 
-  Matrix3? getNodeTransform(node) {
-    if (!(node.hasAttribute('transform') ||
-        (node.nodeName == 'use' &&
-            (node.hasAttribute('x') || node.hasAttribute('y'))))) {
+  Matrix3? getNodeTransform(XmlElement node) {
+    if ((node.getAttribute('transform') == null || 
+      (node.name.local == 'use' && 
+      (node.getAttribute('x') == null || 
+      node.getAttribute('y') == null))
+    )) {
       return Matrix3.identity();
     }
 
@@ -468,44 +461,45 @@ class SVGLoaderParser {
     return transform;
   }
 
-  void parseCSSStylesheet(node) {
-    if (node.sheet == null ||
-        node.sheet.cssRules == null ||
-        node.sheet.cssRules.length == 0) {
-      return;
-    }
+  void parseCSSStylesheet(XmlElement node) {
+    throw("parseCSSStylesheet not implimented yet.");
+    // if (node.sheet == null ||
+    //     node.sheet.cssRules == null ||
+    //     node.sheet.cssRules.length == 0) {
+    //   return;
+    // }
 
-    for (int i = 0; i < node.sheet.cssRules.length; i++) {
-      final stylesheet = node.sheet.cssRules[i];
+    // for (int i = 0; i < node.sheet.cssRules.length; i++) {
+    //   final stylesheet = node.sheet.cssRules[i];
 
-      if (stylesheet.type != 1) continue;
+    //   if (stylesheet.type != 1) continue;
 
-      RegExp reg = RegExp(r",", multiLine: true);
-      final selectorList =
-          stylesheet.selectorText.split(reg).map((i) => i.trim()).toList();
+    //   RegExp reg = RegExp(r",", multiLine: true);
+    //   final selectorList =
+    //       stylesheet.selectorText.split(reg).map((i) => i.trim()).toList();
 
-      // final selectorList = stylesheet.selectorText
-      // 	.split( /,/gm )
-      // 	.filter( Boolean )
-      // 	.map( i => i.trim() );
+    //   // final selectorList = stylesheet.selectorText
+    //   // 	.split( /,/gm )
+    //   // 	.filter( Boolean )
+    //   // 	.map( i => i.trim() );
 
-      for (int j = 0; j < selectorList.length; j++) {
-        final sj = selectorList[j];
+    //   for (int j = 0; j < selectorList.length; j++) {
+    //     final sj = selectorList[j];
 
-        if (stylesheets[sj] == null) {
-          stylesheets[sj] = {};
-        }
-        stylesheets[sj].addAll(stylesheet.style);
-        // stylesheets[ selectorList[ j ] ] = Object.assign(
-        // 	stylesheets[ selectorList[ j ] ] || {},
-        // 	stylesheet.style
-        // );
+    //     if (stylesheets[sj] == null) {
+    //       stylesheets[sj] = {};
+    //     }
+    //     stylesheets[sj].addAll(stylesheet.style);
+    //     // stylesheets[ selectorList[ j ] ] = Object.assign(
+    //     // 	stylesheets[ selectorList[ j ] ] || {},
+    //     // 	stylesheet.style
+    //     // );
 
-      }
-    }
+    //   }
+    // }
   }
 
-  Map<String, dynamic> parseStyle(node, style) {
+  Map<String, dynamic> parseStyle(XmlElement node, Map<String,dynamic> style) {
     // style = Object.assign( {}, style );
     // clone style
     Map<String, dynamic> style2 = <String, dynamic>{};
@@ -513,11 +507,10 @@ class SVGLoaderParser {
 
     final stylesheetStyles = {};
 
-    if (node.hasAttribute('class')) {
+    final ngac = node.getAttribute('class');
+    if (ngac != null) {
       final reg = RegExp(r"\s");
-      final classSelectors = node
-          .getAttribute('class')
-          .split(reg)
+      final classSelectors = ngac.split(reg)
           // .filter( Boolean )
           .map((i) => i.trim())
           .toList();
@@ -528,13 +521,13 @@ class SVGLoaderParser {
       }
     }
 
-    if (node.hasAttribute('id')) {
+    final ngaid = node.getAttribute('id');
+    if (ngaid != null) {
       // stylesheetStyles = Object.assign( stylesheetStyles, stylesheets[ '#' + node.getAttribute( 'id' ) ] );
-
-      stylesheetStyles.addAll(stylesheets['#${node.getAttribute('id')}'] ?? {});
+      stylesheetStyles.addAll(stylesheets['#${ngaid}'] ?? {});
     }
 
-    void addStyle(svgName, jsName, [adjustFunction]) {
+    void addStyle(String svgName, String jsName, [adjustFunction]) {
       adjustFunction ??= (v) {
         if (v.startsWith('url')) {
           console.info('SVGLoader: url access in attributes is not implemented.');
@@ -543,27 +536,37 @@ class SVGLoaderParser {
         return v;
       };
 
-      if (node.hasAttribute(svgName)) {
-        style2[jsName] = adjustFunction(node.getAttribute(svgName));
+      final ngasvgName = node.getAttribute(svgName);
+      if (ngasvgName != null) {
+        style2[jsName] = adjustFunction(ngasvgName);
       }
       if (stylesheetStyles[svgName] != null) {
         style2[jsName] = adjustFunction(stylesheetStyles[svgName]);
       }
 
-      if (node.style != null) {
-        final style = node.style;
-        final value = style.getPropertyValue(svgName);
-        if (value != "") {
-          style2[jsName] = adjustFunction(value);
+      // 1. Get the current style attribute value
+      String? currentStyle = node.getAttribute('style');
+      if (currentStyle != null) {
+        // 2. Parse and modify the CSS string manually
+        //    This is a simplified example; for complex CSS, you might need a dedicated CSS parsing library
+        final List<String> styleProperties = currentStyle.split(';').map((s) => s.trim()).toList();
+        for (final prop in styleProperties) {
+          if (prop.isNotEmpty) {
+            final parts = prop.split(':').map((s) => s.trim()).toList();
+            if (parts.length == 2 && parts[1] != 'none') {
+              style2[parts[0]] = adjustFunction(parts[1]);
+              break;
+            }
+          }
         }
       }
     }
 
-    num clamp(v) {
+    num clamp(String? v) {
       return math.max<num>(0, math.min(1, parseFloatWithUnits(v)));
     }
 
-    num positive(v) {
+    num positive(String? v) {
       return math.max<num>(0, parseFloatWithUnits(v));
     }
 
@@ -584,11 +587,11 @@ class SVGLoaderParser {
 
   // http://www.w3.org/TR/SVG11/implnote.html#PathElementImplementationNotes
 
-  getReflection(a, b) {
+  double getReflection(double a, double b) {
     return a - (b - a);
   }
 
-  double svgAngle(ux, uy, vx, vy) {
+  double svgAngle(double ux, double uy, double vx, double vy) {
     final dot = ux * vx + uy * vy;
     final len = math.sqrt(ux * ux + uy * uy) * math.sqrt(vx * vx + vy * vy);
     double ang = math.acos(math.max(
@@ -610,7 +613,7 @@ class SVGLoaderParser {
 		 * aX, aY, xRadius, yRadius, aStartAngle, aEndAngle, aClockwise, aRotation
 		 */
 
-  void parseArcCommand(path, rx, ry, xAxisRotation, largeArcFlag, sweepFlag, start, end) {
+  void parseArcCommand(ShapePath path, double rx, double ry, double xAxisRotation, double largeArcFlag, double sweepFlag, Vector start, Vector end) {
     if (rx == 0 || ry == 0) {
       // draw a line if either of the radii == 0
       path.lineTo(end.x, end.y);
@@ -1038,8 +1041,8 @@ class SVGLoaderParser {
     return path;
   }
 
-  ShapePath parsePathNode(node) {
-    final d = node.getAttribute('d');
+  ShapePath parsePathNode(XmlElement node) {
+    final d = node.getAttribute('d')!;
     return parsePath(d);
   }
 
@@ -1047,7 +1050,7 @@ class SVGLoaderParser {
 		* According to https://www.w3.org/TR/SVG/shapes.html#RectElementRXAttribute
 		* rounded corner should be rendered to elliptical arc, but bezier curve does the job well enough
 		*/
-  ShapePath parseRectNode(node) {
+  ShapePath parseRectNode(XmlElement node) {
     final x = parseFloatWithUnits(node.getAttribute('x') ?? '0');
     final y = parseFloatWithUnits(node.getAttribute('y') ?? '0');
     final rx = parseFloatWithUnits(node.getAttribute('rx') ?? '0');
@@ -1080,7 +1083,7 @@ class SVGLoaderParser {
     return path;
   }
 
-  ShapePath parsePolygonNode(node) {
+  ShapePath parsePolygonNode(XmlElement node) {
     console.info("SVGLoader: parsePolygonNode todo test.");
     // final regex = /(-?[\d\.?]+)[,|\s](-?[\d\.?]+)/g;
     final regex = RegExp(r"(-?[\d\.?]+)[,|\s](-?[\d\.?]+)");
@@ -1101,7 +1104,7 @@ class SVGLoaderParser {
     // };
     // node.getAttribute('points').replace(regex, iterator);
 
-    String points = node.getAttribute('points');
+    String points = node.getAttribute('points')!;
     final matches = regex.allMatches(points);
 
     for (final match in matches) {
@@ -1125,7 +1128,7 @@ class SVGLoaderParser {
     return path;
   }
 
-  ShapePath parsePolylineNode(node) {
+  ShapePath parsePolylineNode(XmlElement node) {
     console.info("SVGLoader: parsePolylineNode todo.");
 
     // final regex = /(-?[\d\.?]+)[,|\s](-?[\d\.?]+)/g;
@@ -1135,7 +1138,10 @@ class SVGLoaderParser {
 
     int index = 0;
 
-    iterator(match, a, b) {
+    String iterator(Match m) {
+      String a = m.group(1)!;
+      String b = m.group(2)!;
+
       final x = parseFloatWithUnits(a);
       final y = parseFloatWithUnits(b);
 
@@ -1146,16 +1152,18 @@ class SVGLoaderParser {
       }
 
       index++;
+      return '';
     }
 
-    node.getAttribute('points').replace(regex, iterator);
+    node.getAttribute('points')?.replaceAllMapped(regex, iterator);//.replaceAll(regex, iterator);
+
 
     path.currentPath.autoClose = false;
 
     return path;
   }
 
-  ShapePath parseCircleNode(node) {
+  ShapePath parseCircleNode(XmlElement node) {
     final x = parseFloatWithUnits(node.getAttribute('cx'));
     final y = parseFloatWithUnits(node.getAttribute('cy'));
     final r = parseFloatWithUnits(node.getAttribute('r'));
@@ -1169,7 +1177,7 @@ class SVGLoaderParser {
     return path;
   }
 
-  ShapePath parseEllipseNode(node) {
+  ShapePath parseEllipseNode(XmlElement node) {
     final x = parseFloatWithUnits(node.getAttribute('cx'));
     final y = parseFloatWithUnits(node.getAttribute('cy'));
     final rx = parseFloatWithUnits(node.getAttribute('rx'));
@@ -1184,7 +1192,7 @@ class SVGLoaderParser {
     return path;
   }
 
-  ShapePath parseLineNode(node) {
+  ShapePath parseLineNode(XmlElement node) {
     final x1 = parseFloatWithUnits(node.getAttribute('x1'));
     final y1 = parseFloatWithUnits(node.getAttribute('y1'));
     final x2 = parseFloatWithUnits(node.getAttribute('x2'));
@@ -1213,7 +1221,7 @@ class SVGLoaderParser {
   }
 
   void transformPath(path, Matrix3 m) {
-    transfVec2(v2) {
+    void transfVec2(Vector v2) {
       tempV3.setValues(v2.x, v2.y, 1).applyMatrix3(m);
 
       v2.setValues(tempV3.x, tempV3.y);
@@ -1263,79 +1271,67 @@ class SVGLoaderParser {
   }
 
   void parseNode(node, style) {
-    if (node.nodeType != 1) return;
+    if(node.nodeType != XmlNodeType.ELEMENT) return;
 
+    //if(node.nodeType == XmlNodeType.Node) return;
     final transform = getNodeTransform(node);
-
     bool traverseChildNodes = true;
 
     dynamic path;
-
-    switch (node.nodeName) {
+    switch (node.name.local) {
       case 'svg':
         break;
-
       case 'style':
         parseCSSStylesheet(node);
         break;
-
       case 'g':
         style = parseStyle(node, style);
         break;
-
       case 'path':
         style = parseStyle(node, style);
-        if (node.hasAttribute('d')) {
+        if (node.getAttribute('d') != null) {
           path = parsePathNode(node);
         }
         break;
-
       case 'rect':
         style = parseStyle(node, style);
         path = parseRectNode(node);
         break;
-
       case 'polygon':
         style = parseStyle(node, style);
         path = parsePolygonNode(node);
         break;
-
       case 'polyline':
         style = parseStyle(node, style);
         path = parsePolylineNode(node);
         break;
-
       case 'circle':
         style = parseStyle(node, style);
         path = parseCircleNode(node);
         break;
-
       case 'ellipse':
         style = parseStyle(node, style);
         path = parseEllipseNode(node);
         break;
-
       case 'line':
         style = parseStyle(node, style);
         path = parseLineNode(node);
         break;
-
       case 'defs':
         traverseChildNodes = false;
         break;
-
       case 'use':
-        style = parseStyle(node, style);
-        final usedNodeId = node.href.baseVal.substring(1);
-        final usedNode = node.viewportElement.getElementById(usedNodeId);
-        if (usedNode != null) {
-          parseNode(usedNode, style);
-        } 
-        else {
-          console.info("SVGLoader: 'use node' references non-existent node id: $usedNodeId");
-        }
-
-        break;
+        // style = parseStyle(node, style);
+        // final usedNodeId = node.href.baseVal.substring(1);
+        // final usedNode = node.viewportElement.getElementById(usedNodeId);
+        // if (usedNode != null) {
+        //   parseNode(usedNode, style);
+        // } 
+        // else {
+        //   console.info("SVGLoader: 'use node' references non-existent node id: $usedNodeId");
+        // }
+        throw("SVGLoader: 'use node' references non-existent node.");
+        //break;
 
       default:
       // Console.log( node );
@@ -1348,15 +1344,13 @@ class SVGLoaderParser {
       }
 
       transformPath(path, currentTransform);
-
       paths.add(path);
-
       path.userData = {"node": node, "style": style};
     }
 
     if (traverseChildNodes) {
-      final nodes = node.childNodes;
-
+      final nodes = (node as XmlElement).children;//.toList();//.childElements.toList();
+      
       for (int i = 0; i < nodes.length; i++) {
         parseNode(nodes[i], style);
       }
@@ -1364,14 +1358,14 @@ class SVGLoaderParser {
 
     if (transform != null) {
       if(transformStack.isNotEmpty){
-      transformStack.removeLast();
+        transformStack.removeLast();
 
-      if (transformStack.isNotEmpty) {
-        currentTransform.setFrom(transformStack[transformStack.length - 1]);
-      } 
-      else {
-        currentTransform.identity();
-      }
+        if (transformStack.isNotEmpty) {
+          currentTransform.setFrom(transformStack[transformStack.length - 1]);
+        } 
+        else {
+          currentTransform.identity();
+        }
       }
     }
   }
@@ -1394,19 +1388,19 @@ class SVGLoaderParser {
     return str.substring(start, end);
   }
 
-  static Map<String,dynamic> getStrokeStyle(width, color, lineJoin, lineCap, miterLimit) {
+  static Map<String,dynamic> getStrokeStyle([
+    double width = 1, 
+    String color = '#000', 
+    String lineJoin = 'miter', 
+    String lineCap = 'butt', 
+    double miterLimit = 4
+  ]) {
     // Param width: Stroke width
     // Param color: As returned by THREE.Color.getStyle()
     // Param lineJoin: One of "round", "bevel", "miter" or "miter-limit"
     // Param lineCap: One of "round", "square" or "butt"
     // Param miterLimit: Maximum join length, in multiples of the "width" parameter (join is truncated if it exceeds that distance)
     // Returns style object
-
-    width = width ?? 1;
-    color = color ?? '#000';
-    lineJoin = lineJoin ?? 'miter';
-    lineCap = lineCap ?? 'butt';
-    miterLimit = miterLimit ?? 4;
 
     return {
       "strokeColor": color,

@@ -6,9 +6,7 @@ import 'package:three_js_helpers/three_js_helpers.dart';
 import 'package:three_js_objects/three_js_objects.dart';
 
 class WebglLightprobeCubeCamera extends StatefulWidget {
-  
   const WebglLightprobeCubeCamera({super.key});
-
   @override
   createState() => _State();
 }
@@ -29,9 +27,6 @@ class _State extends State<WebglLightprobeCubeCamera> {
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
       setup: setup,
-      settings: three.Settings(
-        useOpenGL: useOpenGL
-      )
     );
     super.initState();
   }

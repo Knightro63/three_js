@@ -1,5 +1,4 @@
 import 'dart:async';
-import '../src/statistics.dart';
 import 'package:flutter/material.dart' hide Matrix4;
 import 'package:three_js/three_js.dart' as three;
 
@@ -10,14 +9,26 @@ class MultiViews extends StatefulWidget {
 }
 
 class _MyAppState extends State<MultiViews> {
+  List<three.FlutterAngleTexture> textures = [];
+
+  @override
+  void initState(){
+    super.initState();
+  }
+
+  @override
+  void dispose(){
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Column(
         children: [
           const MultiViews1(),
-          Container(height: 2, color: Colors.red,),
-          const MultiViews2()
+          Container(height: 2, color: Colors.red),
+          const MultiViews2(),
         ],
       )
     );
@@ -45,9 +56,6 @@ class _MultiViews1State extends State<MultiViews1> {
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
       setup: setup,
-      settings: three.Settings(
-        useOpenGL: useOpenGL
-      ),
       size: const Size(300,300),
     );
     super.initState();
@@ -116,10 +124,8 @@ class _MultiViews2State extends State<MultiViews2> {
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
       setup: setup,
-      settings: three.Settings(
-        useOpenGL: useOpenGL
-      ),
       size: const Size(300,300),
+      renderNumber: 1
     );
     super.initState();
   }
@@ -143,7 +149,6 @@ class _MultiViews2State extends State<MultiViews2> {
   Future<void> setup() async {
     threeJs.camera = three.PerspectiveCamera(45, threeJs.width / threeJs.height, 1, 2200);
     threeJs.camera.position.setValues(3, 6, 100);
-
 
     threeJs.scene = three.Scene();
     threeJs.scene.background = three.Color(1, 1, 0);

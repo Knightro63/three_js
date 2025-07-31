@@ -30,11 +30,11 @@ class _State extends State<WebglPostprocessingUnrealBloomSelective> {
     });
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
-      setup: setup,
+      setup: setup,      
       settings: three.Settings(
         //animate: false,
         useSourceTexture: true,
-        useOpenGL: useOpenGL
+        
       )
     );
     super.initState();

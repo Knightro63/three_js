@@ -65,9 +65,16 @@ class Scene extends Object3D {
     if ( source.environment != null ) environment = source.environment?.clone();
     if ( source.fog != null ) fog = source.fog?.clone();
 
+		this.backgroundBlurriness = source.backgroundBlurriness;
+		this.backgroundIntensity = source.backgroundIntensity;
+		this.backgroundRotation.copy( source.backgroundRotation );
+
+		this.environmentIntensity = source.environmentIntensity;
+		this.environmentRotation.copy( source.environmentRotation );
+
     if ( source.overrideMaterial != null ) overrideMaterial = source.overrideMaterial?.clone();
 
-    autoUpdate = source.autoUpdate;
+    //autoUpdate = source.autoUpdate;
     matrixAutoUpdate = source.matrixAutoUpdate;
 
     return this;

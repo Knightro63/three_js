@@ -16,7 +16,6 @@ import 'package:image/image.dart' as img;
 import 'dart:math' as math;
 import 'dart:async';
 import 'package:three_js_terrain/three_js_terrain.dart' as terrain;
-import '../src/statistics.dart';
 
 class TerrainPage extends StatefulWidget {
   const TerrainPage({super.key});
@@ -38,9 +37,6 @@ class _State extends State<TerrainPage> {
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
       setup: setup,
-      settings: three.Settings(
-        useOpenGL: useOpenGL
-      )
     );
     super.initState();
   }
@@ -189,7 +185,7 @@ class _State extends State<TerrainPage> {
   }
   Future<void> setupWorld() async{
     generateSky();
-    generateWater();
+    await generateWater();
     // three.TextureLoader().fromAsset('assets/textures/three_terrain/sky1.jpg').then((t1) {
     //   t1?.minFilter = three.LinearFilter; // Texture is not a power-of-two size; use smoother interpolation.
     //   skyDome = three.Mesh(
@@ -534,7 +530,7 @@ class _State extends State<TerrainPage> {
     folderSky.addSlider( parameters, 'azimuth', - 180, 180, 0.1 ).onChange( updateSun );
   }
 
-  void generateWater(){
+  Future<void> generateWater() async{
     final Map<String,dynamic> params = {
       'color': 0xa6ceec,
       'scale': 5.0,
@@ -543,13 +539,15 @@ class _State extends State<TerrainPage> {
     };
 
     final waterGeometry = three.PlaneGeometry(16384+1024, 16384+1024, 16, 16);
-  
+    final textureLoader = three.TextureLoader();
     final water = Water( waterGeometry, WaterOptions(
       color: params['color'],
       scale: params['scale'],
       flowDirection: three.Vector2( params['flowX'], params['flowY'] ),
       textureWidth: 1024,
-      textureHeight: 1024
+      textureHeight: 1024,
+      normalMap0: await textureLoader.fromAsset( 'assets/textures/water/Water_1_M_Normal.jpg'),
+      normalMap1: await textureLoader.fromAsset( 'assets/textures/water/Water_2_M_Normal.jpg')
     ));
 
     water.rotation.x = math.pi * - 0.5;

@@ -17,7 +17,7 @@ class WebGLState {
   Map<String, dynamic> get buffers => {"color": colorBuffer, "depth": depthBuffer, "stencil": stencilBuffer};
   Map<int, bool> enabledCapabilities = <int, bool>{};
 
-  dynamic xrFramebuffer;
+  Framebuffer? xrFramebuffer;
   Map currentBoundFramebuffers = {};
 	final uboBindings = WeakMap();
 	final uboProgramMap = WeakMap();
@@ -76,8 +76,6 @@ class WebGLState {
     maxTextures = gl.getParameter(WebGL.MAX_COMBINED_TEXTURE_IMAGE_UNITS);
     emptyTextures[WebGL.TEXTURE_2D] = createTexture(WebGL.TEXTURE_2D, WebGL.TEXTURE_2D, 1);
     emptyTextures[WebGL.TEXTURE_CUBE_MAP] = createTexture(WebGL.TEXTURE_CUBE_MAP, WebGL.TEXTURE_CUBE_MAP_POSITIVE_X, 6);
-
-    // init
 
     colorBuffer.setClear(0, 0, 0, 1, false);
     depthBuffer.setClear(1);
@@ -161,7 +159,6 @@ class WebGLState {
   void bindXRFramebuffer(Framebuffer? framebuffer) {
     if (framebuffer != xrFramebuffer) {
       gl.bindFramebuffer(WebGL.FRAMEBUFFER, framebuffer);
-
       xrFramebuffer = framebuffer;
     }
   }
@@ -177,7 +174,6 @@ class WebGLState {
       currentBoundFramebuffers[target] = framebuffer;
 
       // gl.DRAW_FRAMEBUFFER is equivalent to gl.FRAMEBUFFER
-
       if (target == WebGL.DRAW_FRAMEBUFFER) {
         currentBoundFramebuffers[WebGL.FRAMEBUFFER] = framebuffer;
       }

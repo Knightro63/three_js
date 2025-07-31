@@ -1,6 +1,6 @@
 name: three_js_postprocessing
 description: "Flutter three_js_postprocessing package converted from threejs and three_dart package created for three_js adds extra opengl shaders to your project."
-version: 0.1.0
+version: 0.2.0
 homepage: https://github.com/Knightro63/three_js/tree/main/packages/three_js_postprocessing
 
 environment:
@@ -10,8 +10,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  three_js_core: ^0.1.0
-  three_js_math: ^0.1.0
+  three_js_core: ^0.2.0
+  three_js_math: ^0.2.0
     
 dev_dependencies:
   flutter_test:

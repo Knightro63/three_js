@@ -40,7 +40,7 @@ class Line extends Object3D {
   /// [material] — material for the line. Default is a new
   /// [LineBasicMaterial].
   /// 
-  Line(BufferGeometry? geometry, Material? material) : super() {
+  Line([BufferGeometry? geometry, Material? material]) : super() {
     this.geometry = geometry ?? BufferGeometry();
     this.material = material ?? LineBasicMaterial(<MaterialProperty, dynamic>{});
     type = "Line";

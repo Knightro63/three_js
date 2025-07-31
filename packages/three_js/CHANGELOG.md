@@ -1,3 +1,44 @@
+## 0.2.1
+
+* Updated: console logger for wasm
+* Added linux to platfroms
+* Updated README
+
+## 0.2.0
+
+* Updated: flutter_angle: 0.3.0
+* Added: WASM Support.
+* Added: iOS Simulator Support.
+* Removed: three_js_text due to WASM support
+
+## 0.1.7
+
+* Updated to newest version of flutter_angle: 0.2.8
+* Fixed Safari mouse wheel bug
+
+## 0.1.6
+
+* Updated to newest version of flutter_angle: 0.2.5
+
+## 0.1.5
+
+* Fixed: Middle wheel bug
+
+## 0.1.4
+
+* Fixed: Windows move and change size bug.
+* Added: Web track pad scale, rotate, and pan support.
+* Changed android minSdkVersion to 21.
+
+## 0.1.3
+
+* Updated three_js_core to fix bug
+
+## 0.1.2
+
+* Updated three_js_core to fix material bug
+* Added VideoTexture for web only
+
 ## 0.1.1
 
 * Updated three_js_core to fix android bug.

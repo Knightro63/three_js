@@ -30,9 +30,6 @@ class _State extends State<WebglLinesFatRaycasting> {
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
       setup: setup,
-      settings: three.Settings(
-        useOpenGL: useOpenGL
-      )
     );
     gui = Gui((){setState(() {});});
     super.initState();
@@ -238,8 +235,8 @@ class _State extends State<WebglLinesFatRaycasting> {
       'visualize threshold': matThresholdLine.visible,
       'width': matLine.linewidth,
       'alphaToCoverage': matLine.alphaToCoverage,
-      'threshold': raycaster.params['Line2']?.threshold ?? 0.0,
-      'translation': raycaster.params['Line2']?.threshold ?? 0.0,
+      'threshold': raycaster.params['Line2']['threshold'] ?? 0.0,
+      'translation': raycaster.params['Line2']['threshold'] ?? 0.0,
       'animate': !threeJs.pause
     };
 
@@ -276,7 +273,7 @@ class _State extends State<WebglLinesFatRaycasting> {
 
     folder.addSlider( params, 'width', 10, 100 ).onChange(( val ) {
       matLine.linewidth = val;
-      matThresholdLine.linewidth = matLine.linewidth! + raycaster.params['Line2'].threshold;
+      matThresholdLine.linewidth = matLine.linewidth! + raycaster.params['Line2']['threshold'];
     } );
 
     folder.addButton( params, 'alphaToCoverage' ).onChange(( val ) {
@@ -284,8 +281,8 @@ class _State extends State<WebglLinesFatRaycasting> {
     } );
 
     folder.addSlider( params, 'threshold', 0, 10 ).onChange(( val ) {
-      raycaster.params['Line2'].threshold = val;
-      matThresholdLine.linewidth = matLine.linewidth! + raycaster.params['Line2'].threshold;
+      raycaster.params['Line2']['threshold'] = val;
+      matThresholdLine.linewidth = matLine.linewidth! + raycaster.params['Line2']['threshold'];
     } );
 
     folder.addSlider( params, 'translation', 0, 10 ).onChange(( val ) {

@@ -42,9 +42,6 @@ class _FPSGamePageState extends State<FPSGame> {
       });
     });
     threeJs = three.ThreeJS(
-      settings: three.Settings(
-        useOpenGL: true
-      ),
       onSetupComplete: (){
         setState(() {});
         // Keybindings

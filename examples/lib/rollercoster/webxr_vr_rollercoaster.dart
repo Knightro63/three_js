@@ -11,15 +11,12 @@ extension on three.Vector3{
     array[offset] = storage[0];
     array[offset + 1] = storage[1];
     array[offset + 2] = storage[2];
-
     return array;
   }
 }
 
 class WebXRVRRollercoaster extends StatefulWidget {
-  
   const WebXRVRRollercoaster({super.key});
-
   @override
   createState() => _State();
 }
@@ -38,11 +35,8 @@ class _State extends State<WebXRVRRollercoaster> {
       });
     });
     threeJs = three.ThreeJS(
-      onSetupComplete: (){setState(() {});},
+      onSetupComplete: () async{setState(() {});},
       setup: setup,
-      settings: three.Settings(
-        useOpenGL: useOpenGL
-      )
     );
     super.initState();
   }
@@ -60,7 +54,7 @@ class _State extends State<WebXRVRRollercoaster> {
       body: Stack(
         children: [
           threeJs.build(),
-          Statistics(data: data)
+          Statistics(data: data),
         ],
       ) 
     );
@@ -82,7 +76,7 @@ class _State extends State<WebXRVRRollercoaster> {
     threeJs.scene = three.Scene();
     threeJs.scene.background = three.Color.fromHex32( 0xf0f0ff );
 
-    final light = three.HemisphereLight( 0xfff0f0, 0x60606, .3 );
+    final light = three.HemisphereLight( 0xfff0f0, 0x60606, 0.3 );
     light.position.setValues( 1, 1, 1 );
     threeJs.scene.add( light );
 
@@ -93,7 +87,6 @@ class _State extends State<WebXRVRRollercoaster> {
     train.add( threeJs.camera );
 
     // environment
-
     geometry = three.PlaneGeometry( 500, 500, 15, 15 );
     geometry.rotateX( - math.pi / 2 );
 
@@ -101,7 +94,6 @@ class _State extends State<WebXRVRRollercoaster> {
     final vertex = three.Vector3();
 
     for (int i = 0; i < positions.length; i += 3 ) {
-
       vertex.fromNativeArray( positions, i );
 
       vertex.x += math.Random().nextDouble() * 10 - 5;
@@ -135,8 +127,7 @@ class _State extends State<WebXRVRRollercoaster> {
     threeJs.scene.add( mesh );
 
     //
-
-    final PI2 = math.pi * 2;
+    const pi2 = math.pi * 2;
 
     RollerCoasterCurve rcc() {
       final vector = three.Vector3();
@@ -144,7 +135,7 @@ class _State extends State<WebXRVRRollercoaster> {
 
       final rcc = RollerCoasterCurve(
         getPointAt:  (double t ) {
-          t = t * PI2;
+          t = t * pi2;
 
           final x = math.sin( t * 3 ) * math.cos( t * 4 ) * 50;
           final y = math.sin( t * 10 ) * 2 + math.cos( t * 17 ) * 2 + 5;
@@ -155,7 +146,7 @@ class _State extends State<WebXRVRRollercoaster> {
       );
 
       rcc.getTangentAt = (double t ) {
-        final delta = 0.0001;
+        const delta = 0.0001;
         final t1 = math.max( 0.0, t - delta );
         final t2 = math.min( 1.0, t + delta );
 
@@ -164,7 +155,7 @@ class _State extends State<WebXRVRRollercoaster> {
       };
 
       return rcc;
-    };
+    }
 
     final curve = rcc();
 

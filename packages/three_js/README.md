@@ -27,30 +27,78 @@ This is a dart conversion of three.js and three_dart, originally created by [@mr
  - Metal supported
 
 **iOS-Simulator**
- - No longer supported due to IOSurface issue, please use override to flutter_angle: ^0.1.0 for testing on simulator.
+ - Minimum os Deployment Target: 12.0
+ - Xcode 13 or newer
+ - Swift 5
+ - Metal supported
 
 **Android**
  - compileSdkVersion: 34
+ - minSdk: 21
  - OpenGL supported
  - Vulkan supported
 
- **Windows**
- - Intel supported.
- - AMD supported.
- - Direct3D 11 and OpenGL supported
+**Android Emulator**
+ - compileSdkVersion: 34
+ - minSdk: 21
+ - OpenGL supported
+
+**Windows**
+ - Intel supported
+ - AMD supported
+ - Qualcom supported
+ - Direct3D 11 supported
+ - OpenGL supported
 
 **Web**
  - WebGL2 supported
 
 **WASM**
- - Currently not supported due to WebGL2RenderingContext conversion issue.
+ - WebGL2 supported; please add `<script src="https://cdn.jsdelivr.net/gh/Knightro63/flutter_angle/assets/gles_bindings.js"></script>` to your index.html to load the js_interop file.
 
 **Linux**
- - Unsupported
+ - Ubuntu supported (Tested on Linux Mint)
+ - OpenGL supported
+ - Please install `sudo apt install libglew-dev`
 
 ## Getting started
 
-To get started add three_js to your pubspec.yaml file.
+To get started add three_js to your pubspec.yaml file. Adding permissions for audio and video is required if using either item.
+Please use [Permission Handler](https://pub.dev/packages/permission_handler) package to help with this.
+
+**Android**
+ - Add the following to your AndroidManifest.
+
+```xml
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.example.app">
+    <application
+      ...
+      />
+    </application>
+    <!-- Internet access permissions. If using web assets -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!--
+      Media access permissions.
+      Android 13 or higher.
+      https://developer.android.com/about/versions/13/behavior-changes-13#granular-media-permissions
+      -->
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+    <!--
+      Storage access permissions.
+      Android 12 or lower.
+      -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+</manifest>
+```
+
+**MacOS and iOS**
+ - Please add some permissions to have this work. User Selected File "Read/Write"
+ - If using web assets please add: Incoming Connections (Server)
+
+**Linux**
+ - The folling is required for audio and video `sudo apt install libmpv-dev mpv`
 
 ## Usage
 
@@ -66,31 +114,58 @@ Find the example for this API [here](https://github.com/Knightro63/three_js/tree
  - MD2 annimations do not work
  - Collada animations do not work
  - Collada kinnametics does not work
- - PMREM gives weird artifacts
+ - PMREM gives weird artifacts or is completely black
 
 **MacOS**
- - Audio has a [bug](https://github.com/bluefireteam/audioplayers/issues/1296)
+ - N/A
 
 **iOS**
  - Protoplanets does not function correctly
 
 **Android**
- - Morphtargets dones not work
+ - Morphtargets does not work on some devices
  - Some RGBELoaders cause app to crash
  
 **Windows**
+ - Tonemapping turns screen black
+ - Some RGBELoaders cause app to crash
 
 **Web**
  - Lens Flare not working correctly
- - Postprocessing does not work
- - Track pad has some bugs
+ - Simplify modifer has weird artifacts
 
-## Librarues and Plugins
+ **WASM**
+ - Simple GI does not work
+ - Simplify modifer has weird artifacts
+
+**Linux**
+ - Tonemapping turns screen black
+ - Change screen size does not function currently
+ - Postprocessing does not work
+ - Track pad does not zoom out
+ - Some RGBELoaders cause app to crash
+
+## Libraries and Plugins
+
+**Other Libs**
+ - [Advanced Exporters](https://pub.dev/packages/three_js_advanced_exporters) a USDZ exporter to your three_js project.
+ - [BVH CSG](https://pub.dev/packages/three_js_bvh_csg) a bvh csg api for three_js.
+ - [Exporters](https://pub.dev/packages/three_js_exporters) an api to add STL, OBJ or PLY exporter for three_js.
+ - [Geometry](https://pub.dev/packages/three_js_geometry) an api to add complex geometries to three_js.
+ - [Line](https://pub.dev/packages/three_js_line) an api to add more line types to three_js.
+ - [Helpers](https://pub.dev/packages/three_js_helpers) an api to add helpers to three_js.
+ - [Modifers](https://pub.dev/packages/three_js_modifers) an api to add simplify or subdivision to three_js.
+ - [Post Processing](https://pub.dev/packages/three_js_postprocessing) a post processor to three_js.
+ - [SVG](https://pub.dev/packages/three_js_svg) an api to add a svg importer and exporter to three_js.
+ - [Three JS Loader](https://pub.dev/packages/three_js_tjs_loader) a loader to add three js json files to three_js.
+ - [Transfrom Controls](https://pub.dev/packages/three_js_transform_controls) a transfor controller for 3d objects for three_js.
+ - [Video Texture](https://pub.dev/packages/three_js_video_texture) an api to add videos to three_js.
 
 **ADD-ONS**
- - [Omio](https://github.com/Knightro63/oimo_physics) a physics engine for three_js
- - [Cannon](https://github.com/Knightro63/cannon_physics) a physics engine for three_js
- - [Terrain](https://github.com/Knightro63/three_js/tree/main/packages/three_js_terrain) a map generator for three_js
+ - [Omio](https://pub.dev/packages/oimo_physics) a physics engine for three_js.
+ - [Cannon](https://pub.dev/packages/cannon_physics) a physics engine for three_js.
+ - [Terrain](https://pub.dev/packages/three_js_terrain) a map generator for three_js.
+ - [XR](https://pub.dev/packages/three_js_xr) a VR/AR/MR sdk for three_js. (web only)
 
 ## Contributing
 

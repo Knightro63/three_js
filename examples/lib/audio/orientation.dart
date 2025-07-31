@@ -30,9 +30,6 @@ class _State extends State<AudioOrientation> {
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
       setup: setup,
-      settings: three.Settings(
-        useOpenGL: useOpenGL
-      )
     );
     super.initState();
   }
@@ -88,14 +85,15 @@ class _State extends State<AudioOrientation> {
     threeJs.scene.add( mesh );
 
     final positionalAudio = PositionalAudio(
-      path: 'sounds/376737_Skullbeatz___Bad_Cat_Maste.mp3',
+      path: 'assets/sounds/376737_Skullbeatz___Bad_Cat_Maste.mp3',
       listner: threeJs.camera,
       refDistance: 0.75,
       coneInnerAngle: 90,
       coneOuterAngle: 180,
       coneOuterGain: 0.1,
-      maxDistance: 2
+      maxDistance: 2,
     );
+    positionalAudio.setVolume(0);
     positionalAudio.play();
 
     final helper = PositionalAudioHelper( positionalAudio, 0.1 );

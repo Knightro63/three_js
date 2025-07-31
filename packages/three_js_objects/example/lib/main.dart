@@ -72,10 +72,9 @@ class _MarchingState extends State<Marching> {
   void initState() {
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
-      setup: setup,
-      settings: three.Settings(
+      setup: setup,      settings: three.Settings(
         renderOptions: {"format": tmath.RGBAFormat,"samples": 8},
-        useOpenGL: true
+        
       )
     );
     super.initState();

@@ -28,9 +28,6 @@ class _MyAppState extends State<WebglLoaderTextureBasis> {
       
       onSetupComplete: (){setState(() {});},
       setup: setup,
-      settings: three.Settings(
-        useOpenGL: true
-      )
     );
     super.initState();
   }

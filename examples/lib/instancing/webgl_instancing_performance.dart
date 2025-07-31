@@ -35,15 +35,14 @@ class _MyAppState extends State<WebglInstancingPerformance> {
     threeJs = three.ThreeJS(
       
       onSetupComplete: (){setState(() {});},
-      setup: setup,
-      settings: three.Settings(
+      setup: setup,      settings: three.Settings(
         renderOptions: {
           "minFilter": three.LinearFilter,
           "magFilter": three.LinearFilter,
           "format": three.RGBAFormat,
           "samples": 4
         },
-        useOpenGL: true
+        
       )
     );
     super.initState();

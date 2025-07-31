@@ -67,7 +67,7 @@ class WebGLAttributes {
     };
   }
 
-  void updateBuffer(Buffer buffer, BufferAttribute attribute, int bufferType) {
+  void updateBuffer(Buffer buffer, attribute, int bufferType) {
     final updateRange = attribute.updateRange;
 
     gl.bindBuffer(bufferType, buffer);
@@ -83,14 +83,13 @@ class WebGLAttributes {
     }
   }
 
-  void updateBufferNew(Buffer buffer, BufferAttribute attribute, int bufferType) {
+  void updateBufferNew(Buffer buffer, attribute, int bufferType) {
     final array = attribute.array;
-    final updateRange = attribute.updateRange;
     final updateRanges = attribute.updateRanges;
 
     gl.bindBuffer(bufferType, buffer);
 
-    if (updateRange!["count"] == -1) {
+    if (updateRanges!["length"] == 0) {
       // Not using update ranges
       gl.bufferSubData(bufferType, 0, attribute.array);
     } 
@@ -114,7 +113,7 @@ class WebGLAttributes {
 				// We add one here to merge adjacent ranges. This is safe because ranges
 				// operate over positive integers.
 				if ( range.start <= previousRange.start + previousRange.count + 1 ) {
-					previousRange.count = math.max(
+					previousRange.count = math.max<int>(
 						previousRange.count,
 						range.start + range.count - previousRange.start
 					);
@@ -124,7 +123,7 @@ class WebGLAttributes {
 					updateRanges[ mergeIndex ] = range;
 				}
 			}
-
+      updateRanges.length = mergeIndex + 1;
 			for (int i = 0, l = updateRanges.length; i < l; i ++ ) {
 				final range = updateRanges[i];
         Float32Array f = Float32Array.fromList(attribute.array.sublist(range.start,range.count) as List<double>);
@@ -159,7 +158,7 @@ class WebGLAttributes {
         remove(len[i]);
       }
       else if(len[i] is NativeArray){
-        (len[i] as NativeArray).dispose();
+        //(len[i] as NativeArray).dispose();
         remove(len[i]);
       }
     }
@@ -170,7 +169,7 @@ class WebGLAttributes {
       final data = buffers.get(attribute.data);
 
       if (data != null) {
-        gl.deleteBuffer(data.buffer);
+        gl.deleteBuffer(data['buffer']);
         buffers.delete(attribute.data);
       }
     } else {

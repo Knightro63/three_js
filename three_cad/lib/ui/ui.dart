@@ -4,9 +4,11 @@ import 'package:css/css.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Actions;
 import 'package:flutter/services.dart';
+import 'package:three_cad/src/cad/constraints.dart';
 import 'package:three_cad/src/cad/draw_types.dart';
 import 'package:three_cad/src/cad/sketch.dart';
 import 'package:three_cad/src/navigation/globals.dart';
+import 'package:three_cad/src/navigation/nav_icons.dart';
 
 import 'package:three_js/three_js.dart' as three;
 import 'package:three_js_helpers/three_js_helpers.dart';
@@ -69,9 +71,6 @@ class _UIPageState extends State<UIScreen> {
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
       setup: setup,
-      settings: three.Settings(
-        useOpenGL: true
-      )
     );
     super.initState();
   }
@@ -106,7 +105,7 @@ class _UIPageState extends State<UIScreen> {
   }
 
   Future<void> setup() async{
-    threeJs.screenSize = Size(MediaQuery.of(context).size.width,MediaQuery.of(context).size.height-80);
+    //threeJs.screenSize = Size(MediaQuery.of(context).size.width,MediaQuery.of(context).size.height-150);
     const frustumSize = 1.0;
     final aspect = threeJs.width / threeJs.height;
     cameraPersp = three.PerspectiveCamera( 50, aspect, 0.1, 100 );
@@ -219,6 +218,7 @@ class _UIPageState extends State<UIScreen> {
         case ' ':
           break;
         case 'escape':
+          draw.endSketch(true);
           break;
       }
     });
@@ -235,12 +235,18 @@ class _UIPageState extends State<UIScreen> {
           break;
       }
     });
+    threeJs.domElement.addEventListener(three.PeripheralType.pointerup, (details){
+      orbit.enableZoom = true;
+      planeSelected();
+    });
     threeJs.domElement.addEventListener(three.PeripheralType.pointerdown, (details){
+      orbit.enableZoom = false;
       planeSelected();
     });
 
     threeJs.addAnimationEvent((dt){
       origin.update();
+      draw.updateScale();
       orbit.update();
       if (viewHelper != null && viewHelper!.animating ) {
         viewHelper!.update( dt );
@@ -252,6 +258,8 @@ class _UIPageState extends State<UIScreen> {
       threeJs.camera,
       origin.childred.children[0].clone(),
       threeJs.globalKey,
+      CSS.changeTheme(theme),
+      context,
       (){
         setState(() {});
       }
@@ -294,7 +302,7 @@ class _UIPageState extends State<UIScreen> {
     viewHelper = ViewHelper2(
       //size: 1.8,
       offsetType: OffsetType.topRight,
-      offset: three.Vector2(10, 10),
+      offset: three.Vector2(5,-70),
       screenSize: const Size(120, 120), 
       listenableKey: threeJs.globalKey,
       camera: threeJs.camera,
@@ -442,21 +450,22 @@ class _UIPageState extends State<UIScreen> {
       onTap: onTap,
       child: Container(
         margin: const EdgeInsets.all(5),
-        width: 45,
-        height: 45,
+        width: 35,
+        height: 35,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: (selected?Theme.of(context).secondaryHeaderColor:Theme.of(context).primaryColorLight))
+          border: Border.all(color: (selected?CSS.changeTheme(theme).secondaryHeaderColor:CSS.changeTheme(theme).hintColor))
         ),
         alignment: Alignment.center,
-        child: Icon(icon, color: (selected?Theme.of(context).secondaryHeaderColor:Theme.of(context).primaryColorLight)),
+        child: Icon(icon, color: (selected?CSS.changeTheme(theme).secondaryHeaderColor:CSS.changeTheme(theme).hintColor)),
       ),
     );
   }
   Widget actionNav(){
     return Actions.sketch == action?sketchNav():Row(
       children: [
-        selectionIcon(Icons.draw,action == Actions.prepareSketec,(){
+        SketchIcons(DrawType.none,action == Actions.prepareSketec,CSS.changeTheme(theme),
+          (){
             setState(() {
               if(action == Actions.prepareSketec){
                 action = Actions.none;
@@ -528,7 +537,21 @@ class _UIPageState extends State<UIScreen> {
   Widget sketchNav(){
     return Row(
       children: [
-        selectionIcon(Icons.timeline,draw.drawType == DrawType.line,
+        SketchIcons(DrawType.point,draw.drawType == DrawType.point,CSS.changeTheme(theme),
+          (){
+            if(draw.drawType != DrawType.none){
+              setState(() {
+                draw.endSketch();
+              });
+            }
+            else{
+              setState(() {
+                draw.startSketch(DrawType.point);
+              });
+            }
+          },
+        ),
+        SketchIcons(DrawType.line,draw.drawType == DrawType.line,CSS.changeTheme(theme),
           (){
             if(draw.drawType != DrawType.none){
               setState(() {
@@ -542,11 +565,11 @@ class _UIPageState extends State<UIScreen> {
             }
           },
         ),
-        selectionIcon(Icons.check_box_outline_blank_sharp,draw.drawType == DrawType.box2Point,
+        SketchIcons(DrawType.box2Point,draw.drawType == DrawType.box2Point,CSS.changeTheme(theme),
           (){
             if(draw.drawType != DrawType.none){
               setState(() {
-                draw.endSketch();
+                draw.endSketch(true);
               });
             }
             else{
@@ -556,25 +579,25 @@ class _UIPageState extends State<UIScreen> {
             }
           },
         ),
-        selectionIcon(Icons.circle_outlined,draw.drawType == DrawType.circle,
+        SketchIcons(DrawType.circleCenter,draw.drawType == DrawType.circleCenter,CSS.changeTheme(theme),
           (){
             if(draw.drawType != DrawType.none){
               setState(() {
-                draw.endSketch();
+                draw.endSketch(true);
               });
             }
             else{
               setState(() {
-                draw.startSketch(DrawType.circle);
+                draw.startSketch(DrawType.circleCenter);
               });
             }
           }
         ),
-        selectionIcon(Icons.check_box_outline_blank_sharp,draw.drawType == DrawType.boxCenter,
+        SketchIcons(DrawType.boxCenter,draw.drawType == DrawType.boxCenter,CSS.changeTheme(theme),
           (){
             if(draw.drawType != DrawType.none){
               setState(() {
-                draw.endSketch();
+                draw.endSketch(true);
               });
             }
             else{
@@ -584,7 +607,7 @@ class _UIPageState extends State<UIScreen> {
             }
           }
         ),
-        selectionIcon(Icons.cable_rounded,draw.drawType == DrawType.spline,
+        SketchIcons(DrawType.spline,draw.drawType == DrawType.spline,CSS.changeTheme(theme),
           (){
             if(draw.drawType != DrawType.none){
               setState(() {
@@ -597,6 +620,148 @@ class _UIPageState extends State<UIScreen> {
               });
             }
           }
+        ),
+        SketchIcons(DrawType.arc3Point,draw.drawType == DrawType.arc3Point,CSS.changeTheme(theme),
+          (){
+            if(draw.drawType != DrawType.none){
+              setState(() {
+                draw.endSketch(true);
+              });
+            }
+            else{
+              setState(() {
+                draw.startSketch(DrawType.arc3Point);
+              });
+            }
+          }
+        ),
+        SketchIcons(DrawType.dimensions,draw.drawType == DrawType.dimensions,CSS.changeTheme(theme),
+          (){
+            if(draw.drawType != DrawType.none){
+              setState(() {
+                draw.endSketch(true);
+              });
+            }
+            else{
+              setState(() {
+                draw.startSketch(DrawType.dimensions);
+              });
+            }
+          }
+        ),
+        Container(
+          color: CSS.changeTheme(theme).dividerColor,
+          width: 2,
+          height: 35,
+        ),
+        ConstraintIcons(Constraints.horizontal,draw.constraintType == Constraints.horizontal,CSS.changeTheme(theme),
+          (){
+            setState(() {
+              if(draw.constraintType == Constraints.none){
+                draw.constraintType = Constraints.horizontal;
+                draw.endSketch(true);
+              }
+              else{
+                draw.constraintType = Constraints.none;
+              }
+            });
+          }
+        ),
+        ConstraintIcons(Constraints.equal,draw.constraintType == Constraints.equal,CSS.changeTheme(theme),(){
+            setState(() {
+              if(draw.constraintType == Constraints.none){
+                draw.constraintType = Constraints.equal;
+                draw.endSketch(true);
+              }
+              else{
+                draw.constraintType = Constraints.none;
+              }
+            });
+          }),
+        ConstraintIcons(Constraints.coincident,draw.constraintType == Constraints.coincident,CSS.changeTheme(theme),(){
+            setState(() {
+              if(draw.constraintType == Constraints.none){
+                draw.constraintType = Constraints.coincident;
+                draw.endSketch(true);
+              }
+              else{
+                draw.constraintType = Constraints.none;
+              }
+            });
+          }),
+        ConstraintIcons(Constraints.tangent,draw.constraintType == Constraints.tangent,CSS.changeTheme(theme),(){
+            setState(() {
+              if(draw.constraintType == Constraints.none){
+                draw.constraintType = Constraints.tangent;
+                draw.endSketch(true);
+              }
+              else{
+                draw.constraintType = Constraints.none;
+              }
+            });
+          }),
+        ConstraintIcons(Constraints.concentric,draw.constraintType == Constraints.concentric,CSS.changeTheme(theme),(){
+            setState(() {
+              if(draw.constraintType == Constraints.none){
+                draw.constraintType = Constraints.concentric;
+                draw.endSketch(true);
+              }
+              else{
+                draw.constraintType = Constraints.none;
+              }
+            });
+          }),
+        ConstraintIcons(Constraints.midpoint,draw.constraintType == Constraints.midpoint,CSS.changeTheme(theme),(){
+            setState(() {
+              if(draw.constraintType == Constraints.none){
+                draw.constraintType = Constraints.midpoint;
+                draw.endSketch(true);
+              }
+              else{
+                draw.constraintType = Constraints.none;
+              }
+            });
+          }),
+        ConstraintIcons(Constraints.parallel,draw.constraintType == Constraints.parallel,CSS.changeTheme(theme),(){
+            setState(() {
+              if(draw.constraintType == Constraints.none){
+                draw.constraintType = Constraints.parallel;
+                draw.endSketch(true);
+              }
+              else{
+                draw.constraintType = Constraints.none;
+              }
+            });
+          }),
+        ConstraintIcons(Constraints.perpendicular,draw.constraintType == Constraints.perpendicular,CSS.changeTheme(theme),(){
+            setState(() {
+              if(draw.constraintType == Constraints.none){
+                draw.constraintType = Constraints.perpendicular;
+                draw.endSketch(true);
+              }
+              else{
+                draw.constraintType = Constraints.none;
+              }
+            });
+          }),
+        Container(
+          color: CSS.changeTheme(theme).dividerColor,
+          width: 2,
+          height: 35,
+        ),
+        selectionIcon(Icons.open_with,draw.moveSketch,
+          (){
+            setState(() {
+              if(!draw.moveSketch){
+                draw.moveSketch = true;
+                draw.constraintType = Constraints.none;
+                draw.endSketch(true);
+              }
+              else{
+                draw.moveSketch = false;
+              }
+            });
+          },
         ),
         selectionIcon(Icons.check,false,
           (){
@@ -616,6 +781,7 @@ class _UIPageState extends State<UIScreen> {
       ],
     );
   }
+  
   @override
   Widget build(BuildContext context) {
     double deviceWidth = MediaQuery.of(context).size.width;
@@ -1048,7 +1214,11 @@ class _UIPageState extends State<UIScreen> {
                 actionNav(),
                 Stack(
                   children: [
-                    threeJs.build(),
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height-70,
+                      child: threeJs.build(),
+                    )
+            
                     if(threeJs.mounted)Positioned(
                       top: 5,
                       left: 20,

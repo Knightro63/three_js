@@ -40,7 +40,7 @@ class Vector4 extends Vector{
     this.w = w;
   }
 
-  Vector4.fromJson(Map<String,num>? json) {
+  Vector4.fromJson([Map<String,num>? json]) {
     storage = Float32List(4);
     if (json != null) {
       List<num> data = json.values.toList();
@@ -617,6 +617,15 @@ class Vector4 extends Vector{
   }
   @override
   List<num> toNumArray(List<num> array, [int offset = 0]) {
+    array[offset] = storage[0];
+    array[offset + 1] = storage[1];
+    array[offset + 2] = storage[2];
+    array[offset + 3] = storage[3];
+
+    return array;
+  }
+  @override
+  NativeArray copyIntoNativeArray(NativeArray array, [int offset = 0]) {
     array[offset] = storage[0];
     array[offset + 1] = storage[1];
     array[offset + 2] = storage[2];

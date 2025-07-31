@@ -350,7 +350,6 @@ mixin WebGLUniformsHelper {
       //mat2array.set(List<double>.from(elements.map((e) => e.toDouble())), 0);
 
       gl.uniformMatrix2fv(addr, false, mat2array);
-
       copyArray(cache, elements);
     }
   }
@@ -366,15 +365,6 @@ mixin WebGLUniformsHelper {
 
       copyArray(cache, v);
     } 
-    else if(kIsWeb){
-      final element = elements.sublist(0);
-      if (arraysEqual(cache, element)) {
-        return;
-      }
-
-      gl.uniformMatrix3fv(addr, false, element);
-      copyArray(cache, elements);
-    }
     else {
       if (arraysEqual(cache, elements)) {
         return;

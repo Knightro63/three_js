@@ -55,6 +55,7 @@ abstract class Vector {
   Vector fromNativeArray(NativeArray array, [int offset = 0]);
   Vector copyFromUnknown(array, [int offset = 0]);
   List<num> toNumArray(List<num> array, [int offset = 0]);
+  NativeArray copyIntoNativeArray(NativeArray array, [int offset = 0]);
   Vector copyFromArray(List<double> array, [int offset = 0]);
   List<double> copyIntoArray([List<double> array, int offset = 0]);
 

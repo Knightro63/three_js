@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
+import './bplist_parser.dart';
 import 'package:three_js_animations/three_js_animations.dart';
 import 'package:three_js_core_loaders/three_js_core_loaders.dart';
 
@@ -65,10 +66,10 @@ class SCNLoader extends Loader {
   }
 
   Future<AnimationObject?> _parse(Uint8List bufferBytes) async{
-    //Map temp = BPlist.parseBuffer(bufferBytes);
+    Map temp = BPlist.parseBuffer(bufferBytes);
     //final keys = temp.keys.toList();
-    //print(temp[keys[1]].length);
-    return null;
+    return AnimationObject()..userData['map'] = temp;
+    //return null;
   }
 
   @override

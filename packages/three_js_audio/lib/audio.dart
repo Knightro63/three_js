@@ -1,5 +1,6 @@
 import 'dart:async';
-import 'package:audioplayers/audioplayers.dart';
+import 'dart:io';
+import 'package:media_kit/media_kit.dart';
 import 'package:three_js_core/three_js_core.dart';
 
 /// This utility class holds static references to some global audio objects.
@@ -10,9 +11,9 @@ class Audio extends Object3D{
   bool autoplay;
   bool loop;
   bool hasPlaybackControl;
-  bool _isPlaying = false;
 
-  AudioPlayer? source;
+  Player? _player;
+  
   //Uint8List? _buffer;
 
   int loopEnd = 0;
@@ -22,9 +23,11 @@ class Audio extends Object3D{
 
   late double _volume;
   late double _balance;
+  //AudioLoader _loader = AudioLoader();
 
   Timer? _delay;
-  bool get isPlaying => _isPlaying;
+  bool get isPlaying => _player?.state.playing ?? false;
+  bool _hasStarted = false;
 
   String path;
 
@@ -37,12 +40,19 @@ class Audio extends Object3D{
     this.autoplay = false,
     this.loop = false
   }){
+    MediaKit.ensureInitialized();
     _balance = balance;
     _volume = volume;
 
-    if(autoplay){
-      play();
-    }
+    _player ??= Player();
+    setVolume(_volume);
+    setBalance(_balance);
+    setPlaybackRate(playbackRate);
+    _player!.open(Media(_convert(path),start: Duration(milliseconds: loopStart)),play: autoplay).then((_){
+      if(loop){
+        _player!.setPlaylistMode(PlaylistMode.single);
+      }
+    });
   }
 
   // void setBuffer(Uint8List buffer){
@@ -52,58 +62,53 @@ class Audio extends Object3D{
   @override
   void dispose(){
     _delay?.cancel();
-    source?.dispose();
+    _player?.dispose();
     super.dispose();
   }
 
   /// Plays a single run of the given [file], with a given [volume].
   Future<void> play([int delay = 0]) async{
-		if (_isPlaying) {
+		if (_hasStarted && isPlaying) {
 			console.warning( 'Audio: Audio is already playing.' );
 			return;
 		}
+
+    _hasStarted = true;
 
 		if(!hasPlaybackControl){
 			console.warning( 'Audio: this Audio has no playback control.' );
 			return;
 		}
-
-    _isPlaying = true;
-
-    if(source == null){
-      if(delay != 0){
-        _delay = Timer(Duration(milliseconds: delay), (){
-          _play();
-          _delay?.cancel();
-          _delay = null;
-        });
-      }
-      else{
-        _play();
-      }
+    if(delay == 0){
+      replay();
     }
     else{
-      resume();
+      Future.delayed(Duration(milliseconds: delay),replay);
     }
   }
 
-  /// Plays a single run of the given [file], with a given [volume].
-  Future<void> _play() async{
-    final src = AudioPlayer();
-    src.onPlayerComplete.listen((event) {
-      _isPlaying = false;
-    });
-    //await src.setReleaseMode(loop?ReleaseMode.loop:ReleaseMode.stop);
-    //await src.setPlaybackRate(playbackRate);
-    await src.play(
-      AssetSource(path),
-      volume: _volume,
-      mode: PlayerMode.lowLatency,
-      position: Duration(milliseconds: loopStart),
-      balance: _balance
-    );
-    
-    source = src;
+  Future<void> replay() async{
+    await _player?.seek(Duration.zero);
+    await _player?.play();
+  }
+
+  static String _convert(dynamic url){
+    if(url is File){
+      return 'file:///${url.path}';
+    }
+    else if(url is Uri){
+      return url.path;
+    }
+    else if(url is String){
+      if(url.contains('http://') || url.contains('https://')){  
+        return url;
+      }
+      else if(url.contains('assets')){
+        return 'asset:///$url';
+      }
+    }
+
+    throw('File type not allowed. Must be a path, asset, or url string.');
   }
 
   /// Stops the currently playing background music track (if any).
@@ -115,14 +120,12 @@ class Audio extends Object3D{
 
     _delay?.cancel();
     _delay = null;
-    _isPlaying = false;
-    await source?.stop();
+    _player?.stop();
   }
 
   /// Resumes the currently played (but resumed) background music.
   Future<void> resume() async {
-    _isPlaying = true;
-    await source?.resume();
+    await _player?.play();
   }
 
   /// Pauses the background music without unloading or resetting the audio
@@ -133,9 +136,8 @@ class Audio extends Object3D{
 			return;
 		}
 
-		if(_isPlaying) {
-      _isPlaying = false;
-      await source?.pause();
+		if(isPlaying) {
+      _player?.pause();
     }
 
     _delay?.cancel();
@@ -143,18 +145,18 @@ class Audio extends Object3D{
   }
 
 	double? getPlaybackRate() {
-		return source?.playbackRate;
+		return _player?.state.rate;
 	}
 
-	Future<void>? setPlaybackRate(double value) async{
+	void setPlaybackRate(double value){
 		if (!hasPlaybackControl) {
 			console.warning( 'Audio: this Audio has no playback control.' );
 			return;
 		}
 
-		if (_isPlaying) {
+		if (isPlaying) {
       playbackRate = value;
-			await source?.setPlaybackRate(value);
+      _player?.setRate(value);
 		}
 	}
 
@@ -164,10 +166,10 @@ class Audio extends Object3D{
 			return false;
 		}
 
-		return source?.releaseMode == ReleaseMode.loop;
+		return _player?.state.playlist == PlaylistMode.single;
 	}
 
-	Future<void> setLoop( value ) async{
+	void setLoop(bool value ){
 		if (!hasPlaybackControl) {
 			console.warning( 'Audio: this Audio has no playback control.' );
 			return;
@@ -175,9 +177,12 @@ class Audio extends Object3D{
 
 		loop = value;
 
-		if (_isPlaying ) {
-			await source?.setReleaseMode(loop?ReleaseMode.loop:ReleaseMode.stop);
+		if (isPlaying && value) {
+			_player?.setPlaylistMode(PlaylistMode.single);
 		}
+    else if(isPlaying){
+      _player?.setPlaylistMode(PlaylistMode.none);
+    }
 	}
 
 	void setLoopStart(int value ) {
@@ -189,20 +194,20 @@ class Audio extends Object3D{
 	}
 
 	double? getBalance() {
-		return source?.balance;
+		return 0;//_player != null?_player?.state.audioParams. getPan(source!):0;
 	}
 
-	Future<void> setBalance(double value ) async{
+	void setBalance(double value ){
     _balance = value;
-		await source?.setBalance(value);
+    //_player?.se
 	}
 
 	double? getVolume() {
-		return source?.volume;
+		return _player?.state.volume;
 	}
 
-	Future<void> setVolume(double value ) async{
+	void setVolume(double value ){
     _volume = value;
-		await source?.setVolume(value);
+    _player?.setVolume(value*100);
 	}
 }

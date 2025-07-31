@@ -152,7 +152,7 @@ class FBXLoader extends Loader {
     }
 
     TextureLoader textureLoader = TextureLoader(manager: manager)
-        .setPath((resourcePath == '' || resourcePath == null) ? path : '')
+        .setPath(this.resourcePath ?? path)//(resourcePath == '' || resourcePath == null) ? path : ''
         .setCrossOrigin(crossOrigin);
 
     return __FBXTreeParser(textureLoader, manager, innerWidth, innerHeight).parse();

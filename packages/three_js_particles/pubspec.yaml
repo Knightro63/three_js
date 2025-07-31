@@ -1,0 +1,20 @@
+name: three_js_particles
+description: "A type of three_js api that allows users to add particles to their projects."
+version: 0.0.1
+homepage:
+
+environment:
+  sdk: ^3.8.0
+  flutter: ">=1.17.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  three_js: ^0.1.6
+  
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:

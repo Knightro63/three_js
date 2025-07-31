@@ -1,0 +1,24 @@
+name: three_js_advanced_exporters
+description: "Flutter three_js_advanced_exporters package exports usdz from three_js."
+version: 0.0.1
+homepage: https://github.com/Knightro63/three_js/tree/main/packages/three_js_advanced_exporters
+
+environment:
+  sdk: '>=3.3.2 <4.0.0'
+  flutter: ">=1.17.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  file_picker: ^10.1.9
+  path_provider: ^2.1.5
+  image: ^4.5.4
+  web: ^1.1.1
+  three_js_exporters: ^0.2.0
+  three_js_core: ^0.2.0
+  three_js_math: ^0.2.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0

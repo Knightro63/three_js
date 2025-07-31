@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:three_js_core/others/index.dart';
+import 'package:three_js_core/renderers/index.dart';
 import 'package:three_js_core/three_js_core.dart' as core;
 import 'package:three_js_math/three_js_math.dart';
 
@@ -14,7 +15,6 @@ class Settings{
     this.autoClear = true,
     Map<String,dynamic>? renderOptions,
     this.animate = true,
-    this.useOpenGL = false,
     this.alpha = false,
     this.autoClearDepth = true,
     this.autoClearStencil = true,
@@ -27,7 +27,8 @@ class Settings{
     this.shadowMapType = PCFShadowMap,
     this.toneMappingExposure = 1.0,
     this.logarithmicDepthBuffer = false,
-    this.stencil = true
+    this.stencil = true,
+    this.xr
   }){
     this.renderOptions = renderOptions ?? {
       "format": RGBAFormat,
@@ -35,8 +36,8 @@ class Settings{
     };
   }
 
+  WebXRManager Function(WebGLRenderer renderer, dynamic gl)? xr;
   bool animate;
-  bool useOpenGL;
   bool logarithmicDepthBuffer;
   bool useSourceTexture;
   bool enableShadowMap;
@@ -57,7 +58,7 @@ class Settings{
 }
 
 /// threeJs utility class. If you want to learn how to connect cannon.js with js, please look at the examples/threejs_* instead.
-class ThreeJS {
+class ThreeJS with WidgetsBindingObserver{
   void Function() onSetupComplete;
   ThreeJS({
     Settings? settings,
@@ -68,27 +69,32 @@ class ThreeJS {
     required this.setup,
     Size? size,
     core.WebGLRenderer? renderer,
-    this.texture,
+    this.renderNumber = 0,
     this.loadingWidget,
   }){
+    this.angle = FlutterAngle();
     this.settings = settings ?? Settings();
     _size = size;
-    lateRenderer = renderer;
   }
 
-  //bool _allowDeleteTexture = true;
+  int renderNumber;
+
+  late final BuildContext _context;
+  Timer? _debounceTimer;
+
   Widget? loadingWidget;
   Size? _size;
   late Settings settings;
   final GlobalKey<core.PeripheralsState> globalKey = GlobalKey<core.PeripheralsState>();
   core.PeripheralsState get domElement => globalKey.currentState!;
 
+  bool visible = true;
+
   FlutterAngleTexture? texture;
   late final RenderingContext gl;
 
   core.WebGLRenderTarget? renderTarget;
   core.WebGLRenderer? renderer;
-  core.WebGLRenderer? lateRenderer;
   core.Clock clock = core.Clock();
 
   late core.Scene scene;
@@ -113,7 +119,7 @@ class ThreeJS {
   List<Function(double dt)> events = [];
   List<Function()> disposeEvents = [];
 
-  FlutterAngle angle = FlutterAngle();
+  late FlutterAngle angle;
 
   void addAnimationEvent(Function(double dt) event){
     events.add(event);
@@ -122,18 +128,27 @@ class ThreeJS {
     disposeEvents.add(event);
   }
 
+  @override
+  void didChangeMetrics() {
+    _debounceTimer?.cancel(); // Clear existing timer
+    _debounceTimer = Timer(const Duration(milliseconds: 300), () { // Set a new timer
+      onWindowResize(_context);
+    });
+  }
+
   void dispose(){
     if(disposed) return;
     disposed = true;
+    _debounceTimer?.cancel(); // Cancel timer if active
+    WidgetsBinding.instance.removeObserver(this);
+
     ticker?.dispose();
     renderer?.dispose();
     renderTarget?.dispose();
-    lateRenderer?.dispose();
     scene.dispose();
     for(final event in disposeEvents){
       event.call();
     }
-
     
     camera.dispose();
     events.clear();
@@ -149,16 +164,22 @@ class ThreeJS {
     if (screenSize != null) {
       return;
     }
-
+    _context = context;
+    WidgetsBinding.instance.addObserver(this);
     final mqd = MediaQuery.of(context);
 
     screenSize = _size ?? mqd.size;
     dpr = mqd.devicePixelRatio;
 
-   initPlatformState();
+    width = screenSize!.width;
+    height = screenSize!.height;
+    
+    Future.delayed(Duration(milliseconds: renderNumber*100), () async{
+      await initPlatformState();
+    });
   }
   
-  void animate(Duration duration) {
+  Future<void> animate(Duration duration) async {
     if (!mounted || disposed || updating) {
       return;
     }
@@ -166,7 +187,7 @@ class ThreeJS {
     double dt = clock.getDelta();
     
     if(settings.animate){
-      render(dt);
+      await render(dt);
       if(!pause){
         for(int i = 0; i < events.length;i++){
           events[i].call(dt);
@@ -196,41 +217,39 @@ class ThreeJS {
   }
   
   void initRenderer() {
-    renderer = lateRenderer;
-    if(renderer == null){
-      Map<String, dynamic> options = {
-        "width": width,
-        "height": height,
-        "gl": gl,
-        "stencil": settings.stencil,
-        "antialias": true,
-        "alpha": settings.alpha,
-        "clearColor": settings.clearColor,
-        "clearAlpha": settings.clearAlpha,
-        "logarithmicDepthBuffer": settings.logarithmicDepthBuffer
-      };
-      
-      renderer = lateRenderer ?? core.WebGLRenderer(options);
-      renderer!.setPixelRatio(dpr);
-      renderer!.setSize(width, height, false);
-      renderer!.alpha = settings.alpha;
-      renderer!.shadowMap.enabled = settings.enableShadowMap;
-      renderer!.shadowMap.type = settings.shadowMapType;
-      renderer!.autoClear = settings.autoClear;
-      renderer!.setClearColor(
-        Color.fromHex32(settings.clearColor), 
-        settings.clearAlpha
-      );
-      renderer!.autoClearDepth = settings.autoClearDepth;
-      renderer!.autoClearStencil = settings.autoClearStencil;
-      renderer!.outputEncoding = sRGBEncoding;
-      renderer!.localClippingEnabled = settings.localClippingEnabled;
-      renderer!.clippingPlanes = settings.clippingPlanes;
-      renderer!.toneMapping = settings.toneMapping;
-      renderer!.toneMappingExposure = settings.toneMappingExposure;
-    }
+    Map<String, dynamic> options = {
+      "width": width,
+      "height": height,
+      "gl": gl,
+      "stencil": settings.stencil,
+      "antialias": true,
+      "alpha": settings.alpha,
+      "clearColor": settings.clearColor,
+      "clearAlpha": settings.clearAlpha,
+      "logarithmicDepthBuffer": settings.logarithmicDepthBuffer,
+      'xr': settings.xr
+    };
+    
+    renderer = core.WebGLRenderer(options);
+    renderer!.setPixelRatio(dpr);
+    renderer!.setSize(width, height, false);
+    renderer!.alpha = settings.alpha;
+    renderer!.shadowMap.enabled = settings.enableShadowMap;
+    renderer!.shadowMap.type = settings.shadowMapType;
+    renderer!.autoClear = settings.autoClear;
+    renderer!.setClearColor(
+      Color.fromHex32(settings.clearColor), 
+      settings.clearAlpha
+    );
+    renderer!.autoClearDepth = settings.autoClearDepth;
+    renderer!.autoClearStencil = settings.autoClearStencil;
+    renderer!.outputEncoding = sRGBEncoding;
+    renderer!.localClippingEnabled = settings.localClippingEnabled;
+    renderer!.clippingPlanes = settings.clippingPlanes;
+    renderer!.toneMapping = settings.toneMapping;
+    renderer!.toneMappingExposure = settings.toneMappingExposure;
 
-    if(settings.useSourceTexture && !kIsWeb){
+    if(settings.useSourceTexture){
       final core.WebGLRenderTargetOptions pars = core.WebGLRenderTargetOptions(settings.renderOptions);
       renderTarget = core.WebGLRenderTarget((width * dpr).toInt(), (height * dpr).toInt(), pars);
       renderer!.setRenderTarget(renderTarget);
@@ -238,30 +257,30 @@ class ThreeJS {
     }
   }
   
-  void onWindowResize(BuildContext context){
+  Future<void> onWindowResize(BuildContext context) async{
+    if (disposed) return;
     double dt = clock.getDelta();
-    final mqd = MediaQuery.of(context);
-    if(_size == null && screenSize != mqd.size){
+    final mqd = MediaQuery.maybeOf(context);
+    if (mqd == null) return;
+    if(_size == null && screenSize != mqd.size && texture != null){
       screenSize = mqd.size;
       width = screenSize!.width;
       height = screenSize!.height;
       dpr = mqd.devicePixelRatio;
 
-      camera.aspect = width / height;
+      final options = AngleOptions(
+        width: width.toInt(),
+        height: height.toInt(),
+        dpr: dpr,
+      );
+
+      await angle.resize(texture!, options);
+
+      camera.aspect = width/height;
       camera.updateProjectionMatrix();
 
-      if(settings.useSourceTexture && !kIsWeb){
-        renderTarget?.width = (width * dpr).toInt(); 
-        renderTarget?.height = (height * dpr).toInt();
-      }
-      else if(kIsWeb){
-        texture?.element?.width = (width * dpr).toInt();
-        texture?.element?.height = (height * dpr).toInt();
-      }
-
       windowResizeUpdate?.call(screenSize!);
-      renderer!.setPixelRatio(dpr);
-      renderer!.setSize(width, height, true);
+      renderer!.setSize(width, height, false);
 
       if(postProcessor != null){
         postProcessor?.call(dt);
@@ -280,10 +299,8 @@ class ThreeJS {
   }
 
   Future<void> initPlatformState() async {
-    width = screenSize!.width;
-    height = screenSize!.height;
     if(texture == null){
-      await angle.init(false,!settings.useOpenGL);
+      await angle.init();
       
       texture = await angle.createTexture(      
         AngleOptions(
@@ -292,7 +309,7 @@ class ThreeJS {
           dpr: dpr,
           alpha: settings.alpha,
           antialias: true,
-          customRenderer: false,
+          customRenderer: !settings.useSourceTexture,
           useSurfaceProducer: true
         )
       );
@@ -310,39 +327,33 @@ class ThreeJS {
         key: globalKey,
         builder: (BuildContext context) {
           return Container(
-            width: width,
-            height: height,
-            child: NotificationListener<SizeChangedLayoutNotification>(
-            onNotification: (notification) {
-              onWindowResize(context);
-              return true;
-            },
+            width: !visible?0:width,
+            height: !visible?0:height,
             child: SizeChangedLayoutNotifier(
               child: Builder(builder: (BuildContext context) {
-                  if (kIsWeb) {
-                    return texture != null && mounted? HtmlElementView(viewType:texture!.textureId.toString()):loadingWidget ?? Container(
+                if (kIsWeb) {
+                  return texture != null && mounted? HtmlElementView(viewType:texture!.textureId.toString()):loadingWidget ?? Container(
+                    width: MediaQuery.of(context).size.width,
+                    height: MediaQuery.of(context).size.height,
+                    color: Theme.of(context).canvasColor,
+                    alignment: Alignment.center,
+                    child: const CircularProgressIndicator()
+                  );
+                } 
+                else {
+                  return texture != null && mounted?
+                    Transform.scale(
+                      scaleY: sourceTexture != null || Platform.isAndroid?1:-1,
+                      child:Texture(textureId: texture!.textureId)
+                    ):loadingWidget ?? Container(
                       width: MediaQuery.of(context).size.width,
                       height: MediaQuery.of(context).size.height,
                       color: Theme.of(context).canvasColor,
                       alignment: Alignment.center,
                       child: const CircularProgressIndicator()
                     );
-                  } 
-                  else {
-                    return texture != null && mounted?
-                      Transform.scale(
-                        scaleY: sourceTexture != null || Platform.isAndroid?1:-1,
-                        child:Texture(textureId: texture!.textureId)
-                      ):loadingWidget ?? Container(
-                        width: MediaQuery.of(context).size.width,
-                        height: MediaQuery.of(context).size.height,
-                        color: Theme.of(context).canvasColor,
-                        alignment: Alignment.center,
-                        child: const CircularProgressIndicator()
-                      );
-                  }
-                })
-              )
+                }
+              })
             )
           );
         }

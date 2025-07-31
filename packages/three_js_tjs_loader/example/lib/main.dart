@@ -45,8 +45,7 @@ class _MyAppState extends State<WebglInstancingPerformance> {
     threeJs = three.ThreeJS(
       
       onSetupComplete: (){setState(() {});},
-      setup: setup,
-      settings: three.Settings(
+      setup: setup,      settings: three.Settings(
         renderOptions: {
           "minFilter": tmath.LinearFilter,
           "magFilter": tmath.LinearFilter,

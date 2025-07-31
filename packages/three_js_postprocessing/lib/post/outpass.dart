@@ -74,9 +74,9 @@ class OutputPass extends Pass {
 
 		// rebuild defines if required
 
-		if ( _toneMapping != renderer.toneMapping ) {//_outputColorSpace != renderer.outputColorSpace ||
+		if (_outputColorSpace != renderer.outputColorSpace || _toneMapping != renderer.toneMapping ) {//
 
-			_outputColorSpace = SRGBTransfer;//renderer.outputColorSpace;
+			_outputColorSpace = renderer.outputColorSpace;
 			_toneMapping = renderer.toneMapping;
 
 			material.defines = {};

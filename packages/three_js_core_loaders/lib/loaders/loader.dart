@@ -25,7 +25,6 @@ abstract class Loader {
     crossOrigin = 'anonymous';
     withCredentials = false;
     path = '';
-    resourcePath = '';
     requestHeader = {};
   }
 

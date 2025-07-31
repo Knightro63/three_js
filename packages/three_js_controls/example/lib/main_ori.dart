@@ -39,15 +39,14 @@ class _MyAppState extends State<MiscControlsOrbit> {
   void initState() {
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
-      setup: setup,
-      settings: three.Settings(
+      setup: setup,      settings: three.Settings(
         renderOptions: {
           "minFilter": tmath.LinearFilter,
           "magFilter": tmath.LinearFilter,
           "format": tmath.RGBAFormat,
           "samples": 4
         },
-        useOpenGL: true
+        
       )
     );
     super.initState();

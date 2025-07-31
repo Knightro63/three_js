@@ -28,9 +28,6 @@ class _State extends State<WebglSprites> {
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
       setup: setup,
-      settings: three.Settings(
-        useOpenGL: useOpenGL
-      ),
       windowResizeUpdate: (size){
         final width = size.width;
         final height = size.height;

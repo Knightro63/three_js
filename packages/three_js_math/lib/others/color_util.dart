@@ -23,6 +23,22 @@ enum ColorSpace{
       return ColorSpace.linear;
     }
   }
+
+  @override
+  String toString(){
+    switch (this) {
+      case ColorSpace.no:
+        return NoColorSpace;
+      case ColorSpace.srgb:
+        return SRGBColorSpace;
+      case ColorSpace.ldp3:
+        return LinearDisplayP3ColorSpace;
+      case ColorSpace.dp3:
+        return DisplayP3ColorSpace ;
+      default:
+      return LinearSRGBColorSpace;
+    }
+  }
 }
 
 final Color _color = Color();
@@ -55,7 +71,7 @@ class Color{
     storage = Float32List.fromList(list);
   }
   Color.fromHex64(int hex){
-    int alpha = (0xff000000 & hex) >> 32;
+    int alpha = (0xff000000 & hex) >> 24;
     int red = (0x00ff0000 & hex) >> 16;
     int green = (0x0000ff00 & hex) >> 8;
     int blue = (0x000000ff & hex) >> 0;
@@ -90,6 +106,9 @@ class Color{
     storage[2] = b;
   }
   double get alpha => storage[3];
+  set alpha(double a){
+    storage[3] = a;
+  }
 
   int getHex() {
     return (red * 255).toInt() << 16 ^
@@ -392,6 +411,17 @@ class Color{
 
 		return this;
 	}
+
+	Color getRGB(Color target, [ColorSpace? colorSpace ] ) {
+    colorSpace ??= ColorManagement.workingColorSpace;
+		ColorManagement.fromWorkingColorSpace( Color.copy( this ), colorSpace );
+
+		target.red = _color.red;
+		target.green = _color.green;
+		target.blue = _color.blue;
+
+		return target;
+	}
 }
 
 final lsrgb2ldp3 = Matrix3.identity().setValues(
@@ -483,7 +513,8 @@ class ColorManagement {
 		return convert(color, sourceColorSpace, workingColorSpace);
 	}
 
-	static String getPrimaries(ColorSpace colorSpace ) {
+	static String? getPrimaries(ColorSpace colorSpace ) {
+    //if(colorSpace == ColorSpace.no) return null;
 		return fn[colorSpace]['primaries'];
 	}
 

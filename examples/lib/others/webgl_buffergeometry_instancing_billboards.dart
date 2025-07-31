@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:math' as math;
 import 'package:example/src/statistics.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
 import 'package:three_js_geometry/three_js_geometry.dart';
@@ -29,9 +31,6 @@ class _State extends State<WebglBuffergeometryInstancingBillboards> {
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
       setup: setup,
-      settings: three.Settings(
-        useOpenGL: useOpenGL
-      )
     );
     super.initState();
   }
@@ -78,8 +77,8 @@ class _State extends State<WebglBuffergeometryInstancingBillboards> {
     }
 
     geometry.setAttributeFromString( 'translate', three.InstancedBufferAttribute( translateArray, 3 ) );
-    const vertexShader = '''
-      precision highp float;
+    final vertexShader = '''
+      ${!kIsWeb && Platform.isLinux ?'':'precision highp float'};
       uniform mat4 modelViewMatrix;
       uniform mat4 projectionMatrix;
       uniform float time;
@@ -104,8 +103,8 @@ class _State extends State<WebglBuffergeometryInstancingBillboards> {
 
       }
     ''';
-    const fragmentShader = '''
-      precision highp float;
+    final fragmentShader = '''
+      ${!kIsWeb && Platform.isLinux ?'':'precision highp float'};
 
       uniform sampler2D map;
 

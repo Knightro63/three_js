@@ -63,12 +63,11 @@ class _State extends State<WebglAnimationWalk> {
     });
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
-      setup: setup,
-      settings: three.Settings(
+      setup: setup,      settings: three.Settings(
         toneMapping: three.ACESFilmicToneMapping,
         toneMappingExposure: 0.5,
         enableShadowMap: true,
-        useOpenGL: useOpenGL
+        
       )
     );
     super.initState();

@@ -31,10 +31,9 @@ class _State extends State<WebglLightprobe> {
     });
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
-      setup: setup,
+      setup: setup,      
       settings: three.Settings(
         toneMapping: three.NoToneMapping,
-        useOpenGL: useOpenGL
       )
     );
     super.initState();

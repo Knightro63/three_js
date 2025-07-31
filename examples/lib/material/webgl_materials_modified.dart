@@ -26,11 +26,7 @@ class _State extends State<WebglMaterialsModified> {
     });
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
-      setup: setup,
-      settings: three.Settings(
-        useOpenGL: useOpenGL
-      )
-    );
+      setup: setup,    );
     super.initState();
   }
   @override

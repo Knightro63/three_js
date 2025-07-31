@@ -41,8 +41,7 @@ class _State extends State<WebglGeometries> {
     threeJs = three.ThreeJS(
       
       onSetupComplete: (){setState(() {});},
-      setup: setup,
-      settings: three.Settings(
+      setup: setup,      settings: three.Settings(
         localClippingEnabled: true,
       )
     );

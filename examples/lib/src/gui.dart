@@ -23,6 +23,8 @@ class GuiWidget{
   String get name => _name;
   double _step = 1.0;
 
+  bool visible = true;
+
   void Function()? _onFinished;
   Function(dynamic)? _onChanged;
 
@@ -38,6 +40,15 @@ class GuiWidget{
 
   set name(newName){
     _name = newName;
+  }
+
+  void hide(){
+    visible = false;
+    update();
+  }
+  void show(){
+    visible = true;
+    update();
   }
 
   Widget _createDD(){
@@ -280,6 +291,7 @@ class GuiWidget{
   }
 
   Widget render([BuildContext? context]){
+    if(!visible) return Container();
     switch (type) {
       case GuiWidgetType.dropdown:
         return _createDD();
@@ -331,7 +343,7 @@ class Folder{
     return _widgets.last;
   }
   GuiWidget addSlider(Map<String,dynamic> value, String name, double min, double max, [double step = 1.0]){
-    _widgets.add(GuiWidget(name, GuiWidgetType.slider, update, value, [min,max,step]));
+    _widgets.add(GuiWidget(name, GuiWidgetType.slider, update, value, [min, max, step]));
     return _widgets.last;
   }
   GuiWidget addCheckBox(Map<String,dynamic> value, String name){

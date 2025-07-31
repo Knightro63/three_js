@@ -8,7 +8,6 @@ import 'package:three_js/three_js.dart' as three;
 import 'package:three_js_geometry/three_js_geometry.dart';
 
 class WebglSimpleGi extends StatefulWidget {
-  
   const WebglSimpleGi({super.key});
 
   @override
@@ -31,9 +30,6 @@ class _State extends State<WebglSimpleGi> {
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
       setup: setup,
-      settings: three.Settings(
-        useOpenGL: useOpenGL
-      )
     );
     super.initState();
   }

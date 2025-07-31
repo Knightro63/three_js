@@ -7,8 +7,8 @@ final _taskCache = new WeakMap();
 
 class Rhino3dmLoader extends Loader {
   String libraryPath = '';
-  this.libraryPending = null;
-  this.libraryBinary = null;
+  dynamic libraryPending;
+  dynamic libraryBinary;
   Map libraryConfig = {};
 
   String url = '';
@@ -44,7 +44,7 @@ class Rhino3dmLoader extends Loader {
 
 		this.url = url;
 
-		loader.load( url, ( buffer ){
+		loader.unknown( url).then(( buffer ){
 
 			// Check for an existing task using this buffer. A transferred buffer cannot be transferred
 			// again from this thread.
@@ -71,26 +71,22 @@ class Rhino3dmLoader extends Loader {
 	}
 
 	decodeObjects( buffer, url ) {
-
 		let worker;
 		let taskID;
 
 		final taskCost = buffer.byteLength;
 
 		final objectPending = this._getWorker( taskCost )
-			.then( ( _worker ) => {
+			.then( ( _worker ){
 
 				worker = _worker;
 				taskID = this.workerNextTaskID ++;
 
-				return new Promise( ( resolve, reject ) => {
-
+				return new Promise( ( resolve, reject ){
 					worker._callbacks[ taskID ] = { resolve, reject };
-
-					worker.postMessage( { type: 'decode', id: taskID, buffer }, [ buffer ] );
+					worker.postMessage( { 'type': 'decode', 'id': taskID, 'buffer':buffer }, [ buffer ] );
 
 					// this.debug();
-
 				} );
 
 			} )
@@ -119,14 +115,11 @@ class Rhino3dmLoader extends Loader {
 
 		// Cache the task result.
 		_taskCache.set( buffer, {
-
-			url: url,
-			promise: objectPending
-
+			'url': url,
+			'promise': objectPending
 		} );
 
 		return objectPending;
-
 	}
 
 	void parse( data, onLoad, onError ) {
@@ -179,7 +172,7 @@ class Rhino3dmLoader extends Loader {
 			return new MeshStandardMaterial.fromMap( {
 				'color': Color( 1, 1, 1 ),
 				'metalness': 0.8,
-				'name': Loader.DEFAULT_MATERIAL_NAME,
+				'name': '__DEFAULT',
 				'side': DoubleSide
 			} );
 		}
@@ -199,7 +192,7 @@ class Rhino3dmLoader extends Loader {
 			'transparent': material.transparency > 0 ? true : false
 		} );
 
-		mat.userData.id = material.id;
+		mat.userData['id'] = material.id;
 
 		if ( material.pbrSupported ) {
 			final pbr = material.pbr;
@@ -315,19 +308,14 @@ class Rhino3dmLoader extends Loader {
 
 		}
 
-		if ( renderEnvironment ) {
-
-			new EXRLoader().load( renderEnvironment.image, function ( texture ) {
-
-				texture.mapping = THREE.EquirectangularReflectionMapping;
+		if ( renderEnvironment != null) {
+			new EXRLoader().load( renderEnvironment.image, ( texture ) {
+				texture.mapping = EquirectangularReflectionMapping;
 				mat.envMap = texture;
-
 			} );
-
 		}
 
 		return mat;
-
 	}
 
 	_createGeometry( data ) {
@@ -340,13 +328,13 @@ class Rhino3dmLoader extends Loader {
 		object.userData[ 'layers' ] = data.layers;
 		object.userData[ 'groups' ] = data.groups;
 		object.userData[ 'settings' ] = data.settings;
-		object.userData.settings[ 'renderSettings' ] = data.renderSettings;
+		object.userData['settings'][ 'renderSettings' ] = data.renderSettings;
 		object.userData[ 'objectType' ] = 'File3dm';
 		object.userData[ 'materials' ] = null;
 
 		object.name = this.url;
 
-		let objects = data.objects;
+		dynamic objects = data.objects;
 		final materials = data.materials;
 
 		for (int i = 0; i < objects.length; i ++ ) {
@@ -361,7 +349,7 @@ class Rhino3dmLoader extends Loader {
 					instanceReferences.add( obj );
 					break;
 				default:
-					let matId = null;
+					dynamic matId = null;
 
 					switch ( attributes.materialSource.name ) {
 						case 'ObjectMaterialSource_MaterialFromLayer':
@@ -377,7 +365,7 @@ class Rhino3dmLoader extends Loader {
 							break;
 					}
 
-					let material = null;
+					dynamic material = null;
 
 					if ( matId >= 0 ) {
 						final rMaterial = materials[ matId ];

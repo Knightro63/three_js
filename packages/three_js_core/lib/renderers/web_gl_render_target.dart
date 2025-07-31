@@ -3,7 +3,6 @@
  * Texture parameters for an auto-generated target texture
  * depthBuffer/stencilBuffer: Booleans to indicate if we should generate these buffers
 */
-// import "package:universal_html/html.dart";
 
 part of three_renderers;
 
@@ -73,7 +72,7 @@ class RenderTarget with EventDispatcher {
       this.options.format, 
       this.options.type, 
       this.options.anisotropy, 
-      this.options.encoding
+      this.options.colorSpace
     );
     
     texture.isRenderTargetTexture = true;
@@ -81,7 +80,8 @@ class RenderTarget with EventDispatcher {
     texture.generateMipmaps = this.options.generateMipmaps;
     texture.internalFormat = this.options.internalFormat;
     texture.minFilter = this.options.minFilter != null ? this.options.minFilter! : LinearFilter;
-		textures = [];
+		texture.colorSpace = this.options.colorSpace ?? NoColorSpace;
+    textures = [];
 
 		final count = this.options.count;
 		for (int i = 0; i < count; i ++ ) {
@@ -225,6 +225,8 @@ class WebGLRenderTargetOptions {
   bool resolveDepthBuffer = false;
   bool resolveStencilBuffer = false;
 
+  String? colorSpace;
+
   void dispose(){
     depthTexture?.dispose();
     depthTexture = null;
@@ -232,68 +234,28 @@ class WebGLRenderTargetOptions {
 
   WebGLRenderTargetOptions([Map<String, dynamic>? json]) {
     json ??= {};
-    if (json["wrapS"] != null) {
-      wrapS = json["wrapS"];
-    }
-    if(json['count'] != null){
-      count = json['count'];
-    }
-    if(json['resolveDepthBuffer'] != null){
-      resolveDepthBuffer = json['resolveDepthBuffer'];
-    }
-    if(json['resolveStencilBuffer'] != null){
-      resolveStencilBuffer = json['resolveStencilBuffer'];
-    }
-    if(json['internalFormat'] != null){
-      internalFormat = json['internalFormat'];
-    }
-    if (json["wrapT"] != null) {
-      wrapT = json["wrapT"];
-    }
-    if (json["wrapR"] != null) {
-      wrapR = json["wrapR"];
-    }
-    if (json["magFilter"] != null) {
-      magFilter = json["magFilter"];
-    }
-    if (json["minFilter"] != null) {
-      minFilter = json["minFilter"];
-    }
-    if (json["format"] != null) {
-      format = json["format"];
-    }
-    if (json["type"] != null) {
-      type = json["type"];
-    }
-    if (json["anisotropy"] != null) {
-      anisotropy = json["anisotropy"];
-    }
-    if (json["depthBuffer"] != null) {
-      depthBuffer = json["depthBuffer"];
-    }
-    if (json["mapping"] != null) {
-      mapping = json["mapping"];
-    }
-    if (json["generateMipmaps"] != null) {
-      generateMipmaps = json["generateMipmaps"];
-    }
-    if (json["depthTexture"] != null) {
-      depthTexture = json["depthTexture"];
-    }
-    if (json["encoding"] != null) {
-      encoding = json["encoding"];
-    }
-    if (json["useMultisampleRenderToTexture"] != null) {
-      useMultisampleRenderToTexture = json["useMultisampleRenderToTexture"];
-    }
-    if (json["ignoreDepth"] != null) {
-      ignoreDepth = json["ignoreDepth"];
-    }
-    if (json["useRenderToTexture"] != null) {
-      useRenderToTexture = json["useRenderToTexture"];
-    }
-
+    wrapS = json["wrapS"];
+    count = json['count'] ?? 1;
+    resolveDepthBuffer = json['resolveDepthBuffer'] ?? false;
+    resolveStencilBuffer = json['resolveStencilBuffer'] ?? false;
+    internalFormat = json['internalFormat'];
+    wrapT = json["wrapT"];
+    wrapR = json["wrapR"];
+    magFilter = json["magFilter"];
+    minFilter = json["minFilter"];
+    format = json["format"];
+    type = json["type"];
+    anisotropy = json["anisotropy"];
+    depthBuffer = json["depthBuffer"];
+    mapping = json["mapping"];
+    generateMipmaps = json["generateMipmaps"] ?? false;
+    depthTexture = json["depthTexture"];
+    encoding = json["encoding"];
+    useMultisampleRenderToTexture = json["useMultisampleRenderToTexture"] ?? false;
+    ignoreDepth = json["ignoreDepth"] ?? false;
+    useRenderToTexture = json["useRenderToTexture"] ?? false;
     samples = json["samples"];
+    colorSpace = json['colorSpace'];
   }
 
   Map<String, dynamic> toJson() {
@@ -319,7 +281,8 @@ class WebGLRenderTargetOptions {
       "useMultisampleRenderToTexture": useMultisampleRenderToTexture,
       "ignoreDepth": ignoreDepth,
       "useRenderToTexture": useRenderToTexture,
-      "samples": samples
+      "samples": samples,
+      'colorSpace': colorSpace
     };
   }
 }

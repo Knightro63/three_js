@@ -4,7 +4,7 @@ class Clock {
   late bool autoStart;
   late int startTime;
   late int oldTime;
-  late int _prevTime;
+  int _prevTime = 0;
   late double elapsedTime;
   late bool running;
   int fps = 0;

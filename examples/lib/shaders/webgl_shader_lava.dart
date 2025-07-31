@@ -28,11 +28,10 @@ class _State extends State<WebglShaderLava> {
     });
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
-      setup: setup,
+      setup: setup,      
       settings: three.Settings(
         autoClear: false,
         useSourceTexture: true,
-        useOpenGL: useOpenGL
       )
     );
     super.initState();
@@ -175,7 +174,6 @@ class _State extends State<WebglShaderLava> {
     composer.addPass( outputPass );
 
     controls = three.OrbitControls( threeJs.camera, threeJs.globalKey);
-
     threeJs.postProcessor = ([double? dt]){
       threeJs.renderer!.setRenderTarget(null);
       composer.render(dt);

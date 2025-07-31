@@ -9,11 +9,14 @@ import 'package:example/controls/misc_controls_transform.dart';
 import 'package:example/exporters/misc_exporter_obj.dart';
 import 'package:example/exporters/misc_exporter_ply.dart';
 import 'package:example/exporters/misc_exporter_stl.dart';
+import 'package:example/exporters/misc_exporter_usdz.dart';
 import 'package:example/games/flutter_game.dart';
 import 'package:example/games/games_fps2.dart';
 import 'package:example/geometry/marching_cubes.dart';
 import 'package:example/geometry/webgl_buffergeometry_custom_attributes_particles.dart';
 import 'package:example/geometry/webgl_decals.dart';
+import 'package:example/geometry/webgl_decals2.dart';
+import 'package:example/geometry/webgl_geometries_parametric.dart';
 import 'package:example/geometry/webgl_geometry_convex.dart';
 import 'package:example/geometry/webgl_geometry_dynamic.dart';
 import 'package:example/geometry/webgl_geometry_extrude_shapes.dart';
@@ -31,6 +34,9 @@ import 'package:example/instancing/webgl_instancing_raycasting.dart';
 import 'package:example/instancing/webgl_instancing_scatter.dart';
 import 'package:example/lights/webgl_lightprobe.dart';
 import 'package:example/lights/webgl_lightprobe_cube_camera.dart';
+import 'package:example/line/webgl_interactive_lines.dart';
+import 'package:example/line/webgl_lines_colors.dart';
+import 'package:example/line/webgl_lines_dashed.dart';
 import 'package:example/line/webgl_lines_fat.dart';
 import 'package:example/line/webgl_lines_fat_raycasting.dart';
 import 'package:example/line/webgl_lines_fat_wireframe.dart';
@@ -49,8 +55,11 @@ import 'package:example/loaders/webgl_loader_stl.dart';
 import 'package:example/loaders/webgl_loader_usdz.dart';
 import 'package:example/loaders/webgl_loader_vox.dart';
 import 'package:example/loaders/webgl_loader_xyz.dart';
+import 'package:example/material/webgl_materials_video.dart';
+import 'package:example/material/webgl_tonemapping.dart';
+import 'package:example/projected/webgl_projected_3d_model.dart';
+import 'package:example/projected/webgl_projected_basic.dart';
 import 'package:example/src/statistics.dart';
-import 'package:example/texture/webgl_video_texture.dart';
 import 'package:example/material/webgl_materials_car.dart';
 import 'package:example/material/webgl_materials_physical_transmission.dart';
 import 'package:example/multi_views/webgl2_multiple_rendertargets.dart';
@@ -227,6 +236,9 @@ class MyAppState extends State<MyApp> {
               '/misc_exporter_obj':(BuildContext context) {
                 return const MiscExporterOBJ();
               },
+              '/misc_exporter_usdz':(BuildContext context) {
+                return const MiscExporterUSDZ();
+              },
               '/webgl_camera_array':(BuildContext context) {
                 return const WebglCameraArray();
               },
@@ -275,6 +287,15 @@ class MyAppState extends State<MyApp> {
               '/webgl_interactive_points':(BuildContext context) {
                 return const WebglInteractivePoints();
               },
+              '/webgl_interactive_lines':(BuildContext context) {
+                return const WebglInteractiveLines();
+              },
+              '/webgl_lines_colors':(BuildContext context) {
+                return const WebglLinesColors();
+              },
+              '/webgl_lines_dashed':(BuildContext context) {
+                return const WebglLinesDashed();
+              },
               '/webgl_lines_fat':(BuildContext context) {
                 return const WebglLinesFat();
               },
@@ -287,8 +308,14 @@ class MyAppState extends State<MyApp> {
               '/webgl_decals':(BuildContext context) {
                 return const WebglDecals();
               },
+              '/webgl_decals2':(BuildContext context) {
+                return const WebglDecals2();
+              },
               '/webgl_sprites':(BuildContext context) {
                 return const WebglSprites();
+              },
+              '/webgl_tonemapping':(BuildContext context) {
+                return const WebglTonemapping();
               },
               '/webgl_points_sprites':(BuildContext context) {
                 return const WebglPointsSprites();
@@ -334,6 +361,9 @@ class MyAppState extends State<MyApp> {
               },
               '/webgl_geometry_spline_editor':(BuildContext context) {
                 return const WebglGeometrySplineEditor();
+              },
+              '/webgl_geometries_parametric':(BuildContext context) {
+                return const WebglGeometriesParametric();
               },
               '/three_terrain':(BuildContext context) {
                 return const TerrainPage();
@@ -443,8 +473,14 @@ class MyAppState extends State<MyApp> {
               '/webgl_materials':(BuildContext context) {
                 return const WebglMaterials();
               },
-              '/flutter_material':(BuildContext context) {
-                return const WebglVideoTexture();
+              '/webgl_materials_video':(BuildContext context) {
+                return const WebglMaterialsVideo();
+              },
+              '/webgl_projected_basic':(BuildContext context) {
+                return const WebglProjectedBasic();
+              },
+              '/webgl_projected_3d_model':(BuildContext context) {
+                return const WebglProjected3DModel();
               },
               '/webgl_materials_car':(BuildContext context) {
                 return const WebglMaterialsCar();

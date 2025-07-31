@@ -29,10 +29,8 @@ class _State extends State<WebglMaterialsCar> {
     });
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
-      setup: setup,
-      settings: three.Settings(
+      setup: setup,      settings: three.Settings(
         enableShadowMap: true,
-        useOpenGL: useOpenGL,
         toneMapping: three.ACESFilmicToneMapping,
         toneMappingExposure: 0.85
       )

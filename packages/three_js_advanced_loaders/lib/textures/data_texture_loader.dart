@@ -20,7 +20,7 @@ class TextureLoaderData{
     this.mipmapCount,
     this.generateMipmaps,
     this.flipY,
-    this.encoding,
+    this.colorSpace,
     this.anisotropy = 1,
     this.minFilter = LinearFilter,
     this.magFilter = LinearFilter,
@@ -41,7 +41,7 @@ class TextureLoaderData{
   bool? generateMipmaps;
   List? mipmaps;
   bool? flipY;
-  int? encoding;
+  String? colorSpace;
   int anisotropy;
   int? minFilter;
   int? magFilter;
@@ -70,7 +70,7 @@ class TextureLoaderData{
     'generateMipmaps': generateMipmaps,
     'mipmaps': mipmaps,
     'flipY': flipY,
-    'encoding': encoding,
+    'colorSpace': colorSpace,
     'anisotropy': anisotropy,
     'magFilter': magFilter,
     'minFilter': minFilter,
@@ -209,8 +209,8 @@ class DataTextureLoader extends Loader {
 
     texture.anisotropy = texData["anisotropy"] ?? 1;
 
-    if (texData["encoding"] != null) {
-      texture.encoding = texData["encoding"];
+    if (texData["colorSpace"] != null) {
+      texture.colorSpace = texData["encoding"];
     }
 
     if (texData["flipY"] != null) {

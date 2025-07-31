@@ -504,9 +504,9 @@ class SVGLoader extends Loader{
 
     final List<Shape> shapesToReturn = [];
     for (final p in simplePaths) {
-      final amIAHole = isAHole[p["identifier"]]!;
+      final amIAHole = isAHole[p["identifier"]];
 
-      if (!amIAHole["isHole"]) {
+      if (amIAHole?["isHole"] == false) {
         final shape = Shape(null);
         shape.curves = p["curves"];
         final holes = isAHole

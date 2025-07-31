@@ -28,11 +28,10 @@ class _State extends State<WebglLoaderUsdz> {
     });
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
-      setup: setup,
-      settings: three.Settings(
+      setup: setup,      settings: three.Settings(
         toneMapping: three.ACESFilmicToneMapping,
         toneMappingExposure: 2.0,
-        useOpenGL: useOpenGL
+        
       )
     );
     super.initState();

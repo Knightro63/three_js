@@ -237,6 +237,7 @@ class Projector{
       ( v2.positionScreen.x - v1.positionScreen.x ) < 0;
   }
   void pushLine(num a,num b) {
+    try{
     RenderableVertex v1 = _vertexPool[ a.toInt() ];
     RenderableVertex v2 = _vertexPool[ b.toInt() ]; // Clip
 
@@ -248,7 +249,7 @@ class Projector{
       v1.positionScreen.scale( 1 / v1.positionScreen.w );
       v2.positionScreen.scale( 1 / v2.positionScreen.w );
 
-      _line = getNextLineInPool();
+      _line = getNextLineInPool()!;
       _line.id = object.id;
       _line.v1.copy( v1 );
       _line.v2.copy( v2 );
@@ -256,11 +257,15 @@ class Projector{
       _line.renderOrder = object.renderOrder;
       _line.material = object.material;
 
-      if(object.material?.vertexColors != null) {
+      if(object.material?.vertexColors != null && colors.length > a*3 && colors.length > b*3) {
         _line.vertexColors[0].copyFromArray( colors, (a * 3).toInt() );
         _line.vertexColors[1].copyFromArray( colors, (b * 3).toInt() );
       }
       _renderData.elements.add( _line );
+    }
+    }
+    catch(e){
+      console.warning('projector.dart -> pushLine -> Exception: $e');
     }
   }
 
@@ -365,6 +370,7 @@ class Projector{
       _renderData.objects.sort(painterSort);
     } 
     
+    try{
     List<RenderableObject> objects = _renderData.objects;
 
     for(int o = 0; o < objects.length; o ++) {
@@ -521,6 +527,10 @@ class Projector{
     if(sortElements){
       _renderData.elements.sort(painterSort);
     }
+    }
+    catch(e){
+      console.warning('projector.dart -> projectScene pt 3 -> Exception: $e');
+    }
 
     return _renderData;
   }
@@ -573,7 +583,8 @@ class Projector{
     }
     return _facePool[ _faceCount ++ ];
   }
-  RenderableLine getNextLineInPool() {
+  RenderableLine? getNextLineInPool() {
+    try{
     if ( _lineCount == _linePoolLength ) {
       RenderableLine line = RenderableLine();
       _linePool.add( line );
@@ -582,6 +593,11 @@ class Projector{
       return line;
     }
     return _linePool[ _lineCount ++ ];
+    }
+    catch(e){
+      console.warning('projector.dart -> getNextLineInPool -> Exception:$e');
+      return null;
+    }
   }
   RenderableSprite getNextSpriteInPool() {
     if(_spriteCount == _spritePoolLength){
@@ -605,6 +621,7 @@ class Projector{
     }
   }
   bool clipLine(Vector4 s1,Vector4 s2 ) {
+    try{
     double alpha1 = 0;
     double alpha2 = 1; // Calculate the boundary coordinate of each vertex for the near and far clip planes,
     // Z = -1 and Z = +1, respectively.
@@ -650,6 +667,11 @@ class Projector{
         s2.lerp( s1, 1 - alpha2 );
         return true;
       }
+    }
+    }
+    catch(e){
+      console.warning('projector.dart -> pushLine -> Exception: $e');
+      return false;
     }
   }
 }

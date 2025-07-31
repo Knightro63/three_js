@@ -13,9 +13,9 @@ dependencies:
   
   three_js_objects:
     path: ../
-  three_js_core: ^0.1.0
-  three_js_math: ^0.1.0
-  three_js_controls: ^0.1.0
+  three_js_core: ^0.2.0
+  three_js_math: ^0.2.0
+  three_js_controls: ^0.2.0
 
 dev_dependencies:
   flutter_test:
