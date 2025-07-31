@@ -258,10 +258,11 @@ class ThreeJS with WidgetsBindingObserver{
   }
   
   Future<void> onWindowResize(BuildContext context) async{
+    if (disposed) return;
     double dt = clock.getDelta();
-    final mqd = MediaQuery.of(context);
+    final mqd = MediaQuery.maybeOf(context);
+    if (mqd == null) return;
     if(_size == null && screenSize != mqd.size && texture != null){
-      print('SIZES: ${mqd.size}, ${screenSize}');
       screenSize = mqd.size;
       width = screenSize!.width;
       height = screenSize!.height;
