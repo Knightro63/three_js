@@ -1,3 +1,8 @@
+## 0.3.0
+
+* Made Audio an abstract class.
+* Changed to audioplayers package.
+
 ## 0.2.0
 
 * Updated to the newest versions of three_js packages.

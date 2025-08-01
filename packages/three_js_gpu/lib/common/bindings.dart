@@ -7,6 +7,7 @@ import 'package:three_js_gpu/common/data_map.dart';
 import 'package:three_js_gpu/common/info.dart';
 import 'package:three_js_gpu/common/pipelines.dart';
 import 'package:three_js_gpu/common/sampled_texture.dart';
+import 'package:three_js_gpu/common/storage_buffer.dart';
 import 'package:three_js_gpu/common/textures.dart';
 import 'package:three_js_gpu/gpu_backend.dart';
 
@@ -88,7 +89,7 @@ class Bindings extends DataMap {
 			} 
       else if ( binding is StorageBuffer ) {
 				final attribute = binding.attribute;
-				final attributeType = attribute.isIndirectStorageBufferAttribute ? AttributeType.INDIRECT : AttributeType.STORAGE;
+				final attributeType = attribute.isIndirectStorageBufferAttribute ? AttributeType.indirect : AttributeType.storage;
 
 				this.attributes.update( attribute, attributeType );
 			}

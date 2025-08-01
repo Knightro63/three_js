@@ -3,7 +3,6 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:example/src/statistics.dart';
 import 'package:three_js/three_js.dart' as three;
-import 'package:three_js_audio/positional_audio.dart';
 import 'package:three_js_audio/three_js_audio.dart';
 import 'package:three_js_helpers/three_js_helpers.dart';
 
@@ -82,8 +81,8 @@ class _State extends State<AudioSandbox> {
     mesh1.rotation.y = math.pi/6;
     threeJs.scene.add( mesh1 );
 
-    final sound1 = PositionalAudio(
-      path: 'assets/sounds/358232_j_s_song.mp3',
+    final sound1 = three.PositionalAudio(
+      audioSource: FlutterAudio(path: 'assets/sounds/358232_j_s_song.mp3'),
       listner: threeJs.camera,
       refDistance: 20,
       maxDistance: 250
@@ -93,7 +92,7 @@ class _State extends State<AudioSandbox> {
     mesh1.add( sound1 );
 
     if(showHelpers){
-      final sound1helper = PositionalAudioHelper( sound1, 300 );
+      final sound1helper = three.PositionalAudioHelper( sound1, 300 );
       sound1.add( sound1helper );
     }
 
@@ -104,8 +103,8 @@ class _State extends State<AudioSandbox> {
     mesh2.rotation.y = -math.pi/6;
     threeJs.scene.add( mesh2 );
 
-    final sound2 = PositionalAudio(
-      path: 'assets/sounds/376737_Skullbeatz___Bad_Cat_Maste.mp3',
+    final sound2 = three.PositionalAudio(
+      audioSource: FlutterAudio(path: 'assets/sounds/376737_Skullbeatz___Bad_Cat_Maste.mp3'),
       listner: threeJs.camera,
       refDistance: 20,
       maxDistance: 250
@@ -115,7 +114,7 @@ class _State extends State<AudioSandbox> {
     mesh2.add( sound2 );
 
     if(showHelpers){
-      final sound2helper = PositionalAudioHelper( sound2, 300 );
+      final sound2helper = three.PositionalAudioHelper( sound2, 300 );
       sound2.add( sound2helper );
     }
 
@@ -125,8 +124,8 @@ class _State extends State<AudioSandbox> {
     mesh3.position.setValues( 0, 30, - 250 );
     threeJs.scene.add( mesh3 );
 
-    final sound3 = PositionalAudio(
-      path: 'assets/sounds/Project_Utopia.mp3',
+    final sound3 = three.PositionalAudio(
+      audioSource: FlutterAudio(path: 'assets/sounds/Project_Utopia.mp3'),
       listner: threeJs.camera,
       refDistance: 20,
       maxDistance: 250
@@ -138,7 +137,7 @@ class _State extends State<AudioSandbox> {
     mesh3.add( sound3 );
 
     if(showHelpers){
-      final sound3helper = PositionalAudioHelper( sound3, 300 );
+      final sound3helper = three.PositionalAudioHelper( sound3, 300 );
       sound3.add( sound3helper );
     }
 

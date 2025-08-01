@@ -33,6 +33,9 @@ dependencies:
   three_js_video_texture: ^0.0.1
   three_js_advanced_exporters: ^0.0.1
   
+  three_js_audio_latency:
+    path: ../packages/three_js_audio_latency
+
   permission_handler: ^11.3.1
   camera: ^0.10.6
   camera_macos: ^0.0.9
@@ -50,6 +53,18 @@ dependency_overrides:
       url: https://github.com/alex-melnyk/flutter-permission-handler.git 
       path: permission_handler_apple
   file_picker: ^10.1.9
+  three_js_advanced_loaders:
+    path: ../packages/three_js_advanced_loaders
+  three_js_video_texture:
+    path: ../packages/three_js_video_texture
+  three_js_audio:
+    path: ../packages/three_js_audio
+  three_js_core:
+    path: ../packages/three_js_core
+  three_js_math:
+    path: ../packages/three_js_math
+  flutter_angle:
+    path: ../../flutter_angle/flutter_angle
 
 flutter:
   uses-material-design: true

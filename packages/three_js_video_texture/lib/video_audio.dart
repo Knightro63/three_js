@@ -7,39 +7,24 @@ import 'package:three_js_core/three_js_core.dart';
 ///
 /// You can use as a helper to very simply play a sound or a background music.
 /// Alternatively you can create your own instances and control them yourself.
-class Audio extends Object3D{
-  bool autoplay;
-  bool loop;
-  bool hasPlaybackControl;
-
+class VideoAudio extends Audio{
   Player? _player;
-  
-  //Uint8List? _buffer;
-
-  int loopEnd = 0;
-  int loopStart = 0;
-  //double? duration;
-  double playbackRate;
-
   late double _volume;
   late double _balance;
-  //AudioLoader _loader = AudioLoader();
-
   Timer? _delay;
+  @override
   bool get isPlaying => _player?.state.playing ?? false;
   bool _hasStarted = false;
 
-  String path;
-
-  Audio({
-    required this.path,
+  VideoAudio({
+    required super.path,
     double balance = 0.0,
     double volume = 1.0,
-    this.playbackRate = 1.0,
-    this.hasPlaybackControl = true,
-    this.autoplay = false,
-    this.loop = false
-  }){
+    super.playbackRate = 1.0,
+    super.hasPlaybackControl = true,
+    super.autoplay = false,
+    super.loop = false
+  }):super(){
     MediaKit.ensureInitialized();
     _balance = balance;
     _volume = volume;
@@ -67,6 +52,7 @@ class Audio extends Object3D{
   }
 
   /// Plays a single run of the given [file], with a given [volume].
+  @override
   Future<void> play([int delay = 0]) async{
 		if (_hasStarted && isPlaying) {
 			console.warning( 'Audio: Audio is already playing.' );
@@ -86,7 +72,7 @@ class Audio extends Object3D{
       Future.delayed(Duration(milliseconds: delay),replay);
     }
   }
-
+  @override
   Future<void> replay() async{
     await _player?.seek(Duration.zero);
     await _player?.play();
@@ -112,6 +98,7 @@ class Audio extends Object3D{
   }
 
   /// Stops the currently playing background music track (if any).
+  @override
   Future<void> stop() async {
 		if (!hasPlaybackControl) {
 			console.warning( 'Audio: this Audio has no playback control.' );
@@ -124,12 +111,14 @@ class Audio extends Object3D{
   }
 
   /// Resumes the currently played (but resumed) background music.
+  @override
   Future<void> resume() async {
     await _player?.play();
   }
 
   /// Pauses the background music without unloading or resetting the audio
   /// player.
+  @override
   Future<void> pause() async {
 		if (!hasPlaybackControl) {
 			console.warning( 'Audio: this Audio has no playback control.' );
@@ -144,10 +133,12 @@ class Audio extends Object3D{
     _delay = null;
   }
 
+  @override
 	double? getPlaybackRate() {
 		return _player?.state.rate;
 	}
 
+  @override
 	void setPlaybackRate(double value){
 		if (!hasPlaybackControl) {
 			console.warning( 'Audio: this Audio has no playback control.' );
@@ -160,15 +151,17 @@ class Audio extends Object3D{
 		}
 	}
 
+  @override
 	bool getLoop() {
 		if (!hasPlaybackControl ) {
 			console.warning( 'Audio: this Audio has no playback control.' );
 			return false;
 		}
 
-		return _player?.state.playlist == PlaylistMode.single;
+		return _player?.state.playlistMode == PlaylistMode.single;
 	}
 
+  @override
 	void setLoop(bool value ){
 		if (!hasPlaybackControl) {
 			console.warning( 'Audio: this Audio has no playback control.' );
@@ -185,27 +178,33 @@ class Audio extends Object3D{
     }
 	}
 
+  @override
 	void setLoopStart(int value ) {
 		loopStart = value;
 	}
 
+  @override
 	void setLoopEnd(int value ) {
 		loopEnd = value;
 	}
 
+  @override
 	double? getBalance() {
 		return 0;//_player != null?_player?.state.audioParams. getPan(source!):0;
 	}
 
+  @override
 	void setBalance(double value ){
     _balance = value;
     //_player?.se
 	}
 
+  @override
 	double? getVolume() {
 		return _player?.state.volume;
 	}
 
+  @override
 	void setVolume(double value ){
     _volume = value;
     _player?.setVolume(value*100);

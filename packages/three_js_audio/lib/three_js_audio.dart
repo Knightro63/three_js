@@ -1,4 +1,4 @@
 library three_js_audio;
 
-export 'audio.dart';
-export 'positional_audio_helper.dart';
+export 'flutter_audio.dart';
+export './flutter_audio_loader.dart';

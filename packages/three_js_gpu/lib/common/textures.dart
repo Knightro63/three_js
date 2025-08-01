@@ -90,7 +90,7 @@ class Textures extends DataMap {
 
 		//
 
-		final options = { sampleCount };
+		final options = { 'sampleCount': sampleCount };
 
 		// XR render targets require no texture updates
 
@@ -141,7 +141,7 @@ class Textures extends DataMap {
 	 * @param {Texture} texture - The texture to update.
 	 * @param {Object} [options={}] - The options.
 	 */
-	updateTexture(Texture texture, [Map? options]) {
+	updateTexture(Texture texture, [Map<String,dynamic>? options]) {
     options ??= {};
 
 		final textureData = this.get( texture );
@@ -174,15 +174,15 @@ class Textures extends DataMap {
     final height = this.getSize( texture ).height;
     final depth = this.getSize( texture ).depth;
 
-		options.width = width;
-		options.height = height;
-		options.depth = depth;
-		options.needsMipmaps = this.needsMipmaps( texture );
-		options.levels = options.needsMipmaps ? this.getMipLevels( texture, width, height ) : 1;
+		options['width'] = width;
+		options['height'] = height;
+		options['depth'] = depth;
+		options['needsMipmaps'] = this.needsMipmaps( texture );
+		options['levels'] = options['needsMipmaps'] == true? this.getMipLevels( texture, width, height ) : 1;
 
 		if ( isRenderTarget || texture is StorageTexture) {
 			backend.createSampler( texture );
-			backend.createTexture( texture, options );
+			backend.createTexture( texture, options);
 
 			textureData.generation = texture.version;
 		} 
@@ -201,19 +201,15 @@ class Textures extends DataMap {
 				} else {
 
 					if ( texture.images ) {
-
 						final images = [];
 
 						for ( final image in texture.images ) {
 							images.add( image );
 						}
 
-						options.images = images;
-
+						options['images'] = images;
 					} else {
-
-						options.image = image;
-
+						options['image'] = image;
 					}
 
 					if ( textureData.isDefaultTexture == null || textureData.isDefaultTexture == true ) {
@@ -226,22 +222,13 @@ class Textures extends DataMap {
 					}
 
 					if ( texture.source.dataReady == true ) backend.updateTexture( texture, options );
-
-					if ( options.needsMipmaps && texture.mipmaps.length == 0 ) backend.generateMipmaps( texture );
-
+					if ( options['needsMipmaps'] && texture.mipmaps.length == 0 ) backend.generateMipmaps( texture );
 				}
-
 			} else {
-
-				// async update
-
 				backend.createDefaultTexture( texture );
-
 				textureData.isDefaultTexture = true;
 				textureData.generation = texture.version;
-
 			}
-
 		}
 
 		// dispose handler
@@ -288,41 +275,31 @@ class Textures extends DataMap {
 	 * @return {Vector3} The target vector.
 	 */
 	getSize( texture, target = _size ) {
-
 		var image = texture.images ? texture.images[ 0 ] : texture.image;
 
 		if ( image ) {
-
 			if ( image.image != null ) image = image.image;
-
-			if ( image instanceof HTMLVideoElement ) {
-
-				target.width = image.videoWidth || 1;
-				target.height = image.videoHeight || 1;
+			if ( image is HTMLVideoElement ) {
+				target.width = image.videoWidth ?? 1;
+				target.height = image.videoHeight ?? 1;
 				target.depth = 1;
-
-			} else if ( image instanceof VideoFrame ) {
-
-				target.width = image.displayWidth || 1;
-				target.height = image.displayHeight || 1;
+			} 
+      else if ( image is VideoFrame ) {
+				target.width = image.displayWidth ?? 1;
+				target.height = image.displayHeight ?? 1;
 				target.depth = 1;
-
-			} else {
-
-				target.width = image.width || 1;
-				target.height = image.height || 1;
-				target.depth = texture.isCubeTexture ? 6 : ( image.depth || 1 );
-
+			} 
+      else {
+				target.width = image.width ?? 1;
+				target.height = image.height ?? 1;
+				target.depth = texture.isCubeTexture ? 6 : ( image.depth ?? 1 );
 			}
-
-		} else {
-
+		} 
+    else {
 			target.width = target.height = target.depth = 1;
-
 		}
 
 		return target;
-
 	}
 
 	/**

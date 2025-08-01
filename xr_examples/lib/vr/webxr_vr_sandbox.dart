@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:js_interop';
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
+import 'package:three_js_objects/three_js_objects.dart';
 import 'package:three_js_xr/three_js_xr.dart';
 import 'package:three_js_geometry/three_js_geometry.dart';
 import 'dart:math' as math;
@@ -90,7 +91,7 @@ class _State extends State<WebXRVRSandbox> {
     threeJs.camera.position.setValues( 0, 1.6, 1.5 );
 
     //
-    final torusGeometry = three.TorusKnotGeometry( ...Object.values( parameters ) );
+    final torusGeometry = three.TorusKnotGeometry(0.6,0.2,150,20,2,3);
     final torusMaterial = three.MeshPhysicalMaterial.fromMap( {
       'transmission': 1.0, 'roughness': 0, 'metalness': 0.25, 'thickness': 0.5, 'side': three.DoubleSide
     } );
@@ -108,11 +109,11 @@ class _State extends State<WebXRVRSandbox> {
 
     // lensflare
     final loader = three.TextureLoader();
-    final texture0 = loader.fromAsset( 'textures/lensflare/lensflare0.png' );
-    final texture3 = loader.fromAsset( 'textures/lensflare/lensflare3.png' );
+    final texture0 = (await loader.fromAsset( 'textures/lensflare/lensflare0.png' ))!;
+    final texture3 = (await loader.fromAsset( 'textures/lensflare/lensflare3.png' ))!;
 
     final lensflare = Lensflare();
-    lensflare.position.set( 0, 5, - 5 );
+    lensflare.position.setValues( 0, 5, - 5 );
     lensflare.addElement( LensflareElement( texture0, 700, 0 ) );
     lensflare.addElement( LensflareElement( texture3, 60, 0.6 ) );
     lensflare.addElement( LensflareElement( texture3, 70, 0.7 ) );
@@ -121,16 +122,16 @@ class _State extends State<WebXRVRSandbox> {
     threeJs.scene.add( lensflare );
 
     //
-    reflector = Reflector( three.PlaneGeometry( 2, 2 ), {
-      textureWidth: window.innerWidth * window.devicePixelRatio,
-      textureHeight: window.innerHeight * window.devicePixelRatio
+    final reflector = Reflector( three.PlaneGeometry( 2, 2 ), {
+      'textureWidth': threeJs.width * threeJs.dpr,
+      'textureHeight': threeJs.height * threeJs.dpr
     });
     reflector.position.x = 1;
     reflector.position.y = 1.5;
     reflector.position.z = - 3;
     reflector.rotation.y = - math.pi / 4;
     // TOFIX: Reflector breaks transmission
-    // scene.add( reflector );
+    threeJs.scene.add( reflector );
 
     final frameGeometry = three.BoxGeometry( 2.1, 2.1, 0.1 );
     final frameMaterial = three.MeshPhongMaterial();
@@ -164,14 +165,14 @@ class _State extends State<WebXRVRSandbox> {
     // GUI
     void onChange() {
       torus.geometry?.dispose();
-      torus.geometry = three.TorusKnotGeometry( ...Object.values( parameters ) );
+      torus.geometry = three.TorusKnotGeometry(0.6,0.2,150,20,2,3);
     }
 
     void onThicknessChange() {
       torus.material?.thickness = parameters['thickness'];
     }
 
-    final gui = GUI( { width: 300 } );
+    final gui = Gui( { width: 300 } );
     gui.add( parameters, 'radius', 0.0, 1.0 ).onChange( onChange );
     gui.add( parameters, 'tube', 0.0, 1.0 ).onChange( onChange );
     gui.add( parameters, 'tubularSegments', 10, 150, 1 ).onChange( onChange );
@@ -181,7 +182,7 @@ class _State extends State<WebXRVRSandbox> {
     gui.add( parameters, 'thickness', 0, 1 ).onChange( onThicknessChange );
     gui.domElement.style.visibility = 'hidden';
 
-    final group = InteractiveGroup( renderer, camera );
+    final group = InteractiveGroup( threeJs.renderer, threeJs.camera );
     threeJs.scene.add( group );
 
     final mesh = HTMLMesh( gui.domElement );

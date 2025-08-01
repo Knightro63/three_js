@@ -3,8 +3,8 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:example/src/statistics.dart';
 import 'package:three_js/three_js.dart' as three;
-import 'package:three_js_audio/positional_audio.dart';
 import 'package:three_js_audio/three_js_audio.dart';
+import 'package:three_js_audio_latency/audio_latency.dart';
 
 class AudioOrientation extends StatefulWidget {
   
@@ -39,6 +39,7 @@ class _State extends State<AudioOrientation> {
     timer.cancel();
     threeJs.dispose();
     three.loading.clear();
+    AudioLatency.deinitSource();
     super.dispose();
   }
 
@@ -84,8 +85,12 @@ class _State extends State<AudioOrientation> {
     mesh.receiveShadow = true;
     threeJs.scene.add( mesh );
 
-    final positionalAudio = PositionalAudio(
-      path: 'assets/sounds/376737_Skullbeatz___Bad_Cat_Maste.mp3',
+    //final audioSource = FlutterAudio(path: 'assets/sounds/376737_Skullbeatz___Bad_Cat_Maste.mp3');
+    await AudioLatency.initSource();
+    final audioSource = AudioLatency(path: 'assets/sounds/376737_Skullbeatz___Bad_Cat_Maste.mp3');
+
+    final positionalAudio = three.PositionalAudio(
+      audioSource: audioSource,
       listner: threeJs.camera,
       refDistance: 0.75,
       coneInnerAngle: 90,
@@ -96,9 +101,8 @@ class _State extends State<AudioOrientation> {
     positionalAudio.setVolume(0);
     positionalAudio.play();
 
-    final helper = PositionalAudioHelper( positionalAudio, 0.1 );
+    final helper = three.PositionalAudioHelper( positionalAudio, 0.1 );
     positionalAudio.add( helper );
-    
     //
 
     final gltfLoader = three.GLTFLoader();

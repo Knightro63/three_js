@@ -2,6 +2,8 @@
 
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_gpu/common/data_map.dart';
+import 'package:three_js_gpu/common/render_context.dart';
+import 'package:three_js_gpu/common/render_list.dart';
 import 'package:three_js_math/three_js_math.dart';
 
 final _clearColor = /*@__PURE__*/ new Color();
@@ -47,11 +49,11 @@ class Background extends DataMap {
 			final sceneData = this.get( scene );
 			final backgroundNode = background;
 
-			_clearColor.copy( renderer._clearColor );
+			_clearColor.setFrom( renderer._clearColor );
 
 			let backgroundMesh = sceneData.backgroundMesh;
 
-			if ( backgroundMesh == undefined ) {
+			if ( backgroundMesh == null ) {
 
 				final backgroundMeshNode = context( vec4( backgroundNode ).mul( backgroundIntensity ), {
 					// @TODO: Add Texture2D support using node context

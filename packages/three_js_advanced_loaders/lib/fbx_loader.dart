@@ -272,9 +272,9 @@ class __FBXTreeParser {
   }
 
   // Parse embedded image data in _FBXTree.Video.Content
-  String? parseImage(videoNode) {
-    final content = videoNode.Content;
-    String fileName = videoNode.RelativeFilename ?? videoNode.Filename;
+  String? parseImage(Map videoNode) {
+    final content = videoNode['Content'];
+    String fileName = videoNode['RelativeFilename'] ?? videoNode['Filename'];
     final extension = fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase();
 
     String type;
@@ -305,6 +305,11 @@ class __FBXTreeParser {
         type = 'image/tga';
         break;
 
+			case 'webp':
+
+				type = 'image/webp';
+				break;
+
       default:
         console.warning('FBXLoader: Image type "$extension" is not supported.');
         return null;
@@ -325,7 +330,7 @@ class __FBXTreeParser {
   // Parse nodes in _FBXTree.Objects.Texture
   // These contain details such as UV scaling, cropping, rotation etc and are connected
   // to images in _FBXTree.Objects.Video
-  Future<Map<int,Texture>> parseTextures(images) async {
+  Future<Map<int,Texture>> parseTextures(Map images) async {
     final Map<int,Texture> textureMap = {};
     if (_fbxTree.objects?["Texture"] != null) {
       final textureNodes = _fbxTree.objects!["Texture"];
@@ -339,7 +344,7 @@ class __FBXTreeParser {
   }
 
   // Parse individual node in _FBXTree.Objects.Texture
-  Future<Texture> parseTexture(textureNode, images) async {
+  Future<Texture> parseTexture(Map textureNode, Map images) async {
     final Texture texture = await loadTexture(textureNode, images);
 
     texture.id = textureNode["id"];
@@ -363,11 +368,17 @@ class __FBXTreeParser {
       texture.repeat.y = values[1];
     }
 
+		if (textureNode["Translation"] != null) {
+			final values = textureNode['Translation'].value;
+			texture.offset.x = values[ 0 ];
+			texture.offset.y = values[ 1 ];
+		}
+
     return texture;
   }
 
   // load a texture specified as a blob or data URI, or via an external URL using TextureLoader
-  Future<Texture> loadTexture(textureNode, images) async {
+  Future<Texture> loadTexture(Map textureNode, Map images) async {
     String fileName = '';
 
     final currentPath = textureLoader.path;
@@ -412,7 +423,7 @@ class __FBXTreeParser {
   }
 
   // Parse nodes in _FBXTree.Objects.Material
-  Map<int?,Material> parseMaterials(textureMap) {
+  Map<int?,Material> parseMaterials(Map textureMap) {
     final Map<int?,Material> materialMap = {};
 
     if (_fbxTree.objects?["Material"] != null) {
@@ -469,7 +480,7 @@ class __FBXTreeParser {
 
   // Parse FBX material and return parameters suitable for a three.js material
   // Also parse the texture map and return any textures associated with the material
-  Map<String,dynamic> parseParameters(Map materialNode, Map textureMap, id) {
+  Map<String,dynamic> parseParameters(Map materialNode, Map textureMap, int id) {
     Map<String, dynamic> parameters = {};
 
     if (materialNode["BumpFactor"] != null) {
@@ -490,7 +501,8 @@ class __FBXTreeParser {
 
     if (materialNode["Emissive"] != null) {
       parameters["emissive"] = Color.fromList(List<double>.from(materialNode["Emissive"]["value"]));
-    } else if (materialNode["EmissiveColor"] != null &&
+    } 
+    else if (materialNode["EmissiveColor"] != null &&
         (materialNode["EmissiveColor"]["type"] == 'Color' ||
             materialNode["EmissiveColor"].type == 'ColorRGB')) {
       // The blender exporter exports emissive color here instead of in materialNode.Emissive
@@ -609,12 +621,12 @@ class __FBXTreeParser {
   }
 
   // get a texture from the textureMap for use by a material.
-  Texture getTexture(textureMap, id) {
+  Texture getTexture(Map textureMap, int id) {
     // if the texture is a layered texture, just use the first layer and issue a warning
     if (_fbxTree.objects?["LayeredTexture"] != null &&
         _fbxTree.objects?["LayeredTexture"].id != null) {
       console.warning('FBXLoader: layered textures are not supported in three.js. Discarding all but first layer.');
-      id = connections[id].children[0].ID;
+      id = connections[id].children[0]['ID'];
     }
 
     return textureMap[id];
@@ -671,7 +683,7 @@ class __FBXTreeParser {
   // Parse single nodes in _FBXTree.Objects.Deformer
   // The top level skeleton node has type 'Skin' and sub nodes have type 'Cluster'
   // Each skin node represents a skeleton and each cluster node represents a bone
-  Map<String, dynamic> parseSkeleton(relationships, deformerNodes) {
+  Map<String, dynamic> parseSkeleton(Map relationships, Map deformerNodes) {
     final rawBones = [];
 
     relationships["children"].forEach((child) {
@@ -701,11 +713,11 @@ class __FBXTreeParser {
   }
 
   // The top level morph deformer node has type "BlendShape" and sub nodes have type "BlendShapeChannel"
-  List<Map<String,dynamic>>? parseMorphTargets(relationships, deformerNodes) {
+  List<Map<String,dynamic>>? parseMorphTargets(Map relationships, Map deformerNodes) {
     final List<Map<String,dynamic>> rawMorphTargets = [];
 
-    for (int i = 0; i < relationships.children.length; i++) {
-      final child = relationships.children[i];
+    for (int i = 0; i < relationships['children'].length; i++) {
+      final child = relationships['children'][i];
 
       final morphTargetNode = deformerNodes[child["ID"]];
 
@@ -1111,7 +1123,7 @@ class __FBXTreeParser {
       transformData["eulerOrder"] = _getEulerOrder(modelNode["RotationOrder"]["value"]);
     }
    else{
-      transformData["eulerOrder"] = 'ZYX';
+      transformData["eulerOrder"] = _getEulerOrder(0);//'ZYX';
    }
 
     if (modelNode["Lcl_Translation"] != null){
@@ -1200,7 +1212,7 @@ class __FBXTreeParser {
     }
   }
 
-  parsePoseNodes() {
+  Map parsePoseNodes() {
     final bindMatrices = {};
 
     if (_fbxTree.objects?.keys.contains("Pose") ?? false) {
@@ -1329,7 +1341,7 @@ class _GeometryParser {
   }
 
   // Generate a BufferGeometry from a node in _FBXTree.Objects.Geometry
-  BufferGeometry genGeometry(Map geoNode, skeleton, morphTargets, preTransform) {
+  BufferGeometry genGeometry(Map<String,dynamic> geoNode, skeleton, List morphTargets, Matrix4 preTransform) {
     final geo = BufferGeometry();
     if (geoNode["attrName"] != null) geo.name = geoNode["attrName"];
 
@@ -1423,8 +1435,8 @@ class _GeometryParser {
     return geo;
   }
 
-  parseGeoNode(Map geoNode, skeleton) {
-    final geoInfo = {};
+  Map<String,dynamic> parseGeoNode(Map<String,dynamic> geoNode, skeleton) {
+    final Map<String,dynamic> geoInfo = {};
 
     geoInfo["vertexPositions"] =
         (geoNode["Vertices"] != null) ? geoNode["Vertices"]["a"] : [];
@@ -1632,6 +1644,47 @@ class _GeometryParser {
     return buffers;
   }
 
+	// See https://www.khronos.org/opengl/wiki/Calculating_a_Surface_Normal
+	Vector3 getNormalNewell(List<Vector3> vertices ) {
+		final normal = Vector3( 0.0, 0.0, 0.0 );
+
+		for (int i = 0; i < vertices.length; i ++ ) {
+			final current = vertices[ i ];
+			final next = vertices[ ( i + 1 ) % vertices.length ];
+
+			normal.x += ( current.y - next.y ) * ( current.z + next.z );
+			normal.y += ( current.z - next.z ) * ( current.x + next.x );
+			normal.z += ( current.x - next.x ) * ( current.y + next.y );
+		}
+
+		normal.normalize();
+
+		return normal;
+	}
+
+	Map<String,dynamic> getNormalTangentAndBitangent(List<Vector3> vertices ) {
+		final normalVector = this.getNormalNewell( vertices );
+		// Avoid up being equal or almost equal to normalVector
+		final up = normalVector.z.abs() > 0.5 ? Vector3( 0.0, 1.0, 0.0 ) : Vector3( 0.0, 0.0, 1.0 );
+		final tangent = up.cross( normalVector ).normalize();
+		final bitangent = normalVector.clone().cross( tangent ).normalize();
+
+		return {
+			'normal': normalVector,
+			'tangent': tangent,
+			'bitangent': bitangent
+		};
+
+	}
+
+	Vector2 flattenVertex(Vector vertex, Vector normalTangent, Vector normalBitangent ) {
+		return Vector2(
+			vertex.dot( normalTangent ),
+			vertex.dot( normalBitangent )
+		);
+	}
+
+
   // Generate data for a single face in a geometry. If the face is a quad then split it into 2 tris
   void genFace(
     MorphBuffers buffers,
@@ -1645,63 +1698,110 @@ class _GeometryParser {
     faceWeightIndices,
     faceLength
   ){
-    for (int i = 2; i < faceLength; i++) {
-      buffers.vertex.add(geoInfo["vertexPositions"][facePositionIndexes[0]]);
-      buffers.vertex.add(geoInfo["vertexPositions"][facePositionIndexes[1]]);
-      buffers.vertex.add(geoInfo["vertexPositions"][facePositionIndexes[2]]);
+		List<List<num>> triangles;
 
-      buffers.vertex.add(geoInfo["vertexPositions"][facePositionIndexes[(i - 1) * 3]]);
-      buffers.vertex.add(geoInfo["vertexPositions"][facePositionIndexes[(i - 1) * 3 + 1]]);
-      buffers.vertex.add(geoInfo["vertexPositions"][facePositionIndexes[(i - 1) * 3 + 2]]);
+		if ( faceLength > 3 ) {
 
-      buffers.vertex.add(geoInfo["vertexPositions"][facePositionIndexes[i * 3]]);
-      buffers.vertex.add(geoInfo["vertexPositions"][facePositionIndexes[i * 3 + 1]]);
-      buffers.vertex.add(geoInfo["vertexPositions"][facePositionIndexes[i * 3 + 2]]);
+			// Triangulate n-gon using earcut
+
+			final List<Vector3> vertices = [];
+			// in morphing scenario vertexPositions represent morphPositions
+			// while baseVertexPositions represent the original geometry's positions
+			final positions = geoInfo['baseVertexPositions'] ?? geoInfo['vertexPositions'];
+			for (int i = 0; i < facePositionIndexes.length; i += 3 ) {
+
+				vertices.add(
+					Vector3(
+						positions[ facePositionIndexes[ i ] ],
+						positions[ facePositionIndexes[ i + 1 ] ],
+						positions[ facePositionIndexes[ i + 2 ] ]
+					)
+				);
+
+			}
+      final  gntab = getNormalTangentAndBitangent( vertices );
+			final tangent = gntab['tangent'];
+      final bitangent = gntab['bitangent'];
+			final List<Vector?> triangulationInput = [];
+
+			for ( final vertex in vertices ) {
+				triangulationInput.add( this.flattenVertex( vertex, tangent, bitangent ) );
+			}
+
+			// When vertices is an array of [0,0,0] elements (which is the case for vertices not participating in morph)
+			// the triangulationInput will be an array of [0,0] elements
+			// resulting in an array of 0 triangles being returned from ShapeUtils.triangulateShape
+			// leading to not pushing into buffers.vertex the redundant vertices (the vertices that are not morphed).
+			// That's why, in order to support morphing scenario, "positions" is looking first for baseVertexPositions,
+			// so that we don't end up with an array of 0 triangles for the faces not participating in morph.
+			triangles = ShapeUtils.triangulateShape( triangulationInput, [] );
+
+		} else {
+			// Regular triangle, skip earcut triangulation step
+			triangles = [[ 0, 1, 2 ]];
+		}
+
+    for(final i in triangles){//(int i = 2; i < faceLength; i++) {
+      final i0 = i[0].toInt();
+      final i1 = i[1].toInt();
+      final i2 = i[2].toInt();
+
+      buffers.vertex.add(geoInfo["vertexPositions"][facePositionIndexes[i0 * 3]]);
+      buffers.vertex.add(geoInfo["vertexPositions"][facePositionIndexes[i0 * 3 + 1]]);
+      buffers.vertex.add(geoInfo["vertexPositions"][facePositionIndexes[i0 * 3 + 2]]);
+
+      buffers.vertex.add(geoInfo["vertexPositions"][facePositionIndexes[i1 * 3]]);
+      buffers.vertex.add(geoInfo["vertexPositions"][facePositionIndexes[i1 * 3 + 1]]);
+      buffers.vertex.add(geoInfo["vertexPositions"][facePositionIndexes[i1 * 3 + 2]]);
+
+      buffers.vertex.add(geoInfo["vertexPositions"][facePositionIndexes[i2 * 3]]);
+      buffers.vertex.add(geoInfo["vertexPositions"][facePositionIndexes[i2 * 3 + 1]]);
+      buffers.vertex.add(geoInfo["vertexPositions"][facePositionIndexes[i2 * 3 + 2]]);
 
       if (geoInfo["skeleton"] != null) {
-        buffers.vertexWeights.add(faceWeights[0]);
-        buffers.vertexWeights.add(faceWeights[1]);
-        buffers.vertexWeights.add(faceWeights[2]);
-        buffers.vertexWeights.add(faceWeights[3]);
+        buffers.vertexWeights.add(faceWeights[i0 * 4]);
+        buffers.vertexWeights.add(faceWeights[i0 * 4 + 1]);
+        buffers.vertexWeights.add(faceWeights[i0 * 4 + 2]);
+        buffers.vertexWeights.add(faceWeights[i0 * 4 + 3]);
 
-        buffers.vertexWeights.add(faceWeights[(i - 1) * 4]);
-        buffers.vertexWeights.add(faceWeights[(i - 1) * 4 + 1]);
-        buffers.vertexWeights.add(faceWeights[(i - 1) * 4 + 2]);
-        buffers.vertexWeights.add(faceWeights[(i - 1) * 4 + 3]);
+        buffers.vertexWeights.add(faceWeights[i1 * 4]);
+        buffers.vertexWeights.add(faceWeights[i1  * 4 + 1]);
+        buffers.vertexWeights.add(faceWeights[i1  * 4 + 2]);
+        buffers.vertexWeights.add(faceWeights[i1  * 4 + 3]);
 
-        buffers.vertexWeights.add(faceWeights[i * 4]);
-        buffers.vertexWeights.add(faceWeights[i * 4 + 1]);
-        buffers.vertexWeights.add(faceWeights[i * 4 + 2]);
-        buffers.vertexWeights.add(faceWeights[i * 4 + 3]);
+        buffers.vertexWeights.add(faceWeights[i2 * 4]);
+        buffers.vertexWeights.add(faceWeights[i2 * 4 + 1]);
+        buffers.vertexWeights.add(faceWeights[i2 * 4 + 2]);
+        buffers.vertexWeights.add(faceWeights[i2 * 4 + 3]);
 
-        buffers.weightsIndices.add(faceWeightIndices[0]);
-        buffers.weightsIndices.add(faceWeightIndices[1]);
-        buffers.weightsIndices.add(faceWeightIndices[2]);
-        buffers.weightsIndices.add(faceWeightIndices[3]);
+        buffers.weightsIndices.add(faceWeightIndices[i0 * 4]);
+        buffers.weightsIndices.add(faceWeightIndices[i0 * 4 + 1]);
+        buffers.weightsIndices.add(faceWeightIndices[i0 * 4 + 2]);
+        buffers.weightsIndices.add(faceWeightIndices[i0 * 4 + 3]);
 
-        buffers.weightsIndices.add(faceWeightIndices[(i - 1) * 4]);
-        buffers.weightsIndices.add(faceWeightIndices[(i - 1) * 4 + 1]);
-        buffers.weightsIndices.add(faceWeightIndices[(i - 1) * 4 + 2]);
-        buffers.weightsIndices.add(faceWeightIndices[(i - 1) * 4 + 3]);
+        buffers.weightsIndices.add(faceWeightIndices[i1 * 4]);
+        buffers.weightsIndices.add(faceWeightIndices[i1 * 4 + 1]);
+        buffers.weightsIndices.add(faceWeightIndices[i1 * 4 + 2]);
+        buffers.weightsIndices.add(faceWeightIndices[i1 * 4 + 3]);
 
-        buffers.weightsIndices.add(faceWeightIndices[i * 4]);
-        buffers.weightsIndices.add(faceWeightIndices[i * 4 + 1]);
-        buffers.weightsIndices.add(faceWeightIndices[i * 4 + 2]);
-        buffers.weightsIndices.add(faceWeightIndices[i * 4 + 3]);
+        buffers.weightsIndices.add(faceWeightIndices[i2 * 4]);
+        buffers.weightsIndices.add(faceWeightIndices[i2 * 4 + 1]);
+        buffers.weightsIndices.add(faceWeightIndices[i2 * 4 + 2]);
+        buffers.weightsIndices.add(faceWeightIndices[i2 * 4 + 3]);
       }
 
       if (geoInfo["color"] != null) {
-        buffers.colors.add(faceColors[0]);
-        buffers.colors.add(faceColors[1]);
-        buffers.colors.add(faceColors[2]);
+        buffers.colors.add(faceColors[i0 * 3]);
+        buffers.colors.add(faceColors[i0 * 3 + 1]);
+        buffers.colors.add(faceColors[i0 * 3 + 2]);
 
-        buffers.colors.add(faceColors[(i - 1) * 3]);
-        buffers.colors.add(faceColors[(i - 1) * 3 + 1]);
-        buffers.colors.add(faceColors[(i - 1) * 3 + 2]);
+        buffers.colors.add(faceColors[i1 * 3]);
+        buffers.colors.add(faceColors[i1 * 3 + 1]);
+        buffers.colors.add(faceColors[i1 * 3 + 2]);
 
-        buffers.colors.add(faceColors[i * 3]);
-        buffers.colors.add(faceColors[i * 3 + 1]);
-        buffers.colors.add(faceColors[i * 3 + 2]);
+        buffers.colors.add(faceColors[i2 * 3]);
+        buffers.colors.add(faceColors[i2 * 3 + 1]);
+        buffers.colors.add(faceColors[i2 * 3 + 2]);
       }
 
       if (geoInfo["material"] != null &&
@@ -1712,17 +1812,17 @@ class _GeometryParser {
       }
 
       if (geoInfo['normal'] != null) {
-        buffers.normal.add(faceNormals[0]);
-        buffers.normal.add(faceNormals[1]);
-        buffers.normal.add(faceNormals[2]);
+        buffers.normal.add(faceNormals[i0 * 3]);
+        buffers.normal.add(faceNormals[i0 * 3 + 1]);
+        buffers.normal.add(faceNormals[i0 * 3 + 2]);
 
-        buffers.normal.add(faceNormals[(i - 1) * 3]);
-        buffers.normal.add(faceNormals[(i - 1) * 3 + 1]);
-        buffers.normal.add(faceNormals[(i - 1) * 3 + 2]);
+        buffers.normal.add(faceNormals[i1 * 3]);
+        buffers.normal.add(faceNormals[i1 * 3 + 1]);
+        buffers.normal.add(faceNormals[i1 * 3 + 2]);
 
-        buffers.normal.add(faceNormals[i * 3]);
-        buffers.normal.add(faceNormals[i * 3 + 1]);
-        buffers.normal.add(faceNormals[i * 3 + 2]);
+        buffers.normal.add(faceNormals[i2 * 3]);
+        buffers.normal.add(faceNormals[i2 * 3 + 1]);
+        buffers.normal.add(faceNormals[i2 * 3 + 2]);
       }
       
       if (geoInfo["uv"] != null) {
@@ -1734,19 +1834,19 @@ class _GeometryParser {
           }
           
           buffers.uvs[j].addAll([
-            faceUVs[j][0],
-            faceUVs[j][1],
-            faceUVs[j][(i - 1) * 2],
-            faceUVs[j][(i - 1) * 2 + 1],
-            faceUVs[j][i * 2],
-            faceUVs[j][i * 2 + 1]
+            faceUVs[j][i0 * 2],
+            faceUVs[j][i0 * 2 + 1],
+            faceUVs[j][i1 * 2],
+            faceUVs[j][i1 * 2 + 1],
+            faceUVs[j][i2 * 2],
+            faceUVs[j][i2 * 2 + 1]
           ]);
         });
       }
     }
   }
 
-  addMorphTargets(parentGeo, parentGeoNode, morphTargets, preTransform) {
+  void addMorphTargets(BufferGeometry parentGeo, Map<String,dynamic> parentGeoNode, List morphTargets, Matrix4 preTransform) {
     if (morphTargets.length == 0) return;
 
     parentGeo.morphTargetsRelative = true;
@@ -1771,13 +1871,14 @@ class _GeometryParser {
   // in _FBXTree.Objects.Geometry, however it can only have attributes for position, normal
   // and a special attribute Index defining which vertices of the original geometry are affected
   // Normal and position attributes only have data for the vertices that are affected by the morph
-  void genMorphGeometry(parentGeo, parentGeoNode, morphGeoNode, preTransform, name) {
-    final vertexIndices = (parentGeoNode.PolygonVertexIndex != null)? parentGeoNode.PolygonVertexIndex.a: [];
+  void genMorphGeometry(BufferGeometry parentGeo, Map<String,dynamic> parentGeoNode, morphGeoNode, Matrix4 preTransform, String? name) {
+    final basePositions = parentGeoNode['Vertices'] != null ? parentGeoNode['Vertices']['a'] : [];
+    final vertexIndices = (parentGeoNode['PolygonVertexIndex'] != null)? parentGeoNode['PolygonVertexIndex']['a']: [];
 
-    final morphPositionsSparse = (morphGeoNode.Vertices != null) ? morphGeoNode.Vertices.a : [];
-    final indices = (morphGeoNode.Indexes != null) ? morphGeoNode.Indexes.a : [];
+    final morphPositionsSparse = (morphGeoNode['Vertices'] != null) ? morphGeoNode['Vertices']['a'] : [];
+    final indices = (morphGeoNode['Indexes'] != null) ? morphGeoNode['Indexes']['a'] : [];
 
-    final length = parentGeo.attributes.position.count * 3;
+    final length = parentGeo.attributes['position'].length * 3;
     final morphPositions = Float32List(length);
 
     for (int i = 0; i < indices.length; i++) {
@@ -1792,16 +1893,17 @@ class _GeometryParser {
     final morphGeoInfo = {
       "vertexIndices": vertexIndices,
       "vertexPositions": morphPositions,
+      "baseVertexPositions": basePositions
     };
 
     final morphBuffers = genBuffers(morphGeoInfo);
 
     final positionAttribute = Float32BufferAttribute.fromList(morphBuffers.vertex, 3);
-    positionAttribute.name = name ?? morphGeoNode.attrName;
+    positionAttribute.name = name ?? morphGeoNode['attrName'];
 
     positionAttribute.applyMatrix4(preTransform);
 
-    parentGeo.morphAttributes['position'].add(positionAttribute);
+    parentGeo.morphAttributes['position']?.add(positionAttribute);
   }
 
   // Parse normal from _FBXTree.Objects.Geometry.LayerElementNormal if it exists
@@ -1847,14 +1949,20 @@ class _GeometryParser {
   }
 
   // Parse Vertex Colors from _FBXTree.Objects.Geometry.LayerElementColor if it exists
-  parseVertexColors(colorNode) {
-    final mappingType = colorNode.MappingInformationType;
-    final referenceType = colorNode.ReferenceInformationType;
-    final buffer = colorNode.Colors.a;
+  Map<String,dynamic> parseVertexColors(Map colorNode) {
+    final mappingType = colorNode['MappingInformationType'];
+    final referenceType = colorNode['ReferenceInformationType'];
+    final buffer = colorNode['Colors']['a'];
     var indexBuffer = [];
     if (referenceType == 'IndexToDirect') {
-      indexBuffer = colorNode.ColorIndex.a;
+      indexBuffer = colorNode['ColorIndex']['a'];
     }
+
+		for (var i = 0, c = Color(); i < buffer.length; i += 4 ) {
+			c.fromUnknown( buffer, i );
+			ColorManagement.toWorkingColorSpace( c, ColorSpace.srgb );//colorSpaceToWorking
+			c.copyIntoArray( buffer, i );
+		}
 
     return {
       "dataSize": 4,

@@ -1,6 +1,6 @@
-# three_js_audio
+# three_js_audio_latency
 
-[![Pub Version](https://img.shields.io/pub/v/three_js_audio)](https://pub.dev/packages/three_js_audio)
+[![Pub Version](https://img.shields.io/pub/v/three_js_audio_latency)](https://pub.dev/packages/three_js_audio_latency)
 [![analysis](https://github.com/Knightro63/three_js/actions/workflows/flutter.yml/badge.svg)](https://github.com/Knightro63/three_js/actions/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-purple.svg)](https://opensource.org/licenses/MIT)
 
@@ -10,7 +10,10 @@ This is a dart conversion of three.js and three_dart, originally created by [@mr
 
 ## Usage
 
-This project is a api that adds audio to three_js.
+This project is a api that adds low latency audio to three_js.
+
+**Web and WASM**
+ - please add `<script src="https://cdn.jsdelivr.net/gh/Knightro63/flutter_soloud/web/libflutter_soloud_plugin.js"></script>` and `<script src="https://cdn.jsdelivr.net/gh/Knightro63/flutter_soloud/web/init_module.dart.js"></script>` to your index.html to load the js_interop file.
 
 ## Example
 

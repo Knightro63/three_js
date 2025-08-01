@@ -1,7 +1,6 @@
 import 'dart:math' as math;
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
-import 'audio.dart';
 
 final _position = Vector3.zero();
 final _quaternion = Quaternion.identity();
@@ -20,7 +19,8 @@ extension Ex on double {
   double toPrecision(int n) => double.parse(toStringAsFixed(n));
 }
 
-class PositionalAudio extends Audio {
+class PositionalAudio extends Object3D{
+  Audio audioSource;
   double refDistance;
   double maxDistance;
   int rolloffFactor;
@@ -32,7 +32,7 @@ class PositionalAudio extends Audio {
   Object3D listner;
 
 	PositionalAudio({
-    required super.path,
+    required this.audioSource,
     required this.listner,
     this.refDistance = 0,
     this.maxDistance = double.maxFinite,
@@ -73,9 +73,108 @@ class PositionalAudio extends Audio {
       return _AudioArea(temp > r,theta.toDeg(),sign);
     }
   }
+  
+  bool get hasPlaybackControl => audioSource.hasPlaybackControl;
+  bool get isPlaying => audioSource.isPlaying;
+  Matrix4 get matrixWorld => audioSource.matrixWorld;
+  bool get autoplay => audioSource.autoplay;
+  bool get loop => audioSource.loop;
+  int get loopEnd => audioSource.loopEnd;
+  int get loopStart => audioSource.loopStart;
+  double get playbackRate => audioSource.playbackRate;
+  String get path => audioSource.path;
+
+  set hasPlaybackControl(bool value){
+    audioSource.hasPlaybackControl = value;
+  }
+  set autoplay(bool value){
+    audioSource.autoplay = value;
+  }
+  set loop(bool value){
+    audioSource.loop = value;
+  }
+  set loopEnd(int value){
+    audioSource.loopEnd = value;
+  }
+  set loopStart(int value){
+    audioSource.loopStart = value;
+  }
+  set playbackRate(double value){
+    audioSource.playbackRate = value;
+  }
+  set path(String value){
+    audioSource.path = value;
+  }
+
+  Future<void> play([int delay = 0]) async{
+    await audioSource.play(delay);
+  }
+
+  Future<void> replay() async{
+    await audioSource.replay();
+  }
+
+  Future<void> stop() async {
+    await audioSource.stop();
+  }
+
+  Future<void> resume() async {
+    await audioSource.resume();
+  }
+
+  Future<void> pause() async {
+    await audioSource.pause();
+  }
+
+	double? getPlaybackRate() {
+    return audioSource.getPlaybackRate();
+  }
+
+	void setPlaybackRate(double value){
+    audioSource.setPlaybackRate(value);
+  }
+
+	bool getLoop() {
+    return audioSource.getLoop();
+  }
+
+	void setLoop(bool value ){
+    audioSource.setLoop(value);
+  }
+
+	void setLoopStart(int value ) {
+		audioSource.setLoopStart(value);
+	}
+
+	void setLoopEnd(int value ) {
+		audioSource.setLoopEnd(value);
+	}
+
+	double? getBalance() {
+		return audioSource.getBalance();
+	}
+
+	void setBalance(double value ){
+    audioSource.setBalance(value);
+	}
+
+	double? getVolume() {
+		return audioSource.getVolume();
+	}
+
+  void setVolume(double volume){
+    print(volume);
+    audioSource.setVolume(volume);
+  }
 
   @override
-	void updateMatrixWorld([bool force = false]) {
+  void dispose(){
+    super.dispose();
+    audioSource.dispose();
+  }
+
+  @override
+  void updateMatrixWorld([bool force = false]) {
 		super.updateMatrixWorld( force );
 
 		if (hasPlaybackControl && !isPlaying) return;

@@ -104,7 +104,7 @@ class UniformsGroup extends UniformBuffer {
 
 		return ( offset / gpuChunkBytes ).ceil() * gpuChunkBytes;
 
-	}
+	};
 
 	/**
 	 * Updates this group by updating each uniform object of

@@ -976,7 +976,7 @@ class _UIPageState extends State<UIScreen> {
                                     onChanged:(value){
                                       setState(() {
                                         selectedValue = value;
-                                        late final three.Mesh mesh;
+                                        three.Mesh mesh;
                                         int n = int.parse(selectedValue.split('|').last);
                                         for(final m in threeJs.scene.children){
                                           if(m.id == n){
@@ -1838,7 +1838,7 @@ class _UIPageState extends State<UIScreen> {
                           control.camera = threeJs.camera;
 
                           threeJs.camera.lookAt(orbit.target);
-                          threeJs.onWindowResize(context);
+                          //threeJs.onWindowResize(context);
                         },
                         child:Container(
                           width: 25,

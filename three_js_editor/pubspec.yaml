@@ -11,16 +11,16 @@ dependencies:
   cupertino_icons: ^1.0.6
   file_picker: ^10.1.2
   flutter_colorpicker: ^1.1.0
-  three_js: ^0.1.0
-  three_js_helpers: ^0.1.0
-  three_js_transform_controls: ^0.1.0
-  three_js_svg: ^0.1.0
-  three_js_objects: ^0.1.0
-  three_js_tjs_loader: ^0.1.0
-  three_js_postprocessing: ^0.1.0
-  three_js_modifers: ^0.1.0
-  three_js_exporters: ^0.1.0
-  three_js_bvh_csg: ^0.1.0
+  three_js: ^0.2.0
+  three_js_helpers: ^0.2.0
+  three_js_transform_controls: ^0.2.0
+  three_js_svg: ^0.2.0
+  three_js_objects: ^0.2.0
+  three_js_tjs_loader: ^0.2.0
+  three_js_postprocessing: ^0.2.0
+  three_js_modifers: ^0.2.0
+  three_js_exporters: ^0.2.0
+  three_js_bvh_csg: ^0.2.0
   css:
     git:
       url: https://github.com/Knightro63/css.git

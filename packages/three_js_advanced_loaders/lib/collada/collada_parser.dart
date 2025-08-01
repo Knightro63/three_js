@@ -1490,7 +1490,7 @@ class ColladaParser{
     }
   }
 
-  parsePhysicsRigidBody(XmlElement xml, Map<String,dynamic> data ) {
+  void parsePhysicsRigidBody(XmlElement xml, Map<String,dynamic> data ) {
     for (final child in xml.descendantElements) {
       switch ( child.name.local ) {
         case 'technique_common':
@@ -1973,10 +1973,12 @@ class ColladaParser{
     final instanceNodes = data['instanceNodes'];
 
     // nodes
-
-    for (final node in nodes) {
-      objects.add(await getBuild( library['nodes']![ node ], buildNode ));
+    for (int i = 0, l = nodes.length; i < l; i ++ ) {
+      objects.add( getNode( nodes[ i ] ) );
     }
+    // for (final node in nodes) {
+    //   objects.add(await getBuild( library['nodes']![ node ], buildNode ));
+    // }
 
     // instance cameras
 

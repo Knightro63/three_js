@@ -155,10 +155,6 @@ class _UIPageState extends State<UIScreen> {
       creteHelpers();
     });
     
-    threeJs.domElement.addEventListener(
-      three.PeripheralType.resize, 
-      threeJs.onWindowResize
-    );
     threeJs.domElement.addEventListener(three.PeripheralType.keydown,(event) {
       event as LogicalKeyboardKey;
       switch (event.keyLabel.toLowerCase()) {
@@ -1217,8 +1213,7 @@ class _UIPageState extends State<UIScreen> {
                     SizedBox(
                       height: MediaQuery.of(context).size.height-70,
                       child: threeJs.build(),
-                    )
-            
+                    ),
                     if(threeJs.mounted)Positioned(
                       top: 5,
                       left: 20,

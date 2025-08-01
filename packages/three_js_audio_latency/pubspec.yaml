@@ -1,7 +1,7 @@
-name: three_js_audio
+name: three_js_audio_latency
 description: "Flutter audio package converted from threejs and three_dart package."
-version: 0.2.1
-homepage: https://github.com/Knightro63/three_js/tree/main/packages/three_js_audio
+version: 0.0.1
+homepage: https://github.com/Knightro63/three_js/tree/main/packages/three_js_audio_latency
 
 environment:
   sdk: '>=3.3.2 <4.0.0'
@@ -10,7 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  audioplayers: ^6.5.0
+  flutter_soloud: ^3.2.1
   three_js_core: ^0.2.0
   three_js_math: ^0.2.0
   three_js_core_loaders: ^0.2.0

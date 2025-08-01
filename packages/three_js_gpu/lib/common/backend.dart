@@ -2,9 +2,11 @@ import 'dart:typed_data';
 
 import 'package:flutter/cupertino.dart' hide WeakMap, Texture;
 import 'package:three_js_core/others/weak_map.dart';
+import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_gpu/common/bind_group.dart';
 import 'package:three_js_gpu/common/compute_pipeline.dart';
 import 'package:three_js_gpu/common/programmable_stage.dart';
+import 'package:three_js_gpu/common/render_context.dart';
 import 'package:three_js_math/three_js_math.dart';
 
 Vector2? _vector2;
