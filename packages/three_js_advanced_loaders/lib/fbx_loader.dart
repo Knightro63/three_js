@@ -548,7 +548,7 @@ class __FBXTreeParser {
           case 'Maya|TEX_color_map':
             parameters["map"] = scope.getTexture(textureMap, childID);
             if (parameters["map"] != null) {
-              parameters["map"].encoding = sRGBEncoding;
+              parameters["map"].colorSpace = SRGBColorSpace;
             }
 
             break;
@@ -561,7 +561,7 @@ class __FBXTreeParser {
           case 'EmissiveColor':
             parameters["emissiveMap"] = scope.getTexture(textureMap, childID);
             if (parameters["emissiveMap"] != null) {
-              parameters["emissiveMap"].encoding = sRGBEncoding;
+              parameters["emissiveMap"].colorSpace = SRGBColorSpace;
             }
 
             break;
@@ -575,7 +575,7 @@ class __FBXTreeParser {
             parameters["envMap"] = scope.getTexture(textureMap, childID);
             if (parameters["envMap"] != null) {
               parameters["envMap"].mapping = EquirectangularReflectionMapping;
-              parameters["envMap"].encoding = sRGBEncoding;
+              parameters["envMap"].colorSpace = SRGBColorSpace;
             }
 
             break;
@@ -583,7 +583,7 @@ class __FBXTreeParser {
           case 'SpecularColor':
             parameters["specularMap"] = scope.getTexture(textureMap, childID);
             if (parameters["specularMap"] != null) {
-              parameters["specularMap"].encoding = sRGBEncoding;
+              parameters["specularMap"].colorSpace = SRGBColorSpace;
             }
 
             break;

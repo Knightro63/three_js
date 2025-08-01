@@ -113,13 +113,11 @@ class FileLoader extends Loader {
   Future<ThreeFile> fromBytes(Uint8List bytes, [String? type, String? location]) async{
     String cacheName = String.fromCharCodes(bytes).toString().substring(0,50);
     final cached = Cache.get(cacheName);
-
     if (cached != null) {
       manager.itemStart(cacheName);
       manager.itemEnd(cacheName);
-      return cached;
+      return ThreeFile(type??'bytes',cached,'cache');
     }
-
     Cache.add(cacheName,bytes);
     return ThreeFile(type??'bytes',bytes,location);
   }

@@ -43,7 +43,7 @@ class TGALoader extends DataTextureLoader {
   @override
   Future<DataTexture?> fromPath(String filePath) async{
     _init();
-    ThreeFile? tf = await _loader.fromPath(path+filePath);
+    ThreeFile? tf = await _loader.fromPath(filePath);
     return tf == null?null:_parse(tf.data);
   }
   
