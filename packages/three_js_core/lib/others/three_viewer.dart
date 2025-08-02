@@ -130,6 +130,7 @@ class ThreeJS with WidgetsBindingObserver{
 
   @override
   void didChangeMetrics() {
+    if (disposed) return;
     _debounceTimer?.cancel(); // Clear existing timer
     _debounceTimer = Timer(const Duration(milliseconds: 300), () { // Set a new timer
       onWindowResize(_context);

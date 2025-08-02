@@ -210,7 +210,7 @@ class PeripheralsState extends State<Peripherals> {
                 _prevScale = event.scale;
               }
             }
-            else if(isWindows){
+            else if(isWindows && event is! PointerScrollEvent){
               _onPointerEvent(context, PeripheralType.pointerup, event);
               start = false;
             }

@@ -59,6 +59,8 @@ import 'package:example/material/webgl_materials_video.dart';
 import 'package:example/material/webgl_tonemapping.dart';
 import 'package:example/projected/webgl_projected_3d_model.dart';
 import 'package:example/projected/webgl_projected_basic.dart';
+import 'package:example/screenshot/flutter_screenshot.dart';
+import 'package:example/screenshot/opengl_screenshot.dart';
 import 'package:example/src/statistics.dart';
 import 'package:example/material/webgl_materials_car.dart';
 import 'package:example/material/webgl_materials_physical_transmission.dart';
@@ -664,6 +666,12 @@ class MyAppState extends State<MyApp> {
               },
               '/webgl_postprocessing_unreal_bloom_selective':(BuildContext context) {
                 return const WebglPostprocessingUnrealBloomSelective();
+              },
+              '/flutter_screenshot':(BuildContext context) {
+                return const FlutterScreenshot();
+              },
+              '/opengl_screenshot':(BuildContext context) {
+                return const OpenglScreenshot();
               },
             }
           ),
