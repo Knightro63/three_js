@@ -17,7 +17,7 @@ dependencies:
   css:
     git:
       url: https://github.com/Knightro63/css.git
-  three_js: ^0.2.0
+  three_js: ^0.2.1
     #path: ../packages/three_js
   three_js_helpers: ^0.2.0
   three_js_transform_controls: ^0.2.0
@@ -30,11 +30,10 @@ dependencies:
   three_js_exporters: ^0.2.0
   three_js_line: ^0.2.0
   three_js_bvh_csg: ^0.2.0
-  three_js_video_texture: ^0.0.1
+  three_js_video_texture: ^0.0.2
+  three_js_audio: ^0.2.1
+  three_js_audio_latency: ^0.0.1
   three_js_advanced_exporters: ^0.0.1
-  
-  three_js_audio_latency:
-    path: ../packages/three_js_audio_latency
 
   permission_handler: ^11.3.1
   camera: ^0.10.6
@@ -53,18 +52,6 @@ dependency_overrides:
       url: https://github.com/alex-melnyk/flutter-permission-handler.git 
       path: permission_handler_apple
   file_picker: ^10.1.9
-  three_js_advanced_loaders:
-    path: ../packages/three_js_advanced_loaders
-  three_js_video_texture:
-    path: ../packages/three_js_video_texture
-  three_js_audio:
-    path: ../packages/three_js_audio
-  three_js_core:
-    path: ../packages/three_js_core
-  three_js_math:
-    path: ../packages/three_js_math
-  flutter_angle:
-    path: ../../flutter_angle/flutter_angle
 
 flutter:
   uses-material-design: true
