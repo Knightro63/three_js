@@ -1,4 +1,6 @@
 import 'package:three_js_core/three_js_core.dart';
+import 'package:three_js_gpu/common/renderer.dart';
+import 'package:three_js_gpu/nodes/standard_node_library.dart';
 import './gpu_backend.dart';
 
 /*
@@ -25,16 +27,18 @@ const debugHandler = {
  */
 class WebGPURenderer extends Renderer{
   bool isWebGPURenderer = true;
-  StandardNodeLibrary library = StandardNodeLibrary();
 
-  WebGPURenderer(super.backend, super.parameters);
+  WebGPURenderer(super.backend, super.parameters){
+    library = StandardNodeLibrary();
+  }
 
 	/**
 	 * Constructs a new WebGPU renderer.
 	 *
 	 * @param {WebGPURenderer~Options} [parameters] - The configuration parameter.
 	 */
-	factory WebGPURenderer.create( parameters) {
+	factory WebGPURenderer.create([RendererParameters? parameters]) {
+    parameters ??= RendererParameters();
 		Type BackendClass;
 
 		if ( parameters.forceWebGL ) {
@@ -42,15 +46,15 @@ class WebGPURenderer extends Renderer{
 		} 
     else {
 			BackendClass = WebGPUBackend;
-			parameters.getFallback = () => {
+			parameters.getFallback = (){
 				console.warning( 'THREE.WebGPURenderer: WebGPU is not available, running under WebGL2 backend.' );
 				return new WebGLBackend( parameters );
 			};
 		}
 
-		final backend = new BackendClass( parameters );
+		final backend = BackendClass( parameters );
 
-		if ( typeof __THREE_DEVTOOLS__ !== 'undefined' ) {
+		if ( typeof __THREE_DEVTOOLS__ != null ) {
 			__THREE_DEVTOOLS__.dispatchEvent( new CustomEvent( 'observe', { detail: this } ) );
 		}
 

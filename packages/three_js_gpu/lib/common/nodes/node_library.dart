@@ -110,7 +110,7 @@ class NodeLibrary {
 		}
 
 		if (nodeClass is! Function ) throw( 'Node class ${ nodeClass.name } is not a class.' );
-		if (type is Function || typeof type === 'object' ) throw( 'Base class ${ type } is not a class.' );
+		if (type is Function || typeof type == 'object' ) throw( 'Base class ${ type } is not a class.' );
 
 		library.set( type, nodeClass );
 	}

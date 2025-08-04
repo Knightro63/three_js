@@ -23,17 +23,17 @@ class Attributes extends DataMap {
 		return attributeData;
 	}
 
-	void update(BufferAttribute attribute, int type ) {
+	void update(BufferAttribute attribute, AttributeType type ) {
 		final data = get( attribute );
 
 		if ( data.version == null ) {
-			if ( type == AttributeType.vertex.index ) {
+			if ( type == AttributeType.vertex ) {
 				backend.createAttribute( attribute );
-			} else if ( type == AttributeType.indx.index ) {
+			} else if ( type == AttributeType.indx ) {
 				backend.createIndexAttribute( attribute );
-			} else if ( type == AttributeType.storage.index ) {
+			} else if ( type == AttributeType.storage ) {
 				backend.createStorageAttribute( attribute );
-			} else if ( type == AttributeType.indirect.index ) {
+			} else if ( type == AttributeType.indirect ) {
 				(backend as WebGPUBackend).createIndirectStorageAttribute( attribute );
 			}
 

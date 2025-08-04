@@ -1,24 +1,9 @@
-import { ArrayCamera } from '../../cameras/ArrayCamera.js';
-import { EventDispatcher } from '../../core/EventDispatcher.js';
-import { PerspectiveCamera } from '../../cameras/PerspectiveCamera.js';
-import { Quaternion } from '../../math/Quaternion.js';
-import { RAD2DEG } from '../../math/MathUtils.js';
-import { Vector2 } from '../../math/Vector2.js';
-import { Vector3 } from '../../math/Vector3.js';
-import { Vector4 } from '../../math/Vector4.js';
-import { WebXRController } from '../webxr/WebXRController.js';
-import { AddEquation, BackSide, CustomBlending, DepthFormat, DepthStencilFormat, FrontSide, RGBAFormat, UnsignedByteType, UnsignedInt248Type, UnsignedIntType, ZeroFactor } from '../../constants.js';
-import { DepthTexture } from '../../textures/DepthTexture.js';
-import { XRRenderTarget } from './XRRenderTarget.js';
-import { CylinderGeometry } from '../../geometries/CylinderGeometry.js';
-import QuadMesh from './QuadMesh.js';
-import NodeMaterial from '../../materials/nodes/NodeMaterial.js';
-import { PlaneGeometry } from '../../geometries/PlaneGeometry.js';
-import { MeshBasicMaterial } from '../../materials/MeshBasicMaterial.js';
-import { Mesh } from '../../objects/Mesh.js';
+import 'package:three_js_gpu/common/renderer.dart';
+import 'package:three_js_math/three_js_math.dart';
+import 'package:three_js_core/three_js_core.dart';
 
-const _cameraLPos = /*@__PURE__*/ new Vector3();
-const _cameraRPos = /*@__PURE__*/ new Vector3();
+final _cameraLPos = Vector3();
+final _cameraRPos = Vector3();
 
 /**
  * The XR manager is built on top of the WebXR Device API to
@@ -29,6 +14,35 @@ const _cameraRPos = /*@__PURE__*/ new Vector3();
  * @augments EventDispatcher
  */
 class XRManager extends EventDispatcher {
+  bool enabled = false;
+  bool isPresenting = false;
+  bool cameraAutoUpdate = true;
+  Renderer _renderer;
+  PerspectiveCamera _cameraL = new PerspectiveCamera();
+  PerspectiveCamera _cameraR = new PerspectiveCamera();
+  late final List<PerspectiveCamera> _cameras = [ this._cameraL, this._cameraR ];
+  late ArrayCamera _cameraXR = ArrayCamera(_cameras);
+  double? _currentDepthNear;
+  double? _currentDepthFar;
+  RenderTarget? _xrRenderTarget;
+  List _layers = [];
+  List<XRInputSource> _controllerInputSources = [];
+  List<WebXRController> _controllers = [];
+  bool _supportsLayers = false;
+  double _foveation = 1.0;
+  double _framebufferScaleFactor = 1;
+  XRReferenceSpace? _customReferenceSpace;
+  String _referenceSpaceType = 'local-floor';
+  final Vector2 _currentSize = Vector2();
+  double? _currentPixelRatio;
+  XRReferenceSpace? _referenceSpace;
+  XRSession? _session;
+  bool _useMultiview = false;
+  late bool _useMultiviewIfPossible;
+  XRFrame? _xrFrame;
+  XRProjectionLayer? _glProjLayer;
+  XRWebGLLayer? _glBaseLayer;
+  XRWebGLBinding? _glBinding;
 
 	/**
 	 * Constructs a new XR manager.
@@ -36,140 +50,10 @@ class XRManager extends EventDispatcher {
 	 * @param {Renderer} renderer - The renderer.
 	 * @param {boolean} [multiview=false] - Enables multiview if the device supports it.
 	 */
-	constructor( renderer, multiview = false ) {
-
-		super();
-
-		/**
-		 * This flag globally enables XR rendering.
-		 *
-		 * @type {boolean}
-		 * @default false
-		 */
-		this.enabled = false;
-
-		/**
-		 * Whether the XR device is currently presenting or not.
-		 *
-		 * @type {boolean}
-		 * @default false
-		 * @readonly
-		 */
-		this.isPresenting = false;
-
-		/**
-		 * Whether the XR camera should automatically be updated or not.
-		 *
-		 * @type {boolean}
-		 * @default true
-		 */
-		this.cameraAutoUpdate = true;
-
-		/**
-		 * The renderer.
-		 *
-		 * @private
-		 * @type {Renderer}
-		 */
+	XRManager(Renderer renderer, [multiview = false ]):super(){
 		this._renderer = renderer;
-
-		// camera
-
-		/**
-		 * Represents the camera for the left eye.
-		 *
-		 * @private
-		 * @type {PerspectiveCamera}
-		 */
-		this._cameraL = new PerspectiveCamera();
 		this._cameraL.viewport = new Vector4();
-
-		/**
-		 * Represents the camera for the right eye.
-		 *
-		 * @private
-		 * @type {PerspectiveCamera}
-		 */
-		this._cameraR = new PerspectiveCamera();
 		this._cameraR.viewport = new Vector4();
-
-		/**
-		 * A list of cameras used for rendering the XR views.
-		 *
-		 * @private
-		 * @type {Array<Camera>}
-		 */
-		this._cameras = [ this._cameraL, this._cameraR ];
-
-		/**
-		 * The main XR camera.
-		 *
-		 * @private
-		 * @type {ArrayCamera}
-		 */
-		this._cameraXR = new ArrayCamera();
-
-		/**
-		 * The current near value of the XR camera.
-		 *
-		 * @private
-		 * @type {?number}
-		 * @default null
-		 */
-		this._currentDepthNear = null;
-
-		/**
-		 * The current far value of the XR camera.
-		 *
-		 * @private
-		 * @type {?number}
-		 * @default null
-		 */
-		this._currentDepthFar = null;
-
-		/**
-		 * A list of WebXR controllers requested by the application.
-		 *
-		 * @private
-		 * @type {Array<WebXRController>}
-		 */
-		this._controllers = [];
-
-		/**
-		 * A list of XR input source. Each input source belongs to
-		 * an instance of WebXRController.
-		 *
-		 * @private
-		 * @type {Array<XRInputSource?>}
-		 */
-		this._controllerInputSources = [];
-
-		/**
-		 * The XR render target that represents the rendering destination
-		 * during an active XR session.
-		 *
-		 * @private
-		 * @type {?RenderTarget}
-		 * @default null
-		 */
-		this._xrRenderTarget = null;
-
-		/**
-		 * An array holding all the non-projection layers
-		 *
-		 * @private
-		 * @type {Array<Object>}
-		 * @default []
-		 */
-		this._layers = [];
-
-		/**
-		 * Whether the device has support for all layer types.
-		 *
-		 * @type {boolean}
-		 * @default false
-		 */
-		this._supportsLayers = false;
 
 		this._frameBufferTargets = null;
 
@@ -208,23 +92,6 @@ class XRManager extends EventDispatcher {
 		 */
 		this._currentAnimationLoop = null;
 
-		/**
-		 * The current pixel ratio.
-		 *
-		 * @private
-		 * @type {?number}
-		 * @default null
-		 */
-		this._currentPixelRatio = null;
-
-		/**
-		 * The current size of the renderer's canvas
-		 * in logical pixel unit.
-		 *
-		 * @private
-		 * @type {Vector2}
-		 */
-		this._currentSize = new Vector2();
 
 		/**
 		 * The default event listener for handling events inside a XR session.
@@ -261,124 +128,15 @@ class XRManager extends EventDispatcher {
 		this._onAnimationFrame = onAnimationFrame.bind( this );
 
 		/**
-		 * The current XR reference space.
-		 *
-		 * @private
-		 * @type {?XRReferenceSpace}
-		 * @default null
-		 */
-		this._referenceSpace = null;
-
-		/**
-		 * The current XR reference space type.
-		 *
-		 * @private
-		 * @type {XRReferenceSpaceType}
-		 * @default 'local-floor'
-		 */
-		this._referenceSpaceType = 'local-floor';
-
-		/**
-		 * A custom reference space defined by the application.
-		 *
-		 * @private
-		 * @type {?XRReferenceSpace}
-		 * @default null
-		 */
-		this._customReferenceSpace = null;
-
-		/**
-		 * The framebuffer scale factor.
-		 *
-		 * @private
-		 * @type {number}
-		 * @default 1
-		 */
-		this._framebufferScaleFactor = 1;
-
-		/**
-		 * The foveation factor.
-		 *
-		 * @private
-		 * @type {number}
-		 * @default 1
-		 */
-		this._foveation = 1.0;
-
-		/**
-		 * A reference to the current XR session.
-		 *
-		 * @private
-		 * @type {?XRSession}
-		 * @default null
-		 */
-		this._session = null;
-
-		/**
-		 * A reference to the current XR base layer.
-		 *
-		 * @private
-		 * @type {?XRWebGLLayer}
-		 * @default null
-		 */
-		this._glBaseLayer = null;
-
-		/**
-		 * A reference to the current XR binding.
-		 *
-		 * @private
-		 * @type {?XRWebGLBinding}
-		 * @default null
-		 */
-		this._glBinding = null;
-
-		/**
-		 * A reference to the current XR projection layer.
-		 *
-		 * @private
-		 * @type {?XRProjectionLayer}
-		 * @default null
-		 */
-		this._glProjLayer = null;
-
-		/**
-		 * A reference to the current XR frame.
-		 *
-		 * @private
-		 * @type {?XRFrame}
-		 * @default null
-		 */
-		this._xrFrame = null;
-
-		/**
 		 * Whether to use the WebXR Layers API or not.
 		 *
 		 * @private
 		 * @type {boolean}
 		 * @readonly
 		 */
-		this._useLayers = ( typeof XRWebGLBinding !== 'undefined' && 'createProjectionLayer' in XRWebGLBinding.prototype ); // eslint-disable-line compat/compat
+		this._useLayers = ( typeof XRWebGLBinding != 'null' && 'createProjectionLayer' in XRWebGLBinding.prototype ); // eslint-disable-line compat/compat
 
-		/**
-		 * Whether the usage of multiview has been requested by the application or not.
-		 *
-		 * @private
-		 * @type {boolean}
-		 * @default false
-		 * @readonly
-		 */
 		this._useMultiviewIfPossible = multiview;
-
-		/**
-		 * Whether the usage of multiview is actually enabled. This flag only evaluates to `true`
-		 * if multiview has been requested by the application and the `OVR_multiview2` is available.
-		 *
-		 * @private
-		 * @type {boolean}
-		 * @readonly
-		 */
-		this._useMultiview = false;
-
 	}
 
 	/**
@@ -389,12 +147,9 @@ class XRManager extends EventDispatcher {
 	 * @param {number} index - The index of the XR controller.
 	 * @return {Group} A group that represents the controller's transformation.
 	 */
-	getController( index ) {
-
-		const controller = this._getController( index );
-
+	getController(int index ) {
+		final controller = this._getController( index );
 		return controller.getTargetRaySpace();
-
 	}
 
 	/**
@@ -405,12 +160,9 @@ class XRManager extends EventDispatcher {
 	 * @param {number} index - The index of the XR controller.
 	 * @return {Group} A group that represents the controller's transformation.
 	 */
-	getControllerGrip( index ) {
-
-		const controller = this._getController( index );
-
+	getControllerGrip(int index ) {
+		final controller = this._getController( index );
 		return controller.getGripSpace();
-
 	}
 
 	/**
@@ -423,7 +175,7 @@ class XRManager extends EventDispatcher {
 	 */
 	getHand( index ) {
 
-		const controller = this._getController( index );
+		final controller = this._getController( index );
 
 		return controller.getHandSpace();
 
@@ -432,18 +184,14 @@ class XRManager extends EventDispatcher {
 	/**
 	 * Returns the foveation value.
 	 *
-	 * @return {number|undefined} The foveation value. Returns `undefined` if no base or projection layer is defined.
+	 * @return {number|null} The foveation value. Returns `null` if no base or projection layer is defined.
 	 */
-	getFoveation() {
-
-		if ( this._glProjLayer === null && this._glBaseLayer === null ) {
-
-			return undefined;
-
+	double? getFoveation() {
+		if ( this._glProjLayer == null && this._glBaseLayer == null ) {
+			return null;
 		}
 
 		return this._foveation;
-
 	}
 
 	/**
@@ -452,22 +200,16 @@ class XRManager extends EventDispatcher {
 	 * @param {number} foveation - A number in the range `[0,1]` where `0` means no foveation (full resolution)
 	 * and `1` means maximum foveation (the edges render at lower resolution).
 	 */
-	setFoveation( foveation ) {
-
+	void setFoveation(double foveation ) {
 		this._foveation = foveation;
 
-		if ( this._glProjLayer !== null ) {
-
+		if ( this._glProjLayer != null ) {
 			this._glProjLayer.fixedFoveation = foveation;
-
 		}
 
-		if ( this._glBaseLayer !== null && this._glBaseLayer.fixedFoveation !== undefined ) {
-
+		if ( this._glBaseLayer != null && this._glBaseLayer.fixedFoveation != null ) {
 			this._glBaseLayer.fixedFoveation = foveation;
-
 		}
-
 	}
 
 	/**
@@ -475,10 +217,8 @@ class XRManager extends EventDispatcher {
 	 *
 	 * @return {number} The framebuffer scale factor.
 	 */
-	getFramebufferScaleFactor() {
-
+	double getFramebufferScaleFactor() {
 		return this._framebufferScaleFactor;
-
 	}
 
 	/**
@@ -488,16 +228,12 @@ class XRManager extends EventDispatcher {
 	 *
 	 * @param {number} factor - The framebuffer scale factor.
 	 */
-	setFramebufferScaleFactor( factor ) {
-
+	void setFramebufferScaleFactor(double factor ) {
 		this._framebufferScaleFactor = factor;
 
-		if ( this.isPresenting === true ) {
-
-			console.warn( 'THREE.XRManager: Cannot change framebuffer scale while presenting.' );
-
+		if ( this.isPresenting == true ) {
+			console.warning( 'THREE.XRManager: Cannot change framebuffer scale while presenting.' );
 		}
-
 	}
 
 	/**
@@ -505,10 +241,8 @@ class XRManager extends EventDispatcher {
 	 *
 	 * @return {XRReferenceSpaceType} The reference space type.
 	 */
-	getReferenceSpaceType() {
-
+	XRReferenceSpaceType getReferenceSpaceType() {
 		return this._referenceSpaceType;
-
 	}
 
 	/**
@@ -518,16 +252,11 @@ class XRManager extends EventDispatcher {
 	 *
 	 * @param {XRReferenceSpaceType} type - The reference space type.
 	 */
-	setReferenceSpaceType( type ) {
-
+	void setReferenceSpaceType(XRReferenceSpaceType type ) {
 		this._referenceSpaceType = type;
-
-		if ( this.isPresenting === true ) {
-
-			console.warn( 'THREE.XRManager: Cannot change reference space type while presenting.' );
-
+		if ( this.isPresenting == true ) {
+			console.warning( 'THREE.XRManager: Cannot change reference space type while presenting.' );
 		}
-
 	}
 
 	/**
@@ -535,10 +264,8 @@ class XRManager extends EventDispatcher {
 	 *
 	 * @return {XRReferenceSpace} The XR reference space.
 	 */
-	getReferenceSpace() {
-
-		return this._customReferenceSpace || this._referenceSpace;
-
+	XRReferenceSpace getReferenceSpace() {
+		return this._customReferenceSpace ?? this._referenceSpace;
 	}
 
 	/**
@@ -546,10 +273,8 @@ class XRManager extends EventDispatcher {
 	 *
 	 * @param {XRReferenceSpace} space - The XR reference space.
 	 */
-	setReferenceSpace( space ) {
-
+	setReferenceSpace(XRReferenceSpace space ) {
 		this._customReferenceSpace = space;
-
 	}
 
 	/**
@@ -557,25 +282,19 @@ class XRManager extends EventDispatcher {
 	 *
 	 * @return {ArrayCamera} The XR camera.
 	 */
-	getCamera() {
-
+	ArrayCamera getCamera() {
 		return this._cameraXR;
-
 	}
 
 	/**
 	 * Returns the environment blend mode from the current XR session.
 	 *
-	 * @return {'opaque'|'additive'|'alpha-blend'|undefined} The environment blend mode. Returns `undefined` when used outside of a XR session.
+	 * @return {'opaque'|'additive'|'alpha-blend'|null} The environment blend mode. Returns `null` when used outside of a XR session.
 	 */
 	getEnvironmentBlendMode() {
-
-		if ( this._session !== null ) {
-
+		if ( this._session != null ) {
 			return this._session.environmentBlendMode;
-
 		}
-
 	}
 
 	/**
@@ -583,10 +302,8 @@ class XRManager extends EventDispatcher {
 	 *
 	 * @return {?XRFrame} The XR frame. Returns `null` when used outside a XR session.
 	 */
-	getFrame() {
-
+	XRFrame? getFrame() {
 		return this._xrFrame;
-
 	}
 
 	/**
@@ -594,10 +311,8 @@ class XRManager extends EventDispatcher {
 	 *
 	 * @return {boolean} Whether the engine renders to a multiview render target or not.
 	 */
-	useMultiview() {
-
+	bool useMultiview() {
 		return this._useMultiview;
-
 	}
 
 	/**
@@ -617,8 +332,8 @@ class XRManager extends EventDispatcher {
 	 */
 	createQuadLayer( width, height, translation, quaternion, pixelwidth, pixelheight, rendercall, attributes = {} ) {
 
-		const geometry = new PlaneGeometry( width, height );
-		const renderTarget = new XRRenderTarget(
+		final geometry = new PlaneGeometry( width, height );
+		final renderTarget = new XRRenderTarget(
 			pixelwidth,
 			pixelheight,
 			{
@@ -628,12 +343,12 @@ class XRManager extends EventDispatcher {
 					pixelwidth,
 					pixelheight,
 					attributes.stencil ? UnsignedInt248Type : UnsignedIntType,
-					undefined,
-					undefined,
-					undefined,
-					undefined,
-					undefined,
-					undefined,
+					null,
+					null,
+					null,
+					null,
+					null,
+					null,
 					attributes.stencil ? DepthStencilFormat : DepthFormat
 				),
 				stencilBuffer: attributes.stencil,
@@ -643,15 +358,15 @@ class XRManager extends EventDispatcher {
 
 		renderTarget._autoAllocateDepthBuffer = true;
 
-		const material = new MeshBasicMaterial( { color: 0xffffff, side: FrontSide } );
+		final material = new MeshBasicMaterial( { color: 0xffffff, side: FrontSide } );
 		material.map = renderTarget.texture;
 		material.map.offset.y = 1;
 		material.map.repeat.y = - 1;
-		const plane = new Mesh( geometry, material );
+		final plane = new Mesh( geometry, material );
 		plane.position.copy( translation );
 		plane.quaternion.copy( quaternion );
 
-		const layer = {
+		final layer = {
 			type: 'quad',
 			width: width,
 			height: height,
@@ -666,7 +381,7 @@ class XRManager extends EventDispatcher {
 
 		this._layers.push( layer );
 
-		if ( this._session !== null ) {
+		if ( this._session != null ) {
 
 			layer.plane.material = new MeshBasicMaterial( { color: 0xffffff, side: FrontSide } );
 			layer.plane.material.blending = CustomBlending;
@@ -676,7 +391,7 @@ class XRManager extends EventDispatcher {
 
 			layer.xrlayer = this._createXRLayer( layer );
 
-			const xrlayers = this._session.renderState.layers;
+			final xrlayers = this._session.renderState.layers;
 			xrlayers.unshift( layer.xrlayer );
 			this._session.updateRenderState( { layers: xrlayers } );
 
@@ -708,8 +423,8 @@ class XRManager extends EventDispatcher {
 	 */
 	createCylinderLayer( radius, centralAngle, aspectratio, translation, quaternion, pixelwidth, pixelheight, rendercall, attributes = {} ) {
 
-		const geometry = new CylinderGeometry( radius, radius, radius * centralAngle / aspectratio, 64, 64, true, Math.PI - centralAngle / 2, centralAngle );
-		const renderTarget = new XRRenderTarget(
+		final geometry = new CylinderGeometry( radius, radius, radius * centralAngle / aspectratio, 64, 64, true, Math.PI - centralAngle / 2, centralAngle );
+		final renderTarget = new XRRenderTarget(
 			pixelwidth,
 			pixelheight,
 			{
@@ -719,12 +434,12 @@ class XRManager extends EventDispatcher {
 					pixelwidth,
 					pixelheight,
 					attributes.stencil ? UnsignedInt248Type : UnsignedIntType,
-					undefined,
-					undefined,
-					undefined,
-					undefined,
-					undefined,
-					undefined,
+					null,
+					null,
+					null,
+					null,
+					null,
+					null,
 					attributes.stencil ? DepthStencilFormat : DepthFormat
 				),
 				stencilBuffer: attributes.stencil,
@@ -734,15 +449,15 @@ class XRManager extends EventDispatcher {
 
 		renderTarget._autoAllocateDepthBuffer = true;
 
-		const material = new MeshBasicMaterial( { color: 0xffffff, side: BackSide } );
+		final material = new MeshBasicMaterial( { color: 0xffffff, side: BackSide } );
 		material.map = renderTarget.texture;
 		material.map.offset.y = 1;
 		material.map.repeat.y = - 1;
-		const plane = new Mesh( geometry, material );
+		final plane = new Mesh( geometry, material );
 		plane.position.copy( translation );
 		plane.quaternion.copy( quaternion );
 
-		const layer = {
+		final layer = {
 			type: 'cylinder',
 			radius: radius,
 			centralAngle: centralAngle,
@@ -758,7 +473,7 @@ class XRManager extends EventDispatcher {
 
 		this._layers.push( layer );
 
-		if ( this._session !== null ) {
+		if ( this._session != null ) {
 
 			layer.plane.material = new MeshBasicMaterial( { color: 0xffffff, side: BackSide } );
 			layer.plane.material.blending = CustomBlending;
@@ -768,7 +483,7 @@ class XRManager extends EventDispatcher {
 
 			layer.xrlayer = this._createXRLayer( layer );
 
-			const xrlayers = this._session.renderState.layers;
+			final xrlayers = this._session.renderState.layers;
 			xrlayers.unshift( layer.xrlayer );
 			this._session.updateRenderState( { layers: xrlayers } );
 
@@ -790,33 +505,33 @@ class XRManager extends EventDispatcher {
 	 */
 	renderLayers( ) {
 
-		const translationObject = new Vector3();
-		const quaternionObject = new Quaternion();
-		const renderer = this._renderer;
+		final translationObject = new Vector3();
+		final quaternionObject = new Quaternion();
+		final renderer = this._renderer;
 
-		const wasPresenting = this.isPresenting;
-		const rendererOutputTarget = renderer.getOutputRenderTarget();
-		const rendererFramebufferTarget = renderer._frameBufferTarget;
+		final wasPresenting = this.isPresenting;
+		final rendererOutputTarget = renderer.getOutputRenderTarget();
+		final rendererFramebufferTarget = renderer._frameBufferTarget;
 		this.isPresenting = false;
 
-		const rendererSize = new Vector2();
+		final rendererSize = new Vector2();
 		renderer.getSize( rendererSize );
-		const rendererQuad = renderer._quad;
+		final rendererQuad = renderer._quad;
 
-		for ( const layer of this._layers ) {
+		for ( final layer of this._layers ) {
 
-			layer.renderTarget.isXRRenderTarget = this._session !== null;
+			layer.renderTarget.isXRRenderTarget = this._session != null;
 			layer.renderTarget._hasExternalTextures = layer.renderTarget.isXRRenderTarget;
 
 			if ( layer.renderTarget.isXRRenderTarget && this._supportsLayers ) {
 
 				layer.xrlayer.transform = new XRRigidTransform( layer.plane.getWorldPosition( translationObject ), layer.plane.getWorldQuaternion( quaternionObject ) );
 
-				const glSubImage = this._glBinding.getSubImage( layer.xrlayer, this._xrFrame );
+				final glSubImage = this._glBinding.getSubImage( layer.xrlayer, this._xrFrame );
 				renderer.backend.setXRRenderTargetTextures(
 					layer.renderTarget,
 					glSubImage.colorTexture,
-					undefined );
+					null );
 
 				renderer._setXRLayerSize( layer.renderTarget.width, layer.renderTarget.height );
 				renderer.setOutputRenderTarget( layer.renderTarget );
@@ -824,7 +539,7 @@ class XRManager extends EventDispatcher {
 				renderer._frameBufferTarget = null;
 
 				this._frameBufferTargets || ( this._frameBufferTargets = new WeakMap() );
-				const { frameBufferTarget, quad } = this._frameBufferTargets.get( layer.renderTarget ) || { frameBufferTarget: null, quad: null };
+				final { frameBufferTarget, quad } = this._frameBufferTargets.get( layer.renderTarget ) || { frameBufferTarget: null, quad: null };
 				if ( ! frameBufferTarget ) {
 
 					renderer._quad = new QuadMesh( new NodeMaterial() );
@@ -882,18 +597,18 @@ class XRManager extends EventDispatcher {
 	 */
 	async setSession( session ) {
 
-		const renderer = this._renderer;
-		const backend = renderer.backend;
+		final renderer = this._renderer;
+		final backend = renderer.backend;
 
 		this._gl = renderer.getContext();
-		const gl = this._gl;
-		const attributes = gl.getContextAttributes();
+		final gl = this._gl;
+		final attributes = gl.getContextAttributes();
 
 		this._session = session;
 
-		if ( session !== null ) {
+		if ( session != null ) {
 
-			if ( backend.isWebGPUBackend === true ) throw new Error( 'THREE.XRManager: XR is currently not supported with a WebGPU backend. Use WebGL by passing "{ forceWebGL: true }" to the constructor of the renderer.' );
+			if ( backend.isWebGPUBackend == true ) throw new Error( 'THREE.XRManager: XR is currently not supported with a WebGPU backend. Use WebGL by passing "{ forceWebGL: true }" to the constructor of the renderer.' );
 
 			session.addEventListener( 'select', this._onSessionEvent );
 			session.addEventListener( 'selectstart', this._onSessionEvent );
@@ -915,7 +630,7 @@ class XRManager extends EventDispatcher {
 
 			//
 
-			if ( this._useLayers === true ) {
+			if ( this._useLayers == true ) {
 
 				// default path using XRWebGLBinding/XRProjectionLayer
 
@@ -931,7 +646,7 @@ class XRManager extends EventDispatcher {
 
 				}
 
-				const projectionlayerInit = {
+				final projectionlayerInit = {
 					colorFormat: gl.RGBA8,
 					depthFormat: glDepthFormat,
 					scaleFactor: this._framebufferScaleFactor,
@@ -945,9 +660,9 @@ class XRManager extends EventDispatcher {
 
 				}
 
-				const glBinding = new XRWebGLBinding( session, gl );
-				const glProjLayer = glBinding.createProjectionLayer( projectionlayerInit );
-				const layersArray = [ glProjLayer ];
+				final glBinding = new XRWebGLBinding( session, gl );
+				final glProjLayer = glBinding.createProjectionLayer( projectionlayerInit );
+				final layersArray = [ glProjLayer ];
 
 				this._glBinding = glBinding;
 				this._glProjLayer = glProjLayer;
@@ -955,8 +670,8 @@ class XRManager extends EventDispatcher {
 				renderer.setPixelRatio( 1 );
 				renderer._setXRLayerSize( glProjLayer.textureWidth, glProjLayer.textureHeight );
 
-				const depth = this._useMultiview ? 2 : 1;
-				const depthTexture = new DepthTexture( glProjLayer.textureWidth, glProjLayer.textureHeight, depthType, undefined, undefined, undefined, undefined, undefined, undefined, depthFormat, depth );
+				final depth = this._useMultiview ? 2 : 1;
+				final depthTexture = new DepthTexture( glProjLayer.textureWidth, glProjLayer.textureHeight, depthType, null, null, null, null, null, null, depthFormat, depth );
 
 				this._xrRenderTarget = new XRRenderTarget(
 					glProjLayer.textureWidth,
@@ -968,8 +683,8 @@ class XRManager extends EventDispatcher {
 						depthTexture: depthTexture,
 						stencilBuffer: renderer.stencil,
 						samples: attributes.antialias ? 4 : 0,
-						resolveDepthBuffer: ( glProjLayer.ignoreDepthValues === false ),
-						resolveStencilBuffer: ( glProjLayer.ignoreDepthValues === false ),
+						resolveDepthBuffer: ( glProjLayer.ignoreDepthValues == false ),
+						resolveStencilBuffer: ( glProjLayer.ignoreDepthValues == false ),
 						depth: this._useMultiview ? 2 : 1,
 						multiview: this._useMultiview
 					} );
@@ -984,10 +699,10 @@ class XRManager extends EventDispatcher {
 				if ( this._supportsLayers ) {
 
 					// switch layers to native
-					for ( const layer of this._layers ) {
+					for ( final layer of this._layers ) {
 
 						// change material so it "punches" out a hole to show the XR Layer.
-						layer.plane.material = new MeshBasicMaterial( { color: 0xffffff, side: layer.type === 'cylinder' ? BackSide : FrontSide } );
+						layer.plane.material = new MeshBasicMaterial( { color: 0xffffff, side: layer.type == 'cylinder' ? BackSide : FrontSide } );
 						layer.plane.material.blending = CustomBlending;
 						layer.plane.material.blendEquation = AddEquation;
 						layer.plane.material.blendSrc = ZeroFactor;
@@ -1007,7 +722,7 @@ class XRManager extends EventDispatcher {
 
 				// fallback to XRWebGLLayer
 
-				const layerInit = {
+				final layerInit = {
 					antialias: renderer.samples > 0,
 					alpha: true,
 					depth: renderer.depth,
@@ -1015,7 +730,7 @@ class XRManager extends EventDispatcher {
 					framebufferScaleFactor: this.getFramebufferScaleFactor()
 				};
 
-				const glBaseLayer = new XRWebGLLayer( session, gl, layerInit );
+				final glBaseLayer = new XRWebGLLayer( session, gl, layerInit );
 				this._glBaseLayer = glBaseLayer;
 
 				session.updateRenderState( { baseLayer: glBaseLayer } );
@@ -1031,8 +746,8 @@ class XRManager extends EventDispatcher {
 						type: UnsignedByteType,
 						colorSpace: renderer.outputColorSpace,
 						stencilBuffer: renderer.stencil,
-						resolveDepthBuffer: ( glBaseLayer.ignoreDepthValues === false ),
-						resolveStencilBuffer: ( glBaseLayer.ignoreDepthValues === false ),
+						resolveDepthBuffer: ( glBaseLayer.ignoreDepthValues == false ),
+						resolveStencilBuffer: ( glBaseLayer.ignoreDepthValues == false ),
 					}
 				);
 
@@ -1066,22 +781,22 @@ class XRManager extends EventDispatcher {
 	 */
 	updateCamera( camera ) {
 
-		const session = this._session;
+		final session = this._session;
 
-		if ( session === null ) return;
+		if ( session == null ) return;
 
-		const depthNear = camera.near;
-		const depthFar = camera.far;
+		final depthNear = camera.near;
+		final depthFar = camera.far;
 
-		const cameraXR = this._cameraXR;
-		const cameraL = this._cameraL;
-		const cameraR = this._cameraR;
+		final cameraXR = this._cameraXR;
+		final cameraL = this._cameraL;
+		final cameraR = this._cameraR;
 
 		cameraXR.near = cameraR.near = cameraL.near = depthNear;
 		cameraXR.far = cameraR.far = cameraL.far = depthFar;
 		cameraXR.isMultiViewCamera = this._useMultiview;
 
-		if ( this._currentDepthNear !== cameraXR.near || this._currentDepthFar !== cameraXR.far ) {
+		if ( this._currentDepthNear != cameraXR.near || this._currentDepthFar != cameraXR.far ) {
 
 			// Note that the new renderState won't apply until the next frame. See #18320
 
@@ -1099,8 +814,8 @@ class XRManager extends EventDispatcher {
 		cameraR.layers.mask = camera.layers.mask | 0b100;
 		cameraXR.layers.mask = cameraL.layers.mask | cameraR.layers.mask;
 
-		const parent = camera.parent;
-		const cameras = cameraXR.cameras;
+		final parent = camera.parent;
+		final cameras = cameraXR.cameras;
 
 		updateCamera( cameraXR, parent );
 
@@ -1112,7 +827,7 @@ class XRManager extends EventDispatcher {
 
 		// update projection matrix for proper view frustum culling
 
-		if ( cameras.length === 2 ) {
+		if ( cameras.length == 2 ) {
 
 			setProjectionFromUnion( cameraXR, cameraL, cameraR );
 
@@ -1142,7 +857,7 @@ class XRManager extends EventDispatcher {
 
 		let controller = this._controllers[ index ];
 
-		if ( controller === undefined ) {
+		if ( controller == null ) {
 
 			controller = new WebXRController();
 			this._controllers[ index ] = controller;
@@ -1170,28 +885,28 @@ function setProjectionFromUnion( camera, cameraL, cameraR ) {
 	_cameraLPos.setFromMatrixPosition( cameraL.matrixWorld );
 	_cameraRPos.setFromMatrixPosition( cameraR.matrixWorld );
 
-	const ipd = _cameraLPos.distanceTo( _cameraRPos );
+	final ipd = _cameraLPos.distanceTo( _cameraRPos );
 
-	const projL = cameraL.projectionMatrix.elements;
-	const projR = cameraR.projectionMatrix.elements;
+	final projL = cameraL.projectionMatrix.elements;
+	final projR = cameraR.projectionMatrix.elements;
 
 	// VR systems will have identical far and near planes, and
 	// most likely identical top and bottom frustum extents.
 	// Use the left camera for these values.
-	const near = projL[ 14 ] / ( projL[ 10 ] - 1 );
-	const far = projL[ 14 ] / ( projL[ 10 ] + 1 );
-	const topFov = ( projL[ 9 ] + 1 ) / projL[ 5 ];
-	const bottomFov = ( projL[ 9 ] - 1 ) / projL[ 5 ];
+	final near = projL[ 14 ] / ( projL[ 10 ] - 1 );
+	final far = projL[ 14 ] / ( projL[ 10 ] + 1 );
+	final topFov = ( projL[ 9 ] + 1 ) / projL[ 5 ];
+	final bottomFov = ( projL[ 9 ] - 1 ) / projL[ 5 ];
 
-	const leftFov = ( projL[ 8 ] - 1 ) / projL[ 0 ];
-	const rightFov = ( projR[ 8 ] + 1 ) / projR[ 0 ];
-	const left = near * leftFov;
-	const right = near * rightFov;
+	final leftFov = ( projL[ 8 ] - 1 ) / projL[ 0 ];
+	final rightFov = ( projR[ 8 ] + 1 ) / projR[ 0 ];
+	final left = near * leftFov;
+	final right = near * rightFov;
 
 	// Calculate the new camera's position offset from the
 	// left camera. xOffset should be roughly half `ipd`.
-	const zOffset = ipd / ( - leftFov + rightFov );
-	const xOffset = zOffset * - leftFov;
+	final zOffset = ipd / ( - leftFov + rightFov );
+	final xOffset = zOffset * - leftFov;
 
 	// TODO: Better way to apply this offset?
 	cameraL.matrixWorld.decompose( camera.position, camera.quaternion, camera.scale );
@@ -1201,7 +916,7 @@ function setProjectionFromUnion( camera, cameraL, cameraR ) {
 	camera.matrixWorldInverse.copy( camera.matrixWorld ).invert();
 
 	// Check if the projection uses an infinite far plane.
-	if ( projL[ 10 ] === - 1.0 ) {
+	if ( projL[ 10 ] == - 1.0 ) {
 
 		// Use the projection matrix from the left eye.
 		// The camera offset is sufficient to include the view volumes
@@ -1214,12 +929,12 @@ function setProjectionFromUnion( camera, cameraL, cameraR ) {
 		// Find the union of the frustum values of the cameras and scale
 		// the values so that the near plane's position does not change in world space,
 		// although must now be relative to the new union camera.
-		const near2 = near + zOffset;
-		const far2 = far + zOffset;
-		const left2 = left - xOffset;
-		const right2 = right + ( ipd - xOffset );
-		const top2 = topFov * far / far2 * near2;
-		const bottom2 = bottomFov * far / far2 * near2;
+		final near2 = near + zOffset;
+		final far2 = far + zOffset;
+		final left2 = left - xOffset;
+		final right2 = right + ( ipd - xOffset );
+		final top2 = topFov * far / far2 * near2;
+		final bottom2 = bottomFov * far / far2 * near2;
 
 		camera.projectionMatrix.makePerspective( left2, right2, top2, bottom2, near2, far2 );
 		camera.projectionMatrixInverse.copy( camera.projectionMatrix ).invert();
@@ -1237,7 +952,7 @@ function setProjectionFromUnion( camera, cameraL, cameraR ) {
  */
 function updateCamera( camera, parent ) {
 
-	if ( parent === null ) {
+	if ( parent == null ) {
 
 		camera.matrixWorld.copy( camera.matrix );
 
@@ -1261,7 +976,7 @@ function updateCamera( camera, parent ) {
  */
 function updateUserCamera( camera, cameraXR, parent ) {
 
-	if ( parent === null ) {
+	if ( parent == null ) {
 
 		camera.matrix.copy( cameraXR.matrixWorld );
 
@@ -1290,19 +1005,19 @@ function updateUserCamera( camera, cameraXR, parent ) {
 
 function onSessionEvent( event ) {
 
-	const controllerIndex = this._controllerInputSources.indexOf( event.inputSource );
+	final controllerIndex = this._controllerInputSources.indexOf( event.inputSource );
 
-	if ( controllerIndex === - 1 ) {
+	if ( controllerIndex == - 1 ) {
 
 		return;
 
 	}
 
-	const controller = this._controllers[ controllerIndex ];
+	final controller = this._controllers[ controllerIndex ];
 
-	if ( controller !== undefined ) {
+	if ( controller != null ) {
 
-		const referenceSpace = this.getReferenceSpace();
+		final referenceSpace = this.getReferenceSpace();
 
 		controller.update( event.inputSource, event.frame, referenceSpace );
 		controller.dispatchEvent( { type: event.type, data: event.inputSource } );
@@ -1313,8 +1028,8 @@ function onSessionEvent( event ) {
 
 function onSessionEnd() {
 
-	const session = this._session;
-	const renderer = this._renderer;
+	final session = this._session;
+	final renderer = this._renderer;
 
 	session.removeEventListener( 'select', this._onSessionEvent );
 	session.removeEventListener( 'selectstart', this._onSessionEvent );
@@ -1327,9 +1042,9 @@ function onSessionEnd() {
 
 	for ( let i = 0; i < this._controllers.length; i ++ ) {
 
-		const inputSource = this._controllerInputSources[ i ];
+		final inputSource = this._controllerInputSources[ i ];
 
-		if ( inputSource === null ) continue;
+		if ( inputSource == null ) continue;
 
 		this._controllerInputSources[ i ] = null;
 
@@ -1348,9 +1063,9 @@ function onSessionEnd() {
 	this._xrRenderTarget = null;
 
 	// switch layers back to emulated
-	if ( this._supportsLayers === true ) {
+	if ( this._supportsLayers == true ) {
 
-		for ( const layer of this._layers ) {
+		for ( final layer of this._layers ) {
 
 			// Recreate layer render target to reset state
 			layer.renderTarget = new XRRenderTarget(
@@ -1363,12 +1078,12 @@ function onSessionEnd() {
 						layer.pixelwidth,
 						layer.pixelheight,
 						layer.stencilBuffer ? UnsignedInt248Type : UnsignedIntType,
-						undefined,
-						undefined,
-						undefined,
-						undefined,
-						undefined,
-						undefined,
+						null,
+						null,
+						null,
+						null,
+						null,
+						null,
 						layer.stencilBuffer ? DepthStencilFormat : DepthFormat
 					),
 					stencilBuffer: layer.stencilBuffer,
@@ -1407,15 +1122,15 @@ function onSessionEnd() {
 
 function onInputSourcesChange( event ) {
 
-	const controllers = this._controllers;
-	const controllerInputSources = this._controllerInputSources;
+	final controllers = this._controllers;
+	final controllerInputSources = this._controllerInputSources;
 
 	// Notify disconnected
 
 	for ( let i = 0; i < event.removed.length; i ++ ) {
 
-		const inputSource = event.removed[ i ];
-		const index = controllerInputSources.indexOf( inputSource );
+		final inputSource = event.removed[ i ];
+		final index = controllerInputSources.indexOf( inputSource );
 
 		if ( index >= 0 ) {
 
@@ -1430,11 +1145,11 @@ function onInputSourcesChange( event ) {
 
 	for ( let i = 0; i < event.added.length; i ++ ) {
 
-		const inputSource = event.added[ i ];
+		final inputSource = event.added[ i ];
 
 		let controllerIndex = controllerInputSources.indexOf( inputSource );
 
-		if ( controllerIndex === - 1 ) {
+		if ( controllerIndex == - 1 ) {
 
 			// Assign input source a controller that currently has no input source
 
@@ -1446,7 +1161,7 @@ function onInputSourcesChange( event ) {
 					controllerIndex = i;
 					break;
 
-				} else if ( controllerInputSources[ i ] === null ) {
+				} else if ( controllerInputSources[ i ] == null ) {
 
 					controllerInputSources[ i ] = inputSource;
 					controllerIndex = i;
@@ -1458,11 +1173,11 @@ function onInputSourcesChange( event ) {
 
 			// If all controllers do currently receive input we ignore new ones
 
-			if ( controllerIndex === - 1 ) break;
+			if ( controllerIndex == - 1 ) break;
 
 		}
 
-		const controller = controllers[ controllerIndex ];
+		final controller = controllers[ controllerIndex ];
 
 		if ( controller ) {
 
@@ -1475,9 +1190,9 @@ function onInputSourcesChange( event ) {
 }
 
 // Creation method for native WebXR layers
-function createXRLayer( layer ) {
+createXRLayer( layer ) {
 
-	if ( layer.type === 'quad' ) {
+	if ( layer.type == 'quad' ) {
 
 		return this._glBinding.createQuadLayer( {
 			transform: new XRRigidTransform( layer.translation, layer.quaternion ),
@@ -1508,26 +1223,26 @@ function createXRLayer( layer ) {
 
 // Animation Loop
 
-function onAnimationFrame( time, frame ) {
+onAnimationFrame( time, frame ) {
 
-	if ( frame === undefined ) return;
+	if ( frame == null ) return;
 
-	const cameraXR = this._cameraXR;
-	const renderer = this._renderer;
-	const backend = renderer.backend;
+	final cameraXR = this._cameraXR;
+	final renderer = this._renderer;
+	final backend = renderer.backend;
 
-	const glBaseLayer = this._glBaseLayer;
+	final glBaseLayer = this._glBaseLayer;
 
-	const referenceSpace = this.getReferenceSpace();
-	const pose = frame.getViewerPose( referenceSpace );
+	final referenceSpace = this.getReferenceSpace();
+	final pose = frame.getViewerPose( referenceSpace );
 
 	this._xrFrame = frame;
 
-	if ( pose !== null ) {
+	if ( pose != null ) {
 
-		const views = pose.views;
+		final views = pose.views;
 
-		if ( this._glBaseLayer !== null ) {
+		if ( this._glBaseLayer != null ) {
 
 			backend.setXRTarget( glBaseLayer.framebuffer );
 
@@ -1537,7 +1252,7 @@ function onAnimationFrame( time, frame ) {
 
 		// check if it's necessary to rebuild cameraXR's camera list
 
-		if ( views.length !== cameraXR.cameras.length ) {
+		if ( views.length != cameraXR.cameras.length ) {
 
 			cameraXR.cameras.length = 0;
 			cameraXRNeedsUpdate = true;
@@ -1546,22 +1261,22 @@ function onAnimationFrame( time, frame ) {
 
 		for ( let i = 0; i < views.length; i ++ ) {
 
-			const view = views[ i ];
+			final view = views[ i ];
 
 			let viewport;
 
-			if ( this._useLayers === true ) {
+			if ( this._useLayers == true ) {
 
-				const glSubImage = this._glBinding.getViewSubImage( this._glProjLayer, view );
+				final glSubImage = this._glBinding.getViewSubImage( this._glProjLayer, view );
 				viewport = glSubImage.viewport;
 
 				// For side-by-side projection, we only produce a single texture for both eyes.
-				if ( i === 0 ) {
+				if ( i == 0 ) {
 
 					backend.setXRRenderTargetTextures(
 						this._xrRenderTarget,
 						glSubImage.colorTexture,
-						( this._glProjLayer.ignoreDepthValues && ! this._useMultiview ) ? undefined : glSubImage.depthStencilTexture
+						( this._glProjLayer.ignoreDepthValues && ! this._useMultiview ) ? null : glSubImage.depthStencilTexture
 					);
 
 				}
@@ -1574,7 +1289,7 @@ function onAnimationFrame( time, frame ) {
 
 			let camera = this._cameras[ i ];
 
-			if ( camera === undefined ) {
+			if ( camera == null ) {
 
 				camera = new PerspectiveCamera();
 				camera.layers.enable( i );
@@ -1589,14 +1304,14 @@ function onAnimationFrame( time, frame ) {
 			camera.projectionMatrixInverse.copy( camera.projectionMatrix ).invert();
 			camera.viewport.set( viewport.x, viewport.y, viewport.width, viewport.height );
 
-			if ( i === 0 ) {
+			if ( i == 0 ) {
 
 				cameraXR.matrix.copy( camera.matrix );
 				cameraXR.matrix.decompose( cameraXR.position, cameraXR.quaternion, cameraXR.scale );
 
 			}
 
-			if ( cameraXRNeedsUpdate === true ) {
+			if ( cameraXRNeedsUpdate == true ) {
 
 				cameraXR.cameras.push( camera );
 
@@ -1612,10 +1327,10 @@ function onAnimationFrame( time, frame ) {
 
 	for ( let i = 0; i < this._controllers.length; i ++ ) {
 
-		const inputSource = this._controllerInputSources[ i ];
-		const controller = this._controllers[ i ];
+		final inputSource = this._controllerInputSources[ i ];
+		final controller = this._controllers[ i ];
 
-		if ( inputSource !== null && controller !== undefined ) {
+		if ( inputSource != null && controller != null ) {
 
 			controller.update( inputSource, frame, referenceSpace );
 
@@ -1634,5 +1349,3 @@ function onAnimationFrame( time, frame ) {
 	this._xrFrame = null;
 
 }
-
-export default XRManager;

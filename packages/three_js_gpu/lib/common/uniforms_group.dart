@@ -358,7 +358,7 @@ void setArray(NativeArray a,NativeArray b, int offset ) {
  * @param {number} offset - An index offset for the first array.
  * @return {boolean} Whether the given arrays are equal or not.
  */
-bool arraysEqual(NativeArray a, NativeArray b, int offset ) {
+bool arraysEqual(a, b, int offset ) {
 	for (int i = 0, l = b.length; i < l; i ++ ) {
 		if ( a[ offset + i ] != b[ i ] ) return false;
 	}

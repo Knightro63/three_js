@@ -1,12 +1,12 @@
-
-
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_gpu/common/data_map.dart';
+import 'package:three_js_gpu/common/nodes/nodes.dart';
 import 'package:three_js_gpu/common/render_context.dart';
 import 'package:three_js_gpu/common/render_list.dart';
+import 'package:three_js_gpu/common/renderer.dart';
 import 'package:three_js_math/three_js_math.dart';
 
-final _clearColor = /*@__PURE__*/ new Color();
+final _clearColor = Color();
 
 
 class Background extends DataMap {
@@ -134,7 +134,7 @@ class Background extends DataMap {
 
 			// premultiply alpha
 
-			if ( renderer.backend is WebGLBackend == true || renderer.alpha == true ) {
+			if ( renderer.backend is WebGLBackend || renderer.alpha == true ) {
 				clearColorValue.r *= clearColorValue.a;
 				clearColorValue.g *= clearColorValue.a;
 				clearColorValue.b *= clearColorValue.a;

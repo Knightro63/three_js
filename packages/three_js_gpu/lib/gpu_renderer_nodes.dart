@@ -1,4 +1,6 @@
 import 'package:three_js_core/three_js_core.dart';
+import 'package:three_js_gpu/common/renderer.dart';
+import 'package:three_js_gpu/nodes/basic_node_library.dart';
 import './gpu_backend.dart';
 import './gpu_renderer.dart';
 
@@ -10,18 +12,20 @@ import './gpu_renderer.dart';
  * @augments Renderer
  */
 class WebGPURenderer extends Renderer {
-  BasicNodeLibrary library = BasicNodeLibrary();
   bool isWebGPURenderer = true;
 
-  WebGPURenderer(super.backend, super.parameters);
+  WebGPURenderer(super.backend, super.parameters){
+    library = BasicNodeLibrary();
+  }
 
 	/**
 	 * Constructs a new WebGPU renderer.
 	 *
 	 * @param {WebGPURenderer~Options} [parameters] - The configuration parameter.
 	 */
-	factory WebGPURenderer.create( parameters = {} ) {
-		let BackendClass;
+	factory WebGPURenderer.create([RendererParameters? parameters]) {
+    parameters ??= RendererParameters();
+		dynamic BackendClass;
 
 		if ( parameters.forceWebGL ) {
 			BackendClass = WebGLBackend;
@@ -34,5 +38,6 @@ class WebGPURenderer extends Renderer {
 		}
 
 		final backend = BackendClass( parameters );
+    return WebGPURenderer(backend,parameters);
 	}
 }

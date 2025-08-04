@@ -1,7 +1,13 @@
-import ChainMap from './ChainMap.js';
-import RenderObject from './RenderObject.js';
+import 'package:three_js_gpu/common/bindings.dart';
+import 'package:three_js_gpu/common/chain_map.dart';
+import 'package:three_js_gpu/common/geometries.dart';
+import 'package:three_js_gpu/common/info.dart';
+import 'package:three_js_gpu/common/nodes/nodes.dart';
+import 'package:three_js_gpu/common/pipelines.dart';
+import 'package:three_js_gpu/common/render_object.dart';
+import 'package:three_js_gpu/common/renderer.dart';
 
-const _chainKeys = [];
+final _chainKeys = [];
 
 /**
  * This module manages the render objects of the renderer.
@@ -9,6 +15,13 @@ const _chainKeys = [];
  * @private
  */
 class RenderObjects {
+  Renderer renderer;
+  Nodes nodes;
+  Geometries geometries;
+  Pipelines pipelines;
+  Bindings bindings;
+  Info info;
+  Map<String,dynamic> chainMaps = {};
 
 	/**
 	 * Constructs a new render object management component.
@@ -20,59 +33,7 @@ class RenderObjects {
 	 * @param {Bindings} bindings - Renderer component for managing bindings.
 	 * @param {Info} info - Renderer component for managing metrics and monitoring data.
 	 */
-	constructor( renderer, nodes, geometries, pipelines, bindings, info ) {
-
-		/**
-		 * The renderer.
-		 *
-		 * @type {Renderer}
-		 */
-		this.renderer = renderer;
-
-		/**
-		 * Renderer component for managing nodes related logic.
-		 *
-		 * @type {Nodes}
-		 */
-		this.nodes = nodes;
-
-		/**
-		 * Renderer component for managing geometries.
-		 *
-		 * @type {Geometries}
-		 */
-		this.geometries = geometries;
-
-		/**
-		 * Renderer component for managing pipelines.
-		 *
-		 * @type {Pipelines}
-		 */
-		this.pipelines = pipelines;
-
-		/**
-		 * Renderer component for managing bindings.
-		 *
-		 * @type {Bindings}
-		 */
-		this.bindings = bindings;
-
-		/**
-		 * Renderer component for managing metrics and monitoring data.
-		 *
-		 * @type {Info}
-		 */
-		this.info = info;
-
-		/**
-		 * A dictionary that manages render contexts in chain maps
-		 * for each pass ID.
-		 *
-		 * @type {Object<string,ChainMap>}
-		 */
-		this.chainMaps = {};
-
-	}
+	RenderObjects(this.renderer,this.nodes,this.geometries,this.pipelines,this.bindings,this.info );
 
 	/**
 	 * Returns a render object for the given object and state data.
@@ -88,8 +49,7 @@ class RenderObjects {
 	 * @return {RenderObject} The render object.
 	 */
 	get( object, material, scene, camera, lightsNode, renderContext, clippingContext, passId ) {
-
-		const chainMap = this.getChainMap( passId );
+		final chainMap = this.getChainMap( passId );
 
 		// reuse chainArray
 		_chainKeys[ 0 ] = object;
@@ -97,46 +57,33 @@ class RenderObjects {
 		_chainKeys[ 2 ] = renderContext;
 		_chainKeys[ 3 ] = lightsNode;
 
-		let renderObject = chainMap.get( _chainKeys );
+		var renderObject = chainMap.get( _chainKeys );
 
-		if ( renderObject === undefined ) {
-
+		if ( renderObject == null ) {
 			renderObject = this.createRenderObject( this.nodes, this.geometries, this.renderer, object, material, scene, camera, lightsNode, renderContext, clippingContext, passId );
-
 			chainMap.set( _chainKeys, renderObject );
-
-		} else {
-
+		} 
+    else {
 			renderObject.updateClipping( clippingContext );
 
 			if ( renderObject.needsGeometryUpdate ) {
-
 				renderObject.setGeometry( object.geometry );
-
 			}
 
-			if ( renderObject.version !== material.version || renderObject.needsUpdate ) {
-
-				if ( renderObject.initialCacheKey !== renderObject.getCacheKey() ) {
-
+			if ( renderObject.version != material.version || renderObject.needsUpdate ) {
+				if ( renderObject.initialCacheKey != renderObject.getCacheKey() ) {
 					renderObject.dispose();
-
 					renderObject = this.get( object, material, scene, camera, lightsNode, renderContext, clippingContext, passId );
-
-				} else {
-
+				} 
+        else {
 					renderObject.version = material.version;
-
 				}
-
 			}
-
 		}
 
 		_chainKeys.length = 0;
 
 		return renderObject;
-
 	}
 
 	/**
@@ -145,19 +92,15 @@ class RenderObjects {
 	 * @param {string} [passId='default'] - The pass ID.
 	 * @return {ChainMap} The chain map.
 	 */
-	getChainMap( passId = 'default' ) {
-
-		return this.chainMaps[ passId ] || ( this.chainMaps[ passId ] = new ChainMap() );
-
+	getChainMap( [String passId = 'default'] ) {
+		return this.chainMaps[ passId ] ?? ( this.chainMaps[ passId ] = new ChainMap() );
 	}
 
 	/**
 	 * Frees internal resources.
 	 */
 	dispose() {
-
 		this.chainMaps = {};
-
 	}
 
 	/**
@@ -177,26 +120,17 @@ class RenderObjects {
 	 * @return {RenderObject} The render object.
 	 */
 	createRenderObject( nodes, geometries, renderer, object, material, scene, camera, lightsNode, renderContext, clippingContext, passId ) {
+		final chainMap = this.getChainMap( passId );
+		final renderObject = new RenderObject( nodes, geometries, renderer, object, material, scene, camera, lightsNode, renderContext, clippingContext );
 
-		const chainMap = this.getChainMap( passId );
-
-		const renderObject = new RenderObject( nodes, geometries, renderer, object, material, scene, camera, lightsNode, renderContext, clippingContext );
-
-		renderObject.onDispose = () => {
-
+		renderObject.onDispose = (){
 			this.pipelines.delete( renderObject );
 			this.bindings.delete( renderObject );
 			this.nodes.delete( renderObject );
 
 			chainMap.delete( renderObject.getChainArray() );
-
 		};
 
 		return renderObject;
-
 	}
-
-
 }
-
-export default RenderObjects;

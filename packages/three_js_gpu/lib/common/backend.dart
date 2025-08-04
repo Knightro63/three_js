@@ -1,12 +1,12 @@
 import 'dart:typed_data';
-
-import 'package:flutter/cupertino.dart' hide WeakMap, Texture;
 import 'package:three_js_core/others/weak_map.dart';
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_gpu/common/bind_group.dart';
 import 'package:three_js_gpu/common/compute_pipeline.dart';
 import 'package:three_js_gpu/common/programmable_stage.dart';
 import 'package:three_js_gpu/common/render_context.dart';
+import 'package:three_js_gpu/common/render_object.dart';
+import 'package:three_js_gpu/common/renderer.dart';
 import 'package:three_js_math/three_js_math.dart';
 
 Vector2? _vector2;
@@ -205,7 +205,7 @@ abstract class Backend {
 	 * @param {RenderObject} renderObject - The render object.
 	 * @return {boolean} Whether the render pipeline requires an update or not.
 	 */
-	needsRenderUpdate( /*renderObject*/ ) { }
+	bool needsRenderUpdate(RenderObject renderObject);
 
 	/**
 	 * Returns a cache key that is used to identify render pipelines.
@@ -490,7 +490,7 @@ abstract class Backend {
 	 */
 	Vector2 getDrawingBufferSize() {
 		_vector2 = _vector2 ?? new Vector2();
-		return this.renderer.getDrawingBufferSize( _vector2 );
+		return this.renderer?.getDrawingBufferSize( _vector2 );
 	}
 
 	/**
@@ -510,9 +510,9 @@ abstract class Backend {
 	Color? getClearColor() {
 		final renderer = this.renderer;
 
-		_color4 = _color4 ?? new Color();
-		renderer.getClearColor( _color4 );
-		_color4.getRGB( _color4 );
+		_color4 = _color4 ?? Color();
+		renderer?.getClearColor( _color4 );
+		_color4?.getRGB( _color4! );
 		return _color4;
 	}
 

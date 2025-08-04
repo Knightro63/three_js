@@ -3,6 +3,7 @@ import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_gpu/common/backend.dart';
 import 'package:three_js_gpu/common/data_map.dart';
 import 'package:three_js_gpu/common/info.dart';
+import 'package:three_js_gpu/common/renderer.dart';
 import 'package:three_js_gpu/common/storage_texture.dart';
 import 'package:three_js_math/three_js_math.dart';
 
@@ -160,7 +161,7 @@ class Textures extends DataMap {
 		if ( texture is FramebufferTexture ) {
 			final renderTarget = this.renderer.getRenderTarget();
 
-			if ( renderTarget ) {
+			if ( renderTarget != null) {
 				texture.type = renderTarget.texture.type;
 			} 
       else {
@@ -239,27 +240,20 @@ class Textures extends DataMap {
 			textureData.generation = texture.version;
 
 			//
-
 			this.info.memory.textures ++;
 
 			// dispose
-
-			final onDispose = () => {
-
+			final onDispose = (){
 				texture.removeEventListener( 'dispose', onDispose );
-
 				this._destroyTexture( texture );
-
 			};
 
 			texture.addEventListener( 'dispose', onDispose );
-
 		}
 
 		//
 
 		textureData.version = texture.version;
-
 	}
 
 	/**
@@ -310,30 +304,22 @@ class Textures extends DataMap {
 	 * @param {number} height - The texture's height.
 	 * @return {number} The number of mipmap levels.
 	 */
-	getMipLevels( texture, width, height ) {
-
+	getMipLevels(Texture texture, width, height ) {
 		var mipLevelCount;
 
 		if ( texture.isCompressedTexture ) {
-
-			if ( texture.mipmaps ) {
-
+			if ( texture.mipmaps != null) {
 				mipLevelCount = texture.mipmaps.length;
-
-			} else {
-
+			} 
+      else {
 				mipLevelCount = 1;
-
 			}
 
 		} else {
-
 			mipLevelCount = ( MathUtils.log2( math.max( width, height ) ) ).floor() + 1;
-
 		}
 
 		return mipLevelCount;
-
 	}
 
 	bool needsMipmaps(Texture texture ) {

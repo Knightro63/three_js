@@ -1,6 +1,7 @@
 
 
 import 'package:three_js_gpu/common/quad_mesh.dart';
+import 'package:three_js_gpu/common/renderer.dart';
 import 'package:three_js_math/three_js_math.dart';
 
 /**

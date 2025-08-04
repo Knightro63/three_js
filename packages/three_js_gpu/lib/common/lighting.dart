@@ -5,8 +5,8 @@ import 'package:three_js_gpu/common/quad_mesh.dart';
 
 import './chain_map.dart';
 
-const _defaultLights = /*@__PURE__*/ new LightsNode();
-const _chainKeys = [];
+final _defaultLights = LightsNode();
+final _chainKeys = [];
 
 /**
  * This renderer module manages the lights nodes which are unique
