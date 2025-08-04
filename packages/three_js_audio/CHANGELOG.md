@@ -1,4 +1,4 @@
-## 0.3.0
+## 0.2.1
 
 * Made Audio an abstract class.
 * Changed to audioplayers package.

@@ -3,6 +3,7 @@
 * Updated: console logger for wasm
 * Added linux to platfroms
 * Updated README
+* Removed audio package for users to choose their own audio type.
 
 ## 0.2.0
 

@@ -1,3 +1,8 @@
+## 0.2.1
+
+* Removed archive
+* Fixed fbx change texture location bug
+
 ## 0.2.0
 
 * Fixed wasm loading issue.

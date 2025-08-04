@@ -149,6 +149,8 @@ Find the example for this API [here](https://github.com/Knightro63/three_js/tree
 
 **Other Libs**
  - [Advanced Exporters](https://pub.dev/packages/three_js_advanced_exporters) a USDZ exporter to your three_js project.
+ - [Audio](https://pub.dev/packages/three_js_audio) an audio api using flutters audioplayer from pub.dev do not use with any other audio package..
+ - [Audio Latency](https://pub.dev/packages/three_js_audio_latency) an audio api using SoLoud from pub.dev do not use with any other audio package..
  - [BVH CSG](https://pub.dev/packages/three_js_bvh_csg) a bvh csg api for three_js.
  - [Exporters](https://pub.dev/packages/three_js_exporters) an api to add STL, OBJ or PLY exporter for three_js.
  - [Geometry](https://pub.dev/packages/three_js_geometry) an api to add complex geometries to three_js.
@@ -159,7 +161,7 @@ Find the example for this API [here](https://github.com/Knightro63/three_js/tree
  - [SVG](https://pub.dev/packages/three_js_svg) an api to add a svg importer and exporter to three_js.
  - [Three JS Loader](https://pub.dev/packages/three_js_tjs_loader) a loader to add three js json files to three_js.
  - [Transfrom Controls](https://pub.dev/packages/three_js_transform_controls) a transfor controller for 3d objects for three_js.
- - [Video Texture](https://pub.dev/packages/three_js_video_texture) an api to add videos to three_js.
+ - [Video Texture](https://pub.dev/packages/three_js_video_texture) an api to add videos and audio to three_js do not use with any other audio package.
 
 **ADD-ONS**
  - [Omio](https://pub.dev/packages/oimo_physics) a physics engine for three_js.

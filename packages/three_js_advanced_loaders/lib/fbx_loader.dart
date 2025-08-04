@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:math' as math;
-import 'package:archive/archive.dart';
+//import 'package:archive/archive.dart';
 
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
@@ -3116,8 +3116,8 @@ class _BinaryParser {
         // https://pub.dev/packages/archive
         // use archive replace fflate.js
         // final data = fflate.unzlibSync( Uint8List( reader.getArrayBuffer( compressedLength ) ) ); // eslint-disable-line no-undef
-
-        final data = const ZLibDecoder().decodeBytes(reader.getArrayBuffer(compressedLength), verify: true);
+        //final data = const ZLibDecoder().decodeBytes(reader.getArrayBuffer(compressedLength), verify: true);
+        final data = ZLibDecoder().convert(reader.getArrayBuffer(compressedLength));
         final reader2 = _BinaryReader(data);
 
         switch (type) {
