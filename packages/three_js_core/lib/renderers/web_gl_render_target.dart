@@ -194,6 +194,11 @@ class WebGLRenderTarget extends RenderTarget {
     depthTexture?.dispose();
     texture.dispose();
     options.dispose();
+
+    textures.forEach((t){
+      t.dispose();
+    });
+    textures.clear();
   }
 }
 

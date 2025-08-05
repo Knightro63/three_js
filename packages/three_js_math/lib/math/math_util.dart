@@ -3,9 +3,6 @@ import 'package:uuid/uuid.dart';
 import 'dart:typed_data';
 import 'dart:math' as math;
 
-final _floatView = Float32List(1);
-final _int32View = Int32List.view(_floatView.buffer);
-
 extension ListExtension on List{
   void set<T>(List<T> newList, [int index = 0]) {
    setAll(index, newList.sublist(0, math.min(newList.length, length)));
@@ -109,6 +106,8 @@ class MathUtils{
   }
 
   static int toHalfFloat(num val) {
+    final _floatView = Float32List(1);
+    final _int32View = Int32List.view(_floatView.buffer);
     // Source: http://gamedev.stackexchange.com/questions/17326/conversion-of-a-number-from-single-precision-floating-point-representation-to-a/17410#17410
 
     /* This method is faster than the OpenEXR implementation (very often

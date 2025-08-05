@@ -53,8 +53,8 @@ class _State extends State<WebglInstancingRaycast> {
     );
   }
 
-  static double amount = 10;
-  final count = math.pow( amount, 3 ).toInt();
+  double amount = 10;
+  late final count = math.pow( amount, 3 ).toInt();
   late three.InstancedMesh mesh;
   late three.OrbitControls controls;
 

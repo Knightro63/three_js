@@ -61,6 +61,7 @@ import 'package:example/projected/webgl_projected_3d_model.dart';
 import 'package:example/projected/webgl_projected_basic.dart';
 import 'package:example/screenshot/flutter_screenshot.dart';
 import 'package:example/screenshot/opengl_screenshot.dart';
+import 'package:example/src/memory_leak_hunting.dart';
 import 'package:example/src/statistics.dart';
 import 'package:example/material/webgl_materials_car.dart';
 import 'package:example/material/webgl_materials_physical_transmission.dart';
@@ -213,6 +214,9 @@ class MyAppState extends State<MyApp> {
                   callback: callback,
                   prevLocation: pageLocation,
                 );
+              },
+              '/memory_leak_hunting':(BuildContext context) {
+                return const MemoryLeakHunting();
               },
               '/webgl_periodictable':(BuildContext context) {
                 return const WebglPeriodictable();

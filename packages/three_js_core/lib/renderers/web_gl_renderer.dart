@@ -479,6 +479,10 @@ class WebGLRenderer {
     shadowMap.dispose();
 
     properties.dispose();
+
+    _gl.deleteFramebuffer(_scratchFrameBuffer);
+    _gl.deleteFramebuffer(_srcFramebuffer);
+    _gl.deleteFramebuffer(_dstFramebuffer);
   }
 
   // Events

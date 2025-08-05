@@ -13,7 +13,7 @@ class WebglLoaderGltf3 extends StatefulWidget {
 }
 
 class _MyAppState extends State<WebglLoaderGltf3> {
-  static final _textKey = GlobalKey<FormState>();
+  final _textKey = GlobalKey<FormState>();
 
   List<int> data = List.filled(60, 0, growable: true);
   late Timer timer;

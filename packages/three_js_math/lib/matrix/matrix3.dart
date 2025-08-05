@@ -18,7 +18,6 @@ class Matrix3 {
 
   Matrix3 setValues(double n11, double n12, double n13, double n21, double n22, double n23, double n31, double n32, double n33) {
     final te = storage;
-
     te[0] = n11;
     te[1] = n21;
     te[2] = n31;

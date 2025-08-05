@@ -7,11 +7,8 @@ import '../buffer/index.dart';
 import 'index.dart';
 import 'package:flutter_angle/flutter_angle.dart';
 
-final _vector3 = Vector3(0, 0, 0);
-
 class Vector3 extends Vector{
-  
-  final _quaternion = Quaternion();
+
   double operator [](int i) => storage[i];
   void operator []=(int i, double v) {
     if(i == 0) x = v;
@@ -264,10 +261,12 @@ class Vector3 extends Vector{
   }
 
   Vector3 applyEuler(Euler euler) {
+    final _quaternion = Quaternion();
     return applyQuaternion(_quaternion.setFromEuler(euler, false));
   }
 
   Vector3 applyAxisAngle(axis, angle) {
+    final _quaternion = Quaternion();
     return applyQuaternion(_quaternion.setFromAxisAngle(axis, angle));
   }
   @override
@@ -514,12 +513,14 @@ class Vector3 extends Vector{
   }
 
   Vector3 projectOnPlane(Vector3 planeNormal) {
+    final _vector3 = Vector3(0, 0, 0);
     _vector3.setFrom(this).projectOnVector(planeNormal);
 
     return sub(_vector3);
   }
 
   Vector3 reflect(Vector3 normal) {
+    final _vector3 = Vector3(0, 0, 0);
     // reflect incident vector off plane orthogonal to normal
     // normal is assumed to have unit length
 

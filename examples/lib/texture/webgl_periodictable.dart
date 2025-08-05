@@ -32,6 +32,14 @@ class _State extends State<WebglPeriodictable> {
   }
   @override
   void dispose() {
+    kinematicsTween.forEach((t){
+      t.dispose();
+    });
+    table.clear();
+    kinematicsTween.clear();
+    objects.clear();
+    controls.dispose();
+    targets.clear();
     timer.cancel();
     threeJs.dispose();
     three.loading.clear();

@@ -1,8 +1,7 @@
 import 'package:three_js_math/three_js_math.dart';
 
-final Vector3 _vector = Vector3.zero();
-
 class InterleavedBufferAttribute extends BufferAttribute{
+  final Vector3 _vector = Vector3.zero();
   int offset;
   InterleavedBuffer? data;
   late String type;

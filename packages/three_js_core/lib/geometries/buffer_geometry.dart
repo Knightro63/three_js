@@ -9,12 +9,7 @@ import 'dart:math' as math;
 
 int _bufferGeometryId = 1; // BufferGeometry uses odd numbers as Id
 
-final _bufferGeometrym1 = Matrix4.identity();
-final _bufferGeometryobj = Object3D();
-final _bufferGeometryoffset = Vector3.zero();
-final _bufferGeometrybox = BoundingBox();
-final _bufferGeometryboxMorphTargets = BoundingBox();
-final _bufferGeometryvector = Vector3.zero();
+
 
 /// A representation of mesh, line, or point geometry. Includes vertex
 /// positions, face indices, normals, colors, UVs, and custom attributes
@@ -44,6 +39,13 @@ final _bufferGeometryvector = Vector3.zero();
 /// final mesh = Mesh( geometry, material );
 /// ```
 class BufferGeometry with EventDispatcher {
+  final _bufferGeometrym1 = Matrix4.identity();
+  final _bufferGeometryobj = Object3D();
+  final _bufferGeometryoffset = Vector3.zero();
+  final _bufferGeometrybox = BoundingBox();
+  final _bufferGeometryboxMorphTargets = BoundingBox();
+  final _bufferGeometryvector = Vector3.zero();
+  
   int id = _bufferGeometryId += 2;
   String uuid = MathUtils.generateUUID();
 
@@ -230,6 +232,7 @@ class BufferGeometry with EventDispatcher {
 
   /// Applies the rotation represented by the quaternion to the geometry.
   BufferGeometry applyQuaternion(Quaternion q) {
+    final Matrix4 m1 = Matrix4.identity();
     m1.makeRotationFromQuaternion(q);
     applyMatrix4(m1);
     return this;

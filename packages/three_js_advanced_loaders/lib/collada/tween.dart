@@ -355,7 +355,7 @@ class Sequence {
   }
 }
 
-TweenGroup mainGroup = TweenGroup();
+//TweenGroup mainGroup = TweenGroup();
 
 class Tween{
   int _duration = 1000;
@@ -398,7 +398,21 @@ class Tween{
   var _object;
 
   Tween(this._object,[ TweenGroup? group]) {
-    this._group = group ?? mainGroup;
+    this._group = group ?? TweenGroup();
+  }
+
+  void dispose(){
+    _valuesStart.clear();
+    _valuesEnd.clear();
+    _valuesStartRepeat.clear();
+    _chainedTweens.clear();
+  
+    _onStartCallback = null;
+    _onEveryStartCallback = null;
+    _onUpdateCallback = null;
+    _onRepeatCallback = null;
+    _onCompleteCallback = null;
+    _onStopCallback = null;
   }
 
   int getId() {
@@ -595,7 +609,7 @@ class Tween{
     return this;
   }
   Tween group([TweenGroup? group]) {
-    group ??= mainGroup;
+    group ??= TweenGroup();
     this._group = group;
     return this;
   }

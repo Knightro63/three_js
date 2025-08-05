@@ -1,4 +1,5 @@
 const List<String> filesJson = [
+  'memory_leak_hunting',
   'webgl_periodictable',
   'timing',
   'orientation',

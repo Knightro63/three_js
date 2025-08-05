@@ -1,12 +1,12 @@
 import 'package:three_js_math/three_js_math.dart';
 import 'dart:math' as math;
 
-final _v1 = Vector3.zero();
-final _v2 = Vector3.zero();
-final _box = BoundingBox();
-
 /// A sphere defined by a center and radius.
 class BoundingSphere{
+  final _v1 = Vector3.zero();
+  final _v2 = Vector3.zero();
+  final _box = BoundingBox();
+
   late Vector3 center;
   late double radius;
 

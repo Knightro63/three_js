@@ -65,7 +65,7 @@ class _State extends State<WebglGeometryExtrudeSplines> {
   final position = three.Vector3();
   final lookAt = three.Vector3();
 
-  static final pipeSpline = three.CatmullRomCurve3( points:[
+  final pipeSpline = three.CatmullRomCurve3( points:[
     three.Vector3( 0, 10, - 10 ), three.Vector3( 10, 0, - 10 ),
     three.Vector3( 20, 0, 0 ), three.Vector3( 30, 0, 10 ),
     three.Vector3( 30, 0, 20 ), three.Vector3( 20, 0, 30 ),
@@ -82,7 +82,7 @@ class _State extends State<WebglGeometryExtrudeSplines> {
     three.Vector3( 90, 0, 0 ), three.Vector3( 100, 0, 0 )
   ] );
 
-  static final sampleClosedSpline = three.CatmullRomCurve3( points: [
+  final sampleClosedSpline = three.CatmullRomCurve3( points: [
     three.Vector3( 0, - 40, - 40 ),
     three.Vector3( 0, 40, - 40 ),
     three.Vector3( 0, 140, - 40 ),
@@ -91,7 +91,7 @@ class _State extends State<WebglGeometryExtrudeSplines> {
   ] );
 
   // Keep a dictionary of Curve instances
-  final splines = {
+  late final splines = {
     'GrannyKnot': three.GrannyKnot(),
     'HeartCurve': three.HeartCurve( 3.5 ),
     'VivianiCurve': three.VivianiCurve( 70 ),

@@ -1,6 +1,8 @@
 import 'dart:typed_data';
+import 'dart:io';
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
+import 'package:flutter/foundation.dart';
 
 class Lensflare extends Mesh {
   late void Function() dispose1;
@@ -33,7 +35,7 @@ class Lensflare extends Mesh {
 			},
 			'vertexShader': /* glsl */'''
 
-				precision highp float;
+				${!kIsWeb && Platform.isLinux ?'':'precision highp float'};
 
 				uniform vec3 screenPosition;
 				uniform vec2 scale;
@@ -48,7 +50,7 @@ class Lensflare extends Mesh {
 
 			'fragmentShader': /* glsl */'''
 
-				precision highp float;
+				${!kIsWeb && Platform.isLinux ?'':'precision highp float'};
 
 				void main() {
 
@@ -68,7 +70,7 @@ class Lensflare extends Mesh {
 			},
 			'vertexShader': /* glsl */'''
 
-				precision highp float;
+				${!kIsWeb && Platform.isLinux ?'':'precision highp float'};
 
 				uniform vec3 screenPosition;
 				uniform vec2 scale;
@@ -88,7 +90,7 @@ class Lensflare extends Mesh {
 
 			'fragmentShader': /* glsl */'''
 
-				precision highp float;
+				${!kIsWeb && Platform.isLinux ?'':'precision highp float'};
 
 				uniform sampler2D map;
 
@@ -280,7 +282,7 @@ class LensflareElement {
 	}
 }
 
-const _shader = {
+final _shader = {
 	'name': 'LensflareElementShader',
 
 	'uniforms': {
@@ -293,7 +295,7 @@ const _shader = {
 
 	'vertexShader': /* glsl */'''
 
-		precision highp float;
+		${!kIsWeb && Platform.isLinux ?'':'precision highp float'};
 
 		uniform vec3 screenPosition;
 		uniform vec2 scale;
@@ -332,7 +334,7 @@ const _shader = {
 
 	'fragmentShader': /* glsl */'''
 
-		precision highp float;
+		${!kIsWeb && Platform.isLinux ?'':'precision highp float'};
 
 		uniform sampler2D map;
 		uniform vec3 color;

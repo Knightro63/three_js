@@ -72,7 +72,6 @@ class ThreeJS with WidgetsBindingObserver{
     this.renderNumber = 0,
     this.loadingWidget,
   }){
-    this.angle = FlutterAngle();
     this.settings = settings ?? Settings();
     _size = size;
   }
@@ -119,7 +118,7 @@ class ThreeJS with WidgetsBindingObserver{
   List<Function(double dt)> events = [];
   List<Function()> disposeEvents = [];
 
-  late FlutterAngle angle;
+  FlutterAngle? angle = FlutterAngle();
 
   void addAnimationEvent(Function(double dt) event){
     events.add(event);
@@ -141,11 +140,15 @@ class ThreeJS with WidgetsBindingObserver{
     if(disposed) return;
     disposed = true;
     _debounceTimer?.cancel(); // Cancel timer if active
+    _debounceTimer = null;
     WidgetsBinding.instance.removeObserver(this);
 
     ticker?.dispose();
+    ticker = null;
     renderer?.dispose();
+    renderer = null;
     renderTarget?.dispose();
+    renderTarget = null;
     scene.dispose();
     for(final event in disposeEvents){
       event.call();
@@ -157,8 +160,15 @@ class ThreeJS with WidgetsBindingObserver{
 
     allNativeData.dispose();
 
-    angle.dispose([texture!]);
-    texture = null;
+    angle?.dispose([texture]);
+    loadingWidget = null;
+    _size = null;
+    screenSize = null;
+
+    rendererUpdate = null;
+    windowResizeUpdate = null;
+    postProcessor = null;
+    setup = null;
   }
 
   void initSize(BuildContext context){
@@ -199,7 +209,7 @@ class ThreeJS with WidgetsBindingObserver{
   }
   Future<void> render([double? dt]) async{
     if(sourceTexture == null){
-      angle.activateTexture(texture!);
+      angle?.activateTexture(texture!);
     }
     rendererUpdate?.call(); 
     if(postProcessor == null){
@@ -212,9 +222,9 @@ class ThreeJS with WidgetsBindingObserver{
     }
     
     if(sourceTexture != null){
-      angle.activateTexture(texture!);
+      angle?.activateTexture(texture!);
     }
-    await angle.updateTexture(texture!,sourceTexture);
+    await angle?.updateTexture(texture!,sourceTexture);
   }
   
   void initRenderer() {
@@ -275,7 +285,7 @@ class ThreeJS with WidgetsBindingObserver{
         dpr: dpr,
       );
 
-      await angle.resize(texture!, options);
+      await angle?.resize(texture!, options);
 
       camera.aspect = width/height;
       camera.updateProjectionMatrix();
@@ -301,9 +311,9 @@ class ThreeJS with WidgetsBindingObserver{
 
   Future<void> initPlatformState() async {
     if(texture == null){
-      await angle.init();
+      await angle?.init();
       
-      texture = await angle.createTexture(      
+      texture = await angle?.createTexture(      
         AngleOptions(
           width: width.toInt(), 
           height: height.toInt(), 

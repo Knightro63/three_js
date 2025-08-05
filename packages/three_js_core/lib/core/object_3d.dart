@@ -14,28 +14,28 @@ typedef OnRender = void Function({
 
 int _object3DId = 0;
 
-Vector3 _v1 = Vector3.zero();
-Quaternion _q1 = Quaternion(0,0,0,1);
-Matrix4 m1 = Matrix4.identity();
-Vector3 _target = Vector3.zero();
-
-Vector3 _position = Vector3.zero();
-Vector3 _scale = Vector3.zero();
-Quaternion _quaternion = Quaternion(0,0,0,1);
-
-Vector3 _xAxis = Vector3(1, 0, 0);
-Vector3 _yAxis = Vector3(0, 1, 0);
-Vector3 _zAxis = Vector3(0, 0, 1);
-
-Event _addedEvent = Event(type: "added");
-Event _removedEvent = Event(type: "removed");
-
 /// This is the base class for most objects in three.js and provides a set of
 /// properties and methods for manipulating objects in 3D space.
 ///
 /// Note that this can be used for grouping objects via the [add] method which adds the object as a child, however it is better to
 /// use [Group] for this.
 class Object3D with EventDispatcher {
+  final Vector3 _v1 = Vector3.zero();
+  final Quaternion _q1 = Quaternion(0,0,0,1);
+  final Matrix4 m1 = Matrix4.identity();
+  final Vector3 _target = Vector3.zero();
+
+  final Vector3 _position = Vector3.zero();
+  final Vector3 _scale = Vector3.zero();
+  final Quaternion _quaternion = Quaternion(0,0,0,1);
+
+  final Vector3 _xAxis = Vector3(1, 0, 0);
+  final Vector3 _yAxis = Vector3(0, 1, 0);
+  final Vector3 _zAxis = Vector3(0, 0, 1);
+
+  final Event _addedEvent = Event(type: "added");
+  final Event _removedEvent = Event(type: "removed");
+
   BoundingSphere? boundingSphere;
   bool disposed = false;
   static Vector3 defaultUp = Vector3(0.0, 1.0, 0.0);

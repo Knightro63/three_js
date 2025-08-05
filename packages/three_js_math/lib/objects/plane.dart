@@ -4,11 +4,10 @@ import '../vector/index.dart';
 import '../matrix/matrix3.dart';
 import '../matrix/matrix4.dart';
 
-final _vector1 = Vector3.zero();
-final _vector2 = Vector3.zero();
-final _normalMatrix = Matrix3.identity();
-
 class Plane {
+  final _vector1 = Vector3.zero();
+  final _vector2 = Vector3.zero();
+  final _normalMatrix = Matrix3.identity();
   String type = "Plane";
 
   late Vector3 normal;

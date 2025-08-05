@@ -79,7 +79,7 @@ class WebGLCubeUVMaps {
     final cubemapUV = cubeUVmaps.get(texture);
 
     if (cubemapUV != null) {
-      cubemapUV.delete(texture);
+      cubeUVmaps.delete(texture);
       cubemapUV.dispose();
     }
   }

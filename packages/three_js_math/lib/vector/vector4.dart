@@ -8,8 +8,7 @@ import 'package:flutter_angle/flutter_angle.dart';
 
 class Vector4 extends Vector{
   String type = "Vector4";
-
-
+  
   double operator [](int i) => storage[i];
   void operator []=(int i, double v) {
     if(i == 0) x = v;

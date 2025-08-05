@@ -2,11 +2,10 @@ import '../math/math_util.dart';
 import '../matrix/matrix4.dart';
 import '../vector/vector3.dart';
 
-final _startP = Vector3();
-final _startEnd = Vector3();
-
 /// A geometric line segment represented by a start and end point.
 class Line3 {
+  final _startP = Vector3();
+  final _startEnd = Vector3();
   late Vector3 start;
   late Vector3 end;
 

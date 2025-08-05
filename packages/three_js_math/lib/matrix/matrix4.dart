@@ -4,15 +4,13 @@ import '../vector/index.dart';
 import '../rotation/index.dart';
 import 'dart:math' as math;
 
-final _matrix4v1 = Vector3.zero();
-final _matrix4m1 = Matrix4.identity();
-final _matrix4zero = Vector3(0, 0, 0);
-final _matrix4one = Vector3(1, 1, 1);
-final _matrix4x = Vector3.zero();
-final _matrix4y = Vector3.zero();
-final _matrix4z = Vector3.zero();
-
 class Matrix4 {
+  // 
+  
+  // final _matrix4zero = Vector3(0, 0, 0);
+  // final _matrix4one = Vector3(1, 1, 1);
+
+
   String type = "Matrix4";
   late Float32List storage;
 
@@ -193,6 +191,7 @@ class Matrix4 {
   }
 
   Matrix4 extractRotation(Matrix4 m) {
+    final _matrix4v1 = Vector3.zero();
     // this method does not support reflection matrices
 
     final te = storage;
@@ -334,10 +333,15 @@ class Matrix4 {
   }
 
   Matrix4 makeRotationFromQuaternion(Quaternion q) {
+    final _matrix4zero = Vector3(0, 0, 0);
+    final _matrix4one = Vector3(1, 1, 1);
     return compose(_matrix4zero, q, _matrix4one);
   }
 
   Matrix4 lookAt(Vector3 eye, Vector3 target, Vector3 up) {
+    final _matrix4x = Vector3.zero();
+    final _matrix4y = Vector3.zero();
+    final _matrix4z = Vector3.zero();
     final te = storage;
 
     _matrix4z.sub2(eye, target);
@@ -836,6 +840,8 @@ class Matrix4 {
   }
 
   Matrix4 _decompose(Vector3 position, dynamic quaternion, Vector3 scale) {
+    final _matrix4v1 = Vector3.zero();
+    final _matrix4m1 = Matrix4.identity();
     final te = storage;
 
     double sx = (_matrix4v1.setValues(te[0], te[1], te[2])).length;
