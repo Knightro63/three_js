@@ -94,8 +94,10 @@ class _State extends State<WebglRandomUV> {
     const double s = 2;
     shadowCam?.near = 0.5;
     shadowCam?.far = 3;
-    shadowCam?.right = shadowCam.top	= s;
-    shadowCam?.left = shadowCam.bottom = - s;
+    shadowCam?.right = s;
+    shadowCam?.top = s;
+    shadowCam?.left = - s;
+    shadowCam?.bottom = - s;
 
     // add ground plane
     final plane = three.PlaneGeometry( 2, 2 );
@@ -118,10 +120,12 @@ class _State extends State<WebglRandomUV> {
 
     final noise = await tl.fromAsset( 'assets/textures/noise.png' );
 
-    await three.RGBELoader().setPath( 'assets/textures/equirectangular/' ).fromAsset( 'lobe.hdr').then (( texture ) {
-      texture.mapping = three.EquirectangularReflectionMapping;
-      threeJs.scene.background = texture;
-      threeJs.scene.environment = texture;
+    await three.RGBELoader().setPath( 'assets/textures/equirectangular/' ).fromAsset( 'moonless_golf_1k.hdr').then (( texture ) {
+      final dataTexture = texture as three.DataTexture;
+      dataTexture.mapping = three.EquirectangularReflectionMapping;
+      print(dataTexture.image.data.runtimeType);
+      threeJs.scene.background = dataTexture;
+      threeJs.scene.environment = dataTexture;
       threeJs.scene.backgroundBlurriness = 0.5;
       threeJs.scene.backgroundIntensity = 0.15;
       threeJs.scene.environmentIntensity = 0.15;

@@ -32,7 +32,7 @@ class _State extends State<WebglPostprocessingUnrealBloomSelective> {
       onSetupComplete: (){setState(() {});},
       setup: setup,      
       settings: three.Settings(
-        //animate: false,
+        animate: false,
         useSourceTexture: true,
         
       )
@@ -157,6 +157,7 @@ class _State extends State<WebglPostprocessingUnrealBloomSelective> {
     finalComposer.addPass( mixPass );
 
     threeJs.domElement.addEventListener(three.PeripheralType.pointerdown, onPointerDown );
+    threeJs.domElement.addEventListener(three.PeripheralType.pointermove, onPointerMove );
 
     final bloomFolder = gui.addFolder( 'bloom'.toUpperCase() );
 
@@ -172,20 +173,24 @@ class _State extends State<WebglPostprocessingUnrealBloomSelective> {
 
     bloomFolder.addSlider( params, 'threshold', 0.0, 1.0 )..step(0.1)..onChange( ( value ) {
       bloomPass.threshold = value;
+      threeJs.render();
     } );
 
     bloomFolder.addSlider( params, 'strength', 0.0, 10)..step(0.1)..onChange( ( value ) {
       bloomPass.strength = value;
+      threeJs.render();
     } );
 
     bloomFolder.addSlider( params, 'radius', 0.0, 1.0 )..step( 0.01 )..onChange( ( value ) {
       bloomPass.radius =  value;
+      threeJs.render();
     } );
 
     final toneMappingFolder = gui.addFolder( 'tone mapping'.toUpperCase() );
 
     toneMappingFolder.addSlider( params, 'exposure', 0.1, 2 )..step(0.1)..onChange( ( value ) {
       threeJs.renderer!.toneMappingExposure = math.pow( value, 4.0 ).toDouble();
+      threeJs.render();
     } );
 
     setupScene();
@@ -225,6 +230,10 @@ class _State extends State<WebglPostprocessingUnrealBloomSelective> {
       final object = intersects[ 0 ].object;
       object!.layers.toggle( BLOOM_SCENE );
     }
+  }
+  
+  void onPointerMove(event){
+    threeJs.render();
   }
 
   void darkenNonBloomed( obj ) {

@@ -29,6 +29,7 @@ import 'package:example/geometry/webgl_points_sprites.dart';
 import 'package:example/geometry/webgl_sprites.dart';
 import 'package:example/instancing/webgl_gpgpu_protoplanet.dart';
 import 'package:example/instancing/webgl_instancing_dynamic.dart';
+import 'package:example/instancing/webgl_instancing_dynamic_blocks.dart';
 import 'package:example/instancing/webgl_instancing_morph.dart';
 import 'package:example/instancing/webgl_instancing_raycasting.dart';
 import 'package:example/instancing/webgl_instancing_scatter.dart';
@@ -337,6 +338,9 @@ class MyAppState extends State<MyApp> {
               },
               '/webgl_instancing_dynamic':(BuildContext context) {
                 return const WebglInstancingDynamic();
+              },
+              '/webgl_instancing_dynamic_blocks':(BuildContext context) {
+                return const WebglInstancingDynamicBlocks();
               },
               '/webgl_instancing_morph':(BuildContext context) {
                 return const WebglInstancingMorph();

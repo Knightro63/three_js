@@ -51,54 +51,19 @@ This is a dart conversion of three.js and three_dart, originally created by [@mr
  - OpenGL supported
 
 **Web**
- - WebGL2 supported
+ - WebGL2 supported. please add `<script src="https://cdn.jsdelivr.net/gh/Knightro63/flutter_angle/assets/gles_bindings.js"></script>` to your index.html to load the js_interop file.
 
 **WASM**
- - WebGL2 supported; please add `<script src="https://cdn.jsdelivr.net/gh/Knightro63/flutter_angle/assets/gles_bindings.js"></script>` to your index.html to load the js_interop file.
+ - WebGL2 supported. please add `<script src="https://cdn.jsdelivr.net/gh/Knightro63/flutter_angle/assets/gles_bindings.js"></script>` to your index.html to load the js_interop file.
 
 **Linux**
  - Ubuntu supported (Tested on Linux Mint)
  - OpenGL supported
- - Please install `sudo apt install libglew-dev`
 
 ## Getting started
 
 To get started add three_js to your pubspec.yaml file. Adding permissions for audio and video is required if using either item.
 Please use [Permission Handler](https://pub.dev/packages/permission_handler) package to help with this.
-
-**Android**
- - Add the following to your AndroidManifest.
-
-```xml
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.example.app">
-    <application
-      ...
-      />
-    </application>
-    <!-- Internet access permissions. If using web assets -->
-    <uses-permission android:name="android.permission.INTERNET" />
-    <!--
-      Media access permissions.
-      Android 13 or higher.
-      https://developer.android.com/about/versions/13/behavior-changes-13#granular-media-permissions
-      -->
-    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
-    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
-    <!--
-      Storage access permissions.
-      Android 12 or lower.
-      -->
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-</manifest>
-```
-
-**MacOS and iOS**
- - Please add some permissions to have this work. User Selected File "Read/Write"
- - If using web assets please add: Incoming Connections (Server)
-
-**Linux**
- - The folling is required for audio and video `sudo apt install libmpv-dev mpv`
 
 ## Usage
 
@@ -140,7 +105,6 @@ Find the example for this API [here](https://github.com/Knightro63/three_js/tree
 
 **Linux**
  - Tonemapping turns screen black
- - Change screen size does not function currently
  - Postprocessing does not work
  - Track pad does not zoom out
  - Some RGBELoaders cause app to crash

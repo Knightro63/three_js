@@ -395,7 +395,7 @@ class Tween{
   void Function(dynamic)? _onCompleteCallback;
   void Function(dynamic)? _onStopCallback;
 
-  var _object;
+  final _object;
 
   Tween(this._object,[ TweenGroup? group]) {
     this._group = group ?? TweenGroup();
@@ -592,7 +592,7 @@ class Tween{
   }
   Tween resume([int? time]) {
     time ??= now();
-    if (!this._isPaused || !this._isPlaying) {
+    if (this._isPaused || this._isPlaying) {
       return this;
     }
     this._isPaused = false;
@@ -781,9 +781,9 @@ class Tween{
       var isInterpolationList = !startIsArray && endIsArray;
 
       if (isInterpolationList) {
-          _object[property] = this._interpolation(end, value);
+        _object[property] = this._interpolation(end, value);
       }
-      else if (end.runtimeType == 'object' && end != null) {
+      else if (end is Map) {
         // eslint-disable-next-line
         // @ts-ignore FIXME?
         this._updateProperties(_object[property], start, end, value);

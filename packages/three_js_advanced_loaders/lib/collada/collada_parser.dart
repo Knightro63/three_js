@@ -156,7 +156,7 @@ class ColladaParser{
     if ( data['build'] != null ) return data['build'];
     data['build'] = await buildNode(data);
 
-    return data['build'];
+    return await getBuild(data, buildNode);//data['build'];
   }
 
   // animation
@@ -396,8 +396,8 @@ class ColladaParser{
     return AnimationClip( name, duration, tracks );
   }
 
-  getAnimationClip( id ) {
-    return getBuild( library['clips']![ id ], buildAnimationClip );
+  Future getAnimationClip( id ) async{
+    return await getBuild( library['clips']![ id ], buildAnimationClip );
   }
 
   // controller
@@ -438,8 +438,8 @@ class ColladaParser{
     return build;
   }
 
-  getController( id ) {
-    return getBuild( library['controllers']![ id ], buildController );
+  Future getController( id ) async{
+    return await getBuild( library['controllers']![ id ], buildController );
   }
 
   // image
@@ -457,10 +457,10 @@ class ColladaParser{
     return data['init_from'];
   }
 
-  getImage( id ) {
+  Future getImage( id ) async{
     final data = library['images']![ id ];
     if ( data != null ) {
-      return getBuild( data, buildImage );
+      return await getBuild( data, buildImage );
     }
 
     console.warning( 'ColladaLoader: Couldn\'t find image with ID: $id');
@@ -575,8 +575,8 @@ class ColladaParser{
     return data;
   }
 
-  getEffect( id ) {
-    return getBuild( library['effects']![ id ], buildEffect );
+  Future getEffect( id ) async{
+    return await getBuild( library['effects']![ id ], buildEffect );
   }
 
   void parseMaterial(XmlElement xml ) {
@@ -613,7 +613,7 @@ class ColladaParser{
   }
 
   Future<Material?> buildMaterial(Map<String,dynamic> data ) async{
-    final effect = getEffect( data['url'] );
+    final effect = await getEffect( data['url'] );
     final Map<String,dynamic> technique = effect['profile']['technique'];
     Material? material;
 
@@ -640,11 +640,11 @@ class ColladaParser{
 
       if ( sampler != null ) {
         final surface = effect['profile']['surfaces'][ sampler['source'] ];
-        image = getImage( surface['init_from'] );
+        image = await getImage( surface['init_from'] );
       } 
       else {
         console.warning( 'ColladaLoader: Undefined sampler. Access image directly (see #12530).' );
-        image = getImage( textureObject['id'] );
+        image = await getImage( textureObject['id'] );
       }
 
       // create texture if image is avaiable
@@ -978,11 +978,11 @@ class ColladaParser{
     return camera;
   }
 
-  getCamera( id ) {
+  Future getCamera( id ) async {
     final data = library['cameras']![ id ];
 
     if ( data != null ) {
-      return getBuild( data, buildCamera );
+      return await getBuild( data, buildCamera );
     }
 
     console.warning( 'ColladaLoader: Couldn\'t find camera with ID: $id');
@@ -1066,11 +1066,11 @@ class ColladaParser{
     return light;
   }
 
-  getLight( id ) {
+  Future getLight( id ) async{
     final data = library['lights']?[ id ];
 
     if ( data != null ) {
-      return getBuild( data, buildLight );
+      return await getBuild( data, buildLight );
     }
 
     console.warning( 'ColladaLoader: Couldn\'t find light with ID: $id');
@@ -1428,8 +1428,8 @@ class ColladaParser{
     return build;
   }
 
-  getGeometry( id ) {
-    return getBuild( library['geometries']![ id ], buildGeometry );
+  Future getGeometry( id ) async {
+    return await getBuild( library['geometries']![ id ], buildGeometry );
   }
 
   // kinematics
@@ -1439,8 +1439,8 @@ class ColladaParser{
     return data;
   }
 
-  getKinematicsModel( id ) {
-    return getBuild( library['kinematicsModels']![ id ], buildKinematicsModel );
+  Future getKinematicsModel( id ) async{
+    return await getBuild( library['kinematicsModels']![ id ], buildKinematicsModel );
   }
 
   void parseKinematicsTechniqueCommon(XmlElement xml, Map<String, dynamic> data ) {
@@ -1641,7 +1641,7 @@ class ColladaParser{
     final visualSceneId = library['visualScenes']?.keys;
     if ( kinematicsModelId == null || kinematicsModelId.isEmpty || kinematicsSceneId == null || kinematicsSceneId.isEmpty) return;
 
-    final kinematicsModel = getKinematicsModel( kinematicsModelId.toList()[0] );
+    final kinematicsModel = await getKinematicsModel( kinematicsModelId.toList()[0] );
     final kinematicsScene = getKinematicsScene( kinematicsSceneId.toList()[0] );
     final visualScene = await getVisualScene( visualSceneId!.toList()[0] );
 
@@ -1960,8 +1960,8 @@ class ColladaParser{
     return Skeleton( bones, boneInverses );
   }
 
-  Future<Object3D?> buildNode(Map<String,dynamic> data ) async {
-    final objects = [];
+  Future<Object3D?> buildNode(Map<String,dynamic> data ) async{
+    final List<Object3D> objects = [];
 
     final matrix = data['matrix'];
     final nodes = data['nodes'];
@@ -1974,7 +1974,7 @@ class ColladaParser{
 
     // nodes
     for (int i = 0, l = nodes.length; i < l; i ++ ) {
-      objects.add( getNode( nodes[ i ] ) );
+      objects.add(await getNode( nodes[ i ] ) );
     }
     // for (final node in nodes) {
     //   objects.add(await getBuild( library['nodes']![ node ], buildNode ));
@@ -2017,7 +2017,7 @@ class ColladaParser{
     // instance lights
 
     for (int i = 0, l = instanceLights.length; i < l; i ++ ) {
-      final instanceLight = getLight( instanceLights[ i ] );
+      final instanceLight = await getLight( instanceLights[ i ] );
 
       if ( instanceLight != null ) {
         objects.add( instanceLight.clone() );
@@ -2050,13 +2050,13 @@ class ColladaParser{
     else {
       object = ( type == 'JOINT' ) ?Bone() :Group();
       for (int i = 0; i < objects.length; i ++ ) {
-        object.add( objects[ i ] );
+        object.add( await objects[ i ] );
       }
     }
 
-    object?.name = ( type == 'JOINT' ) ? data['sid'] : data['name'];
-    object?.matrix.setFrom( matrix );
-    object?.matrix.decompose( object.position, object.quaternion, object.scale );
+    object.name = ( type == 'JOINT' ) ? data['sid'] : data['name'];
+    object.matrix.setFrom( matrix );
+    object.matrix.decompose( object.position, object.quaternion, object.scale );
 
     return object;
   }
@@ -2105,7 +2105,7 @@ class ColladaParser{
     } 
     else {
       for ( final id in clips!.keys ) {
-        animations.add( getAnimationClip( id ) );
+        animations.add( await getAnimationClip( id ) );
       }
     }
   }
@@ -2290,9 +2290,9 @@ class ColladaParser{
     key.value[ property ] = ( ( key.time - prev.time ) * ( next.value[ property ] - prev.value[ property ] ) / ( next.time - prev.time ) ) + prev.value[ property ];
   }
 
-  getBuild(Map<String, dynamic> data, builder ) {
+  Future getBuild(Map<String, dynamic> data, builder ) async{
     if ( data['build'] != null ) return data['build'];
-    data['build'] = builder( data );
+    data['build'] = await builder( data );
 
     return data['build'];
   }
@@ -2539,7 +2539,7 @@ class ColladaParser{
 
     final jointSource = data['sources'][ data['joints']['inputs']['JOINT'] ];
     final inverseSource = data['sources'][ data['joints']['inputs']['INV_BIND_MATRIX'] ];
-    
+
     final weights = sources[ vertexWeights['inputs']['WEIGHT']['id'] ]['array'];
     int stride = 0;
 
@@ -2565,8 +2565,8 @@ class ColladaParser{
       vertexSkinData.sort( descending );
 
       conv(List list, int index) {
-        if(index <= 0){
-          return list[0];
+        if(index < 0){
+          return list[list.length-index];
         }
         if(index >= list.length){
           if((index-list.length) >= list.length){
@@ -2583,7 +2583,7 @@ class ColladaParser{
         //final d = vertexSkinData.length > j ? vertexSkinData[ j ]:null;
         final d = conv(vertexSkinData,j);
         if ( d != null ) {
-          build['indices']['array'].add( d['index'] );
+          build['indices']['array'].add( d['index']);
           build['weights']['array'].add( d['weight']);
         } 
         else {

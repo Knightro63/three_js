@@ -45,6 +45,7 @@ const List<String> filesJson = [
   "webgl_instancing_performance",
   "webgl_instancing_raycast",
   "webgl_instancing_dynamic",
+  "webgl_instancing_dynamic_blocks",
   'webgl_instancing_morph',
   "webgl_interactive_voxelpainter",
   "webgl_gpgpu_protoplanet",

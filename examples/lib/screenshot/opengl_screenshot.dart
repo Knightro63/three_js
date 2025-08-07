@@ -16,8 +16,8 @@ class _State extends State<OpenglScreenshot> {
   List<int> data = List.filled(60, 0, growable: true);
   late Timer timer;
   late three.ThreeJS threeJs;
-  late final three.Uint8Array buffer;// = three.Uint8Array( SIZE2 * 4 );
-  late final three.WebGLRenderTarget rt;// = three.WebGLRenderTarget( SIZE, SIZE );
+  late final three.Uint8Array buffer;
+  late final three.WebGLRenderTarget rt;
 
   @override
   void initState() {
@@ -47,16 +47,13 @@ class _State extends State<OpenglScreenshot> {
       floatingActionButton: InkWell(
         onTap: () async{
           try {
-            final width = threeJs.width.toInt();
-            final height = threeJs.height.toInt();
-
             threeJs.renderer?.setRenderTarget( rt );
             threeJs.renderer?.render( threeJs.scene, threeJs.camera );
-            threeJs.renderer?.readRenderTargetPixels(rt, 0, 0, width, height, buffer);
+            threeJs.renderer?.readRenderTargetPixels(rt, 0, 0, desiredWidth, desiredHeight, buffer);
             
             img.Image image = img.Image.fromBytes(
-              width: width,
-              height: height,
+              width: desiredWidth,
+              height: desiredHeight,
               bytes: buffer.toDartList().buffer,
               numChannels: 4,
               order: img.ChannelOrder.rgb
@@ -64,6 +61,7 @@ class _State extends State<OpenglScreenshot> {
             image = img.copyFlip(image, direction: img.FlipDirection.vertical);
             Uint8List pngBytes = img.encodePng(image);
             SaveFile.saveBytes(printName: 'opengl_test', fileType: 'png', bytes: pngBytes);
+            threeJs.renderer?.setRenderTarget(null);
           }catch (e) {
             rethrow;
           }
@@ -87,10 +85,12 @@ class _State extends State<OpenglScreenshot> {
   }
 
   late three.OrbitControls controls;
+  int desiredWidth = 1920;
+  int desiredHeight = 1080;
 
   Future<void> setup() async {
-    buffer = three.Uint8Array( threeJs.width.toInt() * threeJs.height.toInt() * 4 );
-    rt = three.WebGLRenderTarget( threeJs.width.toInt(), threeJs.height.toInt() );
+    buffer = three.Uint8Array( desiredWidth * desiredHeight * 4 );
+    rt = three.WebGLRenderTarget( desiredWidth, desiredHeight, three.WebGLRenderTargetOptions({'colorSpace': three.SRGBColorSpace}) );
 
     threeJs.scene = three.Scene();
 

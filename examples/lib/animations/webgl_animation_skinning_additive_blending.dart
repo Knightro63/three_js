@@ -32,8 +32,8 @@ class _State extends State<WebglAnimationSkinningAdditiveBlending> {
     threeJs = three.ThreeJS(
       
       onSetupComplete: (){setState(() {});},
-      setup: setup,      settings: three.Settings(
-
+      setup: setup,      
+      settings: three.Settings(
         outputEncoding: three.sRGBEncoding,
       )
     );

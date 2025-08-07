@@ -212,10 +212,6 @@ class _UIPageState extends State<UIScreen> {
 
     threeJs.scene.add(scene);
 
-    threeJs.domElement.addEventListener(
-      three.PeripheralType.resize, 
-      threeJs.onWindowResize
-    );
     threeJs.domElement.addEventListener(three.PeripheralType.keydown,(event) {
       event as LogicalKeyboardKey;
       switch (event.keyLabel.toLowerCase()) {
@@ -1838,7 +1834,6 @@ class _UIPageState extends State<UIScreen> {
                           control.camera = threeJs.camera;
 
                           threeJs.camera.lookAt(orbit.target);
-                          //threeJs.onWindowResize(context);
                         },
                         child:Container(
                           width: 25,

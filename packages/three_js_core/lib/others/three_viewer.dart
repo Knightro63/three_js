@@ -22,7 +22,8 @@ class Settings{
     this.clearColor = 0x000000,
     this.localClippingEnabled = false,
     this.clippingPlanes = const [],
-    this.outputEncoding = LinearEncoding,
+    this.colorSpace = ColorSpace.srgb,
+    this.outputEncoding = sRGBEncoding,
     this.toneMapping = NoToneMapping,
     this.shadowMapType = PCFShadowMap,
     this.toneMappingExposure = 1.0,
@@ -52,6 +53,7 @@ class Settings{
   late Map<String,dynamic> renderOptions;
   List<Plane> clippingPlanes;
   int outputEncoding;
+  ColorSpace colorSpace;
   int toneMapping;
   int shadowMapType;
   double toneMappingExposure;
@@ -254,7 +256,8 @@ class ThreeJS with WidgetsBindingObserver{
     );
     renderer!.autoClearDepth = settings.autoClearDepth;
     renderer!.autoClearStencil = settings.autoClearStencil;
-    renderer!.outputEncoding = sRGBEncoding;
+    renderer!.outputEncoding = settings.outputEncoding;
+    renderer!.outputColorSpace = settings.colorSpace.toString();
     renderer!.localClippingEnabled = settings.localClippingEnabled;
     renderer!.clippingPlanes = settings.clippingPlanes;
     renderer!.toneMapping = settings.toneMapping;

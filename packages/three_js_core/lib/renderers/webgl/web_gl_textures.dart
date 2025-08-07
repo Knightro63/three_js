@@ -526,6 +526,101 @@ class WebGLTextures {
     return forceUpload;
   }
 
+	int getRow(int index, num rowLength, int componentStride ) {
+		return ( ( index / componentStride ).floor() / rowLength ).floor();
+	}
+
+	void updateTexture(Texture texture, ImageElement image, int glFormat, int glType ) {
+		int componentStride = 4; // only RGBA supported
+		final updateRanges = texture.updateRanges;
+
+		if ( updateRanges.length == 0 ) {
+			state.texSubImage2D( WebGL.TEXTURE_2D, 0, 0, 0, image.width, image.height, glFormat, glType, image.data );
+		} 
+    else {
+
+			// Before applying update ranges, we merge any adjacent / overlapping
+			// ranges to reduce load on `gl.texSubImage2D`. Empirically, this has led
+			// to performance improvements for applications which make heavy use of
+			// update ranges. Likely due to GPU command overhead.
+			//
+			// Note that to reduce garbage collection between frames, we merge the
+			// update ranges in-place. This is safe because this method will clear the
+			// update ranges once updated.
+
+			updateRanges.sort( ( a, b ) => a.start - b.start );
+
+			// To merge the update ranges in-place, we work from left to right in the
+			// existing updateRanges array, merging ranges. This may result in a final
+			// array which is smaller than the original. This index tracks the last
+			// index representing a merged range, any data after this index can be
+			// trimmed once the merge algorithm is completed.
+			int mergeIndex = 0;
+
+			for (int i = 1; i < updateRanges.length; i ++ ) {
+				final previousRange = updateRanges[ mergeIndex ];
+				final range = updateRanges[ i ];
+
+				// Only merge if in the same row and overlapping/adjacent
+				final previousEnd = previousRange.start + previousRange.count;
+				final currentRow = getRow( range.start, image.width, componentStride );
+				final previousRow = getRow( previousRange.start, image.width, componentStride );
+
+				// We add one here to merge adjacent ranges. This is safe because ranges
+				// operate over positive integers.
+				if (
+					range.start <= previousEnd + 1 &&
+					currentRow == previousRow &&
+					getRow( range.start + range.count - 1, image.width, componentStride ) == currentRow // ensure range doesn't spill
+				) {
+
+					previousRange.count = math.max(
+						previousRange.count,
+						range.start + range.count - previousRange.start
+					);
+
+				} else {
+					++ mergeIndex;
+					updateRanges[ mergeIndex ] = range;
+				}
+			}
+
+			// Trim the array to only contain the merged ranges.
+			updateRanges.length = mergeIndex + 1;
+
+			final currentUnpackRowLen = _gl.getParameter( WebGL.UNPACK_ROW_LENGTH );
+			final currentUnpackSkipPixels = _gl.getParameter( WebGL.UNPACK_SKIP_PIXELS );
+			final currentUnpackSkipRows = _gl.getParameter( WebGL.UNPACK_SKIP_ROWS );
+
+			_gl.pixelStorei( WebGL.UNPACK_ROW_LENGTH, image.width.toInt() );
+
+			for (int i = 0, l = updateRanges.length; i < l; i ++ ) {
+				final range = updateRanges[ i ];
+
+				final pixelStart = ( range.start / componentStride ).floor();
+				final pixelCount = ( range.count / componentStride ).ceil();
+
+				final x = (pixelStart % image.width).toInt();
+				final y = ( pixelStart / image.width ).floor();
+
+				// Assumes update ranges refer to contiguous memory
+				final width = pixelCount;
+				final height = 1;
+
+				_gl.pixelStorei( WebGL.UNPACK_SKIP_PIXELS, x );
+				_gl.pixelStorei( WebGL.UNPACK_SKIP_ROWS, y );
+
+				state.texSubImage2D( WebGL.TEXTURE_2D, 0, x, y, width, height, glFormat, glType, image.data );
+			}
+
+			texture.clearUpdateRanges();
+
+			_gl.pixelStorei( WebGL.UNPACK_ROW_LENGTH, currentUnpackRowLen );
+			_gl.pixelStorei( WebGL.UNPACK_SKIP_PIXELS, currentUnpackSkipPixels );
+			_gl.pixelStorei( WebGL.UNPACK_SKIP_ROWS, currentUnpackSkipRows );
+		}
+	}
+
   void uploadTexture(Map<String, dynamic> textureProperties, Texture texture, int slot) {
     dynamic textureType = WebGL.TEXTURE_2D;
 
@@ -561,6 +656,7 @@ class WebGLTextures {
 
       final useTexStorage = (isWebGL2 && texture is! VideoTexture);
       final allocateMemory = (textureProperties["__version"] == null) || (forceUpload == true);
+      final dataReady = source.dataReady;
       final levels = getMipLevels(texture, image);
       
       if (texture is DepthTexture) {
@@ -585,9 +681,10 @@ class WebGLTextures {
 
           for (int i = 0, il = mipmaps.length; i < il; i++) {
             mipmap = mipmaps[i];
-            if (useTexStorage) {
+            if (useTexStorage && dataReady) {
               state.texSubImage2D(WebGL.TEXTURE_2D, i, 0, 0, mipmap.width, mipmap.height, glFormat, glType, mipmap.data);
-            } else {
+            } 
+            else {
               state.texImage2D(WebGL.TEXTURE_2D, i, glInternalFormat, mipmap.width, mipmap.height, 0, glFormat, glType, mipmap.data);
             }
           }
@@ -600,7 +697,9 @@ class WebGLTextures {
             if (allocateMemory) {
               state.texStorage2D(WebGL.TEXTURE_2D, levels, glInternalFormat, image.width.toInt(), image.height.toInt());
             }
-            state.texSubImage2D(WebGL.TEXTURE_2D, 0, 0, 0, image.width, image.height, glFormat, glType, image.data);
+						if ( dataReady ) {
+							updateTexture( texture, image, glFormat, glType );
+						}          
           } 
           else {
             state.texImage2D(WebGL.TEXTURE_2D, 0, glInternalFormat, image.width, image.height, 0, glFormat, glType, image.data);
@@ -617,7 +716,7 @@ class WebGLTextures {
 						mipmap = mipmaps[ i ];
 						if ( texture.format != RGBAFormat ) {
 							if ( glFormat > 0 ) {
-								if ( useTexStorage ) {
+								if ( useTexStorage && dataReady) {
                   if ( texture.layerUpdates.isNotEmpty ) {
                     final layerByteLength = TextureUtils.getByteLength( mipmap.width, mipmap.height, texture.format, texture.type );
                     for ( final layerIndex in texture.layerUpdates ) {
@@ -638,7 +737,7 @@ class WebGLTextures {
 								console.warning( 'THREE.WebGLRenderer: Attempt to load unsupported compressed texture format in .uploadTexture()' );
 							}
 						} else {
-							if ( useTexStorage ) {
+							if ( useTexStorage && dataReady) {
 								state.texSubImage3D( WebGL.TEXTURE_2D_ARRAY, i, 0, 0, 0, mipmap.width, mipmap.height, image.depth, glFormat, glType, mipmap.data );
 							} else {
 								state.texImage3D( WebGL.TEXTURE_2D_ARRAY, i, glInternalFormat, mipmap.width, mipmap.height, image.depth, 0, glFormat, glType, mipmap.data );
@@ -655,7 +754,7 @@ class WebGLTextures {
 
 						if ( texture.format != RGBAFormat ) {
 							if ( glFormat > 0 ) {
-								if ( useTexStorage ) {
+								if ( useTexStorage && dataReady) {
 									state.compressedTexSubImage2D( WebGL.TEXTURE_2D, i, 0, 0, mipmap.width, mipmap.height, glFormat, mipmap.data );
 								} else {
 									state.compressedTexImage2D( WebGL.TEXTURE_2D, i, glInternalFormat, mipmap.width, mipmap.height, 0, mipmap.data );
@@ -664,7 +763,7 @@ class WebGLTextures {
 								console.warning( 'THREE.WebGLRenderer: Attempt to load unsupported compressed texture format in .uploadTexture()' );
 							}
 						} else {
-							if ( useTexStorage ) {
+							if ( useTexStorage && dataReady) {
 								state.texSubImage2D( WebGL.TEXTURE_2D, i, 0, 0, mipmap.width, mipmap.height, glFormat, glType, mipmap.data );
 							} else {
 								state.texImage2D( WebGL.TEXTURE_2D, i, glInternalFormat, mipmap.width, mipmap.height, 0, glFormat, glType, mipmap.data );
@@ -678,21 +777,23 @@ class WebGLTextures {
           if (allocateMemory) {
             state.texStorage3D(WebGL.TEXTURE_2D_ARRAY, levels, glInternalFormat, image.width, image.height, image.depth);
           }
-          if ( texture.layerUpdates.isNotEmpty) {
-            final layerByteLength = TextureUtils.getByteLength( image.width, image.height, texture.format, texture.type );
-            for ( final layerIndex in texture.layerUpdates ) {
-              final layerData = image.data.subarray(
-                layerIndex * layerByteLength / image.data.BYTES_PER_ELEMENT,
-                ( layerIndex + 1 ) * layerByteLength / image.data.BYTES_PER_ELEMENT
-              );
-              state.texSubImage3D( WebGL.TEXTURE_2D_ARRAY, 0, 0, 0, layerIndex, image.width, image.height, 1, glFormat, glType, layerData );
-            }
+          if(dataReady){
+            if ( texture.layerUpdates.isNotEmpty ) {
+              final layerByteLength = TextureUtils.getByteLength( image.width, image.height, texture.format, texture.type );
+              for ( final layerIndex in texture.layerUpdates ) {
+                final layerData = image.data.subarray(
+                  layerIndex * layerByteLength / image.data.BYTES_PER_ELEMENT,
+                  ( layerIndex + 1 ) * layerByteLength / image.data.BYTES_PER_ELEMENT
+                );
+                state.texSubImage3D( WebGL.TEXTURE_2D_ARRAY, 0, 0, 0, layerIndex, image.width, image.height, 1, glFormat, glType, layerData );
+              }
 
-            texture.clearLayerUpdates();
-          } 
-          else {
-            state.texSubImage3D( WebGL.TEXTURE_2D_ARRAY, 0, 0, 0, 0, image.width, image.height, image.depth, glFormat, glType, image.data );
-          }   
+              texture.clearLayerUpdates();
+            } 
+            else {
+              state.texSubImage3D( WebGL.TEXTURE_2D_ARRAY, 0, 0, 0, 0, image.width, image.height, image.depth, glFormat, glType, image.data );
+            }
+          }
         } else {
           state.texImage3D(WebGL.TEXTURE_2D_ARRAY, 0, glInternalFormat, image.width, image.height, image.depth, 0,
               glFormat, glType, image.data);
@@ -703,7 +804,9 @@ class WebGLTextures {
           if (allocateMemory) {
             state.texStorage3D(WebGL.TEXTURE_3D, levels, glInternalFormat, image.width, image.height, image.depth);
           }
-          state.texSubImage3D(WebGL.TEXTURE_3D, 0, 0, 0, 0, image.width, image.height, image.depth, glFormat, glType, image.data);
+          if(dataReady){
+            state.texSubImage3D(WebGL.TEXTURE_3D, 0, 0, 0, 0, image.width, image.height, image.depth, glFormat, glType, image.data);
+          }
         } else {
           state.texImage3D(WebGL.TEXTURE_3D, 0, glInternalFormat, image.width, image.height, image.depth, 0, glFormat,glType, image.data);
         }
@@ -738,7 +841,7 @@ class WebGLTextures {
 
           for (int i = 0, il = mipmaps.length; i < il; i++) {
             mipmap = mipmaps[i];
-            if (useTexStorage) {
+            if (useTexStorage && dataReady) {
               state.texSubImage2DIf(WebGL.TEXTURE_2D, i, 0, 0, glFormat, glType, mipmap);
             } 
             else {
@@ -753,7 +856,9 @@ class WebGLTextures {
             if (allocateMemory) {
               state.texStorage2D(WebGL.TEXTURE_2D, levels, glInternalFormat, image.width.toInt(), image.height.toInt());
             }
-            state.texSubImage2DIf(WebGL.TEXTURE_2D, 0, 0, 0, glFormat, glType, image);
+            if(dataReady){
+              state.texSubImage2DIf(WebGL.TEXTURE_2D, 0, 0, 0, glFormat, glType, image);
+            }
           } 
           else {
             state.texImage2DIf(WebGL.TEXTURE_2D, 0, glInternalFormat, glFormat, glType, image);
@@ -800,7 +905,7 @@ class WebGLTextures {
       final isCompressed = (texture.isCompressedTexture || texture is CompressedTexture);
       final isDataTexture = (texture.image[0] != null && texture is DataTexture);
       final isCubeTexture = (texture.image[0] != null && texture is CubeTexture);
-
+      print('here1');
       final cubeImage = [];
 
       for (int i = 0; i < 6; i++) {
@@ -808,6 +913,7 @@ class WebGLTextures {
           cubeImage.add(texture.image[i]);
         } 
         else {
+          print('here2');
           cubeImage.add(isDataTexture ? texture.image[i].image : texture.image[i]);
         }
 
@@ -821,6 +927,7 @@ class WebGLTextures {
 
       final useTexStorage = (isWebGL2 && texture is! VideoTexture);
       final allocateMemory = (textureProperties['__version'] == null);
+      final dataReady = source.dataReady;
       int levels = getMipLevels(texture, image);
 
       setTextureParameters(WebGL.TEXTURE_CUBE_MAP, texture);
@@ -840,21 +947,23 @@ class WebGLTextures {
 
             if (texture.format != RGBAFormat) {
               if (glFormat != null) {
-                if (useTexStorage ) {
+                if (useTexStorage && dataReady) {
                   state.compressedTexSubImage2D(WebGL.TEXTURE_CUBE_MAP_POSITIVE_X + i, j, 0, 0, mipmap.width, mipmap.height, glFormat, mipmap.data);
-                } else {
+                } 
+                else {
                   state.compressedTexImage2D(WebGL.TEXTURE_CUBE_MAP_POSITIVE_X + i, j, glInternalFormat, mipmap.width, mipmap.height, 0, mipmap.data);
                 }
-              } else {
+              } 
+              else {
                 console.warning('WebGLRenderer: Attempt to load unsupported compressed texture format in .setTextureCube()');
               }
-            } else {
-              if (useTexStorage) {
-                state.texSubImage2D(WebGL.TEXTURE_CUBE_MAP_POSITIVE_X + i, j, 0, 0, mipmap.width, mipmap.height, glFormat,
-                    glType, mipmap.data);
-              } else {
-                state.texImage2D(WebGL.TEXTURE_CUBE_MAP_POSITIVE_X + i, j, glInternalFormat, mipmap.width, mipmap.height,
-                    0, glFormat, glType, mipmap.data);
+            } 
+            else {
+              if (useTexStorage && dataReady) {
+                state.texSubImage2D(WebGL.TEXTURE_CUBE_MAP_POSITIVE_X + i, j, 0, 0, mipmap.width, mipmap.height, glFormat,glType, mipmap.data);
+              } 
+              else {
+                state.texImage2D(WebGL.TEXTURE_CUBE_MAP_POSITIVE_X + i, j, glInternalFormat, mipmap.width, mipmap.height,0, glFormat, glType, mipmap.data);
               }
             }
           }
@@ -875,7 +984,7 @@ class WebGLTextures {
 
         for (int i = 0; i < 6; i++) {
           if (isDataTexture || isCubeTexture) {
-            if (useTexStorage) {
+            if (useTexStorage && dataReady) {
               if( kIsWeb ){
                 state.texSubImage2DNoSize(WebGL.TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, 0, 0, glFormat, glType, cubeImage[i].data);
               }
@@ -896,32 +1005,30 @@ class WebGLTextures {
               final mipmap = mipmaps[j];
               final mipmapImage = mipmap.image[i].image;
 
-              if (useTexStorage) {
-                state.texSubImage2D(WebGL.TEXTURE_CUBE_MAP_POSITIVE_X + i, j + 1, 0, 0, mipmapImage.width,
-                    mipmapImage.height, glFormat, glType, mipmapImage.data);
-              } else {
-                state.texImage2D(WebGL.TEXTURE_CUBE_MAP_POSITIVE_X + i, j + 1, glInternalFormat, mipmapImage.width,
-                    mipmapImage.height, 0, glFormat, glType, mipmapImage.data);
+              if (useTexStorage && dataReady) {
+                state.texSubImage2D(WebGL.TEXTURE_CUBE_MAP_POSITIVE_X + i, j + 1, 0, 0, mipmapImage.width,mipmapImage.height, glFormat, glType, mipmapImage.data);
+              } 
+              else {
+                state.texImage2D(WebGL.TEXTURE_CUBE_MAP_POSITIVE_X + i, j + 1, glInternalFormat, mipmapImage.width,mipmapImage.height, 0, glFormat, glType, mipmapImage.data);
               }
             }
           } 
           else {
-            if (useTexStorage) {
+            if (useTexStorage && dataReady) {
               state.texSubImage2DIf(WebGL.TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, 0, 0, glFormat, glType, cubeImage[i]);
-            } else {
-              state.texImage2DIf(
-                  WebGL.TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, glInternalFormat, glFormat, glType, cubeImage[i]);
+            } 
+            else {
+              state.texImage2DIf(WebGL.TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, glInternalFormat, glFormat, glType, cubeImage[i]);
             }
 
             for (int j = 0; j < mipmaps.length; j++) {
               final mipmap = mipmaps[j];
 
-              if (useTexStorage) {
-                state.texSubImage2DIf(
-                    WebGL.TEXTURE_CUBE_MAP_POSITIVE_X + i, j + 1, 0, 0, glFormat, glType, mipmap.image[i]);
-              } else {
-                state.texImage2DIf(
-                    WebGL.TEXTURE_CUBE_MAP_POSITIVE_X + i, j + 1, glInternalFormat, glFormat, glType, mipmap.image[i]);
+              if (useTexStorage && dataReady) {
+                state.texSubImage2DIf(WebGL.TEXTURE_CUBE_MAP_POSITIVE_X + i, j + 1, 0, 0, glFormat, glType, mipmap.image[i]);
+              } 
+              else {
+                state.texImage2DIf(WebGL.TEXTURE_CUBE_MAP_POSITIVE_X + i, j + 1, glInternalFormat, glFormat, glType, mipmap.image[i]);
               }
             }
           }

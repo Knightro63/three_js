@@ -4,7 +4,6 @@ import 'dart:typed_data';
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
-import 'package:three_js_core/textures/texture_utils.dart';
 import 'package:three_js_math/three_js_math.dart';
 import '../../objects/index.dart';
 import '../../core/index.dart';

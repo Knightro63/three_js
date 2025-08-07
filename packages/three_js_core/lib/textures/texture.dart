@@ -76,6 +76,8 @@ class Texture with EventDispatcher {
 
   Set layerUpdates = Set();
 
+  List<TextureRangeInfo> updateRanges = [];
+
   Texture([
     image, 
     int? mapping, 
@@ -279,6 +281,13 @@ class Texture with EventDispatcher {
     return uv;
   }
 
+	void addUpdateRange( start, count ) {
+		this.updateRanges.add(TextureRangeInfo(start, count ));
+	}
+	void clearUpdateRanges() {
+		this.updateRanges.clear();
+	}
+
 
 	// Setting this property to `true` indicates the engine the PMREM
 	// must be regenerated.
@@ -291,6 +300,13 @@ class Texture with EventDispatcher {
 			this.pmremVersion ++;
 		}
 	}
+}
+
+class TextureRangeInfo{
+  int start;
+  int count;
+
+  TextureRangeInfo(this.start,this.count);
 }
 
 class ImageDataInfo {

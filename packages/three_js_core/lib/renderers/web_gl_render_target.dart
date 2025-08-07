@@ -15,14 +15,9 @@ class RenderTarget with EventDispatcher {
   late bool depthBuffer;
   late bool resolveDepthBuffer;
   late bool resolveStencilBuffer;
-  // bool isWebGLCubeRenderTarget = false;
-  // bool isWebGL3DRenderTarget = false;
-  // bool isWebGLArrayRenderTarget = false;
   bool isXRRenderTarget = false;
-  // bool isWebGLMultipleRenderTargets = false;
 
   List<Texture> textures = [];
-  //late Texture _texture;
   late Vector4 scissor;
   late bool scissorTest;
   late Vector4 viewport;
@@ -50,7 +45,6 @@ class RenderTarget with EventDispatcher {
 		  textures[0] = value;
     }
 	}
-
 
   RenderTarget(this.width, this.height, [WebGLRenderTargetOptions? options]):super(){
     scissor = Vector4(0, 0, width.toDouble(), height.toDouble());
@@ -163,6 +157,10 @@ class RenderTarget with EventDispatcher {
 
   void dispose() {
     dispatchEvent(Event(type: "dispose"));
+    textures.forEach((t){
+      t.dispose();
+    });
+    textures.clear();
   }
 }
 
@@ -195,10 +193,10 @@ class WebGLRenderTarget extends RenderTarget {
     texture.dispose();
     options.dispose();
 
-    textures.forEach((t){
-      t.dispose();
-    });
-    textures.clear();
+    // textures.forEach((t){
+    //   t.dispose();
+    // });
+    // textures.clear();
   }
 }
 
@@ -236,6 +234,31 @@ class WebGLRenderTargetOptions {
     depthTexture?.dispose();
     depthTexture = null;
   }
+
+  WebGLRenderTargetOptions.create({
+    this.wrapS,
+    this.count = 1,
+    this.resolveDepthBuffer = false,
+    this.resolveStencilBuffer = false,
+    this.internalFormat,
+    this.wrapT,
+    this.wrapR,
+    this.magFilter,
+    this.minFilter,
+    this.format,
+    this.type,
+    this.anisotropy,
+    this.depthBuffer,
+    this.mapping,
+    this.generateMipmaps = false,
+    this.depthTexture,
+    this.encoding,
+    this.useMultisampleRenderToTexture = false,
+    this.ignoreDepth = false,
+    this.useRenderToTexture = false,
+    this.samples,
+    this.colorSpace,
+  });
 
   WebGLRenderTargetOptions([Map<String, dynamic>? json]) {
     json ??= {};

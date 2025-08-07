@@ -91,22 +91,6 @@ class WeakMap<K, V> {
   }
 
   void clear() {
-    // _map.forEach((k,dynamic v){
-    //   if(v is List){
-    //     v.forEach((l){
-    //       l?.dispose();
-    //     });
-    //   }
-    //   else if(v is Map){
-    //     v.forEach((nk,nv){
-    //       print('Type: ${nv.runtimeType}');
-    //     });
-    //   }
-    //   else if(v is! num){
-    //     v?.dispose();
-    //   }
-    // });
-
     _map.clear();
     // expando = Expando();
     // _keys.clear();

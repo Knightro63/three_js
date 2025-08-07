@@ -155,11 +155,10 @@ class _State extends State<WebglAnimationWalk> {
     threeJs.domElement.addEventListener( three.PeripheralType.keydown, onKeyDown );
     threeJs.domElement.addEventListener( three.PeripheralType.keyup, onKeyUp );
 
-    await three.RGBELoader().setPath('assets/textures/equirectangular/').fromAsset( 'lobe.hdr').then(( texture ) {
-      texture.mapping = three.EquirectangularReflectionMapping;
-      threeJs.scene.environment = texture;
-      threeJs.scene.environmentIntensity = 1.5;
-    });
+    final three.DataTexture texture = await three.RGBELoader().setPath('assets/textures/equirectangular/').fromAsset( 'moonless_golf_1k.hdr');
+    texture.mapping = three.EquirectangularReflectionMapping;
+    threeJs.scene.environment = texture;
+    threeJs.scene.environmentIntensity = 1.5;
 
     await loadModel();
     await addFloor();
@@ -169,10 +168,10 @@ class _State extends State<WebglAnimationWalk> {
     const size = 50.0;
     const repeat = 16.0;
     
-    final pointLight = three.PointLight( 0xffffff, 0.05 );
-    threeJs.camera.add( pointLight );
-    threeJs.scene.add(threeJs.camera);
-    threeJs.camera.lookAt(threeJs.scene.position);
+    // final pointLight = three.PointLight( 0xffffff, 0.05 );
+    // threeJs.camera.add( pointLight );
+    // threeJs.scene.add(threeJs.camera);
+    // threeJs.camera.lookAt(threeJs.scene.position);
 
     final maxAnisotropy = threeJs.renderer!.capabilities.getMaxAnisotropy().toInt();
     final textureLoader = three.TextureLoader();
@@ -234,7 +233,7 @@ class _State extends State<WebglAnimationWalk> {
             object.castShadow = true;
             object.receiveShadow = true;
             object.material?.shadowSide = three.DoubleSide;
-            //object.material.envMapIntensity = 0.5;
+            object.material?.envMapIntensity = 0.5;
             object.material?.metalness = 1.0;
             object.material?.roughness = 0.2;
             object.material?.color.setValues( 1, 1, 1 );

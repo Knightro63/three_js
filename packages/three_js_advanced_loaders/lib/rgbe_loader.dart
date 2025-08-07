@@ -105,7 +105,7 @@ class RGBELoader extends DataTextureLoader {
       rgbeFormatError = 3,
       rgbeMemoryError = 4;
 
-    rgbeError(rgbeErrorCode, msg) {
+    rgbeError(int rgbeErrorCode, [String? msg]) {
       switch (rgbeErrorCode) {
         case rgbeReadError:
           console.error('RGBELoader Read Error: ${msg ?? ""}');
@@ -116,10 +116,8 @@ class RGBELoader extends DataTextureLoader {
         case rgbeFormatError:
           console.error('RGBELoader Bad File Format: ${msg ?? ""}');
           break;
-        case rgbeMemoryError:
-          console.error('RGBELoader: Error: ${msg ?? ""}');
-          break;
         default:
+          console.error('RGBELoader: Memory Error: ${msg ?? ""}');
       }
 
       return rgbeRETURNFAILURE;
@@ -232,15 +230,15 @@ class RGBELoader extends DataTextureLoader {
       header["valid"] = valid;
 
       header["programtype"] = match?[1];
-      header["string"] += 'line\n';
+      header["string"] += '$line\n';
 
       while (true) {
         line = fgets(buffer);
         if (null == line) break;
-        header["string"] += 'line\n';
+        header["string"] += '$line\n';
 
         if (line.isNotEmpty && '#' == line[0]) {
-          header["comments"] += 'line\n';
+          header["comments"] += '$line\n';
           continue; // comment line
         }
 
@@ -263,8 +261,8 @@ class RGBELoader extends DataTextureLoader {
         if (dimensionsRe.hasMatch(line)) {
           match = dimensionsRe.firstMatch(line);
           header["valid"] |= rgbeVALIDDIMENSIONS;
-          header["height"] = int.parse(match![1]!);
-          header["width"] = int.parse(match[2]!);
+          header["height"] = int.parse(match![1]!, radix: 10);
+          header["width"] = int.parse(match[2]!, radix: 10);
         }
 
         if ((header["valid"] & rgbeVALIDFORMAT) == 1 &&
@@ -352,7 +350,8 @@ class RGBELoader extends DataTextureLoader {
             }
             //ptr += count;
 
-          } else {
+          } 
+          else {
             // a literal-run
             scanlineBuffer.setAll(ptr, buffer.sublist(pos, pos + count));
             ptr += count;
