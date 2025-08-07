@@ -4,6 +4,7 @@ import 'dart:typed_data';
 //import 'dart:ui' as ui;
 import 'package:web/web.dart' as html;
 import 'dart:convert';
+import 'dart:ui' as ui;
 import 'package:three_js_core/three_js_core.dart';
 
 import '../utils/blob.dart';
@@ -120,11 +121,11 @@ Future<html.HTMLImageElement> createImageElementFromBytes(Uint8List bytes, [Stri
   // Create an ImageElement and set its source to the data URL
   html.HTMLImageElement imageElement = html.HTMLImageElement();
   imageElement.src = dataUrl;
-  //int start = DateTime.now().millisecondsSinceEpoch;
-  //print(DateTime.now());
-  List? dimensions = _getJpegDimensions(bytes);//await _getDimensions(bytes);//
-  //print(DateTime.now().millisecondsSinceEpoch-start);
-  //imageElement = setDimensions(imageElement, dimensions);
+  // int start = DateTime.now().millisecondsSinceEpoch;
+  // print(start);
+  List? dimensions = await _getDimensions(bytes);
+  // print(DateTime.now().millisecondsSinceEpoch-start);
+  // imageElement = setDimensions(imageElement, dimensions);
   if (dimensions != null) {
     console.verbose("extracted dimension width ${dimensions[0]} and height ${dimensions[1]}");
     imageElement.width = dimensions[0];
@@ -152,8 +153,8 @@ Future<ImageElement?> processImage(Uint8List? bytes, String? url, bool flipY) as
         url: url,
         data: imageElement,
         width: imageElement.width,
-        height: imageElement.height
-      )
+        height: imageElement.height,
+      ),
     );
   }
   else{

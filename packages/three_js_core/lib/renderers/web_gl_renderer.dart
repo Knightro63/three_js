@@ -21,8 +21,8 @@ class WebGLRenderer {
   bool reverseDepthBuffer = false;
 
   bool renderBackground = false;
-  late WebGLRenderList? currentRenderList;
-  late WebGLRenderState? currentRenderState;
+  WebGLRenderList? currentRenderList;
+  WebGLRenderState? currentRenderState;
 
   // render() can be called from within a callback triggered by another render.
 

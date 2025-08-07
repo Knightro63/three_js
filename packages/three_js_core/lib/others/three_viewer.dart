@@ -90,7 +90,7 @@ class ThreeJS with WidgetsBindingObserver{
   bool visible = true;
 
   FlutterAngleTexture? texture;
-  late final RenderingContext gl;
+  RenderingContext? gl;
 
   core.WebGLRenderTarget? renderTarget;
   core.WebGLRenderer? renderer;
@@ -301,7 +301,9 @@ class ThreeJS with WidgetsBindingObserver{
   }
 
   Future<void> initScene() async{
-    initRenderer();
+    if (renderer == null) {
+      initRenderer();
+    }
     await setup?.call();
     mounted = true;
     ticker = Ticker(animate);
@@ -327,7 +329,9 @@ class ThreeJS with WidgetsBindingObserver{
     }
 
     console.info(texture?.toMap());
-    gl = texture!.getContext();
+    if (gl == null) {
+      gl = texture!.getContext();
+    }
     await initScene();
   }
 
