@@ -67,15 +67,15 @@ html.HTMLImageElement setDimensions(html.HTMLImageElement imageElement, String? 
   return imageElement;
 }
 
-// Future<List>? _getDimensions(Uint8List bytes) async{
-//   final codec = await ui.instantiateImageCodec(bytes);
-//   final frameInfo = await codec.getNextFrame();
-//   final width = frameInfo.image.width;
-//   final height = frameInfo.image.height;
-//   frameInfo.image.dispose();
+Future<List>? _getDimensions(Uint8List bytes) async{
+  final codec = await ui.instantiateImageCodec(bytes);
+  final frameInfo = await codec.getNextFrame();
+  final width = frameInfo.image.width;
+  final height = frameInfo.image.height;
+  frameInfo.image.dispose();
 
-//   return [width, height];
-// }
+  return [width, height];
+}
 
 List? _getJpegDimensions(Uint8List bytes) {
   // Verify the JPEG header (SOI marker)
