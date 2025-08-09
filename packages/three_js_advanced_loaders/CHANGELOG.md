@@ -1,3 +1,8 @@
+## 0.2.2
+
+* Fixed fbx change texture location bug
+* Fixed Tween bug
+
 ## 0.2.1
 
 * Removed archive

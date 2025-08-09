@@ -1,3 +1,9 @@
+## 0.2.2
+
+* Updated to the latest version of three_js_math
+* Added png quick support
+* Removed some global variables
+
 ## 0.2.1
 
 * Fixed: WASM not being supported on pub.dev

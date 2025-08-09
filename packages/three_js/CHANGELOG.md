@@ -1,3 +1,7 @@
+## 0.2.2
+
+* Updated to the latest version of three_js apis
+
 ## 0.2.1
 
 * Updated: console logger for wasm

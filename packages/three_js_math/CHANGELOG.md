@@ -1,3 +1,8 @@
+## 0.2.2
+
+* Updated to newest version of flutter_angle: 0.3.4
+* Removed some global variables
+
 ## 0.2.1
 
 * Updated to newest version of flutter_angle: 0.3.3
