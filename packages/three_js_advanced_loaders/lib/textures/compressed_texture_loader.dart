@@ -16,7 +16,7 @@ import 'package:three_js_core/three_js_core.dart';
 /// ```
 class CompressedTextureLoader extends Loader {
   late final FileLoader _loader; 
-  final texture = CompressedTexture();
+  final texture = CompressedTexture([]);
   List images = [];
   int loaded = 0;
 
@@ -29,6 +29,7 @@ class CompressedTextureLoader extends Loader {
     super.dispose();
     _loader.dispose();
   }
+
   void _init(){
     _loader.setResponseType('arraybuffer');
     _loader.setRequestHeader(requestHeader);

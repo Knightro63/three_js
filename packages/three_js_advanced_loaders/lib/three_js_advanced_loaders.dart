@@ -12,3 +12,4 @@ export 'tga_loader.dart';
 export 'collada/index.dart';
 export 'md2/index.dart';
 export 'bvh_loader.dart';
+export 'dds_loader.dart';

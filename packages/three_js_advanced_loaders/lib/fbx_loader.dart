@@ -305,6 +305,14 @@ class __FBXTreeParser {
         type = 'image/tga';
         break;
 
+      case 'dds':
+        if (manager.getHandler('.dds') == null) {
+          console.warning('FBXLoader: DDS loader not found, skipping $fileName');
+        }
+
+        type = 'image/dds';
+        break;
+
 			case 'webp':
 
 				type = 'image/webp';
@@ -410,6 +418,18 @@ class __FBXTreeParser {
         texture = (await loader.unknown(fileName)) as Texture;
       }
     } 
+    else if (extension == 'dds') {
+      print('is dds');
+      final loader = manager.getHandler('.dds');
+      if (loader == null) {
+        console.warning('FBXLoader: DDS loader not found, creating placeholder texture for ${textureNode["RelativeFilename"]}');
+        texture = Texture();
+      } 
+      else {
+        loader.setPath(textureLoader.path);
+        texture = (await loader.unknown(fileName)) as Texture;
+      }
+    }
     else if (extension == 'psd') {
       console.warning('FBXLoader: PSD textures are not supported, creating placeholder texture for ${textureNode["RelativeFilename"]}');
       texture = Texture();

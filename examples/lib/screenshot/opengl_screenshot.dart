@@ -94,8 +94,8 @@ class _State extends State<OpenglScreenshot> {
 
     threeJs.scene = three.Scene();
 
-    threeJs.camera = three.PerspectiveCamera(45, threeJs.width / threeJs.height, 0.25, 20);
-    threeJs.camera.position.setValues( - 0, 0, 2.7 );
+    threeJs.camera = three.PerspectiveCamera(75, threeJs.width / threeJs.height, 0.1, 1000);
+    threeJs.camera.position.setValues( 0,0,5 );
     threeJs.camera.lookAt(threeJs.scene.position);
 
     controls = three.OrbitControls(threeJs.camera, threeJs.globalKey);
