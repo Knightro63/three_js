@@ -29,27 +29,47 @@ class Settings{
     this.toneMappingExposure = 1.0,
     this.logarithmicDepthBuffer = false,
     this.stencil = true,
-    this.xr
+    this.xr,
+    this.antialias = false,
+
+
+    this.depth = true,
+    this.premultipliedAlpha = true,
+    this.preserveDrawingBuffer = false,
+    this.powerPreference = core.PowerPreference.defaultp,
+    this.failIfMajorPerformanceCaveat = false,
+    this.reverseDepthBuffer = false,
+    this.precision = core.Precision.highp,
   }){
     this.renderOptions = renderOptions ?? {
       "format": RGBAFormat,
       "samples": 4
     };
   }
-
-  WebXRManager Function(WebGLRenderer renderer, dynamic gl)? xr;
-  bool animate;
+  
+  bool premultipliedAlpha;
+  bool preserveDrawingBuffer;
+  PowerPreference powerPreference;
+  bool reverseDepthBuffer;
+  bool failIfMajorPerformanceCaveat;
+  bool depth = true;
+  Precision precision;
+  bool alpha;
+  bool stencil;
   bool logarithmicDepthBuffer;
+  int clearColor;
+  double clearAlpha;
+  bool antialias;
+  WebXRManager Function(WebGLRenderer renderer, dynamic gl)? xr;
+
+  
+  bool animate;
   bool useSourceTexture;
   bool enableShadowMap;
   bool autoClear;
-  bool alpha;
-  bool stencil;
   bool autoClearDepth;
   bool autoClearStencil;
   bool localClippingEnabled;
-  int clearColor;
-  double clearAlpha;
   late Map<String,dynamic> renderOptions;
   List<Plane> clippingPlanes;
   int outputEncoding;
@@ -230,18 +250,25 @@ class ThreeJS with WidgetsBindingObserver{
   }
   
   void initRenderer() {
-    Map<String, dynamic> options = {
-      "width": width,
-      "height": height,
-      "gl": gl,
-      "stencil": settings.stencil,
-      "antialias": true,
-      "alpha": settings.alpha,
-      "clearColor": settings.clearColor,
-      "clearAlpha": settings.clearAlpha,
-      "logarithmicDepthBuffer": settings.logarithmicDepthBuffer,
-      'xr': settings.xr
-    };
+    WebGLRendererParameters options = WebGLRendererParameters(
+      width: width,
+      height: height,
+      gl: gl!,
+      stencil: settings.stencil,
+      antialias: settings.antialias,
+      alpha: settings.alpha,
+      clearColor: settings.clearColor,
+      clearAlpha: settings.clearAlpha,
+      logarithmicDepthBuffer: settings.logarithmicDepthBuffer,
+      xr: settings.xr,
+      depth: settings.depth,
+      premultipliedAlpha: settings.premultipliedAlpha,
+      preserveDrawingBuffer: settings.preserveDrawingBuffer,
+      powerPreference: settings.powerPreference,
+      failIfMajorPerformanceCaveat: settings.failIfMajorPerformanceCaveat,
+      reverseDepthBuffer: settings.reverseDepthBuffer,
+      precision: settings.precision,
+    );
     
     renderer = core.WebGLRenderer(options);
     renderer!.setPixelRatio(dpr);
@@ -324,7 +351,7 @@ class ThreeJS with WidgetsBindingObserver{
           height: height.toInt(), 
           dpr: dpr,
           alpha: settings.alpha,
-          antialias: true,
+          antialias: settings.antialias,
           customRenderer: !settings.useSourceTexture,
           useSurfaceProducer: true
         )

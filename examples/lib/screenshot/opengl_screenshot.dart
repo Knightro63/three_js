@@ -90,7 +90,10 @@ class _State extends State<OpenglScreenshot> {
 
   Future<void> setup() async {
     buffer = three.Uint8Array( desiredWidth * desiredHeight * 4 );
-    rt = three.WebGLRenderTarget( desiredWidth, desiredHeight, three.WebGLRenderTargetOptions({'colorSpace': three.SRGBColorSpace}) );
+    rt = three.WebGLRenderTarget( desiredWidth, desiredHeight, three.WebGLRenderTargetOptions({
+      'colorSpace': three.SRGBColorSpace,
+      'samples': 4,
+    }) );
 
     threeJs.scene = three.Scene();
 
@@ -116,7 +119,7 @@ class _State extends State<OpenglScreenshot> {
     final result = await loader.fromAsset('DamagedHelmet.gltf');
     final object = result!.scene;
     threeJs.scene.add(object);
-  
+
     threeJs.addAnimationEvent((dt){
       controls.update();
     });

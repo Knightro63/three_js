@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:example/src/statistics.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
 import 'package:three_js_geometry/three_js_geometry.dart';
@@ -74,7 +75,7 @@ class _State extends State<WebglShaderLava> {
 
     threeJs.scene = three.Scene();
 
-    final textureLoader = three.TextureLoader();
+    final textureLoader = three.TextureLoader(flipY: !kIsWeb);
 
     final cloudTexture = await textureLoader.fromAsset( 'assets/textures/lava/cloud.png' );
     final lavaTexture = await textureLoader.fromAsset( 'assets/textures/lava/lavatile.jpg' );

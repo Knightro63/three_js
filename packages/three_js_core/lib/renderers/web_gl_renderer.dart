@@ -1,9 +1,85 @@
 part of three_renderers;
 
 enum RenderType{after,before,custom}
+enum PowerPreference{high,defaultp,low;
+
+  String get name => _name();
+  String _name(){
+    if(index == 0){
+      return 'high-performance';
+    }
+    else if(index == 2){
+      return 'low-power';
+    }
+    else{
+      return 'default';
+    }
+  }
+}
+
+enum Precision{highp,mediump,lowp}
+
+class WebGLRendererParameters{
+  double width;
+  double height;
+  RenderingContext gl;
+  bool stencil;
+  bool antialias;
+  bool alpha;
+  int clearColor;
+  double clearAlpha;
+  bool logarithmicDepthBuffer;
+  bool premultipliedAlpha;
+  bool preserveDrawingBuffer;
+  PowerPreference powerPreference;
+  bool reverseDepthBuffer;
+  bool failIfMajorPerformanceCaveat;
+  bool depth = true;
+  Precision precision;
+  WebXRManager Function(WebGLRenderer renderer, dynamic gl)? xr;
+
+  WebGLRendererParameters({
+    required this.width,
+    required this.height,
+    required this.gl,
+    this.stencil = true,
+    this.antialias = false,
+    this.alpha = false,
+    this.clearAlpha = 1.0,
+    this.clearColor = 0x000000,
+    this.logarithmicDepthBuffer = false,
+    this.depth = true,
+    this.premultipliedAlpha = true,
+    this.preserveDrawingBuffer = false,
+    this.powerPreference = PowerPreference.defaultp,
+    this.failIfMajorPerformanceCaveat = false,
+    this.reverseDepthBuffer = false,
+    this.precision = Precision.highp,
+    this.xr,
+  });
+
+  factory WebGLRendererParameters.fromMap(Map<String,dynamic> map){
+    return WebGLRendererParameters(
+      width: map["width"].toDouble(),
+      height: map["height"].toDouble(),
+      depth: map["depth"] ?? true,
+      stencil: map["stencil"] ?? true,
+      antialias: map["antialias"] ?? false,
+      premultipliedAlpha: map["premultipliedAlpha"] ?? true,
+      preserveDrawingBuffer: map["preserveDrawingBuffer"] ?? false,
+      powerPreference: map["powerPreference"] ?? "default",
+      failIfMajorPerformanceCaveat: map["failIfMajorPerformanceCaveat"] ?? false,
+      alpha: map["alpha"] ?? false,
+      gl: map["gl"],
+      xr: map["xr"],
+      precision: map['precision'],
+      reverseDepthBuffer: map['reverseDepthBuffer']
+    );
+  }
+}
 
 class WebGLRenderer {
-  late Map<String, dynamic> parameters;
+  late WebGLRendererParameters parameters;
 
   bool _didDispose = false;
   bool alpha = false;
@@ -16,7 +92,7 @@ class WebGLRenderer {
 
   bool premultipliedAlpha = true;
   bool preserveDrawingBuffer = false;
-  String powerPreference = "default";
+  PowerPreference powerPreference = PowerPreference.defaultp;
   bool failIfMajorPerformanceCaveat = false;
   bool reverseDepthBuffer = false;
 
@@ -164,31 +240,31 @@ class WebGLRenderer {
   late final Framebuffer _scratchFrameBuffer;
   late final Framebuffer _srcFramebuffer;
 	late final Framebuffer _dstFramebuffer;
+  WebGLRenderer(this.parameters) {
+    _width = this.parameters.width;
+    _height = this.parameters.height;
 
-  WebGLRenderer(Map<String, dynamic>? parameters) {
-    this.parameters = parameters ?? <String, dynamic>{};
+    depth = this.parameters.depth;
+    stencil = this.parameters.stencil;
+    antialias = this.parameters.antialias;
+    premultipliedAlpha = this.parameters.premultipliedAlpha;
+    preserveDrawingBuffer = this.parameters.preserveDrawingBuffer;
+    powerPreference = this.parameters.powerPreference;
 
-    _width = this.parameters["width"].toDouble();
-    _height = this.parameters["height"].toDouble();
+    failIfMajorPerformanceCaveat = this.parameters.failIfMajorPerformanceCaveat;
 
-    depth = this.parameters["depth"] ?? true;
-    stencil = this.parameters["stencil"] ?? true;
-    antialias = this.parameters["antialias"] ?? false;
-    premultipliedAlpha = this.parameters["premultipliedAlpha"] ?? true;
-    preserveDrawingBuffer = this.parameters["preserveDrawingBuffer"] ?? false;
-    powerPreference = this.parameters["powerPreference"] ?? "default";
-
-    failIfMajorPerformanceCaveat = this.parameters["failIfMajorPerformanceCaveat"] ?? false;
-
-    alpha = this.parameters["alpha"] ?? false;
+    alpha = this.parameters.alpha;
 
     _viewport = Vector4(0, 0, width, height);
     _scissor = Vector4(0, 0, width, height);
 
-    _gl = this.parameters["gl"];
-    _setXR = this.parameters["xr"];
+    _gl = this.parameters.gl;
+    _setXR = this.parameters.xr;
 
     initGLContext();
+  }
+  factory WebGLRenderer.fromMap([Map<String, dynamic>? parameters]) {
+    return WebGLRenderer(WebGLRendererParameters.fromMap(parameters ?? {}));
   }
 
   void initGLContext() {
@@ -1777,12 +1853,11 @@ class WebGLRenderer {
         }
 
         final halfFloatSupportedByExt = textureType == HalfFloatType &&
-            (extensions.get('EXT_color_buffer_half_float') ||
-                (capabilities.isWebGL2 && extensions.get('EXT_color_buffer_float')));
+            (extensions.has('EXT_color_buffer_half_float') ||
+                (capabilities.isWebGL2 && extensions.has('EXT_color_buffer_float')));
 
         if (textureType != UnsignedByteType &&
-            utils.convert(textureType) !=
-                _gl.getParameter(WebGL.IMPLEMENTATION_COLOR_READ_TYPE) && // IE11, Edge and Chrome Mac < 52 (#9513)
+            (kIsWeb && utils.convert(textureType) != _gl.getParameter(WebGL.IMPLEMENTATION_COLOR_READ_TYPE)) && // IE11, Edge and Chrome Mac < 52 (#9513)
             !(textureType == FloatType &&
                 (capabilities.isWebGL2 ||
                     extensions.get('OES_texture_float') ||

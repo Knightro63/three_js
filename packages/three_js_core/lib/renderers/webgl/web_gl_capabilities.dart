@@ -4,7 +4,7 @@ class WebGLCapabilities {
   bool _didDispose = false;
   bool isWebGL2 = true;
 
-  Map<String, dynamic> parameters;
+  WebGLRendererParameters parameters;
   RenderingContext gl;
   WebGLExtensions extensions;
   WebGLUtils utils;
@@ -31,7 +31,7 @@ class WebGLCapabilities {
   bool drawBuffers = true;
 
   WebGLCapabilities(this.gl, this.extensions, this.parameters, this.utils) {
-    precision = parameters["precision"] ?? "highp";
+    precision = parameters.precision.name;
 
     maxPrecision = getMaxPrecision(precision);
     if (maxPrecision != precision) {
@@ -39,8 +39,8 @@ class WebGLCapabilities {
       precision = maxPrecision;
     }
 
-    logarithmicDepthBuffer = parameters["logarithmicDepthBuffer"] == true;
-    reverseDepthBuffer = parameters['reverseDepthBuffer'] == true && extensions.has( 'EXT_clip_control' );
+    logarithmicDepthBuffer = parameters.logarithmicDepthBuffer == true;
+    reverseDepthBuffer = parameters.reverseDepthBuffer == true && extensions.has( 'EXT_clip_control' );
 
     maxTextures = gl.getParameter(WebGL.MAX_TEXTURE_IMAGE_UNITS);
     maxVertexTextures = gl.getParameter(WebGL.MAX_VERTEX_TEXTURE_IMAGE_UNITS);
@@ -111,7 +111,7 @@ class WebGLCapabilities {
   void dispose(){
     if(_didDispose) return;
     _didDispose = true;
-    parameters.clear();
+    //parameters.clear();
     extensions.dispose();
   }
 }

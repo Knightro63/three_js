@@ -29,6 +29,10 @@ class _MyAppState extends State<MultiViews> {
           const MultiViews1(),
           Container(height: 2, color: Colors.red),
           const MultiViews2(),
+          Container(
+            width: 100,
+            height: 1000,
+          )
         ],
       )
     );

@@ -53,7 +53,9 @@ dependency_overrides:
       path: permission_handler_apple
   file_picker: ^10.1.9
   three_js_core:
-  #   path: ../packages/three_js_core
+    path: ../packages/three_js_core
+  three_js_core_loaders:
+    path: ../packages/three_js_core_loaders
   # three_js_math:
   #   path: ../packages/three_js_math
   # three_js_advanced_loaders:

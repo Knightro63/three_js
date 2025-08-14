@@ -635,12 +635,7 @@ class GLTFParser {
     }
     else if (sourceURI != null) {
       final String resolve = LoaderUtils.resolveURL(sourceURI, options["path"]);
-      if(resolve.startsWith('assets') || resolve.startsWith('packages')){
-        texture = await loader.fromAsset(resolve);
-      }
-      else{//if(resolve.contains("https")){
-        texture = await loader.fromNetwork(Uri.parse(resolve));
-      }
+      texture = await loader.unknown(resolve);
     } 
     else if (sourceURI == null) {
       throw ('GLTFLoader: Image $sourceIndex is missing URI and bufferView');
