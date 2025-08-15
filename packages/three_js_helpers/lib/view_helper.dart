@@ -56,11 +56,17 @@ class ViewHelper extends Object3D {
   late final Object3D negYAxisHelper;
   late final Object3D negZAxisHelper;
 
-  Size screenSize;
+  final Size screenSize;
   OffsetType offsetType;
   late final Vector2 _offset;
   Vector2? _pointerPos;
   final Vector2 _scissorPos = Vector2();
+
+  bool _didChange = true;
+  final Vector4 _viewport = Vector4();
+  late Size size;
+  double ratioX = 0;
+  double ratioY = 0;
 
   ViewHelper({
     required this.camera, 
@@ -70,7 +76,7 @@ class ViewHelper extends Object3D {
     this.offsetType = OffsetType.bottomLeft,
   }):super(){
     _offset = offset ?? Vector2();
-    _calculatePosition();
+    
     orthoCamera.position.setValues( 0, 0, 2 );
 		xAxis = Mesh( geometry, getAxisMaterial( color1 ) );
 		yAxis = Mesh( geometry, getAxisMaterial( color2 ) );
@@ -120,31 +126,39 @@ class ViewHelper extends Object3D {
 		interactiveObjects.add( negYAxisHelper );
 		interactiveObjects.add( negZAxisHelper );
 
+    add(Mesh(PlaneGeometry(10,10),MeshBasicMaterial.fromMap({'color': color1}))..position.z = -1);
+
     _activate();
   }
+
   void _calculatePosition(){
     final RenderBox renderBox = listenableKey.currentContext!.findRenderObject() as RenderBox;
-    final size = renderBox.size;
+    size = renderBox.size;
+    ratioX = _viewport.z/size.width;
+    ratioY = _viewport.w/size.height;
+
+    final ox = _offset.x*ratioX;
+    final oy = _offset.y*ratioY;
 
     if(offsetType == OffsetType.bottomLeft){
-      _scissorPos.x = _offset.x;
-      _scissorPos.y = _offset.y;
+      _scissorPos.x = ox;
+      _scissorPos.y = oy;
     }
     else if(offsetType == OffsetType.bottomRight){
-      _scissorPos.x = size.width-(_offset.x+screenSize.width);
-      _scissorPos.y = _offset.y;
+      _scissorPos.x = _viewport.z-(ox+screenSize.width*ratioX);
+      _scissorPos.y = oy;
     }
     else if(offsetType == OffsetType.topLeft){
-      _scissorPos.x = _offset.x;
-      _scissorPos.y = size.height-(_offset.y+screenSize.height);
+      _scissorPos.x = ox;
+      _scissorPos.y = _viewport.w-(oy+screenSize.height*ratioY);
     }
     else if(offsetType == OffsetType.topRight){
-      _scissorPos.x = size.width-(_offset.x+screenSize.width);
-      _scissorPos.y = size.height-(_offset.y+screenSize.height);
+      _scissorPos.x = _viewport.z-screenSize.width*ratioX+ox;
+      _scissorPos.y = _viewport.w-screenSize.height*ratioY+oy;
     }
     else if(offsetType == OffsetType.center){
-      _scissorPos.x = (size.width/2-(screenSize.width)/2);//offset.x+
-      _scissorPos.y = (size.height/2-(screenSize.height)/2);//offset.y+
+      _scissorPos.x = _viewport.z/2-screenSize.width+ox;
+      _scissorPos.y = _viewport.w/2-screenSize.height+oy;
     }
   }
   void render(WebGLRenderer renderer) {
@@ -179,9 +193,18 @@ class ViewHelper extends Object3D {
     }
 
     renderer.clearDepth();
-
     renderer.getViewport( viewport );
-    renderer.setViewport( _scissorPos.width, _scissorPos.height, screenSize.width, screenSize.height );
+    if(viewport.z != _viewport.z || viewport.w != _viewport.w){
+      _viewport.setFrom(viewport);
+      _calculatePosition();
+      _didChange = true;
+    }
+    renderer.setViewport( 
+      _scissorPos.x,
+      _scissorPos.y,
+      screenSize.width*ratioX, 
+      screenSize.height*ratioY 
+    );
 
     renderer.render( this, orthoCamera );
     renderer.setViewport( viewport.x, viewport.y, viewport.z, viewport.w );
@@ -228,41 +251,42 @@ class ViewHelper extends Object3D {
     dummy.lookAt( targetPosition );
     q2.setFrom( dummy.quaternion );
   }
-  void _calculatePointerPosition(Size size){
+  void _calculatePointerPosition(){
     _pointerPos = Vector2();
     if(offsetType == OffsetType.bottomLeft){
       _pointerPos!.x = _offset.x;
-      _pointerPos!.y = size.height-(_offset.y+screenSize.height);
+      _pointerPos!.y = size.height-screenSize.height-_offset.y;
     }
     else if(offsetType == OffsetType.bottomRight){
       _pointerPos!.x = size.width-(_offset.x+screenSize.width);
-      _pointerPos!.y = size.height-(_offset.y+screenSize.height);
+      _pointerPos!.y = size.height-screenSize.height-_offset.y;
     }
     else if(offsetType == OffsetType.topLeft){
       _pointerPos!.x = _offset.x;
-      _pointerPos!.y = _offset.y;//size.height-(offset.y+screenSize.height);
+      _pointerPos!.y = -_offset.y;
     }
     else if(offsetType == OffsetType.topRight){
       _pointerPos!.x = size.width-(_offset.x+screenSize.width);
-      _pointerPos!.y = _offset.y;//size.height-(offset.y+screenSize.height);
+      _pointerPos!.y = -_offset.y;
     }
     else if(offsetType == OffsetType.center){
-      _pointerPos!.x = (size.width/2-(screenSize.width)/2);//offset.x+
-      _pointerPos!.y = (size.height/2-(screenSize.height)/2);//offset.y+
+      _pointerPos!.x = size.width/2-screenSize.width/2+_offset.x;
+      _pointerPos!.y = size.height/2-screenSize.height/2-_offset.y;
     }
+
+    //_pointerPos!.x += -4*(_pointerPos!.x/(size.width-(_offset.x+screenSize.width)))+2;
+    _pointerPos!.y += 4*(_pointerPos!.y/(size.height-screenSize.height-_offset.y))+3;
   }
 
   bool handleClick(WebPointerEvent event ) {
-    if(_pointerPos == null){
-      final RenderBox renderBox = listenableKey.currentContext!.findRenderObject() as RenderBox;
-      final size = renderBox.size;
-      _calculatePointerPosition(size);
+    if(_pointerPos == null || _didChange){
+      _calculatePointerPosition();
     }
 
     if (animating) return false;
     mouse.x = (event.clientX - _pointerPos!.x) / screenSize.width * 2 - 1;
     mouse.y  = -(event.clientY - _pointerPos!.y+2) / screenSize.height * 2 + 1;
-
+    print(mouse.storage);
     raycaster.setFromCamera( mouse, orthoCamera );
     final intersects = raycaster.intersectObjects( interactiveObjects, false );
     if ( intersects.isNotEmpty) {
@@ -318,6 +342,7 @@ class ViewHelper extends Object3D {
 
   @override
   void dispose() {
+    if(disposed) return;
     super.dispose();
     geometry.dispose();
 
@@ -338,17 +363,20 @@ class ViewHelper extends Object3D {
     negXAxisHelper.material?.dispose();
     negYAxisHelper.material?.dispose();
     negZAxisHelper.material?.dispose();
-
+  
     _deactivate();
+    disposed = true;
   }
 
   /// Adds the event listeners of the controls.
   void _activate() {
+    if(disposed) return;
     _domElement.addEventListener(PeripheralType.pointerdown, handleClick);
   }
 
   /// Removes the event listeners of the controls.
   void _deactivate() {
+    if(disposed) return;
     _domElement.removeEventListener(PeripheralType.pointerdown, handleClick);
   }
 }

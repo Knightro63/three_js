@@ -123,7 +123,6 @@ class _State extends State<WebglRandomUV> {
     await three.RGBELoader().setPath( 'assets/textures/equirectangular/' ).fromAsset( 'moonless_golf_1k.hdr').then (( texture ) {
       final dataTexture = texture as three.DataTexture;
       dataTexture.mapping = three.EquirectangularReflectionMapping;
-      print(dataTexture.image.data.runtimeType);
       threeJs.scene.background = dataTexture;
       threeJs.scene.environment = dataTexture;
       threeJs.scene.backgroundBlurriness = 0.5;
