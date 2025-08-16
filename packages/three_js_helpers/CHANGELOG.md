@@ -1,3 +1,7 @@
+## 0.2.1
+
+* Updated view helper
+
 ## 0.2.0
 
 * Updated to three_js latest packages.
