@@ -1,3 +1,8 @@
+## 0.2.3
+
+* Updated three_js_core_loaders
+* Updated README
+
 ## 0.2.2
 
 * Updated to the latest version of three_js apis

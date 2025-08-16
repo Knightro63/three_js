@@ -77,39 +77,39 @@ Future<List>? _getDimensions(Uint8List bytes) async{
   return [width, height];
 }
 
-List? _getJpegDimensions(Uint8List bytes) {
-  // Verify the JPEG header (SOI marker)
-  if (bytes.length < 4 || bytes[0] != 0xFF || bytes[1] != 0xD8) {
-    return null; // Not a valid JPEG
-  }
+// List? _getJpegDimensions(Uint8List bytes) {
+//   // Verify the JPEG header (SOI marker)
+//   if (bytes.length < 4 || bytes[0] != 0xFF || bytes[1] != 0xD8) {
+//     return null; // Not a valid JPEG
+//   }
 
-  int offset = 2;
-  while (offset < bytes.length) {
-    // Each segment in a JPEG file starts with 0xFF followed by a marker byte
-    if (bytes[offset] != 0xFF) break;
-    int marker = bytes[offset + 1];
-    offset += 2;
+//   int offset = 2;
+//   while (offset < bytes.length) {
+//     // Each segment in a JPEG file starts with 0xFF followed by a marker byte
+//     if (bytes[offset] != 0xFF) break;
+//     int marker = bytes[offset + 1];
+//     offset += 2;
 
-    // Skip markers that do not contain size information
-    if (marker == 0xC0 || marker == 0xC2) { // Start of Frame markers
-      if (offset + 7 <= bytes.length) {
-        // Extract height and width from the segment
-        int height = (bytes[offset + 3] << 8) + bytes[offset + 4];
-        int width = (bytes[offset + 5] << 8) + bytes[offset + 6];
-        console.verbose("extracted width $width and height $height");
-        return [width, height];
-      } else {
-        break;
-      }
-    } else {
-      // Get the length of this segment
-      int segmentLength = (bytes[offset] << 8) + bytes[offset + 1];
-      offset += segmentLength;
-    }
-  }
+//     // Skip markers that do not contain size information
+//     if (marker == 0xC0 || marker == 0xC2) { // Start of Frame markers
+//       if (offset + 7 <= bytes.length) {
+//         // Extract height and width from the segment
+//         int height = (bytes[offset + 3] << 8) + bytes[offset + 4];
+//         int width = (bytes[offset + 5] << 8) + bytes[offset + 6];
+//         console.verbose("extracted width $width and height $height");
+//         return [width, height];
+//       } else {
+//         break;
+//       }
+//     } else {
+//       // Get the length of this segment
+//       int segmentLength = (bytes[offset] << 8) + bytes[offset + 1];
+//       offset += segmentLength;
+//     }
+//   }
 
-  return null; // Dimensions not found
-}
+//   return null; // Dimensions not found
+// }
 
 Future<html.HTMLImageElement> createImageElementFromBytes(Uint8List bytes, [String? dimensions]) async{
   // Convert bytes to a base64-encoded string

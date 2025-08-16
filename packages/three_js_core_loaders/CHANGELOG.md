@@ -1,3 +1,7 @@
+## 0.2.1
+
+* Updated _getDimensions
+
 ## 0.2.0
 
 * Updated to newest version of three_js core and math.
