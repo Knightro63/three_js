@@ -1,3 +1,7 @@
+## 0.2.3
+
+* Fixed gltf texture bug
+
 ## 0.2.2
 
 * Fixed fbx change texture location bug

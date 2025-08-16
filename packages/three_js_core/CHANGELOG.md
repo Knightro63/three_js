@@ -1,3 +1,7 @@
+## 0.2.3
+
+* Updated to webglrenderer options
+
 ## 0.2.2
 
 * Updated to the latest version of three_js_math
