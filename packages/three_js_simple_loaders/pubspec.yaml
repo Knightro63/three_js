@@ -1,6 +1,6 @@
 name: three_js_simple_loaders
 description: "three_js simple loader package e.g.(obj and stl) converted from threejs and three_dart package."
-version: 0.2.0
+version: 0.2.1
 homepage: https://github.com/Knightro63/three_js/tree/main/packages/three_js_simple_loaders
 
 topics:

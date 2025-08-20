@@ -114,7 +114,7 @@ class MTLLoader extends Loader {
       }
     }
 
-    final materialCreator = MaterialCreator(resourcePath != "" ? resourcePath : path,materialOptions);
+    final materialCreator = MaterialCreator(resourcePath != null ? resourcePath : path,materialOptions);
     materialCreator.setCrossOrigin(crossOrigin);
     materialCreator.setManager(manager);
     materialCreator.setMaterials(materialsInfo);
@@ -455,8 +455,8 @@ class MaterialCreator {
 
   Future<Texture?> loadTexture(url, mapping, onLoad, onProgress, onError) async {
     final manager = (this.manager != null) ? this.manager : defaultLoadingManager;
-     TextureLoader? loader = manager.getHandler(url);
-
+    TextureLoader? loader = manager.getHandler(url);
+    
     if (loader == null) {
       loader = TextureLoader(manager: manager);
       loader.flipY = true;

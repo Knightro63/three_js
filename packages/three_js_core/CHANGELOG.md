@@ -1,3 +1,10 @@
+## 0.2.4
+
+* Added: renderer support options
+* Added: isVisibleOnScreen for scroll support
+* Fixed: window resizing for some devices not functioning correctly
+* Fixed: throw errors with Object3D raycasting
+
 ## 0.2.3
 
 * Updated to webglrenderer options

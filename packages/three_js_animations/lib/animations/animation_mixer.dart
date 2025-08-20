@@ -77,11 +77,9 @@ class AnimationMixer with EventDispatcher {
 
           continue;
         }
-        //TODO
-        //final path = prototypeAction?.propertyBindings[i]?.binding.parsedPath ?? prototypeAction;
-        final path = prototypeAction != null
-            ? prototypeAction.propertyBindings[i]?.binding.parsedPath
-            : null;
+
+        final path = prototypeAction?.propertyBindings[i]?.binding.parsedPath;
+
         binding = PropertyMixer(
             PropertyBinding.create(root, trackName, path) as PropertyBinding,
             track.valueTypeName,

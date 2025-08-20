@@ -127,11 +127,15 @@ class ThreeJS with WidgetsBindingObserver{
   Size? screenSize;
   double dpr = 1.0;
 
-  bool disposed = false;
   WebGLTexture? sourceTexture;
+
   bool pause = false;
-  bool mounted = false;
-  bool updating = false;
+  bool _disposed = false;
+  bool isVisibleOnScreen = true;
+  bool _mounted = false;
+  bool get mounted => _mounted;
+  bool _updating = false;
+  bool get updating => _updating;
 
   void Function()? rendererUpdate;
   void Function(Size newSize)? windowResizeUpdate;
@@ -151,9 +155,9 @@ class ThreeJS with WidgetsBindingObserver{
 
   @override
   void didChangeMetrics() {
-    if (disposed) return;
+    if (_disposed) return;
     _debounceTimer?.cancel(); // Clear existing timer
-    _debounceTimer = Timer(const Duration(milliseconds: 300), () { // Set a new timer
+    _debounceTimer = Timer(Duration(milliseconds: 300+renderNumber*100), () { // Set a new timer
       if (_context != null && _context!.mounted) {
         onWindowResize(_context!);
       }
@@ -161,8 +165,8 @@ class ThreeJS with WidgetsBindingObserver{
   }
 
   void dispose(){
-    if(disposed) return;
-    disposed = true;
+    if(_disposed) return;
+    _disposed = true;
     _debounceTimer?.cancel(); // Cancel timer if active
     _debounceTimer = null;
     WidgetsBinding.instance.removeObserver(this);
@@ -215,10 +219,10 @@ class ThreeJS with WidgetsBindingObserver{
   }
   
   Future<void> animate(Duration duration) async {
-    if (!mounted || disposed || updating) {
+    if (!mounted || _disposed || updating || !isVisibleOnScreen || !visible) {
       return;
     }
-    updating = true;
+    _updating = true;
     double dt = clock.getDelta();
     
     if(settings.animate){
@@ -229,7 +233,7 @@ class ThreeJS with WidgetsBindingObserver{
         }
       }
     }
-    updating = false;
+    _updating = false;
   }
   Future<void> render([double? dt]) async{
     if(sourceTexture == null){
@@ -301,7 +305,7 @@ class ThreeJS with WidgetsBindingObserver{
   }
   
   Future<void> onWindowResize(BuildContext context) async{
-    if (disposed) return;
+    if (_disposed) return;
     double dt = clock.getDelta();
     final mqd = MediaQuery.maybeOf(context);
     if (mqd == null) return;
@@ -337,7 +341,7 @@ class ThreeJS with WidgetsBindingObserver{
       initRenderer();
     }
     await setup?.call();
-    mounted = true;
+    _mounted = true;
     ticker = Ticker(animate);
     ticker?.start();
     onSetupComplete();

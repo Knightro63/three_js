@@ -31,8 +31,8 @@ class _State extends State<WebglLightsSpotlight> {
     });
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
-      setup: setup,      settings: three.Settings(
-
+      setup: setup,      
+      settings: three.Settings(
         enableShadowMap: true,
         shadowMapType: three.PCFSoftShadowMap,
         toneMapping: three.ACESFilmicToneMapping,

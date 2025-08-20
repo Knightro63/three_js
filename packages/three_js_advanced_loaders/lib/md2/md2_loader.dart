@@ -378,7 +378,7 @@ class MD2Loader extends Loader {
 		geometry.morphAttributes['position'] = morphPositions;
 		geometry.morphAttributes['normal'] = morphNormals;
 		geometry.morphTargetsRelative = false;
-  
-		return MD2LoaderData(geometry, AnimationClip.createClipsFromMorphTargetSequences( frames, 10, true ));
+
+		return MD2LoaderData(geometry, AnimationClip.createClipsFromMorphTargetSequences( frames, 10, false ));
 	}
 }

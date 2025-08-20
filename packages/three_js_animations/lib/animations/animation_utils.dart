@@ -46,15 +46,13 @@ class AnimationUtils {
       return (times[i] - times[j]).toInt();
     }
 
-    int  n = times.length;
+    int n = times.length;
     List<int> result = List<int>.filled(n, 0);
     for (int i = 0; i != n; ++i) {
       result[i] = i;
     }
 
-    result.sort((a, b) {
-      return compareTime(a, b);
-    });
+    result.sort(compareTime);
 
     return result;
   }

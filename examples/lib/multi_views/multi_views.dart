@@ -10,6 +10,7 @@ class MultiViews extends StatefulWidget {
 
 class _MyAppState extends State<MultiViews> {
   List<three.FlutterAngleTexture> textures = [];
+  ScrollController controller = ScrollController();
 
   @override
   void initState(){
@@ -24,11 +25,12 @@ class _MyAppState extends State<MultiViews> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
+      controller: controller,
       child: Column(
         children: [
-          const MultiViews1(),
+          MultiViews1(controller: controller,),
           Container(height: 2, color: Colors.red),
-          const MultiViews2(),
+          MultiViews2(controller: controller,),
           Container(
             width: 100,
             height: 1000,
@@ -40,7 +42,11 @@ class _MyAppState extends State<MultiViews> {
 }
 
 class MultiViews1 extends StatefulWidget {
-  const MultiViews1({super.key});
+  const MultiViews1({
+    super.key,
+    required this.controller
+  });
+  final ScrollController controller ;
   @override
   createState() => _MultiViews1State();
 }
@@ -103,12 +109,22 @@ class _MultiViews1State extends State<MultiViews1> {
 
     threeJs.addAnimationEvent((dt){
       object.rotation.x = object.rotation.x + 0.01;
+      if(widget.controller.offset > 299){
+        threeJs.isVisibleOnScreen = false;
+      }
+      else{
+        threeJs.isVisibleOnScreen = true;
+      }
     });
   }
 }
 
 class MultiViews2 extends StatefulWidget {
-  const MultiViews2({super.key});
+  const MultiViews2({
+    super.key,
+    required this.controller
+  });
+  final ScrollController controller ;
   @override
   createState() => _MultiViews2State();
 }
@@ -176,6 +192,13 @@ class _MultiViews2State extends State<MultiViews2> {
       object.rotation.y = object.rotation.y + 0.02;
       object.rotation.x = object.rotation.x + 0.01;
       mixer?.update(dt);
+
+      if(widget.controller.offset > 599){
+        threeJs.isVisibleOnScreen = false;
+      }
+      else{
+        threeJs.isVisibleOnScreen = true;
+      }
     });
   }
 }

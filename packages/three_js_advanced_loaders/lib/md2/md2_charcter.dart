@@ -31,7 +31,7 @@ class MD2Character {
   List<Texture> skinsWeapon = [];
 
   List<MorphAnimMesh> weapons = [];
-  //AnimationAction? activeAnimation;
+  AnimationClip? activeAnimationClip;
   AnimationMixer? mixer;
   void Function()? onLoadComplete;
   int loadCounter = 0;
@@ -112,7 +112,7 @@ class MD2Character {
 			meshBody = mesh;
 
 			meshBody?.clipOffset = 0;
-			activeClip = mesh.animations.isNotEmpty?mesh.animations[0]:null;
+			activeAnimationClip = mesh.animations.isNotEmpty?mesh.animations[0]:null;
 
 			mixer = AnimationMixer( mesh );
 			checkLoadingComplete();
@@ -183,7 +183,7 @@ class MD2Character {
 			}
 		}
 		activeClip = clipName;
-		//syncWeaponAnimation();
+		syncWeaponAnimation();
 	}
 
 	void syncWeaponAnimation() {

@@ -610,7 +610,7 @@ class Object3D with EventDispatcher {
   /// object. Subclasses such as [Mesh], [Line], and [Points]
   /// implement this method in order to use raycasting.
   void raycast(Raycaster raycaster, List<Intersection> intersects) {
-    throw("Object3D not implimented");
+    console.warning("Object3D not implimented");
   }
 
   /// [callback] - A function with as first argument an object3D object.
@@ -732,7 +732,7 @@ class Object3D with EventDispatcher {
   }
 
   void computeBoundingSphere(){
-    throw('Object3D.computeBoundingSphere is Not implimented!');
+    console.warning('Object3D.computeBoundingSphere is Not implimented!');
   }
 
   /// meta -- object containing metadata such as materials, textures or images

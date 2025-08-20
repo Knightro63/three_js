@@ -1,3 +1,7 @@
+## 0.2.1
+
+* Fixed mtl loader
+
 ## 0.2.0
 
 * Updated to the latest version of three_js packages.

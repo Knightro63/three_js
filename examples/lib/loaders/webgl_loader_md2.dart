@@ -30,9 +30,9 @@ class _State extends State<WebglLoaderMd2> {
     });
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
-      setup: setup,      settings: three.Settings(
+      setup: setup,      
+      settings: three.Settings(
         enableShadowMap: true,
-        
       )
     );
     super.initState();
@@ -87,7 +87,7 @@ class _State extends State<WebglLoaderMd2> {
     light1.angle = 0.5;
     light1.penumbra = 0.5;
 
-    //light1.castShadow = true;
+    light1.castShadow = true;
     light1.shadow?.mapSize.width = 1024;
     light1.shadow?.mapSize.height = 1024;
     threeJs.scene.add( light1 );
@@ -97,7 +97,7 @@ class _State extends State<WebglLoaderMd2> {
     light2.angle = 0.5;
     light2.penumbra = 0.5;
 
-    //light2.castShadow = true;
+    light2.castShadow = true;
     light2.shadow?.mapSize.width = 1024;
     light2.shadow?.mapSize.height = 1024;
     threeJs.scene.add( light2 );
@@ -168,7 +168,7 @@ class _State extends State<WebglLoaderMd2> {
 
     gui.addButton( playbackConfig, 'wireframe' ).onChange((val) {
       character.setWireframe( val );
-    } );
+    });
 
     setupWeaponsGUI() {
       final folder = wg.addFolder( 'Weapons' );
@@ -216,7 +216,7 @@ class _State extends State<WebglLoaderMd2> {
         playbackConfig[ clip.name ] = false;//generateCallback( clip );
         folder.addButton(playbackConfig,clip.name).onChange((val){
           generateCallback( clip );
-        });//folder.addButton( playbackConfig, clip.name, clip.name);
+        });
       }
     }
 
@@ -224,14 +224,15 @@ class _State extends State<WebglLoaderMd2> {
       setupSkinsGUI();
       setupWeaponsGUI();
       setupGUIAnimations();
+
+      character.setAnimation( character.meshBody!.animations[ 0 ] );
     };
     character.scale = 0.03;
     await character.loadParts( config );
     threeJs.scene.add( character.root );
     threeJs.addAnimationEvent((dt){
       controls.update();
+			character.update( dt );
     });
-
-
   }
 }
