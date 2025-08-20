@@ -125,9 +125,7 @@ class ViewHelper extends Object3D {
 		interactiveObjects.add( negXAxisHelper );
 		interactiveObjects.add( negYAxisHelper );
 		interactiveObjects.add( negZAxisHelper );
-
-    add(Mesh(PlaneGeometry(10,10),MeshBasicMaterial.fromMap({'color': color1}))..position.z = -1);
-
+    
     _activate();
   }
 
@@ -286,7 +284,7 @@ class ViewHelper extends Object3D {
     if (animating) return false;
     mouse.x = (event.clientX - _pointerPos!.x) / screenSize.width * 2 - 1;
     mouse.y  = -(event.clientY - _pointerPos!.y+2) / screenSize.height * 2 + 1;
-    print(mouse.storage);
+
     raycaster.setFromCamera( mouse, orthoCamera );
     final intersects = raycaster.intersectObjects( interactiveObjects, false );
     if ( intersects.isNotEmpty) {

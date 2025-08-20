@@ -108,7 +108,8 @@ class _State extends State<BoxSelection> {
       selectionBox.startPoint.setValues(
         ( event.clientX / threeJs.width ) * 2 - 1,
         - ( event.clientY / threeJs.height ) * 2 + 1,
-        0.5 );
+        0.5 
+      );
     });
 
     threeJs.domElement.addEventListener(three.PeripheralType.pointermove, ( event ) {
