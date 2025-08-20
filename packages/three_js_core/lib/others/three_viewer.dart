@@ -100,7 +100,7 @@ class ThreeJS with WidgetsBindingObserver{
 
   int renderNumber;
 
-  late final BuildContext _context;
+  BuildContext? _context;
   Timer? _debounceTimer;
 
   Widget? loadingWidget;
@@ -154,7 +154,9 @@ class ThreeJS with WidgetsBindingObserver{
     if (disposed) return;
     _debounceTimer?.cancel(); // Clear existing timer
     _debounceTimer = Timer(const Duration(milliseconds: 300), () { // Set a new timer
-      onWindowResize(_context);
+      if (_context != null && _context!.mounted) {
+        onWindowResize(_context!);
+      }
     });
   }
 
