@@ -11,7 +11,7 @@ dependencies:
   flutter:
     sdk: flutter
   logger: ^2.5.0
-  three_js_math: ^0.2.2
+  three_js_math: ^0.2.3
   web: ^1.1.1
 
 dev_dependencies:
