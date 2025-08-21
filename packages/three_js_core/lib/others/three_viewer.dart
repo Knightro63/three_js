@@ -32,7 +32,6 @@ class Settings{
     this.xr,
     this.antialias = false,
 
-
     this.depth = true,
     this.premultipliedAlpha = true,
     this.preserveDrawingBuffer = false,
@@ -40,6 +39,7 @@ class Settings{
     this.failIfMajorPerformanceCaveat = false,
     this.reverseDepthBuffer = false,
     this.precision = core.Precision.highp,
+    this.screenResolution
   }){
     this.renderOptions = renderOptions ?? {
       "format": RGBAFormat,
@@ -61,7 +61,7 @@ class Settings{
   double clearAlpha;
   bool antialias;
   WebXRManager Function(WebGLRenderer renderer, dynamic gl)? xr;
-
+  double? screenResolution;
   
   bool animate;
   bool useSourceTexture;
@@ -85,17 +85,18 @@ class ThreeJS with WidgetsBindingObserver{
   ThreeJS({
     Settings? settings,
     required this.onSetupComplete, 
+    required this.setup,
     this.rendererUpdate,
     this.postProcessor,
     this.windowResizeUpdate,
-    required this.setup,
     Size? size,
     core.WebGLRenderer? renderer,
     this.renderNumber = 0,
-    this.loadingWidget,
+    this.loadingWidget
   }){
     this.settings = settings ?? Settings();
-    _size = size;
+    _resolution = this.settings.screenResolution;
+    _fixedSize = size;
   }
 
   int renderNumber;
@@ -104,8 +105,8 @@ class ThreeJS with WidgetsBindingObserver{
   Timer? _debounceTimer;
 
   Widget? loadingWidget;
-  Size? _size;
-  late Settings settings;
+  Size? _fixedSize;
+  late final Settings settings;
   final GlobalKey<core.PeripheralsState> globalKey = GlobalKey<core.PeripheralsState>();
   core.PeripheralsState get domElement => globalKey.currentState!;
 
@@ -116,16 +117,21 @@ class ThreeJS with WidgetsBindingObserver{
 
   core.WebGLRenderTarget? renderTarget;
   core.WebGLRenderer? renderer;
-  core.Clock clock = core.Clock();
+  final core.Clock clock = core.Clock();
 
-  late core.Scene scene;
-  late core.Camera camera;
+  late final core.Scene scene;
+  late final core.Camera camera;
   Ticker? ticker;
 
-  late double width;
-  late double height;
+  double get width => screenSize!.width;
+  double get height => screenSize!.height;
+
   Size? screenSize;
-  double dpr = 1.0;
+  double? _resolution;
+  double get dpr => _resolution ?? 1.0;
+  void setResolution(double newResolution){
+    _resolution = newResolution;
+  }
 
   WebGLTexture? sourceTexture;
 
@@ -140,6 +146,7 @@ class ThreeJS with WidgetsBindingObserver{
   void Function()? rendererUpdate;
   void Function(Size newSize)? windowResizeUpdate;
   void Function([double? dt])? postProcessor;
+  Future<void> Function(BuildContext) onWindowResize = (context) async{};
   FutureOr<void> Function()? setup;
   List<Function(double dt)> events = [];
   List<Function()> disposeEvents = [];
@@ -159,7 +166,7 @@ class ThreeJS with WidgetsBindingObserver{
     _debounceTimer?.cancel(); // Clear existing timer
     _debounceTimer = Timer(Duration(milliseconds: 300+renderNumber*100), () { // Set a new timer
       if (_context != null && _context!.mounted) {
-        onWindowResize(_context!);
+        _onWindowResize(_context!);
       }
     });
   }
@@ -190,7 +197,7 @@ class ThreeJS with WidgetsBindingObserver{
 
     angle?.dispose([texture]);
     loadingWidget = null;
-    _size = null;
+    _fixedSize = null;
     screenSize = null;
 
     rendererUpdate = null;
@@ -207,12 +214,9 @@ class ThreeJS with WidgetsBindingObserver{
     WidgetsBinding.instance.addObserver(this);
     final mqd = MediaQuery.of(context);
 
-    screenSize = _size ?? mqd.size;
-    dpr = mqd.devicePixelRatio;
+    screenSize = _fixedSize ?? mqd.size;
+    _resolution ??= mqd.devicePixelRatio;
 
-    width = screenSize!.width;
-    height = screenSize!.height;
-    
     Future.delayed(Duration(milliseconds: renderNumber*100), () async{
       await initPlatformState();
     });
@@ -277,7 +281,7 @@ class ThreeJS with WidgetsBindingObserver{
     );
     
     renderer = core.WebGLRenderer(options);
-    renderer!.setPixelRatio(dpr);
+    renderer!.setPixelRatio(_resolution!);
     renderer!.setSize(width, height, false);
     renderer!.alpha = settings.alpha;
     renderer!.shadowMap.enabled = settings.enableShadowMap;
@@ -298,27 +302,28 @@ class ThreeJS with WidgetsBindingObserver{
 
     if(settings.useSourceTexture){
       final core.WebGLRenderTargetOptions pars = core.WebGLRenderTargetOptions(settings.renderOptions);
-      renderTarget = core.WebGLRenderTarget((width * dpr).toInt(), (height * dpr).toInt(), pars);
+      renderTarget = core.WebGLRenderTarget((width * _resolution!).toInt(), (height * _resolution!).toInt(), pars);
       renderer!.setRenderTarget(renderTarget);
       sourceTexture = renderer!.getRenderTargetGLTexture(renderTarget!);
     }
   }
   
-  Future<void> onWindowResize(BuildContext context) async{
+  Future<void> _onWindowResize(BuildContext context) async{
     if (_disposed) return;
     double dt = clock.getDelta();
     final mqd = MediaQuery.maybeOf(context);
     if (mqd == null) return;
-    if(_size == null && screenSize != mqd.size && texture != null){
+    if(_fixedSize == null && screenSize != mqd.size && texture != null){
       screenSize = mqd.size;
-      width = screenSize!.width;
-      height = screenSize!.height;
-      dpr = mqd.devicePixelRatio;
+
+      if(settings.screenResolution == null){
+        _resolution = mqd.devicePixelRatio;
+      }
 
       final options = AngleOptions(
         width: width.toInt(),
         height: height.toInt(),
-        dpr: dpr,
+        dpr: _resolution!,
       );
 
       await angle?.resize(texture!, options);
@@ -355,7 +360,7 @@ class ThreeJS with WidgetsBindingObserver{
         AngleOptions(
           width: width.toInt(), 
           height: height.toInt(), 
-          dpr: dpr,
+          dpr: _resolution!,
           alpha: settings.alpha,
           antialias: settings.antialias,
           customRenderer: !settings.useSourceTexture,

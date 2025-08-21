@@ -57,8 +57,6 @@ class _State extends State<WebglRefraction> {
   late final Refractor refractor;
 
   Future<void> setup() async {
-    threeJs.clock = three.Clock();
-
     // scene
     threeJs.scene = three.Scene();
 

@@ -26,12 +26,6 @@ class _State extends State<WebglVolumeCloud> {
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
       setup: setup,
-      windowResizeUpdate: (newSize){
-        threeJs.width = newSize.width;
-        threeJs.height = newSize.height;
-				threeJs.camera.aspect = newSize.width / newSize.height;
-				threeJs.camera.updateProjectionMatrix();
-      }
     );
     super.initState();
   }
