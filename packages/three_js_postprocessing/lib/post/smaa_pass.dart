@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'package:three_js_postprocessing/post/index.dart';
@@ -16,69 +18,56 @@ class SMAAPass extends Pass {
   late ShaderMaterial materialWeights;
   late ShaderMaterial materialBlend;
 
-	SMAAPass(int width,int height ) : super() {
+	SMAAPass() : super() {
 		// render targets
-		this.edgesRT = new WebGLRenderTarget( width, height, 
+		this.edgesRT = new WebGLRenderTarget( 1, 1, 
       WebGLRenderTargetOptions({
         "depthBuffer": false,
-        "generateMipmaps": false,
-        "minFilter": LinearFilter,
-        "format": RGBFormat
+        'type': HalfFloatType
       }) 
     );
 		this.edgesRT.texture.name = 'SMAAPass.edges';
 
-		this.weightsRT = new WebGLRenderTarget( width, height, 
+		this.weightsRT = new WebGLRenderTarget( 1, 1, 
       WebGLRenderTargetOptions({
         "depthBuffer": false,
-        "generateMipmaps": false,
-        "minFilter": LinearFilter,
-        "format": RGBAFormat
+        'type': HalfFloatType
       })
     );
 		this.weightsRT.texture.name = 'SMAAPass.weights';
 
 
 		final areaTextureImage = ImageElement(
-      // url: this.getAreaTexture(),
-      // src: this.getAreaTexture(),
-      data: Uint8Array.fromList(this.getAreaTexture().codeUnits),
+      data: Uint8Array.fromList(base64Decode(this.getAreaTexture().split(',').last)),
       width: 256,
       height: 256
     );
-    // asigning data to HTMLImageElement.src is asynchronous (see #15162)
-    this.areaTexture.needsUpdate = true;
 
-
-		this.areaTexture = new Texture(null, null, null, null, null, null, null, null, null, null);
+		this.areaTexture = new Texture();
 		this.areaTexture.name = 'SMAAPass.area';
-		this.areaTexture.image = areaTextureImage;
-		this.areaTexture.format = RGBFormat;
+		//this.areaTexture.image = areaTextureImage;
 		this.areaTexture.minFilter = LinearFilter;
 		this.areaTexture.generateMipmaps = false;
 		this.areaTexture.flipY = false;
+    this.areaTexture.needsUpdate = true;
 
 		final searchTextureImage = ImageElement(
-      // url: this.getSearchTexture(),
-      // src: this.getSearchTexture(),
-      data: Uint8Array.fromList(this.getSearchTexture().codeUnits),
+      data: Uint8Array.fromList(base64Decode(this.getSearchTexture().split(',').last)),
       width: 256,
       height: 256
-    );
-    // asigning data to HTMLImageElement.src is asynchronous (see #15162)
-    this.searchTexture.needsUpdate = true;
+    );    
 
-		this.searchTexture = new Texture(null, null, null, null, null, null, null, null, null, null);
+		this.searchTexture = new Texture();
 		this.searchTexture.name = 'SMAAPass.search';
 		this.searchTexture.image = searchTextureImage;
 		this.searchTexture.magFilter = NearestFilter;
 		this.searchTexture.minFilter = NearestFilter;
 		this.searchTexture.generateMipmaps = false;
 		this.searchTexture.flipY = false;
+    this.searchTexture.needsUpdate = true;
 
 		// materials - pass 1
 		this.uniformsEdges = UniformsUtils.clone( smaaEdgesShader['uniforms'] );
-		this.uniformsEdges[ 'resolution' ]['value'].set( 1 / width, 1 / height );
 
 		this.materialEdges = ShaderMaterial.fromMap( {
 			'defines': smaaEdgesShader['defines'],
@@ -91,7 +80,6 @@ class SMAAPass extends Pass {
 
 		this.uniformsWeights = UniformsUtils.clone( smaaWeightsShader['uniforms'] );
 
-		this.uniformsWeights[ 'resolution' ]['value'].set( 1 / width, 1 / height );
 		this.uniformsWeights[ 'tDiffuse' ]['value'] = this.edgesRT.texture;
 		this.uniformsWeights[ 'tArea' ]['value'] = this.areaTexture;
 		this.uniformsWeights[ 'tSearch' ]['value'] = this.searchTexture;
@@ -106,9 +94,7 @@ class SMAAPass extends Pass {
 		// materials - pass 3
 
 		this.uniformsBlend = UniformsUtils.clone( smaaBlendShader['uniforms'] );
-
-		this.uniformsBlend[ 'resolution' ].value.set( 1 / width, 1 / height );
-		this.uniformsBlend[ 'tDiffuse' ].value = this.weightsRT.texture;
+		this.uniformsBlend[ 'tDiffuse' ]['value'] = this.weightsRT.texture;
 
 		this.materialBlend = new ShaderMaterial.fromMap( {
 			'uniforms': this.uniformsBlend,
@@ -116,15 +102,14 @@ class SMAAPass extends Pass {
 			'fragmentShader': smaaBlendShader['fragmentShader']
 		} );
 
-		this.needsSwap = false;
-		this.fsQuad = new FullScreenQuad( null );
+		this.fsQuad = new FullScreenQuad();
 	}
 
 	void render(WebGLRenderer renderer, WebGLRenderTarget writeBuffer, WebGLRenderTarget readBuffer, {num? deltaTime, bool? maskActive}) {
 
 		// pass 1
 
-		this.uniformsEdges[ 'tDiffuse' ].value = readBuffer.texture;
+		this.uniformsEdges[ 'tDiffuse' ]['value'] = readBuffer.texture;
 
 		this.fsQuad.material = this.materialEdges;
 
@@ -142,7 +127,7 @@ class SMAAPass extends Pass {
 
 		// pass 3
 
-		this.uniformsBlend[ 'tColor' ].value = readBuffer.texture;
+		this.uniformsBlend[ 'tColor' ]['value'] = readBuffer.texture;
 
 		this.fsQuad.material = this.materialBlend;
 
@@ -165,9 +150,23 @@ class SMAAPass extends Pass {
 		this.edgesRT.setSize( width, height );
 		this.weightsRT.setSize( width, height );
 
-		this.materialEdges.uniforms[ 'resolution' ].value.set( 1 / width, 1 / height );
-		this.materialWeights.uniforms[ 'resolution' ].value.set( 1 / width, 1 / height );
-		this.materialBlend.uniforms[ 'resolution' ].value.set( 1 / width, 1 / height );
+		this.materialEdges.uniforms[ 'resolution' ]['value'].setValues( 1 / width, 1 / height );
+		this.materialWeights.uniforms[ 'resolution' ]['value'].setValues( 1 / width, 1 / height );
+		this.materialBlend.uniforms[ 'resolution' ]['value'].setValues( 1 / width, 1 / height );
+	}
+
+	void dispose() {
+		this.edgesRT.dispose();
+		this.weightsRT.dispose();
+
+		this.areaTexture.dispose();
+		this.searchTexture.dispose();
+
+		this.materialEdges.dispose();
+		this.materialWeights.dispose();
+		this.materialBlend.dispose();
+
+		this.fsQuad.dispose();
 	}
 
 	String getAreaTexture() {

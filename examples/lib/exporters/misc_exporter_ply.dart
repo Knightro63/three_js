@@ -31,6 +31,11 @@ class _State extends State<MiscExporterPly> {
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
       setup: setup,
+      settings: three.Settings(
+        antialias: true,
+        powerPreference: three.PowerPreference.low,
+        precision: three.Precision.lowp
+      )
     );
     gui = Gui((){setState(() {});});
     super.initState();

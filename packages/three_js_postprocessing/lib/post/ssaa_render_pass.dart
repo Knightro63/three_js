@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'package:three_js_postprocessing/post/index.dart';
@@ -104,7 +103,7 @@ class SSAARenderPass extends Pass {
       "height": readBuffer.height
     };
 
-    Map<String, dynamic> originalViewOffset = jsonDecode(jsonEncode(camera.view ?? {}));
+    Map<String, dynamic> originalViewOffset = camera.view?.toMap ?? {};//jsonDecode(jsonEncode(camera.view ?? {}));
 
     if (originalViewOffset["enabled"] == true){
       viewOffset.addAll(originalViewOffset);
@@ -116,22 +115,23 @@ class SSAARenderPass extends Pass {
 
       if (camera.type == "PerspectiveCamera") {
         (camera as PerspectiveCamera).setViewOffset(
-            viewOffset["fullWidth"],
-            viewOffset["fullHeight"],
-            viewOffset["offsetX"] + jitterOffset[0] * 0.0625,
-            viewOffset["offsetY"] + jitterOffset[1] * 0.0625, // 0.0625 = 1 / 16
+          viewOffset["fullWidth"]*1.0,
+          viewOffset["fullHeight"]*1.0,
+          viewOffset["offsetX"] + jitterOffset[0] * 0.0625,
+          viewOffset["offsetY"] + jitterOffset[1] * 0.0625, // 0.0625 = 1 / 16
 
-            viewOffset["width"],
-            viewOffset["height"]);
+          viewOffset["width"]*1.0,
+          viewOffset["height"]*1.0
+        );
       } else if (camera.type == "OrthographicCamera") {
         (camera as OrthographicCamera).setViewOffset(
-            viewOffset["fullWidth"],
-            viewOffset["fullHeight"],
-            viewOffset["offsetX"] + jitterOffset[0] * 0.0625,
-            viewOffset["offsetY"] + jitterOffset[1] * 0.0625, // 0.0625 = 1 / 16
-
-            viewOffset["width"],
-            viewOffset["height"]);
+          viewOffset["fullWidth"]*1.0,
+          viewOffset["fullHeight"]*1.0,
+          viewOffset["offsetX"] + jitterOffset[0] * 0.0625,
+          viewOffset["offsetY"] + jitterOffset[1] * 0.0625, // 0.0625 = 1 / 16
+          viewOffset["width"]*1.0,
+          viewOffset["height"]*1.0
+        );
       }
 
       double sampleWeight = baseSampleWeight;

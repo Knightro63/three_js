@@ -148,6 +148,9 @@ const List<String> filesJson = [
   'webgl2_multiple_rendertargets',
   'webgl_postprocessing_unreal_bloom',
   'webgl_postprocessing_unreal_bloom_selective',
+  'webgl_postprocessing_fxaa',
+  'webgl_postprocessing_smaa',
+  'webgl_postprocessing_taa',
   'flutter_screenshot',
   'opengl_screenshot'
 ];

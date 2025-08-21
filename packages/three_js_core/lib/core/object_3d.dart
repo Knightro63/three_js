@@ -456,7 +456,7 @@ class Object3D with EventDispatcher {
 
   /// Removes `object` as child of this object. An arbitrary number of objects
   /// may be removed.
-  Object3D remove(Object3D object) {
+  Object3D? remove(Object3D object) {
     final index = children.indexOf(object);
 
     if (index != -1) {

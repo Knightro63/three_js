@@ -58,6 +58,9 @@ import 'package:example/loaders/webgl_loader_vox.dart';
 import 'package:example/loaders/webgl_loader_xyz.dart';
 import 'package:example/material/webgl_materials_video.dart';
 import 'package:example/material/webgl_tonemapping.dart';
+import 'package:example/postprocessing/webgl_postprocessing_fxaa.dart';
+import 'package:example/postprocessing/webgl_postprocessing_smaa.dart';
+import 'package:example/postprocessing/webgl_postprocessing_taa.dart';
 import 'package:example/projected/webgl_projected_3d_model.dart';
 import 'package:example/projected/webgl_projected_basic.dart';
 import 'package:example/screenshot/flutter_screenshot.dart';
@@ -674,6 +677,15 @@ class MyAppState extends State<MyApp> {
               },
               '/webgl_postprocessing_unreal_bloom_selective':(BuildContext context) {
                 return const WebglPostprocessingUnrealBloomSelective();
+              },
+              '/webgl_postprocessing_fxaa':(BuildContext context) {
+                return const WebglPostprocessingFXAA();
+              },
+              '/webgl_postprocessing_smaa':(BuildContext context) {
+                return const WebglPostprocessingSMAA();
+              },
+              '/webgl_postprocessing_taa':(BuildContext context) {
+                return const WebglPostprocessingTAA();
               },
               '/flutter_screenshot':(BuildContext context) {
                 return const FlutterScreenshot();
