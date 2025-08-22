@@ -1063,6 +1063,134 @@ class BufferGeometry with EventDispatcher {
     lineDistances?.clear();
     parameters?.clear();
   }
+
+  Object? getProperty(String key) {
+    if(key == 'id'){
+      return id;
+    }else if(key == 'uuid'){
+      return uuid;
+    }else if(key == 'type'){
+      return type;
+    }else if(key == 'boundingBox'){
+      return boundingBox;
+    }else if(key == 'boundingSphere'){
+      return boundingSphere;
+    }else if(key == 'name'){
+      return name;
+    }else if(key == 'attributes'){
+      return attributes;
+    }else if(key == 'morphAttributes'){
+      return morphAttributes;
+    }else if(key == 'morphTargetsRelative'){
+      return morphTargetsRelative;
+    }else if(key == 'drawRange'){
+      return drawRange;
+    }else if(key == 'userData'){
+      return userData;
+    }else if(key == 'groups'){
+      return groups;
+    }else if(key == 'index'){
+      return index;
+    }else if(key == 'morphTargets'){
+      return morphTargets;
+    }else if(key == 'directGeometry'){
+      return directGeometry;
+    }else if(key == 'disposed'){
+      return disposed;
+    }else if(key == 'elementsNeedUpdate'){
+      return elementsNeedUpdate;
+    }else if(key == 'verticesNeedUpdate'){
+      return verticesNeedUpdate;
+    }else if(key == 'uvsNeedUpdate'){
+      return uvsNeedUpdate;
+    }else if(key == 'normalsNeedUpdate'){
+      return normalsNeedUpdate;
+    }else if(key == 'colorsNeedUpdate'){
+      return colorsNeedUpdate;
+    }else if(key == 'lineDistancesNeedUpdate'){
+      return lineDistancesNeedUpdate;
+    }else if(key == 'groupsNeedUpdate'){
+      return groupsNeedUpdate;
+    }else if(key == 'colors'){
+      return colors;
+    }else if(key == 'lineDistances'){
+      return lineDistances;
+    }else if(key == 'parameters'){
+      return parameters;
+    }else if(key == 'curveSegments'){
+      return curveSegments;
+    }else if(key == 'maxInstanceCount'){
+      return maxInstanceCount;
+    }else if(key == 'instanceCount'){
+      return instanceCount;
+    }
+
+    return null;
+  }
+
+  void setProperty(String key, dynamic value){
+    if(key == 'id'){
+      id = value;
+    }else if(key == 'uuid'){
+      uuid = value;
+    }else if(key == 'type'){
+      type = value;
+    }else if(key == 'boundingBox'){
+      boundingBox = value;
+    }else if(key == 'boundingSphere'){
+      boundingSphere = value;
+    }else if(key == 'name'){
+      name = value;
+    }else if(key == 'attributes'){
+      attributes = value;
+    }else if(key == 'morphAttributes'){
+      morphAttributes = value;
+    }else if(key == 'morphTargetsRelative'){
+      morphTargetsRelative = value;
+    }else if(key == 'drawRange'){
+      drawRange = value;
+    }else if(key == 'userData'){
+      userData = value;
+    }else if(key == 'groups'){
+      groups = value;
+    }else if(key == 'index'){
+      index = value;
+    }else if(key == 'morphTargets'){
+      morphTargets = value;
+    }else if(key == 'directGeometry'){
+      directGeometry = value;
+    }else if(key == 'disposed'){
+      disposed = value;
+    }else if(key == 'elementsNeedUpdate'){
+      elementsNeedUpdate = value;
+    }else if(key == 'verticesNeedUpdate'){
+      verticesNeedUpdate = value;
+    }else if(key == 'uvsNeedUpdate'){
+      uvsNeedUpdate = value;
+    }else if(key == 'normalsNeedUpdate'){
+      normalsNeedUpdate = value;
+    }else if(key == 'colorsNeedUpdate'){
+      colorsNeedUpdate = value;
+    }else if(key == 'lineDistancesNeedUpdate'){
+      lineDistancesNeedUpdate = value;
+    }else if(key == 'groupsNeedUpdate'){
+      groupsNeedUpdate = value;
+    }else if(key == 'colors'){
+      colors = value;
+    }else if(key == 'lineDistances'){
+      lineDistances = value;
+    }else if(key == 'parameters'){
+      parameters = value;
+    }else if(key == 'curveSegments'){
+      curveSegments = value;
+    }else if(key == 'maxInstanceCount'){
+      maxInstanceCount = value;
+    }else if(key == 'instanceCount'){
+      instanceCount = value;
+    }
+  }
+  dynamic operator [] (key) => getProperty(key);
+  void operator []=(String key, dynamic value) => setProperty(key, value);
 }
 
 class BufferGeometryParameters {

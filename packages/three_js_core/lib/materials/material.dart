@@ -1025,74 +1025,199 @@ class Material with EventDispatcher {
     emissiveMap?.dispose();
   }
 
-  Object? getProperty(String propertyName) {
-    if (propertyName == "vertexParameters") {
-      return color;
-    } else if (propertyName == "opacity") {
-      return opacity;
-    } else if (propertyName == "color") {
-      return color;
-    } else if (propertyName == "emissive") {
-      return emissive;
-    } else if (propertyName == "flatShading") {
-      return flatShading;
-    } else if (propertyName == "wireframe") {
-      return wireframe;
-    } else if (propertyName == "vertexColors") {
-      return vertexColors;
-    } else if (propertyName == "transparent") {
-      return transparent;
-    } else if (propertyName == "depthTest") {
-      return depthTest;
-    } else if (propertyName == "depthWrite") {
-      return depthWrite;
-    } else if (propertyName == "visible") {
-      return visible;
-    } else if (propertyName == "blending") {
+  Object? getProperty(String key) {
+    if (key == "alphaTest") {
+      return alphaTest;
+    }else if (key == "bumpScale") {
+      return bumpScale;
+    } else if (key == "alphaMap") {
+      return alphaMap;
+    } else if (key == "aoMap") {
+      return aoMap;
+    } else if (key == "blendDst") {
+      return blendDst;
+    } else if (key == "blendDstAlpha") {
+      return blendDstAlpha;
+    } else if (key == "blendSrcAlpha") {
+      return blendSrcAlpha;
+    } else if (key == "blendEquation") {
+      return blendEquation;
+    } else if (key == "blending") {
       return blending;
-    } else if (propertyName == "side") {
-      return side;
-    } else if (propertyName == "roughness") {
-      return roughness;
-    } else if (propertyName == "metalness") {
+    } else if (key == "blendSrc") {
+      return blendSrc;
+    } else if (key == "blendSrcAlpha") {
+      return blendSrcAlpha;
+    } else if (key == "clearcoat") {
+      return clearcoat;
+    } else if (key == "clearcoatRoughness") {
+      return clearcoatRoughness;
+    } else if (key == "clipIntersection") {
+      return clipIntersection;
+    } else if (key == "clipping") {
+      return clipping;
+    } else if (key == "clippingPlanes") {
+      return clippingPlanes;
+    } else if (key == "clipShadows") {
+      return clipShadows;
+    } else if (key == "color") {
+      return color;
+    } else if (key == "colorWrite") {
+      return colorWrite;
+    } else if (key == "combine") {
+      return combine;
+    } else if (key == "defines") {
+      return defines;
+    } else if (key == "depthPacking") {
+      return depthPacking;
+    } else if (key == "depthTest") {
+      return depthTest;
+    } else if (key == "depthWrite") {
+      return depthWrite;
+    } else if (key == "dithering") {
+      return dithering;
+    } else if (key == "emissive") {
+      return emissive;
+    } else if (key == "emissiveMap") {
+      return emissiveMap;
+    } else if (key == "extensions") {
+      return extensions;
+    } else if (key == "flatShading") {
+      return flatShading;
+    } else if (key == "fog") {
+      return fog;
+    } else if (key == "fragmentShader") {
+      return fragmentShader;
+    }else if (key == "specularMap") {
+      return specularMap;
+    } else if (key == "instanced") {
+      return instanced;
+    } else if (key == "lights") {
+      return lights;
+    } else if (key == "linecap") {
+      return linecap;
+    } else if (key == "linejoin") {
+      return linejoin;
+    } else if (key == "linewidth") {
+      return linewidth;
+    } else if (key == "matcap") {
+      return matcap;
+    } else if (key == "map") {
+      return map;
+    } else if (key == "metalness") {
       return metalness;
-    } else {
-      throw ("Material.getProperty type: $type propertyName: $propertyName is not support ");
+    } else if (key == "metalnessMap") {
+      return metalnessMap;
+    } else if (key == "name") {
+      return name;
+    } else if (key == "normalMap") {
+      return normalMap;
+    } else if (key == "normalScale") {
+      return normalScale;
+    } else if (key == "opacity") {
+      return opacity;
+    } else if (key == "polygonOffset") {
+      return polygonOffset;
+    } else if (key == "polygonOffsetFactor") {
+      return polygonOffsetFactor;
+    } else if (key == "polygonOffsetUnits") {
+      return polygonOffsetUnits;
+    } else if (key == "premultipliedAlpha") {
+      return premultipliedAlpha;
+    } else if (key == "reflectivity") {
+      return reflectivity;
+    } else if (key == "roughness") {
+      return roughness;
+    }else if (key == "refractionRatio") {
+      return refractionRatio;
+    }else if (key == "roughnessMap") {
+      return roughnessMap;
+    } else if(key == 'specularColorMap'){
+      return specularColorMap;
+    }else if (key == "shininess") {
+      return shininess;
+    } else if (key == "side") {
+      return side;
+    } else if (key == "size") {
+      return size;
+    } else if (key == "dashSize") {
+      return dashSize;
+    } else if (key == "gapSize") {
+      return gapSize;
+    } else if (key == "scale") {
+      return scale;
+    } else if (key == "sizeAttenuation") {
+      return sizeAttenuation;
+    } else if (key == "stencilZFail") {
+      return stencilZFail;
+    } else if (key == "stencilZPass") {
+      return stencilZPass;
+    } else if (key == "stencilFail") {
+      return stencilFail;
+    } else if (key == "stencilFunc") {
+      return stencilFunc;
+    } else if (key == "stencilRef") {
+      return stencilRef;
+    } else if (key == "stencilWrite") {
+      return stencilWrite;
+    } else if (key == "toneMapped") {
+      return toneMapped;
+    } else if (key == "transparent") {
+      return transparent;
+    } else if (key == "uniforms") {
+      return uniforms;
+    } else if (key == "vertexShader") {
+      return vertexShader;
+    } else if (key == "visible") {
+      return visible;
+    } else if (key == "vertexColors") {
+      return vertexColors;
+    } else if (key == "wireframe") {
+      return wireframe;
+    } else if (key == "wireframeLinewidth") {
+      return wireframeLinewidth;
+    } else if (key == "shadowSide") {
+      return shadowSide;
+    }else if(key == "aoMapIntensity" ){
+      return aoMapIntensity;
+    }else if(key == "bumpMap"){
+      return bumpMap;
+    }else if (key == "envMap") {
+      return envMap;
+    }else if (key == "envMapIntensity") {
+      return envMapIntensity;
+    }else if (key == "transmission") {
+      return transmission;
+    }else if (key == "thickness") {
+      return thickness;
+    }else if (key == "attenuationDistance") {
+      return attenuationDistance;
+    }else if (key == "ior") {
+      return ior;
+    }else if(key == 'thicknessMap'){
+      return thicknessMap;
+    }else if(key == 'specularIntensity'){
+      return specularIntensity;
+    }else if(key == 'attenuationColor'){
+      return attenuationColor;
+    }else if(key == 'specularColor'){
+      return specularColor;
+    }else if (key == "specular") {
+      return specular;
+    } else if(key == 'glslVersion'){
+      return glslVersion;
+    }else if (key == 'displacementScale') {
+      return displacementScale;
+    }else if (key == 'emissiveIntensity') {
+      return emissiveIntensity;
     }
+    console.error("Material.setValues key: $key is not support");
+    return null;
   }
-  void operator []=(String key, dynamic value) => setProperty(key, value);
-  void setProperty(String propertyName, dynamic value) {
-    if (propertyName == "color") {
-      color = value;
-    } else if (propertyName == "opacity") {
-      opacity = value.toDouble();
-    } else if (propertyName == "emissive") {
-      emissive = value;
-    } else if (propertyName == "flatShading") {
-      flatShading = value;
-    } else if (propertyName == "wireframe") {
-      wireframe = value;
-    } else if (propertyName == "vertexColors") {
-      vertexColors = value;
-    } else if (propertyName == "transparent") {
-      transparent = value;
-    } else if (propertyName == "depthTest") {
-      depthTest = value;
-    } else if (propertyName == "depthWrite") {
-      depthWrite = value;
-    } else if (propertyName == "visible") {
-      visible = value;
-    } else if (propertyName == "blending") {
-      blending = value;
-    } else if (propertyName == "side") {
-      side = value;
-    } else if (propertyName == "roughness") {
-      roughness = value.toDouble();
-    } else if (propertyName == "metalness") {
-      metalness = value.toDouble();
-    } else {
-      throw ("Material.setProperty type: $type propertyName: $propertyName is not support ");
-    }
+  dynamic operator [] (key) => getProperty(key);
+  void operator []=(String key, dynamic value) => setValueFromString(key, value);
+  void setProperty(String key, dynamic value) {
+    setValueFromString(key, value);
   }
 
   set needsUpdate(bool value) {

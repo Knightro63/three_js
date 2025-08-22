@@ -74,8 +74,17 @@ class ObjectLoader extends Loader {
     return _parse(tf.data);
   }
 
+  Future<Object3D?> fromMap(Map<String,dynamic> map) async{
+    _init();
+    return _parseMap(map);
+  }
+  
   Future<Object3D?> _parse(Uint8List bytes) async {
     Map<String,dynamic> json = jsonDecode(String.fromCharCodes(bytes));
+    return await _parseMap(json);
+  }
+
+  Future<Object3D?> _parseMap(Map<String,dynamic> json) async {
     final metadata = json['metadata'];
 
     if (metadata == null || metadata['type'] == null || metadata['type'].toLowerCase() == 'geometry') {
@@ -100,7 +109,7 @@ class ObjectLoader extends Loader {
     return object;
   }
 
-  Map<String,Shape> parseShapes(json) {
+  Map<String,Shape> parseShapes(List<Map<String,dynamic>>? json) {
     final Map<String,Shape> shapes = {};
 
     if (json != null) {
@@ -113,8 +122,8 @@ class ObjectLoader extends Loader {
     return shapes;
   }
 
-  parseSkeletons(json, object) {
-    final skeletons = {};
+  Map<String,dynamic> parseSkeletons(Map<String,dynamic>? json, Object3D object) {
+    final Map<String,dynamic> skeletons = {};
     final Map<String, Bone?> bones = {};
 
     // generate bone lookup table
@@ -136,8 +145,8 @@ class ObjectLoader extends Loader {
     return skeletons;
   }
 
-  parseGeometries(json, shapes) {
-    final geometries = {};
+  Map<String,dynamic> parseGeometries(List<Map<String,dynamic>>? json, [shapes]) {
+    final Map<String,dynamic> geometries = {};
 
     if (json != null) {
       final bufferGeometryLoader = BufferGeometryLoader();
@@ -182,12 +191,12 @@ class ObjectLoader extends Loader {
     return geometries;
   }
 
-  parseMaterials(json, textures) {
-    final cache = {}; // MultiMaterial
-    final materials = {};
+  Map<String,dynamic> parseMaterials(List<Map<String,dynamic>>? json, Map<String,Texture>textures) {
+    final Map<String,dynamic> cache = {}; // MultiMaterial
+    final Map<String,dynamic> materials = {};
 
     if (json != null) {
-      final loader = MaterialLoader(null);
+      final loader = MaterialLoader();
       loader.setTextures(textures);
 
       for (int i = 0, l = json.length; i < l; i++) {
@@ -222,8 +231,8 @@ class ObjectLoader extends Loader {
     return materials;
   }
 
-  parseAnimations(json) {
-    final animations = {};
+  Map<String,dynamic> parseAnimations(List<Map<String,dynamic>>? json) {
+    final Map<String,dynamic> animations = {};
 
     if (json != null) {
       for (int i = 0; i < json.length; i++) {
@@ -237,9 +246,9 @@ class ObjectLoader extends Loader {
     return animations;
   }
 
-  parseImages(json, onLoad) async {
+  Future<Map<String,dynamic>> parseImages(List<Map<String,dynamic>>? json, [void Function()? onLoad]) async {
     final scope = this;
-    final images = {};
+    final Map<String,dynamic> images = {};
 
     late ImageLoader loader;
 
@@ -325,14 +334,14 @@ class ObjectLoader extends Loader {
     return images;
   }
 
-  Map parseTextures(json, images) {
+  Map<String,Texture> parseTextures(List<Map<String,dynamic>>? json, Map<String,dynamic> images) {
     parseConstant(value, type) {
       if (value is num) return value;
       console.warning('ObjectLoader.parseTexture: Constant should be in numeric form. $value');
       return type[value];
     }
 
-    final textures = {};
+    final Map<String,Texture> textures = {};
 
     if (json != null) {
       for (int i = 0, l = json.length; i < l; i++) {
@@ -414,8 +423,7 @@ class ObjectLoader extends Loader {
     return textures;
   }
 
-  Object3D parseObject(
-      Map<String, dynamic> data, geometries, materials, textures, animations) {
+  Object3D parseObject( Map<String, dynamic> data, geometries, materials, textures, animations) {
     dynamic object;
 
     getGeometry(name) {
@@ -733,7 +741,7 @@ class ObjectLoader extends Loader {
     return object;
   }
 
-  bindSkeletons(object, skeletons) {
+  void bindSkeletons(Object3D object, Map<String, dynamic> skeletons) {
     if (skeletons.keys.length == 0) return;
 
     object.traverse((child) {
@@ -751,13 +759,13 @@ class ObjectLoader extends Loader {
 
   /* DEPRECATED */
 
-  setTexturePath(value) {
+  Loader setTexturePath(String? value) {
     console.error('ObjectLoader: .setTexturePath() has been renamed to .setResourcePath().');
     return setResourcePath(value);
   }
 }
 
-final textureMapping = {
+final Map<String, int> textureMapping = {
   "UVMapping": UVMapping,
   "CubeReflectionMapping": CubeReflectionMapping,
   "CubeRefractionMapping": CubeRefractionMapping,
@@ -766,13 +774,13 @@ final textureMapping = {
   "CubeUVReflectionMapping": CubeUVReflectionMapping
 };
 
-final textureWrapping = {
+final Map<String, int> textureWrapping = {
   "RepeatWrapping": RepeatWrapping,
   "ClampToEdgeWrapping": ClampToEdgeWrapping,
   "MirroredRepeatWrapping": MirroredRepeatWrapping
 };
 
-final textureFilter = {
+final Map<String, int> textureFilter = {
   "NearestFilter": NearestFilter,
   "NearestMipmapNearestFilter": NearestMipmapNearestFilter,
   "NearestMipmapLinearFilter": NearestMipmapLinearFilter,

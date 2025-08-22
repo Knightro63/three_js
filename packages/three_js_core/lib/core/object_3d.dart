@@ -1044,8 +1044,6 @@ class Object3D with EventDispatcher {
       return quaternion;
     } else if (propertyName == "material") {
       return material;
-    } else if (propertyName == "opacity") {
-      return null;
     } else if (propertyName == "morphTargetInfluences") {
       return morphTargetInfluences;
     } else if (propertyName == "castShadow") {
@@ -1054,30 +1052,200 @@ class Object3D with EventDispatcher {
       return receiveShadow;
     } else if (propertyName == "visible") {
       return visible;
-    } else {
-      throw ("Object3D.getProperty type: $type propertyName: $propertyName is not support ");
+    }else if(propertyName == 'uuid'){
+      return uuid;
+    }else if(propertyName == 'type'){
+      return type;
+    }else if(propertyName == 'boundingSphere'){
+      return boundingSphere;
+    }else if(propertyName == 'tag'){
+      return tag;
+    }else if(propertyName == 'parent'){
+      return parent;
+    }else if(propertyName == 'children'){
+      return children;
+    }else if(propertyName == 'autoUpdate'){
+      return autoUpdate;
+    }else if(propertyName == 'matrix'){
+      return matrix;
+    }else if(propertyName == 'matrixWorld'){
+      return matrixWorld;
+    }else if(propertyName == 'matrixAutoUpdate'){
+      return matrixAutoUpdate;
+    }else if(propertyName == 'matrixWorldAutoUpdate'){
+      return matrixWorldAutoUpdate;
+    }else if(propertyName == 'matrixWorldNeedsUpdate'){
+      return matrixWorldNeedsUpdate;
+    }else if(propertyName == 'layers'){
+      return layers;
+    }else if(propertyName == 'frustumCulled'){
+      return frustumCulled;
+    }else if(propertyName == 'renderOrder'){
+      return renderOrder;
+    }else if(propertyName == 'isImmediateRenderObject'){
+      return isImmediateRenderObject;
+    }else if(propertyName == 'userData'){
+      return userData;
+    }else if(propertyName == 'extra'){
+      return extra;
+    }else if(propertyName == 'geometry'){
+      return geometry;
+    }else if(propertyName == 'up'){
+      return up;
+    }else if(propertyName == 'position'){
+      return position;
+    }else if(propertyName == 'rotation'){
+      return rotation;
+    }else if(propertyName == 'quaternion'){
+      return quaternion;
+    }else if(propertyName == 'scale'){
+      return scale;
+    }else if(propertyName == 'modelViewMatrix'){
+      return modelViewMatrix;
+    }else if(propertyName == 'normalMatrix'){
+      return normalMatrix;
+    }else if(propertyName == 'material'){
+      return material;
+    }else if(propertyName == 'morphTargetInfluences'){
+      return morphTargetInfluences;
+    }else if(propertyName == 'morphTargetDictionary'){
+      return morphTargetDictionary;
+    }else if(propertyName == 'count'){
+      return count;
+    }else if(propertyName == 'bindMatrix'){
+      return bindMatrix;
+    }else if(propertyName == 'skeleton'){
+      return skeleton;
+    }else if(propertyName == 'overrideMaterial'){
+      return overrideMaterial;
+    }else if(propertyName == 'customDistanceMaterial'){
+      return customDistanceMaterial;
+    }else if(propertyName == 'customDepthMaterial'){
+      return customDepthMaterial;
+    }else if(propertyName == 'onBeforeRender'){
+      return onBeforeRender;
+    }else if(propertyName == 'background'){
+      return background;
+    }else if(propertyName == 'environment'){
+      return environment;
+    }else if(propertyName == 'instanceMatrix'){
+      return instanceMatrix;
+    }else if(propertyName == 'instanceColor'){
+      return instanceColor;
     }
+
+    console.error("Object3D.getProperty type: $type propertyName: $propertyName is not support ");
+    return null;
   }
 
-  Object3D setProperty(String propertyName, value) {
+  Object3D setProperty(String propertyName, dynamic newValue) {
     if (propertyName == "id") {
-      id = value;
-    } else if (propertyName == "castShadow") {
-      castShadow = value;
-    } else if (propertyName == "receiveShadow") {
-      receiveShadow = value;
-    } else if (propertyName == "visible") {
-      visible = value;
+      id = newValue;
     } else if (propertyName == "name") {
-      name = value;
+      name = newValue;
+    } else if (propertyName == "scale") {
+      scale = newValue;
+    } else if (propertyName == "position") {
+      position = newValue;
     } else if (propertyName == "quaternion") {
-      quaternion.setFrom(value);
-    } else {
-      throw ("Object3D.setProperty type: $type propertyName: $propertyName is not support ");
+      quaternion = newValue;
+    } else if (propertyName == "material") {
+      material = newValue;
+    } else if (propertyName == "morphTargetInfluences") {
+      morphTargetInfluences = newValue;
+    } else if (propertyName == "castShadow") {
+      castShadow = newValue;
+    } else if (propertyName == "receiveShadow") {
+      receiveShadow = newValue;
+    } else if (propertyName == "visible") {
+      visible = newValue;
+    }else if(propertyName == 'uuid'){
+      uuid = newValue;
+    }else if(propertyName == 'type'){
+      type = newValue;
+    }else if(propertyName == 'boundingSphere'){
+      boundingSphere = newValue;
+    }else if(propertyName == 'tag'){
+      tag = newValue;
+    }else if(propertyName == 'parent'){
+      parent = newValue;
+    }else if(propertyName == 'children'){
+      children = newValue;
+    }else if(propertyName == 'autoUpdate'){
+      autoUpdate = newValue;
+    }else if(propertyName == 'matrix'){
+      matrix = newValue;
+    }else if(propertyName == 'matrixWorld'){
+      matrixWorld = newValue;
+    }else if(propertyName == 'matrixAutoUpdate'){
+      matrixAutoUpdate = newValue;
+    }else if(propertyName == 'matrixWorldAutoUpdate'){
+      matrixWorldAutoUpdate = newValue;
+    }else if(propertyName == 'matrixWorldNeedsUpdate'){
+      matrixWorldNeedsUpdate = newValue;
+    }else if(propertyName == 'layers'){
+      layers = newValue;
+    }else if(propertyName == 'frustumCulled'){
+      frustumCulled = newValue;
+    }else if(propertyName == 'renderOrder'){
+      renderOrder = newValue;
+    }else if(propertyName == 'isImmediateRenderObject'){
+      isImmediateRenderObject = newValue;
+    }else if(propertyName == 'userData'){
+      userData = newValue;
+    }else if(propertyName == 'extra'){
+      extra = newValue;
+    }else if(propertyName == 'geometry'){
+      geometry = newValue;
+    }else if(propertyName == 'up'){
+      up = newValue;
+    }else if(propertyName == 'position'){
+      position = newValue;
+    }else if(propertyName == 'rotation'){
+      rotation = newValue;
+    }else if(propertyName == 'quaternion'){
+      quaternion = newValue;
+    }else if(propertyName == 'scale'){
+      scale = newValue;
+    }else if(propertyName == 'modelViewMatrix'){
+      modelViewMatrix = newValue;
+    }else if(propertyName == 'normalMatrix'){
+      normalMatrix = newValue;
+    }else if(propertyName == 'material'){
+      material = newValue;
+    }else if(propertyName == 'morphTargetInfluences'){
+      morphTargetInfluences = newValue;
+    }else if(propertyName == 'morphTargetDictionary'){
+      morphTargetDictionary = newValue;
+    }else if(propertyName == 'count'){
+      count = newValue;
+    }else if(propertyName == 'bindMatrix'){
+      bindMatrix = newValue;
+    }else if(propertyName == 'skeleton'){
+      skeleton = newValue;
+    }else if(propertyName == 'overrideMaterial'){
+      overrideMaterial = newValue;
+    }else if(propertyName == 'customDistanceMaterial'){
+      customDistanceMaterial = newValue;
+    }else if(propertyName == 'customDepthMaterial'){
+      customDepthMaterial = newValue;
+    }else if(propertyName == 'onBeforeRender'){
+      onBeforeRender = newValue;
+    }else if(propertyName == 'background'){
+      background = newValue;
+    }else if(propertyName == 'environment'){
+      environment = newValue;
+    }else if(propertyName == 'instanceMatrix'){
+      instanceMatrix = newValue;
+    }else if(propertyName == 'instanceColor'){
+      instanceColor = newValue;
     }
 
     return this;
   }
+  
+  dynamic operator [] (key) => getProperty(key);
+  void operator []=(String key, dynamic value) => setProperty(key, value);
 
   void dispose(){
     if(disposed) return;
