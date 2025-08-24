@@ -15,19 +15,19 @@ This is a dart conversion of three.js and three_dart, originally created by [@mr
 ## Requirements
 
 **MacOS**
- - Minimum os Deployment Target: 10.14
+ - Minimum os Deployment Target: 10.15
  - Xcode 13 or newer
  - Swift 5
  - Metal supported
 
 **iOS**
- - Minimum os Deployment Target: 12.0
+ - Minimum os Deployment Target: 13.0
  - Xcode 13 or newer
  - Swift 5
  - Metal supported
 
 **iOS-Simulator**
- - Minimum os Deployment Target: 12.0
+ - Minimum os Deployment Target: 13.0
  - Xcode 13 or newer
  - Swift 5
  - Metal supported

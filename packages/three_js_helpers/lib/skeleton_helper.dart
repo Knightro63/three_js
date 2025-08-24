@@ -15,8 +15,8 @@ final _matrixWorldInv = Matrix4();
 /// ```
 class SkeletonHelper extends LineSegments {
   bool isSkeletonHelper = true;
-  late dynamic root;
-  late dynamic bones;
+  late Object3D root;
+  late List<Bone> bones;
 
   SkeletonHelper.create(super.geometry, super.material){
     type = 'SkeletonHelper';
@@ -38,7 +38,7 @@ class SkeletonHelper extends LineSegments {
     for (int i = 0; i < bones.length; i++) {
       final bone = bones[i];
 
-      if (bone.parent != null && bone.parent!.type == "Bone") {
+      if (bone.parent is Bone) {
         vertices.addAll([0, 0, 0]);
         vertices.addAll([0, 0, 0]);
         colors.addAll([color1.red, color1.green, color1.blue]);
@@ -79,12 +79,12 @@ class SkeletonHelper extends LineSegments {
     for (int i = 0, j = 0; i < bones.length; i++) {
       final bone = bones[i];
 
-      if (bone.parent != null && bone.parent.type == "Bone") {
+      if (bone.parent is Bone) {
         _boneMatrix.multiply2(_matrixWorldInv, bone.matrixWorld);
         _shvector.setFromMatrixPosition(_boneMatrix);
         position.setXYZ(j, _shvector.x, _shvector.y, _shvector.z);
 
-        _boneMatrix.multiply2(_matrixWorldInv, bone.parent.matrixWorld);
+        _boneMatrix.multiply2(_matrixWorldInv, bone.parent!.matrixWorld);
         _shvector.setFromMatrixPosition(_boneMatrix);
         position.setXYZ(j + 1, _shvector.x, _shvector.y, _shvector.z);
 

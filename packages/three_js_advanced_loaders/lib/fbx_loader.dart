@@ -344,7 +344,7 @@ class __FBXTreeParser {
       final textureNodes = _fbxTree.objects!["Texture"];
       for (final nodeID in textureNodes.keys) {
         final texture = await parseTexture(textureNodes[nodeID], images);
-        textureMap[_parseInt(nodeID)!] = texture;
+        if(texture != null)textureMap[_parseInt(nodeID)!] = texture;
       }
     }
 
@@ -352,11 +352,11 @@ class __FBXTreeParser {
   }
 
   // Parse individual node in _FBXTree.Objects.Texture
-  Future<Texture> parseTexture(Map textureNode, Map images) async {
-    final Texture texture = await loadTexture(textureNode, images);
+  Future<Texture?> parseTexture(Map textureNode, Map images) async {
+    final Texture? texture = await loadTexture(textureNode, images);
 
-    texture.id = textureNode["id"];
-    texture.name = textureNode["attrName"];
+    texture?.id = textureNode["id"];
+    texture?.name = textureNode["attrName"];
 
     final wrapModeU = textureNode["WrapModeU"];
     final wrapModeV = textureNode["WrapModeV"];
@@ -367,26 +367,26 @@ class __FBXTreeParser {
     // http://download.autodesk.com/us/fbx/SDKdocs/FBX_SDK_Help/files/fbxsdkref/class_k_fbx_texture.html#889640e63e2e681259ea81061b85143a
     // 0: repeat(default), 1: clamp
 
-    texture.wrapS = valueU == 0 ? RepeatWrapping : ClampToEdgeWrapping;
-    texture.wrapT = valueV == 0 ? RepeatWrapping : ClampToEdgeWrapping;
+    texture?.wrapS = valueU == 0 ? RepeatWrapping : ClampToEdgeWrapping;
+    texture?.wrapT = valueV == 0 ? RepeatWrapping : ClampToEdgeWrapping;
 
     if (textureNode["Scaling"] != null) {
       final values = textureNode["Scaling"].value;
-      texture.repeat.x = values[0];
-      texture.repeat.y = values[1];
+      texture?.repeat.x = values[0];
+      texture?.repeat.y = values[1];
     }
 
 		if (textureNode["Translation"] != null) {
 			final values = textureNode['Translation'].value;
-			texture.offset.x = values[ 0 ];
-			texture.offset.y = values[ 1 ];
+			texture?.offset.x = values[ 0 ];
+			texture?.offset.y = values[ 1 ];
 		}
 
     return texture;
   }
 
   // load a texture specified as a blob or data URI, or via an external URL using TextureLoader
-  Future<Texture> loadTexture(Map textureNode, Map images) async {
+  Future<Texture?> loadTexture(Map textureNode, Map images) async {
     String fileName = '';
 
     final currentPath = textureLoader.path;
@@ -401,7 +401,7 @@ class __FBXTreeParser {
       }
     }
 
-    late Texture texture;
+    Texture? texture;
     String nodeFileName = textureNode["FileName"];
 
     final extension = nodeFileName.substring(nodeFileName.length - 3).toLowerCase();
@@ -415,11 +415,11 @@ class __FBXTreeParser {
       } 
       else {
         loader.setPath(textureLoader.path);
-        texture = (await loader.unknown(fileName)) as Texture;
+        final String resolve = manager.resolveURL(fileName);
+        texture = (await loader.unknown(resolve)) as Texture?;
       }
     } 
     else if (extension == 'dds') {
-      print('is dds');
       final loader = manager.getHandler('.dds');
       if (loader == null) {
         console.warning('FBXLoader: DDS loader not found, creating placeholder texture for ${textureNode["RelativeFilename"]}');
@@ -427,12 +427,21 @@ class __FBXTreeParser {
       } 
       else {
         loader.setPath(textureLoader.path);
-        texture = (await loader.unknown(fileName)) as Texture;
+        final String resolve = manager.resolveURL(fileName);
+        texture = (await loader.unknown(resolve)) as Texture;
       }
     }
     else if (extension == 'psd') {
-      console.warning('FBXLoader: PSD textures are not supported, creating placeholder texture for ${textureNode["RelativeFilename"]}');
-      texture = Texture();
+      final loader = manager.getHandler('.psd');
+      if (loader == null) {
+        console.warning('FBXLoader: PSD textures are not supported, creating placeholder texture for ${textureNode["RelativeFilename"]}');
+        texture = Texture();
+      } 
+      else {
+        loader.setPath(textureLoader.path);
+        final String resolve = manager.resolveURL(fileName);
+        texture = (await loader.unknown(resolve)) as Texture?;
+      }
     } 
     else {
       texture = (await textureLoader.unknown(fileName)) as Texture;
@@ -641,7 +650,7 @@ class __FBXTreeParser {
   }
 
   // get a texture from the textureMap for use by a material.
-  Texture getTexture(Map textureMap, int id) {
+  Texture? getTexture(Map textureMap, int id) {
     // if the texture is a layered texture, just use the first layer and issue a warning
     if (_fbxTree.objects?["LayeredTexture"] != null &&
         _fbxTree.objects?["LayeredTexture"].id != null) {
@@ -1981,7 +1990,7 @@ class _GeometryParser {
 		for (var i = 0, c = Color(); i < buffer.length; i += 4 ) {
 			c.fromUnknown( buffer, i );
 			ColorManagement.toWorkingColorSpace( c, ColorSpace.srgb );//colorSpaceToWorking
-			c.copyIntoArray( buffer, i );
+			c.copyIntoList( buffer, i );
 		}
 
     return {
@@ -2410,11 +2419,11 @@ class _AnimationParser {
 
     if (preRotation != null) {
       preRotation =
-          preRotation.map((v) => v.toRad()).toList();
+          preRotation.map((v) => (v as double).toRad()).toList();
       preRotation.add(eulerOrder);
 
-      if (preRotation.length == 4 && RotationOrders.values[preRotation[3]].index >= 0) {
-        preRotation[3] = RotationOrders.values[preRotation[3]].index.toDouble();
+      if (preRotation.length == 4 && RotationOrders.fromString(preRotation[3]).index >= 0) {
+        preRotation[3] = RotationOrders.fromString(preRotation[3]).index.toDouble();
       }
 
       final preRotationEuler =
@@ -3508,9 +3517,7 @@ Matrix4 _generateTransform(Map transformData) {
     List<double> array = List<double>.from(transformData["preRotation"]
         .map((e) => (e as double).toRad())
         .toList());
-    array.add(RotationOrders
-        .values[transformData["eulerOrder"]].index
-        .toDouble());
+    array.add(RotationOrders.fromString(transformData["eulerOrder"]).index.toDouble());
     lPreRotationM.makeRotationFromEuler(tempEuler.fromArray(array));
   }
 

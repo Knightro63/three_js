@@ -58,10 +58,12 @@ dependency_overrides:
     path: ../packages/three_js_core
   # three_js_math:
   #   path: ../packages/three_js_math
-  # three_js_helpers:
-  #   path: ../packages/three_js_helpers
-  # three_js_advanced_loaders:
-  #   path: ../packages/three_js_advanced_loaders
+  three_js_helpers:
+    path: ../packages/three_js_helpers
+  three_js_animations:
+    path: ../packages/three_js_animations
+  three_js_advanced_loaders:
+    path: ../packages/three_js_advanced_loaders
   three_js_postprocessing:
     path: ../packages/three_js_postprocessing
 

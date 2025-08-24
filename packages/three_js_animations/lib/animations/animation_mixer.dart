@@ -237,10 +237,10 @@ class AnimationMixer with EventDispatcher {
 
     final clipUuid = action.clip.uuid;
     final actionsByClip = this.actionsByClip;
-    final actionsForClip = actionsByClip[clipUuid];
-    final knownActionsForClip = actionsForClip.knownActions;
-    final lastKnownAction = knownActionsForClip[knownActionsForClip.length - 1];
-    final byClipCacheIndex = action.byClipCacheIndex;
+    final Map actionsForClip = actionsByClip[clipUuid];
+    final List knownActionsForClip = actionsForClip['knownActions'];
+    final AnimationAction lastKnownAction = knownActionsForClip[knownActionsForClip.length - 1];
+    final byClipCacheIndex = action.byClipCacheIndex ?? 0;
 
     lastKnownAction.byClipCacheIndex = byClipCacheIndex;
     knownActionsForClip[byClipCacheIndex] = lastKnownAction;
@@ -248,12 +248,12 @@ class AnimationMixer with EventDispatcher {
 
     action.byClipCacheIndex = null;
 
-    Map actionByRoot = actionsForClip.actionByRoot;
+    Map actionByRoot = actionsForClip['actionByRoot'];
     final rootUuid = (action.localRoot ?? root).uuid;
 
     actionByRoot.remove(rootUuid);
 
-    if (knownActionsForClip.isEmpty()) {
+    if (knownActionsForClip.isEmpty) {
       actionsByClip.remove(clipUuid);
     }
 
@@ -440,7 +440,7 @@ class AnimationMixer with EventDispatcher {
     if (actionsForClip != null) {
       final existingAction = actionsForClip?['actionByRoot'][rootUuid];
 
-      if (existingAction != null && existingAction.blendMode == blendMode) {
+      if (existingAction != null && existingAction['blendMode'] == blendMode) {
         return existingAction;
       }
 
@@ -486,7 +486,7 @@ class AnimationMixer with EventDispatcher {
     final actionsForClip = actionsByClip[clipUuid];
 
     if (actionsForClip != null) {
-      return actionsForClip.actionByRoot[rootUuid];
+      return actionsForClip['actionByRoot'][rootUuid];
     }
 
     return null;
@@ -597,7 +597,7 @@ class AnimationMixer with EventDispatcher {
 
     // for ( final clipUuid in actionsByClip ) {
     actionsByClip.forEach((clipUuid, value) {
-      final actionByRoot = actionsByClip[clipUuid].actionByRoot,
+      final actionByRoot = actionsByClip[clipUuid]['actionByRoot'],
           action = actionByRoot[rootUuid];
 
       if (action != null) {
