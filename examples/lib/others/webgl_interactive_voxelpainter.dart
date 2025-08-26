@@ -80,7 +80,7 @@ class _State extends State<WebglInteractiveVoxelpainter> {
     // cubes
 
     final map = await three.TextureLoader().fromAsset( 'assets/textures/square-outline-textured.png' );
-    //map.colorSpace = three.SRGBColorSpace;
+    map?.colorSpace = three.SRGBColorSpace;
     cubeGeo = three.BoxGeometry( 50, 50, 50 );
     cubeMaterial = three.MeshLambertMaterial.fromMap( { 'color': 0xfeb74c, 'map': map } );
 

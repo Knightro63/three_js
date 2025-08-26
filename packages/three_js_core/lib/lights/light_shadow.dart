@@ -1,3 +1,5 @@
+import 'package:three_js_core/others/console.dart';
+
 import '../cameras/index.dart';
 import 'package:three_js_math/three_js_math.dart';
 import '../math/frustum.dart';
@@ -135,4 +137,76 @@ class LightShadow {
       mapPass!.dispose();
     }
   }
+
+  dynamic getProperty(String propertyName) {
+    if (propertyName == "camera") {
+      return camera;
+    } else if (propertyName == "bias") {
+      return bias;
+    } else if (propertyName == "normalBias") {
+      return normalBias;
+    } else if (propertyName == "radius") {
+      return radius;
+    } else if (propertyName == "blurSamples") {
+      return blurSamples;
+    } else if (propertyName == "intensity") {
+      return intensity;
+    } else if (propertyName == "mapSize") {
+      return mapSize;
+    } else if (propertyName == "map") {
+      return map;
+    } else if (propertyName == "mapPass") {
+      return mapPass;
+    } else if (propertyName == "matrix") {
+      return matrix;
+    } else if (propertyName == "autoUpdate") {
+      return autoUpdate;
+    } else if (propertyName == "needsUpdate") {
+      return needsUpdate;
+    } else if (propertyName == "viewportCount") {
+      return viewportCount;
+    } else if (propertyName == "focus") {
+      return focus;
+    }
+
+    console.error("LightShadow.getProperty type: $runtimeType propertyName: $propertyName is not support ");
+    return null;
+  }
+
+  LightShadow setProperty(String propertyName, dynamic newValue) {
+    if (propertyName == "camera") {
+      camera = newValue;
+    } else if (propertyName == "bias") {
+      bias = newValue;
+    } else if (propertyName == "normalBias") {
+      normalBias = newValue;
+    } else if (propertyName == "radius") {
+      radius = newValue;
+    } else if (propertyName == "blurSamples") {
+      blurSamples = newValue;
+    } else if (propertyName == "intensity") {
+      intensity = newValue;
+    } else if (propertyName == "mapSize") {
+      mapSize = newValue;
+    } else if (propertyName == "map") {
+      map = newValue;
+    } else if (propertyName == "mapPass") {
+      mapPass = newValue;
+    } else if (propertyName == "matrix") {
+      matrix = newValue;
+    } else if (propertyName == "autoUpdate") {
+      autoUpdate = newValue;
+    } else if (propertyName == "needsUpdate") {
+      needsUpdate = newValue;
+    } else if (propertyName == "viewportCount") {
+      viewportCount = newValue;
+    } else if (propertyName == "focus") {
+      focus = newValue;
+    }
+
+    return this;
+  }
+
+  dynamic operator [] (key) => getProperty(key);
+  void operator []=(String key, dynamic value) => setProperty(key, value);
 }
