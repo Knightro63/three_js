@@ -37,6 +37,8 @@ class Object3D with EventDispatcher {
   final Event _removedEvent = Event(type: "removed");
 
   BoundingSphere? boundingSphere;
+  BoundingBox? boundingBox;
+  
   bool disposed = false;
   static Vector3 defaultUp = Vector3(0.0, 1.0, 0.0);
   static bool defaultMatrixAutoUpdate = true;
@@ -735,6 +737,10 @@ class Object3D with EventDispatcher {
     console.warning('Object3D.computeBoundingSphere is Not implimented!');
   }
 
+  void computeBoundingBox(){
+    console.warning('Object3D.computeBoundingBox is Not implimented!');
+  }
+
   /// meta -- object containing metadata such as materials, textures or images
   /// for the object.
   /// 
@@ -1058,6 +1064,8 @@ class Object3D with EventDispatcher {
       return type;
     }else if(propertyName == 'boundingSphere'){
       return boundingSphere;
+    }else if(propertyName == 'boundingBox'){
+      return boundingBox;
     }else if(propertyName == 'tag'){
       return tag;
     }else if(propertyName == 'parent'){
@@ -1165,6 +1173,8 @@ class Object3D with EventDispatcher {
       type = newValue;
     }else if(propertyName == 'boundingSphere'){
       boundingSphere = newValue;
+    }else if(propertyName == 'boundingBox'){
+      boundingBox = newValue;
     }else if(propertyName == 'tag'){
       tag = newValue;
     }else if(propertyName == 'parent'){

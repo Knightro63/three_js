@@ -177,7 +177,6 @@ class ThreeJS with WidgetsBindingObserver{
     _debounceTimer?.cancel(); // Cancel timer if active
     _debounceTimer = null;
     WidgetsBinding.instance.removeObserver(this);
-
     ticker?.dispose();
     ticker = null;
     renderer?.dispose();
