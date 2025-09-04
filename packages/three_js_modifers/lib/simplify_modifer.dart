@@ -3,8 +3,7 @@ import 'package:three_js_math/three_js_math.dart';
 import './buffergeometry_utils.dart';
 import 'dart:math' as math;
 
-final _cb = Vector3.zero();
-final _ab = Vector3.zero();
+
 
 class SimplifyModifier {
 	static BufferGeometry modify(BufferGeometry bufferGeometry, int count) {
@@ -350,6 +349,9 @@ class SimplifyModifier {
 // we use a triangle class to represent structure of face slightly differently
 
 class Triangle {
+  final _cb = Vector3.zero();
+  final _ab = Vector3.zero();
+
   final normal = Vector3.zero();
   Vertex? v1;
   Vertex? v2;

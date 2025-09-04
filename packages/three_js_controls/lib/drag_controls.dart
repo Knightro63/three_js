@@ -3,14 +3,6 @@ import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'package:flutter/material.dart' hide Matrix4;
 
-final _raycaster = Raycaster();
-final _plane = Plane();
-final _pointer = Vector2.zero();
-final _offset = Vector3.zero();
-final _intersection = Vector3.zero();
-final _worldPosition = Vector3.zero();
-final _inverseMatrix = Matrix4.identity();
-
 /// This class can be used to provide a drag'n'drop interaction.
 class DragControls with EventDispatcher {
   late DragControls scope;
@@ -27,6 +19,14 @@ class DragControls with EventDispatcher {
   late List<Object3D> objects;
   List<Object3D> get _objects => objects;
   Camera get _camera => camera;
+
+  final _raycaster = Raycaster();
+  final _plane = Plane();
+  final _pointer = Vector2.zero();
+  final _offset = Vector3.zero();
+  final _intersection = Vector3.zero();
+  final _worldPosition = Vector3.zero();
+  final _inverseMatrix = Matrix4.identity();
 
   /// [objects] - An array of draggable 3D objects.
   /// 

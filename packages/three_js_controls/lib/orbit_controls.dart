@@ -5,10 +5,6 @@ import 'package:three_js_math/three_js_math.dart';
 import 'spherical.dart';
 import 'package:flutter/material.dart' hide Matrix4;
 
-final _changeEvent = Event(type: 'change');
-final _startEvent = Event(type: 'start');
-final _endEvent = Event(type: 'end');
-
 // This set of controls performs orbiting, dollying (zooming), and panning.
 // Unlike TrackballControls, it maintains the "up" direction object.up (+Y by default).
 //
@@ -96,9 +92,9 @@ class OrbitControls with EventDispatcher {
   late Map<String, dynamic> mouseButtons;
   late Map<String, dynamic> touches;
 
-  final changeEvent = Event(type: 'change');
-  final startEvent = Event(type: 'start');
-  final endEvent = Event(type: 'end');
+  final _changeEvent = Event(type: 'change');
+  final _startEvent = Event(type: 'start');
+  final _endEvent = Event(type: 'end');
 
   int state = OrbitState.none;
   double eps = 0.000001;

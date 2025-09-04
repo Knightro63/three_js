@@ -4,8 +4,6 @@ import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_geometry/three_js_geometry.dart';
 import 'dart:math' as math;
 
-BufferGeometry? _lineGeometry;
-
 /// An 3D arrow object for visualizing directions.
 /// 
 /// ```
@@ -22,6 +20,7 @@ BufferGeometry? _lineGeometry;
 /// scene.add( arrowHelper );
 /// ```
 class ArrowHelper extends Object3D {
+  BufferGeometry? _lineGeometry;
   late Line line;
   late Mesh cone;
   final _axis = Vector3();

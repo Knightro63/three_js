@@ -4,8 +4,6 @@ import 'dart:typed_data';
 import 'package:three_js_math/three_js_math.dart';
 import 'package:three_js_core/three_js_core.dart';
 
-final _box = BoundingBox();
-
 /// Helper object to graphically show the world-axis-aligned bounding box
 /// around an object. The actual bounding box is handled with [BoundingBox],
 /// this is just a visual helper for debugging. It can be automatically
@@ -20,6 +18,7 @@ final _box = BoundingBox();
 /// scene.add( box );
 /// ```
 class BoxHelper extends LineSegments {
+  final _box = BoundingBox();
   Object3D? object;
 
   BoxHelper.create(super.geometry, super.material);

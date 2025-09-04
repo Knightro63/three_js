@@ -40,9 +40,8 @@ import "package:three_js_math/three_js_math.dart";
  *
  */
 
-final _color = Color();
-
 class PLYLoader extends Loader {
+  final _color = Color();
   late final FileLoader _loader;
 
   /// [manager] — The [loadingManager] for the loader to use. Default is [DefaultLoadingManager].

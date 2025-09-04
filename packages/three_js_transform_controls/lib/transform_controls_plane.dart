@@ -1,8 +1,24 @@
-part of three_js_transform_controls;
-
-enum GizmoType{translate,rotate,scale,view}
+import 'package:three_js_core/three_js_core.dart';
+import 'package:three_js_math/three_js_math.dart';
+import './transform_controls.dart';
+import './transform_controls_gizmo.dart';
 
 class TransformControlsPlane extends Mesh {
+  final _alignVector = Vector3(0, 1, 0);
+  final _identityQuaternion = Quaternion();
+  final _dirVector = Vector3();
+  final _tempMatrix = Matrix4();
+
+  final _unitX = Vector3(1, 0, 0);
+  final _unitY = Vector3(0, 1, 0);
+  final _unitZ = Vector3(0, 0, 1);
+
+  final _v1 = Vector3();
+  final _v2 = Vector3();
+  final _v3 = Vector3();
+
+  final _tempVector = Vector3.zero();
+
   bool isTransformControlsPlane = true;
 
   Camera? camera;

@@ -4,9 +4,6 @@ import 'dart:typed_data';
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 
-final _v1 = Vector3.zero();
-final _v2 = Vector3.zero();
-
 /// Visualizes an object's vertex tangents.
 /// Requires that tangents have been specified in a [custom attribute] or
 /// have been calculated using [computeTangents].
@@ -22,6 +19,9 @@ final _v2 = Vector3.zero();
 /// scene.add( helper );
 /// ```
 class VertexTangentsHelper extends LineSegments {
+  final _v1 = Vector3.zero();
+  final _v2 = Vector3.zero();
+
   late Object3D object;
   late double size;
 

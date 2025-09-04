@@ -6,16 +6,6 @@ import 'package:three_js_objects/csm/csm_shaders.dart';
 import 'csm_frustum.dart';
 import 'dart:math' as math;
 
-final _cameraToLightMatrix = Matrix4();
-final _lightSpaceFrustum = CSMFrustum();
-final _center = Vector3();
-final _bbox = BoundingBox();
-final List<double> _uniformArray = [];
-final List<double> _logArray = [];
-final _lightOrientationMatrix = Matrix4();
-final _lightOrientationMatrixInverse = Matrix4();
-final _up = Vector3( 0, 1, 0 );
-
 enum CSMMode{practical,logarithmic,uniform,custom}
 
 class CSMData{
@@ -53,6 +43,16 @@ class CSMData{
 }
 
 class CSM{
+  final _cameraToLightMatrix = Matrix4();
+  final _lightSpaceFrustum = CSMFrustum();
+  final _center = Vector3();
+  final _bbox = BoundingBox();
+  final List<double> _uniformArray = [];
+  final List<double> _logArray = [];
+  final _lightOrientationMatrix = Matrix4();
+  final _lightOrientationMatrixInverse = Matrix4();
+  final _up = Vector3( 0, 1, 0 );
+
   Map shaders = {};
   List<Light> lights = [];
   List<double> breaks = [];

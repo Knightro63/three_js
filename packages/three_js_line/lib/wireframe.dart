@@ -4,10 +4,10 @@ import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'dart:math' as math;
 
-final _start = Vector3();
-final _end = Vector3();
-
 class Wireframe extends Mesh {
+  final _start = Vector3();
+  final _end = Vector3();
+
   Wireframe.create(super.geometry, super.material){
     this.type = 'Wireframe';
   }

@@ -2,9 +2,7 @@
 import 'package:three_js_math/three_js_math.dart';
 import 'package:three_js_core/three_js_core.dart';
 
-final _v1 = Vector3();
-final _v2 = Vector3();
-final _v3 = Vector3();
+
 
 /// Helper object to assist with visualizing a [page:DirectionalLight]'s
 /// effect on the scene. This consists of plane and a line representing the
@@ -18,6 +16,10 @@ final _v3 = Vector3();
 /// scene.add( helper );
 /// ```
 class DirectionalLightHelper extends Object3D {
+  final _v1 = Vector3();
+  final _v2 = Vector3();
+  final _v3 = Vector3();
+  
   late DirectionalLight light;
   late Line lightPlane;
   late Line targetLine;

@@ -1,5 +1,3 @@
-
-
 import 'package:three_js_core/renderers/shaders/shader_chunk/index.dart';
 
 final csmShader = {

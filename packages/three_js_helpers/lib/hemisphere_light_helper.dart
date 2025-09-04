@@ -6,10 +6,6 @@ import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_geometry/three_js_geometry.dart';
 import 'dart:math' as math;
 
-final _vectorHemisphereLightHelper = Vector3();
-final _color1 = Color(0, 0, 0);
-final _color2 = Color(0, 0, 0);
-
 /// Creates a visual aid consisting of a spherical [Mesh] for a
 /// [HemisphereLight].
 /// 
@@ -19,6 +15,10 @@ final _color2 = Color(0, 0, 0);
 /// scene.add( helper );
 /// ```
 class HemisphereLightHelper extends Object3D {
+  final _vectorHemisphereLightHelper = Vector3();
+  final _color1 = Color(0, 0, 0);
+  final _color2 = Color(0, 0, 0);
+
   Color? color;
   late Light light;
 

@@ -1,21 +1,28 @@
-part of three_js_transform_controls;
-
-final _tempVector = Vector3.zero();
-final _tempVector2 = Vector3.zero();
-final _tempQuaternion = Quaternion.identity();
-final _unit = {
-  "X": Vector3(1, 0, 0),
-  "Y": Vector3(0, 1, 0),
-  "Z": Vector3(0, 0, 1)
-};
-
-final _mouseDownEvent = Event(type: 'mouseDown');
-final _mouseUpEvent = Event(type: 'mouseUp', mode: null);
-final _objectChangeEvent = Event(type: 'objectChange');
-
-Pointer? _pointer0;
+import 'package:flutter/widgets.dart' hide Matrix4, Color;
+import 'package:three_js_core/three_js_core.dart';
+import 'package:three_js_math/three_js_math.dart';
+import './transform_controls_gizmo.dart';
+import './transform_controls_plane.dart';
 
 class TransformControls extends Object3D {
+  final _changeEvent = Event(type: 'change');
+  final _raycaster = Raycaster();
+
+  final _tempVector = Vector3.zero();
+  final _tempVector2 = Vector3.zero();
+  final _tempQuaternion = Quaternion.identity();
+  final _unit = {
+    "X": Vector3(1, 0, 0),
+    "Y": Vector3(0, 1, 0),
+    "Z": Vector3(0, 0, 1)
+  };
+
+  final _mouseDownEvent = Event(type: 'mouseDown');
+  final _mouseUpEvent = Event(type: 'mouseUp', mode: null);
+  final _objectChangeEvent = Event(type: 'objectChange');
+
+  Pointer? _pointer0;
+
   bool disposed = false;
   bool isTransformControls = true;
 

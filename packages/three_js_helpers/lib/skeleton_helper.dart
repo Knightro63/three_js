@@ -2,10 +2,6 @@
 import 'package:three_js_math/three_js_math.dart';
 import 'package:three_js_core/three_js_core.dart';
 
-final _shvector = Vector3();
-final _boneMatrix = Matrix4();
-final _matrixWorldInv = Matrix4();
-
 /// A helper object to assist with visualizing a [Skeleton]. The
 /// helper is rendered using a [LineBasicMaterial].
 /// 
@@ -14,6 +10,10 @@ final _matrixWorldInv = Matrix4();
 /// scene.add( helper );
 /// ```
 class SkeletonHelper extends LineSegments {
+  final _shvector = Vector3();
+  final _boneMatrix = Matrix4();
+  final _matrixWorldInv = Matrix4();
+
   bool isSkeletonHelper = true;
   late Object3D root;
   late List<Bone> bones;

@@ -2,10 +2,6 @@ import 'package:three_js_core/three_js_core.dart';
 import 'dart:math' as math;
 import 'package:three_js_math/three_js_math.dart';
 
-/// Ported from: https://github.com/maurizzzio/quickhull3d/ by Mauricio Poppe (https://github.com/maurizzzio)
-const visible = 0;
-const deleted = 1;
-
 class ConvexHull {
   Vector3 v1 = Vector3();
 
@@ -284,7 +280,7 @@ class ConvexHull {
         for (int i = 0; i < newFace2s.length; i++) {
           final face = newFace2s[i];
 
-          if (face.mark == visible) {
+          if (face.mark == 0) {
             final distance = face.distanceToPoint(vertex.point);
 
             if (distance > maxDistance) {
@@ -532,7 +528,7 @@ class ConvexHull {
     for (int i = 0; i < faces.length; i++) {
       final face = faces[i];
 
-      if (face.mark == visible) {
+      if (face.mark == 0) {
         activeFace2s.add(face);
       }
     }
@@ -580,7 +576,7 @@ class ConvexHull {
 
     deleteFace2Vertices(face, null);
 
-    face.mark = deleted;
+    face.mark = 1;
 
     HalfEdge? edge;
 
@@ -597,7 +593,7 @@ class ConvexHull {
       final twinEdge = edge?.twin;
       final oppositeFace2 = twinEdge!.face;
 
-      if (oppositeFace2.mark == visible) {
+      if (oppositeFace2.mark == 0) {
         if (oppositeFace2.distanceToPoint(eyePoint) > tolerance) {
           // the opposite face can see the vertex, so proceed with next edge
 
@@ -721,9 +717,8 @@ class Face2 {
   num area = 0;
 
   num constant = 0; // signed distance from face to the origin
-  VertexNode?
-      outside; // reference to a vertex in a vertex list this face can see
-  num mark = visible;
+  VertexNode? outside; // reference to a vertex in a vertex list this face can see
+  num mark = 0;
   HalfEdge? edge;
 
   static Face2 create(VertexNode a, VertexNode b, VertexNode c) {

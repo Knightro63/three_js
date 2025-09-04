@@ -3,8 +3,6 @@ import 'package:three_js_math/three_js_math.dart';
 import 'package:three_js_core/three_js_core.dart';
 import 'dart:math' as math;
 
-final spotLightHelperVector = Vector3();
-
 /// This displays a cone shaped helper object for a [SpotLight].
 /// 
 /// ```
@@ -16,6 +14,7 @@ final spotLightHelperVector = Vector3();
 /// scene.add( spotLightHelper );
 /// ```
 class SpotLightHelper extends Object3D {
+  final spotLightHelperVector = Vector3();
   late Light light;
   late int? color;
   late LineSegments cone;

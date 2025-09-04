@@ -10,9 +10,9 @@ import 'package:three_js_animations/three_js_animations.dart';
 import 'package:three_js_core_loaders/three_js_core_loaders.dart';
 import 'package:three_js_curves/three_js_curves.dart';
 
-late _FBXTree _fbxTree;
-late Map connections;
-late AnimationObject sceneGraph;
+_FBXTree? _fbxTree;
+Map? connections;
+AnimationObject? sceneGraph;
 
 class MorphBuffers{
   MorphBuffers({
@@ -87,6 +87,9 @@ class FBXLoader extends Loader {
   void dispose(){
     super.dispose();
     _loader.dispose();
+    _fbxTree = null;
+    connections = null;
+    sceneGraph = null;
   }
 
   void _init(){
@@ -185,7 +188,7 @@ class __FBXTreeParser {
 
     parseScene(deformers, geometryMap, materials);
 
-    return sceneGraph;
+  return sceneGraph!;
   }
 
   // Parses _FBXTree.Connections which holds parent-child connections between objects (e.g. material -> texture, model->geometry )
@@ -193,8 +196,8 @@ class __FBXTreeParser {
   Map parseConnections() {
     final Map connectionMap = {};
 
-    if (_fbxTree.connections != null) {
-      final rawConnections = _fbxTree.connections!["connections"];
+    if (_fbxTree?.connections != null) {
+      final rawConnections = _fbxTree?.connections!["connections"];
       rawConnections.forEach((rawConnection) {
         final fromID = rawConnection[0];
         final toID = rawConnection[1];
@@ -230,8 +233,8 @@ class __FBXTreeParser {
     final Map images = {};
     final blobs = {};
 
-    if (_fbxTree.objects?["Video"] != null) {
-      final videoNodes = _fbxTree.objects!["Video"];
+    if (_fbxTree?.objects?["Video"] != null) {
+      final videoNodes = _fbxTree?.objects!["Video"];
 
       for (final nodeID in videoNodes.keys) {
         final videoNode = videoNodes[nodeID];
@@ -340,8 +343,8 @@ class __FBXTreeParser {
   // to images in _FBXTree.Objects.Video
   Future<Map<int,Texture>> parseTextures(Map images) async {
     final Map<int,Texture> textureMap = {};
-    if (_fbxTree.objects?["Texture"] != null) {
-      final textureNodes = _fbxTree.objects!["Texture"];
+    if (_fbxTree?.objects?["Texture"] != null) {
+      final textureNodes = _fbxTree?.objects!["Texture"];
       for (final nodeID in textureNodes.keys) {
         final texture = await parseTexture(textureNodes[nodeID], images);
         if(texture != null)textureMap[_parseInt(nodeID)!] = texture;
@@ -390,7 +393,7 @@ class __FBXTreeParser {
     String fileName = '';
 
     final currentPath = textureLoader.path;
-    final children = connections[textureNode["id"]]["children"];
+    final children = connections?[textureNode["id"]]["children"];
 
     if (children != null && children.length > 0 && images[children[0]["ID"]] != null) {
       fileName = images[children[0]["ID"]];
@@ -455,8 +458,8 @@ class __FBXTreeParser {
   Map<int?,Material> parseMaterials(Map textureMap) {
     final Map<int?,Material> materialMap = {};
 
-    if (_fbxTree.objects?["Material"] != null) {
-      final materialNodes = _fbxTree.objects!["Material"];
+    if (_fbxTree?.objects?["Material"] != null) {
+      final materialNodes = _fbxTree?.objects!["Material"];
 
       for (final nodeID in materialNodes.keys) {
         final material = parseMaterial(materialNodes[nodeID], textureMap);
@@ -482,7 +485,7 @@ class __FBXTreeParser {
     }
 
     // Ignore unused materials which don't have any connections.
-    if (!connections.containsKey(id_)) return null;
+    if (connections?.containsKey(id_) == false) return null;
 
     Map<String,dynamic> parameters = parseParameters(materialNode, textureMap, id_);
 
@@ -568,7 +571,7 @@ class __FBXTreeParser {
 
     final scope = this;
 
-    final connection = connections[id];
+    final connection = connections?[id];
 
     if (connection["children"] != null) {
       connection["children"].forEach((child) {
@@ -652,10 +655,10 @@ class __FBXTreeParser {
   // get a texture from the textureMap for use by a material.
   Texture? getTexture(Map textureMap, int id) {
     // if the texture is a layered texture, just use the first layer and issue a warning
-    if (_fbxTree.objects?["LayeredTexture"] != null &&
-        _fbxTree.objects?["LayeredTexture"].id != null) {
+    if (_fbxTree?.objects?["LayeredTexture"] != null &&
+        _fbxTree?.objects?["LayeredTexture"].id != null) {
       console.warning('FBXLoader: layered textures are not supported in three.js. Discarding all but first layer.');
-      id = connections[id].children[0]['ID'];
+      id = connections?[id].children[0]['ID'];
     }
 
     return textureMap[id];
@@ -668,13 +671,13 @@ class __FBXTreeParser {
     Map skeletons = {};
     Map morphTargets = {};
 
-    if (_fbxTree.objects?["Deformer"] != null) {
-      final deformerNodes = _fbxTree.objects!["Deformer"];
+    if (_fbxTree?.objects?["Deformer"] != null) {
+      final deformerNodes = _fbxTree?.objects!["Deformer"];
 
       for (final nodeID in deformerNodes.keys) {
         Map deformerNode = deformerNodes[nodeID];
 
-        final relationships = connections[_parseInt(nodeID)];
+        final relationships = connections?[_parseInt(nodeID)];
 
         if (deformerNode["attrType"] == 'Skin') {
           final skeleton = parseSkeleton(relationships, deformerNodes);
@@ -759,8 +762,7 @@ class __FBXTreeParser {
 
       if (morphTargetNode.attrType != 'BlendShapeChannel') return null;
 
-      rawMorphTarget["geoID"] =
-          connections[_parseInt(child["ID"])].children.filter((child) {
+      rawMorphTarget["geoID"] = connections?[_parseInt(child["ID"])].children.filter((child) {
         return child.relationship == null;
       })[0].ID;
 
@@ -776,14 +778,14 @@ class __FBXTreeParser {
 
     Map modelMap = parseModels(deformers["skeletons"], geometryMap, materialMap);
 
-    final modelNodes = _fbxTree.objects?["Model"] ?? {};
+    final modelNodes = _fbxTree?.objects?["Model"] ?? {};
 
     final scope = this;
     modelMap.forEach((key, model) {
       final modelNode = modelNodes[model.id];
       scope.setLookAtProperties(model, modelNode);
 
-      final parentConnections = connections[model.id]["parents"];
+      final parentConnections = connections?[model.id]["parents"];
 
       parentConnections.forEach((connection) {
         final parent = modelMap[connection["ID"]];
@@ -791,14 +793,14 @@ class __FBXTreeParser {
       });
 
       if (model.parent == null) {
-        sceneGraph.add(model);
+        sceneGraph?.add(model);
       }
     });
 
     bindSkeleton(deformers["skeletons"], geometryMap, modelMap);
     createAmbientLight();
 
-    sceneGraph.traverse((node) {
+    sceneGraph?.traverse((node) {
       if (node.userData["transformData"] != null) {
         if (node.parent != null) {
           node.userData["transformData"]["parentMatrix"] = node.parent?.matrix;
@@ -816,23 +818,23 @@ class __FBXTreeParser {
     final List<AnimationClip> animations = _AnimationParser().parse();
 
     // if all the models where already combined in a single group, just return that
-    if (sceneGraph.children.length == 1 && sceneGraph.children[0] is Group) {
-      (sceneGraph.children[0] as AnimationObject).animations = animations;
-      sceneGraph = sceneGraph.children[0] as AnimationObject;
+    if (sceneGraph?.children.length == 1 && sceneGraph?.children[0] is Group) {
+      (sceneGraph?.children[0] as AnimationObject).animations = animations;
+      sceneGraph = sceneGraph?.children[0] as AnimationObject;
     }
 
-    sceneGraph.animations = animations;
+    sceneGraph?.animations = animations;
   }
 
   // parse nodes in _FBXTree.Objects.Model
   Map parseModels(skeletons, Map<int?,BufferGeometry> geometryMap, Map<int?,Material> materialMap) {
     final modelMap = {};
-    final modelNodes = _fbxTree.objects?["Model"] ?? {};
+    final modelNodes = _fbxTree?.objects?["Model"] ?? {};
 
     for (final nodeID in modelNodes.keys) {
       final id = _parseInt(nodeID);
       final node = modelNodes[nodeID];
-      final relationships = connections[id];
+      final relationships = connections?[id];
 
       Object3D? model = buildSkeleton(relationships, skeletons, id, node["attrName"]);
 
@@ -920,7 +922,7 @@ class __FBXTreeParser {
     dynamic cameraAttribute;
 
     relationships.children.forEach((child) {
-      final attr = _fbxTree.objects?["_NodeAttribute"][child["ID"]];
+      final attr = _fbxTree?.objects?["_NodeAttribute"][child["ID"]];
 
       if (attr != null) {
         cameraAttribute = attr;
@@ -990,7 +992,7 @@ class __FBXTreeParser {
     dynamic lightAttribute;
 
     relationships.children.forEach((child) {
-      final attr = _fbxTree.objects?["_NodeAttribute"][child["ID"]];
+      final attr = _fbxTree?.objects?["_NodeAttribute"][child["ID"]];
 
       if (attr != null) {
         lightAttribute = attr;
@@ -1192,11 +1194,11 @@ class __FBXTreeParser {
 
   void setLookAtProperties(model, Map modelNode) {
     if (modelNode["LookAtProperty"] != null) {
-      final children = connections[model.id].children;
+      final children = connections?[model.id].children;
 
       children.forEach((child) {
         if (child.relationship == 'LookAtProperty') {
-          final lookAtTarget = _fbxTree.objects?["Model"][child["ID"]];
+          final lookAtTarget = _fbxTree?.objects?["Model"][child["ID"]];
 
           if (lookAtTarget.Lcl_Translation != null) {
             final pos = lookAtTarget.Lcl_Translation.value;
@@ -1204,7 +1206,7 @@ class __FBXTreeParser {
             // DirectionalLight, SpotLight
             if (model.target != null) {
               model.target.position.fromArray(pos);
-              sceneGraph.add(model.target);
+              sceneGraph?.add(model.target);
             } 
             else {
               model.lookAt(Vector3.zero().copyFromUnknown(pos));
@@ -1221,12 +1223,12 @@ class __FBXTreeParser {
     for (final iD in skeletons.keys) {
       final skeleton = skeletons[iD];
 
-      final parents = connections[_parseInt(skeleton["ID"])]["parents"];
+      final parents = connections?[_parseInt(skeleton["ID"])]["parents"];
 
       parents.forEach((parent) {
         if (geometryMap.containsKey(parent["ID"])) {
           final geoID = parent["ID"];
-          final geoRelationships = connections[geoID];
+          final geoRelationships = connections?[geoID];
 
           geoRelationships["parents"].forEach((geoConnParent) {
             if (modelMap.containsKey(geoConnParent["ID"])) {
@@ -1244,8 +1246,8 @@ class __FBXTreeParser {
   Map parsePoseNodes() {
     final bindMatrices = {};
 
-    if (_fbxTree.objects?.keys.contains("Pose") ?? false) {
-      final bindPoseNode = _fbxTree.objects?["Pose"];
+    if (_fbxTree?.objects?.keys.contains("Pose") ?? false) {
+      final bindPoseNode = _fbxTree?.objects?["Pose"];
 
       for (final nodeID in bindPoseNode.keys) {
         if (bindPoseNode[nodeID]["attrType"] == 'BindPose' &&
@@ -1271,15 +1273,15 @@ class __FBXTreeParser {
 
   // Parse ambient color in _FBXTree.GlobalSettings - if it's not set to black (default), create an ambient light
   void createAmbientLight() {
-    if (_fbxTree.globalSettings?["AmbientColor"] != null) {
-      final ambientColor = _fbxTree.globalSettings!["AmbientColor"]["value"];
+    if (_fbxTree?.globalSettings?["AmbientColor"] != null) {
+      final ambientColor = _fbxTree?.globalSettings!["AmbientColor"]["value"];
       final r = ambientColor[0];
       final g = ambientColor[1];
       final b = ambientColor[2];
 
       if (r != 0 || g != 0 || b != 0) {
         final color = Color(r, g, b);
-        sceneGraph.add(AmbientLight(color.getHex(), 1));
+        sceneGraph?.add(AmbientLight(color.getHex(), 1));
       }
     }
   }
@@ -1290,11 +1292,11 @@ class _GeometryParser {
   // Parse nodes in _FBXTree.Objects.Geometry
   Map<int?,BufferGeometry> parse(deformers) {
     final Map<int?,BufferGeometry> geometryMap = {};
-    if (_fbxTree.objects?["Geometry"] != null) {
-      final geoNodes = _fbxTree.objects!["Geometry"];
+    if (_fbxTree?.objects?["Geometry"] != null) {
+      final geoNodes = _fbxTree?.objects!["Geometry"];
       
       for (final nodeID in geoNodes.keys) {
-        final relationships = connections[_parseInt(nodeID)];
+        final relationships = connections?[_parseInt(nodeID)];
         final geo = parseGeometry(relationships, geoNodes[nodeID], deformers);
 
         geometryMap[_parseInt(nodeID)] = geo!;
@@ -1322,7 +1324,7 @@ class _GeometryParser {
     final morphTargets = [];
 
     List modelNodes = relationships["parents"].map((parent) {
-      return _fbxTree.objects?["Model"][parent["ID"]];
+      return _fbxTree?.objects?["Model"][parent["ID"]];
     }).toList();
 
     // don't create geometry if it is not associated with any models
@@ -1886,7 +1888,7 @@ class _GeometryParser {
     final scope = this;
     morphTargets.forEach((morphTarget) {
       morphTarget.rawTargets.forEach((rawTarget) {
-        final morphGeoNode = _fbxTree.objects?["Geometry"][rawTarget.geoID];
+        final morphGeoNode = _fbxTree?.objects?["Geometry"][rawTarget.geoID];
 
         if (morphGeoNode != null) {
           scope.genMorphGeometry(parentGeo, parentGeoNode, morphGeoNode,
@@ -2100,7 +2102,7 @@ class _AnimationParser {
   parseClips() {
     // since the actual transformation data is stored in _FBXTree.Objects.AnimationCurve,
     // if this is null we can safely assume there are no animations
-    if (_fbxTree.objects?["AnimationCurve"] == null) return null;
+    if (_fbxTree?.objects?["AnimationCurve"] == null) return null;
 
     final curveNodesMap = parseAnimationCurveNodes();
 
@@ -2116,7 +2118,7 @@ class _AnimationParser {
   // each AnimationCurveNode holds data for an animation transform for a model (e.g. left arm rotation )
   // and is referenced by an AnimationLayer
   parseAnimationCurveNodes() {
-    final rawCurveNodes = _fbxTree.objects?["AnimationCurveNode"];
+    final rawCurveNodes = _fbxTree?.objects?["AnimationCurveNode"];
 
     final curveNodesMap = {};
 
@@ -2141,7 +2143,7 @@ class _AnimationParser {
   // previously parsed AnimationCurveNodes. Each AnimationCurve holds data for a single animated
   // axis ( e.g. times and values of x rotation)
   parseAnimationCurves(curveNodesMap) {
-    final rawCurves = _fbxTree.objects?["AnimationCurve"];
+    final rawCurves = _fbxTree?.objects?["AnimationCurve"];
 
     // TODO: Many values are identical up to roundoff error, but won't be optimised
     // e.g. position times: [0, 0.4, 0. 8]
@@ -2159,7 +2161,7 @@ class _AnimationParser {
         "values": rawCurves[nodeID]["KeyValueFloat"]["a"],
       };
 
-      final relationships = connections[animationCurve["id"]];
+      final relationships = connections?[animationCurve["id"]];
 
       if (relationships != null) {
         final animationCurveID = relationships["parents"][0]["ID"];
@@ -2189,13 +2191,13 @@ class _AnimationParser {
   // to various AnimationCurveNodes and is referenced by an AnimationStack node
   // note: theoretically a stack can have multiple layers, however in practice there always seems to be one per stack
   Map parseAnimationLayers(curveNodesMap) {
-    final rawLayers = _fbxTree.objects?["AnimationLayer"];
+    final rawLayers = _fbxTree?.objects?["AnimationLayer"];
     Map layersMap = {};
 
     for (final nodeID in rawLayers.keys) {
       final layerCurveNodes = [];
 
-      final connection = connections[int.parse(nodeID.toString())];
+      final connection = connections?[int.parse(nodeID.toString())];
 
       if (connection != null) {
         // all the animationCurveNodes used in the layer
@@ -2209,12 +2211,12 @@ class _AnimationParser {
             if (curveNode["curves"]["x"] != null ||
                 curveNode["curves"]["y"] != null ||
                 curveNode["curves"]["z"] != null) {
-              final modelID = connections[child["ID"]]["parents"].where((parent) {
+              final modelID = connections?[child["ID"]]["parents"].where((parent) {
                 return parent["relationship"] != null;
               }).toList()[0]["ID"];
 
               if (modelID != null) {
-                final rawModel = _fbxTree.objects?["Model"][modelID];
+                final rawModel = _fbxTree?.objects?["Model"][modelID];
 
                 if (rawModel == null) {
                   console.warning('FBXLoader: Encountered a unused curve. $child');
@@ -2231,7 +2233,7 @@ class _AnimationParser {
                   "initialScale": [1, 1, 1],
                 };
 
-                sceneGraph.traverse((child) {
+                sceneGraph?.traverse((child) {
                   if (child.id == rawModel["id"]) {
                     node["transform"] = child.matrix;
 
@@ -2264,23 +2266,23 @@ class _AnimationParser {
             else if (curveNode['curves']?['morph'] != null) {
               if (layerCurveNodes[i] == null) {
                 final deformerID =
-                    connections[child["ID"]].parents.filter((parent) {
+                    connections?[child["ID"]].parents.filter((parent) {
                   return parent.relationship != null;
                 })[0].ID;
 
-                final morpherID = connections[deformerID].parents[0].ID;
-                final geoID = connections[morpherID].parents[0].ID;
+                final morpherID = connections?[deformerID].parents[0].ID;
+                final geoID = connections?[morpherID].parents[0].ID;
 
                 // assuming geometry is not used in more than one model
-                final modelID = connections[geoID].parents[0].ID;
+                final modelID = connections?[geoID].parents[0].ID;
 
-                final rawModel = _fbxTree.objects?["Model"][modelID];
+                final rawModel = _fbxTree?.objects?["Model"][modelID];
 
                 final node = {
                   "modelName": rawModel.attrName
                       ? PropertyBinding.sanitizeNodeName(rawModel.attrName)
                       : '',
-                  "morphName": _fbxTree.objects?["Deformer"][deformerID].attrName,
+                  "morphName": _fbxTree?.objects?["Deformer"][deformerID].attrName,
                 };
 
                 layerCurveNodes[i] = node;
@@ -2301,13 +2303,13 @@ class _AnimationParser {
   // parse nodes in _FBXTree.Objects.AnimationStack. These are the top level node in the animation
   // hierarchy. Each Stack node will be used to create a AnimationClip
   parseAnimStacks(layersMap) {
-    final rawStacks = _fbxTree.objects?["AnimationStack"];
+    final rawStacks = _fbxTree?.objects?["AnimationStack"];
 
     // connect the stacks (clips) up to the layers
     final rawClips = {};
 
     for (final nodeID in rawStacks.keys) {
-      final children = connections[int.parse(nodeID.toString())]["children"];
+      final children = connections?[int.parse(nodeID.toString())]["children"];
 
       if (children.length > 1) {
         // it seems like stacks will always be associated with a single layer. But just in case there are files
@@ -2470,9 +2472,7 @@ class _AnimationParser {
       return val / 100;
     }).toList();
 
-    final morphNum = sceneGraph
-        .getObjectByName(rawTracks.modelName)
-        ?.morphTargetDictionary?[rawTracks.morphName];
+    final morphNum = sceneGraph?.getObjectByName(rawTracks.modelName)?.morphTargetDictionary?[rawTracks.morphName];
 
     return NumberKeyframeTrack(
         '${rawTracks.modelName}.morphTargetInfluences[$morphNum]',

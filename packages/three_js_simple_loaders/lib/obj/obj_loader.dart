@@ -7,22 +7,6 @@ import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'package:three_js_core_loaders/three_js_core_loaders.dart';
 
-// o object_name | g group_name
-final _objectPattern = RegExp("^[og]\s*(.+)?");
-// mtllib file_reference
-final _materialLibraryPattern = RegExp("^mtllib ");
-// usemtl material_name
-final _materialUsePattern = RegExp("^usemtl ");
-// usemap map_name
-final _mapUsePattern = RegExp("^usemap ");
-
-final _vA = Vector3();
-final _vB = Vector3();
-final _vC = Vector3();
-
-final _ab = Vector3();
-final _cb = Vector3();
-
 class ParseStateMaterial {
   late dynamic index;
   late dynamic name;
@@ -138,6 +122,13 @@ class ParseStateObject {
 }
 
 class ParserState {
+  final _vA = Vector3();
+  final _vB = Vector3();
+  final _vC = Vector3();
+
+  final _ab = Vector3();
+  final _cb = Vector3();
+
   final objects = [];
   ParseStateObject? object;
 
@@ -377,6 +368,15 @@ class ParserState {
 /// each texture coordinate vertex, vertex normals, and the faces that make each polygon defined as a list of
 /// vertices, and texture vertices.
 class OBJLoader extends Loader {
+  // o object_name | g group_name
+  final _objectPattern = RegExp("^[og]\s*(.+)?");
+  // mtllib file_reference
+  final _materialLibraryPattern = RegExp("^mtllib ");
+  // usemtl material_name
+  final _materialUsePattern = RegExp("^usemtl ");
+  // usemap map_name
+  final _mapUsePattern = RegExp("^usemap ");
+  
   late final FileLoader _loader;
   MaterialCreator? materials;
 

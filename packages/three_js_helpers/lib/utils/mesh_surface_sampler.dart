@@ -14,10 +14,10 @@ import 'package:three_js_math/three_js_math.dart';
  * - https://stackoverflow.com/a/4322940/1314762
  */
 
-final _face = Triangle();
-final _color = Vector3();
-
 class MeshSurfaceSampler {
+  final _face = Triangle();
+  final _color = Vector3();
+
   late BufferGeometry geometry;
 
   late Float32BufferAttribute positionAttribute;

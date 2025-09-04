@@ -3,10 +3,9 @@ import 'package:three_js_geometry/three_js_geometry.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'dart:math' as math;
 
-final _box = BoundingBox();
-final _vector = Vector3();
-
 class LineSegmentsGeometry extends InstancedBufferGeometry {
+  final _box = BoundingBox();
+  final _vector = Vector3();
 
 	LineSegmentsGeometry():super(){
 		this.type = 'LineSegmentsGeometry';

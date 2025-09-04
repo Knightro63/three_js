@@ -424,7 +424,20 @@ class Object3D with EventDispatcher {
   /// since an object can have at most one parent.
   /// 
   /// See [Group] for info on manually grouping objects.
+  Object3D insert(int index, Object3D? object) {
+    return _addInsert(object,index);
+  }
+
+  /// Adds `object` as child of this object. An arbitrary number of objects may
+  /// be added. Any current parent on an object passed in here will be removed,
+  /// since an object can have at most one parent.
+  /// 
+  /// See [Group] for info on manually grouping objects.
   Object3D add(Object3D? object) {
+    return _addInsert(object);
+  }
+
+  Object3D _addInsert(Object3D? object,[int? insert]) {
     if (object == this) {
       console.warning('Object3D.add: object can\'t be added as a child of itself. $object');
       return this;
@@ -436,7 +449,12 @@ class Object3D with EventDispatcher {
       }
 
       object.parent = this;
-      children.add(object);
+      if(insert != null){
+        children.insert(insert, object);
+      }
+      else{
+        children.add(object);
+      }
 
       object.dispatchEvent(_addedEvent);
     } 

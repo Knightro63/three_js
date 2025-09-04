@@ -4,10 +4,6 @@ import 'dart:typed_data';
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 
-final _v1 = Vector3.zero();
-final _v2 = Vector3.zero();
-final _normalMatrix = Matrix3.identity();
-
 /// Visualizes an object's vertex normals.
 /// Requires that normals have been specified in a [custom attribute] or
 /// have been calculated using [computeVertexNormals].
@@ -23,6 +19,10 @@ final _normalMatrix = Matrix3.identity();
 /// scene.add( helper );
 /// ```
 class VertexNormalsHelper extends LineSegments {
+  final _v1 = Vector3.zero();
+  final _v2 = Vector3.zero();
+  final _normalMatrix = Matrix3.identity();
+
   late Object3D object;
   late double size;
 

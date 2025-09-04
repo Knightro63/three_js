@@ -2,31 +2,31 @@ import 'package:three_js_math/three_js_math.dart';
 import 'package:three_js_core/three_js_core.dart';
 import 'dart:math' as math;
 
-final _frustum = Frustum();
-final _center = Vector3.zero();
-
-final _tmpPoint = Vector3.zero();
-
-final _vecNear = Vector3.zero();
-final _vecTopLeft = Vector3.zero();
-final _vecTopRight = Vector3.zero();
-final _vecDownRight = Vector3.zero();
-final _vecDownLeft = Vector3.zero();
-
-final _vecFarTopLeft = Vector3.zero();
-final _vecFarTopRight = Vector3.zero();
-final _vecFarDownRight = Vector3.zero();
-final _vecFarDownLeft = Vector3.zero();
-
-final _vectemp1 = Vector3.zero();
-final _vectemp2 = Vector3.zero();
-final _vectemp3 = Vector3.zero();
-
-final _matrix = Matrix4();
-final _quaternion = Quaternion();
-final _scale = Vector3.zero();
-
 class SelectionBox {
+  final _frustum = Frustum();
+  final _center = Vector3.zero();
+
+  final _tmpPoint = Vector3.zero();
+
+  final _vecNear = Vector3.zero();
+  final _vecTopLeft = Vector3.zero();
+  final _vecTopRight = Vector3.zero();
+  final _vecDownRight = Vector3.zero();
+  final _vecDownLeft = Vector3.zero();
+
+  final _vecFarTopLeft = Vector3.zero();
+  final _vecFarTopRight = Vector3.zero();
+  final _vecFarDownRight = Vector3.zero();
+  final _vecFarDownLeft = Vector3.zero();
+
+  final _vectemp1 = Vector3.zero();
+  final _vectemp2 = Vector3.zero();
+  final _vectemp3 = Vector3.zero();
+
+  final _matrix = Matrix4();
+  final _quaternion = Quaternion();
+  final _scale = Vector3.zero();
+
   final Camera camera;
   final Scene scene;
   Vector3 startPoint = Vector3.zero();

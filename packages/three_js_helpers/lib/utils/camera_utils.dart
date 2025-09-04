@@ -2,16 +2,6 @@ import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'dart:math' as math;
 
-final _va = Vector3(), // from pe to pa
-	_vb = Vector3(), // from pe to pb
-	_vc = Vector3(), // from pe to pc
-	_vr = Vector3(), // right axis of screen
-	_vu = Vector3(), // up axis of screen
-	_vn = Vector3(), // normal vector of screen
-	_vec = Vector3(), // temporary vector
-	_quat = Quaternion(); // temporary quaternion
-
-
 /** Set a PerspectiveCamera's projectionMatrix and quaternion
  * to exactly frame the corners of an arbitrary rectangle.
  * NOTE: This function ignores the standard parameters;
@@ -22,7 +12,15 @@ final _va = Vector3(), // from pe to pa
  * @param {boolean} estimateViewFrustum */
 class CameraUtils{
   static void frameCorners(Camera camera,Vector3 bottomLeftCorner,Vector3 bottomRightCorner,Vector3 topLeftCorner, [bool estimateViewFrustum = false] ) {
-
+    final _va = Vector3(), // from pe to pa
+      _vb = Vector3(), // from pe to pb
+      _vc = Vector3(), // from pe to pc
+      _vr = Vector3(), // right axis of screen
+      _vu = Vector3(), // up axis of screen
+      _vn = Vector3(), // normal vector of screen
+      _vec = Vector3(), // temporary vector
+      _quat = Quaternion(); // temporary quaternion
+      
     final pa = bottomLeftCorner, pb = bottomRightCorner, pc = topLeftCorner;
     final pe = camera.position; // eye position
     final n = camera.near; // distance of near clipping plane

@@ -30,15 +30,9 @@ class KTXLoader extends CompressedTextureLoader {
 	}
 }
 
-
-const HEADER_LEN = 12 + ( 13 * 4 ); // identifier + header elements (not including key value meta-data pairs)
-// load types
-const COMPRESSED_2D = 0; // uses a gl.compressedTexImage2D()
-//const COMPRESSED_3D = 1; // uses a gl.compressedTexImage3D()
-//const TEX_2D = 2; // uses a gl.texImage2D()
-//const TEX_3D = 3; // uses a gl.texImage3D()
-
 class KhronosTextureContainer {
+  final HEADER_LEN = 12 + ( 13 * 4 ); // identifier + header elements (not including key value meta-data pairs)
+
   ByteBuffer arrayBuffer;
   int glType = 0; // must be 0 for compressed textures
   int glTypeSize = 1; // must be 1 for compressed textures
@@ -130,7 +124,7 @@ class KhronosTextureContainer {
 
 		// we now have a completely validated file, so could use existence of loadType as success
 		// would need to make this more elaborate & adjust checks above to support more than one load type
-		loadType = COMPRESSED_2D;
+		loadType = 0;
 	}
 
   int getUint32(Uint8List dv, int offset , bool littleEndian) {

@@ -2,7 +2,6 @@ import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_postprocessing/post/index.dart';
 import 'pass.dart';
 
-
 class ShaderPass extends Pass {
   late dynamic textureID;
 

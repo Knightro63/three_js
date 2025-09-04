@@ -3,14 +3,6 @@ import 'package:three_js_curves/three_js_curves.dart';
 import 'dart:math' as math;
 import 'package:three_js_math/three_js_math.dart';
 
-double degsToRads = math.pi / 180;
-num digit0 = 48; 
-num digit9 = 57;
-num comma = 44;
-num space = 32;
-num period = 46;
-num minus = 45;
-
 class SvgPath {
   static transformSVGPath(svgPathStr) {
     final path = ShapePath();
@@ -48,12 +40,12 @@ class SvgPath {
       while (idx < len) {
         c = svgPathStr.codeUnitAt(idx);
 
-        if (c != comma && c != space) break;
+        if (c != 44 && c != 32) break;
 
         idx++;
       }
 
-      if (c == minus) {
+      if (c == 45) {
         sidx = idx++;
       } else {
         sidx = idx;
@@ -64,10 +56,10 @@ class SvgPath {
       while (idx < len) {
         c = svgPathStr.codeUnitAt(idx);
 
-        if (digit0 <= c && c <= digit9) {
+        if (48 <= c && c <= 57) {
           idx++;
           continue;
-        } else if (c == period) {
+        } else if (c == 46) {
           idx++;
           //isFloat = true;
           continue;
@@ -92,13 +84,13 @@ class SvgPath {
       while (idx < len) {
         c = svgPathStr.codeUnitAt(idx);
 
-        if (c != comma && c != space) break;
+        if (c != 44 && c != 32) break;
 
         idx++;
       }
 
       c = svgPathStr.codeUnitAt(idx);
-      return (c == minus || (digit0 <= c && c <= digit9));
+      return (c == 45 || (48 <= c && c <= 57));
     }
 
     bool canRepeat;
@@ -230,7 +222,7 @@ class SvgPath {
         case 'A':
           rx = eatNum();
           ry = eatNum();
-          xar = eatNum() * degsToRads;
+          xar = eatNum() * math.pi / 180;
           laf = eatNum();
           sf = eatNum();
           nx = eatNum();

@@ -228,7 +228,7 @@ class SkeletonUtils {
 
       for ( int j = 0; j < bones.length; ++ j ) {
         bone = bones[ j ];
-        name = getBoneName( bone!, options ) ?? bone.name;
+        name = getBoneName( bone, options ) ?? bone.name;
         boneTo = getBoneByName( name, source.skeleton! );
 
         if ( boneTo != null) {

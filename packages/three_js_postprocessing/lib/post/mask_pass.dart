@@ -1,5 +1,4 @@
 import "package:three_js_core/three_js_core.dart";
-
 import "pass.dart";
 
 class MaskPass extends Pass {

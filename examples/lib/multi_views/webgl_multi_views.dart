@@ -107,10 +107,18 @@ class _MyAppState extends State<WebglMultiViews> {
   Future<void> setup() async {
     for (int ii = 0; ii < views.length; ++ ii ) {
       final view = views[ ii ];
-      threeJs.camera = three.PerspectiveCamera( view['fov'], threeJs.width / threeJs.height, 1, 10000 );
-      threeJs.camera.position.copyFromArray( view['eye'] );
-      threeJs.camera.up.copyFromArray( view['up'] );
-      view['camera'] = threeJs.camera;
+      if(ii == views.length-1){
+        threeJs.camera = three.PerspectiveCamera( view['fov'], threeJs.width / threeJs.height, 1, 10000 );
+        threeJs.camera.position.copyFromArray( view['eye'] );
+        threeJs.camera.up.copyFromArray( view['up'] );
+        view['camera'] = threeJs.camera;
+      }
+      else{
+        final camera = three.PerspectiveCamera( view['fov'], threeJs.width / threeJs.height, 1, 10000 );
+        camera.position.copyFromArray( view['eye'] );
+        camera.up.copyFromArray( view['up'] );
+        view['camera'] = camera;
+      }
     }
 
     threeJs.scene = three.Scene();

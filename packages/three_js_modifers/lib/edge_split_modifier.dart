@@ -3,11 +3,10 @@ import 'package:three_js_math/three_js_math.dart';
 import './buffergeometry_utils.dart';
 import 'dart:math' as math;
 
-final _A = Vector3.zero();
-final _B = Vector3.zero();
-final _C = Vector3.zero();
-
 class EdgeSplitModifier {
+  final _A = Vector3.zero();
+  final _B = Vector3.zero();
+  final _C = Vector3.zero();
 
 	BufferGeometry modify(BufferGeometry geometry, cutOffAngle, [bool tryKeepNormals = true ]) {
 		bool hadNormals = false;

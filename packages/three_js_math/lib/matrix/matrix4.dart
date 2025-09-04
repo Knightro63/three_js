@@ -5,12 +5,8 @@ import '../rotation/index.dart';
 import 'dart:math' as math;
 
 class Matrix4 {
-  // 
-  
   // final _matrix4zero = Vector3(0, 0, 0);
   // final _matrix4one = Vector3(1, 1, 1);
-
-
   String type = "Matrix4";
   late Float32List storage;
 

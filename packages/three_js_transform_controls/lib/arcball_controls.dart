@@ -1,4 +1,9 @@
-part of three_js_transform_controls;
+import 'dart:math' as math;
+import 'package:flutter/widgets.dart' hide Matrix4, Color;
+import 'package:three_js_core/three_js_core.dart';
+import 'package:three_js_math/three_js_math.dart';
+import 'package:three_js_helpers/three_js_helpers.dart';
+import 'package:three_js_curves/three_js_curves.dart';
 
 //trackball state
 class State2 {
@@ -23,16 +28,6 @@ class Input {
   static const int cursor = 5;
 }
 
-//cursor center coordinates
-Vector2 _center = Vector2(0, 0);
-
-//transformation matrices for gizmos and camera
-Map<String,Matrix4> _transformation = {'camera': Matrix4(), 'gizmos': Matrix4()};
-
-Matrix4 _gizmoMatrixStateTemp = Matrix4();
-Matrix4 _cameraMatrixStateTemp = Matrix4();
-Vector3 _scalePointTemp = Vector3();
-
 /// Arcball controls allow the camera to be controlled by a virtual trackball with full touch support and advanced navigation functionality.
 /// 
 /// Cursor/finger positions and movements are mapped over a virtual trackball surface
@@ -56,6 +51,22 @@ Vector3 _scalePointTemp = Vector3();
 /// To use this, as with all files in the /examples directory, you will have to
 /// include the file separately in your HTML.
 class ArcballControls with EventDispatcher {
+  //cursor center coordinates
+  Vector2 _center = Vector2(0, 0);
+
+  final _changeEvent = Event(type: 'change');
+  final _startEvent = Event(type: 'start');
+  final _endEvent = Event(type: 'end');
+  final _raycaster = Raycaster();
+  final _offset = Vector3.zero();
+
+  //transformation matrices for gizmos and camera
+  Map<String,Matrix4> _transformation = {'camera': Matrix4(), 'gizmos': Matrix4()};
+
+  Matrix4 _gizmoMatrixStateTemp = Matrix4();
+  Matrix4 _cameraMatrixStateTemp = Matrix4();
+  Vector3 _scalePointTemp = Vector3();
+
   bool disposed = false;
   Vector3 target = Vector3();
   final Vector3 _currentTarget = Vector3();

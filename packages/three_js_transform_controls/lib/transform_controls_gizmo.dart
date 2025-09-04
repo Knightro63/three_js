@@ -1,25 +1,28 @@
-part of three_js_transform_controls;
+import 'dart:math' as math;
+import 'dart:typed_data';
+import 'package:three_js_core/three_js_core.dart';
+import 'package:three_js_math/three_js_math.dart';
+import 'package:three_js_geometry/three_js_geometry.dart' as geo;
+import './transform_controls.dart';
 
 enum ContorlsMode{gizmo,picker,helper}
-
-final _tempEuler = Euler(0, 0, 0);
-final _alignVector = Vector3(0, 1, 0);
-final _zeroVector = Vector3(0, 0, 0);
-final _lookAtMatrix = Matrix4();
-final _tempQuaternion2 = Quaternion();
-final _identityQuaternion = Quaternion();
-final _dirVector = Vector3();
-final _tempMatrix = Matrix4();
-
-final _unitX = Vector3(1, 0, 0);
-final _unitY = Vector3(0, 1, 0);
-final _unitZ = Vector3(0, 0, 1);
-
-final _v1 = Vector3();
-final _v2 = Vector3();
-final _v3 = Vector3();
+enum GizmoType{translate,rotate,scale,view}
 
 class TransformControlsGizmo extends Object3D {
+  final _tempEuler = Euler(0, 0, 0);
+  final _alignVector = Vector3(0, 1, 0);
+  final _zeroVector = Vector3(0, 0, 0);
+  final _lookAtMatrix = Matrix4();
+  final _tempQuaternion2 = Quaternion();
+  final _identityQuaternion = Quaternion();
+
+  final _unitX = Vector3(1, 0, 0);
+  final _unitY = Vector3(0, 1, 0);
+  final _unitZ = Vector3(0, 0, 1);
+
+  final _tempVector = Vector3.zero();
+  final _tempQuaternion = Quaternion.identity();
+
   bool isTransformControlsGizmo = true;
 
   Camera? camera;
