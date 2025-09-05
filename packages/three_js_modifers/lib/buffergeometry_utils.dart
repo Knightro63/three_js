@@ -71,7 +71,7 @@ class BufferGeometryUtils{
       // used by another index
       if (hashToIndex.containsKey(hash)) {
         newIndices.add( hashToIndex[ hash ] );
-      } 
+      }
       else {
         // copy data to the index in the temporary attributes
         for (int j = 0, l = attributeNames.length; j < l; j ++ ) {
@@ -129,5 +129,166 @@ class BufferGeometryUtils{
 
     result.setIndex( newIndices );
     return result;
+  }
+
+  /// Method to merge multiple [BufferGeometry] objects into a single geometry.
+  ///
+  /// All geometries must have:
+  /// - The same set of attributes (e.g., `position`, `normal`, `uv`).
+  /// - The same set of morph attributes (if any).
+  /// - The same indexing type (either all indexed or all non-indexed).
+  /// - The same `morphTargetsRelative` flag.
+  ///
+  /// If [useGroups] is `true`, the resulting geometry will contain groups
+  /// corresponding to each input geometry. This is useful for assigning
+  /// different materials to different parts of the merged geometry.
+  ///
+  /// Returns:
+  /// - A new merged [BufferGeometry] if successful.
+  /// - `null` if the geometries are incompatible or merging fails.
+  static BufferGeometry? mergeGeometries(List<BufferGeometry> geometries,
+      [bool useGroups = false]) {
+    if (geometries.isEmpty) return null;
+
+    // Check if the first geometry is indexed
+    final bool isIndexed = geometries[0].getIndex() != null;
+
+    // Store the set of attribute names and morph attribute names from the first geometry
+    final attributesUsed = Set<String>.from(geometries[0].attributes.keys);
+    final morphAttributesUsed =
+        Set<String>.from(geometries[0].morphAttributes.keys);
+
+    // Maps to collect attributes and morph attributes from all geometries
+    final Map<String, List<BufferAttribute>> attributes = {};
+    final Map<String, List<List<BufferAttribute>>> morphAttributes = {};
+
+    // All geometries must have the same morphTargetsRelative flag
+    final bool morphTargetsRelative = geometries[0].morphTargetsRelative;
+    final mergedGeometry = BufferGeometry();
+
+    int offset = 0;
+
+    // --- Iterate over all geometries ---
+    for (int i = 0; i < geometries.length; i++) {
+      final geometry = geometries[i];
+      int attributesCount = 0;
+
+      // Ensure all geometries are either indexed or non-indexed
+      if (isIndexed != (geometry.getIndex() != null)) return null;
+
+      // Collect attributes
+      for (final name in geometry.attributes.keys) {
+        if (!attributesUsed.contains(name)) return null;
+
+        attributes.putIfAbsent(name, () => []);
+        attributes[name]!.add(geometry.getAttributeFromString(name));
+        attributesCount++;
+      }
+
+      if (attributesCount != attributesUsed.length) return null;
+
+      // Collect morph attributes
+      if (morphTargetsRelative != geometry.morphTargetsRelative) return null;
+
+      for (final name in geometry.morphAttributes.keys) {
+        if (!morphAttributesUsed.contains(name)) return null;
+
+        morphAttributes.putIfAbsent(name, () => []);
+        morphAttributes[name]!.add(geometry.morphAttributes[name]!);
+      }
+
+      // Add groups if requested
+      if (useGroups) {
+        int count;
+        if (isIndexed) {
+          count = geometry.getIndex()!.count;
+        } else if (geometry.getAttributeFromString('position') != null) {
+          count = geometry.getAttributeFromString('position').count;
+        } else {
+          return null;
+        }
+        mergedGeometry.addGroup(offset, count, i);
+        offset += count;
+      }
+    }
+
+    // --- Merge indices ---
+    if (isIndexed) {
+      int indexOffset = 0;
+      final List<int> mergedIndex = [];
+      for (final geometry in geometries) {
+        final index = geometry.getIndex()!;
+        for (int j = 0; j < index.count; j++) {
+          mergedIndex.add(index.getX(j)!.toInt() + indexOffset);
+        }
+        indexOffset =
+            (indexOffset + geometry.getAttributeFromString('position').count)
+                .toInt();
+      }
+      mergedGeometry.setIndex(mergedIndex);
+    }
+
+    // --- Merge attributes --
+    for (final name in attributes.keys) {
+      final mergedAttribute = _mergeAttributes(attributes[name]!);
+      if (mergedAttribute == null) return null;
+
+      mergedGeometry.setAttributeFromString(name, mergedAttribute);
+    }
+
+    // --- Merge morph attributes ---
+    for (final name in morphAttributes.keys) {
+      final numMorphTargets = morphAttributes[name]![0].length;
+      if (numMorphTargets == 0) continue;
+
+      mergedGeometry.morphAttributes[name] = [];
+
+      for (int i = 0; i < numMorphTargets; i++) {
+        final morphToMerge = <BufferAttribute>[];
+        for (int j = 0; j < morphAttributes[name]!.length; j++) {
+          morphToMerge.add(morphAttributes[name]![j][i]);
+        }
+        final mergedMorph = _mergeAttributes(morphToMerge);
+        if (mergedMorph == null) return null;
+
+        mergedGeometry.morphAttributes[name]!.add(mergedMorph);
+      }
+    }
+
+    return mergedGeometry;
+  }
+
+  /// Merges a list of [BufferAttribute] objects into a single attribute.
+  ///
+  /// Requirements:
+  /// - All attributes must have the same [itemSize] and [normalized] flag.
+  ///
+  /// Returns:
+  /// - A new [BufferAttribute] containing all merged data.
+  /// - `null` if attributes are incompatible.
+  static BufferAttribute? _mergeAttributes(List<BufferAttribute> attributes) {
+    if (attributes.isEmpty) return null;
+
+    final itemSize = attributes[0].itemSize;
+    final normalized = attributes[0].normalized;
+
+    int count = 0;
+    for (final attr in attributes) {
+      if (attr.itemSize != itemSize || attr.normalized != normalized) {
+        return null;
+      }
+      count += attr.count;
+    }
+
+    // Create a new array to hold all merged attribute data
+    final array = Float32Array(count * itemSize);
+
+    int offset = 0;
+    for (final attr in attributes) {
+      final Float32Array srcArray = attr.array as Float32Array;
+      array.set(srcArray.toDartList(), offset);
+      offset += srcArray.length;
+    }
+    return Float32BufferAttribute(array, itemSize, normalized);
   }
 }
