@@ -331,7 +331,7 @@ class ThreeJS with WidgetsBindingObserver{
       camera.updateProjectionMatrix();
 
       windowResizeUpdate?.call(screenSize!);
-      renderer!.setSize(width, height, false);
+      renderer!.setSize(width, height);
 
       if(postProcessor != null){
         postProcessor?.call(dt);

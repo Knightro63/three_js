@@ -339,7 +339,7 @@ Function updateMorphTargets = (Mesh mesh, Map<String, dynamic> meshDef) {
 
 Function createPrimitiveKey = (Map<String, dynamic> primitiveDef) {
   final dracoExtension = primitiveDef["extensions"] != null
-      ? primitiveDef["extensions"][extensions["KHR_DRACO_MESH_COMPRESSION"]!]
+      ? primitiveDef["extensions"][gltfExtensions["KHR_DRACO_MESH_COMPRESSION"]!]
       : null;
   late String geometryKey;
 

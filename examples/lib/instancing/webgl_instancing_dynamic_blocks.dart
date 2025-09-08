@@ -143,7 +143,6 @@ class _State extends State<WebglInstancingDynamicBlocks> {
       .easing( al.Easing.Sinusoidal[al.ETTypes.In] );
 
       tween.onComplete( (t){
-        print('here');
         animation['t'] = 0;
         currentColorIndex = nextColorIndex;
         nextColorIndex ++;

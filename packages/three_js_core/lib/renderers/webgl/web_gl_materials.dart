@@ -44,17 +44,17 @@ class WebGLMaterials {
     } else if (material is MeshPhongMaterial) {
       refreshUniformsCommon(uniforms, material);
       refreshUniformsPhong(uniforms, material);
+    } else if (material is MeshPhysicalMaterial) {
+      refreshUniformsCommon(uniforms, material);
+      refreshUniformsStandard(uniforms, material);
+      refreshUniformsPhysical(uniforms, material, transmissionRenderTarget);
     } else if (material is MeshStandardMaterial) {
       refreshUniformsCommon(uniforms, material);
       refreshUniformsStandard(uniforms, material);
 			if ( material is MeshPhysicalMaterial ) {
 				refreshUniformsPhysical( uniforms, material, transmissionRenderTarget );
       }
-    } else if (material is MeshPhysicalMaterial) {
-      refreshUniformsCommon(uniforms, material);
-      refreshUniformsStandard(uniforms, material);
-      refreshUniformsPhysical(uniforms, material, transmissionRenderTarget);
-    }else if (material is MeshMatcapMaterial) {
+    } else if (material is MeshMatcapMaterial) {
       refreshUniformsCommon(uniforms, material);
       refreshUniformsMatcap(uniforms, material);
     } else if (material is MeshDepthMaterial) {

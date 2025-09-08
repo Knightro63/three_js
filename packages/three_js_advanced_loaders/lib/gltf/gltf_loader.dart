@@ -288,8 +288,8 @@ class GLTFLoader extends Loader {
     final _ddsLoader = params['_ddsLoader'];
     
     final String content;
-    final extensions = {};
-    final plugins = {};
+    final Map<String,dynamic> extensions = {};
+    final Map<String,dynamic> plugins = {};
 
     late final String magic;
     if(kIsWasm){
@@ -300,8 +300,8 @@ class GLTFLoader extends Loader {
       magic = LoaderUtils.decodeText(Uint8List.view(data.buffer, 0, 4));
     }
     if (magic == behm) {
-      extensions[extensions["KHR_BINARY_GLTF"]] = GLTFBinaryExtension(data.buffer);
-      content = extensions[extensions["KHR_BINARY_GLTF"]].content;
+      extensions[gltfExtensions["KHR_BINARY_GLTF"]!] = GLTFBinaryExtension(data.buffer);
+      content = extensions[gltfExtensions["KHR_BINARY_GLTF"]].content;
     } 
     else {
       content = LoaderUtils.decodeText(data);

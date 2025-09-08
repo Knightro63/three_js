@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
+import 'package:three_js_advanced_loaders/gltf/gltf_extensions.dart';
 
 import 'gltf_mesh_standard_sg_material.dart';
 import 'gltf_helper.dart';
@@ -16,52 +17,30 @@ import 'gltf_loader.dart';
 class GLTFParser {
   late FileLoader fileLoader;
   late Map<String, dynamic> json;
-  late dynamic extensions;
-  late Map plugins;
+  Map<String,dynamic> extensions = {};
+  Map<String,dynamic> plugins = {};
   late Map<String, dynamic> options;
-  late GLTFRegistry cache;
-  late Map associations;
-  late Map primitiveCache;
-  late Map<String,dynamic> meshCache;
-  late Map<String,dynamic> cameraCache;
-  late Map lightCache;
-  late Map nodeNamesUsed;
+  GLTFRegistry cache = GLTFRegistry();
+  Map associations = {};
+  Map<String,dynamic> primitiveCache = {};
+  Map<String,dynamic> meshCache = {"refs": {}, "uses": {}};
+  Map<String,dynamic> cameraCache = {"refs": {}, "uses": {}};
+  Map<String,dynamic> lightCache = {"refs": {}, "uses": {}};
+  Map<String,dynamic> nodeNamesUsed = {};
   late TextureLoader textureLoader;
 
   Function? createNodeAttachment;
   Function? extendMaterialParams;
   Function? loadBufferView;
 
-  late Map textureCache;
-  late Map sourceCache;
+  Map textureCache = {};
+  Map sourceCache = {};
 
   GLTFParser get parser => this;
 
   GLTFParser(Map<String, dynamic>? json, Map<String, dynamic>? options) {
     this.json = json ?? {};
-    extensions = {};
-    plugins = {};
     this.options = options ?? {};
-
-    // loader object cache
-    cache = GLTFRegistry();
-
-    textureCache = {};
-    sourceCache = {};
-
-    // associations between Three.js objects and glTF elements
-    associations = {};
-
-    // BufferGeometry caching
-    primitiveCache = {};
-
-    // Object3D instance caches
-    meshCache = {"refs": {}, "uses": {}};
-    cameraCache = {"refs": {}, "uses": {}};
-    lightCache = {"refs": {}, "uses": {}};
-
-    // Track node names, to ensure no duplicates
-    nodeNamesUsed = {};
 
     // Use an ImageBitmapLoader if imageBitmaps are supported. Moves much of the
     // expensive work of uploading a texture to the GPU off the main thread.
@@ -84,11 +63,11 @@ class GLTFParser {
     loadBufferView = loadBufferView2;
   }
 
-  void setExtensions(extensions) {
+  void setExtensions(Map<String,dynamic> extensions) {
     this.extensions = extensions;
   }
 
-  void setPlugins(plugins) {
+  void setPlugins(Map<String,dynamic> plugins) {
     this.plugins = plugins;
   }
 
@@ -374,7 +353,7 @@ class GLTFParser {
 
     // If present, GLB container is required to be the first buffer.
     if (bufferDef["uri"] == null && bufferIndex == 0) {
-      return extensions[extensions["KHR_BINARY_GLTF"]].body;
+      return extensions[gltfExtensions["KHR_BINARY_GLTF"]].body;
     }
 
     final options = this.options;
@@ -573,8 +552,8 @@ class GLTFParser {
       loader = (options["manager"] as LoadingManager).getHandler(sourceDef["uri"]);
     }
 
-    loader ??= textureExtensions[extensions["MSFT_TEXTURE_DDS"]] != null
-        ? parser.extensions[extensions["MSFT_TEXTURE_DDS"]]["ddsLoader"]
+    loader ??= textureExtensions[gltfExtensions["MSFT_TEXTURE_DDS"]] != null
+        ? parser.extensions[gltfExtensions["MSFT_TEXTURE_DDS"]]["ddsLoader"]
         : textureLoader;
 
     return loadTextureImage(textureIndex, sourceIndex, loader);
@@ -665,14 +644,14 @@ class GLTFParser {
       console.warning('GLTFLoader: Custom UV set ${mapDef["texCoord"]} for texture $mapName not yet supported.');
     }
 
-    if (parser.extensions[extensions["KHR_TEXTURE_TRANSFORM"]] != null) {
+    if (parser.extensions[gltfExtensions["KHR_TEXTURE_TRANSFORM"]] != null) {
       final transform = mapDef["extensions"] != null
-          ? mapDef["extensions"][extensions["KHR_TEXTURE_TRANSFORM"]]
+          ? mapDef["extensions"][gltfExtensions["KHR_TEXTURE_TRANSFORM"]]
           : null;
 
       if (transform != null) {
         final gltfReference = parser.associations[texture];
-        texture = parser.extensions[extensions["KHR_TEXTURE_TRANSFORM"]].extendTexture(texture, transform);
+        texture = parser.extensions[gltfExtensions["KHR_TEXTURE_TRANSFORM"]].extendTexture(texture, transform);
         parser.associations[texture] = gltfReference;
       }
     }
@@ -805,13 +784,13 @@ class GLTFParser {
 
     List pending = [];
 
-    if (materialExtensions[extensions["KHR_MATERIALS_PBR_SPECULAR_GLOSSINESS"]] != null) {
-      final sgExtension =extensions[extensions["KHR_MATERIALS_PBR_SPECULAR_GLOSSINESS"]];
+    if (materialExtensions[gltfExtensions["KHR_MATERIALS_PBR_SPECULAR_GLOSSINESS"]] != null) {
+      final sgExtension = extensions[gltfExtensions["KHR_MATERIALS_PBR_SPECULAR_GLOSSINESS"]];
       materialType = sgExtension.getMaterialType(materialIndex);
       pending.add(sgExtension.extendParams(materialParams, materialDef, parser));
     } 
-    else if (materialExtensions[extensions["KHR_MATERIALS_UNLIT"]] != null) {
-      final kmuExtension = extensions[extensions["KHR_MATERIALS_UNLIT"]];
+    else if (materialExtensions[gltfExtensions["KHR_MATERIALS_UNLIT"]] != null) {
+      final kmuExtension = extensions[gltfExtensions["KHR_MATERIALS_UNLIT"]];
       materialType = kmuExtension.getMaterialType(materialIndex);
       pending.add(kmuExtension.extendParams(materialParams, materialDef, parser));
     } 
@@ -919,7 +898,7 @@ class GLTFParser {
     late Material material;
 
     if (materialType == GLTFMeshStandardSGMaterial) {
-      material = extensions[extensions["KHR_MATERIALS_PBR_SPECULAR_GLOSSINESS"]].createMaterial(materialParams);
+      material = extensions[gltfExtensions["KHR_MATERIALS_PBR_SPECULAR_GLOSSINESS"]].createMaterial(materialParams);
     } else {
       material = createMaterialType(materialType, materialParams);
     }
@@ -984,7 +963,7 @@ class GLTFParser {
     final cache = primitiveCache;
 
     createDracoPrimitive(primitive) async {
-      final geometry = await extensions[extensions["KHR_DRACO_MESH_COMPRESSION"]]
+      final geometry = await extensions[gltfExtensions["KHR_DRACO_MESH_COMPRESSION"]]
           .decodePrimitive(primitive, parser);
       return await addPrimitiveAttributes(geometry, primitive, parser);
     }
@@ -1005,7 +984,7 @@ class GLTFParser {
       else {
         dynamic geometryPromise;
 
-        if (primitive["extensions"] != null && primitive["extensions"][extensions["KHR_DRACO_MESH_COMPRESSION"]] != null) {
+        if (primitive["extensions"] != null && primitive["extensions"][gltfExtensions["KHR_DRACO_MESH_COMPRESSION"]] != null) {
           // Use DRACO geometry if available
           geometryPromise = await createDracoPrimitive(primitive);
         } 

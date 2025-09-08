@@ -411,4 +411,6 @@ class Vector2 extends Vector{
   String toString(){
     return toJson().toString();
   }
+
+  Vector2 operator*(Vector2 v) => multiply(v);
 }

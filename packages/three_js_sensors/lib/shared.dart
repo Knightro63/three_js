@@ -5,11 +5,25 @@
 /// a particular direction.
 class AccelerometerEvent {
   /// Contructs an instance with the given [x], [y], and [z] values.
-  AccelerometerEvent(this.x, this.y, this.z);
-  AccelerometerEvent.fromList(List<double> list)
-      : x = list[0],
-        y = list[1],
-        z = list[2];
+  AccelerometerEvent(this.x, this.y, this.z){_init();}
+  AccelerometerEvent.fromList(List<double> list): x = list[0],y = list[1],z = list[2]{_init();}
+  
+  void _init(){
+    final now = DateTime.now();
+    final stopwatch = Stopwatch()..start();
+    // Get the nanosecond part (the extra precision beyond microseconds)
+    // This value is relative to when the stopwatch was started.
+    // In a real-world scenario, you would obtain this from a high-resolution source.
+    final extraNanos = stopwatch.elapsedTicks % 1000;
+    stopwatch.stop();
+    timeStampNS = (now.microsecondsSinceEpoch * 1000) + extraNanos;
+    timeStamp = now.millisecondsSinceEpoch;
+  }
+
+  late final int timeStamp;
+  late final int timeStampNS;
+  
+  late List<double> data = [x,y,z];
 
   /// Acceleration force along the x axis (including gravity) measured in m/s^2.
   ///
@@ -36,15 +50,30 @@ class AccelerometerEvent {
 }
 
 class MagnetometerEvent {
-  MagnetometerEvent(this.x, this.y, this.z);
+  MagnetometerEvent(this.x, this.y, this.z){_init();}
   MagnetometerEvent.fromList(List<double> list)
       : x = list[0],
         y = list[1],
-        z = list[2];
+        z = list[2]{_init();}
+  void _init(){
+    final now = DateTime.now();
+    final stopwatch = Stopwatch()..start();
+    // Get the nanosecond part (the extra precision beyond microseconds)
+    // This value is relative to when the stopwatch was started.
+    // In a real-world scenario, you would obtain this from a high-resolution source.
+    final extraNanos = stopwatch.elapsedTicks % 1000;
+    stopwatch.stop();
+    timeStampNS = (now.microsecondsSinceEpoch * 1000) + extraNanos;
+    timeStamp = now.millisecondsSinceEpoch;
+  }
+
+  late final int timeStamp;
+  late final int timeStampNS;
 
   final double x;
   final double y;
   final double z;
+  late List<double> data = [x,y,z];
   @override
   String toString() => '[Magnetometer (x: $x, y: $y, z: $z)]';
 }
@@ -53,11 +82,25 @@ class MagnetometerEvent {
 /// the device in 3D space.
 class GyroscopeEvent {
   /// Contructs an instance with the given [x], [y], and [z] values.
-  GyroscopeEvent(this.x, this.y, this.z);
+  GyroscopeEvent(this.x, this.y, this.z){_init();}
   GyroscopeEvent.fromList(List<double> list)
       : x = list[0],
         y = list[1],
-        z = list[2];
+        z = list[2]{_init();}
+  void _init(){
+    final now = DateTime.now();
+    final stopwatch = Stopwatch()..start();
+    // Get the nanosecond part (the extra precision beyond microseconds)
+    // This value is relative to when the stopwatch was started.
+    // In a real-world scenario, you would obtain this from a high-resolution source.
+    final extraNanos = stopwatch.elapsedTicks % 1000;
+    stopwatch.stop();
+    timeStampNS = (now.microsecondsSinceEpoch * 1000) + extraNanos;
+    timeStamp = now.millisecondsSinceEpoch;
+  }
+
+  late final int timeStamp;
+  late final int timeStampNS;
 
   /// Rate of rotation around the x axis measured in rad/s.
   ///
@@ -81,6 +124,8 @@ class GyroscopeEvent {
   /// on.
   final double z;
 
+  late List<double> data = [x,y,z];
+
   @override
   String toString() => '[GyroscopeEvent (x: $x, y: $y, z: $z)]';
 }
@@ -90,11 +135,25 @@ class GyroscopeEvent {
 /// [AccelerometerEvent], this event does not include the effects of gravity.
 class UserAccelerometerEvent {
   /// Contructs an instance with the given [x], [y], and [z] values.
-  UserAccelerometerEvent(this.x, this.y, this.z);
+  UserAccelerometerEvent(this.x, this.y, this.z){_init();}
   UserAccelerometerEvent.fromList(List<double> list)
       : x = list[0],
         y = list[1],
-        z = list[2];
+        z = list[2]{_init();}
+  void _init(){
+    final now = DateTime.now();
+    final stopwatch = Stopwatch()..start();
+    // Get the nanosecond part (the extra precision beyond microseconds)
+    // This value is relative to when the stopwatch was started.
+    // In a real-world scenario, you would obtain this from a high-resolution source.
+    final extraNanos = stopwatch.elapsedTicks % 1000;
+    stopwatch.stop();
+    timeStampNS = (now.microsecondsSinceEpoch * 1000) + extraNanos;
+    timeStamp = now.millisecondsSinceEpoch;
+  }
+
+  late final int timeStamp;
+  late final int timeStampNS;
 
   /// Acceleration force along the x axis (excluding gravity) measured in m/s^2.
   ///
@@ -116,16 +175,32 @@ class UserAccelerometerEvent {
   /// towards the user and negative mean it is moving away from them.
   final double z;
 
+  late List<double> data = [x,y,z];
+  
   @override
   String toString() => '[UserAccelerometerEvent (x: $x, y: $y, z: $z)]';
 }
 
 class AbsoluteOrientationEvent {
-  AbsoluteOrientationEvent(this.yaw, this.pitch, this.roll);
+  AbsoluteOrientationEvent(this.yaw, this.pitch, this.roll){_init();}
   AbsoluteOrientationEvent.fromList(List<double> list)
       : yaw = list[0],
         pitch = list[1],
-        roll = list[2];
+        roll = list[2]{_init();}
+  void _init(){
+    final now = DateTime.now();
+    final stopwatch = Stopwatch()..start();
+    // Get the nanosecond part (the extra precision beyond microseconds)
+    // This value is relative to when the stopwatch was started.
+    // In a real-world scenario, you would obtain this from a high-resolution source.
+    final extraNanos = stopwatch.elapsedTicks % 1000;
+    stopwatch.stop();
+    timeStampNS = (now.microsecondsSinceEpoch * 1000) + extraNanos;
+    timeStamp = now.millisecondsSinceEpoch;
+  }
+
+  late final int timeStamp;
+  late final int timeStampNS;
 
   /// The yaw of the device in radians.
   final double yaw;
@@ -140,7 +215,21 @@ class AbsoluteOrientationEvent {
 }
 
 class ScreenOrientationEvent {
-  ScreenOrientationEvent(this.angle);
+  ScreenOrientationEvent(this.angle){_init();}
+  void _init(){
+    final now = DateTime.now();
+    final stopwatch = Stopwatch()..start();
+    // Get the nanosecond part (the extra precision beyond microseconds)
+    // This value is relative to when the stopwatch was started.
+    // In a real-world scenario, you would obtain this from a high-resolution source.
+    final extraNanos = stopwatch.elapsedTicks % 1000;
+    stopwatch.stop();
+    timeStampNS = (now.microsecondsSinceEpoch * 1000) + extraNanos;
+    timeStamp = now.millisecondsSinceEpoch;
+  }
+
+  late final int timeStamp;
+  late final int timeStampNS;
 
   /// The screen's current orientation angle. The angle may be 0, 90, 180, -90 degrees
   final double? angle;

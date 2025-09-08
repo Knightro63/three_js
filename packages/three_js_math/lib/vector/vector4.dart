@@ -708,4 +708,6 @@ class Vector4 extends Vector{
   String toString(){
     return toJson().toString();
   }
+
+  Vector4 operator*(Vector4 v) => multiply(v);
 }

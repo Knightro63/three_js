@@ -71,7 +71,6 @@ class _State extends State<WebXRVRPanoramaDepth> {
   Future<void> setup() async {
     threeJs.renderer?.xr.enabled = true;
     (threeJs.renderer?.xr as WebXRWorker).setReferenceSpaceType( 'local' );
-    threeJs.clock = three.Clock();
     threeJs.scene = three.Scene();
     threeJs.scene.background = three.Color.fromHex32( 0x101010 );
 

@@ -1016,4 +1016,8 @@ class Matrix4 {
   Matrix4 getInverse(Matrix4 matrix) {
     return setFrom(matrix).invert();
   }
+
+  Matrix4 operator*(Matrix4 m) => multiply(m);
+  double operator[](int index) => storage[index];
+  void operator[]=(int index,double value) => storage[index] = value;
 }

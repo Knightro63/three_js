@@ -595,4 +595,50 @@ class Quaternion {
   void onChange(Function callback) {
     onChangeCallback = callback;
   }
+
+  Map<String,dynamic> getAxisAngle() {
+    final angle = 2 * math.acos(w);
+
+    // Handle edge case for zero or 180-degree rotations
+    final s = math.sqrt(1 - w * w);
+    final axis = Vector3();
+
+    if (s < 0.00001) { // Angle is close to 0 or 180 degrees
+      // Default axis, or handle as needed for your application
+      axis.setValues(1, 0, 0); 
+    } else {
+      axis.setValues(x / s, y / s, z / s);
+    }
+
+    return { 'axis': axis, 'angle': angle };
+  }
+
+  Quaternion rotateInto(Vector3 from, Vector3 to) {
+    double kTolerance = MathUtils.epsilon * 100;
+
+    // Directly build the quaternion using the following technique:
+    // http://lolengine.net/blog/2014/02/24/quaternion-from-two-vectors-final
+    double norm_u_norm_v = math.sqrt(from.length2 * to.length2);
+    double real_part = norm_u_norm_v + from.clone().dot(to);
+    Vector3 n;
+    if (real_part < kTolerance * norm_u_norm_v) {
+      // If |from| and |to| are exactly opposite, rotate 180 degrees around an
+      // arbitrary orthogonal axis. Axis normalization can happen later, when we
+      // normalize the quaternion.
+      real_part = 0.0;
+      n = (from.x.abs() > from.z.abs()) ? Vector3(-from[1], from[0], 0) : Vector3(0, -from[2], from[1]);
+    } else {
+      // Otherwise, build the quaternion the standard way.
+      n = from.clone().cross(to);
+    }
+
+    x = n.x;
+    y = n.y;
+    z = n.z;
+    w = real_part;
+
+    // Build and return a normalized quaternion.
+    // Note that Rotation::FromQuaternion automatically performs normalization.
+    return this;
+  }
 }

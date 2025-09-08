@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter_angle/flutter_angle.dart';
+import 'package:three_js_math/three_js_math.dart';
 import 'dart:math' as math;
 import 'index.dart';
 
@@ -10,6 +11,13 @@ class Matrix3 {
   String type = "Matrix3";
   late Float32List storage;
 
+  Matrix3(){
+    storage = Float32List.fromList([0, 0, 0, 0, 0, 0, 0, 0, 0]);
+  }
+
+  Matrix3.zero(){
+    storage = Float32List.fromList([0, 0, 0, 0, 0, 0, 0, 0, 0]);
+  }
   /// Creates a 3x3 matrix with the given arguments in row-major order. If no arguments are provided, the constructor initializes
   /// the [Matrix3] to the 3x3 [identity matrix](https://en.wikipedia.org/wiki/Identity_matrix).
   Matrix3.identity() {
@@ -403,4 +411,60 @@ class Matrix3 {
   Map<String, dynamic> toJson() {
     return {'storage': storage};
   }
+
+  Matrix3 add(Matrix3 rhs) {
+    for (int row = 0; row < storage.length; ++row) {
+      storage[row] += rhs.storage[row];
+    }
+    return this;
+  }
+
+  Matrix3 sub( Matrix3 rhs) {
+    for (int row = 0; row < storage.length; ++row) {
+      storage[row] -= rhs.storage[row];
+    }
+    return this;
+  }
+
+  bool areEqual(Matrix3 m) {
+    for (int row = 0; row < storage.length; row++) {
+      if (storage[row] != m.storage[row]) return false;
+    }
+    return true;
+  }
+
+  // Sets the upper 3x3 of a Matrix to represent a 3D rotation.
+  Matrix3 rotateByQuaternion(Quaternion r) {
+    final double aa = r.x * r.x;
+    final double bb = r.y * r.y;
+    final double cc = r.z * r.z;
+    final double dd = r.w * r.w;
+
+    final double ab = r.x * r.y;
+    final double ac = r.x * r.z;
+    final double bc = r.y * r.z;
+
+    final double ad = r.x * r.w;
+    final double bd = r.y * r.w;
+    final double cd = r.z * r.w;
+
+    storage[0] = aa - bb - cc + dd;
+    storage[1] = 2 * ab - 2 * cd;
+    storage[2] = 2 * ac + 2 * bd;
+    storage[3] = 2 * ab + 2 * cd;
+    storage[4] = -aa + bb - cc + dd;
+    storage[5] = 2 * bc - 2 * ad;
+    storage[6] = 2 * ac - 2 * bd;
+    storage[7] = 2 * bc + 2 * ad;
+    storage[8] = -aa - bb + cc + dd;
+
+    return this;
+  }
+
+  Matrix3 operator*(Matrix3 m) => multiply(m);
+  Matrix3 operator-(Matrix3 rhs) => sub(rhs);
+  Matrix3 operator+(Matrix3 rhs) => add(rhs);
+
+  double operator[](int index) => storage[index];
+  void operator[]=(int index,double value) => storage[index] = value;
 }

@@ -457,6 +457,8 @@ class Vector3 extends Vector{
   
   @override
   double get length => math.sqrt(x * x + y * y + z * z);
+
+  Vector3 operator*(Vector3 v) => multiply(v);
   
   @override
   double manhattanLength() {

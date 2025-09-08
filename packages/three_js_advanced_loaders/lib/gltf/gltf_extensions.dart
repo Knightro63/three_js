@@ -12,7 +12,7 @@ import 'dart:math' as math;
 ///********** extensions ***********/
 ///*********************************/
 
-Map<String, String> extensions = {
+Map<String, String> gltfExtensions = {
   "KHR_BINARY_GLTF": 'KHR_binary_glTF',
   "KHR_DRACO_MESH_COMPRESSION": 'KHR_draco_mesh_compression',
   "KHR_LIGHTS_PUNCTUAL": 'KHR_lights_punctual',
@@ -62,7 +62,7 @@ class GLTFMaterialsAnisotropyExtension extends GLTFExtension {
   late GLTFParser parser;
 
   GLTFMaterialsAnisotropyExtension(this.parser) {
-    name = extensions["KHR_MATERIALS_ANISOTROPY"]!;
+    name = gltfExtensions["KHR_MATERIALS_ANISOTROPY"]!;
 
     getMaterialType = (materialIndex) {
       final parser = this.parser;
@@ -116,7 +116,7 @@ class GLTFMaterialsSpecularExtension extends GLTFExtension {
   late GLTFParser parser;
 
   GLTFMaterialsSpecularExtension(this.parser) {
-    name = extensions["KHR_MATERIALS_SPECULAR"]!;
+    name = gltfExtensions["KHR_MATERIALS_SPECULAR"]!;
 
     getMaterialType = (materialIndex) {
       final parser = this.parser;
@@ -172,7 +172,7 @@ class GLTFTextureDDSExtension extends GLTFExtension {
   late dynamic ddsLoader;
 
   GLTFTextureDDSExtension(this.ddsLoader) {
-    name = extensions["MSFT_TEXTURE_DDS"]!;
+    name = gltfExtensions["MSFT_TEXTURE_DDS"]!;
     if (!ddsLoader) {
       throw ('THREE.GLTFLoader: Attempting to load .dds texture without importing DDSLoader');
     }
@@ -189,7 +189,7 @@ class GLTFLightsExtension extends GLTFExtension {
   late dynamic cache;
 
   GLTFLightsExtension(this.parser) {
-    name = extensions["KHR_LIGHTS_PUNCTUAL"]!;
+    name = gltfExtensions["KHR_LIGHTS_PUNCTUAL"]!;
     // Object3D instance caches
     cache = {"refs": {}, "uses": {}};
 
@@ -327,7 +327,7 @@ class GLTFLightsExtension extends GLTFExtension {
 ///
 class GLTFMaterialsUnlitExtension extends GLTFExtension {
   GLTFMaterialsUnlitExtension() {
-    name = extensions["KHR_MATERIALS_UNLIT"]!;
+    name = gltfExtensions["KHR_MATERIALS_UNLIT"]!;
     getMaterialType = (materialIndex) {
       return MeshBasicMaterial;
     };
@@ -368,7 +368,7 @@ class GLTFMaterialsClearcoatExtension extends GLTFExtension {
   late GLTFParser parser;
 
   GLTFMaterialsClearcoatExtension(this.parser) {
-    name = extensions["KHR_MATERIALS_CLEARCOAT"]!;
+    name = gltfExtensions["KHR_MATERIALS_CLEARCOAT"]!;
     getMaterialType = (materialIndex) {
       final parser = this.parser;
       final materialDef = parser.json["materials"][materialIndex];
@@ -436,7 +436,7 @@ class GLTFMaterialsSheenExtension extends GLTFExtension {
   late GLTFParser parser;
 
   GLTFMaterialsSheenExtension(this.parser) {
-    name = extensions["KHR_MATERIALS_SHEEN"]!;
+    name = gltfExtensions["KHR_MATERIALS_SHEEN"]!;
 
     getMaterialType = (materialIndex) {
       final parser = this.parser;
@@ -497,7 +497,7 @@ class GLTFMaterialsTransmissionExtension extends GLTFExtension {
   late GLTFParser parser;
 
   GLTFMaterialsTransmissionExtension(this.parser) {
-    name = extensions["KHR_MATERIALS_TRANSMISSION"]!;
+    name = gltfExtensions["KHR_MATERIALS_TRANSMISSION"]!;
     getMaterialType = (int materialIndex) {
       final parser = this.parser;
       Map<String, dynamic> materialDef =
@@ -546,7 +546,7 @@ class GLTFMaterialsIorExtension extends GLTFExtension {
   late GLTFParser parser;
 
   GLTFMaterialsIorExtension(this.parser) {
-    name = extensions["KHR_MATERIALS_IOR"]!;
+    name = gltfExtensions["KHR_MATERIALS_IOR"]!;
 
     getMaterialType = (materialIndex) {
       final parser = this.parser;
@@ -585,7 +585,7 @@ class GLTFMaterialsVolumeExtension extends GLTFExtension {
   late GLTFParser parser;
 
   GLTFMaterialsVolumeExtension(this.parser) {
-    name = extensions["KHR_MATERIALS_VOLUME"]!;
+    name = gltfExtensions["KHR_MATERIALS_VOLUME"]!;
 
     getMaterialType = (materialIndex) {
       final parser = this.parser;
@@ -635,7 +635,7 @@ class GLTFTextureBasisUExtension extends GLTFExtension {
   late GLTFParser parser;
 
   GLTFTextureBasisUExtension(this.parser) {
-    name = extensions["KHR_TEXTURE_BASISU"]!;
+    name = gltfExtensions["KHR_TEXTURE_BASISU"]!;
     loadTexture = loadTexture2;
   }
 
@@ -677,7 +677,7 @@ class GLTFTextureWebPExtension extends GLTFExtension {
   bool? isSupported;
 
   GLTFTextureWebPExtension(this.parser) {
-    name = extensions["EXT_TEXTURE_WEBP"]!;
+    name = gltfExtensions["EXT_TEXTURE_WEBP"]!;
     loadTexture = loadTexture2;
   }
 
@@ -739,7 +739,7 @@ class GLTFMeshoptCompression extends GLTFExtension {
   late GLTFParser parser;
 
   GLTFMeshoptCompression(this.parser) {
-    name = extensions["EXT_MESHOPT_COMPRESSION"]!;
+    name = gltfExtensions["EXT_MESHOPT_COMPRESSION"]!;
     loadBufferView = (index) async {
       Map<String, dynamic> json = parser.json;
       Map<String, dynamic> bufferView = json["bufferViews"][index];
@@ -792,7 +792,7 @@ class GLTFBinaryExtension extends GLTFExtension {
   late Map<String, dynamic> header;
 
   GLTFBinaryExtension(ByteBuffer data) {
-    name = extensions["KHR_BINARY_GLTF"]!;
+    name = gltfExtensions["KHR_BINARY_GLTF"]!;
     // final headerView = DataView( data, 0, BINARY_EXTENSION_HEADER_LENGTH );
     final headerView = ByteData.view(data, 0, behl);
 
@@ -856,7 +856,7 @@ class GLTFDracoMeshCompressionExtension extends GLTFExtension {
     if (dracoLoader == null) {
       throw ('THREE.GLTFLoader: No DRACOLoader instance provided.');
     }
-    name = extensions["KHR_DRACO_MESH_COMPRESSION"]!;
+    name = gltfExtensions["KHR_DRACO_MESH_COMPRESSION"]!;
     this.dracoLoader.preload();
   }
 
@@ -913,7 +913,7 @@ class GLTFDracoMeshCompressionExtension extends GLTFExtension {
 ///
 class GLTFTextureTransformExtension extends GLTFExtension {
   GLTFTextureTransformExtension(){
-    name = extensions["KHR_TEXTURE_TRANSFORM"]!;
+    name = gltfExtensions["KHR_TEXTURE_TRANSFORM"]!;
   }
 
   Texture extendTexture(Texture texture, transform) {
@@ -969,7 +969,7 @@ class GLTFMaterialsPbrSpecularGlossinessExtension extends GLTFExtension {
   ];
 
   GLTFMaterialsPbrSpecularGlossinessExtension() {
-    name = extensions["KHR_MATERIALS_PBR_SPECULAR_GLOSSINESS"]!;
+    name = gltfExtensions["KHR_MATERIALS_PBR_SPECULAR_GLOSSINESS"]!;
     getMaterialType = (materialIndex) {
       return GLTFMeshStandardSGMaterial;
     };
@@ -1065,6 +1065,6 @@ class GLTFMaterialsPbrSpecularGlossinessExtension extends GLTFExtension {
 ///
 class GLTFMeshQuantizationExtension extends GLTFExtension {
   GLTFMeshQuantizationExtension(){
-    name = extensions["KHR_MESH_QUANTIZATION"]!;
+    name = gltfExtensions["KHR_MESH_QUANTIZATION"]!;
   }
 }

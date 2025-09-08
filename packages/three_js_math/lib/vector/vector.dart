@@ -63,4 +63,7 @@ abstract class Vector {
   Vector fromBuffer(BufferAttribute attribute,int index);
   Vector random();
   Map<String, dynamic> toJson();
+
+  double operator[](int index) => storage[index];
+  void operator[]=(int index,double value) => storage[index] = value;
 }
