@@ -106,9 +106,9 @@ class _State extends State<WebglMaterialsPhysicalTransmission> {
 
     hdrEquirect.mapping = three.EquirectangularReflectionMapping;
     threeJs.scene.background = hdrEquirect;
-    //threeJs.scene.environment = hdrEquirect;
+    threeJs.scene.environment = hdrEquirect;
     threeJs.scene.backgroundRotation = three.Euler(math.pi);
-    //threeJs.scene.environmentRotation = three.Euler(math.pi);
+    threeJs.scene.environmentRotation = three.Euler(math.pi);
 
     final geometry = three.SphereGeometry( 20, 64, 32 );
     final texture = three.CanvasTexture( await generateTexture() );

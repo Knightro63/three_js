@@ -467,6 +467,17 @@ class Vector4 extends Vector{
     return this;
   }
 
+	Vector4 setFromMatrixPosition(Matrix4 m ) {
+		final e = m.storage;
+
+		this.x = e[ 12 ];
+		this.y = e[ 13 ];
+		this.z = e[ 14 ];
+		this.w = e[ 15 ];
+
+		return this;
+	}
+
   Vector4 min(Vector4 v) {
     x = math.min(x, v.x);
     y = math.min(y, v.y);

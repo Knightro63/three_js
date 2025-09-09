@@ -187,13 +187,13 @@ class WebGLRenderer {
 
   // transmission
   double transmissionResolutionScale = 1.0;
-  RenderTarget? _transmissionRenderTarget;
 
   // camera matrices cache
 
   final projScreenMatrix = Matrix4.identity();
 
   final _vector3 = Vector3();
+  final _vector4 = Vector4();
 
   final _emptyScene = Scene();
 
@@ -519,9 +519,6 @@ class WebGLRenderer {
     cubeuvmaps.dispose();
     bindingStates.dispose();
     programCache.dispose();
-
-    _transmissionRenderTarget?.dispose();
-    _transmissionRenderTarget = null;
     
     currentRenderList?.dispose();
     for(final stack in renderListStack){
@@ -925,6 +922,7 @@ class WebGLRenderer {
     currentRenderState!.setupLights(physicallyCorrectLights);
 
     if (camera is ArrayCamera) {
+      
       final cameras = camera.cameras;
       if (transmissiveObjects != null && transmissiveObjects.isNotEmpty) {
         for (int i = 0, l = cameras.length; i < l; i ++ ) {
@@ -1006,14 +1004,14 @@ class WebGLRenderer {
       else if (object is Sprite) {
         if (!object.frustumCulled || _frustum.intersectsSprite(object)) {
           if (sortObjects) {
-            _vector3.setFromMatrixPosition(object.matrixWorld).applyMatrix4(projScreenMatrix);
+            _vector4.setFromMatrixPosition(object.matrixWorld).applyMatrix4(projScreenMatrix);
           }
 
           BufferGeometry geometry = objects.update(object);
           final material = object.material;
 
           if (material != null && material.visible) {
-            currentRenderList!.push(object, geometry, material, groupOrder, _vector3.z, null);
+            currentRenderList!.push(object, geometry, material, groupOrder, _vector4.z, null);
           }
         }
       } 
@@ -1035,13 +1033,13 @@ class WebGLRenderer {
           if (sortObjects) {
             if (object.boundingSphere != null ) {
               if (object.boundingSphere == null ) object.computeBoundingSphere();
-              _vector3.setFrom(object.boundingSphere!.center );
+              _vector4.setFrom(object.boundingSphere!.center );
             } 
             else {
               if ( geometry.boundingSphere == null ) geometry.computeBoundingSphere();
-              _vector3.setFrom( geometry.boundingSphere!.center );
+              _vector4.setFrom( geometry.boundingSphere!.center );
             }
-            _vector3..applyMatrix4(object.matrixWorld)..applyMatrix4(projScreenMatrix);
+            _vector4..applyMatrix4(object.matrixWorld)..applyMatrix4(projScreenMatrix);
           }
 
           if (material is GroupMaterial) {
@@ -1050,23 +1048,21 @@ class WebGLRenderer {
             if (groups.isNotEmpty) {
               for (int i = 0, l = groups.length; i < l; i++) {
                 Map<String, dynamic> group = groups[i];
-                if(group["materialIndex"] < material.children.length){
-                  final groupMaterial = material.children[group["materialIndex"]];
+                final groupMaterial = material.children[group["materialIndex"]];
 
-                  if (groupMaterial.visible) {
-                    currentRenderList!.push(object, geometry, groupMaterial, groupOrder, _vector3.z, group);
-                  }
+                if (groupMaterial.visible) {
+                  currentRenderList!.push(object, geometry, groupMaterial, groupOrder, _vector4.z, group);
                 }
               }
             } 
             else {
-              if (material.visible) {
-                currentRenderList!.push(object, geometry, material, groupOrder, _vector3.z, null);
+              if (material.visible && material.children.isNotEmpty) {
+                currentRenderList!.push(object, geometry, material.children[0], groupOrder, _vector4.z, null);
               }
             }
           } 
           else if (material != null && material.visible) {
-            currentRenderList!.push(object, geometry, material, groupOrder, _vector3.z, null);
+            currentRenderList!.push(object, geometry, material, groupOrder, _vector4.z, null);
           }
         }
       }
@@ -1113,25 +1109,28 @@ class WebGLRenderer {
 				return;
 			}
 
-			if ( currentRenderState?.state.transmissionRenderTarget[ camera.id ] == null ) {
-				currentRenderState?.state.transmissionRenderTarget[ camera.id ] = WebGLRenderTarget( 1, 1, WebGLRenderTargetOptions({
-					'generateMipmaps': true,
-					'type': ( extensions.has( 'EXT_color_buffer_half_float' ) || extensions.has( 'EXT_color_buffer_float' ) ) ? HalfFloatType : UnsignedByteType,
-					'minFilter': LinearMipmapLinearFilter,
-					'samples': 4,
-					'stencilBuffer': stencil,
-					'resolveDepthBuffer': false,
-					'resolveStencilBuffer': false,
+      RenderTarget? transmissionRenderTarget = currentRenderState?.state.transmissionRenderTarget[ camera.id ];
+      final activeViewport = camera.viewport ?? _currentViewport;
+
+			if ( currentRenderState?.state.transmissionRenderTarget[ camera.id ] == null ||
+        (activeViewport.w.toInt() != transmissionRenderTarget?.height || activeViewport.z.toInt() != transmissionRenderTarget?.width)
+      ) {
+        transmissionRenderTarget?.dispose();
+        currentRenderState?.state.transmissionRenderTarget[ camera.id ] = WebGLRenderTarget( 1, 1, WebGLRenderTargetOptions({
+          'generateMipmaps': true,
+          'type': ( extensions.has( 'EXT_color_buffer_half_float' ) || extensions.has( 'EXT_color_buffer_float' ) ) ? HalfFloatType : UnsignedByteType,
+          'minFilter': LinearMipmapLinearFilter,
+          'samples': 4,
+          'stencilBuffer': stencil,
+          'resolveDepthBuffer': false,
+          'resolveStencilBuffer': false,
           'colorSpace': ColorManagement.workingColorSpace.toString(),
         }));
+
+        transmissionRenderTarget = currentRenderState?.state.transmissionRenderTarget[ camera.id ];
 			}
 
-			final RenderTarget transmissionRenderTarget = currentRenderState?.state.transmissionRenderTarget[ camera.id ];
-
-			final activeViewport = camera.viewport ?? _currentViewport;
-			transmissionRenderTarget.setSize( (activeViewport.z * transmissionResolutionScale).toInt(), (activeViewport.w * transmissionResolutionScale).toInt());
-
-			//
+			transmissionRenderTarget!.setSize( (activeViewport.z * transmissionResolutionScale).toInt(), (activeViewport.w * transmissionResolutionScale).toInt());
 
 			final currentRenderTarget = getRenderTarget();
 			setRenderTarget( transmissionRenderTarget );

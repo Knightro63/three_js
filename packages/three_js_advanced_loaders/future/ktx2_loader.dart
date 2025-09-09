@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:math' as math;
 import 'package:three_js_core/three_js_core.dart';
@@ -25,7 +26,7 @@ let _zstd;
 class KTX2Loader extends Loader {
   String transcoderPath = '';
   Map<String,dynamic> workerConfig = {};
-  String workerSourceURL = '';
+  String? workerSourceURL;
   WorkerPool workerPool = new WorkerPool();
   dynamic transcoderBinary;
   dynamic transcoderPending;
@@ -112,9 +113,9 @@ class KTX2Loader extends Loader {
 
 					final body = [
 						'/* constants */',
-						'let _EngineFormat = ' + JSON.stringify( EngineFormat ),
-						'let _TranscoderFormat = ' + JSON.stringify( TranscoderFormat ),
-						'let _BasisFormat = ' + JSON.stringify( BasisFormat ),
+						'let _EngineFormat = ' + jsonEncode( EngineFormat ),
+						'let _TranscoderFormat = ' + jsonEncode( TranscoderFormat ),
+						'let _BasisFormat = ' + jsonEncode( BasisFormat ),
 						'/* basis_transcoder.js */',
 						jsContent,
 						'/* worker */',

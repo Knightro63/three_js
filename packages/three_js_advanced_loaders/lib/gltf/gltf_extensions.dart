@@ -87,10 +87,10 @@ class GLTFMaterialsAnisotropyExtension extends GLTFExtension {
 
       final extension = materialDef["extensions"][name];
 
-      materialParams['anisotropyStrength'] = extension['anisotropyStrength'] ?? 1.0;
+      materialParams['anisotropyStrength'] = (extension['anisotropyStrength'] as num?)?.toDouble() ?? 1.0;
 
       if (extension['anisotropyRotation'] != null) {
-        materialParams['anisotropyRotation'] = extension['anisotropyRotation'];
+        materialParams['anisotropyRotation'] = (extension['anisotropyRotation'] as num?)?.toDouble();
       }
 
       final colorArray = extension['specularColorFactor'] ?? [1, 1, 1];
@@ -916,22 +916,28 @@ class GLTFTextureTransformExtension extends GLTFExtension {
     name = gltfExtensions["KHR_TEXTURE_TRANSFORM"]!;
   }
 
-  Texture extendTexture(Texture texture, transform) {
+  Texture extendTexture(Texture texture, Map<String,dynamic> transform) {
     texture = texture.clone();
 
-    if (transform.offset != null) {
-      texture.offset.copyFromArray(transform.offset);
+    if (transform.containsKey("offset")) {
+      final offset = (transform["offset"] as List?)?.map((item) => item as double).toList();
+      if (offset != null) {
+        texture.offset.copyFromArray(offset);
+      }
     }
 
-    if (transform.rotation != null) {
-      texture.rotation = transform.rotation;
+    if (transform.containsKey("rotation")) {
+      texture.rotation = transform["rotation"];
     }
 
-    if (transform.scale != null) {
-      texture.repeat.copyFromArray(transform.scale);
+    if (transform.containsKey("scale")) {
+      final scale = (transform["scale"] as List?)?.map((item) => item as double).toList();
+      if (scale != null) {
+        texture.repeat.copyFromArray(scale);
+      }
     }
 
-    if (transform.texCoord != null) {
+    if (transform.containsKey("texCoord")) {
       console.warning('GLTFLoader: Custom UV sets in $name extension not yet supported.');
     }
 
