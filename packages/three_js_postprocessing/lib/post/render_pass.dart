@@ -54,7 +54,7 @@ class RenderPass extends Pass {
     renderer.render(scene, camera);
 
     if (clearColor != null) {
-      renderer.setClearColor(_oldClearColor, oldClearAlpha);
+      renderer.setClearColor(_oldClearColor);
     }
 		if ( clearAlpha != null ) {
 			renderer.setClearAlpha( oldClearAlpha );

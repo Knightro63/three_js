@@ -24,26 +24,27 @@ class EffectComposer {
   late Pass copyPass;
 
   EffectComposer(this.renderer, [WebGLRenderTarget? renderTarget]) {
+    _pixelRatio = renderer.getPixelRatio();
+
     if (renderTarget == null) {
       final parameters = {
-        "minFilter": LinearFilter,
-        "magFilter": LinearFilter,
-        "format": RGBAFormat,
         "type": HalfFloatType
       };
 
       final size = renderer.getSize(Vector2());
-      _pixelRatio = renderer.getPixelRatio();
+      
       _width = size.width;
       _height = size.height;
 
       renderTarget = WebGLRenderTarget(
-          (_width * _pixelRatio).toInt(),
-          (_height * _pixelRatio).toInt(),
-          WebGLRenderTargetOptions(parameters));
+        (_width * _pixelRatio).toInt(),
+        (_height * _pixelRatio).toInt(),
+        WebGLRenderTargetOptions(parameters)
+      );
+
+      renderTarget.texture.name = 'EffectComposer.rt1';
     } 
     else {
-      _pixelRatio = 1;
       _width = renderTarget.width*1.0;
       _height = renderTarget.height*1.0;
     }

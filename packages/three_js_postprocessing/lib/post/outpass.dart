@@ -6,7 +6,7 @@ import 'pass.dart';
 
 class OutputPass extends Pass {
   dynamic _toneMapping;
-  dynamic _outputColorSpace;
+  String? _outputColorSpace;
 
   final _LINEAR_SRGB_TO_LINEAR_DISPLAY_P3 = Matrix3.identity().setValues(
     0.8224621, 0.177538, 0.0,
@@ -82,7 +82,7 @@ class OutputPass extends Pass {
 
 			material.defines = {};
 
-			if (getTransfer(_outputColorSpace) == SRGBTransfer ){
+			if (_outputColorSpace == SRGBTransfer ){
         material.defines!['SRGB_TRANSFER'] = '';
       }
 
@@ -90,8 +90,9 @@ class OutputPass extends Pass {
 			else if (_toneMapping == ReinhardToneMapping ){ material.defines!['REINHARD_TONE_MAPPING'] = '';}
 			else if (_toneMapping == CineonToneMapping ){ material.defines!['CINEON_TONE_MAPPING'] = '';}
 			else if (_toneMapping == ACESFilmicToneMapping ){ material.defines!['ACES_FILMIC_TONE_MAPPING'] = '';}
-			else if (_toneMapping == 6 ){ material.defines!['AGX_TONE_MAPPING'] = '';}
-			else if (_toneMapping == 7 ){ material.defines!['NEUTRAL_TONE_MAPPING'] = '';}
+      else if (_toneMapping == AgXToneMapping ) this.material.defines!['AGX_TONE_MAPPING'] = '';
+			else if (_toneMapping == NeutralToneMapping ){ material.defines!['NEUTRAL_TONE_MAPPING'] = '';}
+			else if (_toneMapping == CustomToneMapping ){ material.defines!['CUSTOM_TONE_MAPPING'] = '';}
 
 			material.needsUpdate = true;
 		}

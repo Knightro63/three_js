@@ -1,0 +1,28 @@
+name: three_js_ar
+description: "A new Flutter plugin project."
+version: 0.0.1
+homepage:
+
+environment:
+  sdk: ^3.8.1
+  flutter: '>=3.3.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  plugin_platform_interface: ^2.0.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+# The following section is specific to Flutter packages.
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: com.example.three_js_ar
+        pluginClass: ThreeJsArPlugin
+      ios:
+        pluginClass: ThreeJsArPlugin

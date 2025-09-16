@@ -1,0 +1,75 @@
+group = "com.example.three_js_ar"
+version = "1.0-SNAPSHOT"
+
+buildscript {
+    ext.kotlin_version = "2.1.0"
+    repositories {
+        google()
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath("com.android.tools.build:gradle:8.7.3")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version")
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+apply plugin: "com.android.library"
+apply plugin: "kotlin-android"
+
+android {
+    namespace = "com.example.three_js_ar"
+
+    compileSdk = 35
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_11
+    }
+
+    sourceSets {
+        main.java.srcDirs += "src/main/kotlin"
+        test.java.srcDirs += "src/test/kotlin"
+    }
+
+    defaultConfig {
+        minSdk = 24
+    }
+
+    dependencies {
+        testImplementation("org.jetbrains.kotlin:kotlin-test")
+        testImplementation("org.mockito:mockito-core:5.0.0")
+
+        implementation( "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version")
+        implementation( "androidx.appcompat:appcompat:1.6.1")
+        implementation( "com.google.ar:core:1.40.0")
+        implementation( "com.google.ar.sceneform:core:1.17.1")
+        implementation( "com.google.ar.sceneform:assets:1.17.1")
+        implementation( "com.google.ar.sceneform.ux:sceneform-ux:1.17.1")
+        implementation( "androidx.core:core-ktx:1.13.0-alpha01")
+        implementation( "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.2")
+    }
+
+    testOptions {
+        unitTests.all {
+            useJUnitPlatform()
+
+            testLogging {
+               events "passed", "skipped", "failed", "standardOut", "standardError"
+               outputs.upToDateWhen {false}
+               showStandardStreams = true
+            }
+        }
+    }
+}

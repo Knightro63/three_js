@@ -38,10 +38,10 @@ class _MyAppState extends State<WebglLoaderGlb> {
   void initState() {
     threeJs = three.ThreeJS(
       onSetupComplete: (){setState(() {});},
-      setup: setup,      settings: three.Settings(
+      setup: setup,      
+      settings: three.Settings(
         clearAlpha: 0,
         clearColor: 0xffffff,
-        
       ),
     );
     super.initState();
