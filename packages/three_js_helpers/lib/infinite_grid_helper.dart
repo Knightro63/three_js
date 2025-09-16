@@ -38,7 +38,7 @@ class InfiniteGridHelper extends Mesh {
     uniform float uDistance;
 
     void main() {
-        vec3 pos = position.$axes * uDistance;
+        vec3 pos = position.${axes.name} * uDistance;
         pos.$planeAxes += cameraPosition.$planeAxes;
         
         worldPosition = pos;
