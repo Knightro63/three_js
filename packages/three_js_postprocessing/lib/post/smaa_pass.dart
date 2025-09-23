@@ -37,11 +37,11 @@ class SMAAPass extends Pass {
 		this.weightsRT.texture.name = 'SMAAPass.weights';
 
 
-		final areaTextureImage = ImageElement(
-      data: Uint8Array.fromList(base64Decode(this.getAreaTexture().split(',').last)),
-      width: 256,
-      height: 256
-    );
+		// final areaTextureImage = ImageElement(
+    //   data: Uint8Array.fromList(base64Decode(this.getAreaTexture().split(',').last)),
+    //   width: 256,
+    //   height: 256
+    // );
 
 		this.areaTexture = new Texture();
 		this.areaTexture.name = 'SMAAPass.area';

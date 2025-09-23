@@ -1,5 +1,7 @@
 import 'dart:typed_data';
 import 'dart:convert';
+import 'package:three_js_core/three_js_core.dart';
+
 import '../core/index.dart';
 import 'package:three_js_math/three_js_math.dart';
 import './source.dart';
@@ -31,7 +33,8 @@ class Texture with EventDispatcher {
   bool isOpenGLTexture = false;
   bool isRenderTargetTexture = false; // indicates whether a texture belongs to a render target or not
   // bool needsPMREMUpdate = false; // indicates whether this texture should be processed by PMREMGenerator or not (only relevant for render target textures)
-  
+  RenderTarget? renderTarget;
+
 	int pmremVersion = 0;
 
   late Source source;

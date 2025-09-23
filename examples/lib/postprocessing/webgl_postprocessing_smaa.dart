@@ -39,7 +39,6 @@ class _State extends State<WebglPostprocessingSMAA> {
     timer.cancel();
     threeJs.dispose();
     three.loading.clear();
-    controls.dispose();
     composer.dispose();
     smaaPass.dispose();
     outputPass.dispose();

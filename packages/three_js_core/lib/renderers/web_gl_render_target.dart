@@ -7,10 +7,12 @@
 part of three_renderers;
 
 class RenderTarget with EventDispatcher {
+  String? name;
   bool _didDispose = false;
   late int width;
   late int height;
   int depth = 1;
+  bool multiview = false;
 
   late bool depthBuffer;
   late bool resolveDepthBuffer;
@@ -23,7 +25,7 @@ class RenderTarget with EventDispatcher {
   late Vector4 viewport;
 
   late bool stencilBuffer;
-  DepthTexture? depthTexture;
+  DepthTexture? _depthTexture;
 
   late int _samples;
   late WebGLRenderTargetOptions options;
@@ -46,7 +48,16 @@ class RenderTarget with EventDispatcher {
     }
 	}
 
-  RenderTarget(this.width, this.height, [WebGLRenderTargetOptions? options]):super(){
+
+	set depthTexture(DepthTexture? current ) {
+		if ( this._depthTexture != null ) this._depthTexture?.renderTarget = null;
+		if ( current != null ) current.renderTarget = this;
+		this._depthTexture = current;
+	}
+
+	DepthTexture? get depthTexture => _depthTexture;
+
+  RenderTarget([this.width = 1, this.height = 1, WebGLRenderTargetOptions? options]):super(){
     scissor = Vector4(0, 0, width.toDouble(), height.toDouble());
     scissorTest = false;
 
@@ -54,7 +65,8 @@ class RenderTarget with EventDispatcher {
 
     this.options = options ?? WebGLRenderTargetOptions();
 
-    final image = ImageElement(width: width, height: height, depth: 1);
+    depth = this.options.depth;
+    final image = ImageElement(width: width, height: height, depth: depth);
 
     final texture = Texture(
       image, 
@@ -73,7 +85,7 @@ class RenderTarget with EventDispatcher {
     texture.flipY = false;
     texture.generateMipmaps = this.options.generateMipmaps;
     texture.internalFormat = this.options.internalFormat;
-    texture.minFilter = this.options.minFilter != null ? this.options.minFilter! : LinearFilter;
+    texture.minFilter = this.options.minFilter ?? LinearFilter;
 		texture.colorSpace = this.options.colorSpace ?? NoColorSpace;
     textures = [];
 
@@ -81,8 +93,9 @@ class RenderTarget with EventDispatcher {
 		for (int i = 0; i < count; i ++ ) {
 			textures.add(texture.clone());
 			textures[i].isRenderTargetTexture = true;
+      textures[i].renderTarget = this;
 		}
-    
+
     depthBuffer = this.options.depthBuffer != null ? this.options.depthBuffer! : true;
     stencilBuffer = this.options.stencilBuffer;
     depthTexture = this.options.depthTexture;
@@ -90,11 +103,12 @@ class RenderTarget with EventDispatcher {
 		resolveDepthBuffer = this.options.resolveDepthBuffer;
 		resolveStencilBuffer = this.options.resolveStencilBuffer;
 
-    _samples = (options != null && options.samples != null) ? options.samples! : 0;
+    _samples = this.options.samples ?? 0;
+    multiview = this.options.multiview;
   }
 
   RenderTarget clone() {
-    return RenderTarget(1,1).copy( this );
+    return RenderTarget().copy( this );
   }
 
   RenderTarget copy(RenderTarget source){
@@ -165,7 +179,7 @@ class RenderTarget with EventDispatcher {
 }
 
 class WebGLRenderTarget extends RenderTarget {
-  bool isWebGLRenderTarget = true;
+  
   WebGLRenderTarget(super.width, super.height, [super.options]);
 
   @override
@@ -224,7 +238,8 @@ class WebGLRenderTargetOptions {
   int? samples;
   int? internalFormat;
   int count = 1;
-
+  int depth = 1;
+  bool multiview = false;
   bool resolveDepthBuffer = false;
   bool resolveStencilBuffer = false;
 
@@ -258,6 +273,8 @@ class WebGLRenderTargetOptions {
     this.useRenderToTexture = false,
     this.samples,
     this.colorSpace,
+    this.depth = 1,
+    this.multiview = false
   });
 
   WebGLRenderTargetOptions([Map<String, dynamic>? json]) {
@@ -284,6 +301,8 @@ class WebGLRenderTargetOptions {
     useRenderToTexture = json["useRenderToTexture"] ?? false;
     samples = json["samples"];
     colorSpace = json['colorSpace'];
+    depth = json["depth"] ?? 1;
+    multiview = json['multiview'] ?? false;
   }
 
   Map<String, dynamic> toJson() {
@@ -310,7 +329,9 @@ class WebGLRenderTargetOptions {
       "ignoreDepth": ignoreDepth,
       "useRenderToTexture": useRenderToTexture,
       "samples": samples,
-      'colorSpace': colorSpace
+      'colorSpace': colorSpace,
+      'depth': depth,
+      'multiview': multiview
     };
   }
 }

@@ -5,7 +5,7 @@ import 'package:three_js_postprocessing/shaders/outpass_shader.dart';
 import 'pass.dart';
 
 class OutputPass extends Pass {
-  dynamic _toneMapping;
+  int? _toneMapping;
   String? _outputColorSpace;
 
   final _LINEAR_SRGB_TO_LINEAR_DISPLAY_P3 = Matrix3.identity().setValues(
@@ -69,23 +69,19 @@ class OutputPass extends Pass {
 
   @override
 	void render(WebGLRenderer renderer, WebGLRenderTarget writeBuffer, WebGLRenderTarget readBuffer, {double? deltaTime, bool? maskActive}) {
-
 		uniforms['tDiffuse']['value'] = readBuffer.texture;
 		uniforms['toneMappingExposure']['value'] = renderer.toneMappingExposure;
 
 		// rebuild defines if required
 
-		if (_outputColorSpace != renderer.outputColorSpace || _toneMapping != renderer.toneMapping ) {//
-
+		if (_outputColorSpace != renderer.outputColorSpace || _toneMapping != renderer.toneMapping ) {
 			_outputColorSpace = renderer.outputColorSpace;
 			_toneMapping = renderer.toneMapping;
 
 			material.defines = {};
 
-			if (_outputColorSpace == SRGBTransfer ){
-        material.defines!['SRGB_TRANSFER'] = '';
-      }
-
+			if (_outputColorSpace == SRGBTransfer ) material.defines!['SRGB_TRANSFER'] = '';
+      
 			if (_toneMapping == LinearToneMapping ){ material.defines!['LINEAR_TONE_MAPPING'] = '';}
 			else if (_toneMapping == ReinhardToneMapping ){ material.defines!['REINHARD_TONE_MAPPING'] = '';}
 			else if (_toneMapping == CineonToneMapping ){ material.defines!['CINEON_TONE_MAPPING'] = '';}
@@ -97,15 +93,13 @@ class OutputPass extends Pass {
 			material.needsUpdate = true;
 		}
 
-		//
-
-		if (renderToScreen == true ) {
+		if (renderToScreen) {
 			renderer.setRenderTarget( null );
 			fsQuad.render( renderer );
 		} 
     else {
 			renderer.setRenderTarget( writeBuffer );
-			if (clear ) renderer.clear( renderer.autoClearColor, renderer.autoClearDepth, renderer.autoClearStencil );
+			if (clear) renderer.clear( renderer.autoClearColor, renderer.autoClearDepth, renderer.autoClearStencil );
 			fsQuad.render( renderer );
 		}
 	}

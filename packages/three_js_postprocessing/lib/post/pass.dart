@@ -2,16 +2,9 @@ import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 
 class Pass {
-  // if set to true, the pass is processed by the composer
   bool enabled = true;
-
-  // if set to true, the pass indicates to swap read and write buffer after rendering
   bool needsSwap = true;
-
-  // if set to true, the pass clears its buffer before rendering
   bool clear = false;
-
-  // if set to true, the result of the pass is rendered to screen. This is set automatically by EffectComposer.
   bool renderToScreen = false;
 
   late Object3D scene;
@@ -31,25 +24,18 @@ class Pass {
   void setSize(int width, int height){}
 
   void render(WebGLRenderer renderer, WebGLRenderTarget writeBuffer, WebGLRenderTarget readBuffer,{double? deltaTime, bool? maskActive}) {
-    throw ('THREE.Pass: .render() must be implemented in derived pass.');
+    throw ('Pass: .render() must be implemented in derived pass.');
   }
 
   void dispose() {}
 }
 
-// Helper for passes that need to fill the viewport with a single quad.
-
-// Important: It's actually a hack to put FullScreenQuad into the Pass namespace. This is only
-// done to make examples/js code work. Normally, FullScreenQuad should be exported
-// from this module like Pass.
-
 class FullScreenQuad {
-  Camera camera = OrthographicCamera(-1, 1, 1, -1, 0, 1);
-  BufferGeometry geometry = PlaneGeometry(2, 2);
-  late Mesh _mesh;
+  final Camera camera = OrthographicCamera(-1, 1, 1, -1, 0, 1);
+  final BufferGeometry geometry = FullscreenTriangleGeometry();
+  late final Mesh _mesh;
 
   FullScreenQuad([Material? material]) {
-    geometry.name = "FullScreenQuadGeometry";
     _mesh = Mesh(geometry, material);
   }
 
@@ -63,7 +49,7 @@ class FullScreenQuad {
     _mesh.material = value;
   }
 
-  void render(renderer) {
+  void render(WebGLRenderer renderer) {
     renderer.render(_mesh, camera);
   }
 
@@ -74,9 +60,9 @@ class FullScreenQuad {
 
 
 class FullscreenTriangleGeometry extends BufferGeometry {
-
 	FullscreenTriangleGeometry():super() {
-		this.setAttributeFromString( 'position', Float32BufferAttribute.fromList( [ - 1, 3, 0, - 1, - 1, 0, 3, - 1, 0 ], 3 ) );
-		this.setAttributeFromString( 'uv', Float32BufferAttribute.fromList( [ 0, 2, 0, 0, 2, 0 ], 2 ) );
-	}
+		this.setAttributeFromString( 'position', Float32BufferAttribute.fromList( [ -1, 3, 0, -1, -1, 0, 3, -1 , 0 ], 3 ) );
+		this.setAttributeFromString( 'uv', Float32BufferAttribute.fromList( [ 0,2,0, 0,2,0 ], 2 ) );
+    this.name = "FullScreenQuadGeometry";
+  }
 }

@@ -239,23 +239,23 @@ class ThreeJS with WidgetsBindingObserver{
     _updating = false;
   }
   Future<void> render([double? dt]) async{
-    // if(sourceTexture == null){
-    //   angle?.activateTexture(texture!);
-    // }
-    // rendererUpdate?.call(); 
-    // if(postProcessor == null){
-    //   renderer!.clear();
-    //   renderer!.setViewport(0,0,width,height);
-    //   renderer!.render(scene, camera);
-    // }
-    // else{
+    if(sourceTexture == null){
+      angle?.activateTexture(texture!);
+    }
+    rendererUpdate?.call(); 
+    if(postProcessor == null){
+      renderer!.clear();
+      renderer!.setViewport(0,0,width,height);
+      renderer!.render(scene, camera);
+    }
+    else{
       postProcessor?.call(dt);
-    // }
+    }
     
-    // if(sourceTexture != null){
-    //   angle?.activateTexture(texture!);
-    // }
-    // await angle?.updateTexture(texture!,sourceTexture);
+    if(sourceTexture != null){
+      angle?.activateTexture(texture!);
+    }
+    await angle?.updateTexture(texture!,sourceTexture);
   }
   
   void initRenderer() {
@@ -299,12 +299,12 @@ class ThreeJS with WidgetsBindingObserver{
     renderer!.toneMapping = settings.toneMapping;
     renderer!.toneMappingExposure = settings.toneMappingExposure;
 
-    // if(settings.useSourceTexture){
-    //   final core.WebGLRenderTargetOptions pars = core.WebGLRenderTargetOptions(settings.renderOptions);
-    //   renderTarget = core.WebGLRenderTarget((width * _resolution!).toInt(), (height * _resolution!).toInt(), pars);
-    //   renderer!.setRenderTarget(renderTarget);
-    //   sourceTexture = renderer!.getRenderTargetGLTexture(renderTarget!);
-    // }
+    if(settings.useSourceTexture){
+      final core.WebGLRenderTargetOptions pars = core.WebGLRenderTargetOptions(settings.renderOptions);
+      renderTarget = core.WebGLRenderTarget((width * _resolution!).toInt(), (height * _resolution!).toInt(), pars);
+      renderer!.setRenderTarget(renderTarget);
+      sourceTexture = renderer!.getRenderTargetGLTexture(renderTarget!);
+    }
   }
   
   Future<void> _onWindowResize(BuildContext context) async{

@@ -10,11 +10,12 @@ class RenderPass extends Pass {
   Material? overrideMaterial;
   final Color _oldClearColor = Color();
 
-  RenderPass(Object3D scene, Camera camera, [this.overrideMaterial, this.clearColor, this.clearAlpha = 0]): super() {
+  RenderPass(Scene scene, Camera camera, [this.overrideMaterial, this.clearColor, this.clearAlpha]): super() {
     this.scene = scene;
     this.camera = camera;
 
     clear = true;
+    clearDepth = false;
     needsSwap = false;
   }
 
@@ -23,7 +24,7 @@ class RenderPass extends Pass {
     final oldAutoClear = renderer.autoClear;
     renderer.autoClear = false;
 
-    dynamic oldClearAlpha;
+    double? oldClearAlpha;
     Material? oldOverrideMaterial;
 
     if (overrideMaterial != null) {
@@ -57,7 +58,7 @@ class RenderPass extends Pass {
       renderer.setClearColor(_oldClearColor);
     }
 		if ( clearAlpha != null ) {
-			renderer.setClearAlpha( oldClearAlpha );
+			renderer.setClearAlpha( oldClearAlpha! );
 		}
     if (overrideMaterial != null) {
       scene.overrideMaterial = oldOverrideMaterial;

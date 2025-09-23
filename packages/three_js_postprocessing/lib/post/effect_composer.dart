@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'package:three_js_postprocessing/post/index.dart';
@@ -10,6 +11,7 @@ class EffectComposer {
 
   late WebGLRenderTarget writeBuffer;
   late WebGLRenderTarget readBuffer;
+  final FlutterAngleTexture? texture;
 
   bool renderToScreen = true;
 
@@ -23,7 +25,7 @@ class EffectComposer {
 
   late Pass copyPass;
 
-  EffectComposer(this.renderer, [WebGLRenderTarget? renderTarget]) {
+  EffectComposer(this.renderer, [WebGLRenderTarget? renderTarget, this.texture]) {
     _pixelRatio = renderer.getPixelRatio();
 
     if (renderTarget == null) {
@@ -116,9 +118,10 @@ class EffectComposer {
       final pass = passes[i];
 
       if (pass.enabled == false) continue;
-
+      
       pass.renderToScreen = (renderToScreen && isLastEnabledPass(i));
-      pass.render(renderer, writeBuffer, readBuffer,deltaTime: deltaTime, maskActive: maskActive);
+      if(pass.renderToScreen && !kIsWeb) texture?.activate();
+      pass.render(renderer, writeBuffer, readBuffer, deltaTime: deltaTime, maskActive: maskActive);
 
       if (pass.needsSwap) {
         if (maskActive) {
@@ -143,6 +146,7 @@ class EffectComposer {
       else if (pass is ClearMaskPass) {
         maskActive = false;
       }
+      if(pass.renderToScreen && !kIsWeb) texture?.signalNewFrameAvailable();
     }
     renderer.setRenderTarget(currentRenderTarget);
   }

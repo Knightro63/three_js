@@ -49,8 +49,8 @@ class TAARenderPass extends SSAARenderPass {
 		final sampleWeight = 1.0 / ( jitterOffsets.length );
 
 		if ( this.accumulateIndex >= 0 && this.accumulateIndex < jitterOffsets.length ) {
-			copyUniforms[ 'opacity' ].value = sampleWeight;
-			copyUniforms[ 'tDiffuse' ].value = writeBuffer.texture;
+			copyUniforms[ 'opacity' ]['value'] = sampleWeight;
+			copyUniforms[ 'tDiffuse' ]['value'] = writeBuffer.texture;
 
 			// render the scene multiple times, each slightly jitter offset from the last and accumulate the results.
 			final numSamplesPerFrame = math.pow( 2, this.sampleLevel );

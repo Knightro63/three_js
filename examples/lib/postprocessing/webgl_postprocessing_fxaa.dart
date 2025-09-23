@@ -40,7 +40,6 @@ class _State extends State<WebglPostprocessingFXAA> {
     timer.cancel();
     threeJs.dispose();
     three.loading.clear();
-    controls.dispose();
     composer1.dispose();
     composer2.dispose();
     fxaaPass.dispose();

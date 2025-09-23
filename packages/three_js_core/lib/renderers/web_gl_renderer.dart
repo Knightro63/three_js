@@ -957,7 +957,7 @@ class WebGLRenderer {
       scene.onAfterRender?.call(renderer: this, scene: scene, camera: camera);
     }
 
-    _gl.finish();
+    _gl.flush();
 
     bindingStates.resetDefaultState();
     _currentMaterialId = -1;
