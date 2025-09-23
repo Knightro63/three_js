@@ -341,7 +341,7 @@ class WebPointerEvent {
       // Left button takes precedence over other
       if (leftButtonPressed) return 0;
       // 2nd priority is the right button
-      if (rightButtonPressed || middleButtonPressed) return 2;
+      if (rightButtonPressed) return 2;
       // Lastly the middle button
       if (middleButtonPressed) return 1;
 
