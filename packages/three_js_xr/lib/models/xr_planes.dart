@@ -1,8 +1,7 @@
-import 'dart:js_interop';
 import 'dart:math' as math;
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
-import 'package:three_js_xr/app/web/xr_webgl_bindings.dart';
+import 'package:three_js_xr/app/index.dart';
 import 'package:three_js_xr/renderer/index.dart';
 
 class XRPlanes extends Object3D {
@@ -14,7 +13,7 @@ class XRPlanes extends Object3D {
 
 		xr.addEventListener( 'planesdetected', (event){
 			final frame = event.data as XRFrame;
-			final planes = frame.detectedPlanes.dartify() as Map?;
+			final planes = frame.detectedPlanesMap;
       if(planes != null){
         final referenceSpace = xr.getReferenceSpace();
 
@@ -35,7 +34,7 @@ class XRPlanes extends Object3D {
         for (final plane in planes.keys ) {
           if ( !currentPlanes.containsKey( plane )) {
             final pose = frame.getPose( plane.planeSpace, referenceSpace !)!;
-            matrix.copyFromUnknown( pose.transform.matrix.dartify() );
+            matrix.copyFromUnknown( pose.transform!.array);
 
             final polygon = plane.polygon;
 

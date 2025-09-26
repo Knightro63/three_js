@@ -80,7 +80,7 @@ class OutputPass extends Pass {
 
 			material.defines = {};
 
-			if (_outputColorSpace == SRGBTransfer ) material.defines!['SRGB_TRANSFER'] = '';
+			//if (_outputColorSpace == SRGBTransfer ) material.defines!['SRGB_TRANSFER'] = '';
       
 			if (_toneMapping == LinearToneMapping ){ material.defines!['LINEAR_TONE_MAPPING'] = '';}
 			else if (_toneMapping == ReinhardToneMapping ){ material.defines!['REINHARD_TONE_MAPPING'] = '';}
@@ -94,13 +94,13 @@ class OutputPass extends Pass {
 		}
 
 		if (renderToScreen) {
-			renderer.setRenderTarget( null );
-			fsQuad.render( renderer );
+			// renderer.setRenderTarget( null );
+			// fsQuad.render( renderer );
 		} 
     else {
-			renderer.setRenderTarget( writeBuffer );
-			if (clear) renderer.clear( renderer.autoClearColor, renderer.autoClearDepth, renderer.autoClearStencil );
-			fsQuad.render( renderer );
+			// renderer.setRenderTarget( writeBuffer );
+			// if (clear) renderer.clear( renderer.autoClearColor, renderer.autoClearDepth, renderer.autoClearStencil );
+			// fsQuad.render( renderer );
 		}
 	}
 

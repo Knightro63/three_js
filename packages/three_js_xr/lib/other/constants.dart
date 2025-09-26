@@ -1,7 +1,7 @@
-import 'dart:js_interop';
 import 'dart:convert';
 import 'package:three_js_core/three_js_core.dart';
-import 'package:three_js_xr/app/web/xr_webgl_bindings.dart';
+import 'package:three_js_math/three_js_math.dart';
+import 'package:three_js_xr/app/index.dart';
 import 'package:three_js_xr/models/component.dart';
 import 'package:three_js_xr/models/controller/motion_controllers_modle.dart';
 import 'package:three_js_xr/models/controller/visual_response.dart';
@@ -10,6 +10,36 @@ import 'package:three_js_core_loaders/three_js_core_loaders.dart';
 
 const DEFAULT_PROFILES_PATH = 'https://cdn.jsdelivr.net/npm/@webxr-input-profiles/assets@1.0/dist/profiles';
 const DEFAULT_PROFILE = 'generic-trigger';
+
+enum DistorsionType{pincushion,barrel}
+
+class XROptions{
+  double k1 = 0.022;
+  double k2 = 0.024;
+  double eyeSep = 0.064;
+  late Vector2 lensSize;
+  late Vector2 eyeOffset;
+  DistorsionType distorsionType = DistorsionType.barrel;
+
+  double width;
+  double height;
+  double dpr;
+
+  XROptions({
+    this.eyeSep = 0.064,
+    this.k1 = 0.022, // Adjust for desired distortion
+    this.k2 = 0.024, // Adjust for desired distortion
+    Vector2? lensSize,
+    Vector2? eyeOffset,
+    this.distorsionType = DistorsionType.barrel,
+    this.width = 0,
+    this.height = 0,
+    this.dpr = 1.0
+  }){
+    this.lensSize = lensSize ?? Vector2(1,1);
+    this.eyeOffset = eyeOffset ?? Vector2(0,0);
+  }
+}
 
 final Map<String,dynamic> constants = {
   'Handedness': {
@@ -61,7 +91,7 @@ Future<Map> fetchProfile(XRInputSource xrInputSource, String basePath, [defaultP
 
   // Find the relative path to the first requested profile that is recognized
   Map? match;
-  (xrInputSource.profiles.dartify() as List).any((profileId){
+  xrInputSource.profilesList?.any((profileId){
     final supportedProfile = supportedProfilesList[profileId] as Map<String,dynamic>?;
     if (supportedProfile != null) {
       match = {

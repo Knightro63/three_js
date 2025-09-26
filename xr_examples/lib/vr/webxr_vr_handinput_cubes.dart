@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
+import 'package:three_js_xr/other/constants.dart';
 import 'package:three_js_xr/three_js_xr.dart';
 
 class WebXRVRHandInputCubes extends StatefulWidget {
@@ -67,7 +68,6 @@ class _State extends State<WebXRVRHandInputCubes> {
   final tmpVector1 = three.Vector3();
   final tmpVector2 = three.Vector3();
 
-  late three.OrbitControls controls;
   List<three.Mesh> spheres = [];
 
   bool grabbing = false;
@@ -80,16 +80,17 @@ class _State extends State<WebXRVRHandInputCubes> {
 
   Future<void> setup() async {
     threeJs.renderer?.xr.enabled = true;
-    
+    (threeJs.renderer?.xr as WebXRWorker).setUpOptions(XROptions(
+      width: threeJs.width,
+      height: threeJs.height,
+      dpr: threeJs.dpr,
+    ));
+
     threeJs.scene = three.Scene();
     threeJs.scene.background = three.Color.fromHex32( 0x444444 );
 
     threeJs.camera = three.PerspectiveCamera( 50, threeJs.width / threeJs.height, 0.1, 10 );
     threeJs.camera.position.setValues( 0, 1.6, 3 );
-
-    controls = three.OrbitControls( threeJs.camera, threeJs.globalKey );
-    controls.target.setValues( 0, 1.6, 0 );
-    controls.update();
 
     final floorGeometry = three.PlaneGeometry( 4, 4 );
     final floorMaterial = three.MeshStandardMaterial.fromMap( { 'color': 0x666666 } );
@@ -151,6 +152,8 @@ class _State extends State<WebXRVRHandInputCubes> {
 
     controller1?.add( line.clone() );
     controller2?.add( line.clone() );
+
+    threeJs.customRenderer = (threeJs.renderer?.xr as WebXRWorker).render;
   }
 
   final SphereRadius = 0.05;

@@ -849,6 +849,7 @@ class WebGLRenderer {
   // Rendering
 
   void render(Object3D scene, Camera camera) {
+    
     if (_isContextLost) return;
 
     // update scene graph
@@ -860,7 +861,7 @@ class WebGLRenderer {
 
     if ( xr.enabled && xr.isPresenting ) {
       if (xr.cameraAutoUpdate) xr.updateCamera( camera );
-    	camera = xr.getCamera();
+    	if(kIsWeb) camera = xr.getCamera();
     }
 
     if (scene is Scene) {

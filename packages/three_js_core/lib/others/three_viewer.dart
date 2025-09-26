@@ -146,6 +146,7 @@ class ThreeJS with WidgetsBindingObserver{
   void Function()? rendererUpdate;
   void Function(Size newSize)? windowResizeUpdate;
   void Function([double? dt])? postProcessor;
+  Future<void> Function(core.Scene,core.Camera,FlutterAngleTexture,[double? dt])? customRenderer;
   Future<void> Function(BuildContext) onWindowResize = (context) async{};
   FutureOr<void> Function()? setup;
   List<Function(double dt)> events = [];
@@ -229,7 +230,7 @@ class ThreeJS with WidgetsBindingObserver{
     double dt = clock.getDelta();
     
     if(settings.animate){
-      await render(dt);
+      await (customRenderer?.call(scene,camera,texture!,dt) ?? render(scene,camera,texture!,dt));
       if(!pause){
         for(int i = 0; i < events.length;i++){
           events[i].call(dt);
@@ -238,9 +239,14 @@ class ThreeJS with WidgetsBindingObserver{
     }
     _updating = false;
   }
-  Future<void> render([double? dt]) async{
+
+  Future<void> render([core.Scene? scene, core.Camera? camera, FlutterAngleTexture? texture, double? dt]) async{
+    scene ??= this.scene;
+    camera ??= this.camera;
+    texture ??= this.texture!;
+    
     if(sourceTexture == null){
-      angle?.activateTexture(texture!);
+      angle?.activateTexture(texture);
     }
     rendererUpdate?.call(); 
     if(postProcessor == null){
@@ -253,9 +259,9 @@ class ThreeJS with WidgetsBindingObserver{
     }
     
     if(sourceTexture != null){
-      angle?.activateTexture(texture!);
+      angle?.activateTexture(texture);
     }
-    await angle?.updateTexture(texture!,sourceTexture);
+    await angle?.updateTexture(texture,sourceTexture);
   }
   
   void initRenderer() {
@@ -336,7 +342,7 @@ class ThreeJS with WidgetsBindingObserver{
       if(postProcessor != null){
         postProcessor?.call(dt);
       }
-      render(dt);
+      render(scene,camera,texture!,dt);
     }
   }
 

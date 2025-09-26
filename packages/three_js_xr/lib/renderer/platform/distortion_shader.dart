@@ -3,9 +3,10 @@ import 'package:three_js_math/three_js_math.dart';
 final distortionShader = {
   'uniforms': <String,dynamic>{
     "tDiffuse": <String,dynamic>{ 'value': null },
-    'k1': { 'value': 0.20 }, // Adjust for desired distortion
-    'k2': { 'value': 0.02 }, // Adjust for desired distortion
-    'lensSize': {'value': Vector2(0.9,0.9)},
+    'resolution': { 'value': Vector2() }, // Adjust for desired distortion
+    'k1': { 'value': 0.024 }, // Adjust for desired distortion
+    'k2': { 'value': 0.022 }, // Adjust for desired distortion
+    'lensSize': {'value': Vector2(1,1)},
     'cornerRadius': { 'value': 0.25 },
     'eyeTextureOffsetX': {'value': 0},
     'eyeTextureOffsetY': {'value': 0},

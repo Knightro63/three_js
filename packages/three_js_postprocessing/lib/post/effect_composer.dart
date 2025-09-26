@@ -114,13 +114,18 @@ class EffectComposer {
     final currentRenderTarget = this.renderer.getRenderTarget();
     final il = passes.length;
 
+    bool didActivate = false;
+
     for (int i = 0; i < il; i++) {
       final pass = passes[i];
 
       if (pass.enabled == false) continue;
       
       pass.renderToScreen = (renderToScreen && isLastEnabledPass(i));
-      if(pass.renderToScreen && !kIsWeb) texture?.activate();
+      if(pass.renderToScreen && !kIsWeb && !didActivate){ 
+        texture?.activate();
+        didActivate = true;
+      }
       pass.render(renderer, writeBuffer, readBuffer, deltaTime: deltaTime, maskActive: maskActive);
 
       if (pass.needsSwap) {

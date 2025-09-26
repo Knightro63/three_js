@@ -20,7 +20,6 @@ class XRHandMeshModel extends MotionController{
   String? path;
   XRHandedness? hardness;
 
-	///
 	/// Constructs a new XR hand mesh model.
 	///
 	/// @param {XRHandModel} handModel - The hand model.

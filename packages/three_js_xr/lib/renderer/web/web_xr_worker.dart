@@ -653,7 +653,7 @@ class WebXRWorker extends WebXRManager {
   /// @return {ArrayCamera} The XR camera.
   ////
   @override
-  ArrayCamera getCamera() {
+  Camera getCamera() {
     return cameraXR;
   }
 

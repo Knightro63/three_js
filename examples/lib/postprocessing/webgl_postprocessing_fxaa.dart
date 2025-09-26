@@ -30,7 +30,7 @@ class _State extends State<WebglPostprocessingFXAA> {
       settings: three.Settings(
        //autoClear: false,
         toneMapping: three.ReinhardToneMapping,
-        useSourceTexture: true,
+        //useSourceTexture: true,
       )
     );
     super.initState();
@@ -104,33 +104,37 @@ class _State extends State<WebglPostprocessingFXAA> {
     final renderPass = RenderPass( threeJs.scene, threeJs.camera );
     renderPass.clearAlpha = 0;
 
-    composer1 = EffectComposer( threeJs.renderer!,threeJs.renderTarget );
+    composer1 = EffectComposer( threeJs.renderer!,null, threeJs.texture! );
     composer1.addPass( renderPass );
-    composer1.addPass( outputPass );
+    //composer1.addPass( outputPass );
 
-    composer2 = EffectComposer( threeJs.renderer!,threeJs.renderTarget );
+    composer2 = EffectComposer( threeJs.renderer!,null, threeJs.texture! );
     composer2.addPass( renderPass );
-    composer2.addPass( outputPass );
+    //composer2.addPass( outputPass );
 
     // FXAA is engineered to be applied towards the end of engine post processing after conversion to low dynamic range and conversion to the sRGB color space for display.
 
     composer2.addPass( fxaaPass );
 
-    threeJs.postProcessor = ([dt]){
-      final halfWidth = threeJs.width / 2;
+    threeJs.customRenderer = renderer;
+  }
 
-      controls.update();
-      
-      threeJs.renderer?.setScissorTest( true );
+  Future<void> renderer(three.Scene scene, three.Camera camera, three.FlutterAngleTexture texture,[dt]) async{
+    final halfWidth = threeJs.width / 2;
 
-      threeJs.renderer?.setScissor( 0, 0, halfWidth - 1,threeJs.height );
-      composer1.render(dt);
+    controls.update();
+    final currentAutoClear = threeJs.renderer!.autoClear;
+    threeJs.renderer!.autoClear = false;
+    threeJs.renderer?.setScissorTest( true );
 
-      threeJs.renderer?.setScissor( halfWidth, 0, halfWidth, threeJs.height );
-      composer2.render(dt);
+    threeJs.renderer?.setScissor( 0, 0, halfWidth-1, threeJs.height );
+    composer1.render();
 
-      threeJs.renderer?.setScissorTest( false );
-      threeJs.renderer!.render(threeJs.scene, threeJs.camera);
-    };
+    threeJs.renderer?.setScissor( halfWidth, 0, halfWidth, threeJs.height );
+    composer2.render();
+
+    threeJs.renderer?.setScissorTest( false );
+    threeJs.renderer!.autoClear = currentAutoClear;
+    await texture.signalNewFrameAvailable();
   }
 }

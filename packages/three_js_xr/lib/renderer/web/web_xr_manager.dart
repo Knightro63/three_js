@@ -2,6 +2,7 @@ import 'dart:js_interop';
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'package:three_js_core/renderers/webgl/index.dart';
+import 'package:three_js_xr/other/constants.dart';
 import '../../app/web/xr_webgl_bindings.dart';
 import 'web_xr_controller.dart';
 import 'web_xr_depth_sensing.dart';
@@ -53,6 +54,8 @@ class WebXRWorker extends WebXRManager{
   WebXRWorker(super.renderer, super.gl){
     cameras = [cameraL,cameraR];
   }
+
+  void setUpOptions([XROptions? options]){}
 
   @override
   void init(){
@@ -147,7 +150,7 @@ class WebXRWorker extends WebXRManager{
     }
   }
 
-  void onSessionEnd() {
+  void onSessionEnd(Event event) {
     inputSourcesMap.forEach((inputSource,controller) {
       controller.disconnect(controller);
     });
@@ -600,6 +603,15 @@ class WebXRWorker extends WebXRManager{
     }
 
     xrFrame = null;
+  }
+
+  Future<void> render(Scene scene, Camera camera, FlutterAngleTexture texture, [double? dt]) async{
+    texture.activate();
+    renderer.clear();
+    renderer.setViewport(0,0,texture.options.width.toDouble(),texture.options.height.toDouble());
+    renderer.setRenderTarget(null);
+    renderer.render(scene, camera);
+    await texture.signalNewFrameAvailable();
   }
 
   @override

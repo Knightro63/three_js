@@ -52,8 +52,8 @@ dependency_overrides:
       url: https://github.com/alex-melnyk/flutter-permission-handler.git 
       path: permission_handler_apple
   file_picker: ^10.1.9
-  # flutter_angle:
-  #   path: ../../flutter_angle/flutter_angle
+  flutter_angle:
+    path: ../../flutter_angle/flutter_angle
   three_js_core:
     path: ../packages/three_js_core
   three_js_math:

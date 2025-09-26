@@ -6,9 +6,12 @@ class WebXRManager with EventDispatcher {
   final WebGLRenderer renderer;
   RenderingContext gl;
   bool isPresenting = false;
+  Function? onXRSessionStart;
+  Function? onXRSessionEnd;
 
   WebXRManager(this.renderer, this.gl) : super();
   void init(){}
+
   void setAnimationLoop ( callback ) {
     throw("Not Implimented yet!");
   }

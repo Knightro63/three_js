@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
 import 'package:three_js_video_texture/three_js_video_texture.dart';
+import 'package:three_js_xr/other/constants.dart';
 import 'package:three_js_xr/three_js_xr.dart';
 
 class WebXRVRVideo extends StatefulWidget {
@@ -59,7 +60,11 @@ class _State extends State<WebXRVRVideo> {
 
   Future<void> setup() async {
     threeJs.renderer?.xr.enabled = true;
-
+    (threeJs.renderer?.xr as WebXRWorker).setUpOptions(XROptions(
+      width: threeJs.width,
+      height: threeJs.height,
+      dpr: threeJs.dpr,
+    ));
     final texture = VideoTextureWorker.fromOptions(
       three.VideoTextureOptions(
         asset: 'assets/textures/MaryOculus.mp4',
@@ -110,5 +115,6 @@ class _State extends State<WebXRVRVideo> {
     mesh2.rotation.y = - math.pi / 2;
     mesh2.layers.set( 2 ); // display in right eye only
     threeJs.scene.add( mesh2 );
+    threeJs.customRenderer = (threeJs.renderer?.xr as WebXRWorker).render;
   }
 }

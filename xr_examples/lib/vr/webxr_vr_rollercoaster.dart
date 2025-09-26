@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
+import 'package:three_js_xr/other/constants.dart';
 import '../rollercoster/rollercoaster.dart';
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
@@ -16,7 +17,8 @@ extension on three.Vector3{
 }
 
 class WebXRVRRollercoaster extends StatefulWidget {
-  const WebXRVRRollercoaster({super.key});
+  const WebXRVRRollercoaster({super.key, required this.fullScreen});
+  final void Function(bool) fullScreen;
   @override
   createState() => _State();
 }
@@ -48,6 +50,7 @@ class _State extends State<WebXRVRRollercoaster> {
     timer.cancel();
     threeJs.dispose();
     three.loading.clear();
+    threeJs.renderer?.xr.dispose();
     super.dispose();
   }
 
@@ -80,10 +83,22 @@ class _State extends State<WebXRVRRollercoaster> {
   }
 
   Future<void> setup() async {
-    threeJs.renderer?.xr.enabled = true;
-    (threeJs.renderer?.xr as WebXRWorker).setReferenceSpaceType( 'local' );
-
     threeJs.scene = three.Scene();
+
+    threeJs.renderer?.xr.enabled = true;
+    (threeJs.renderer?.xr as WebXRWorker).setUpOptions(XROptions(
+      width: threeJs.width,
+      height: threeJs.height,
+      dpr: threeJs.dpr,
+    ));
+    threeJs.renderer?.xr.onXRSessionStart = (){
+      widget.fullScreen(true);
+    };
+    threeJs.renderer?.xr.onXRSessionEnd = (){
+      widget.fullScreen(false);
+    };
+
+    (threeJs.renderer?.xr as WebXRWorker).setReferenceSpaceType( 'local' );
     threeJs.scene.background = three.Color.fromHex32( 0xf0f0ff );
 
     final light = three.HemisphereLight( 0xfff0f0, 0x60606, 0.3 );
@@ -212,6 +227,8 @@ class _State extends State<WebXRVRRollercoaster> {
     threeJs.scene.add( mesh );
 
     funfairs.add( mesh );
+
+    threeJs.customRenderer = (threeJs.renderer?.xr as WebXRWorker).render;
 
     threeJs.addAnimationEvent((st){
       final time = DateTime.now().millisecond;

@@ -1,11 +1,10 @@
 import 'package:three_js_advanced_loaders/gltf/gltf_loader.dart';
 import 'package:three_js_core/three_js_core.dart';
-import 'package:three_js_xr/app/web/xr_webgl_bindings.dart';
+import 'package:three_js_xr/app/index.dart';
 import 'package:three_js_xr/models/controller/motion_controllers_modle.dart';
 import 'package:three_js_xr/models/controller/xr_controller_modle.dart';
 import 'package:three_js_xr/other/constants.dart';
-import 'package:three_js_xr/three_js_xr.dart';
-
+import 'package:three_js_xr/renderer/index.dart';
 
 ///
 /// Allows to create controller models for WebXR controllers that can be added as a visual

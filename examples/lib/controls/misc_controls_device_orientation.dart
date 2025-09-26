@@ -26,10 +26,9 @@ class _MyAppState extends State<MiscControlsDeviceOrientation> {
       });
     });
     threeJs = three.ThreeJS(
-      
       onSetupComplete: (){setState(() {});},
-      setup: setup,      settings: three.Settings(
-
+      setup: setup,      
+      settings: three.Settings(
         renderOptions: {
           "minFilter": three.LinearFilter,
           "magFilter": three.LinearFilter,
@@ -72,14 +71,12 @@ class _MyAppState extends State<MiscControlsDeviceOrientation> {
     threeJs.camera.lookAt(threeJs.scene.position);
 
     // controls
-
     controls = three.DeviceOrientationControls(threeJs.camera, threeJs.globalKey);
 
     // world
     final geometry = three.BoxGeometry(1, 1, 1);
     geometry.translate(0, 0.5, 0);
-    final material =
-        three.MeshPhongMaterial.fromMap({'color': 0xffffff, 'flatShading': true});
+    final material = three.MeshPhongMaterial.fromMap({'color': 0xffffff, 'flatShading': true});
 
     for (int i = 0; i < 500; i++) {
       final mesh = three.Mesh(geometry, material);

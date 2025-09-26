@@ -1,4 +1,4 @@
-import 'package:three_js_xr/app/web/xr_webgl_bindings.dart';
+import 'package:three_js_xr/app/index.dart';
 import 'package:three_js_xr/models/component.dart';
 
 ///

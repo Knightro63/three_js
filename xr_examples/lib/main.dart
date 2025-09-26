@@ -30,15 +30,24 @@ class MyAppState extends State<MyApp> {
   final GlobalKey<NavigatorState> _navKey = GlobalKey<NavigatorState>();
   String onPage = '';
   double pageLocation = 0;
+  bool isFullScreen = false;
 
   void callback(String page, [double? location]){
     onPage = page;
+    isFullScreen = false;
     if(location != null){
       pageLocation = location;
     }
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) { 
       _navKey.currentState!.popAndPushNamed('/$page');
       setState(() {});
+    });
+  }
+
+  void fullScreen(bool value){
+    isFullScreen = value;
+    setState(() {
+      
     });
   }
 
@@ -52,7 +61,7 @@ class MyAppState extends State<MyApp> {
         title: 'Three_JS',
         theme: CSS.darkTheme,
         home: Scaffold(
-          appBar: onPage != ''? PreferredSize(
+          appBar: onPage != '' && !isFullScreen? PreferredSize(
             preferredSize: Size(widthInifity,65),
             child:AppBar(callback: callback,page: onPage,)
           ):null,
@@ -75,13 +84,13 @@ class MyAppState extends State<MyApp> {
                 return const WebXRVRHandInputCubes();
               },
               '/webxr_vr_rollercoaster':(BuildContext context) {
-                return const WebXRVRRollercoaster();
+                return WebXRVRRollercoaster(fullScreen: fullScreen);
               },
               '/webxr_vr_panorama':(BuildContext context) {
                 return const WebXRVRPanorama();
               },
               '/webxr_vr_panorama_depth':(BuildContext context) {
-                return const WebXRVRPanoramaDepth();
+                return WebXRVRPanoramaDepth(fullScreen: fullScreen);
               },
               '/webxr_vr_teleport':(BuildContext context) {
                 return const WebXRVRTeleport();

@@ -1,8 +1,6 @@
-import 'dart:js_interop';
-
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
-import '../../app/web/xr_webgl_bindings.dart';
+import '../../app/index.dart';
 
 final Event _moveEvent = Event(type: 'move');
 
@@ -107,12 +105,12 @@ class WebXRController extends Object3D{
 		final WebXRController? grip = _grip;
 		final WebXRController? hand = _hand;
 
-		if ( inputSource != null && frame.session.visibilityState != 'visible-blurred' ) {
+		if ( inputSource != null && frame.session?.visibilityState != 'visible-blurred' ) {
 			if ( targetRay != null ) {
-				inputPose = frame.getPose( inputSource.targetRaySpace, referenceSpace );
+				inputPose = frame.getPose( inputSource.targetRaySpace!, referenceSpace );
 
 				if ( inputPose != null ) {
-					targetRay.matrix.copyFromUnknown( inputPose.transform.matrix );
+					targetRay.matrix.copyFromUnknown( inputPose.transform!.array );
 					targetRay.matrix.decomposeEuler( targetRay.position, targetRay.rotation, targetRay.scale );
 
 					if ( inputPose.linearVelocity != null) {
@@ -138,7 +136,7 @@ class WebXRController extends Object3D{
 			if ( hand != null && inputSource.hand != null) {
 				handPose = true;
 
-        final map = inputSource.hand!.dartify() as Map;
+        final map = inputSource.handMap!;
 
 				for ( final inputjoint in map.keys) {
 					// Update the joints groups with the XRJoint poses
@@ -157,7 +155,7 @@ class WebXRController extends Object3D{
 					final joint = hand.joints[ inputjoint['jointName'] ] as Object3D;
 
 					if ( jointPose != null ) {
-						joint.matrix.copyFromUnknown( jointPose.transform.matrix.dartify() );
+						joint.matrix.copyFromUnknown( jointPose.transform!.array);
 						joint.matrix.decomposeEuler( joint.position, joint.rotation, joint.scale );
 						joint.userData['jointRadius'] = jointPose.radius;
 					}
@@ -198,7 +196,7 @@ class WebXRController extends Object3D{
 					gripPose = frame.getPose( inputSource.gripSpace!, referenceSpace );
 
 					if ( gripPose != null ) {
-						grip.matrix.copyFromUnknown( gripPose.transform.matrix );
+						grip.matrix.copyFromUnknown( gripPose.transform!.array );
 						grip.matrix.decomposeEuler( grip.position, grip.rotation, grip.scale );
 
 						if ( gripPose.linearVelocity != null) {

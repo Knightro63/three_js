@@ -1,11 +1,14 @@
 import 'dart:async';
 import 'dart:math' as math;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
+import 'package:three_js_xr/other/constants.dart';
 import 'package:three_js_xr/three_js_xr.dart';
 
 class WebXRVRPanoramaDepth extends StatefulWidget {
-  const WebXRVRPanoramaDepth({super.key});
+  const WebXRVRPanoramaDepth({super.key, required this.fullScreen});
+  final void Function(bool) fullScreen;
   @override
   createState() => _State();
 }
@@ -70,6 +73,17 @@ class _State extends State<WebXRVRPanoramaDepth> {
 
   Future<void> setup() async {
     threeJs.renderer?.xr.enabled = true;
+    (threeJs.renderer?.xr as WebXRWorker).setUpOptions(XROptions(
+      width: threeJs.width,
+      height: threeJs.height,
+      dpr: threeJs.dpr,
+    ));
+    threeJs.renderer?.xr.onXRSessionStart = (){
+      widget.fullScreen(true);
+    };
+    threeJs.renderer?.xr.onXRSessionEnd = (){
+      widget.fullScreen(false);
+    };
     (threeJs.renderer?.xr as WebXRWorker).setReferenceSpaceType( 'local' );
     threeJs.scene = three.Scene();
     threeJs.scene.background = three.Color.fromHex32( 0x101010 );
@@ -93,7 +107,7 @@ class _State extends State<WebXRVRPanoramaDepth> {
     final sphere = three.Mesh( panoSphereGeo, panoSphereMat );
 
     // Load and assign the texture and depth map
-    final loader = three.TextureLoader();
+    final loader = three.TextureLoader(flipY: !kIsWeb);
 
     await loader.fromAsset( 'assets/textures/kandao3.jpg').then(( texture ) {
       texture?.colorSpace = three.SRGBColorSpace;
@@ -109,6 +123,7 @@ class _State extends State<WebXRVRPanoramaDepth> {
     });
 
     threeJs.scene.add( sphere );
+    threeJs.customRenderer = (threeJs.renderer?.xr as WebXRWorker).render;
     
     threeJs.addAnimationEvent((dt){
       if (threeJs.renderer?.xr.isPresenting == false ) {

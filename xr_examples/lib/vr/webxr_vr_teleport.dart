@@ -1,7 +1,7 @@
 import 'dart:async';
-import 'dart:js_interop';
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
+import 'package:three_js_xr/other/constants.dart';
 import 'package:three_js_xr/three_js_xr.dart';
 import 'package:three_js_geometry/three_js_geometry.dart';
 import 'dart:math' as math;
@@ -64,7 +64,12 @@ class _State extends State<WebXRVRTeleport> {
   Future<void> setup() async {
     threeJs.renderer?.xr.enabled = true;
     //(threeJs.renderer?.xr as WebXRWorker).addEventListener( 'sessionstart', (event) => baseReferenceSpace = (threeJs.renderer?.xr as WebXRWorker).getReferenceSpace() );
-
+    (threeJs.renderer?.xr as WebXRWorker).setUpOptions(XROptions(
+      width: threeJs.width,
+      height: threeJs.height,
+      dpr: threeJs.dpr,
+    ));
+    
     threeJs.scene = three.Scene();
 
     threeJs.camera = three.PerspectiveCamera( 50, threeJs.width / threeJs.height, 0.1, 10 );
@@ -104,7 +109,7 @@ class _State extends State<WebXRVRTeleport> {
         print('jediou32hio');
         final offsetPosition = { 'x': - intersection!.x, 'y': - intersection!.y, 'z': - intersection!.z, 'w': 1 };
         final offsetRotation = three.Quaternion();
-        final transform = XRRigidTransform( offsetPosition.jsify(), offsetRotation.toMap().jsify());
+        final transform = XRRigidTransform.init( offsetPosition, offsetRotation.toMap());
         final teleportSpaceOffset = baseReferenceSpace?.getOffsetReferenceSpace( transform );
         (threeJs.renderer!.xr as WebXRWorker).setReferenceSpace( teleportSpaceOffset );
       }
@@ -146,7 +151,7 @@ class _State extends State<WebXRVRTeleport> {
     final controllerGrip2 = (threeJs.renderer!.xr as WebXRWorker).getControllerGrip( 1 )!;
     controllerGrip2.add( controllerModelFactory.createControllerModel( controllerGrip2 ) );
     threeJs.scene.add( controllerGrip2 );
-
+    threeJs.customRenderer = (threeJs.renderer?.xr as WebXRWorker).render;
     threeJs.addAnimationEvent((dt){
 				intersection = null;
 				if ( controller1.userData['isSelecting'] == true ) {

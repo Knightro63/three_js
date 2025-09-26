@@ -1,8 +1,9 @@
 import 'dart:async';
-import 'package:web/web.dart' as html;
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
+import 'package:three_js_xr/other/constants.dart';
 import 'package:three_js_xr/three_js_xr.dart';
+import '../src/atlas/index.dart';
 
 class WebXRVRPanorama extends StatefulWidget {
   const WebXRVRPanorama({super.key});
@@ -69,7 +70,13 @@ class _State extends State<WebXRVRPanorama> {
   }
 
   Future<void> setup() async {
+    final Atlas atlas = Atlas();
     threeJs.renderer?.xr.enabled = true;
+    (threeJs.renderer?.xr as WebXRWorker).setUpOptions(XROptions(
+      width: threeJs.width,
+      height: threeJs.height,
+      dpr: threeJs.dpr,
+    ));
     (threeJs.renderer?.xr as WebXRWorker).setReferenceSpaceType( 'local' );
 
     threeJs.scene = three.Scene();
@@ -80,7 +87,7 @@ class _State extends State<WebXRVRPanorama> {
     final geometry = three.BoxGeometry( 100, 100, 100 );
     geometry.scale( 1, 1, - 1 );
 
-    final textures = getTexturesFromAtlasFile( 'assets/textures/sun_temple_stripe_stereo.jpg', 12 );
+    final textures = atlas.getTexturesFromAtlasFile( 'assets/textures/sun_temple_stripe_stereo.jpg', 12 );
     final materials = three.GroupMaterial();
 
     for (int i = 0; i < 6; i ++ ) {
@@ -100,39 +107,7 @@ class _State extends State<WebXRVRPanorama> {
     final skyBoxR = three.Mesh( geometry, materialsR );
     skyBoxR.layers.set( 2 );
     threeJs.scene.add( skyBoxR );
-  }
 
-  List<three.Texture> getTexturesFromAtlasFile(String atlasImgUrl, int tilesNum ) {
-    final List<three.Texture> textures = [];
-
-    for (int i = 0; i < tilesNum; i ++ ) {
-      textures.add(three.Texture());
-    }
-
-    final loader = three.ImageLoader();
-    loader.fromAsset(atlasImgUrl).then(( imageObj ) {
-
-      html.HTMLCanvasElement canvas;
-      html.CanvasRenderingContext2D context;
-      final tileWidth = imageObj!.height;
-
-      for (int i = 0; i < textures.length; i ++ ) {
-        canvas = html.document.createElement( 'canvas' ) as html.HTMLCanvasElement;
-        context = canvas.getContext( '2d' ) as html.CanvasRenderingContext2D;
-        canvas.height = tileWidth.toInt();
-        canvas.width = tileWidth.toInt();
-        context.drawImage( imageObj.data, tileWidth * i, 0, tileWidth, tileWidth, 0, 0, tileWidth, tileWidth );
-        
-        textures[ i ].colorSpace = three.SRGBColorSpace;
-        textures[ i ].image = three.ImageElement(
-          data: canvas,
-          width: tileWidth.toInt(),
-          height: tileWidth.toInt()
-        );
-        textures[ i ].needsUpdate = true;
-      }
-    });
-
-    return textures;
+    threeJs.customRenderer = (threeJs.renderer?.xr as WebXRWorker).render;
   }
 }

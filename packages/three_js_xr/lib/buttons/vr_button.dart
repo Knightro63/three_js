@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:three_js_core/three_js_core.dart';
-import 'dart:js_interop';
 import 'package:three_js_xr/three_js_xr.dart';
 
 class VRButton extends StatefulWidget{
@@ -20,13 +19,13 @@ class _State extends State<VRButton>{
   @override
   void initState(){
     super.initState();
-    xrSystem?.addEventListener( 'sessiongranted', (){
+    xrSystem?.addListener( 'sessiongranted', (){
 			xrSessionIsGranted = true;
-		}.jsify());
+		});
 
-		xrSystem?.isSessionSupported( 'immersive-vr' ).toDart.then( ( supported ) {
+		xrSystem?.isSupported( 'immersive-vr' ).then( ( supported ) {
       WidgetsBinding.instance.addPostFrameCallback((_){
-        if(supported.dartify() == false){
+        if(!supported){
           disabled = true;
         }
       });
@@ -34,7 +33,8 @@ class _State extends State<VRButton>{
   }
 
   Future<void> onSessionEnded() async{
-    currentSession?.removeEventListener( 'end', onSessionEnded.jsify() );
+    currentSession?.dispatchEvent(  Event(type: 'end') );
+    currentSession?.removeListener( 'end', onSessionEnded );
     currentSession = null;
     started = false;
   }
@@ -42,21 +42,24 @@ class _State extends State<VRButton>{
   Future<void> onSessionStarted(XRSession session) async{
     await (widget.threeJs.renderer!.xr as WebXRWorker).setSession(currentSession);
     widget.threeJs.renderer?.onXRSessionStart(null);
-    session.addEventListener( 'end', onSessionEnded.jsify() );
+    session.addListener( 'end', onSessionEnded );
     started = true;
   }
 
   void button() async{
     if(!started){
-      xrSystem?.requestSession('immersive-vr', {
+      xrSystem?.requestInit('immersive-vr', {
       'optionalFeatures': [
         'local-floor',
         'bounded-floor',
         'layers']
-      }.jsify()).toDart.then((s){
+      }).then((s){
         currentSession = s;
         onSessionStarted(currentSession!);
       });
+    }
+    else{
+      onSessionEnded();
     }
   }
 
