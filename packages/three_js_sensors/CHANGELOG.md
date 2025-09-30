@@ -1,7 +1,10 @@
 ## 0.1.1
 
-* Fixed pubspec.yaml file.
+* Added Quant to AbsoluteOrientationEvent.
 
+## 0.1.1
+
+* Fixed pubspec.yaml file.
 
 ## 0.1.0
 

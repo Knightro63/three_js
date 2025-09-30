@@ -1,3 +1,5 @@
+enum QuaternionOrientation{xyzw, wxyz, yzwx, zwxy, wzyx, yxzw, zxyw, xwyz, wyzx, zxwy}
+
 // from https://github.com/flutter/plugins/tree/master/packages/sensors
 /// Discrete reading from an accelerometer. Accelerometers measure the velocity
 /// of the device. Note that these readings include the effects of gravity. Put
@@ -182,11 +184,15 @@ class UserAccelerometerEvent {
 }
 
 class AbsoluteOrientationEvent {
-  AbsoluteOrientationEvent(this.yaw, this.pitch, this.roll){_init();}
+  AbsoluteOrientationEvent([this.yaw = 0, this.pitch = 0, this.roll = 0, this.x = 0, this.y = 0, this.z = 0, this.w = 0]){_init();}
   AbsoluteOrientationEvent.fromList(List<double> list)
       : yaw = list[0],
         pitch = list[1],
-        roll = list[2]{_init();}
+        roll = list[2],
+        x = list[3],
+        y = list[4],
+        z = list[5],
+        w = list[6]{_init();}
   void _init(){
     final now = DateTime.now();
     final stopwatch = Stopwatch()..start();
@@ -204,14 +210,46 @@ class AbsoluteOrientationEvent {
 
   /// The yaw of the device in radians.
   final double yaw;
-
   /// The pitch of the device in radians.
   final double pitch;
-
   /// The roll of the device in radians.
   final double roll;
+
+  final double x;
+  final double y;
+  final double z;
+  final double w;
+  List<double> get quaternion => [x,y,z,w];
+  List<double> get eulerAngles => [yaw,pitch,roll];
+
+  List<double> quantFromAxis(QuaternionOrientation orientation, [List<double>? multiply]){
+    multiply ??= [1,1,1,1];
+    switch (orientation) {
+      case QuaternionOrientation.xyzw:
+        return [x*multiply[0],y*multiply[1],z*multiply[2],w*multiply[3]];
+      case QuaternionOrientation.wxyz:
+        return [w*multiply[3],x*multiply[0],y*multiply[1],z*multiply[2]];
+      case QuaternionOrientation.yzwx:
+        return [y*multiply[1],z*multiply[2],w*multiply[3],x*multiply[0]];
+      case QuaternionOrientation.zwxy:
+        return [z*multiply[2],w*multiply[3],x*multiply[0],y*multiply[1]];
+      case QuaternionOrientation.wzyx:
+        return [w*multiply[3],z*multiply[2],y*multiply[1],x*multiply[0]];
+      case QuaternionOrientation.yxzw:
+        return [y*multiply[1],x*multiply[0],z*multiply[2],w*multiply[3]];
+      case QuaternionOrientation.zxyw:    
+        return [z*multiply[2],x*multiply[0],y*multiply[1],w*multiply[3]];
+      case QuaternionOrientation.xwyz:
+        return [x*multiply[0],w*multiply[3],y*multiply[1],z*multiply[2]];
+      case QuaternionOrientation.wyzx:
+        return [w*multiply[3],y*multiply[1],z*multiply[2],x*multiply[0]];
+      case QuaternionOrientation.zxwy:
+        return [z*multiply[2],x*multiply[0],w*multiply[3],y*multiply[1]];
+    }
+  }
+
   @override
-  String toString() => '[Orientation (yaw: $yaw, pitch: $pitch, roll: $roll)]';
+  String toString() => '[Orientation (yaw: $yaw, pitch: $pitch, roll: $roll, x: $x, y: $y, z: $z, w: $w)]';
 }
 
 class ScreenOrientationEvent {

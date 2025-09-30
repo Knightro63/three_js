@@ -87,7 +87,7 @@ class _State extends State<WebXRVRPanorama> {
     final geometry = three.BoxGeometry( 100, 100, 100 );
     geometry.scale( 1, 1, - 1 );
 
-    final textures = atlas.getTexturesFromAtlasFile( 'assets/textures/sun_temple_stripe_stereo.jpg', 12 );
+    final textures = await atlas.getTexturesFromAtlasFile( 'assets/textures/sun_temple_stripe_stereo.jpg', 12 );
     final materials = three.GroupMaterial();
 
     for (int i = 0; i < 6; i ++ ) {

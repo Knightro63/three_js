@@ -38,7 +38,7 @@ public class ThreeJsArPlugin: NSObject, FlutterPlugin {
         result(FlutterError(code: "invalid_argument", message: "Invalid tap coordinates", details: nil))
         return
       }
-        result(arManager.performRaycast(at: CGPoint(x: x, y: y)))
+      result(arManager.performRaycast(at: CGPoint(x: x, y: y)))
     case "textureFrameAvailable":
       arManager.texture?.textureFrameAvailable()
     default:

@@ -2,7 +2,7 @@ import 'package:three_js/three_js.dart' as three;
 import 'package:web/web.dart' as html;
 
 class Atlas{
-  List<three.Texture> getTexturesFromAtlasFile(String atlasImgUrl, int tilesNum ) {
+  Future<List<three.Texture>> getTexturesFromAtlasFile(String atlasImgUrl, int tilesNum ) async{
     final List<three.Texture> textures = [];
 
     for (int i = 0; i < tilesNum; i ++ ) {
@@ -10,7 +10,7 @@ class Atlas{
     }
 
     final loader = three.ImageLoader();
-    loader.fromAsset(atlasImgUrl).then(( imageObj ) {
+    final imageObj = await loader.fromAsset(atlasImgUrl);
 
       html.HTMLCanvasElement canvas;
       html.CanvasRenderingContext2D context;
@@ -31,7 +31,6 @@ class Atlas{
         );
         textures[ i ].needsUpdate = true;
       }
-    });
 
     return textures;
   }

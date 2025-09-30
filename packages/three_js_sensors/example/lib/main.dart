@@ -19,7 +19,7 @@ class _MyAppState extends State<MyApp> {
   final Vector3 _magnetometer = Vector3.zero();
   final Vector3 _userAaccelerometer = Vector3.zero();
   final Vector3 _orientation = Vector3.zero();
-  final Vector3 _absoluteOrientation = Vector3.zero();
+  final Quaternion _absoluteOrientation = Quaternion(0,0,0,1);
   final Vector3 _absoluteOrientation2 = Vector3.zero();
   double? _screenOrientation = 0;
 
@@ -72,7 +72,7 @@ class _MyAppState extends State<MyApp> {
     });
     motionSensors.absoluteOrientation().listen((AbsoluteOrientationEvent event) {
       setState(() {
-        _absoluteOrientation.setValues(event.yaw, event.pitch, event.roll);
+        _absoluteOrientation.setValues(event.x, event.y, event.z, event.w);
       });
     });
     motionSensors.screenOrientation().listen((ScreenOrientationEvent event) {
@@ -145,6 +145,7 @@ class _MyAppState extends State<MyApp> {
                   Text(degrees(_absoluteOrientation.x).toStringAsFixed(4)),
                   Text(degrees(_absoluteOrientation.y).toStringAsFixed(4)),
                   Text(degrees(_absoluteOrientation.z).toStringAsFixed(4)),
+                  Text(degrees(_absoluteOrientation.w).toStringAsFixed(4)),
                 ],
               ),
               const Text('Orientation (accelerometer + magnetometer)'),

@@ -99,7 +99,6 @@ class WebXRWorker extends WebXRManager{
     end();
     isPresenting = false;
     dispatchEvent(Event(type: 'sessionend'));
-    print('endendend');
     onXRSessionEnd?.call();
   }
 

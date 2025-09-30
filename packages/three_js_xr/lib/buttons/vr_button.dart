@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_xr/three_js_xr.dart';
@@ -33,7 +34,7 @@ class _State extends State<VRButton>{
   }
 
   Future<void> onSessionEnded() async{
-    currentSession?.dispatchEvent(  Event(type: 'end') );
+    if(!kIsWeb) currentSession?.dispatchEvent(  Event(type: 'end') );
     currentSession?.removeListener( 'end', onSessionEnded );
     currentSession = null;
     started = false;

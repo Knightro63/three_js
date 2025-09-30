@@ -313,6 +313,7 @@ class ThreeJsSensors {
                 q[0] as double,
                 q[1] as double,
                 q[2] as double,
+                0,0,0,0
               ),
             );
           }.toJS;
@@ -327,7 +328,7 @@ class ThreeJsSensors {
         apiName: 'AbsoluteOrientationSensor()',
         permissionName: 'accelerometer',
         onError: () {
-          _absoluteOrientationStreamController!.add(AbsoluteOrientationEvent(0, 0, 0));
+          _absoluteOrientationStreamController!.add(AbsoluteOrientationEvent(0, 0, 0, 0, 0, 0, 0));
         },
       );
       _absoluteOrientationResultStream =

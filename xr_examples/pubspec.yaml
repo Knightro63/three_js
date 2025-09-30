@@ -35,6 +35,9 @@ dependency_overrides:
     path: ../packages/three_js_math
   three_js_advanced_loaders:
     path: ../packages/three_js_advanced_loaders
+  three_js_sensors:
+    path: ../packages/three_js_sensors
+
   flutter_angle:
     path: ../../flutter_angle/flutter_angle
 

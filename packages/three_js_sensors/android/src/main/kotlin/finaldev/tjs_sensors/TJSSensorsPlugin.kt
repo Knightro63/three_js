@@ -178,14 +178,19 @@ class RotationVectorStreamHandler(private val sensorManager: SensorManager, sens
   }
 
   override fun onSensorChanged(event: SensorEvent?) {
-    var matrix = FloatArray(9)
-    SensorManager.getRotationMatrixFromVector(matrix, event!!.values)
-    if (matrix[7] > 1.0f) matrix[7] = 1.0f
-    if (matrix[7] < -1.0f) matrix[7] = -1.0f
-    var orientation = FloatArray(3)
-    SensorManager.getOrientation(matrix, orientation)
-    val sensorValues = listOf(-orientation[0], -orientation[1], orientation[2])
-    eventSink?.success(sensorValues)
+      var matrix = FloatArray(9)
+      SensorManager.getRotationMatrixFromVector(matrix, event!!.values)
+      if (matrix[7] > 1.0f) matrix[7] = 1.0f
+      if (matrix[7] < -1.0f) matrix[7] = -1.0f
+      var orientation = FloatArray(3)
+      SensorManager.getOrientation(matrix, orientation)
+      
+      val q = floatArrayOf(0f, 0f, 0f, 0f)
+      SensorManager.getQuaternionFromVector(q, event!!.values)
+
+      val sensorValues = listOf(-orientation[0], -orientation[1], orientation[2], q[1], q[2], q[3], q[0])
+
+      eventSink?.success(sensorValues)
   }
 
   fun setUpdateInterval(interval: Int) {

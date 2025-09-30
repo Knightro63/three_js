@@ -230,9 +230,9 @@ class AttitudeStreamHandler: NSObject, FlutterStreamHandler {
                     // Let the y-axis point to magnetic north instead of the x-axis
                     if self.attitudeReferenceFrame == CMAttitudeReferenceFrame.xMagneticNorthZVertical {
                         let yaw = (data!.attitude.yaw + Double.pi + Double.pi / 2).truncatingRemainder(dividingBy: Double.pi * 2) - Double.pi
-                        events([yaw, data!.attitude.pitch, data!.attitude.roll])
+                        events([yaw, data!.attitude.pitch, data!.attitude.roll,data!.attitude.quaternion.x,data!.attitude.quaternion.y,data!.attitude.quaternion.z, data!.attitude.quaternion.w] )
                     } else {
-                        events([data!.attitude.yaw, data!.attitude.pitch, data!.attitude.roll])
+                        events([data!.attitude.yaw, data!.attitude.pitch, data!.attitude.roll,data!.attitude.quaternion.x,data!.attitude.quaternion.y,data!.attitude.quaternion.z, data!.attitude.quaternion.w] )
                     }
                 }
             }

@@ -38,6 +38,7 @@ extension type WebXRSession._(JSObject _) implements JSObject {
   external JSArray<XRInputSource>? inputSources;
   external String get environmentBlendMode;
   external void addEventListener(String name,JSAny? event);
+  void dispatchEvent(dynamic event){}
   external void removeEventListener(String name,JSAny? event);
   external String depthUsage;
   external JSArray? enabledFeatures;
