@@ -17,18 +17,18 @@ dependencies:
   css:
     git:
       url: https://github.com/Knightro63/css.git
-  three_js: ^0.2.4
+  three_js: ^0.2.5
     #path: ../packages/three_js
-  three_js_helpers: ^0.2.2
-  three_js_transform_controls: ^0.2.0
-  three_js_svg: ^0.2.0
-  three_js_objects: ^0.2.0
-  three_js_tjs_loader: ^0.2.0
-  three_js_postprocessing: ^0.2.0
-  three_js_modifers: ^0.2.0
+  three_js_helpers: ^0.2.3
+  three_js_transform_controls: ^0.2.1
+  three_js_svg: ^0.2.1
+  three_js_objects: ^0.2.1
+  three_js_tjs_loader: ^0.2.1
+  three_js_postprocessing: ^0.2.1
+  three_js_modifers: ^0.2.1
   three_js_terrain: ^0.2.0
   three_js_exporters: ^0.2.0
-  three_js_line: ^0.2.0
+  three_js_line: ^0.2.1
   three_js_bvh_csg: ^0.2.0
   three_js_video_texture: ^0.0.2
   three_js_audio: ^0.2.1
@@ -52,36 +52,6 @@ dependency_overrides:
       url: https://github.com/alex-melnyk/flutter-permission-handler.git 
       path: permission_handler_apple
   file_picker: ^10.1.9
-  flutter_angle:
-    path: ../../flutter_angle/flutter_angle
-  three_js_core:
-    path: ../packages/three_js_core
-  three_js_math:
-    path: ../packages/three_js_math
-  three_js_controls:
-    path: ../packages/three_js_controls
-  three_js_helpers:
-    path: ../packages/three_js_helpers
-  three_js_animations:
-    path: ../packages/three_js_animations
-  three_js_advanced_loaders:
-    path: ../packages/three_js_advanced_loaders
-  three_js_postprocessing:
-    path: ../packages/three_js_postprocessing
-  three_js_geometry:
-    path: ../packages/three_js_geometry
-  three_js_line:
-    path: ../packages/three_js_line
-  three_js_modifers:
-    path: ../packages/three_js_modifers
-  three_js_objects:
-    path: ../packages/three_js_objects
-  three_js_simple_loaders:
-    path: ../packages/three_js_simple_loaders
-  three_js_svg:
-    path: ../packages/three_js_svg
-  three_js_transform_controls:
-    path: ../packages/three_js_transform_controls
 
 flutter:
   uses-material-design: true
