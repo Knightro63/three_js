@@ -1,10 +1,7 @@
-## 0.2.2
-
-* Fixed effect composer for platform postprocessing
-
 ## 0.2.1
 
 * Added FXAA pass
+* Fixed effect composer for platform postprocessing
 
 ## 0.2.0
 

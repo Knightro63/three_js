@@ -18,10 +18,10 @@ dependencies:
   xml: ^6.5.0
   flutter:
     sdk: flutter
-  three_js_core: ^0.2.5
+  three_js_core: ^0.2.0
   three_js_core_loaders: ^0.2.1
   three_js_curves: ^0.2.0
-  three_js_math: ^0.2.4
+  three_js_math: ^0.2.0
   three_js_geometry: ^0.2.0
   three_js_animations: ^0.2.1
   three_js_controls: ^0.2.0

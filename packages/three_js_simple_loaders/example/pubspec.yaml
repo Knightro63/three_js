@@ -11,9 +11,9 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.6
   
-  three_js_core_loaders: ^0.1.0
-  three_js_core: ^0.1.0
-  three_js_math: ^0.1.0
+  three_js_core_loaders: ^0.2.0
+  three_js_core: ^0.2.0
+  three_js_math: ^0.2.0
   three_js_simple_loaders:
     path: ../
 

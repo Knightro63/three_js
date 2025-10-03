@@ -12,7 +12,7 @@ dependencies:
   cupertino_icons: ^1.0.6
   three_js_core:
     path: ../
-  three_js_math: ^0.1.0
+  three_js_math: ^0.2.0
 
 dev_dependencies:
   flutter_test:
