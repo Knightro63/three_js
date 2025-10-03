@@ -1,5 +1,9 @@
 ## 0.2.1
 
+* Removed some global variables.
+
+## 0.2.1
+
 * Fixed mtl loader
 
 ## 0.2.0

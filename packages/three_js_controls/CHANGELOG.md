@@ -1,3 +1,7 @@
+## 0.2.1
+
+* Removed some gloable variables.
+
 ## 0.2.0
 
 * Updated three_js packages.

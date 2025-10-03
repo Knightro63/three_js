@@ -1,3 +1,7 @@
+## 0.2.1
+
+* Updated buffergeometry utils.
+
 ## 0.2.0
 
 * Updated to newest version of three_js packages.

@@ -1,3 +1,10 @@
+## 0.2.5
+
+Fixed: Middle mouse button
+Added: getproperties for Object3d and lights
+Added: VR support for android and iOS
+Updated: Fixed bug on renderer
+
 ## 0.2.4
 
 * Added: renderer support options

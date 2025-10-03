@@ -1,3 +1,7 @@
+## 0.2.4
+
+* Fixed some FBX issues
+
 ## 0.2.3
 
 * Fixed gltf texture bug

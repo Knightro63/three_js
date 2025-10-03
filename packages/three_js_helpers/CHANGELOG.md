@@ -1,3 +1,8 @@
+## 0.2.3
+
+* Removed globale variables.
+* Updated view helper
+
 ## 0.2.2
 
 * Updated view helper

@@ -1,3 +1,7 @@
+## 0.1.2
+
+* Added Quant export for AbsoluteOrientation
+
 ## 0.1.1
 
 * Added Quant to AbsoluteOrientationEvent.

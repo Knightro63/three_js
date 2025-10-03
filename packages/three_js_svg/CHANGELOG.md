@@ -1,3 +1,7 @@
+## 0.2.1
+
+* Removed some gloable variables.
+
 ## 0.2.0
 
 * Added WASM support.

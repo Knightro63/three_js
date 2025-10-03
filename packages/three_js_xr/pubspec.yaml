@@ -1,6 +1,6 @@
 name: three_js_xr
 description: "Flutter three_js_xr package converted from threejs to support webxr, arkit and arcore."
-version: 0.0.1
+version: 0.0.2
 homepage: https://github.com/Knightro63/three_js/tree/main/packages/three_js_xr
 
 environment:
@@ -15,8 +15,7 @@ dependencies:
   three_js_core: ^0.2.1
   three_js_geometry: ^0.2.0
   three_js_core_loaders: ^0.2.0
-  three_js_sensors: #^0.1.1
-    path: ../three_js_sensors
+  three_js_sensors: ^0.1.2
   web: ^1.1.1
 
 dev_dependencies:

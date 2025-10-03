@@ -1,3 +1,7 @@
+## 0.2.1
+
+* Fixed minor bug issue.
+
 ## 0.2.0
 
 * Updated to three_js_math and three_js_core version 0.2.0.
