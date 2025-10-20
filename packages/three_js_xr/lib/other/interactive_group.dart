@@ -85,7 +85,7 @@ class InteractiveGroup extends Group {
 		if ( element != null ) {
 			element?.removeEventListener( PeripheralType.pointerdown, onPointerEvent );
 			element?.removeEventListener( PeripheralType.pointerup, onPointerEvent );
-			element?.removeEventListener(  PeripheralType.pointermove, onPointerEvent );
+			element?.removeEventListener( PeripheralType.pointermove, onPointerEvent );
 			// element?.removeEventListener( 'mousedown', onPointerEvent );
 			// element?.removeEventListener( 'mouseup', onPointerEvent );
 			// element?.removeEventListener( 'mousemove', onPointerEvent );

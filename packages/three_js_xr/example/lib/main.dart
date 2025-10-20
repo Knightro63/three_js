@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:math' as math;
 import 'package:three_js/three_js.dart' as three;
+import 'package:three_js_xr/other/constants.dart';
 import 'package:three_js_xr/three_js_xr.dart';
 import 'package:three_js_geometry/three_js_geometry.dart';
 
@@ -47,13 +48,19 @@ class _State extends State<WebXRXRCubes> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          threeJs.build(),
-          if(threeJs.mounted) VRButton(threeJs: threeJs)
-        ],
-      ) 
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: Scaffold(
+        body: Stack(
+          children: [
+            threeJs.build(),
+            if(threeJs.mounted) VRButton(threeJs: threeJs)
+          ],
+        ) 
+      )
     );
   }
 
@@ -70,10 +77,13 @@ class _State extends State<WebXRXRCubes> {
 
   Future<void> setup() async {
     threeJs.renderer?.xr.enabled = true;
-    
+      (threeJs.renderer?.xr as WebXRWorker).setUpOptions(XROptions(
+      width: threeJs.width,
+      height: threeJs.height,
+      dpr: threeJs.dpr,
+    ));
     threeJs.scene = three.Scene();
     threeJs.scene.background = three.Color.fromHex32( 0x505050 );
-
     threeJs.camera = three.PerspectiveCamera( 50, threeJs.width / threeJs.height, 0.1, 10 );
     threeJs.camera.position.setValues( 0, 1.6, 3 );
     threeJs.scene.add( threeJs.camera );
@@ -140,6 +150,8 @@ class _State extends State<WebXRXRCubes> {
     controllerGrip?.add( controllerModelFactory.createControllerModel( controllerGrip! ) );
     threeJs.scene.add( controllerGrip );
 
+    threeJs.customRenderer = (threeJs.renderer?.xr as WebXRWorker).render;
+
     threeJs.addAnimationEvent((dt){
       render();
     });
@@ -170,24 +182,23 @@ class _State extends State<WebXRXRCubes> {
 
   void render() {
     final delta = threeJs.clock.getDelta() * 60;
+    if ( controller != null ){
+      if ( controller?.userData['isSelecting'] == true ) {
+        final cube = room.children[ 0 ];
+        room.remove( cube );
 
-    if ( controller?.userData['isSelecting'] == true ) {
-      final cube = room.children[ 0 ];
-      room.remove( cube );
+        cube.position.setFrom( controller!.position );
+        cube.userData['velocity'].x = ( math.Random().nextDouble() - 0.5 ) * 0.02 * delta;
+        cube.userData['velocity'].y = ( math.Random().nextDouble() - 0.5 ) * 0.02 * delta;
+        cube.userData['velocity'].z = ( math.Random().nextDouble() * 0.01 - 0.05 ) * delta;
+        cube.userData['velocity'].applyQuaternion( controller!.quaternion );
+        room.add( cube );
+      }
 
-      cube.position.setFrom( controller!.position );
-      cube.userData['velocity'].x = ( math.Random().nextDouble() - 0.5 ) * 0.02 * delta;
-      cube.userData['velocity'].y = ( math.Random().nextDouble() - 0.5 ) * 0.02 * delta;
-      cube.userData['velocity'].z = ( math.Random().nextDouble() * 0.01 - 0.05 ) * delta;
-      cube.userData['velocity'].applyQuaternion( controller!.quaternion );
-      room.add( cube );
-
+      // find intersections
+      tempMatrix.identity().extractRotation( controller!.matrixWorld );
+      raycaster.ray.origin.setFromMatrixPosition( controller!.matrixWorld );
     }
-
-    // find intersections
-    tempMatrix.identity().extractRotation( controller!.matrixWorld );
-
-    raycaster.ray.origin.setFromMatrixPosition( controller!.matrixWorld );
     raycaster.ray.direction.setValues( 0, 0, - 1 ).applyMatrix4( tempMatrix );
 
     final intersects = raycaster.intersectObjects( room.children, false );

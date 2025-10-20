@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:math' as math;
 import 'package:three_js_sensors/three_js_sensors.dart';
 import 'package:three_js_core/three_js_core.dart';

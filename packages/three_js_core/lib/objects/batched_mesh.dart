@@ -16,6 +16,28 @@ int sortTransparent(Pool a, Pool b ) {
 	return b.z - a.z;
 }
 
+extension on NativeArray{
+  NativeArray constructure(int s){
+    switch (this.runtimeType) {
+      case Int8Array:
+        return Int8Array(s);
+      case Int16Array:
+        return Int16Array(s);
+      case Int32Array:
+        return Int32Array(s);
+      case Uint8Array:
+        return Uint8Array(s);
+      case Uint16Array:
+        return Uint16Array(s);
+      case Uint32Array:
+        return Uint32Array(s);
+      case Float32Array:
+      default:
+        return Float32Array(s);
+    }
+  }
+}
+
 class Bounds{
   Bounds({
     this.boxInitialized = false,
@@ -125,7 +147,7 @@ final List<Intersection> _batchIntersects = [];
 // copies data from attribute "src" into "target" starting at "targetOffset"
 void copyAttributeData( src, target, [int targetOffset = 0 ]) {
 	final itemSize = target.itemSize;
-	if ( src.isInterleavedBufferAttribute || src.array.finalructor != target.array.finalructor ) {
+	if ( src is InterleavedBufferAttribute || src.array.constructure != target.array.constructure ) {
 
 		// use the component getters and setters if the array data cannot
 		// be copied directly
@@ -218,14 +240,14 @@ class BatchedMesh extends Mesh {
 
 		this.matricesTexture = matricesTexture;
 	}
-	_initIndirectTexture() {
+	void _initIndirectTexture() {
 		int size = math.sqrt( maxInstanceCount ).ceil();
 
 		final indirectArray = Uint32Array( size * size );
 		indirectTexture = DataTexture( indirectArray, size, size, RedIntegerFormat, UnsignedIntType );
 	}
-	_initializeGeometry(BufferGeometry reference ) {
-
+  
+	void _initializeGeometry(BufferGeometry reference ) {
 		final geometry = this.geometry;
 		final maxVertexCount = _maxVertexCount;
 		final maxIndexCount = _maxIndexCount;
@@ -234,10 +256,10 @@ class BatchedMesh extends Mesh {
 
 				final srcAttribute = reference.getAttributeFromString( attributeName );
 				final array = srcAttribute.array;
-        final itemSize = srcAttribute.itemSize;
+        final int itemSize = srcAttribute.itemSize;
         final normalized = srcAttribute.normalized;
 
-				final dstArray = array.finalructor( maxVertexCount * itemSize );
+				final dstArray = (array as NativeArray).constructure( maxVertexCount * itemSize);
 				final dstAttribute = BufferAttribute.fromUnknown( dstArray, itemSize, normalized );
 
 				geometry?.setAttributeFromString( attributeName, dstAttribute );
