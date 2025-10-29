@@ -127,7 +127,7 @@ class SkinnedMesh extends Mesh {
   /// Please use [SkeletonUtils.clone] in the meanwhile.
   @override
   SkinnedMesh clone([bool? recursive]) {
-    return SkinnedMesh(geometry!, material).copy(this, recursive);
+    return SkinnedMesh(geometry!, material)..copy(this, recursive);
   }
 
   @override

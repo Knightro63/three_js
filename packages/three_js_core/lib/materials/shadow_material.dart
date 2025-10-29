@@ -48,6 +48,6 @@ class ShadowMaterial extends Material {
 
   @override
   ShadowMaterial clone() {
-    return ShadowMaterial().copy(this);
+    return ShadowMaterial()..copy(this);
   }
 }

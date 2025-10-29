@@ -35,6 +35,6 @@ class GroupMaterial extends Material {
   /// Return a new material with the same parameters as this material.
   @override
   GroupMaterial clone() {
-    return GroupMaterial().copy(this);
+    return GroupMaterial()..copy(this);
   }
 }

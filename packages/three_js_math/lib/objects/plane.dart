@@ -60,7 +60,7 @@ class Plane {
   }
 
   Plane clone() {
-    return Plane().copyFrom(this);
+    return Plane()..copyFrom(this);
   }
 
   Plane copyFrom(Plane plane) {

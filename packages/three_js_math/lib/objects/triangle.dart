@@ -133,7 +133,7 @@ class Triangle {
   }
 
   Triangle clone() {
-    return Triangle.init().copy(this);
+    return Triangle.init()..copy(this);
   }
 
   Triangle copy(Triangle triangle) {

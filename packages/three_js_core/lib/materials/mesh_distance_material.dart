@@ -44,7 +44,7 @@ class MeshDistanceMaterial extends Material {
   /// Return a new material with the same parameters as this material.
   @override
   MeshDistanceMaterial clone() {
-    return MeshDistanceMaterial(<MaterialProperty, dynamic>{}).copy(this);
+    return MeshDistanceMaterial()..copy(this);
   }
 
   /// Copy the parameters from the passed material into this material.

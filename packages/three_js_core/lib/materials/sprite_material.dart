@@ -52,6 +52,6 @@ class SpriteMaterial extends Material {
 
   @override
   SpriteMaterial clone() {
-    return SpriteMaterial().copy(this);
+    return SpriteMaterial()..copy(this);
   }
 }

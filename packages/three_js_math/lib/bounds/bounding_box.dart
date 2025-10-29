@@ -126,7 +126,7 @@ class BoundingBox{
 
   /// Returns a new [BoundingBox] with the same [min] and [max] as this one.
   BoundingBox clone() {
-    return BoundingBox().setFrom(this);
+    return BoundingBox()..setFrom(this);
   }
 
   /// [box] - [BoundingBox] to copy.

@@ -53,6 +53,6 @@ class MeshDepthMaterial extends Material {
   /// Return a new material with the same parameters as this material.
   @override
   MeshDepthMaterial clone() {
-    return MeshDepthMaterial().copy(this);
+    return MeshDepthMaterial()..copy(this);
   }
 }

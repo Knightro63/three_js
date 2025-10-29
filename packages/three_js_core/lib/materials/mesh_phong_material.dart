@@ -78,7 +78,7 @@ class MeshPhongMaterial extends Material {
 
   @override
   MeshPhongMaterial clone() {
-    return MeshPhongMaterial(<MaterialProperty, dynamic>{}).copy(this);
+    return MeshPhongMaterial()..copy(this);
   }
 
   @override

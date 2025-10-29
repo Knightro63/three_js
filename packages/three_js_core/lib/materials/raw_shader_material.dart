@@ -25,6 +25,6 @@ class RawShaderMaterial extends ShaderMaterial {
 
   @override
   RawShaderMaterial clone() {
-    return RawShaderMaterial().copy(this);
+    return RawShaderMaterial()..copy(this);
   }
 }

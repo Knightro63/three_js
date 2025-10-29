@@ -106,7 +106,7 @@ class LightShadow {
 
   /// Creates a new LightShadow with the same properties as this one.
   LightShadow clone() {
-    return LightShadow().copy(this);
+    return LightShadow()..copy(this);
   }
 
   /// Serialize this LightShadow.

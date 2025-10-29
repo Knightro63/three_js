@@ -66,7 +66,7 @@ class LineBasicMaterial extends Material {
   /// Return a new material with the same parameters as this material.
   @override
   LineBasicMaterial clone() {
-    return LineBasicMaterial({}).copy(this);
+    return LineBasicMaterial()..copy(this);
   }
 }
 

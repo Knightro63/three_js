@@ -40,7 +40,7 @@ class Spherical {
   /// Returns a new spherical with the same [radius], [phi] 
   /// and [theta] properties as this one.
   Spherical clone() {
-    return Spherical().copy(this);
+    return Spherical()..copy(this);
   }
 
   /// Copies the values of the passed Spherical's [radius],

@@ -63,7 +63,7 @@ class MeshToonMaterial extends Material {
 
   @override
   MeshToonMaterial clone() {
-    return MeshToonMaterial(<MaterialProperty, dynamic>{}).copy(this);
+    return MeshToonMaterial()..copy(this);
   }
 
   @override

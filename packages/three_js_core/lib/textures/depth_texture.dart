@@ -93,5 +93,4 @@ class DepthTexture extends Texture {
   DepthTexture clone() {
     return super.clone() as DepthTexture; 
   }
- 
 }

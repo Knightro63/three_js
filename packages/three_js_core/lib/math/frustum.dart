@@ -36,7 +36,7 @@ class Frustum {
   }
 
   Frustum clone() {
-    return Frustum().copy(this);
+    return Frustum()..copy(this);
   }
 
   Frustum copy(Frustum frustum) {

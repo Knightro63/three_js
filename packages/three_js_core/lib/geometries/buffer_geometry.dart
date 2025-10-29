@@ -926,7 +926,7 @@ class BufferGeometry with EventDispatcher {
 
   /// Creates a clone of this BufferGeometry.
   BufferGeometry clone() {
-    return BufferGeometry().copy(this);
+    return BufferGeometry()..copy(this);
   }
 
   BufferGeometry copy(BufferGeometry source) {

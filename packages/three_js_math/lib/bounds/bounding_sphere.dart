@@ -43,7 +43,7 @@ class BoundingSphere{
 
   /// Returns a new sphere with the same [center] and [radius] as this one.
   BoundingSphere clone() {
-    return BoundingSphere().setFrom(this);
+    return BoundingSphere()..setFrom(this);
   }
 
   /// Copies the values of the passed sphere's [center] and

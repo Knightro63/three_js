@@ -70,7 +70,7 @@ class MeshLambertMaterial extends Material {
   /// Return a new material with the same parameters as this material.
   @override
   MeshLambertMaterial clone() {
-    return MeshLambertMaterial(<MaterialProperty, dynamic>{}).copy(this);
+    return MeshLambertMaterial()..copy(this);
   }
   
   /// Copy the parameters from the passed material into this material.

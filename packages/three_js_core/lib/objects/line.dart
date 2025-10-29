@@ -64,7 +64,7 @@ class Line extends Object3D {
   /// Returns a clone of this Line object and its descendants.
   @override
   Line clone([bool? recursive = true]) {
-    return Line(geometry!, material!).copy(this, recursive);
+    return Line(geometry!, material!)..copy(this, recursive);
   }
 
   /// Computes an array of distance values which are necessary for

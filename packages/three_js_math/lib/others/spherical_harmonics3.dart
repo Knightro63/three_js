@@ -169,7 +169,7 @@ class SphericalHarmonics3 {
 
   /// Returns a new instance of [SphericalHarmonics3] with equal coefficients.
   SphericalHarmonics3 clone() {
-    return SphericalHarmonics3().copy(this);
+    return SphericalHarmonics3()..copy(this);
   }
 
   /// [array] - The array holding the numbers of the SH

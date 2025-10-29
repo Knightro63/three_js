@@ -227,7 +227,7 @@ class Object3D with EventDispatcher {
   /// position, rotation and scale.
   void applyMatrix4(Matrix4 matrix) {
     if (matrixAutoUpdate) updateMatrix();
-    this.matrix.multiply(matrix);
+    this.matrix.premultiply(matrix);
     this.matrix.decompose(position, quaternion, scale);
   }
 

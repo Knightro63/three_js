@@ -90,6 +90,6 @@ class MeshBasicMaterial extends Material {
   /// Return a new material with the same parameters as this material.
   @override
   MeshBasicMaterial clone() {
-    return MeshBasicMaterial().copy(this);
+    return MeshBasicMaterial()..copy(this);
   }
 }

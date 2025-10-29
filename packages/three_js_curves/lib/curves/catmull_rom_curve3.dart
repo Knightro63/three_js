@@ -159,7 +159,7 @@ class CatmullRomCurve3 extends Curve {
 
   @override
   CatmullRomCurve3 clone() {
-    return CatmullRomCurve3().copy(this);
+    return CatmullRomCurve3()..copy(this);
   }
 
   @override

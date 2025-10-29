@@ -31,7 +31,7 @@ class Ray {
   }
 
   Ray clone() {
-    return Ray().copyFrom(this);
+    return Ray()..copyFrom(this);
   }
 
   Ray copyFrom(Ray ray) {

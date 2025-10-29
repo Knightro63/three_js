@@ -390,7 +390,7 @@ class Curve {
 
   /// Creates a clone of this instance.
   Curve clone() {
-    return Curve().copy(this);
+    return Curve()..copy(this);
   }
 
   /// Copies another [name] object to this instance.

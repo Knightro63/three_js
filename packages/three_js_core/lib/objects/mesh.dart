@@ -51,7 +51,7 @@ class Mesh extends Object3D {
   /// Returns a clone of this [name] object and its descendants.
   @override
   Mesh clone([bool? recursive = true]) {
-    return Mesh(geometry?.clone(), material?.clone()).copy(this, recursive);
+    return Mesh()..copy(this, recursive);
   }
 
   @override
@@ -64,8 +64,8 @@ class Mesh extends Object3D {
       if (source.morphTargetDictionary != null) {
         morphTargetDictionary = json.decode(json.encode(source.morphTargetDictionary));
       }
-      material = source.material;
-      geometry = source.geometry;
+      material = source.material?.clone();
+      geometry = source.geometry?.clone();
     }
     return this;
   }

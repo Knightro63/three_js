@@ -108,7 +108,7 @@ class RenderTarget with EventDispatcher {
   }
 
   RenderTarget clone() {
-    return RenderTarget().copy( this );
+    return RenderTarget()..copy( this );
   }
 
   RenderTarget copy(RenderTarget source){
@@ -184,7 +184,7 @@ class WebGLRenderTarget extends RenderTarget {
 
   @override
   WebGLRenderTarget clone() {
-    return WebGLRenderTarget(width, height, options).copy(this);
+    return WebGLRenderTarget(width, height, options)..copy(this);
   }
 
   @override

@@ -18,7 +18,7 @@ class InstancedBufferGeometry extends BufferGeometry {
 
   @override
   BufferGeometry clone() {
-    return InstancedBufferGeometry().copy(this);
+    return InstancedBufferGeometry()..copy(this);
   }
 
   @override

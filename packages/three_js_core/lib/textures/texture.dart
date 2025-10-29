@@ -125,7 +125,7 @@ class Texture with EventDispatcher {
   }
 
   Texture clone() {
-    return Texture().copy(this);
+    return Texture()..copy(this);
   }
 
   Texture copy(Texture source) {

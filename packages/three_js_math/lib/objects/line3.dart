@@ -33,7 +33,7 @@ class Line3 {
   /// Returns a new [Line3] with the same [start] and
   /// [end] vectors as this one.
   Line3 clone() {
-    return Line3().setFrom(this);
+    return Line3()..setFrom(this);
   }
 
   /// Copies the passed line's [start] and [end] vectors

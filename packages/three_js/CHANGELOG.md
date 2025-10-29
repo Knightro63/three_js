@@ -1,3 +1,7 @@
+## 0.2.6
+
+* Updated to the latest version of three_js apis
+
 ## 0.2.5
 
 * Updated to the latest version of three_js apis

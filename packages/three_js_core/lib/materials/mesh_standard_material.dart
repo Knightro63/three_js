@@ -110,7 +110,7 @@ class MeshStandardMaterial extends Material {
 
   @override
   MeshStandardMaterial clone() {
-    return MeshStandardMaterial(<MaterialProperty, dynamic>{}).copy(this);
+    return MeshStandardMaterial()..copy(this);
   }
 
   @override
