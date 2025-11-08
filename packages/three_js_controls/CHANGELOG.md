@@ -1,3 +1,7 @@
+## 0.2.2
+
+* Fixed: Some cloning issues.
+
 ## 0.2.1
 
 * Removed some gloable variables.
