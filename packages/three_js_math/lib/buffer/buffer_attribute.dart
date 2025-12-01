@@ -392,6 +392,9 @@ abstract class BufferAttribute<TData extends NativeArray> extends BaseBufferAttr
     } else if (type == "Uint16BufferAttribute") {
       final typed = array as Uint16Array;
       return Uint16BufferAttribute.fromList(Uint16List(typed.length), itemSize, false).copy(this);
+    } else if (type == "Uint32BufferAttribute") {
+      final typed = array as Uint32Array;
+      return Uint32BufferAttribute.fromList(Uint32List(typed.length), itemSize, false).copy(this);
     } else {
       throw ("BufferAttribute type: $type clone need support ....  ");
     }
