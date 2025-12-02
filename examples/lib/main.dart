@@ -50,6 +50,7 @@ import 'package:example/loaders/webgl_loader_gcode.dart';
 import 'package:example/loaders/webgl_loader_glb.dart';
 import 'package:example/loaders/webgl_loader_gltf_3.dart';
 import 'package:example/loaders/webgl_loader_md2.dart';
+import 'package:example/loaders/webgl_loader_pcd.dart';
 import 'package:example/loaders/webgl_loader_ply.dart';
 import 'package:example/loaders/webgl_loader_scn.dart';
 import 'package:example/loaders/webgl_loader_stl.dart';
@@ -395,6 +396,9 @@ class MyAppState extends State<MyApp> {
               },
               '/webgl_loader_collada_kinematics':(BuildContext context) {
                 return const WebglLoaderColladaKinematics();
+              },
+              '/webgl_loader_pcd':(BuildContext context) {
+                return const WebglLoaderPcd();
               },
               '/webgl_loader_ply':(BuildContext context) {
                 return const WebglLoaderPly();

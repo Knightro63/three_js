@@ -1,6 +1,6 @@
 name: three_js_advanced_loaders
 description: "Flutter advanced loaders package e.g.(gltf, glb and fbx) converted from threejs and three_dart package."
-version: 0.2.4
+version: 0.2.5
 homepage: https://github.com/Knightro63/three_js/tree/main/packages/three_js_advanced_loaders
 
 topics:

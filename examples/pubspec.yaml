@@ -52,6 +52,8 @@ dependency_overrides:
       url: https://github.com/alex-melnyk/flutter-permission-handler.git 
       path: permission_handler_apple
   file_picker: ^10.1.9
+  three_js_advanced_loaders:
+    path: ../packages/three_js_advanced_loaders
 
 flutter:
   uses-material-design: true
@@ -79,6 +81,9 @@ flutter:
     - assets/models/md2/ogro/skins/
     - assets/models/md2/ratamahatta/
     - assets/models/md2/ratamahatta/skins/
+    - assets/models/pcd/ascii/
+    - assets/models/pcd/binary/
+    - assets/models/pcd/binary_compressed/
     - assets/models/gltf/test/
     - assets/models/gltf/
     - assets/models/gltf/test/

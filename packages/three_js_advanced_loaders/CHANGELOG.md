@@ -1,3 +1,7 @@
+## 0.2.5
+
+* Added PCD Loader
+
 ## 0.2.4
 
 * Fixed some FBX issues
