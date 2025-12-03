@@ -78,7 +78,7 @@ class _State extends State<WebglLoaderPcd> {
     final loader = three.PCDLoader();
 
     Map<String, dynamic> temp = {
-      'size': 0.001,
+      'size': 0.005,
       'color': 0,
       'name': 'binary/Zaghetto.pcd',
       'points': null
@@ -103,8 +103,12 @@ class _State extends State<WebglLoaderPcd> {
 
     final gui = wg.addFolder('GUI')..open();
 
-    gui.addSlider( temp, 'size', 0.001, 0.01, 0.001 );
-    gui.addColor( temp, 'color' );
+    gui.addSlider( temp, 'size', 0.001, 0.011, 0.001 ).onChange((e){
+      temp['points']?.material!.size = e;
+    });
+    gui.addColor( temp, 'color' ).onChange((e){
+      temp['points']?.material!.color = three.Color.fromHex32(e);
+    });
     gui.addDropDown( temp, 'name', <String>[
       'ascii/simple.pcd',
       'binary/Zaghetto.pcd',

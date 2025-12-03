@@ -150,7 +150,6 @@ class PCDLoader extends Loader {
 				if ( size == 8 ) {
 					return dataview.getFloat64( offset, endian );
 				}
-
 				return dataview.getFloat32( offset, endian );
 			}
 
@@ -158,11 +157,9 @@ class PCDLoader extends Loader {
 				if ( size == 1 ) {
 					return dataview.getInt8( offset );
 				}
-
 				if ( size == 2 ) {
 					return dataview.getInt16( offset, endian );
 				}
-
 				return dataview.getInt32( offset, endian );
 			}
 
@@ -170,11 +167,9 @@ class PCDLoader extends Loader {
 				if ( size == 1 ) {
 					return dataview.getUint8( offset );
 				}
-
 				if ( size == 2 ) {
 					return dataview.getUint16( offset, endian );
 				}
-
 				return dataview.getUint32( offset, endian );
 			}
 		}
@@ -187,64 +182,91 @@ class PCDLoader extends Loader {
 	 * @param {ArrayBuffer} data - The raw PCD data as an array buffer.
 	 * @return {Points} The parsed point cloud.
 	 */
-	Points _parse(List<int> data ) {
+	Points _parse(Uint8List data ) {
 		// from https://gitlab.com/taketwo/three-pcd-loader/blob/master/decompress-lzf.js
 
-	  decompressLZF(Uint8Array inData, int outLength ) {
-			final inLength = inData.length;
-			final outData = new Uint8Array( outLength );
+		Uint8List decompressLZF(Uint8List inData, int outLength) {
+			final int inLength = inData.lengthInBytes;
+			final Uint8List outData = Uint8List(outLength);
 			int inPtr = 0;
 			int outPtr = 0;
-			int ctrl = 0;
+			int ctrl;
 			int len;
 			int ref;
 
-			do {
-				ctrl = inData[ inPtr ++ ];
-				if ( ctrl < ( 1 << 5 ) ) {
+			while (inPtr < inLength) {
+				ctrl = inData[inPtr++];
 
-					ctrl ++;
-					if ( outPtr + ctrl > outLength ) throw ( 'Output buffer is not large enough' );
-					if ( inPtr + ctrl > inLength ) throw ( 'Invalid compressed data' );
-					do {
-						outData[ outPtr ++ ] = inData[ inPtr ++ ];
-					} while ( -- ctrl >= 0);
-
-				} 
-        else {
+				if (ctrl < (1 << 5)) {
+					// Literal run
+					ctrl++;
+					if (outPtr + ctrl > outLength) {
+						throw StateError('Output buffer is not large enough');
+					}
+					if (inPtr + ctrl > inLength) {
+						throw StateError('Invalid compressed data');
+					}
+					
+					// Copy bytes one by one using a while loop
+					int count = ctrl;
+					while (count-- > 0) {
+						outData[outPtr++] = inData[inPtr++];
+					}
+					
+				} else {
+					// Back reference
 					len = ctrl >> 5;
-					ref = outPtr - ( ( ctrl & 0x1f ) << 8 ) - 1;
-					if ( inPtr >= inLength ) throw ( 'Invalid compressed data' );
-					if ( len == 7 ) {
-						len += inData[ inPtr ++ ];
-						if ( inPtr >= inLength ) throw ( 'Invalid compressed data' );
+					ref = outPtr - ((ctrl & 0x1f) << 8) - 1;
+
+					if (inPtr >= inLength) {
+						throw StateError('Invalid compressed data');
 					}
 
-					ref -= inData[ inPtr ++ ];
-					if ( outPtr + len + 2 > outLength ) throw ( 'Output buffer is not large enough' );
-					if ( ref < 0 ) throw ( 'Invalid compressed data' );
-					if ( ref >= outPtr ) throw ( 'Invalid compressed data' );
-					do {
-						outData[ outPtr ++ ] = outData[ ref ++ ];
-					} while ( (-- len + 2 ) >- 0);
+					if (len == 7) {
+						len += inData[inPtr++];
+						if (inPtr >= inLength) {
+							throw StateError('Invalid compressed data');
+						}
+					}
+
+					ref -= inData[inPtr++];
+					
+					// The length in JS was adjusted inside the do-while condition (len-- + 2)
+					final int copyLength = len + 2;
+
+					if (outPtr + copyLength > outLength) {
+						throw StateError('Output buffer is not large enough');
+					}
+					if (ref < 0) {
+						throw StateError('Invalid compressed data (reference < 0)');
+					}
+					if (ref >= outPtr) {
+						throw StateError('Invalid compressed data (reference >= outPtr)');
+					}
+
+					// Copy bytes from the existing output data (back reference)
+					int count = copyLength;
+					while (count-- > 0) {
+						outData[outPtr++] = outData[ref++];
+					}
 				}
-			} while ( inPtr < inLength );
+			}
+
 			return outData;
 		}
-
-		PCDHeader parseHeader( binaryData ) {
+		PCDHeader parseHeader(Uint8List binaryData ) {
 			PCDHeader PCDheader = PCDHeader();
-			final buffer = new Uint8Array.fromList( binaryData );
+			final buffer = binaryData;
 
-			String data = '';
-      String line = '';
-      int i = 0;
-      bool end = false;
+			String sData = '';
+			String line = '';
+			int i = 0;
+			bool end = false;
 
 			final max = buffer.length;
 
 			while ( i < max && end == false ) {
-				final char = String.fromCharCode( buffer[ i ++ ] );
+			final char = String.fromCharCode( buffer[ i ++ ] );
 
 				if ( char == '\n' || char == '\r' ) {
 					if ( line.trim().toLowerCase().startsWith( 'data' ) ) {
@@ -253,26 +275,24 @@ class PCDLoader extends Loader {
 
 					line = '';
 				} 
-        else {
+				else {
 					line += char;
 				}
 
-				data += char;
+				sData += char;
 			}
 
-			final result1 = data.indexOf(RegExp(r'[\r\n]DATA\s(\S*)\s',caseSensitive: false,));//data.search( /[\r\n]DATA\s(\S*)\s/i );
-			final result2 = RegExp(r'[\r\n]DATA\s(\S*)\s',caseSensitive: false).firstMatch(data.substring(result1 - 1))?.group(1);///[\r\n]DATA\s(\S*)\s/i.exec( data.slice( result1 - 1 ) );
-      print(result2);
+			final result1 = sData.indexOf(RegExp(r'[\r\n]DATA\s(\S*)\s',caseSensitive: false,));//data.search( /[\r\n]DATA\s(\S*)\s/i );
+			final result = RegExp(r'[\r\n]DATA\s(\S*)\s',caseSensitive: false).firstMatch(sData.substring(result1 - 1));//
+			final result2 = result?.group(1);///[\r\n]DATA\s(\S*)\s/i.exec( data.slice( result1 - 1 ) );
 			PCDheader.data = result2!;
-			PCDheader.headerLen = result2.length + result1;
-			PCDheader.str = data.substring(0, PCDheader.headerLen);//.slice( 0, PCDheader.headerLen );
+			PCDheader.headerLen = result!.group(0)!.length + result1;
+			PCDheader.str = sData.substring(0, PCDheader.headerLen);
 
 			// remove comments
-
 			PCDheader.str = PCDheader.str?.replaceAll(RegExp(r'#.*', caseSensitive: false), '' );
 
 			// parse
-
 			final version = RegExp(r'^VERSION (.*)',caseSensitive: false,multiLine: true).firstMatch( PCDheader.str!);//^VERSION (.*)/im.exec( PCDheader.str );
       final fields = RegExp(r'^FIELDS (.*)',caseSensitive: false,multiLine: true).firstMatch( PCDheader.str!);//^FIELDS (.*)/im.exec( PCDheader.str );
 			final size = RegExp(r'^SIZE (.*)',caseSensitive: false,multiLine: true).firstMatch( PCDheader.str!);//^SIZE (.*)/im.exec( PCDheader.str );
@@ -284,7 +304,6 @@ class PCDLoader extends Loader {
 			final points = RegExp(r'^POINTS (.*)',caseSensitive: false,multiLine: true).firstMatch( PCDheader.str!);//^POINTS (.*)/im.exec( PCDheader.str );
 
 			// evaluate
-
 			if (version != null )
 				PCDheader.version = double.tryParse(version.group(1) ?? '' );
 
@@ -319,7 +338,7 @@ class PCDLoader extends Loader {
 					return int.parse( x, radix: 10 );
 				} ).toList() ?? [];
 			} 
-      else {
+      		else {
 				PCDheader.count = [];
 				for (int i = 0, l = PCDheader.fields.length; i < l; i ++ ) {
 					PCDheader.count.add( 1 );
@@ -331,17 +350,16 @@ class PCDLoader extends Loader {
 			int sizeSum = 0;
 
 			for (int i = 0, l = PCDheader.fields.length; i < l; i ++ ) {
-
 				if ( PCDheader.data == 'ascii' ) {
 					PCDheader.offset![ PCDheader.fields[ i ] ] = i;
-				} else {
+				} 
+				else {
 					PCDheader.offset![ PCDheader.fields[ i ] ] = sizeSum;
 					sizeSum += PCDheader.size[ i ] * PCDheader.count[ i ];
 				}
 			}
 
 			// for binary only
-
 			PCDheader.rowSize = sizeSum;
 
       print(PCDheader.toString());
@@ -365,13 +383,12 @@ class PCDLoader extends Loader {
 		// ascii
 
 		if ( PCDheader.data == 'ascii' ) {
-
 			final offset = PCDheader.offset!;
-			final textData = utf8.decode(data);//new TextDecoder().decode( data );
-			final pcdData = textData.substring( PCDheader.headerLen );
+			final textData = utf8.decode(data);
+			final pcdData = textData.substring( PCDheader.headerLen);
 			final lines = pcdData.split( '\n' );
 
-			for (int i = 1, l = lines.length; i < l; i ++ ) {
+			for (int i = 0, l = lines.length; i < l; i ++ ) {
 				if ( lines[ i ] == '' ) continue;
 				final line = lines[ i ].split( ' ' );
 
@@ -406,11 +423,9 @@ class PCDLoader extends Loader {
 				}
 
 				if ( offset['normal_x'] != null ) {
-
 					normal.add( double.parse( line[ offset['normal_x'] ] ) );
 					normal.add( double.parse( line[ offset['normal_y'] ] ) );
 					normal.add( double.parse( line[ offset['normal_z'] ] ) );
-
 				}
 
 				if ( offset['intensity'] != null ) {
@@ -430,11 +445,13 @@ class PCDLoader extends Loader {
 		// that requires a totally different parsing approach compared to non-compressed data
 
 		if ( PCDheader.data == 'binary_compressed' ) {
-			final sizes = new Uint32Array.fromList( data.sublist( PCDheader.headerLen, PCDheader.headerLen + 8 ) );
-			final compressedSize = sizes[ 0 ];
-			final decompressedSize = sizes[ 1 ];
-			final decompressed = decompressLZF( Uint8Array.fromList( data.sublist(PCDheader.headerLen + 8, compressedSize)), decompressedSize );
-			final dataview = new ByteData.view( decompressed.toDartList().buffer );
+			final sizes = data.sublist(PCDheader.headerLen, PCDheader.headerLen + 8).buffer.asUint32List();
+			final compressedSize = sizes[0];
+			final decompressedSize = sizes[1];
+
+			final t = data.sublist(PCDheader.headerLen + 8, compressedSize);
+			final decompressed = decompressLZF(t, decompressedSize);
+			final dataview = ByteData.view(decompressed.buffer);
 
 			final offset = PCDheader.offset ?? {};
 
@@ -484,10 +501,10 @@ class PCDLoader extends Loader {
 		// binary
 
 		if ( PCDheader.data == 'binary' ) {
-			final dataview = new ByteData.view( Uint8List.fromList(data).buffer, PCDheader.headerLen );
+			final dataview = ByteData.view( Uint8List.fromList(data).buffer, PCDheader.headerLen);
 			final offset = PCDheader.offset!;
 
-			for ( int i = 0, row = 0; i < PCDheader.points; i ++, row += PCDheader.rowSize ) {
+			for ( int i = 0, row = 0; i < PCDheader.points; i++, row += PCDheader.rowSize ) {
 				if ( offset['x'] != null ) {
 					final xIndex = PCDheader.fields.indexOf( 'x' );
 					final yIndex = PCDheader.fields.indexOf( 'y' );
@@ -540,7 +557,6 @@ class PCDLoader extends Loader {
 		geometry.computeBoundingSphere();
 
 		// build material
-
 		final material = new PointsMaterial.fromMap( { 'size': 0.005 } );
 
 		if ( color.length > 0 ) {
@@ -548,7 +564,6 @@ class PCDLoader extends Loader {
 		}
 
 		// build point cloud
-
 		return new Points( geometry, material );
 	}
 }

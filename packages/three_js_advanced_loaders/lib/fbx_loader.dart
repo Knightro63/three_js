@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:math' as math;
-//import 'package:archive/archive.dart';
-
+import 'package:archive/archive.dart' as arc;
+import 'package:flutter/foundation.dart';
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'package:three_js_animations/three_js_animations.dart';
@@ -3143,12 +3143,19 @@ class _BinaryParser {
         }
 
         // https://pub.dev/packages/archive
-        // use archive replace fflate.js
+        // use archive replace fflate.js'
+        final List<int> data;
         // final data = fflate.unzlibSync( Uint8List( reader.getArrayBuffer( compressedLength ) ) ); // eslint-disable-line no-undef
-        //final data = const ZLibDecoder().decodeBytes(reader.getArrayBuffer(compressedLength), verify: true);
-        final data = ZLibDecoder().convert(reader.getArrayBuffer(compressedLength));
+        if(kIsWeb){
+          data = const arc.ZLibDecoder().decodeBytes(reader.getArrayBuffer(compressedLength), verify: true);
+        }
+        else{
+          data = ZLibDecoder().convert(reader.getArrayBuffer(compressedLength));
+        }
+        //final data = utf8.decode(GZipDecoder().decodeBytes(response.bodyBytes));
         final reader2 = _BinaryReader(data);
 
+        // ... inside your code where you handle the response
         switch (type) {
           case 'b':
           case 'c':
