@@ -361,8 +361,6 @@ class PCDLoader extends Loader {
 
 			// for binary only
 			PCDheader.rowSize = sizeSum;
-
-      print(PCDheader.toString());
 			return PCDheader;
 		}
 

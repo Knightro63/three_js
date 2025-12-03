@@ -168,7 +168,8 @@ class _State extends State<WebglVolumePerlin> {
       }
 
       void main(){
-
+        color = vec4(0.0); // Explicitly initialize color
+        
         vec3 rayDir = normalize( vDirection );
         vec2 bounds = hitBox( vOrigin, rayDir );
 
@@ -198,7 +199,6 @@ class _State extends State<WebglVolumePerlin> {
         }
 
         if ( color.a == 0.0 ) discard;
-
       }
     ''';
 

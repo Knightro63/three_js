@@ -319,8 +319,8 @@ class PropertyBinding extends AnimationBinding{
 
   void setValueDirectSetNeedsUpdate(buffer, int offset) {
     targetObject[propertyName] = buffer[ offset ];
-    targetObject.setProperty(propertyName, buffer[offset]);
-    //targetObject.needsUpdate = true;
+    //targetObject.setProperty(propertyName, buffer[offset]);
+    targetObject.needsUpdate = true;
   }
 
   void setValueDirectSetMatrixWorldNeedsUpdate(buffer, int offset) {
@@ -534,20 +534,18 @@ class PropertyBinding extends AnimationBinding{
 
       resolvedProperty = nodeProperty;
       this.propertyIndex = propertyIndex;
-
       // } else if ( nodeProperty.fromArray != null && nodeProperty.toArray != null ) {
     } 
     else if (["Color", "Vector3", "Quaternion"].contains(nodeProperty.runtimeType.toString())) {
       // must use copy for Object3D.Euler/Quaternion
-
       bindingType = BindingType.hasFromToArray;
-
       resolvedProperty = nodeProperty;
-    } else if (nodeProperty is List) {
+    } 
+    else if (nodeProperty is List) {
       bindingType = BindingType.entireArray;
-
       resolvedProperty = nodeProperty;
-    } else {
+    } 
+    else {
       this.propertyName = propertyName;
     }
 

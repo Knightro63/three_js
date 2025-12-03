@@ -81,9 +81,10 @@ class AnimationMixer with EventDispatcher {
         final path = prototypeAction?.propertyBindings[i]?.binding.parsedPath;
 
         binding = PropertyMixer(
-            PropertyBinding.create(root, trackName, path) as PropertyBinding,
-            track.valueTypeName,
-            track.getValueSize());
+          PropertyBinding.create(root, trackName, path) as PropertyBinding,
+          track.valueTypeName,
+          track.getValueSize()
+        );
 
         ++binding.referenceCount;
         _addInactiveBinding(binding, rootUuid, trackName);

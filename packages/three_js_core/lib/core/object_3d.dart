@@ -133,7 +133,6 @@ class Object3D with EventDispatcher {
     }
     type = json["type"];
     layers.mask = json["layers"];
-
     position = Vector3(json["position"][0],json["position"][1],json["position"][2]);
     quaternion = Quaternion(json["quaternion"][0],json["quaternion"][1],json["quaternion"][2],json["quaternion"][3]);
     scale = Vector3(json["scale"][0],json["scale"][1],json["scale"][2]);
@@ -673,10 +672,8 @@ class Object3D with EventDispatcher {
   /// Note: Modifying the scene graph inside the callback is discouraged.
   void traverseAncestors(Function(Object3D?) callback) {
     final parent = this.parent;
-
     if (parent != null) {
       callback(parent);
-
       parent.traverseAncestors(callback);
     }
   }
@@ -1170,9 +1167,16 @@ class Object3D with EventDispatcher {
     } else if (propertyName == "name") {
       name = newValue;
     } else if (propertyName == "scale") {
-      scale = newValue;
+      if(newValue is Vector3){
+        scale = newValue;
+      }
+      else if(newValue is num){
+        scale.setValues(newValue.toDouble(),newValue.toDouble(),newValue.toDouble());
+      }
     } else if (propertyName == "position") {
-      position = newValue;
+      if(newValue is Vector3){
+        position = newValue;
+      }
     } else if (propertyName == "quaternion") {
       quaternion = newValue;
     } else if (propertyName == "material") {
@@ -1227,22 +1231,12 @@ class Object3D with EventDispatcher {
       geometry = newValue;
     }else if(propertyName == 'up'){
       up = newValue;
-    }else if(propertyName == 'position'){
-      position = newValue;
     }else if(propertyName == 'rotation'){
       rotation = newValue;
-    }else if(propertyName == 'quaternion'){
-      quaternion = newValue;
-    }else if(propertyName == 'scale'){
-      scale = newValue;
     }else if(propertyName == 'modelViewMatrix'){
       modelViewMatrix = newValue;
     }else if(propertyName == 'normalMatrix'){
       normalMatrix = newValue;
-    }else if(propertyName == 'material'){
-      material = newValue;
-    }else if(propertyName == 'morphTargetInfluences'){
-      morphTargetInfluences = newValue;
     }else if(propertyName == 'morphTargetDictionary'){
       morphTargetDictionary = newValue;
     }else if(propertyName == 'count'){

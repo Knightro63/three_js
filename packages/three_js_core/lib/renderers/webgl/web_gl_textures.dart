@@ -33,7 +33,6 @@ class WebGLTextures {
   dynamic multisampledRTTExt;
   final bool supportsInvalidateFramebuffer = false;//typeof navigator === 'undefined' ? false : /OculusBrowser/g.test( navigator.userAgent );
 
-
   WebGLTextures(this.gl, this.extensions, this.state, this.properties, this.capabilities, this.utils, this.info) {
     maxTextures = capabilities.maxTextures;
     maxCubemapSize = capabilities.maxCubemapSize;
@@ -41,9 +40,7 @@ class WebGLTextures {
     maxSamples = capabilities.maxSamples;
 
     multisampledRTTExt = extensions.has( 'WEBGL_multisampled_render_to_texture' )? extensions.get( 'WEBGL_multisampled_render_to_texture' ) : null;
-    multisampledRenderToTextureExtension = extensions.has('WEBGL_multisampled_render_to_texture')
-        ? extensions.get('WEBGL_multisampled_render_to_texture')
-        : null;
+    multisampledRenderToTextureExtension = extensions.has('WEBGL_multisampled_render_to_texture')? extensions.get('WEBGL_multisampled_render_to_texture'): null;
 
     wrappingToGL[RepeatWrapping] = WebGL.REPEAT;
     wrappingToGL[ClampToEdgeWrapping] = WebGL.CLAMP_TO_EDGE;
@@ -453,13 +450,13 @@ class WebGLTextures {
 			if ( texture.type == FloatType && !extensions.has( 'OES_texture_float_linear' )) return; // verify extension
 
 			if ( texture.anisotropy > 1 || properties.get( texture )['__currentAnisotropy'] != null) {
-				final extension = extensions.get( 'EXT_texture_filter_anisotropic' );
-        if (kIsWeb && !kIsWasm) {
-          gl.texParameterf(textureType, extension.TEXTURE_MAX_ANISOTROPY_EXT,math.min(texture.anisotropy, capabilities.getMaxAnisotropy()).toDouble());
-        } 
-        else {
+				// final extension = extensions.get( 'EXT_texture_filter_anisotropic' );
+        // if (kIsWeb && !kIsWasm) {
+        //   gl.texParameterf(textureType, extension.TEXTURE_MAX_ANISOTROPY_EXT,math.min(texture.anisotropy, capabilities.getMaxAnisotropy()).toDouble());
+        // } 
+        // else {
           gl.texParameterf(textureType, WebGL.TEXTURE_MAX_ANISOTROPY_EXT,math.min(texture.anisotropy, capabilities.getMaxAnisotropy()).toDouble());
-        }				
+        //}				
         properties.get( texture )['__currentAnisotropy'] = texture.anisotropy;
       }
     }

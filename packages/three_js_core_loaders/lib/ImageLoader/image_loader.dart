@@ -69,7 +69,7 @@ class ImageLoader extends Loader {
     }
 
     ImageElement? resp;
-    if(!kIsWeb){
+    if(!kIsWeb || kIsWasm){
       final ByteData fileData = await rootBundle.load(asset);
       final bytes = fileData.buffer.asUint8List();
       resp = await processImage(bytes,asset,flipY);
