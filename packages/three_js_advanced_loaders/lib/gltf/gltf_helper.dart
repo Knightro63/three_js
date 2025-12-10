@@ -516,9 +516,9 @@ Function addPrimitiveAttributes = (BufferGeometry geometry, Map<String, dynamic>
   }
 
   if (primitiveDef["indices"] != null && geometry.index == null) {
-    final accessor =
-        await parser.getDependency('accessor', primitiveDef["indices"]);
+    final accessor = await parser.getDependency('accessor', primitiveDef["indices"]);
     geometry.setIndex(accessor);
+    pending.add( accessor );
   }
 
   assignExtrasToUserData(geometry, primitiveDef);

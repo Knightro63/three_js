@@ -866,8 +866,8 @@ class GLTFParser {
 
       if (materialDef["normalTexture"]["scale"] != null) {
         materialParams["normalScale"] = Vector2(
-            materialDef["normalTexture"]["scale"],
-            materialDef["normalTexture"]["scale"]);
+            materialDef["normalTexture"]["scale"].toDouble(),
+            materialDef["normalTexture"]["scale"].toDouble());
       }
     }
 
@@ -892,8 +892,6 @@ class GLTFParser {
     ) {
       pending.add(await parser.assignTexture(materialParams, 'emissiveMap', materialDef["emissiveTexture"], SRGBColorSpace));
     }
-
-    // await Future.wait(pending);
 
     late Material material;
 
@@ -1008,7 +1006,6 @@ class GLTFParser {
   /// @return {Promise<Group|Mesh|SkinnedMesh>}
   ///
   Future<Object3D> loadMesh(int meshIndex) async {
-    final parser = this;
     final json = this.json;
     final extensions = this.extensions;
 
@@ -1025,7 +1022,7 @@ class GLTFParser {
       pending.add(Future.sync(() => material));
     }
 
-    pending.add(parser.loadGeometries(primitives));
+    pending.add(loadGeometries(primitives));
 
     final results = await Future.wait(pending);
 
@@ -1085,29 +1082,32 @@ class GLTFParser {
         updateMorphTargets(mesh, meshDef);
       }
 
-      mesh.name = parser.createUniqueName(meshDef["name"] ?? ('mesh_$meshIndex'));
+      mesh.name = createUniqueName(meshDef["name"] ?? ('mesh_$meshIndex'));
       assignExtrasToUserData(mesh, meshDef);
 
       if (primitive["extensions"] != null){
         addUnknownExtensionsToUserData(extensions, mesh, primitive);
       }
 
-      parser.assignFinalMaterial(mesh);
+      assignFinalMaterial(mesh);
       meshes.add(mesh);
     }
     
-			for (int i = 0, il = meshes.length; i < il; i ++ ) {
-				parser.associations[meshes[ i ]] = {
-					'meshes': meshIndex,
-					'primitives': i
-				};
-			}
+    for (int i = 0, il = meshes.length; i < il; i ++ ) {
+      associations[meshes[ i ]] = {
+        'meshes': meshIndex,
+        'primitives': i
+      };
+    }
 
     if (meshes.length == 1) {
+      if ( meshDef['extensions'] != null) addUnknownExtensionsToUserData( extensions, meshes[ 0 ], meshDef );
       return meshes[0];
     }
 
     final group = Group();
+    if ( meshDef['extensions'] != null) addUnknownExtensionsToUserData( extensions, group, meshDef );
+    associations[group]  = { 'meshes': meshIndex };
     for (int i = 0; i < meshes.length; i++) {
       group.add(meshes[i]);
     }
@@ -1238,16 +1238,11 @@ class GLTFParser {
 
     for (int i = 0, il = animationDef["channels"].length; i < il; i++) {
       Map<String, dynamic> channel = animationDef["channels"][i];
-      Map<String, dynamic> sampler =
-          animationDef["samplers"][channel["sampler"]];
+      Map<String, dynamic> sampler = animationDef["samplers"][channel["sampler"]];
       Map<String, dynamic> target = channel["target"];
       final name = target["node"] ?? target["id"]; // NOTE: target.id is deprecated.
-      final input = animationDef["parameters"] != null
-          ? animationDef["parameters"][sampler["input"]]
-          : sampler["input"];
-      final output = animationDef["parameters"] != null
-          ? animationDef["parameters"][sampler["output"]]
-          : sampler["output"];
+      final input = animationDef["parameters"] != null? animationDef["parameters"][sampler["input"]] : sampler["input"];
+      final output = animationDef["parameters"] != null? animationDef["parameters"][sampler["output"]] : sampler["output"];
 
       pendingNodes.add(getDependency('node', name));
       pendingInputAccessors.add(getDependency('accessor', input));
@@ -1275,7 +1270,6 @@ class GLTFParser {
     for (int i = 0, il = nodes.length; i < il; i++) {
       final node = nodes[i];
       final inputAccessor = inputAccessors[i];
-
       final outputAccessor = outputAccessors[i];
       Map<String, dynamic> sampler = samplers[i];
       Map<String, dynamic> target = targets[i];
@@ -1289,9 +1283,7 @@ class GLTFParser {
 
       String targetName = node.name ?? node.uuid;
 
-      final interpolation = sampler["interpolation"] != null
-          ? gltfInterpolation[sampler["interpolation"]]
-          : InterpolateLinear;
+      final interpolation = sampler["interpolation"] != null ? gltfInterpolation[sampler["interpolation"]] : InterpolateLinear;
 
       final targetNames = [];
 
@@ -1333,8 +1325,7 @@ class GLTFParser {
             // A CUBICSPLINE keyframe in glTF has three output values for each input value,
             // representing inTangent, splineVertex, and outTangent. As a result, track.getValueSize()
             // must be divided by three to get the interpolant's sampleSize argument.
-            return GLTFCubicSplineInterpolant(
-                track.times, track.values, track.getValueSize() ~/ 3, result);
+            return GLTFCubicSplineInterpolant(track.times, track.values, track.getValueSize() ~/ 3, result);
           };
 
           // Mark as CUBICSPLINE. `track.getInterpolation()` doesn't support custom interpolants.
@@ -1353,14 +1344,13 @@ class GLTFParser {
 
   Future<Object3D?> createNodeMesh(int nodeIndex) async {
     final json = this.json;
-    final parser = this;
     Map<String, dynamic> nodeDef = json["nodes"][nodeIndex];
 
     if (nodeDef["mesh"] == null) return null;
 
-    final mesh = await parser.getDependency('mesh', nodeDef["mesh"]);
+    final mesh = await getDependency('mesh', nodeDef["mesh"]);
 
-    final node = parser.getNodeRef(parser.meshCache, nodeDef["mesh"], mesh);
+    final node = getNodeRef(meshCache, nodeDef["mesh"], mesh);
 
     // if weights are provided on the node, override weights on the mesh.
     if (nodeDef["weights"] != null) {
@@ -1378,7 +1368,6 @@ class GLTFParser {
   Future<Object3D> loadNode(int nodeIndex) async {
     return await loadNodeShallow( nodeIndex );
 		// final json = this.json;
-		// final parser = this;
 
 		// final nodeDef = json['nodes'][ nodeIndex ];
 
@@ -1388,9 +1377,9 @@ class GLTFParser {
 		// final childrenDef = nodeDef['children'] ?? [];
 
 		// for (int i = 0, il = childrenDef.length; i < il; i ++ ) {
-		// 	childPending.add( await parser.getDependency( 'node', childrenDef[ i ] ) );
+		// 	childPending.add( await getDependency( 'node', childrenDef[ i ] ) );
 		// }
-		// final skeletonPending = nodeDef['skin'] == null? null : await parser.getDependency( 'skin', nodeDef['skin'] );
+		// final skeletonPending = nodeDef['skin'] == null? null : await getDependency( 'skin', nodeDef['skin'] );
     
     // if ( skeletonPending != null ) {
     //   // This full traverse should be fine because
@@ -1507,7 +1496,17 @@ class GLTFParser {
       }
     }
 
-    associations[node] = {"type": 'nodes', "index": nodeIndex};
+    if (!associations.containsKey( node )) {
+      associations[node] = {};
+    } 
+    else if ( nodeDef['mesh'] != null && meshCache['refs'][ nodeDef['mesh'] ] > 1 ) {
+      final mapping = associations[node];
+      (associations[node] as Map).addAll(mapping);// = { ...mapping };
+    }
+
+    associations[node]['nodes'] = nodeIndex;
+
+    //associations[node] = {"type": 'nodes', "index": nodeIndex};
     return node;
   }
 
@@ -1636,7 +1635,7 @@ class GLTFParser {
       }
 
       node.traverse(( node ){
-        final mappings = parser.associations[node];
+        final mappings = associations[node];
         if ( mappings != null ) {
           reducedAssociations[node] =  mappings;
         }
@@ -1645,7 +1644,7 @@ class GLTFParser {
       return reducedAssociations;
     };
 
-    parser.associations = reduceAssociations( scene );
+    associations = reduceAssociations( scene );
 
     return scene;
 	}

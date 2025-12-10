@@ -1,4 +1,3 @@
-
 import 'package:three_js_gpu/common/backend.dart';
 import 'package:three_js_gpu/common/bind_group.dart';
 import 'package:three_js_gpu/common/bindings.dart';

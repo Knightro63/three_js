@@ -305,11 +305,15 @@ class PMREMGenerator {
       _pingPongRenderTarget = _createRenderTarget(renderTarget.width, renderTarget.height);
 
       final _lodMax = this._lodMax;
-			( { sizeLods: this._sizeLods, lodPlanes: this._lodPlanes, sigmas: this._sigmas, lodMeshes: this._lodMeshes } = _createPlanes( _lodMax ) );
+      final createPlanes = _createPlanes( _lodMax );
+			final sizeLods = createPlanes['sizeLods']; 
+      final lodPlanes = createPlanes['lodPlanes'];
+      final sigmas = createPlanes['sigmas']; 
+      final lodMeshes = createPlanes['lodMeshes'];
 
-      _sizeLods = result["sizeLods"];
-      _lodPlanes = result["lodPlanes"];
-      _sigmas = result["sigmas"];
+      _sizeLods = sizeLods;
+      _lodPlanes = lodPlanes;
+      _sigmas = sigmas;
 
       _blurMaterial = _getBlurShader(_lodMax, renderTarget.width, renderTarget.height);
     }
