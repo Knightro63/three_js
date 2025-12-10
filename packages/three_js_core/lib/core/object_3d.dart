@@ -1052,16 +1052,25 @@ class Object3D with EventDispatcher {
     }
   }
 
-  dynamic getProperty(String propertyName) {
+  dynamic getProperty(String propertyName, [int? offset]) {
     if (propertyName == "id") {
       return id;
     } else if (propertyName == "name") {
       return name;
     } else if (propertyName == "scale") {
+      if(offset != null){
+        return scale[offset];
+      }
       return scale;
     } else if (propertyName == "position") {
+      if(offset != null){
+        return position[offset];
+      }
       return position;
     } else if (propertyName == "quaternion") {
+      if(offset != null){
+        return quaternion[offset];
+      }
       return quaternion;
     } else if (propertyName == "material") {
       return material;
@@ -1118,6 +1127,9 @@ class Object3D with EventDispatcher {
     }else if(propertyName == 'position'){
       return position;
     }else if(propertyName == 'rotation'){
+      if(offset != null){
+        return rotation[offset];
+      }
       return rotation;
     }else if(propertyName == 'quaternion'){
       return quaternion;
@@ -1161,7 +1173,7 @@ class Object3D with EventDispatcher {
     return null;
   }
 
-  Object3D setProperty(String propertyName, dynamic newValue) {
+  Object3D setProperty(String propertyName, dynamic newValue, [int? offset]) {
     if (propertyName == "id") {
       id = newValue;
     } else if (propertyName == "name") {
@@ -1177,8 +1189,16 @@ class Object3D with EventDispatcher {
       if(newValue is Vector3){
         position = newValue;
       }
+      else if(offset != null){
+        position[offset] = newValue;
+      }
     } else if (propertyName == "quaternion") {
-      quaternion = newValue;
+      if(offset != null){
+        quaternion[offset] = newValue;
+      }
+      else{
+        quaternion = newValue;
+      }
     } else if (propertyName == "material") {
       material = newValue;
     } else if (propertyName == "morphTargetInfluences") {
@@ -1232,7 +1252,12 @@ class Object3D with EventDispatcher {
     }else if(propertyName == 'up'){
       up = newValue;
     }else if(propertyName == 'rotation'){
-      rotation = newValue;
+      if(offset != null){
+        rotation[offset] = newValue;
+      }
+      else{
+        rotation = newValue;
+      }
     }else if(propertyName == 'modelViewMatrix'){
       modelViewMatrix = newValue;
     }else if(propertyName == 'normalMatrix'){

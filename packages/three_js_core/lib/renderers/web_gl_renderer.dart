@@ -650,8 +650,8 @@ class WebGLRenderer {
 
     final drawRange = geometry.drawRange;
     BufferAttribute? position = geometry.attributes["position"];
-    int drawStart = drawRange['start']! * rangeFactor;
-    int drawEnd = ( drawRange['start']! + drawRange['count']! ) * rangeFactor;
+    int drawStart = (drawRange['start'] ?? 0) * rangeFactor;
+    int drawEnd = ( (drawRange['start'] ?? 0) + (drawRange['count'] ?? 0) ) * rangeFactor;
 
     if ( group != null ) {
       drawStart = math.max( drawStart, group['start'] * rangeFactor );

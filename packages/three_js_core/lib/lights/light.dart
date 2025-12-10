@@ -102,7 +102,7 @@ class Light extends Object3D {
   }
 
   @override
-  dynamic getProperty(String propertyName) {
+  dynamic getProperty(String propertyName, [int? offset]) {
     if (propertyName == "color") {
       return color;
     } else if (propertyName == "intensity") {
@@ -113,7 +113,7 @@ class Light extends Object3D {
   }
 
   @override
-  Light setProperty(String propertyName, dynamic value) {
+  Light setProperty(String propertyName, dynamic value, [int? offset]) {
     if (propertyName == "intensity") {
       intensity = value;
     } else {
