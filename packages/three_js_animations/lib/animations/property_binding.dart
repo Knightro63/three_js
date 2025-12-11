@@ -252,7 +252,7 @@ class PropertyBinding extends AnimationBinding{
 
   // 0
   void getValueDirect(buffer, int offset) {
-    final v = targetObject.getProperty(propertyName, offset);
+    final v = targetObject.getProperty(propertyName);
     buffer[offset] = v;
   }
 
@@ -313,19 +313,19 @@ class PropertyBinding extends AnimationBinding{
   }
 
   void setValueDirect(buffer, int offset) {
-    //targetObject[propertyName] = buffer[offset];
-    targetObject.setProperty(propertyName, buffer[offset], offset);
+    targetObject[propertyName] = buffer[offset];
+    //targetObject.setProperty(propertyName, buffer[offset], offset);
   }
 
   void setValueDirectSetNeedsUpdate(buffer, int offset) {
-    //targetObject[propertyName] = buffer[ offset ];
-    targetObject.setProperty(propertyName, buffer[offset], offset);
+    targetObject[propertyName] = buffer[ offset ];
+    //targetObject.setProperty(propertyName, buffer[offset], offset);
     targetObject.needsUpdate = true;
   }
 
   void setValueDirectSetMatrixWorldNeedsUpdate(buffer, int offset) {
-    //targetObject[propertyName] = buffer[ offset ];
-    targetObject.setProperty(propertyName, buffer[offset].toDouble(), offset);
+    targetObject[propertyName] = buffer[ offset ];
+    //targetObject.setProperty(propertyName, buffer[offset].toDouble(), offset);
     targetObject.matrixWorldNeedsUpdate = true;
   }
 

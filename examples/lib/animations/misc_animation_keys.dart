@@ -115,17 +115,14 @@ class _State extends State<MiscAnimationKeys> {
         null);
 
     // COLOR
-    final colorKF = three.ColorKeyframeTrack('.material.color', [0, 1, 2],
-        [1, 0, 0, 0, 1, 0, 0, 0, 1], three.InterpolateDiscrete);
+    final colorKF = three.ColorKeyframeTrack('.material.color', [0, 1, 2],[1, 0, 0, 0, 1, 0, 0, 0, 1], three.InterpolateDiscrete);
 
     // OPACITY
-    final opacityKF = three.NumberKeyframeTrack(
-        '.material.opacity', [0, 1, 2], [1, 0, 1], null);
+    final opacityKF = three.NumberKeyframeTrack('.material.opacity', [0, 1, 2], [1, 0, 1], null);
 
     // create an animation sequence with the tracks
     // If a negative time value is passed, the duration will be calculated from the times of the passed tracks array
-    final clip = three.AnimationClip(
-        'Action', 3, [scaleKF, positionKF, quaternionKF, colorKF, opacityKF]);
+    final clip = three.AnimationClip('Action', 3, [scaleKF, positionKF, quaternionKF, colorKF, opacityKF]);
 
     // setup the three.AnimationMixer
     mixer = three.AnimationMixer(mesh);
