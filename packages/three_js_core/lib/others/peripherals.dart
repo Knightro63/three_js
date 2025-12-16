@@ -285,6 +285,10 @@ class PeripheralsState extends State<Peripherals> {
       }
     }
   }
+
+  void overrideEmit(PeripheralType name, event) {
+    _emit(name, event);
+  }
 }
 
 class WebPointerEvent {
