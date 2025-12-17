@@ -977,7 +977,7 @@ class GLTFParser {
 
       if (cached != null) {
         // Use the cached geometry if it exists
-        pending.add(cached.promise);
+        pending.add(cached['promise']);
       } 
       else {
         dynamic geometryPromise;
