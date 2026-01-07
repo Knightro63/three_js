@@ -25,6 +25,7 @@ dependencies:
   three_js_geometry: ^0.2.0
   three_js_animations: ^0.2.1
   three_js_controls: ^0.2.0
+  archive: ^4.0.7
     
 dev_dependencies:
   flutter_test:
