@@ -12,7 +12,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   flutter_colorpicker: ^1.1.0
   image: ^4.5.4
-  three_js: ^0.1.0
+  three_js: ^0.2.6
   three_js_terrain:
     path: ../
 
@@ -35,3 +35,4 @@ flutter:
     - assets/snow1.jpg
     - assets/stone1.jpg
     - assets/heightmap.png
+    - assets/waternormals.jpg

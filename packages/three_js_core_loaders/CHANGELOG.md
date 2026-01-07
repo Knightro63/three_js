@@ -1,3 +1,7 @@
+## 0.2.2
+
+* Fixed minor bug for WASM
+
 ## 0.2.1
 
 * Updated _getDimensions

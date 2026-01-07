@@ -1,3 +1,7 @@
+## 0.2.6
+
+* Added cloning support for Uint32BufferAttribute in BufferAttribute.clone
+
 ## 0.2.5
 
 * Updated to newest version of flutter_angle: 0.3.8

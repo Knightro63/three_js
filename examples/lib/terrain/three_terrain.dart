@@ -186,27 +186,6 @@ class _State extends State<TerrainPage> {
   Future<void> setupWorld() async{
     generateSky();
     await generateWater();
-    // three.TextureLoader().fromAsset('assets/textures/three_terrain/sky1.jpg').then((t1) {
-    //   t1?.minFilter = three.LinearFilter; // Texture is not a power-of-two size; use smoother interpolation.
-    //   skyDome = three.Mesh(
-    //     three.SphereGeometry(8192, 16, 16, 0, math.pi*2, 0, math.pi*0.5),
-    //     three.MeshBasicMaterial.fromMap({'map': t1, 'side': three.BackSide, 'fog': false})
-    //   );
-    //   skyDome.position.y = -99;
-    //   threeJs.scene.add(skyDome);
-    // });
-
-    // water = three.Mesh(
-    //   three.PlaneGeometry(16384+1024, 16384+1024, 16, 16),
-    //   three.MeshLambertMaterial.fromMap({'color': 0x006ba0, 'transparent': true, 'opacity': 0.6})
-    // );
-    // water.position.y = -99;
-    // water.rotation.x = -0.5 * math.pi;
-    // threeJs.scene.add(water);
-
-    // skyLight = three.DirectionalLight(0xe8bdb0, 1.5);
-    // skyLight.position.setValues(2950, 2625, -160); // Sun on the sky texture
-    // threeJs.scene.add(skyLight);
   }
 
   three.Object3D buildTree() {
@@ -346,11 +325,6 @@ class _State extends State<TerrainPage> {
   }
 
   Future<void> settings() async{
-    //guiSettings['lightColor'] = skyLight.color!.getHex();
-    // var elevationGraph = document.getElementById('elevation-graph'),
-    //     slopeGraph = document.getElementById('slope-graph'),
-    //     analyticsValues = document.getElementsByClassName('value');
-
     three.TextureLoader loader = three.TextureLoader();
     final t1 = await loader.fromAsset('assets/textures/three_terrain/sand1.jpg');
     t1?.wrapS = t1.wrapT = three.RepeatWrapping;

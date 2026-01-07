@@ -57,6 +57,7 @@ import 'package:example/loaders/webgl_loader_stl.dart';
 import 'package:example/loaders/webgl_loader_usdz.dart';
 import 'package:example/loaders/webgl_loader_vox.dart';
 import 'package:example/loaders/webgl_loader_xyz.dart';
+import 'package:example/material/webgl_hex_tiling.dart';
 import 'package:example/material/webgl_materials_video.dart';
 import 'package:example/material/webgl_tonemapping.dart';
 import 'package:example/postprocessing/webgl_postprocessing_fxaa.dart';
@@ -498,6 +499,9 @@ class MyAppState extends State<MyApp> {
               },
               '/webgl_projected_3d_model':(BuildContext context) {
                 return const WebglProjected3DModel();
+              },
+              '/webgl_hex_tiling': (BuildContext context) {
+                return const WebglHexTiling();
               },
               '/webgl_materials_car':(BuildContext context) {
                 return const WebglMaterialsCar();

@@ -41,6 +41,7 @@ const List<String> filesJson = [
   'webgl_materials_video',
   'webgl_projected_basic',
   'webgl_projected_3d_model',
+  'webgl_hex_tiling',
   "webgl_instancing_scatter",
   "webgl_instancing_performance",
   "webgl_instancing_raycast",

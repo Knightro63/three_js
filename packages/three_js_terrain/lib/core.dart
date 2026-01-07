@@ -1545,6 +1545,7 @@ class Terrain{
         // (how far between the start-blending-out and fully-blended-out levels the current vertex is)
         // So the opacity is 1.0 minus that.
         final blendAmount = !useLevels ? p :'1.0 - smoothstep(${glslifyNumber(v[0])}, ${glslifyNumber(v[1])}, vPosition.z) + smoothstep(${glslifyNumber(v[2])}, ${glslifyNumber(v[3])}, vPosition.z)';
+        final weight = 'max( min($blendAmount, 1.0), 0.0)';
         assign += '''        
             color = mix(
               texture2D( 
@@ -1552,9 +1553,9 @@ class Terrain{
                 MyvUv * vec2( ${glslifyNumber(tiRepeat.x)}, ${glslifyNumber(tiRepeat.y)} ) + vec2( ${glslifyNumber(tiOffset.x)}, ${glslifyNumber(tiOffset.y)}) 
               ),
               color,
-              max( min($blendAmount, 1.0), 0.0)
+              $weight
             );\n
-          ''';
+        ''';
       }
     }
 
@@ -1571,7 +1572,13 @@ class Terrain{
     final fragPars = '$declare\nvarying vec2 MyvUv;\nvarying vec3 vPosition;\nvarying vec3 myNormal;\n';
 
     final mat = material ?? MeshLambertMaterial();
+    Function? hexOnBeforeCompile;
+    if(mat is HexTilingMaterial){
+      hexOnBeforeCompile = mat.onBeforeCompile;
+    }
+
     mat.onBeforeCompile = (WebGLParameters shader, WebGLRenderer renderer) {
+      hexOnBeforeCompile?.call(shader, renderer);
       // Patch vertexShader to setup MyUv, vPosition, and myNormal
       shader.vertexShader = shader.vertexShader.replaceAll('#include <common>',
           'varying vec2 MyvUv;\nvarying vec3 vPosition;\nvarying vec3 myNormal;\n#include <common>');
@@ -1587,6 +1594,13 @@ class Terrain{
           'type': 't',
           'value': textures[i].texture,
         };
+      }
+
+      if(mat is HexTilingMaterial){
+        shader.fragmentShader = shader.fragmentShader.replaceAll(
+          'texture2D', 
+          'textureNoTileNeyret'
+        );
       }
     };
 

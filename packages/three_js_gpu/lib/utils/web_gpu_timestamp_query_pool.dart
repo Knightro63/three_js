@@ -1,5 +1,4 @@
-import { warnOnce } from '../../../utils.js';
-import TimestampQueryPool from '../../common/TimestampQueryPool.js';
+import 'package:three_js_gpu/common/timestamp_query_pool.dart';
 
 /**
  * Manages a pool of WebGPU timestamp queries for performance measurement.
@@ -8,40 +7,29 @@ import TimestampQueryPool from '../../common/TimestampQueryPool.js';
  * @augments TimestampQueryPool
  */
 class WebGPUTimestampQueryPool extends TimestampQueryPool {
+  GPUDevice device;
+  String type;
 
-	/**
-	 * Creates a new WebGPU timestamp query pool.
-	 *
-	 * @param {GPUDevice} device - The WebGPU device to create queries on.
-	 * @param {string} type - The type identifier for this query pool.
-	 * @param {number} [maxQueries=2048] - Maximum number of queries this pool can hold.
-	 */
-	constructor( device, type, maxQueries = 2048 ) {
+	late final querySet = device.createQuerySet( {
+    'type': 'timestamp',
+    'count': this.maxQueries,
+    'label': 'queryset_global_timestamp_${type}'
+  } );
 
-		super( maxQueries );
-		this.device = device;
-		this.type = type;
+  late final bufferSize = maxQueries * 8;
+  late final resolveBuffer = device.createBuffer( {
+    'label': 'buffer_timestamp_resolve_$type',
+    'size': bufferSize,
+    'usage': GPUBufferUsage.QUERY_RESOLVE | GPUBufferUsage.COPY_SRC
+  } );
 
-		this.querySet = this.device.createQuerySet( {
-			type: 'timestamp',
-			count: this.maxQueries,
-			label: `queryset_global_timestamp_${type}`
-		} );
+  late final resultBuffer = device.createBuffer( {
+    'label': 'buffer_timestamp_result_$type',
+    'size': bufferSize,
+    'usage': GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ
+  } );
 
-		const bufferSize = this.maxQueries * 8;
-		this.resolveBuffer = this.device.createBuffer( {
-			label: `buffer_timestamp_resolve_${type}`,
-			size: bufferSize,
-			usage: GPUBufferUsage.QUERY_RESOLVE | GPUBufferUsage.COPY_SRC
-		} );
-
-		this.resultBuffer = this.device.createBuffer( {
-			label: `buffer_timestamp_result_${type}`,
-			size: bufferSize,
-			usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ
-		} );
-
-	}
+	WebGPUTimestampQueryPool(this.device, this.type, [int maxQueries = 2048] ):super( maxQueries );
 
 	/**
 	 * Allocates a pair of queries for a given render context.
@@ -55,7 +43,7 @@ class WebGPUTimestampQueryPool extends TimestampQueryPool {
 
 		if ( this.currentQueryIndex + 2 > this.maxQueries ) {
 
-			warnOnce( `WebGPUTimestampQueryPool [${ this.type }]: Maximum number of queries exceeded, when using trackTimestamp it is necessary to resolves the queries via renderer.resolveTimestampsAsync( THREE.TimestampQuery.${ this.type.toUpperCase() } ).` );
+			warnOnce( 'WebGPUTimestampQueryPool [${ this.type }]: Maximum number of queries exceeded, when using trackTimestamp it is necessary to resolves the queries via renderer.resolveTimestampsAsync( THREE.TimestampQuery.${ this.type.toUpperCase() } ).' );
 			return null;
 
 		}
@@ -283,5 +271,3 @@ class WebGPUTimestampQueryPool extends TimestampQueryPool {
 	}
 
 }
-
-export default WebGPUTimestampQueryPool;

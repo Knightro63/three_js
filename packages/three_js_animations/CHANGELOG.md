@@ -1,3 +1,8 @@
+## 0.2.2
+
+* Fixed minor bug issue with property binding.
+* Fixed minor bug issue with cubic interpolant.
+
 ## 0.2.1
 
 * Fixed minor bug issue.

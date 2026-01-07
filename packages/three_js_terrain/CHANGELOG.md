@@ -1,3 +1,7 @@
+## 0.2.1
+
+* Added HexTilingMaterial Support.
+
 ## 0.2.0
 
 * Added wasm support.

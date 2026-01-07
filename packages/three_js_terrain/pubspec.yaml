@@ -1,6 +1,6 @@
 name: three_js_terrain
 description: "A type of three_js api that allows users to create terrain for their projects."
-version: 0.2.0
+version: 0.2.1
 homepage: https://github.com/Knightro63/three_js/tree/main/packages/three_js_terrain
 
 environment:
@@ -11,7 +11,7 @@ dependencies:
   flutter:
     sdk: flutter
   image: ^4.5.4
-  three_js_core: ^0.2.0
+  three_js_core: ^0.2.7
   three_js_math: ^0.2.0
 
 dev_dependencies:

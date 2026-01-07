@@ -351,7 +351,7 @@ getToBlobPromise( canvas, mimeType ) {
 class GLTFWriter {
   List plugins = [];
 
-  Map options = {};
+  Map<String,dynamic> options = {};
   List pending = [];
   List buffers = [];
 
@@ -391,10 +391,10 @@ class GLTFWriter {
 	 * @param  {Function} onDone  Callback on completed
 	 * @param  {Object} options options
 	 */
-	Future<Map<String,dynamic>> write(Scene input, Function onDone, [Map? options]) async {
+	Future<Map<String,dynamic>> write(Scene input, Function onDone, [Map<String,dynamic>? options]) async {
     options ??= {};
 
-		options = {
+		options.addEntries({
 			// default options
 			'binary': false,
 			'trs': false,
@@ -402,7 +402,7 @@ class GLTFWriter {
 			'maxTextureSize': double.infinity.toInt(),
 			'animations': [],
 			'includeCustomExtensions': false
-		};
+		}.entries);
 
 		if ( this.options['animations'].length > 0 ) {
 			// Only TRS properties, and not matrices, may be targeted by animation.
@@ -968,8 +968,8 @@ class GLTFWriter {
 
 			final canvas = getCanvas();
 
-			canvas.width = math.min<int>( image.width, options.maxTextureSize );
-			canvas.height = math.min<int>( image.height, options.maxTextureSize );
+			canvas.width = math.min<int>( image.width, options['maxTextureSize'] );
+			canvas.height = math.min<int>( image.height, options['maxTextureSize'] );
 
 			final ctx = canvas.getContext( '2d' );
 
@@ -980,11 +980,11 @@ class GLTFWriter {
 
 			if ( image.data != null ) { // THREE.DataTexture
 				if ( format != RGBAFormat ) {
-					console.error( 'GLTFExporter: Only RGBAFormat is supported.', format );
+					console.error( 'GLTFExporter: Only RGBAFormat is supported. $format' );
 				}
 
-				if ( image.width > options.maxTextureSize || image.height > options.maxTextureSize ) {
-					console.warning( 'GLTFExporter: Image size is bigger than maxTextureSize', image );
+				if ( image.width > options['maxTextureSize'] || image.height > options['maxTextureSize'] ) {
+					console.warning( 'GLTFExporter: Image size is bigger than maxTextureSize. $image' );
 				}
 
 				final data = Uint8ClampedArray( image.height * image.width * 4 );
@@ -1416,7 +1416,7 @@ class GLTFWriter {
 					}
 
 					target[ gltfAttributeName ] = this.processAccessor( relativeAttribute, geometry );
-					cache['attributes'].set( this.getUID( baseAttribute, true ), target[ gltfAttributeName ] );
+					cache['attributes']?[this.getUID( baseAttribute, true )] = target[ gltfAttributeName ];
 				}
 
 				targets.add( target );
@@ -1455,12 +1455,12 @@ class GLTFWriter {
 					cacheKey += ':' + groups[ i ]['start'] + ':' + groups[ i ]['count'];
 				}
 
-				if ( cache['attributes'].has( cacheKey ) ) {
-					primitive['indices'] = cache['attributes'].get( cacheKey );
+				if ( cache['attributes']?.containsKey( cacheKey ) == true) {
+					primitive['indices'] = cache['attributes']?[cacheKey];
 				} 
         else {
 					primitive['indices'] = this.processAccessor( geometry.index!, geometry, groups[ i ]['start'], groups[ i ]['count'] );
-					cache['attributes'].set( cacheKey, primitive['indices'] );
+					cache['attributes']?[cacheKey] = primitive['indices'];
 				}
 
 				if ( primitive['indices'] == null ) primitive.remove('indices');
@@ -1483,7 +1483,7 @@ class GLTFWriter {
 		} );
 
 		final index = json['meshes'].add( meshDef ) - 1;
-		cache['meshes'].set( meshCacheKey, index );
+		cache['meshes']?[meshCacheKey] = index;
 		return index;
 	}
 
@@ -1647,7 +1647,7 @@ class GLTFWriter {
 			channels.add( {
 				'sampler': samplers.length - 1,
 				'target': {
-					'node': nodeMap.get( trackNode ),
+					'node': nodeMap[trackNode],
 					'path': trackProperty
 				}
 			} );
@@ -1688,7 +1688,7 @@ class GLTFWriter {
 		for (int i = 0; i < skeleton.bones.length; ++ i ) {
 			joints.add( nodeMap[skeleton.bones[ i ]]);
 			temporaryBoneInverse.setFrom( skeleton.boneInverses[ i ] );
-			temporaryBoneInverse.multiply( object.bindMatrix! ).toArray( inverseBindMatrices, i * 16 );
+			temporaryBoneInverse.multiply( object.bindMatrix! ).copyIntoArray( inverseBindMatrices.toDartList(), i * 16 );
 		}
 
 		if ( json['skins'] == null ) json['skins'] = [];
@@ -2368,9 +2368,9 @@ class GLTFMeshGpuInstancing extends GLTFExtension{
 		final writer = this.writer;
 		final mesh = object;
 
-		final translationAttr = Float32Array( mesh.count * 3 );
-		final rotationAttr = Float32Array( mesh.count * 4 );
-		final scaleAttr = Float32Array( mesh.count * 3 );
+		final translationAttr = Float32Array( mesh.count! * 3 );
+		final rotationAttr = Float32Array( mesh.count! * 4 );
+		final scaleAttr = Float32Array( mesh.count! * 3 );
 
 		final matrix = Matrix4();
 		final position = Vector3();
@@ -2381,9 +2381,9 @@ class GLTFMeshGpuInstancing extends GLTFExtension{
 			mesh.getMatrixAt( i, matrix );
 			matrix.decompose( position, quaternion, scale );
 
-			position.toArray( translationAttr, i * 3 );
-			quaternion.toArray( rotationAttr, i * 4 );
-			scale.toArray( scaleAttr, i * 3 );
+			position.copyIntoArray( translationAttr.toDartList(), i * 3 );
+			quaternion.toArray( rotationAttr.toDartList(), i * 4 );
+			scale.copyIntoArray( scaleAttr.toDartList(), i * 3 );
 		}
 
 		final attributes = {
@@ -2408,7 +2408,7 @@ class GLTFMeshGpuInstancing extends GLTFExtension{
  */
 class GLTFExporterUtils{
 
-	insertKeyframe( track, time ) {
+	static insertKeyframe( track, time ) {
 		final tolerance = 0.001; // 1ms
 		final valueSize = track.getValueSize();
 
@@ -2553,7 +2553,7 @@ class GLTFExporterUtils{
 			// new) keyframe to the merged track. Values from the previous loop may
 			// be written again, but keyframes are de-duplicated.
 			for (int j = 0; j < sourceTrack.times.length; j ++ ) {
-				final keyframeIndex = this.insertKeyframe( mergedTrack, sourceTrack.times[ j ] );
+				final keyframeIndex = insertKeyframe( mergedTrack, sourceTrack.times[ j ] );
 				mergedTrack.values[ keyframeIndex * targetCount + targetIndex ] = sourceTrack.values[ j ];
 			}
 		}

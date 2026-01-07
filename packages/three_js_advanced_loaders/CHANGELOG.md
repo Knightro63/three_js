@@ -1,6 +1,7 @@
 ## 0.2.5
 
 * Added PCD Loader
+* Fixed cached bug in gltf loader
 
 ## 0.2.4
 

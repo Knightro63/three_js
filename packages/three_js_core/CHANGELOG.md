@@ -1,3 +1,7 @@
+## 0.2.7
+
+Added HexTilingMaterial.
+
 ## 0.2.6
 
 Fixed: Some cloning issues.
