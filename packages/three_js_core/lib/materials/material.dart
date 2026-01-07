@@ -733,10 +733,6 @@ class Material with EventDispatcher {
     }
     if (lightMap != null && lightMap is Texture) {
       data["lightMap"] = lightMap!.toJson(meta)["uuid"];
-    }
-
-    if (lightMap != null && lightMap is Texture) {
-      data["lightMap"] = lightMap!.toJson(meta)['uuid'];
       data["lightMapIntensity"] = lightMapIntensity;
     }
 

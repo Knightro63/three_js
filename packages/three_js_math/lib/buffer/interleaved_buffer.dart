@@ -99,7 +99,7 @@ class InterleavedBuffer {
 
   /// [data] - This object holds shared array buffers required for properly
   /// cloning geometries with interleaved attributes.
-  InterleavedBuffer clone(InterleavedBuffer data) {
+  InterleavedBuffer clone([Map<String,dynamic>? data]) {
     // data.arrayBuffers ??= {};
 
     //TODO: InterleavedBuffer clone

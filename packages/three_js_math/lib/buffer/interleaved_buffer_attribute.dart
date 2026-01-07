@@ -222,53 +222,33 @@ class InterleavedBufferAttribute extends BufferAttribute{
 		return this;
   }
 
-  // clone ( data ) {
+  @override
+  BufferAttribute clone([Map<String,dynamic>? data]) {
+  	if ( data == null ) {
+  		List<double> array = [];
 
-  // 	if ( data == null ) {
-
-  // 		print( 'THREE.InterleavedBufferAttribute.clone(): Cloning an interlaved buffer attribute will deinterleave buffer data!.' );
-
-  // 		List<num> array = [];
-
-  // 		for ( int i = 0; i < this.count; i ++ ) {
-
-  // 			final index = i * this.data!.stride + this.offset;
-
-  // 			for ( int j = 0; j < this.itemSize; j ++ ) {
-
-  // 				array.add( this.data!.array[ index + j ] );
-
-  // 			}
-
-  // 		}
-
-  // 		return new BufferAttribute(array, this.itemSize, this.normalized );
-
-  // 	} else {
-
-  // 		if ( data!.interleavedBuffers == null ) {
-
-  // 			data!.interleavedBuffers = {};
-
-  // 		}
-
-  // 		if ( data!.interleavedBuffers[ this.data!.uuid ] == null ) {
-
-  // 			data!.interleavedBuffers[ this.data!.uuid ] = this.data!.clone( data );
-
-  // 		}
-
-  // 		return new InterleavedBufferAttribute( data!.interleavedBuffers[ this.data!.uuid ], this.itemSize, this.offset, this.normalized );
-
-  // 	}
-
-  // }
+  		for ( int i = 0; i < this.count; i ++ ) {
+  			final index = i * this.data!.stride + this.offset;
+  			for ( int j = 0; j < this.itemSize; j ++ ) {
+  				array.add( this.data!.array[ index + j ].toDouble() );
+  			}
+  		}
+  		return Float32BufferAttribute.fromList(array, this.itemSize, this.normalized );
+  	} 
+    else {
+  		if ( data['interleavedBuffers'] == null ) {
+  			data['interleavedBuffers'] = {};
+  		}
+  		if ( data['interleavedBuffers'][ this.data!.uuid ] == null ) {
+  			data['interleavedBuffers'][ this.data!.uuid ] = this.data!.clone( data );
+  		}
+  		return new InterleavedBufferAttribute( data['interleavedBuffers'][ this.data!.uuid ], this.itemSize, this.offset, this.normalized );
+  	}
+  }
 
   @override
   Map<String, Object> toJson([InterleavedBuffer? data]) {
     if (data == null) {
-      //print('InterleavedBufferAttribute.toJson(): Serializing an interlaved buffer attribute will deinterleave buffer data!.');
-
       List<double> array = [];
 
       for (int i = 0; i < count; i++) {

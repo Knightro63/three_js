@@ -379,7 +379,7 @@ abstract class BufferAttribute<TData extends NativeArray> extends BaseBufferAttr
   }
 
   /// Return a copy of this bufferAttribute.
-  BufferAttribute clone() {
+  BufferAttribute clone([Map<String,dynamic>? data]) {
     // if (type == "BufferAttribute") {
     //   return BufferAttribute(array, itemSize, false).copy(this);
     // } else

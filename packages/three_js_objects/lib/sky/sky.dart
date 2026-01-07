@@ -16,11 +16,7 @@ import 'package:three_js_math/three_js_math.dart';
 */
 
 class Sky extends Mesh {
-  bool isSky = true;
-
-  Sky(super.geometry,super.material){
-
-  }
+  Sky(super.geometry,super.material);
 
 	factory Sky.create(){
 		final shader = Sky.skyShader;

@@ -235,3 +235,22 @@ class Interpolant {
     return null;//copySampleValue(v1, v2, v3);
   }
 }
+
+extension InterpolantLE on List{
+  T? get<T>(int k){
+    if(k >= length){
+      if(k > k-length){
+        return null;
+      }
+      else{
+        return elementAt(k-length);
+      }
+    }
+    else if (k < 0){
+      return elementAt(length+k);
+    }
+    else{
+      return elementAt(k);
+    }
+  }
+}

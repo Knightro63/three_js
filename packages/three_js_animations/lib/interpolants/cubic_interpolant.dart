@@ -53,8 +53,8 @@ class CubicInterpolant extends Interpolant {
     List<num?> pp = parameterPositions;
     int iPrev = v1 - 2;
     int iNext = v1 + 1;
-    num? tPrev = pp[iPrev];
-    num? tNext = pp[iNext];
+    num? tPrev = pp.get(iPrev);
+    num? tNext = pp.get(iNext);
 
     if (tPrev == null) {
       switch (getSettings()['endingStart']) {
@@ -141,10 +141,10 @@ class CubicInterpolant extends Interpolant {
     // combine data linearly
 
     for (int i = 0; i != stride; ++i) {
-      result?[i] = sP * values[oP + i] +
-          s0 * values[o0 + i] +
-          s1 * values[o1 + i] +
-          sN * values[oN + i];
+      result?[i] = sP * values.get(oP + i) +
+          s0 * values.get(o0 + i) +
+          s1 * values.get(o1 + i) +
+          sN * values.get(oN + i);
     }
 
     return result;

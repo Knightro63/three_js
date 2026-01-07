@@ -19,7 +19,7 @@ class InstancedInterleavedBuffer extends InterleavedBuffer {
   }
 
   @override
-  InstancedInterleavedBuffer clone(InterleavedBuffer data) {
+  InstancedInterleavedBuffer clone([Map<String, dynamic>? data]) {
     //if(data is InterleavedBuffer) throw('data must be InstancedInterleavedBuffer'); 
     final ib = super.clone(data);
     ib.meshPerAttribute = meshPerAttribute;

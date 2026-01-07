@@ -345,7 +345,7 @@ class GLTFMaterialsUnlitExtension extends GLTFExtension {
       if (metallicRoughness["baseColorFactor"] is List) {
         List<double> array = List<double>.from(metallicRoughness["baseColorFactor"].map((e) => e.toDouble()).toList());
 
-        materialParams["color"].fromArray(array);
+        materialParams["color"].copyFromArray(array);
         materialParams["opacity"] = array[3];
       }
 

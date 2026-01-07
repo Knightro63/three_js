@@ -198,7 +198,7 @@ class __FBXTreeParser {
 
     if (_fbxTree?.connections != null) {
       final rawConnections = _fbxTree?.connections!["connections"];
-      rawConnections.forEach((rawConnection) {
+      rawConnections?.forEach((rawConnection) {
         final fromID = rawConnection[0];
         final toID = rawConnection[1];
 
@@ -2142,7 +2142,7 @@ class _AnimationParser {
   // parse nodes in _FBXTree.Objects.AnimationCurve and connect them up to
   // previously parsed AnimationCurveNodes. Each AnimationCurve holds data for a single animated
   // axis ( e.g. times and values of x rotation)
-  parseAnimationCurves(curveNodesMap) {
+  parseAnimationCurves(Map curveNodesMap) {
     final rawCurves = _fbxTree?.objects?["AnimationCurve"];
 
     // TODO: Many values are identical up to roundoff error, but won't be optimised
@@ -2179,7 +2179,7 @@ class _AnimationParser {
         } 
         else if (RegExp(r'd|DeformPercent')
           .hasMatch(animationCurveRelationship) &&
-          curveNodesMap.has(animationCurveID)
+          curveNodesMap.containsKey(animationCurveID)
         ) {
           curveNodesMap[animationCurveID]["curves"]['morph'] = animationCurve;
         }

@@ -37,7 +37,7 @@ class AnimationClip {
   /// [createClipsFromMorphTargetSequences]) or from animation hierarchies
   /// ([parseAnimation]) - if your model doesn't already
   /// hold AnimationClips in its geometry's animations array.
-  AnimationClip(this.name,[this.duration = -1, List<KeyframeTrack>? tracks, this.blendMode = NormalAnimationBlendMode]) {
+  AnimationClip(this.name, [this.duration = -1, List<KeyframeTrack>? tracks, this.blendMode = NormalAnimationBlendMode]) {
     this.tracks = tracks ?? [];
 
     uuid = MathUtils.generateUUID();
@@ -122,7 +122,7 @@ class AnimationClip {
       tracks.add(parseKeyframeTrack(jsonTracks[i]).scale(frameTime));
     }
 
-    AnimationClip clip = AnimationClip(json['name'], json['duration'], tracks, json['blendMode']);
+    AnimationClip clip = AnimationClip(json['name'], json['duration'], tracks, json['blendMode'] ?? NormalAnimationBlendMode);
     clip.uuid = json['uuid'];
 
     return clip;
@@ -389,15 +389,21 @@ KeyframeTrack parseKeyframeTrack(Map<String,dynamic> json) {
   }
 
   final trackType = getTrackTypeForValueTypeName(json['type']);
+  late final List<num> times;
+  late final List<num> values;
 
   if (json['times'] == null) {
-    final List<num> times = [];
-    final List<num> values = [];
+    times = [];
+    values = [];
 
     AnimationUtils.flattenJSON(json.keys.toList(), times, values, 'value');
 
     json['times'] = times;
     json['values'] = values;
+  }
+  else{
+    times = List<num>.from(json['times']);
+    values = List<num>.from(json['values']);
   }
 
   // derived classes can define a static parse method
@@ -409,17 +415,17 @@ KeyframeTrack parseKeyframeTrack(Map<String,dynamic> json) {
   // }
 
   if (trackType == "NumberKeyframeTrack") {
-    return NumberKeyframeTrack(json['name'], json['times'], json['values'], json['interpolation']);
+    return NumberKeyframeTrack(json['name'], times, values, json['interpolation']);
   } else if (trackType == "VectorKeyframeTrack") {
-    return VectorKeyframeTrack(json['name'], json['times'], json['values'], json['interpolation']);
+    return VectorKeyframeTrack(json['name'], times, values, json['interpolation']);
   } else if (trackType == "ColorKeyframeTrack") {
-    return ColorKeyframeTrack(json['name'], json['times'], json['values'], json['interpolation']);
+    return ColorKeyframeTrack(json['name'], times, values, json['interpolation']);
   } else if (trackType == "QuaternionKeyframeTrack") {
-    return QuaternionKeyframeTrack(json['name'], json['times'], json['values'], json['interpolation']);
+    return QuaternionKeyframeTrack(json['name'], times, values, json['interpolation']);
   } else if (trackType == "BooleanKeyframeTrack") {
-    return BooleanKeyframeTrack(json['name'], json['times'], json['values'], json['interpolation']);
+    return BooleanKeyframeTrack(json['name'], times, values, json['interpolation']);
   } else if (trackType == "StringKeyframeTrack") {
-    return StringKeyframeTrack(json['name'], json['times'], json['values'], json['interpolation']);
+    return StringKeyframeTrack(json['name'], times, values, json['interpolation']);
   } else {
     throw ("AnimationClip.parseKeyframeTrack trackType: $trackType ");
   }

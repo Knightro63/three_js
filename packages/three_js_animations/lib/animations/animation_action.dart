@@ -39,6 +39,7 @@ class AnimationAction {
   late bool clampWhenFinished;
   late bool zeroSlopeAtStart;
   late bool zeroSlopeAtEnd;
+  String? name;
 
   /// [mixer] - the `AnimationMixer` that is controlled by
   /// this action.
