@@ -37,7 +37,7 @@ class PointLight extends Light {
     type = "PointLight";
   }
 
-  PointLight.fromJson(Map<String, dynamic> json, Map<String,dynamic> rootJson):super.fromJson(json,rootJson) {
+  PointLight.fromJson(Map<String, dynamic> json, [Map<String,dynamic>? rootJson]):super.fromJson(json,rootJson) {
     type = "PointLight";
     distance = json["distance"];
     decay = json["decay"] ?? 1;

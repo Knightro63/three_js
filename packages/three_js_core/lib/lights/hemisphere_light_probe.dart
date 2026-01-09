@@ -17,8 +17,6 @@ class HemisphereLightProbe extends LightProbe {
 
     sh!.coefficients[0]..setFrom(sky)..add(ground)..scale(c0);
     sh!.coefficients[1]..setFrom(sky)..sub(ground)..scale(c1);
-
-    isHemisphereLightProbe = false;
   }
 
   @override

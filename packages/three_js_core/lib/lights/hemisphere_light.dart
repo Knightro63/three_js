@@ -24,8 +24,6 @@ class HemisphereLight extends Light {
     type = 'HemisphereLight';
 
     position.setFrom(Object3D.defaultUp);
-
-    isHemisphereLight = true;
     updateMatrix();
 
     if (groundColor != null) {

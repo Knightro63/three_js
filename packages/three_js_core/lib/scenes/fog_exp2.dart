@@ -13,7 +13,14 @@ class FogExp2 extends FogBase {
   FogExp2(int color,[ double? density]) {
     name = 'FogExp2';
     this.color = Color.fromHex32(color);
-    this.density = (density != null) ? density : 0.00025;
+    this.density = density ?? 0.00025;
+    isFogExp2 = true;
+  }
+
+  FogExp2.fromJson(Map<String,dynamic> json){
+    name = 'FogExp2';
+    this.color = Color.fromHex32(json['color'] ?? 0);
+    this.density = json['density'] ?? 0.00025;
     isFogExp2 = true;
   }
 

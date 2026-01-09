@@ -20,11 +20,7 @@ class Light extends Object3D {
   double? width;
   double? height;
 
-  bool isRectAreaLight = false;
-  bool isHemisphereLightProbe = false;
-  bool isHemisphereLight = false;
-
-  dynamic map;
+  Map<String,dynamic>? map;
   Color? groundColor;
 
   /// [color] - (optional) hexadecimal color of the light. Default
@@ -43,11 +39,12 @@ class Light extends Object3D {
     type = "Light";
   }
 
-  Light.fromJson(Map<String,dynamic> json, Map<String,dynamic> rootJson):super.fromJson(json, rootJson){
+  Light.fromJson(Map<String,dynamic> json, [Map<String,dynamic>? rootJson]):super.fromJson(json, rootJson){
     type = "Light";
-    if (json["color"] != null) {
-      color = Color.fromHex32(json["color"]);
+    for(final key in json.keys){
+      this[key] = json[key];
     }
+    
     intensity = json["intensity"] ?? 1;
   }
 
@@ -105,9 +102,41 @@ class Light extends Object3D {
   dynamic getProperty(String propertyName, [int? offset]) {
     if (propertyName == "color") {
       return color;
-    } else if (propertyName == "intensity") {
+    } 
+    else if (propertyName == "intensity") {
       return intensity;
-    } else {
+    }
+    else if (propertyName == "width") {
+      return width;
+    }
+    else if (propertyName == "height") {
+      return height;
+    }
+    else if (propertyName == "distance") {
+      return distance;
+    }
+    else if (propertyName == "angle") {
+      return angle;
+    }
+    else if (propertyName == "decay") {
+      return decay;
+    }
+    else if (propertyName == "penumbra") {
+      return penumbra;
+    }
+    else if (propertyName == "groundColor") {
+      return groundColor;
+    }
+    else if (propertyName == "shadow") {
+      return shadow;
+    }
+    else if (propertyName == "map") {
+      return map;
+    }
+    else if (propertyName == "sh") {
+      return sh;
+    }
+    else {
       return super.getProperty(propertyName);
     }
   }
@@ -116,7 +145,56 @@ class Light extends Object3D {
   Light setProperty(String propertyName, dynamic value, [int? offset]) {
     if (propertyName == "intensity") {
       intensity = value;
-    } else {
+    }
+    else if (propertyName == "color") {
+      if(value is num){
+        color = Color.fromHex32(value.toInt());
+        return this; 
+      }
+      color = value;
+    }
+    else if(propertyName == "width") {
+      width = value.toDouble();
+    }
+    else if(propertyName == "height") {
+      height = value.toDouble();
+    }
+    else if(propertyName == "distance") {
+      distance = value;
+    }
+    else if (propertyName == "angle") {
+      angle = value;
+    }
+    else if (propertyName == "decay") {
+      decay = value;
+    }
+    else if (propertyName == "penumbra") {
+      penumbra = value;
+    }
+    else if (propertyName == "groundColor") {
+      if(value is num){
+        groundColor = Color.fromHex32(value.toInt());
+        return this; 
+      }
+      groundColor = value;
+    }
+    else if (propertyName == "shadow") {
+      if(value is Map<String,dynamic>){
+        shadow = LightShadow.fromJson(value);
+        return this;
+      }
+      shadow = value;
+    }
+    else if (propertyName == "map") {
+      map = value;
+    }
+    else if(propertyName == "sh") {
+      if(value is! SphericalHarmonics3){
+        throw Exception("The value must be a SphericalHarmonics3 instance");
+      }
+      sh = value;
+    }
+    else {
       super.setProperty(propertyName, value);
     }
 

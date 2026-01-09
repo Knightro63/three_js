@@ -439,9 +439,9 @@ class AnimationMixer with EventDispatcher {
     }
 
     if (actionsForClip != null) {
-      final existingAction = actionsForClip?['actionByRoot'][rootUuid];
+      final AnimationAction? existingAction = actionsForClip?['actionByRoot'][rootUuid];
 
-      if (existingAction != null && existingAction['blendMode'] == blendMode) {
+      if (existingAction != null && existingAction.blendMode == blendMode) {
         return existingAction;
       }
 

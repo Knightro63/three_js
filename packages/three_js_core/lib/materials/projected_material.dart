@@ -70,16 +70,64 @@ class ProjectedMaterial extends MeshPhysicalMaterial {
 
   ProjectedMaterial({
     Camera? camera,
-    required Texture texture,
+    Texture? texture,
     double textureScale = 1,
     Vector2? textureOffset,
     double backgroundOpacity = 1,
     bool cover = false,
     Map<String,dynamic>? options
   }):super.fromMap(options){
+    _init(
+      camera,
+      texture,
+      textureScale,
+      textureOffset,
+      backgroundOpacity,
+      cover,
+      options
+    );
+  }
+  
+  ProjectedMaterial.fromMap([
+    Map<String,dynamic>? map,
+    image,
+    Map<String,dynamic>? options
+  ]):super.fromMap(options){
+    final camera =  Camera.fromJson(map?['camera'] ?? {},{});
+    final texture = Texture.fromJson(map?['texture'], image);
+    final textureScale = map?['textureScale'] as double? ?? 1;
+    final textureOffsetList = map?['textureOffset'] as List<dynamic>?;
+    final textureOffset = textureOffsetList != null
+      ? Vector2(textureOffsetList[0] as double, textureOffsetList[1] as double)
+      : null;
+    final backgroundOpacity = map?['backgroundOpacity'] as double? ?? 1;
+    final cover = map?['cover'] as bool? ?? false;
+
+    _init(
+      camera,
+      texture,
+      textureScale,
+      textureOffset,
+      backgroundOpacity,
+      cover,
+      options
+    );
+  }
+
+  void _init(
+    Camera? camera,
+    Texture? texture,
+    double textureScale,
+    Vector2? textureOffset,
+    double backgroundOpacity,
+    bool cover,
+    Map<String,dynamic>? options
+  ){
     if (backgroundOpacity < 1 && options?['transparent'] == false) {
       console.warning('You have to pass "transparent: true" to the ProjectedMaterial for the backgroundOpacity option to work');
     }
+
+    type = "ProjectedMaterial";
 
     //Object.defineProperty(this, 'isProjectedMaterial', { 'value': true });
 
@@ -99,7 +147,7 @@ class ProjectedMaterial extends MeshPhysicalMaterial {
 
     this.uniforms = {
       'projectedTexture': { 'value': texture },
-      'isTextureLoaded': { 'value': texture.image != null},
+      'isTextureLoaded': { 'value': texture?.image != null},
       'isTextureProjected': { 'value': false },
       'backgroundOpacity': { 'value': backgroundOpacity },
       'viewMatrixCamera': { 'value': Matrix4.identity() },
@@ -407,6 +455,19 @@ class ProjectedMaterial extends MeshPhysicalMaterial {
     super.dispose();
     removeEventListener('resize', _saveCameraProjectionMatrix);
   }
+
+  @override
+  Map<String, dynamic> toJson({Object3dMeta? meta}) {
+    final map = super.toJson();
+    map['projected'] = {};
+    map['projected']['camera'] = this.camera?.toJson(meta: meta);
+    map['projected']['texture'] = this.texture?.toJson(meta);
+    map['projected']['textureScale'] = this.textureScale;
+    map['projected']['textureOffset'] = this.textureOffset.toList();
+    map['projected']['backgroundOpacity'] = this.backgroundOpacity;
+    map['projected']['cover'] = this.cover;
+    return map;
+  }
 }
 
 class ProjectedMaterialUtils{
@@ -473,22 +534,22 @@ class ProjectedMaterialUtils{
   }
 
   // scale to keep the image proportions and apply textureScale
-  static List<double> computeScaledDimensions(Texture texture, Camera camera, double textureScale, bool cover) {
+  static List<double> computeScaledDimensions(Texture? texture, Camera? camera, double textureScale, bool cover) {
     // return some default values if the image hasn't loaded yet
-    if (texture.image == null) {
+    if (texture?.image == null) {
       return [1, 1];
     }
 
     // return if it's a video and if the video hasn't loaded yet
-    if (Texture is VideoTexture && texture.image.width == 0 && texture.image.height == 0) {//if (texture.image.videoWidth == 0 && texture.image.videoHeight == 0) {
+    if (Texture is VideoTexture && texture!.image.width == 0 && texture.image.height == 0) {//if (texture.image.videoWidth == 0 && texture.image.videoHeight == 0) {
       return [1, 1];
     }
 
-    final sourceWidth = texture.image.width;// ?? texture.image.videoWidth ?? texture.image.clientWidth;
+    final sourceWidth = texture!.image.width;// ?? texture.image.videoWidth ?? texture.image.clientWidth;
     final sourceHeight = texture.image.height;// ?? texture.image.videoHeight ?? texture.image.clientHeight;
 
     final double ratio = sourceWidth / sourceHeight;
-    final ratioCamera = getCameraRatio(camera);
+    final ratioCamera = camera != null?getCameraRatio(camera):1;
     final widthCamera = 1;
     final heightCamera = widthCamera * (1 / ratioCamera);
     double widthScaled;

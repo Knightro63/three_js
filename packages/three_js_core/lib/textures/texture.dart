@@ -81,6 +81,43 @@ class Texture with EventDispatcher {
 
   List<TextureRangeInfo> updateRanges = [];
 
+  Texture.fromJson(Map<String, dynamic> json, image) {
+    _init(
+      image,
+      json["mapping"],
+      json["wrap"] != null ? json["wrap"][0] : null,
+      json["wrap"] != null ? json["wrap"][1] : null,
+      json["magFilter"],
+      json["minFilter"],
+      json["format"],
+      json["type"],
+      json["anisotropy"],
+      json["colorSpace"]
+    );
+
+    name = json["name"] ?? "";
+
+    if (json["offset"] != null) {
+      offset.copyFromUnknown(json["offset"]);
+    }
+
+    if (json["repeat"] != null) {
+      repeat.copyFromUnknown(json["repeat"]);
+    }
+
+    if (json["center"] != null) {
+      center.copyFromUnknown(json["center"]);
+    }
+
+    rotation = json["rotation"] ?? 0;
+
+    flipY = json["flipY"] ?? true;
+    premultiplyAlpha = json["premultiplyAlpha"] ?? false;
+    unpackAlignment = json["unpackAlignment"] ?? 4;
+
+    userData = json["userData"] ?? {};
+  }
+
   Texture([
     image, 
     int? mapping, 
@@ -92,7 +129,33 @@ class Texture with EventDispatcher {
     int? type, 
     int? anisotropy, 
     String? colorSpace
-  ]) {
+  ]){
+    _init(
+      image, 
+      mapping, 
+      wrapS, 
+      wrapT, 
+      magFilter,
+      minFilter, 
+      format, 
+      type, 
+      anisotropy, 
+      colorSpace
+    );
+  }
+  
+  void _init(
+    image, 
+    int? mapping, 
+    int? wrapS, 
+    int? wrapT, 
+    int? magFilter,
+    int? minFilter, 
+    int? format, 
+    int? type, 
+    int? anisotropy, 
+    String? colorSpace
+  ){
     source = Source(image);
     this.mapping = mapping ?? Texture.defaultMapping;
 

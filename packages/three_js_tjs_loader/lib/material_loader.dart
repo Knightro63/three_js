@@ -97,6 +97,12 @@ class MaterialLoader extends Loader {
       material = MeshMatcapMaterial();
     } else if (json["type"] == "MeshPhysicalMaterial") {
       material = MeshPhysicalMaterial();
+    } else if (json["type"] == "HexTilingMaterial") {
+      material = HexTilingMaterial(
+        HexTilingParams.fromJson(json['hexTiling'] ?? {}),
+      );
+    } else if (json["type"] == "ProjectedMaterial") {
+      material = ProjectedMaterial.fromJson(json['projected']);
     } else {
       throw (" MaterialLoader ${json["type"]} is not support  ");
     }

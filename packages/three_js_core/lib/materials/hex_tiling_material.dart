@@ -33,6 +33,13 @@ class HexTilingParams {
     this.textureSampleCoefficientExponent = 8
   });
 
+  HexTilingParams.fromJson(Map<String,dynamic> json){
+    patchScale = (json['patchScale'] ?? 2).toDouble();
+    useContrastCorrectedBlending = json['useContrastCorrectedBlending'] ?? true;
+    lookupSkipThreshold = (json['lookupSkipThreshold'] ?? 0.01).toDouble();
+    textureSampleCoefficientExponent = (json['textureSampleCoefficientExponent'] ?? 8.0).toDouble();
+  }
+
   /// Scale factor for the hexagonal tiles used to break up the texture.  This is the most important
   /// parameter for controlling the look of the hex tiling and likely needs to be adjusted for each
   /// texture.
@@ -136,6 +143,7 @@ class HexTilingMaterial extends MeshPhysicalMaterial {
   String get genRandomStringID => generateId()+generateId();
 
   HexTilingMaterial(this.hexTiling,[ Map<String,dynamic>? options]):super.fromMap(options){
+    type = "HexTilingMaterial";
     if(hexTiling != null){
       patchMeshPhysicalMaterial();
       patchMaterial();
@@ -335,4 +343,13 @@ class HexTilingMaterial extends MeshPhysicalMaterial {
         return fragColor;
     }
   ''';
+
+  @override
+  Map<String, dynamic> toJson({Object3dMeta? meta}) {
+    final map = super.toJson();
+    if (hexTiling != null) {
+      map['hexTiling'] = hexTiling!.json;
+    }
+    return map;
+  }
 }

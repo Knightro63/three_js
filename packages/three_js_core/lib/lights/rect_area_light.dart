@@ -45,7 +45,6 @@ class RectAreaLight extends Light {
 
     this.width = width ?? 10;
     this.height = height ?? 10;
-    isRectAreaLight = true;
   }
 
   /// Copies value of all the properties from the [source] to

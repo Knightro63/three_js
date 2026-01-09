@@ -11,12 +11,52 @@ class FogBase {
   bool isFog = false;
   bool isFogExp2 = false;
 
+  dynamic operator [] (key) => getProperty(key);
+  void operator []=(String key, dynamic value) => setProperty(key, value);
+
   FogBase clone() {
     throw(" need implement .... ");
   }
 
   Map<String,dynamic> toJson() {
     throw(" need implement .... ");
+  }
+
+  dynamic getProperty(String propertyName, [int? offset]) {
+    if(propertyName == 'density'){
+      return density;
+    }
+    else if(propertyName == 'near'){
+      return near;
+    }
+    else if(propertyName == 'far'){
+      return far;
+    }
+    else if(propertyName == 'color'){
+      return color;
+    }
+    return null;
+  }
+
+  FogBase setProperty(String propertyName, dynamic value, [int? offset]){
+    if(propertyName == 'density'){
+      density = value.toDouble();
+    }
+    else if(propertyName == 'near'){
+      near = value.toDouble();
+    }
+    else if(propertyName == 'far'){
+      far = value.toDouble();
+    }
+    else if(propertyName == 'fog'){
+      if(value is num){
+        color = Color.fromHex32(value.toInt());
+      }
+
+      color = value;
+    }
+
+    return this;
   }
 }
 
@@ -33,6 +73,14 @@ class Fog extends FogBase {
     this.color = Color.fromHex32(color);
     this.near = near ?? 1;
     this.far = far ?? 1000;
+    isFog = true;
+  }
+
+  Fog.fromJson(Map<String,dynamic> json){
+    name = 'Fog';
+    this.color = Color.fromHex32(json['color'] ?? 0);
+    this.near = json['near'] ?? 1;
+    this.far = json['far'] ?? 1000;
     isFog = true;
   }
 

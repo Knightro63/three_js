@@ -29,7 +29,6 @@ import 'spot_light_shadow.dart';
 /// scene.add( spotLight );
 /// ```
 class SpotLight extends Light {
-  dynamic map;
 
   /// [color] - (optional) hexadecimal color of the light. Default
   /// is 0xffffff (white).

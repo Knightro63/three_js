@@ -42,7 +42,11 @@ class LightShadow {
   /// used as a base class by other light shadows.
   LightShadow([this.camera]);
 
-  LightShadow.fromJson(Map<String, dynamic> json, Map<String,dynamic> rootJson);
+  LightShadow.fromJson(Map<String, dynamic> json, [Map<String,dynamic>? rootJson]){
+    for(final key in json.keys){
+      this[key] = json[key];
+    }
+  }
 
   /// Used internally by the renderer to get the number of viewports that need
   /// to be rendered for this shadow.
@@ -175,6 +179,11 @@ class LightShadow {
 
   LightShadow setProperty(String propertyName, dynamic newValue) {
     if (propertyName == "camera") {
+      if(camera is Map){
+        camera = Camera.fromJson(newValue);
+        return this;
+
+      }
       camera = newValue;
     } else if (propertyName == "bias") {
       bias = newValue;
@@ -187,6 +196,10 @@ class LightShadow {
     } else if (propertyName == "intensity") {
       intensity = newValue;
     } else if (propertyName == "mapSize") {
+      if(newValue is List) {
+        mapSize = Vector2(newValue[0].toDouble(), newValue[1].toDouble());
+        return this;
+      }
       mapSize = newValue;
     } else if (propertyName == "map") {
       map = newValue;
@@ -200,7 +213,56 @@ class LightShadow {
       needsUpdate = newValue;
     } else if (propertyName == "viewportCount") {
       viewportCount = newValue;
-    } else if (propertyName == "focus") {
+    } 
+    else if (propertyName == "frameExtents") {
+      if(newValue is List) {
+        frameExtents.setFrom(Vector2(newValue[0].toDouble(), newValue[1].toDouble()));
+        return this;
+      }
+      frameExtents.setFrom(newValue);
+    }
+    else if (propertyName == "viewports") {
+      viewports.clear();
+      if(newValue is List) {
+        for(var v in newValue) {
+          if(v is List) {
+            viewports.add(Vector4(v[0].toDouble(), v[1].toDouble(), v[2].toDouble(), v[3].toDouble()));
+          } else {
+            viewports.add(v);
+          }
+        }
+      }
+    }
+    else if (propertyName == "frustum") {
+      if(newValue is Frustum) {
+        frustum.copy(newValue);
+      }
+      else if(newValue is List) {
+        frustum.set(newValue[0].toDouble(), newValue[1].toDouble(), newValue[2].toDouble(), newValue[3].toDouble(), newValue[4].toDouble(), newValue[5].toDouble());
+      }
+    }
+    else if (propertyName == "lightPositionWorld") {
+      if(newValue is List) {
+        lightPositionWorld.setFrom(Vector3(newValue[0].toDouble(), newValue[1].toDouble(), newValue[2].toDouble()));
+        return this;
+      }
+      lightPositionWorld.setFrom(newValue);
+    }
+    else if (propertyName == "lookTarget") {
+      if(newValue is List) {
+        lookTarget.setFrom(Vector3(newValue[0].toDouble(), newValue[1].toDouble(), newValue[2].toDouble()));
+        return this;
+      }
+      lookTarget.setFrom(newValue);
+    }
+    else if (propertyName == "projScreenMatrix") {
+      if(newValue is List) {
+        projScreenMatrix.setFrom(Matrix4().copyFromUnknown(newValue));
+        return this;
+      }
+      projScreenMatrix.setFrom(newValue);
+    }
+    else if (propertyName == "focus") {
       focus = newValue;
     }
 

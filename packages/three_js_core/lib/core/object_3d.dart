@@ -126,7 +126,8 @@ class Object3D with EventDispatcher {
     init();
   }
 
-  Object3D.fromJson(Map<String, dynamic> json, Map<String, dynamic> rootJson) {
+  Object3D.fromJson(Map<String, dynamic> json, [Map<String, dynamic>? rootJson]) {
+    rootJson ??= {};
     uuid = json["uuid"];
     if (json["name"] != null) {
       name = json["name"]!;
@@ -1279,6 +1280,10 @@ class Object3D with EventDispatcher {
     }else if(propertyName == 'onBeforeRender'){
       onBeforeRender = newValue;
     }else if(propertyName == 'background'){
+      if(newValue is num){
+        background = Color.fromHex32(newValue.toInt());
+        return this;
+      }
       background = newValue;
     }else if(propertyName == 'environment'){
       environment = newValue;

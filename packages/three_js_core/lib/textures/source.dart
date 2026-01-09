@@ -1,6 +1,6 @@
 import 'package:three_js_core/others/index.dart';
+import 'package:three_js_core/textures/index.dart';
 import 'package:three_js_math/three_js_math.dart';
-import 'image_element.dart';
 
 /// Represents the data source of a texture.
 class Source {
@@ -65,7 +65,7 @@ class Source {
 				url = [];
 
 				for ( int i = 0, l = data.length; i < l; i ++ ) {
-					if ( data[ i ].isDataTexture ) {
+					if ( data[ i ] is DataTexture ) {
 						url.add( serializeImage( data[ i ].image ) );
 					} 
           else {

@@ -102,8 +102,8 @@ class PointLightShadow extends LightShadow {
     ];
   }
 
-  PointLightShadow.fromJson(Map<String, dynamic> json, Map<String,dynamic> rootJson):super.fromJson(json,rootJson) {
-    camera = Object3D.castJson(json["camera"],rootJson) as Camera;
+  PointLightShadow.fromJson(Map<String, dynamic> json, [Map<String,dynamic>? rootJson]):super.fromJson(json,rootJson) {
+    camera = Object3D.castJson(json["camera"],rootJson??{}) as Camera;
   }
 
   /// Update the matrices for the camera and shadow, used internally by the

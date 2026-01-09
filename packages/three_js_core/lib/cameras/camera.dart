@@ -2,6 +2,16 @@ import '../core/index.dart';
 import 'package:three_js_math/three_js_math.dart';
 
 class CameraView{
+  CameraView.fromJson(Map<String,dynamic> json, [Map<String,dynamic>? rootJson]){
+    enabled = json['enabled'] ?? true;
+    fullWidth = (json['fullWidth'] ?? 1).toDouble();
+    fullHeight = (json['fullHeight'] ?? 1).toDouble();
+    offsetX = (json['offsetX'] ?? 0).toDouble();
+    offsetY = (json['offsetY'] ?? 0).toDouble();
+    width = (json['width'] ?? 1).toDouble();
+    height = (json['height'] ?? 1).toDouble();
+  }
+
   CameraView({
     this.enabled = true,
     this.fullWidth = 1,
@@ -12,13 +22,13 @@ class CameraView{
     this.height = 1,
   });
 
-  bool enabled;
-  double fullWidth;
-  double fullHeight;
-  double offsetX;
-  double offsetY;
-  double width;
-  double height;
+  bool enabled = true;
+  double fullWidth = 1;
+  double fullHeight = 1;
+  double offsetX = 0;
+  double offsetY = 0;
+  double width = 1;
+  double height = 1;
 
   Map<String,dynamic> get toMap => {
     'enabled': enabled,
@@ -29,6 +39,8 @@ class CameraView{
     'width':width,
     'height':height
   };
+
+
 }
 
 /// Abstract base class for cameras. This class should always be inherited
@@ -65,7 +77,7 @@ class Camera extends Object3D {
     type = "Camera";
   }
 
-  Camera.fromJson(Map<String,dynamic> json, Map<String,dynamic> rootJson):super.fromJson(json, rootJson){
+  Camera.fromJson(Map<String,dynamic> json, [Map<String,dynamic>? rootJson]):super.fromJson(json, rootJson){
     type = "Camera";
   }
 
@@ -119,5 +131,164 @@ class Camera extends Object3D {
   @override
   Camera clone([bool? recursive = true]) {
     return Camera()..copy(this);
+  }
+
+  @override
+  Map<String,dynamic> toJson({Object3dMeta? meta}){
+    return {
+      'fov': fov,
+      'zoom': zoom,
+      'near': near,
+      'far': far,
+      'focus': focus,
+      'aspect': aspect,
+      'filmGauge': filmGauge,
+      'filmOffset': filmOffset,
+      'left': left,
+      'right': right,
+      'top': top,
+      'bottom': bottom,
+      'view': view?.toMap,
+      'coordinateSystem': coordinateSystem,
+      'viewport': viewport?.toList(),
+      'matrixWorldInverse': matrixWorldInverse.storage,
+      'projectionMatrix': projectionMatrix.storage,
+      'projectionMatrixInverse': projectionMatrixInverse.storage
+    }..addAll(super.toJson(meta: meta));
+  }
+
+  @override
+  dynamic getProperty(String propertyName, [int? offset]) {
+    if(propertyName == 'fov'){
+      return fov;
+    }
+    else if(propertyName == 'zoom'){
+      return zoom;
+    }
+    else if(propertyName == 'near'){
+      return near;
+    }
+    else if(propertyName == 'far'){
+      return far;
+    }
+    else if(propertyName == 'focus'){
+      return focus;
+    }
+    else if(propertyName == 'aspect'){
+      return aspect;
+    }
+    else if(propertyName == 'filmGauge'){
+      return filmGauge;
+    }
+    else if(propertyName == 'left'){
+      return left;
+    }
+    else if(propertyName == 'right'){
+      return right;
+    }
+    else if(propertyName == 'top'){
+      return top;
+    }
+    else if(propertyName == 'bottom'){
+      return bottom;
+    }
+    else if(propertyName == view){
+      return view;
+    }
+    else if(propertyName == 'coordinateSystem'){
+      return coordinateSystem;
+    }
+    else if(propertyName == 'viewport'){
+      return viewport;
+    }
+    else if(propertyName == 'matrixWorldInverse'){
+      return matrixWorldInverse;
+    }
+    else if(propertyName == 'projectionMatrix'){
+      return projectionMatrix;
+    }
+    else if(propertyName == 'projectionMatrixInverse'){
+      return projectionMatrixInverse;
+    }
+    return super.getProperty(propertyName, offset);
+  }
+
+  @override
+  Camera setProperty(String propertyName, dynamic value, [int? offset]){
+    if(propertyName == 'fov'){
+      fov = value.toDouble();
+    }
+    else if(propertyName == 'zoom'){
+      zoom = value.toDouble();
+    }
+    else if(propertyName == 'near'){
+      near = value.toDouble();
+    }
+    else if(propertyName == 'far'){
+      far = value.toDouble();
+    }
+    else if(propertyName == 'focus'){
+      focus = value.toDouble();
+    }
+    else if(propertyName == 'aspect'){
+      aspect = value.toDouble();
+    }
+    else if(propertyName == 'filmGauge'){
+      filmGauge = value.toDouble();
+    }
+    else if(propertyName == 'left'){
+      left = value.toDouble();
+    }
+    else if(propertyName == 'right'){
+      right = value.toDouble();
+    }
+    else if(propertyName == 'top'){
+      top = value.toDouble();
+    }
+    else if(propertyName == 'bottom'){
+      bottom = value.toDouble();
+    }
+    else if(propertyName == view){
+      if(value is Map<String,dynamic>){
+        view = CameraView.fromJson(value);
+        return this;
+      }
+      view = value;
+    }
+    else if(propertyName == 'coordinateSystem'){
+      coordinateSystem = value.toInt();
+    }
+    else if(propertyName == 'viewport'){
+      if(value is List){
+        viewport = Vector4().copyFromUnknown(value);
+        return this;
+      }
+      viewport = value;
+    }
+    else if(propertyName == 'matrixWorldInverse'){
+      if(value is List){
+        matrixWorldInverse = Matrix4().copyFromUnknown(value);
+        return this;
+      }
+      matrixWorldInverse = value;
+    }
+    else if(propertyName == 'projectionMatrix'){
+      if(value is List){
+        projectionMatrix = Matrix4().copyFromUnknown(value);
+        return this;
+      }
+      projectionMatrix = value;
+    }
+    else if(propertyName == 'projectionMatrixInverse'){
+      if(value is List){
+        projectionMatrixInverse = Matrix4().copyFromUnknown(value);
+        return this;
+      }
+      projectionMatrixInverse = value;
+    }
+    else{
+      super.setProperty(propertyName, value);
+    }
+    return this;
   }
 }
