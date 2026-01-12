@@ -68,7 +68,7 @@ class GuiWidget{
         ),
         _SavedWidgets._dropDown(
           itemVal: items, 
-          value: value?[property],
+          value: value?[property].toString(),
           radius: 5,
           color: CSS.darkTheme.canvasColor,
           width: 135,
@@ -136,9 +136,9 @@ class GuiWidget{
             child: Slider(
               activeColor: CSS.darkTheme.secondaryHeaderColor,
               inactiveColor: CSS.darkTheme.primaryTextTheme.bodyMedium!.color,
-              min: items[0],
+              min: items[0].toDouble(),
               divisions: (items[1]-items[0])~/_step,
-              max: items[1],
+              max: items[1].toDouble(),
               onChanged: (newRating){
                 value?[property] = newRating;
                 _onChanged?.call(value?[property]);
@@ -149,7 +149,7 @@ class GuiWidget{
                 _onFinished?.call();
                 update();
               },
-              value: value?[property],
+              value: value?[property].toDouble(),
             ),
           ),
         )
@@ -311,6 +311,10 @@ class GuiWidget{
 
 class Folder{
   void Function() update;
+  void Function(String,dynamic)? _onChange;
+  void onChange(void Function(String,dynamic) function){
+    _onChange = function;
+  }
 
   Folder(String name, this.update){
     _name = name;
@@ -340,26 +344,45 @@ class Folder{
   ){
     List<DropdownMenuItem<String>> ddItem = _SavedWidgets.setDropDownItems(_SavedWidgets.setDropDownFromString(dropdown));
     _widgets.add(GuiWidget(name, GuiWidgetType.dropdown, update, value, ddItem));
+    if(_onChange != null){
+      widgets.last..onChange((val){_onChange?.call(name,val);});
+    }
     return _widgets.last;
   }
-  GuiWidget addSlider(Map<String,dynamic> value, String name, double min, double max, [double step = 1.0]){
+  GuiWidget addSlider(Map<String,dynamic> value, String name, num min, num max, [double step = 1.0]){
     _widgets.add(GuiWidget(name, GuiWidgetType.slider, update, value, [min, max, step]));
+    if(_onChange != null){
+      widgets.last..onChange((val){_onChange?.call(name,val);});
+    }
     return _widgets.last;
   }
   GuiWidget addCheckBox(Map<String,dynamic> value, String name){
     _widgets.add(GuiWidget(name, GuiWidgetType.checkbox, update, value));
+    if(_onChange != null){
+      widgets.last..onChange((val){_onChange?.call(name,val);});
+    }
     return _widgets.last;
   }
-  GuiWidget addColor(Map<String,dynamic> value, String name){
-    _widgets.add(GuiWidget(name, GuiWidgetType.color, update, value));
+  GuiWidget addColor(Map<String,dynamic> value, String valueName){
+    _widgets.add(GuiWidget(valueName, GuiWidgetType.color, update, value));
+    if(_onChange != null){
+      print(valueName);
+      widgets.last..onChange((val){_onChange?.call(valueName,val);});
+    }
     return _widgets.last;
   }
   GuiWidget addFunction(String name){
     _widgets.add(GuiWidget(name, GuiWidgetType.function, update));
+    if(_onChange != null){
+      widgets.last..onChange((val){_onChange?.call(name,val);});
+    }
     return _widgets.last;
   }
   GuiWidget addButton(Map<String,dynamic> value, String name){
     _widgets.add(GuiWidget(name, GuiWidgetType.button, update, value));
+    if(_onChange != null){
+      widgets.last..onChange((val){_onChange?.call(name,val);});
+    }
     return _widgets.last;
   }
 
@@ -368,6 +391,9 @@ class Folder{
 
     for(final wids in widgets){
       w.add(wids.render(context));
+      if(_onChange != null){
+        widgets.last..onChange((val){_onChange?.call(name,val);});
+      }
     }
 
     return w;

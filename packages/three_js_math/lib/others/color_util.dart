@@ -2,6 +2,8 @@ import 'dart:typed_data';
 import 'package:three_js_math/three_js_math.dart';
 import 'dart:math' as math;
 
+final Color _color = Color();
+
 enum ColorSpace{
   no,
   linear,
@@ -313,7 +315,6 @@ class Color{
   }
 
 	Color getHSL(Color target, [ColorSpace colorSpace = ColorSpace.linear] ) {
-    final Color _color = Color();
 		ColorManagement.fromWorkingColorSpace( _color..setFrom( this ), colorSpace );
 
 		final r = _color.red, g = _color.green, b = _color.blue;
@@ -412,7 +413,6 @@ class Color{
 	}
 
 	Color getRGB(Color target, [ColorSpace? colorSpace ] ) {
-    final Color _color = Color();
     colorSpace ??= ColorManagement.workingColorSpace;
 		ColorManagement.fromWorkingColorSpace( Color.copy( this ), colorSpace );
 

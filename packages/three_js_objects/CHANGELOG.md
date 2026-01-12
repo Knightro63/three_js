@@ -1,3 +1,7 @@
+## 0.2.2
+
+* Added planet generator.
+
 ## 0.2.1
 
 * Removed some gloable variables.

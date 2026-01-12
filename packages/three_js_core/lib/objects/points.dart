@@ -18,7 +18,7 @@ class Points extends Object3D {
   /// 
   /// [Material material] — (optional) a [Material]. Default is a new
   /// [PointsMaterial].
-  Points(BufferGeometry geometry, Material? material) {
+  Points([BufferGeometry? geometry, Material? material]) {
     type = 'Points';
 
     this.geometry = geometry;

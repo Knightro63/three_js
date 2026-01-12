@@ -60,6 +60,7 @@ import 'package:example/loaders/webgl_loader_xyz.dart';
 import 'package:example/material/webgl_hex_tiling.dart';
 import 'package:example/material/webgl_materials_video.dart';
 import 'package:example/material/webgl_tonemapping.dart';
+import 'package:example/terrain/webgl_planet_generator.dart';
 import 'package:example/postprocessing/webgl_postprocessing_fxaa.dart';
 import 'package:example/postprocessing/webgl_postprocessing_smaa.dart';
 import 'package:example/postprocessing/webgl_postprocessing_taa.dart';
@@ -379,6 +380,9 @@ class MyAppState extends State<MyApp> {
               },
               '/webgl_geometries_parametric':(BuildContext context) {
                 return const WebglGeometriesParametric();
+              },
+              '/planet_generator':(BuildContext context) {
+                return const WebglPlanetGenerator();
               },
               '/three_terrain':(BuildContext context) {
                 return const TerrainPage();

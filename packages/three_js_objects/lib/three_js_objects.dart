@@ -11,3 +11,5 @@ export 'water/index.dart';
 export 'lights/light_probe_generator.dart';
 export 'sky/sky.dart';
 export './tube_painter.dart';
+export './planet_generator/planet_generator.dart';
+export './planet_generator/atmosphere.dart';

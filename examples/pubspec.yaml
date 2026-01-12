@@ -52,6 +52,8 @@ dependency_overrides:
       url: https://github.com/alex-melnyk/flutter-permission-handler.git 
       path: permission_handler_apple
   file_picker: ^10.1.9
+  three_js_objects:
+    path: ../packages/three_js_objects
     
 flutter:
   uses-material-design: true
@@ -103,6 +105,7 @@ flutter:
     - assets/textures/equirectangular/
     - assets/textures/terrain/
     - assets/textures/sprites/
+    - assets/textures/planet_generator/
     - assets/textures/planets/
     - assets/textures/decal/
     - assets/textures/cube/Park2/

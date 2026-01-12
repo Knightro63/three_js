@@ -9,7 +9,12 @@ import 'dart:math' as math;
 
 int _bufferGeometryId = 1; // BufferGeometry uses odd numbers as Id
 
-
+final _bufferGeometrym1 = Matrix4.identity();
+final _bufferGeometryobj = Object3D();
+final _bufferGeometryoffset = Vector3.zero();
+final _bufferGeometrybox = BoundingBox();
+final _bufferGeometryboxMorphTargets = BoundingBox();
+final _bufferGeometryvector = Vector3.zero();
 
 /// A representation of mesh, line, or point geometry. Includes vertex
 /// positions, face indices, normals, colors, UVs, and custom attributes
@@ -38,14 +43,7 @@ int _bufferGeometryId = 1; // BufferGeometry uses odd numbers as Id
 /// final material = MeshBasicMaterial({MaterialProperty.color: 0xff0000});
 /// final mesh = Mesh( geometry, material );
 /// ```
-class BufferGeometry with EventDispatcher {
-  final _bufferGeometrym1 = Matrix4.identity();
-  final _bufferGeometryobj = Object3D();
-  final _bufferGeometryoffset = Vector3.zero();
-  final _bufferGeometrybox = BoundingBox();
-  final _bufferGeometryboxMorphTargets = BoundingBox();
-  final _bufferGeometryvector = Vector3.zero();
-  
+class BufferGeometry with EventDispatcher { 
   int id = _bufferGeometryId += 2;
   String uuid = MathUtils.generateUUID();
 
