@@ -1,3 +1,7 @@
+## 0.2.8
+
+* Added properties for [] operator.
+
 ## 0.2.7
 
 Added HexTilingMaterial.

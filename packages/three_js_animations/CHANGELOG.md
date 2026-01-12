@@ -1,3 +1,7 @@
+## 0.2.3
+
+* Fixed property mixer bug.
+
 ## 0.2.2
 
 * Fixed minor bug issue with property binding.

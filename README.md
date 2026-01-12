@@ -132,6 +132,7 @@ Find the example for this API [here](https://github.com/Knightro63/three_js/tree
  - [Cannon](https://pub.dev/packages/cannon_physics) a physics engine for three_js.
  - [Terrain](https://pub.dev/packages/three_js_terrain) a map generator for three_js.
  - [XR](https://pub.dev/packages/three_js_xr) a VR/AR/MR sdk for three_js. (web only)
+ - [Yuka](https://pub.dev/packages/yuka) a game ai sdk for three_js.
 
 ## Contributing
 
@@ -148,7 +149,8 @@ Please review the following table for all the supported Modules.
 
  - ✅ Currently Supported
  - ⚠️ Upon request
- - ❌ Not intended, unless a major update has been accomplished
+ - ❗ Waiting on GPU update
+ - ❌ Not intended
 
 | Module | Plugin | Web | Mobile | Desktop |
 |-----------------------------------------------------------------------------------------------|--------|------------|---------|-----|
@@ -170,7 +172,7 @@ Please review the following table for all the supported Modules.
 | [CSMFrustum](https://github.com/Knightro63/three_js/blob/main/packages/three_js_objects/lib/csm/csm_frustum.dart) | [three_js_objects](https://pub.dev/packages/three_js_objects) | ✅ | ✅ | ✅ |
 | [CSMHelper](https://github.com/Knightro63/three_js/blob/main/packages/three_js_objects/lib/csm/csm_helper.dart) | [three_js_objects](https://pub.dev/packages/three_js_objects) | ✅ | ✅ | ✅ |
 | [CSMShader](https://github.com/Knightro63/three_js/blob/main/packages/three_js_objects/lib/csm/csm_shader.dart) | [three_js_objects](https://pub.dev/packages/three_js_objects) | ✅ | ✅ | ✅ |
-| CSMShadowNode |  | ❌ | ❌ | ❌ |
+| CSMShadowNode |  | ❗ | ❗ | ❗ |
 |  | <span style="color: #ff00ff;">**Curves**</span> |  |  |  |
 | [EXTRAS](https://github.com/Knightro63/three_js/blob/main/packages/three_js_curves/lib/curves/extra.dart) | [three_js_curves](https://pub.dev/packages/three_js_curves) | ✅ | ✅ | ✅ |
 | [NURBSCurve](https://github.com/Knightro63/three_js/blob/main/packages/three_js_curves/lib/nurbs/nurbs_curve.dart) | [three_js_curves](https://pub.dev/packages/three_js_curves) | ✅ | ✅ | ✅ |
@@ -206,7 +208,7 @@ Please review the following table for all the supported Modules.
 | [TextGeometry](https://github.com/Knightro63/three_js/blob/main/packages/three_js_text/lib/text/text.dart) | [three_js_text](https://pub.dev/packages/three_js_text) | ✅ | ✅ | ✅ |
 |  | <span style="color: #ff00ff;">**Helpers**</span> |  |  |  |
 | [LightProbeHelper](https://github.com/Knightro63/three_js/blob/main/packages/three_js_helpers/lib/light_probe_helper.dart) | [three_js_helpers](https://pub.dev/packages/three_js_helpers) | ✅ | ✅ | ✅ |
-| LightProbeHelperGPU |  | ❌ | ❌ | ❌ |
+| LightProbeHelperGPU |  | ❗ | ❗ | ❗ |
 | [OctreeHelper](https://github.com/Knightro63/three_js/blob/main/packages/three_js_objects/lib/octree_helper.dart) | [three_js_objects](https://pub.dev/packages/three_js_objects) | ✅ | ✅ | ✅ |
 | [PositionalAudioHelper](https://github.com/Knightro63/three_js/blob/main/packages/three_js_core/lib/audio/positional_audio_helper.dart) | [three_js_core](https://pub.dev/packages/three_js_core) | ✅ | ✅ | ✅ |
 | RapierHelper |  | ❌ | ❌ | ❌ |
@@ -221,7 +223,7 @@ Please review the following table for all the supported Modules.
 | [SelectionBox](https://github.com/Knightro63/three_js/blob/main/packages/three_js_helpers/lib/selection/selection_box.dart) | [three_js_helpers](https://pub.dev/packages/three_js_helpers) | ✅ | ✅ | ✅ |
 | [SelectionHelper](https://github.com/Knightro63/three_js/blob/main/packages/three_js_helpers/lib/selection/selection_helper.dart) | [three_js_helpers](https://pub.dev/packages/three_js_helpers) | ✅ | ✅ | ✅ |
 |  | <span style="color: #ff00ff;">**Lighting**</span> |  |  |  |
-| TiledLighting |  | ❌ | ❌ | ❌ |
+| TiledLighting |  | ❗ | ❗ | ❗ |
 |  | <span style="color: #ff00ff;">**Lights**</span> |  |  |  |
 | [LightProbeGenerator](https://github.com/Knightro63/three_js/blob/main/packages/three_js_objects/lib/lights/light_probe_generator.dart) | [three_js_objects](https://pub.dev/packages/three_js_objects) | ✅ | ✅ | ✅ |
 | RectAreaLightTexturesLib |  | ⚠️ | ⚠️ | ⚠️ |
@@ -301,7 +303,7 @@ Please review the following table for all the supported Modules.
 | SimplexNoise |  | ⚠️ | ⚠️ | ⚠️ |
 |  | <span style="color: #ff00ff;">**Misc**</span> |  |  |  |
 | ConvexObjectBreaker |  | ⚠️ | ⚠️ | ⚠️ |
-| GPUComputationRenderer |  | ❌ | ❌ | ❌ |
+| GPUComputationRenderer |  | ❗ | ❗ | ❗ |
 | [Gyroscope](https://github.com/Knightro63/three_js/blob/main/packages/three_js_particles/lib/gyroscope.dart) | [three_js_particles](https://pub.dev/packages/three_js_particles) | ✅ | ✅ | ✅ |
 | [MD2Character](https://github.com/Knightro63/three_js/blob/main/packages/three_js_advanced_loaders/lib/md2/md2_charcter.dart) | [three_js_advanced_loaders](https://pub.dev/packages/three_js_advanced_loaders) | ✅ | ✅ | ✅ |
 | [MD2Loader](https://github.com/Knightro63/three_js/blob/main/packages/three_js_advanced_loaders/lib/md2/md2_loader.dart) | [three_js_advanced_loaders](https://pub.dev/packages/three_js_advanced_loaders) | ✅ | ✅ | ✅ |
@@ -309,7 +311,7 @@ Please review the following table for all the supported Modules.
 | [MorphAnimMesh](https://github.com/Knightro63/three_js/blob/main/packages/three_js_advanced_loaders/lib/md2/morph_anim_mesh.dart) | [three_js_advanced_loaders](https://pub.dev/packages/three_js_advanced_loaders) | ✅ | ✅ | ✅ |
 | MorphBlendMesh |  | ⚠️ | ⚠️ | ⚠️ |
 | ProgressiveLightMap |  | ⚠️ | ⚠️ | ⚠️ |
-| ProgressiveLightMapGPU |  | ❌ | ❌ | ❌ |
+| ProgressiveLightMapGPU |  | ❗ | ❗ | ❌❗ |
 | [RollerCoasterGeometry](https://github.com/Knightro63/three_js/blob/main/examples/lib/rollercoster/rollercoaster.dart) |  | ✅ | ✅ | ✅ |
 | [TubePainter](https://github.com/Knightro63/three_js/blob/main/packages/three_js_objects/lib/tube_painter.dart) | [three_js_objects](https://pub.dev/packages/three_js_objects) | ✅ | ✅ | ✅ |
 | Volume |  | ⚠️ | ⚠️ | ⚠️ |
@@ -323,18 +325,18 @@ Please review the following table for all the supported Modules.
 |  | <span style="color: #ff00ff;">**Objects**</span> |  |  |  |
 | GroundedSkybox |  | ⚠️ | ⚠️ | ⚠️ |
 | [Lensflare](https://github.com/Knightro63/three_js/blob/main/packages/three_js_objects/lib/lens_flare.dart) | [three_js_objects](https://pub.dev/packages/three_js_objects) | ✅ | ✅ | ✅ |
-| LensflareMesh |  | ❌ | ❌ | ❌ |
+| LensflareMesh |  | ❗ | ❗ | ❗ |
 | [MarchingCubes](https://github.com/Knightro63/three_js/blob/main/packages/three_js_objects/lib/marching_cubes.dart) | [three_js_objects](https://pub.dev/packages/three_js_objects) | ✅ | ✅ | ✅ |
 | [Reflector](https://github.com/Knightro63/three_js/blob/main/packages/three_js_objects/lib/water/reflector.dart) | [three_js_objects](https://pub.dev/packages/three_js_objects) | ✅ | ✅ | ✅ |
 | ReflectorForSSRPass |  | ⚠️ | ⚠️ | ⚠️ |
 | [Refractor](https://github.com/Knightro63/three_js/blob/main/packages/three_js_objects/lib/water/refractor.dart) | [three_js_objects](https://pub.dev/packages/three_js_objects) | ✅ | ✅ | ✅ |
 | ShadowMesh |  | ⚠️ | ⚠️ | ⚠️ |
 | [Sky](https://github.com/Knightro63/three_js/blob/main/packages/three_js_objects/lib/sky/sky.dart) | [three_js_objects](https://pub.dev/packages/three_js_objects) | ✅ | ✅ | ✅ |
-| SkyMesh |  | ❌ | ❌ | ❌ |
+| SkyMesh |  | ❗ | ❗ | ❗ |
 | Water |  | ⚠️ | ⚠️ | ⚠️ |
 | [Water2](https://github.com/Knightro63/three_js/blob/main/packages/three_js_objects/lib/water/water2.dart) | [three_js_objects](https://pub.dev/packages/three_js_objects) | ✅ | ✅ | ✅ |
-| Water2Mesh |  | ❌ | ❌ | ❌ |
-| WaterMesh |  | ❌ | ❌ | ❌ |
+| Water2Mesh |  | ❗ | ❗ | ❗ |
+| WaterMesh |  | ❗ | ❗ | ❗ |
 |  | <span style="color: #ff00ff;">**Off Screen**</span> |  |  |  |
 | Jank |  | ⚠️ | ⚠️ | ⚠️ |
 | OffScreen |  | ❌ | ❌ | ❌ |
@@ -435,8 +437,8 @@ Please review the following table for all the supported Modules.
 | WaterRefractionShader |  | ⚠️ | ⚠️ | ⚠️ |
 |  | <span style="color: #ff00ff;">**Textures**</span> |  |  |  |
 | FlakesTexture |  | ⚠️ | ⚠️ | ⚠️ |
-| | <span style="color: #ff00ff;">**Transpiler**</span> | ❌ | ❌ | ❌ |
-| | <span style="color: #ff00ff;">**TSL**</span> | ❌ | ❌ | ❌ |
+| | <span style="color: #ff00ff;">**Transpiler**</span> | ❗ | ❗ | ❗ |
+| | <span style="color: #ff00ff;">**TSL**</span> | ❗ | ❗ | ❗ |
 |  | <span style="color: #ff00ff;">**Utils**</span> |  |  |  |
 | [BufferGeometryUtils](https://github.com/Knightro63/three_js/blob/main/packages/three_js_modifers/lib/buffergeometry_utils.dart) | [three_js_modifers](https://pub.dev/packages/three_js_modifers) | ✅ | ✅ | ✅ |
 | [CameraUtils](https://github.com/Knightro63/three_js/blob/main/packages/three_js_helpers/lib/utils/camera_utils.dart) | [three_js_helpers](https://pub.dev/packages/three_js_helpers) | ✅ | ✅ | ✅ |
@@ -446,12 +448,12 @@ Please review the following table for all the supported Modules.
 | SceneOptimizer |  | ⚠️ | ⚠️ | ⚠️ |
 | SceneUtils |  | ⚠️ | ⚠️ | ⚠️ |
 | ShadowMapViewer |  | ⚠️ | ⚠️ | ⚠️ |
-| ShadowMapViewerGPU |  | ❌ | ❌ | ❌ |
+| ShadowMapViewerGPU |  | ❗ | ❗ | ❗ |
 | [SkeletonUtils](https://github.com/Knightro63/three_js/blob/main/packages/three_js_helpers/lib/utils/skeleton_utils.dart) | [three_js_helpers](https://pub.dev/packages/three_js_helpers) | ✅ | ✅ | ✅ |
 | SortUtils |  | ⚠️ | ⚠️ | ⚠️ |
 | UVsDebug |  | ⚠️ | ⚠️ | ⚠️ |
 | WebGLTextureUtils |  | ⚠️ | ⚠️ | ⚠️ |
-| WebGPUTextureUtils |  | ❌ | ❌ | ❌ |
+| WebGPUTextureUtils |  | ❗ | ❗ | ❗ |
 |  | <span style="color: #ff00ff;">**WebXR**</span> |  |  |  |
 | [ARButton](https://github.com/Knightro63/three_js/blob/main/packages/three_js_xr/lib/buttons/ar_button.dart) | [three_js_xr](https://pub.dev/packages/three_js_xr) | ✅ | ❌ | ❌ |
 | OculusHandModel |  | ❌ | ❌ | ❌ |

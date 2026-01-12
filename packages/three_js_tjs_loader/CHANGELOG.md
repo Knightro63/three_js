@@ -1,3 +1,7 @@
+## 0.2.2
+
+* Updated Materials to be loaded.
+
 ## 0.2.1
 
 * Updated to newest version of three_js packages.
