@@ -28,7 +28,7 @@ class LatheGeometry extends BufferGeometry {
   /// 
   /// [phiLength] — the radian (0 to 2PI) range of the lathed section 2PI is a
   /// closed lathe, less than 2PI is a portion. Default is 2PI.
-  LatheGeometry(List<Vector2> points,{int segments = 12, double phiStart = 0, double phiLength = math.pi * 2}): super() {
+  LatheGeometry(List<Vector> points,{int segments = 12, double phiStart = 0, double phiLength = math.pi * 2}): super() {
     type = 'LatheGeometry';
     parameters = {
       "points": points,
@@ -40,11 +40,9 @@ class LatheGeometry extends BufferGeometry {
     segments = segments.floor();
 
     // clamp phiLength so it's in range of [ 0, 2PI ]
-
     phiLength = MathUtils.clamp(phiLength, 0, math.pi * 2);
 
     // buffers
-
     final indices = [];
     List<double> vertices = [];
     List<double> uvs = [];
@@ -52,7 +50,6 @@ class LatheGeometry extends BufferGeometry {
     List<double> normals = [];
 
     // helper variables
-
     final inverseSegments = 1.0 / segments;
     final vertex = Vector3.zero();
     final uv = Vector2.zero();
@@ -63,7 +60,6 @@ class LatheGeometry extends BufferGeometry {
     double dy = 0;
 
     // pre-compute normals for initial "meridian"
-
     for (int j = 0; j <= (points.length - 1); j++) {
       // special handling for 1st vertex on path
       if (j == 0) {
@@ -105,10 +101,7 @@ class LatheGeometry extends BufferGeometry {
       }
     }
 
-    // generate vertices, uvs and normals
-
     // generate vertices and uvs
-
     for (int i = 0; i <= segments; i++) {
       final phi = phiStart + i * inverseSegments * phiLength;
 
@@ -117,7 +110,6 @@ class LatheGeometry extends BufferGeometry {
 
       for (int j = 0; j <= (points.length - 1); j++) {
         // vertex
-
         vertex.x = points[j].x * sin;
         vertex.y = points[j].y;
         vertex.z = points[j].x * cos;
@@ -126,14 +118,12 @@ class LatheGeometry extends BufferGeometry {
             [vertex.x.toDouble(), vertex.y.toDouble(), vertex.z.toDouble()]);
 
         // uv
-
         uv.x = i / segments;
         uv.y = j / (points.length - 1);
 
         uvs.addAll([uv.x.toDouble(), uv.y.toDouble()]);
 
         // normal
-
         final x = initNormals[3 * j + 0] * sin;
         final y = initNormals[3 * j + 1];
         final z = initNormals[3 * j + 0] * cos;
@@ -143,7 +133,6 @@ class LatheGeometry extends BufferGeometry {
     }
 
     // indices
-
     for (int i = 0; i < segments; i++) {
       for (int j = 0; j < (points.length - 1); j++) {
         final base = j + i * points.length;
@@ -154,14 +143,12 @@ class LatheGeometry extends BufferGeometry {
         final d = base + 1;
 
         // faces
-
         indices.addAll([a, b, d]);
         indices.addAll([c, d, b]);
       }
     }
 
     // build geometry
-
     setIndex(indices);
     setAttribute(Attribute.position, Float32BufferAttribute.fromList(vertices, 3, false));
     setAttribute(Attribute.uv, Float32BufferAttribute.fromList(uvs, 2, false));

@@ -20,8 +20,8 @@ class CapsuleGeometry extends LatheGeometry {
 		final path = Path();
 		path.absarc( 0, - length / 2, radius, math.pi * 1.5, 0 );
 		path.absarc( 0, length / 2, radius, 0, math.pi * 0.5 );
-  
-    return CapsuleGeometry.create(path.getPoints( capSegments ) as List<Vector2>, radialSegments: radialSegments);
+    
+    return CapsuleGeometry.create(path.getPoints( capSegments ).whereType<Vector>().toList(), radialSegments: radialSegments);
 	}
 
 	factory CapsuleGeometry.fromJson(Map<String,dynamic> data ) {
