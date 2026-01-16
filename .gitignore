@@ -24,6 +24,7 @@ analysis_options.yaml
 .project
 .settings/
 .vscode/*
+.vscode/
 
 */macos
 */web
