@@ -10,7 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  three_js_math: ^0.2.0
+  three_js_math: ^0.3.0
 
 dev_dependencies:
   flutter_test:

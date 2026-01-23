@@ -396,4 +396,10 @@ class MeshGouraudMaterial extends ShaderMaterial {
 
 		return this;
 	}
+
+  /// Return a new material with the same parameters as this material.
+  @override
+  MeshGouraudMaterial clone() {
+    return MeshGouraudMaterial()..copy(this);
+  }
 }

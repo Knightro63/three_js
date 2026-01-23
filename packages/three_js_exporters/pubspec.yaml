@@ -13,8 +13,8 @@ dependencies:
   file_picker: ^10.1.9
   web: ^1.1.1
   path_provider: ^2.1.5
-  three_js_core: ^0.2.0
-  three_js_math: ^0.2.0
+  three_js_core: ^0.3.0
+  three_js_math: ^0.3.0
 
 dev_dependencies:
   flutter_test:

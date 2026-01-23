@@ -41,4 +41,10 @@ class LineDashedMaterial extends LineBasicMaterial {
     gapSize = source.gapSize;
     return this;
   }
+
+  /// Return a new material with the same parameters as this material.
+  @override
+  LineDashedMaterial clone() {
+    return LineDashedMaterial()..copy(this);
+  }
 }

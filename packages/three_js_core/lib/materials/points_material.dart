@@ -62,4 +62,10 @@ class PointsMaterial extends Material {
 
     return this;
   }
+
+  /// Return a new material with the same parameters as this material.
+  @override
+  PointsMaterial clone() {
+    return PointsMaterial()..copy(this);
+  }
 }

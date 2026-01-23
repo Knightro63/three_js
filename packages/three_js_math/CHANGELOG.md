@@ -1,6 +1,7 @@
 ## 0.3.0
 
 * Removed FlutterAngle
+* Removed NativeArray for Zero-Allocation Updates.
 
 ## 0.2.6
 

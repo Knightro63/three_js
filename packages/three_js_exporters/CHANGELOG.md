@@ -1,3 +1,7 @@
+## 0.3.0
+
+* Removed NativeArray for Zero-Allocation Updates.
+
 ## 0.2.0
 
 * Updated to the newest version of three_js_math package.
