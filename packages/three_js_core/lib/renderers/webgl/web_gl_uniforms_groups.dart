@@ -196,7 +196,7 @@ class WebGLUniformsGroups{
 					}
 
 					// the following two properties will be used for partial buffer updates
-					uniform.data = Float32Array( info['storage']! ~/ Float32List.bytesPerElement);
+					uniform.data = Float32List( info['storage']! ~/ Float32List.bytesPerElement);
 					uniform.offset = offset;
 
 					// Update the global offset

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:three_js_core/three_js_core.dart';
@@ -115,7 +116,7 @@ class VideoTextureWorker extends VideoTexture {
   ]){
     final image = ImageElement(
       url: options,
-      //data: Uint8Array(391680),//((options.width ?? 0)*(options.height ?? 0)*4).toInt()),
+      //data: Uint8List(391680),//((options.width ?? 0)*(options.height ?? 0)*4).toInt()),
       src: options.asset,
       width: options.width?.toInt() ?? 0,
       height: options.height?.toInt() ?? 0
@@ -149,12 +150,12 @@ class VideoTextureWorker extends VideoTexture {
         if(image != null && v != null){
           if(image?.data == null || image?.data?.length != v.length){
             print('getyweduwb');
-            image!.data = Uint8Array.fromList(v);
+            image!.data = Uint8List.fromList(v);
             image!.width = _player?.state.width;
             image!.height = _player?.state.height;
           }
           else{
-            (image!.data as Uint8Array).set(v);
+            (image!.data as Uint8List).set(v);
           }
         }
         needsUpdate = true;

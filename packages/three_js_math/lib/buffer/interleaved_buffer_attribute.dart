@@ -1,4 +1,5 @@
 import 'package:three_js_math/three_js_math.dart';
+import 'dart:typed_data';
 
 final Vector3 _vector = Vector3.zero();
 
@@ -15,7 +16,7 @@ class InterleavedBufferAttribute extends BufferAttribute{
     int itemSize, 
     this.offset, 
     [bool _normalized = false]
-  ):super(Float32Array(0),itemSize, _normalized){
+  ):super(Float32List(0),itemSize, _normalized){
     this.data = data;
     type = "InterleavedBufferAttribute";
     this.itemSize = itemSize;
@@ -28,8 +29,8 @@ class InterleavedBufferAttribute extends BufferAttribute{
   }
 
   @override
-  NativeArray get array {
-    return data?.array ?? Uint16Array(0);
+  TypedDataList get array {
+    return data?.array ?? Uint16List(0);
   }
 
   @override

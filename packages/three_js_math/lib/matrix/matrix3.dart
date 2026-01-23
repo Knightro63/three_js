@@ -1,9 +1,6 @@
 import 'dart:typed_data';
-
-import 'package:flutter_angle/flutter_angle.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'dart:math' as math;
-import 'index.dart';
 
 /// A class representing a 3x3
 /// [matrix](https://en.wikipedia.org/wiki/Matrix_(mathematics)).
@@ -351,7 +348,7 @@ class Matrix3 {
 
     return true;
   }
-  Matrix3 factory(NativeArray array, {int offset = 0}) {
+  Matrix3 factory(List<num> array, {int offset = 0}) {
     for (int i = 0; i < 9; i++) {
       storage[i] = array[i + offset].toDouble();
     }

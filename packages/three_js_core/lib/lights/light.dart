@@ -1,3 +1,5 @@
+import 'package:three_js_core/textures/index.dart';
+
 import '../core/index.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'light_shadow.dart';
@@ -20,7 +22,7 @@ class Light extends Object3D {
   double? width;
   double? height;
 
-  Map<String,dynamic>? map;
+  Texture? map;
   Color? groundColor;
 
   /// [color] - (optional) hexadecimal color of the light. Default

@@ -145,11 +145,11 @@ class KhronosTextureContainer {
 		final mipmapCount = loadMipmaps ? numberOfMipmapLevels : 1;
 
 		for ( int level = 0; level < mipmapCount; level ++ ) {
-			final imageSize = arrayBuffer.asInt32List(dataOffset, 1)[0];// Int32Array(arrayBuffer,  )[ 0 ]; // size per face, since not supporting array cubemaps
+			final imageSize = arrayBuffer.asInt32List(dataOffset, 1)[0];// Int32List(arrayBuffer,  )[ 0 ]; // size per face, since not supporting array cubemaps
 			dataOffset += 4; // size of the image + 4 for the imageSize field
 
 			for ( int face = 0; face < numberOfFaces; face ++ ) {
-				final byteArray = arrayBuffer.asUint8List().sublist(dataOffset, imageSize);//Uint8Array(arrayBuffer, dataOffset, imageSize );
+				final byteArray = arrayBuffer.asUint8List().sublist(dataOffset, imageSize);//Uint8List(arrayBuffer, dataOffset, imageSize );
 
 				mipmaps.add( { 'data': byteArray, 'width': width, 'height': height } );
 				dataOffset += imageSize;

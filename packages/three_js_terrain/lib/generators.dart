@@ -132,7 +132,7 @@ extension Generators on Terrain{
     int segments = MathUtils.ceilPowerOfTwo<int>(math.max(options.xSegments, options.ySegments) + 1).toInt();
 
     // Initialize heightmap
-    final List<Float64Array> heightmap = [];
+    final List<Float64List> heightmap = [];
     double smoothing = (options.maxHeight! - options.minHeight!);
     int i,
       size = segments + 1,
@@ -141,7 +141,7 @@ extension Generators on Terrain{
       yl = options.ySegments + 1;
 
       for (i = 0; i <= segments; i++) {
-        heightmap.add(new Float64Array(segments+1));
+        heightmap.add(Float64List(segments+1));
       }
 
       // Generate heightmap

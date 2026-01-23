@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
@@ -38,7 +39,7 @@ class SMAAPass extends Pass {
 
 
 		// final areaTextureImage = ImageElement(
-    //   data: Uint8Array.fromList(base64Decode(this.getAreaTexture().split(',').last)),
+    //   data: Uint8List.fromList(base64Decode(this.getAreaTexture().split(',').last)),
     //   width: 256,
     //   height: 256
     // );
@@ -52,7 +53,7 @@ class SMAAPass extends Pass {
     this.areaTexture.needsUpdate = true;
 
 		final searchTextureImage = ImageElement(
-      data: Uint8Array.fromList(base64Decode(this.getSearchTexture().split(',').last)),
+      data: Uint8List.fromList(base64Decode(this.getSearchTexture().split(',').last)),
       width: 256,
       height: 256
     );    

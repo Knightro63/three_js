@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'dart:typed_data';
 import 'package:three_js_particles/Gyroscope.dart';
 import 'package:three_js_particles/noise/fmb.dart';
 
@@ -157,7 +158,7 @@ class Particles {
     List<double>? factory,
   }){
     final ba = three.Float32BufferAttribute(
-      factory != null?three.Float32Array.fromList(factory):three.Float32Array(maxParticles),
+      factory != null?Float32List.fromList(factory):Float32List(maxParticles),
       1
     );
     geometry.setAttributeFromString(propertyName,ba);

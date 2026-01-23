@@ -1,10 +1,10 @@
 name: three_js_core
 description: "Flutter three_js_core package converted from threejs and three_dart package made for three_js."
-version: 0.2.8
+version: 0.3.0
 homepage: https://github.com/Knightro63/three_js/tree/main/packages/three_js_core
 
 environment:
-  sdk: '>=3.3.2 <4.0.0'
+  sdk: '>=3.5.0 <4.0.0'
   flutter: ">=1.17.0"
 
 dependencies:
@@ -13,9 +13,15 @@ dependencies:
   logger: ^2.5.0
   three_js_math: ^0.2.5
   web: ^1.1.1
+  flutter_angle: ^0.3.9
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
 
+dependency_overrides:
+  three_js_math:
+    path: ../three_js_math
+  flutter_angle:
+    path: ../../../flutter_angle/flutter_angle

@@ -1,7 +1,6 @@
 import 'dart:isolate';
 import 'dart:io';
 import '../utils/blob.dart';
-import 'package:three_js_math/three_js_math.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
@@ -91,7 +90,7 @@ Future<ImageElement?> processImage(Uint8List? bytes, String? url, bool flipY) as
   return image != null?ImageElement(
     url: url,
     src: url,
-    data: Uint8Array.fromList(image.getBytes()),
+    data: Uint8List.fromList(image.getBytes()),
     width: image.width,
     height: image.height
   ):null;

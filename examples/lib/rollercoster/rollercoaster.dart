@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'dart:typed_data';
 
 import 'package:three_js/three_js.dart';
 
@@ -198,9 +199,9 @@ class RollerCoasterGeometry extends BufferGeometry {
 
 		// console.log( vertices.length );
 
-		this.setAttributeFromString( 'position', Float32BufferAttribute( Float32Array.fromList( vertices ), 3 ) );
-		this.setAttributeFromString( 'normal', Float32BufferAttribute( Float32Array.fromList( normals ), 3 ) );
-		this.setAttributeFromString( 'color', Float32BufferAttribute( Float32Array.fromList( colors ), 3 ) );
+		this.setAttributeFromString( 'position', Float32BufferAttribute( Float32List.fromList( vertices ), 3 ) );
+		this.setAttributeFromString( 'normal', Float32BufferAttribute( Float32List.fromList( normals ), 3 ) );
+		this.setAttributeFromString( 'color', Float32BufferAttribute( Float32List.fromList( colors ), 3 ) );
 	}
 }
 
@@ -363,8 +364,8 @@ class RollerCoasterLiftersGeometry extends BufferGeometry {
 			}
 		}
 
-		this.setAttributeFromString( 'position', Float32BufferAttribute( Float32Array.fromList( vertices ), 3 ) );
-		this.setAttributeFromString( 'normal', Float32BufferAttribute( Float32Array.fromList( normals ), 3 ) );
+		this.setAttributeFromString( 'position', Float32BufferAttribute( Float32List.fromList( vertices ), 3 ) );
+		this.setAttributeFromString( 'normal', Float32BufferAttribute( Float32List.fromList( normals ), 3 ) );
 	}
 }
 
@@ -429,7 +430,7 @@ class RollerCoasterShadowGeometry extends BufferGeometry {
 			prevQuaternion.setFrom( quaternion );
 		}
 
-		this.setAttributeFromString( 'position', Float32BufferAttribute( Float32Array.fromList( vertices ), 3 ) );
+		this.setAttributeFromString( 'position', Float32BufferAttribute( Float32List.fromList( vertices ), 3 ) );
 	}
 }
 
@@ -455,7 +456,7 @@ class SkyGeometry extends BufferGeometry {
 			vertices.addAll([ x - size, y, z + size ]);
 		}
 
-		this.setAttributeFromString( 'position', Float32BufferAttribute( Float32Array.fromList( vertices ), 3 ) );
+		this.setAttributeFromString( 'position', Float32BufferAttribute( Float32List.fromList( vertices ), 3 ) );
 	}
 }
 
@@ -504,8 +505,8 @@ class TreesGeometry extends BufferGeometry {
 			}
 		}
 
-		this.setAttributeFromString( 'position', Float32BufferAttribute( Float32Array.fromList( vertices ), 3 ) );
-		this.setAttributeFromString( 'color', Float32BufferAttribute( Float32Array.fromList( colors ), 3 ) );
+		this.setAttributeFromString( 'position', Float32BufferAttribute( Float32List.fromList( vertices ), 3 ) );
+		this.setAttributeFromString( 'color', Float32BufferAttribute( Float32List.fromList( colors ), 3 ) );
 
 	}
 

@@ -28,7 +28,7 @@ final _bufferGeometryvector = Vector3.zero();
 ///
 /// // create a simple square shape. We duplicate the top left and bottom right
 /// // vertices because each vertex needs to appear once per triangle.
-/// final vertices = Float32Array.fromList([
+/// final vertices = Float32List.fromList([
 ///   -1.0, -1.0,  1.0, // v0
 ///     1.0, -1.0,  1.0, // v1
 ///     1.0,  1.0,  1.0, // v2
@@ -518,13 +518,13 @@ class BufferGeometry with EventDispatcher {
         tdir = Vector3.zero();
 
     void handleTriangle(int a, int b, int c) {
-      vA.fromNativeArray(positions, a * 3);
-      vB.fromNativeArray(positions, b * 3);
-      vC.fromNativeArray(positions, c * 3);
+      vA.fromArray(positions, a * 3);
+      vB.fromArray(positions, b * 3);
+      vC.fromArray(positions, c * 3);
 
-      uvA.fromNativeArray(uvs, a * 2);
-      uvB.fromNativeArray(uvs, b * 2);
-      uvC.fromNativeArray(uvs, c * 2);
+      uvA.fromArray(uvs, a * 2);
+      uvB.fromArray(uvs, b * 2);
+      uvC.fromArray(uvs, c * 2);
 
       vB.sub(vA);
       vC.sub(vA);
@@ -584,7 +584,7 @@ class BufferGeometry with EventDispatcher {
     final n = Vector3.zero(), n2 = Vector3.zero();
 
     void handleVertex(int v) {
-      n.fromNativeArray(normals, v * 3);
+      n.fromArray(normals, v * 3);
       n2.setFrom(n);
 
       final t = tan1[v];

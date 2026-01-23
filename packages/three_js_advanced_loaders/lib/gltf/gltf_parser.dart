@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:typed_data';
+import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:three_js_advanced_loaders/gltf/gltf_extensions.dart';
 
@@ -466,13 +467,25 @@ class GLTFParser {
         final int stride = byteStride ~/ elementBytes;
         int totalLen = array.length;
         if(array is Uint8List){
-          ib = InterleavedBuffer(Uint8Array(totalLen).set(array.buffer.asUint8List()), 1);
+          ib = InterleavedBuffer(Uint8List(totalLen).set(array.buffer.asUint8List()), 1);
         }
         else if(array is Int8List){
-          ib = InterleavedBuffer(Int8Array(totalLen).set(array.buffer.asInt8List()), 1);
+          ib = InterleavedBuffer(Int8List(totalLen).set(array.buffer.asInt8List()), 1);
+        }
+        else if(array is Int16List){
+          ib = InterleavedBuffer(Int16List(totalLen).set(array.buffer.asInt16List()), 1);
+        }
+        else if(array is Int32List){
+          ib = InterleavedBuffer(Int32List(totalLen).set(array.buffer.asInt32List()), 1);
+        }
+        else if(array is Uint16List){
+          ib = InterleavedBuffer(Uint16List(totalLen).set(array.buffer.asUint16List()), 1);
+        }
+        else if(array is Uint32List){
+          ib = InterleavedBuffer(Uint32List(totalLen).set(array.buffer.asUint32List()), 1);
         }
         else{
-          ib = InterleavedBuffer(Float32Array(totalLen).set(array.buffer.asFloat32List()), stride);
+          ib = InterleavedBuffer(Float32List(totalLen).set(array.buffer.asFloat32List()), stride);
         }
 
         parser.cache.add(ibCacheKey, ib);
@@ -1298,7 +1311,7 @@ class GLTFParser {
         targetNames.add(targetName);
       }
 
-      dynamic outputArray = outputAccessor.array.toDartList();
+      dynamic outputArray = outputAccessor.array;
 
       if (outputAccessor.normalized) {
         final scale = getNormalizedComponentScale(outputArray.runtimeType);
@@ -1315,7 +1328,7 @@ class GLTFParser {
       for (int j = 0, jl = targetNames.length; j < jl; j++) {
         final track = typedKeyframeTrack.createTrack(
             targetNames[j] + '.' + PathProperties.getValue(target["path"]),
-            inputAccessor.array.toDartList(),
+            inputAccessor.array,
             outputArray,
             interpolation);
 

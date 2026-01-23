@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:typed_data';
 import 'package:example/src/gui.dart';
 import 'package:flutter/material.dart';
 import 'package:example/src/statistics.dart';
@@ -167,7 +168,7 @@ class _State extends State<WebglGeometrySplineEditor> {
     }
 
     final geometry = three.BufferGeometry();
-    geometry.setAttributeFromString( 'position', three.Float32BufferAttribute( three.Float32Array( ARC_SEGMENTS * 3 ), 3 ) );
+    geometry.setAttributeFromString( 'position', three.Float32BufferAttribute( Float32List( ARC_SEGMENTS * 3 ), 3 ) );
 
     three.CatmullRomCurve3 curve = three.CatmullRomCurve3( points:positions );
     three.Line mesh;

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:example/src/statistics.dart';
 import 'package:three_js/three_js.dart' as three;
@@ -80,8 +81,8 @@ class _State extends State<WebglModifierTessellation> {
     final geometry = tessellateModifier.modify( textG );
 
     final numFaces = geometry.attributes['position'].count ~/ 3;
-    final colors = three.Float32Array( numFaces * 3 * 3 );
-    final displacement = three.Float32Array( numFaces * 3 * 3 );
+    final colors = Float32List( numFaces * 3 * 3 );
+    final displacement = Float32List( numFaces * 3 * 3 );
     final color = three.Color();
 
     for (int f = 0; f < numFaces; f ++ ) {

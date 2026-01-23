@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_geometry/three_js_geometry.dart';
 import 'package:three_js_math/three_js_math.dart';
@@ -40,7 +41,7 @@ class LineSegmentsGeometry extends InstancedBufferGeometry {
 		return this;
 	}
 
-	LineSegmentsGeometry setPositions(Float32Array lineSegments ) {
+	LineSegmentsGeometry setPositions(Float32List lineSegments ) {
 		final instanceBuffer = new InstancedInterleavedBuffer( lineSegments, 6, 1 ); // xyz, xyz
 
 		this.setAttributeFromString( 'instanceStart', new InterleavedBufferAttribute( instanceBuffer, 3, 0 ) ); // xyz
@@ -52,7 +53,7 @@ class LineSegmentsGeometry extends InstancedBufferGeometry {
 		return this;
 	}
 
-	LineSegmentsGeometry setColors(Float32Array colors ) {
+	LineSegmentsGeometry setColors(Float32List colors ) {
 		final instanceColorBuffer = new InstancedInterleavedBuffer( colors, 6, 1 ); // rgb, rgb
 
 		this.setAttributeFromString( 'instanceColorStart', new InterleavedBufferAttribute( instanceColorBuffer, 3, 0 ) ); // rgb

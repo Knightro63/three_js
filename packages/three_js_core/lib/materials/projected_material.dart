@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
@@ -570,19 +571,19 @@ class ProjectedMaterialUtils{
   void allocateProjectionData(BufferGeometry geometry, int instancesCount) {
     geometry.setAttributeFromString(
       'savedModelMatrix0',
-      InstancedBufferAttribute(Float32Array(instancesCount * 4), 4)
+      InstancedBufferAttribute(Float32List(instancesCount * 4), 4)
     );
     geometry.setAttributeFromString(
       'savedModelMatrix1',
-      InstancedBufferAttribute(Float32Array(instancesCount * 4), 4)
+      InstancedBufferAttribute(Float32List(instancesCount * 4), 4)
     );
     geometry.setAttributeFromString(
       'savedModelMatrix2',
-      InstancedBufferAttribute(Float32Array(instancesCount * 4), 4)
+      InstancedBufferAttribute(Float32List(instancesCount * 4), 4)
     );
     geometry.setAttributeFromString(
       'savedModelMatrix3',
-      InstancedBufferAttribute(Float32Array(instancesCount * 4), 4)
+      InstancedBufferAttribute(Float32List(instancesCount * 4), 4)
     );
   }
 }

@@ -477,7 +477,7 @@ class TGALoader extends DataTextureLoader {
 		getTgaRGBA( imageData, header['width'] as int, header['height'] as int, result['pixel_data'], result['palettes'] );
 
     final dt = DataTexture(
-      Uint8Array.fromList(imageData),
+      Uint8List.fromList(imageData),
       header['width'] as int,
       header['height'] as int,
     );

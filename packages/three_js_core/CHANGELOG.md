@@ -1,3 +1,8 @@
+## 0.3.0
+
+* Removed NativeArray
+* Put WebglRenderer into its own package
+
 ## 0.2.8
 
 * Added properties for [] operator.

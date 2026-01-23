@@ -8,7 +8,7 @@ class WebGLAttributes {
 
   WebGLAttributes(this.gl);
 
-  Map<String, dynamic> createBuffer(dynamic attribute, int bufferType, {String? name}) {//BufferAttribute<NativeArray<num>>
+  Map<String, dynamic> createBuffer(dynamic attribute, int bufferType, {String? name}) {//BufferAttribute
     final array = attribute.array;
     final usage = attribute.usage;
 
@@ -126,10 +126,10 @@ class WebGLAttributes {
       updateRanges.length = mergeIndex + 1;
 			for (int i = 0, l = updateRanges.length; i < l; i ++ ) {
 				final range = updateRanges[i];
-        Float32Array f = Float32Array.fromList(attribute.array.sublist(range.start,range.count) as List<double>);
+        Float32List f = Float32List.fromList(attribute.array.sublist(range.start,range.count) as List<double>);
 				gl.bufferSubData( 
           bufferType, 
-          range.start * array.BYTES_PER_ELEMENT,
+          range.start * array.bytesPerElement,
 					f,
         );
 
@@ -157,8 +157,7 @@ class WebGLAttributes {
         (len[i] as BufferAttribute).dispose();
         remove(len[i]);
       }
-      else if(len[i] is NativeArray){
-        //(len[i] as NativeArray).dispose();
+      else if(len[i] is TypedDataList){
         remove(len[i]);
       }
     }

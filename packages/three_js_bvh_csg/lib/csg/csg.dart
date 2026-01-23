@@ -255,7 +255,7 @@ class CSG {
     Uint16List index;
 
     if (geom.index != null){
-      index = geom.index!.array.toDartList() as Uint16List;
+      index = geom.index!.array as Uint16List;
     }
     else {
       index = Uint16List((posattr.array.length ~/ posattr.itemSize) | 0);

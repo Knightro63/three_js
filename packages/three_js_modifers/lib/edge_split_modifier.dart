@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 import './buffergeometry_utils.dart';
@@ -10,7 +12,7 @@ class EdgeSplitModifier {
 
 	BufferGeometry modify(BufferGeometry geometry, cutOffAngle, [bool tryKeepNormals = true ]) {
 		bool hadNormals = false;
-		Float32Array? oldNormals;
+		Float32List? oldNormals;
 
 		if ( geometry.attributes['normal'] != null) {
 			hadNormals = true;
@@ -28,15 +30,15 @@ class EdgeSplitModifier {
 			geometry = BufferGeometryUtils.mergeVertices( geometry );
 		}
 
-		final NativeArray<int> indexes = geometry.index!.array as NativeArray<int>;
+		final TypedDataList indexes = geometry.index!.array;
 		final positions = geometry.getAttributeFromString( 'position' ).array;
 
-		late Float32Array normals;
+		late Float32List normals;
 		late List pointToIndexMap;
 
 		final splitIndexes = [];
 		void computeNormals() {
-			normals = Float32Array( indexes.length * 3 );
+			normals = Float32List( indexes.length * 3 );
 
 			for (int i = 0; i < indexes.length; i += 3 ) {
 				num index = indexes[ i ];
@@ -151,13 +153,13 @@ class EdgeSplitModifier {
 		final newAttributes = {};
 		for ( final name in geometry.attributes.keys) {
 			final oldAttribute = geometry.attributes[ name ] as Float32BufferAttribute;
-			final newArray = Float32Array(( indexes.length + splitIndexes.length ) * oldAttribute.itemSize);//oldAttribute.array.constructor( ( indexes.length + splitIndexes.length ) * oldAttribute.itemSize );
+			final newArray = Float32List(( indexes.length + splitIndexes.length ) * oldAttribute.itemSize);//oldAttribute.array.constructor( ( indexes.length + splitIndexes.length ) * oldAttribute.itemSize );
 			newArray.set( oldAttribute.array.toList() );
 			newAttributes[name] = Float32BufferAttribute( newArray, oldAttribute.itemSize, oldAttribute.normalized );
 		}
 
-		final newIndexes = Uint32Array( indexes.length );
-		newIndexes.set( indexes.toDartList() );
+		final newIndexes = Uint32List( indexes.length );
+		newIndexes.set( indexes );
 
 		for (int i = 0; i < splitIndexes.length; i ++ ) {
 

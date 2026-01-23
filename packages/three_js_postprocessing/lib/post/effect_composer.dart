@@ -11,7 +11,7 @@ class EffectComposer {
 
   late WebGLRenderTarget writeBuffer;
   late WebGLRenderTarget readBuffer;
-  final FlutterAngleTexture? texture;
+  final dynamic texture;
 
   bool renderToScreen = true;
 

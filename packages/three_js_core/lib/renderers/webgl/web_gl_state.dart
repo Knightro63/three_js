@@ -124,7 +124,7 @@ class WebGLState {
   }
 
   WebGLTexture createTexture(int type, int target, int count) {
-    final data = Uint8Array(4);
+    final data = Uint8List(4);
     // 4 is required to match default unpack alignment of 4.
     //
     final texture = gl.createTexture();
@@ -231,7 +231,7 @@ class WebGLState {
     }
 
     if (needsUpdate) {
-      Uint32Array buf = Uint32Array.fromList(List<int>.from(drawBuffers));
+      Uint32List buf = Uint32List.fromList(List<int>.from(drawBuffers));
       gl.drawBuffers(buf);
       buf.dispose();
     }
@@ -526,7 +526,7 @@ class WebGLState {
     int height,
     int depth,
     int format,
-    NativeArray? data,
+    TypedData? data,
   ) {
 		gl.compressedTexSubImage3D(target,level,xoffset,yoffset,zoffset,width,height,depth,format,data);
 	}
@@ -538,21 +538,21 @@ class WebGLState {
     int height,
     int depth,
     int border,
-    NativeArray? data,
+    TypedData? data,
   ) {
 		gl.compressedTexImage3D(target,level,internalformat,width,height,depth,border,data);
 	}
 
-  void compressedTexImage2D(int target, int level, int internalformat, int width, int height, int border, NativeArray? pixels) {
+  void compressedTexImage2D(int target, int level, int internalformat, int width, int height, int border, TypedData? pixels) {
     gl.compressedTexImage2D(target, level, internalformat, width, height, border, pixels);
   }
 
-  void texSubImage2D(int target, int level, int x, int y, num width, num height, int glFormat, int glType, NativeArray data) {
+  void texSubImage2D(int target, int level, int x, int y, num width, num height, int glFormat, int glType, TypedData data) {
     gl.texSubImage2D(target, level, x, y, width.toInt(), height.toInt(), glFormat, glType, data);
   }
 
   void texSubImage2DIf(int target, int level, int x, int y, int glFormat, int glType, ImageElement image) {
-    if (kIsWeb && image.data is! NativeArray) {
+    if (kIsWeb && image.data is! TypedData) {
       texSubImage2DNoSize(WebGL.TEXTURE_2D, 0, 0, 0, glFormat, glType, image.data);
     } 
     else {
@@ -569,7 +569,7 @@ class WebGLState {
     }
   }
 
-  void texSubImage3D(int target, int level, int xoffset, int yoffset, int zoffset, int width, int height, int depth, int format, int type, NativeArray? pixels) {
+  void texSubImage3D(int target, int level, int xoffset, int yoffset, int zoffset, int width, int height, int depth, int format, int type, TypedData? pixels) {
     gl.texSubImage3D(target, level, xoffset, yoffset, zoffset, width, height, depth, format, type, pixels);
   }
 
@@ -581,7 +581,7 @@ class WebGLState {
     int width,
     int height,
     int format,
-    NativeArray? pixels,
+    TypedData? pixels,
   ) {
     gl.compressedTexSubImage2D(target, level, xoffset, yoffset, width, height, format, pixels);
   }

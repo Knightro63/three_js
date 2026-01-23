@@ -130,15 +130,15 @@ class Color{
     
     return this;
   }
-  Color fromNativeArray(NativeArray<num> list,[int offset = 0]) {
-    storage[0] = list[offset].toDouble();
-    storage[1] = list[offset+1].toDouble();
-    storage[2] = list[offset+2].toDouble();
-    if(list.length > 3){
-      storage[3] = list[offset+3].toDouble();
-    }
-    return this;
-  }
+  // Color fromNativeArray(NativeArray<num> list,[int offset = 0]) {
+  //   storage[0] = list[offset].toDouble();
+  //   storage[1] = list[offset+1].toDouble();
+  //   storage[2] = list[offset+2].toDouble();
+  //   if(list.length > 3){
+  //     storage[3] = list[offset+3].toDouble();
+  //   }
+  //   return this;
+  // }
   Color fromUnknown(list,[int offset = 0]) {
     storage[0] = list[offset].toDouble();
     storage[1] = list[offset+1].toDouble();
@@ -148,7 +148,7 @@ class Color{
     }
     return this;
   }
-  Color fromList(List<double> list,[int offset = 0]) {
+  Color fromList(List<num> list,[int offset = 0]) {
     storage[0] = list[offset].toDouble();
     storage[1] = list[offset+1].toDouble();
     storage[2] = list[offset+2].toDouble();
@@ -157,7 +157,7 @@ class Color{
     }
     return this;
   }
-  Color copyFromArray(List<double> list,[int offset = 0]) {
+  Color copyFromArray(List<num> list,[int offset = 0]) {
     storage[0] = list[offset].toDouble();
     storage[1] = list[offset+1].toDouble();
     storage[2] = list[offset+2].toDouble();
@@ -166,7 +166,7 @@ class Color{
     }
     return this;
   }
-  NativeArray<num> copyIntoArray(array, [int offset = 0]) {
+  TypedDataList copyIntoArray(TypedDataList array, [int offset = 0]) {
     array[offset] = storage[0];
     array[offset + 1] = storage[1];
     array[offset + 2] = storage[2];

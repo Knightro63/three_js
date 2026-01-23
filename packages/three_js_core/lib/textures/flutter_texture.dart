@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:flutter/rendering.dart' as rend;
 import 'package:flutter/widgets.dart' as wid;
@@ -150,17 +151,17 @@ class FlutterTexture extends Texture {
         imageElement.width = image.width;
         imageElement.height = image.height;
         if(imageElement.data == null){
-          imageElement.data = Uint8Array.fromList(data);
+          imageElement.data = Uint8List.fromList(data);
         }
         else{
-          (imageElement.data as Uint8Array).set(data);
+          (imageElement.data as Uint8List).setAll(0, data);
         }
         return imageElement;
       }
       return ImageElement(
         width: image.width,
         height: image.height,
-        data: Uint8Array.fromList(data)
+        data: Uint8List.fromList(data)
       );
     } catch (e) {
       rethrow;
@@ -185,17 +186,17 @@ class FlutterTexture extends Texture {
         imageElement.width = image.width;
         imageElement.height = image.height;
         if(imageElement.data == null){
-          imageElement.data = Uint8Array.fromList(data);
+          imageElement.data = Uint8List.fromList(data);
         }
         else{
-          (imageElement.data as Uint8Array).set(data);
+          (imageElement.data as Uint8List).setAll(0, data);
         }
         return imageElement;
       }
       return ImageElement(
         width: image.width,
         height: image.height,
-        data: Uint8Array.fromList(data)
+        data: Uint8List.fromList(data)
       );
 
     } catch (e) {

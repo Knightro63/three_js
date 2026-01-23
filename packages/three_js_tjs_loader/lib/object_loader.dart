@@ -592,9 +592,9 @@ class ObjectLoader extends Loader {
         final instanceColor = data["instanceColor"];
 
         object = InstancedMesh(geometry, material, count);
-        object.instanceMatrix = InstancedBufferAttribute(Float32Array(instanceMatrix.array), 16, false);
+        object.instanceMatrix = InstancedBufferAttribute(Float32List.fromList(instanceMatrix.array), 16, false);
         if (instanceColor != null) {
-          object.instanceColor = InstancedBufferAttribute(Float32Array(instanceColor.array), instanceColor.itemSize, false);
+          object.instanceColor = InstancedBufferAttribute(Float32List.fromList(instanceColor.array), instanceColor.itemSize, false);
         }
 
         break;

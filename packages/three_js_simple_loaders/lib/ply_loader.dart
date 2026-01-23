@@ -550,7 +550,6 @@ class PLYLoader extends Loader {
 		}
 
 		BufferGeometry geometry;
-		//if ( data is NativeArray ) {
     final bytes = data.sublist(0);
     final temp = extractHeaderText( bytes );
     final headerText = temp['headerText'];
@@ -564,10 +563,6 @@ class PLYLoader extends Loader {
     else {
       geometry = parseBinary( data.buffer.asByteData(), header );
     }
-		// } 
-    // else {
-		// 	geometry = parseASCII( data, parseHeader( data ) );
-		// }
 
 		return geometry;
 	}

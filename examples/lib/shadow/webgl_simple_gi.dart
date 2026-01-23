@@ -119,7 +119,7 @@ class _State extends State<WebglSimpleGi> {
     int currentVertex = 0;
 
     final color = Float32List( 3 );
-    final three.Uint8Array buffer = three.Uint8Array( SIZE2 * 4 );
+    final Uint8List buffer = Uint8List( SIZE2 * 4 );
 
     void compute([double? dt]) {
       if ( bounces == 3 ) return;
@@ -143,10 +143,10 @@ class _State extends State<WebglSimpleGi> {
 
       for (int i = 0; i < 32; i ++ ) {
         if ( currentVertex >= totalVertex ) break;
-        position.fromNativeArray( positions, currentVertex * 3 );
+        position.fromArray( positions, currentVertex * 3 );
         position.applyMatrix4( object.matrixWorld );
 
-        normal.fromNativeArray( normals, currentVertex * 3 );
+        normal.fromArray( normals, currentVertex * 3 );
         normal.applyMatrix3( normalMatrix.getNormalMatrix( object.matrixWorld ) ).normalize();
 
         camera.position.setFrom( position );

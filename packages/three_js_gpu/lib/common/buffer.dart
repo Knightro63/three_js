@@ -1,6 +1,4 @@
 import 'dart:typed_data';
-import 'package:three_js_math/three_js_math.dart';
-
 import './binding.dart';
 import './buffer_utils.dart';
 
@@ -13,14 +11,14 @@ import './buffer_utils.dart';
  */
 class Buffer extends Binding {
   int bytesPerElement = Float32List.bytesPerElement;
-  Float32Array? _buffer;
-  Float32Array? get buffer => _buffer;
+  Float32List? _buffer;
+  Float32List? get buffer => _buffer;
 
-	Buffer(super.name,[Float32Array? buffer]) {
+	Buffer(super.name,[Float32List? buffer]) {
 		_buffer = buffer;
 	}
 
-	int get byteLength => getFloatLength(_buffer?.byteLength );
+	int get byteLength => getFloatLength(_buffer?.lengthInBytes );
 
 	bool update() {
 		return true;

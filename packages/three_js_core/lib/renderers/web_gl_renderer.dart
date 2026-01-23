@@ -1831,7 +1831,7 @@ class WebGLRenderer {
     _currentMaterialId = -1; // reset current material to ensure correct uniform bindings
   }
 
-  void readRenderTargetPixels(WebGLRenderTarget renderTarget, int x, int y, int width, int height, NativeArray buffer, [activeCubeFaceIndex]) {
+  void readRenderTargetPixels(WebGLRenderTarget renderTarget, int x, int y, int width, int height, TypedData buffer, [int? activeCubeFaceIndex]) {
     dynamic framebuffer = properties.get(renderTarget)["__webglFramebuffer"]; //can be Map or int
 
     if (renderTarget is WebGLCubeRenderTarget && activeCubeFaceIndex != null) {
@@ -1869,7 +1869,7 @@ class WebGLRenderer {
         // the following if statement ensures valid read requests (no out-of-bounds pixels, see #8604)
 
         if ((x >= 0 && x <= (renderTarget.width - width)) && (y >= 0 && y <= (renderTarget.height - height))) {
-          _gl.readPixels(x, y, width, height, utils.convert(textureFormat), utils.convert(textureType), kIsWeb?buffer.data:buffer);
+          _gl.readPixels(x, y, width, height, utils.convert(textureFormat), utils.convert(textureType), buffer);
         }
       } finally {
         final framebuffer = (_currentRenderTarget != null) ? properties.get(_currentRenderTarget)["__webglFramebuffer"] : null;
@@ -1889,8 +1889,8 @@ class WebGLRenderer {
     final width = (texture.image.width * levelScale).floor();
     final height = (texture.image.height * levelScale).floor();
 
-    final x = position != null ? position.x.toInt() : 0;
-    final y = position != null ? position.y.toInt() : 0;
+    final x = position != null && !position.x.isNaN ? position.x.toInt() : 0;
+    final y = position != null && !position.y.isNaN ? position.y.toInt() : 0;
 
     textures.setTexture2D(texture, 0);
     _gl.copyTexSubImage2D(WebGL.TEXTURE_2D, level, 0, 0, x, y, width, height);

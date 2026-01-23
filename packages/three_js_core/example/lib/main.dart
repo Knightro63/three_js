@@ -66,14 +66,18 @@ class _State extends State<WebglGeometries> {
 
     three.Mesh object;
 
-    final ambientLight = three.AmbientLight(0xcccccc, 0.4);
+    final ambientLight = three.AmbientLight(0xffffff, 0.8);
     threeJs.scene.add(ambientLight);
 
     final pointLight = three.PointLight(0xffffff, 0.8);
     threeJs.camera.add(pointLight);
     threeJs.scene.add(threeJs.camera);
 
-    final material = three.MeshPhongMaterial.fromMap({"side": tmath.DoubleSide});
+    final material = three.MeshPhongMaterial.fromMap({
+      "color": 0xffffff,
+      "side": tmath.DoubleSide,
+      "clipShadows": true
+    });
     object = three.Mesh(three.SphereGeometry(75, 20, 10), material);
     object.position.setValues(-300, 0, 200);
     threeJs.scene.add(object);

@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:example/src/statistics.dart';
 import 'package:three_js/three_js.dart' as three;
+import 'package:flutter_angle/flutter_angle.dart';
 import 'package:flutter_angle/flutter_angle.dart';
 
 class WebglOpenglTexture extends StatefulWidget {
@@ -82,11 +84,11 @@ class _State extends State<WebglOpenglTexture> {
     final cubes = []; // just an array we can use to rotate the cubes
 
     {
-      final three.RenderingContext gl = threeJs.renderer!.getContext();
+      final RenderingContext gl = threeJs.renderer!.getContext();
       final glTex = gl.createTexture();
       gl.bindTexture(WebGL.TEXTURE_2D, glTex);
       gl.texImage2D(WebGL.TEXTURE_2D, 0, WebGL.RGBA, 2, 2, 0,
-          WebGL.RGBA, WebGL.UNSIGNED_BYTE, Uint8Array.fromList([
+          WebGL.RGBA, WebGL.UNSIGNED_BYTE, Uint8List.fromList([
             255, 0, 0, 255,
             0, 255, 0, 255,
             0, 0, 255, 255,

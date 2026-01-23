@@ -1,17 +1,17 @@
 name: three_js_math
 description: "Flutter three_js_math package converted from threejs and three_dart package to be used with three_js."
-version: 0.2.6
+version: 0.3.0
 homepage: https://github.com/Knightro63/three_js/tree/main/packages/three_js_math
 
 environment:
-  sdk: '>=3.3.2 <4.0.0'
+  sdk: '>=3.5.0 <4.0.0'
   flutter: ">=1.17.0"
 
 dependencies:
   flutter:
     sdk: flutter
   uuid: ^4.4.0
-  flutter_angle: ^0.3.9
+  #flutter_angle: ^0.3.9
 
 dev_dependencies:
   flutter_test:

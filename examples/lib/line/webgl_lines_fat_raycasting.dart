@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:typed_data';
 import 'package:example/src/gui.dart';
 import 'package:flutter/material.dart';
 import 'package:example/src/statistics.dart';
@@ -147,12 +148,12 @@ class _State extends State<WebglLinesFatRaycasting> {
     }
 
     final lineGeometry = LineGeometry();
-    lineGeometry.setPositions(three.Float32Array.fromList(positions));
-    lineGeometry.setColors(three.Float32Array.fromList(colors));
+    lineGeometry.setPositions(Float32List.fromList(positions));
+    lineGeometry.setColors(Float32List.fromList(colors));
 
     final segmentsGeometry = LineSegmentsGeometry();
-    segmentsGeometry.setPositions(three.Float32Array.fromList(positions));
-    segmentsGeometry.setColors(three.Float32Array.fromList(colors));
+    segmentsGeometry.setPositions(Float32List.fromList(positions));
+    segmentsGeometry.setColors(Float32List.fromList(colors));
 
     segments = LineSegments2( segmentsGeometry, matLine );
     segments.computeLineDistances();

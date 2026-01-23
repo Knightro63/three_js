@@ -126,7 +126,7 @@ class WebGLGeometries {
     wireframeAttributes.set(geometry, attribute);
   }
 
-  BufferAttribute<NativeArray<num>>? getWireframeAttribute(BufferGeometry geometry) {
+  BufferAttribute? getWireframeAttribute(BufferGeometry geometry) {
     final currentAttribute = wireframeAttributes.get(geometry);
 
     if (currentAttribute != null) {

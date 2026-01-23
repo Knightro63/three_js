@@ -1460,7 +1460,7 @@ class WebGPUBackend extends Backend {
 				if ( currentSets.index != index ) {
 
 					final buffer = this.get( index ).buffer;
-					final indexFormat = ( index.array instanceof Uint16Array ) ? GPUIndexFormat.Uint16 : GPUIndexFormat.Uint32;
+					final indexFormat = ( index.array instanceof Uint16List ) ? GPUIndexFormat.Uint16 : GPUIndexFormat.Uint32;
 
 					passEncoderGPU.setIndexBuffer( buffer, indexFormat );
 
@@ -1592,9 +1592,9 @@ class WebGPUBackend extends Backend {
 				final bindingsData = this.get( cameraIndex );
 				final indexesGPU = [];
 
-				final data = new Uint32Array( [ 0, 0, 0, 0 ] );
+				final data = Uint32List.fromList( [ 0, 0, 0, 0 ] );
 
-				for ( let i = 0, len = cameras.length; i < len; i ++ ) {
+				for ( int i = 0, len = cameras.length; i < len; i ++ ) {
 
 					data[ 0 ] = i;
 

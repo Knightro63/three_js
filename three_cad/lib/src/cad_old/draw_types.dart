@@ -1,5 +1,5 @@
+import 'dart:typed_data';
 import 'package:three_js/three_js.dart';
-import 'dart:math' as math;
 import 'package:three_js_line/three_js_line.dart';
 
 enum DrawType{
@@ -22,7 +22,7 @@ enum DrawType{
   static Group createSpline(Vector3 position, int color){
     final g = Group()..name = 'spline';
     // final geometry = BufferGeometry();
-    // geometry.setAttributeFromString('position',Float32BufferAttribute( Float32Array( 200 * 3 ), 3 ) );
+    // geometry.setAttributeFromString('position',Float32BufferAttribute( Float32List( 200 * 3 ), 3 ) );
     // final line = Line(
     //   geometry, 
     //   LineBasicMaterial.fromMap( {
@@ -42,7 +42,7 @@ enum DrawType{
   static Group createCircleSpline(Vector3 position, int color){
     Group objects = Group()..name = 'circleSpline';
     // final geometry = BufferGeometry();
-    // geometry.setAttributeFromString('position',Float32BufferAttribute( Float32Array( 64 * 3 ), 3 ) );
+    // geometry.setAttributeFromString('position',Float32BufferAttribute( Float32List( 64 * 3 ), 3 ) );
 
     // final line = Line(
     //   geometry, 
@@ -219,16 +219,16 @@ enum DrawType{
     final geometry = BufferGeometry();
     geometry.setAttributeFromString(
       'position',
-      segments == 0?Float32BufferAttribute.fromList(position.storage+position.storage,3):Float32BufferAttribute( Float32Array( segments * 3 ), 3 )
+      segments == 0?Float32BufferAttribute.fromList(position.storage+position.storage,3):Float32BufferAttribute( Float32List( segments * 3 ), 3 )
     );
-    final constructionLine = LineDashedMaterial.fromMap( {
-      'color': 0xffff00,
-      'transparent': true,
-      'opacity': 0.5,
-      'linewidth': 5,
-      'gapSize': 1,
-      'dashSize': 0.5
-    });
+    // final constructionLine = LineDashedMaterial.fromMap( {
+    //   'color': 0xffff00,
+    //   'transparent': true,
+    //   'opacity': 0.5,
+    //   'linewidth': 5,
+    //   'gapSize': 1,
+    //   'dashSize': 0.5
+    // });
 
     final matLine = LineBasicMaterial.fromMap( {
       'color': color,//construction?0xffff00:215910,

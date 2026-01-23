@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:typed_data';
 import 'dart:math' as math;
-import 'package:flutter/foundation.dart';
 
 import 'gltf_registry.dart';
 import 'gltf_parser.dart';
@@ -107,13 +106,13 @@ class GLTypeData {
   }
 }
 
-final Map<int,NativeArray Function(int)>webglComponentTypes = {
-  5120: (int s){return Int8Array(s);},
-  5121: (int s){return Uint8Array(s);},
-  5122: (int s){return Int16Array(s);},
-  5123: (int s){return Uint16Array(s);},
-  5125: (int s){return Uint32Array(s);},
-  5126: (int s){return Float32Array(s);}
+final Map<int,TypedData Function(int)>webglComponentTypes = {
+  5120: (int s){return Int8List(s);},
+  5121: (int s){return Uint8List(s);},
+  5122: (int s){return Int16List(s);},
+  5123: (int s){return Uint16List(s);},
+  5125: (int s){return Uint32List(s);},
+  5126: (int s){return Float32List(s);}
 };
 
 final webglCTBPE = {

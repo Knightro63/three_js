@@ -149,8 +149,10 @@ mixin WebGLUniformsHelper {
     cache.clear();
   }
 
-  List<double> flatten(List? array, int nBlocks, int blockSize) {
-    if(array == null || array.isEmpty) return [];
+  Float32List flat = Float32List(0);
+
+  Float32List flatten(List? array, int nBlocks, int blockSize) {
+    if(array == null || array.isEmpty) return Float32List(0);
     final firstElem = array[0];
 
     if (firstElem is num || firstElem is double || firstElem is int) {
@@ -160,7 +162,7 @@ mixin WebGLUniformsHelper {
         array2.add(element.toDouble());
       }
 
-      return array2;
+      return Float32List.fromList(array2);
     }
 
     final n = nBlocks * blockSize;
@@ -382,7 +384,6 @@ mixin WebGLUniformsHelper {
     if (arraysEqual(cache, elements)) {
       return;
     }
-
     gl.uniformMatrix4fv(addr, false, elements);
     copyArray(cache, elements);
   }
@@ -621,7 +622,6 @@ mixin WebGLUniformsHelper {
 
   void setValueM4Array(RenderingContext gl, v, [WebGLTextures? textures]) {
     final data = flatten(v, size, 16);
-
     gl.uniformMatrix4fv(addr, false, data);
   }
 

@@ -1,7 +1,6 @@
 import 'dart:typed_data';
 import '../others/constants.dart';
 import '../math/index.dart';
-import 'package:flutter_angle/flutter_angle.dart';
 
 /// [Interleaved] means that multiple attributes, possibly of different types,
 /// (e.g., position, normal, uv, color) are packed into a single array buffer.
@@ -9,7 +8,7 @@ import 'package:flutter_angle/flutter_angle.dart';
 /// An introduction into interleaved arrays can be found here:
 /// [Interleaved array basics](https://blog.tojicode.com/2011/05/interleaved-array-basics.html)
 class InterleavedBuffer {
-  NativeArray array;
+  TypedDataList array;
   int stride;
   late int meshPerAttribute;
   late int count;
@@ -26,7 +25,7 @@ class InterleavedBuffer {
   String type = "InterleavedBuffer";
 
   void dispose(){
-    array.dispose();
+    //array.dispose();
   }
 
   /// [array] -- A typed array with a shared buffer. Stores the
@@ -44,7 +43,7 @@ class InterleavedBuffer {
   /// [stride] -- The number of typed-array elements per vertex.
   factory InterleavedBuffer.fromList(TypedData array, int stride) {
     final totalLen = array.lengthInBytes;
-    return InterleavedBuffer(Float32Array(totalLen).set(array.buffer.asFloat32List()), stride);
+    return InterleavedBuffer(Float32List(totalLen).set(array.buffer.asFloat32List()), stride);
   }
 
   set needsUpdate(bool value) {
@@ -69,7 +68,7 @@ class InterleavedBuffer {
 
   /// Copies another [source] to this [source].
   InterleavedBuffer copy(InterleavedBuffer source) {
-    array = source.array.clone();
+    array = source.array.sublist(0) as TypedDataList;
     count = source.count;
     stride = source.stride;
     usage = source.usage;
@@ -144,7 +143,7 @@ class InterleavedBuffer {
 
     // if ( data.arrayBuffers[ this.array.buffer._uuid ] == null ) {
 
-    // 	data.arrayBuffers[ this.array.buffer._uuid ] = Array.prototype.slice.call( new Uint32Array( this.array.buffer ) );
+    // 	data.arrayBuffers[ this.array.buffer._uuid ] = Array.prototype.slice.call( Uint32List.fromList( this.array.buffer ) );
 
     // }
 

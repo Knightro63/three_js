@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert' as convert;
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/services.dart';
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
@@ -80,7 +81,7 @@ class BufferGeometryLoader extends Loader {
       final arrayBuffers = json.arrayBuffers;
       final arrayBuffer = arrayBuffers[uuid];
 
-      final ab = Uint32Array(arrayBuffer).buffer;
+      final ab = Uint32List.fromList(arrayBuffer).buffer;
 
       arrayBufferMap[uuid] = ab;
 
@@ -225,29 +226,29 @@ class BufferGeometryLoader extends Loader {
   }
 }
 
-NativeArray getTypedArray(String type, List buffer) {
+TypedDataList getTypedArray(String type, List buffer) {
   if (type == "Uint32Array" || type == "Uint32List") {
-    return Uint32Array.fromList(List<int>.from(buffer));
+    return Uint32List.fromList(List<int>.from(buffer));
   } else if (type == "Uint16Array" || type == "Uint16List") {
-    return Uint16Array.fromList(List<int>.from(buffer));
+    return Uint16List.fromList(List<int>.from(buffer));
   } else if (type == "Float32Array" || type == "Float32List") {
     List<double> b = [];
     for(int i = 0; i < buffer.length;i++){
       b.add(buffer[i].toDouble());
     }
-    return Float32Array.fromList(List<double>.from(b));
+    return Float32List.fromList(List<double>.from(b));
   } else {
     throw (" Util.dart getTypedArray type: $type is not support ");
   }
 }
 
-BufferAttribute getTypedAttribute(NativeArray array, int itemSize,
+BufferAttribute getTypedAttribute(TypedData array, int itemSize,
     [bool normalized = false]) {
-  if (array is Uint32Array) {
+  if (array is Uint32List) {
     return Uint32BufferAttribute(array, itemSize, normalized);
-  } else if (array is Uint16Array) {
+  } else if (array is Uint16List) {
     return Uint16BufferAttribute(array, itemSize, normalized);
-  } else if (array is Float32Array) {
+  } else if (array is Float32List) {
     return Float32BufferAttribute(array, itemSize, normalized);
   } else {
     throw (" Util.dart getTypedArray type: ${array.runtimeType} is not support ");

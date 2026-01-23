@@ -16,7 +16,7 @@ class _State extends State<OpenglScreenshot> {
   List<int> data = List.filled(60, 0, growable: true);
   late Timer timer;
   late three.ThreeJS threeJs;
-  late final three.Uint8Array buffer;
+  late final Uint8List buffer;
   late final three.WebGLRenderTarget rt;
 
   @override
@@ -54,7 +54,7 @@ class _State extends State<OpenglScreenshot> {
             img.Image image = img.Image.fromBytes(
               width: desiredWidth,
               height: desiredHeight,
-              bytes: buffer.toDartList().buffer,
+              bytes: buffer.buffer,
               numChannels: 4,
               order: img.ChannelOrder.rgb
             );
@@ -89,7 +89,7 @@ class _State extends State<OpenglScreenshot> {
   int desiredHeight = 1080;
 
   Future<void> setup() async {
-    buffer = three.Uint8Array( desiredWidth * desiredHeight * 4 );
+    buffer = Uint8List( desiredWidth * desiredHeight * 4 );
     rt = three.WebGLRenderTarget( desiredWidth, desiredHeight, three.WebGLRenderTargetOptions({
       'colorSpace': three.SRGBColorSpace,
       'samples': 4,

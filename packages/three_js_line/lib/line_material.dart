@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 
@@ -425,9 +427,9 @@ class LineMaterial extends ShaderMaterial {
     clipping = true; // required for clipping support
 
     defaultAttributeValues = {
-      'color': [1.0, 1.0, 1.0],
-      'uv': [0.0, 0.0],
-      'uv2': [0.0, 0.0]
+      'color': Float32List.fromList([1.0, 1.0, 1.0]),
+      'uv': Float32List.fromList([0.0, 0.0]),
+      'uv2': Float32List.fromList([0.0, 0.0])
     };
   }
 

@@ -5,12 +5,11 @@ import 'dart:math' as math;
 import 'package:web/web.dart';
 import 'package:image/image.dart' hide Color;
 import 'package:three_js_core/three_js_core.dart' as core;
-import 'package:three_js_math/three_js_math.dart';
 
 class ImageExport{
   static Future<Uint8List?> decodeImageFromList(core.ImageElement element, bool flipY, int maxTextureSize) async {
-    if(element.data is Uint8Array){
-      ByteBuffer bytes = Uint8List.fromList((element.data as Uint8Array).toDartList()).buffer;
+    if(element.data is Uint8List){
+      final ByteBuffer bytes = element.data.buffer;
       Image image = Image.fromBytes(
         width: element.width.toInt(), 
         height: element.height.toInt(), 

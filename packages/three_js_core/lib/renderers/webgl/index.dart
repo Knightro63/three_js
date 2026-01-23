@@ -18,6 +18,7 @@ import '../../lights/index.dart';
 import '../shaders/index.dart';
 import '../../math/frustum.dart';
 import '../pmrem_generator.dart';
+import 'package:flutter_angle/flutter_angle.dart';
 
 part 'web_gl_animation.dart';
 part 'web_gl_attributes.dart';

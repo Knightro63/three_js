@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 
@@ -28,7 +30,7 @@ class InstancedMesh extends Mesh {
   InstancedMesh(super.geometry, super.material, int count){
     type = "InstancedMesh";
 
-    final dl = Float32Array(count * 16);
+    final dl = Float32List(count * 16);
     instanceMatrix = InstancedBufferAttribute(dl, 16, false);
     instanceColor = null;
 
@@ -112,7 +114,7 @@ class InstancedMesh extends Mesh {
   /// [instanceColor][needsUpdate] to
   /// true after updating all the colors.
   void setColorAt(int index, Color color) {
-    instanceColor ??= InstancedBufferAttribute(Float32Array((instanceMatrix!.count * 3).toInt()), 3, false);
+    instanceColor ??= InstancedBufferAttribute(Float32List((instanceMatrix!.count * 3).toInt()), 3, false);
     color.copyIntoArray(instanceColor!.array, index * 3);
   }
 
@@ -127,15 +129,15 @@ class InstancedMesh extends Mesh {
   /// sure you set [instanceMatrix][needsUpdate] 
   /// to true after updating all the matrices.
   void setMatrixAt(int index, Matrix4 matrix) {
-    matrix.copyIntoArray(instanceMatrix!.array.toDartList(), index * 16);
+    matrix.copyIntoList(instanceMatrix!.array, index * 16);
   }
 
 	void setMorphAt(int index, Object3D object ) {
 		final objectInfluences = object.morphTargetInfluences;
 		final len = objectInfluences.length + 1; // morphBaseInfluence + all influences
 
-		morphTexture ??= DataTexture( Float32Array(len * count!), len, count, RedFormat, FloatType );
-		final Float32Array array = morphTexture!.source.data.data;
+		morphTexture ??= DataTexture( Float32List(len * count!), len, count, RedFormat, FloatType );
+		final Float32List array = morphTexture!.source.data.data;
 
 		double morphInfluencesSum = 0;
 		for (int i = 0; i < objectInfluences.length; i ++ ) {

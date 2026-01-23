@@ -1,5 +1,5 @@
 import 'dart:math' as math;
-
+import 'dart:typed_data';
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 
@@ -31,7 +31,7 @@ class BufferGeometryUtils{
       final name = attributeNames[ i ];
       final attr = geometry.attributes[ name ];
       tmpAttributes[ name ] = Float32BufferAttribute(
-        Float32Array( attr.count * attr.itemSize ),
+        Float32List( attr.count * attr.itemSize ),
         attr.itemSize,
         attr.normalized
       );
@@ -41,7 +41,7 @@ class BufferGeometryUtils{
         if ( ! tmpMorphAttributes[ name ] ) tmpMorphAttributes[ name ] = [];
         int j = 0;
         morphAttributes.forEach( ( morphAttr){
-        final array = Float32Array(morphAttr.count * morphAttr.itemSize);//morphAttr.array.constructor( morphAttr.count * morphAttr.itemSize );
+        final array = Float32List(morphAttr.count * morphAttr.itemSize);//morphAttr.array.constructor( morphAttr.count * morphAttr.itemSize );
           tmpMorphAttributes[ name ][ j ] = Float32BufferAttribute(array, morphAttr.itemSize, morphAttr.normalized);//morphAttr.constructor( array, morphAttr.itemSize, morphAttr.normalized );
           j++;
         } );
@@ -281,12 +281,12 @@ class BufferGeometryUtils{
     }
 
     // Create a new array to hold all merged attribute data
-    final array = Float32Array(count * itemSize);
+    final array = Float32List(count * itemSize);
 
     int offset = 0;
     for (final attr in attributes) {
-      final Float32Array srcArray = attr.array as Float32Array;
-      array.set(srcArray.toDartList(), offset);
+      final Float32List srcArray = attr.array as Float32List;
+      array.set(srcArray, offset);
       offset += srcArray.length;
     }
     return Float32BufferAttribute(array, itemSize, normalized);

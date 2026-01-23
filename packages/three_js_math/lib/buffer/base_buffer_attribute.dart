@@ -1,6 +1,7 @@
+import 'dart:typed_data';
 import 'package:three_js_math/three_js_math.dart';
 
-abstract class BaseBufferAttribute<TData extends NativeArray> {
+abstract class BaseBufferAttribute<TData extends TypedDataList> {
   late TData array;
   late int itemSize;
 
@@ -22,7 +23,7 @@ abstract class BaseBufferAttribute<TData extends NativeArray> {
   BaseBufferAttribute();
 
   void dispose(){
-    array.dispose();
+    //array.dispose();
     data?.dispose();
     data = null;
   }

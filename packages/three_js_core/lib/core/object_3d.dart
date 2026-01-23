@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 
@@ -1328,8 +1330,11 @@ class Object3D with EventDispatcher {
 
     parent?.dispose();
     
-    if(background is NativeArray || background is ImageElement || background is Texture){
+    if(background is ImageElement || background is Texture){
       background?.dispose();
+      background = null;
+    }
+    else if(background is TypedDataList){
       background = null;
     }
   

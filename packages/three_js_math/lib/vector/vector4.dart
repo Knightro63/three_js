@@ -4,7 +4,6 @@ import 'dart:math' as math;
 import '../matrix/index.dart';
 import '../rotation/index.dart';
 import 'index.dart';
-import 'package:flutter_angle/flutter_angle.dart';
 
 class Vector4 extends Vector{
   String type = "Vector4";
@@ -635,7 +634,7 @@ class Vector4 extends Vector{
     return array;
   }
   @override
-  NativeArray copyIntoNativeArray(NativeArray array, [int offset = 0]) {
+  Float32List copyIntoList(Float32List array, [int offset = 0]) {
     array[offset] = storage[0];
     array[offset + 1] = storage[1];
     array[offset + 2] = storage[2];
@@ -644,7 +643,7 @@ class Vector4 extends Vector{
     return array;
   }
   @override
-  Vector4 fromNativeArray(NativeArray array, [int offset = 0]) {
+  Vector4 fromArray(List<num> array, [int offset = 0]) {
     x = array[offset].toDouble();
     y = array[offset + 1].toDouble();
     z = array[offset + 2].toDouble();

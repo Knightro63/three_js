@@ -7,6 +7,7 @@ import 'package:three_js_core/others/index.dart';
 import 'package:three_js_core/renderers/index.dart';
 import 'package:three_js_core/three_js_core.dart' as core;
 import 'package:three_js_math/three_js_math.dart';
+import 'package:flutter_angle/flutter_angle.dart';
 
 class Settings{
   Settings({
@@ -193,7 +194,7 @@ class ThreeJS with WidgetsBindingObserver{
     events.clear();
     disposeEvents.clear();
 
-    allNativeData.dispose();
+    //allNativeData.dispose();
 
     angle?.dispose([texture]);
     loadingWidget = null;

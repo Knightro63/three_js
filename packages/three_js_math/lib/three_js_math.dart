@@ -8,4 +8,3 @@ export 'rotation/index.dart';
 export 'buffer/index.dart';
 export 'others/index.dart';
 export 'math/index.dart';
-export 'package:flutter_angle/flutter_angle.dart';

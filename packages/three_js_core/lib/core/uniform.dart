@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:three_js_math/three_js_math.dart';
 
 /// Uniforms are global GLSL variables. They are passed to shader programs.
@@ -14,7 +15,7 @@ import 'package:three_js_math/three_js_math.dart';
 /// objects or ten `number`s.
 class Uniform {
   dynamic value;
-  Float32Array? data;
+  Float32List? data;
   int? offset;
 
 	Uniform(this.value);

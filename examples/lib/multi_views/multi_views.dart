@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart' hide Matrix4;
 import 'package:three_js/three_js.dart' as three;
+import 'package:flutter_angle/flutter_angle.dart';
 
 class MultiViews extends StatefulWidget {
   const MultiViews({super.key});
@@ -9,7 +10,7 @@ class MultiViews extends StatefulWidget {
 }
 
 class _MyAppState extends State<MultiViews> {
-  List<three.FlutterAngleTexture> textures = [];
+  List<FlutterAngleTexture> textures = [];
   ScrollController controller = ScrollController();
 
   @override

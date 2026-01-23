@@ -4,6 +4,7 @@ import 'package:example/src/statistics.dart';
 import 'package:three_js/three_js.dart' as three;
 import 'dart:math' as math;
 import 'package:three_js_postprocessing/three_js_postprocessing.dart';
+import 'package:flutter_angle/flutter_angle.dart';
 
 class WebglPostprocessingFXAA extends StatefulWidget {
   const WebglPostprocessingFXAA({super.key});
@@ -119,7 +120,7 @@ class _State extends State<WebglPostprocessingFXAA> {
     threeJs.customRenderer = renderer;
   }
 
-  Future<void> renderer(three.Scene scene, three.Camera camera, three.FlutterAngleTexture texture,[dt]) async{
+  Future<void> renderer(three.Scene scene, three.Camera camera, FlutterAngleTexture texture,[dt]) async{
     final halfWidth = threeJs.width / 2;
 
     controls.update();

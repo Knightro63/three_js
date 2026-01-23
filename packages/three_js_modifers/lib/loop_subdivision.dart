@@ -284,7 +284,7 @@ class LoopSubdivision {
             const newTriangles = 4; /* maximum number of triangles */
             final arrayLength = (vertexCount * attribute.itemSize) * newTriangles;
             final List<num> floatArray = List.filled(arrayLength, 0, growable: true);//attribute.array.sublist(0,arrayLength);//.constructor(arrayLength);
-            floatArray.replaceRange(0, attribute.array.length, attribute.array.sublist(0));
+            floatArray.replaceRange(0, attribute.array.length, List<num>.from(attribute.array));
             final processGroups = (attributeName == 'position' && ! morph && existing.groups.length > 0);
             int? groupStart; 
             int? groupMaterial;

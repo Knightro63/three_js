@@ -17,13 +17,13 @@ class MarchingCubes extends Mesh{
   late double halfsize;
   late double delta;
 
-  late Float32Array field;
-  late Float32Array normalCache;
-  late Float32Array palette;
-  late Float32Array positionArray;
-  late Float32Array normalArray;
-  late Float32Array uvArray;
-  late Float32Array colorArray;
+  late Float32List field;
+  late Float32List normalCache;
+  late Float32List palette;
+  late Float32List positionArray;
+  late Float32List normalArray;
+  late Float32List uvArray;
+  late Float32List colorArray;
 
   int maxPolyCount;
   late int yd;
@@ -52,25 +52,25 @@ class MarchingCubes extends Mesh{
     yd = size.toInt();
     zd = size2.toInt();
 
-    field = Float32Array(size3.toInt());
-    normalCache = Float32Array(size3.toInt() * 3);
-    palette = Float32Array(size3.toInt() * 3);
+    field = Float32List(size3.toInt());
+    normalCache = Float32List(size3.toInt() * 3);
+    palette = Float32List(size3.toInt() * 3);
 
     final maxVertexCount = maxPolyCount * 3;
 
-    positionArray = Float32Array(maxVertexCount * 3);
+    positionArray = Float32List(maxVertexCount * 3);
     geometry!.setAttributeFromString('position', Float32BufferAttribute(positionArray,3));
 
-    normalArray = Float32Array( maxVertexCount * 3);
+    normalArray = Float32List( maxVertexCount * 3);
     geometry!.setAttributeFromString('normal', Float32BufferAttribute(normalArray,3));
 
     if(enableUvs){
-      uvArray = Float32Array(maxVertexCount * 2 );
+      uvArray = Float32List(maxVertexCount * 2 );
       geometry!.setAttributeFromString('uv', Float32BufferAttribute(uvArray,3));
     }
 
     if (enableColors){
-      colorArray = Float32Array(maxVertexCount * 3 );
+      colorArray = Float32List(maxVertexCount * 3 );
       geometry!.setAttributeFromString('color',Float32BufferAttribute(colorArray,3));
     }
 

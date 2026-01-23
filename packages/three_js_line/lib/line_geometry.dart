@@ -1,5 +1,5 @@
+import 'dart:typed_data';
 import 'line_segments_geometry.dart';
-import 'package:three_js_math/three_js_math.dart';
 
 class LineGeometry extends LineSegmentsGeometry {
 
@@ -10,7 +10,7 @@ class LineGeometry extends LineSegmentsGeometry {
 	LineGeometry setPositions( array ) {
 		// converts [ x1, y1, z1,  x2, y2, z2, ... ] to pairs format
 		final length = array.length - 3;
-		final points = new Float32Array( 2 * length );
+		final points = new Float32List( 2 * length );
 
 		for (int i = 0; i < length; i += 3 ) {
 			points[ 2 * i ] = array[ i ];
@@ -30,7 +30,7 @@ class LineGeometry extends LineSegmentsGeometry {
 	LineGeometry setColors( array ) {
 		// converts [ r1, g1, b1,  r2, g2, b2, ... ] to pairs format
 		final length = array.length - 3;
-		final colors = new Float32Array( 2 * length );
+		final colors = new Float32List( 2 * length );
 
 		for (int i = 0; i < length; i += 3 ) {
 			colors[ 2 * i ] = array[ i ];

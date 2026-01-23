@@ -10,15 +10,15 @@ int absNumericalSort(a, b) {
 
 void denormalize(Vector morph, BufferAttribute attribute) {
   double denominator = 1;
-  NativeArray array = attribute is InterleavedBufferAttribute ? attribute.data!.array : attribute.array;
+  TypedDataList array = attribute is InterleavedBufferAttribute ? attribute.data!.array : attribute.array;
 
-  if (array is Int8Array) {
+  if (array is Int8List) {
     denominator = 127;
   } 
-  else if (array is Int16Array) {
+  else if (array is Int16List) {
     denominator = 32767;
   } 
-  else if (array is Int32Array) {
+  else if (array is Int32List) {
     denominator = 2147483647;
   } 
   else {
@@ -89,7 +89,7 @@ class WebGLMorphtargets {
         width = capabilities.maxTextureSize.toInt();
       }
 
-      final buffer = Float32Array((width * height * 4 * morphTargetsCount).toInt());
+      final buffer = Float32List((width * height * 4 * morphTargetsCount).toInt());
 
       final texture = DataArrayTexture(buffer, width, height, morphTargetsCount);
       texture.type = FloatType;

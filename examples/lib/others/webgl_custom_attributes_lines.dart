@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:typed_data';
 import 'package:example/src/statistics.dart';
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
@@ -120,17 +121,17 @@ class _State extends State<WebglCustomAttributesLines> {
     geometry.center();
 
     final count = geometry.attributes['position'].count;
-    final displacement = three.Float32BufferAttribute(three.Float32Array( count * 3), 3 );
+    final displacement = three.Float32BufferAttribute(Float32List( count * 3), 3 );
     geometry.setAttributeFromString( 'displacement', displacement );
 
-    final customColor = three.Float32BufferAttribute(three.Float32Array( count * 3), 3 );
+    final customColor = three.Float32BufferAttribute(Float32List( count * 3), 3 );
     geometry.setAttributeFromString( 'customColor', customColor );
 
     final color = three.Color( 0xffffff );
 
     for (int i = 0, l = customColor.count; i < l; i ++ ) {
       color.setHSL( i / l, 0.5, 0.5 );
-      color.copyIntoArray( customColor.array, i * customColor.itemSize );
+      color.copyIntoList( customColor.array, i * customColor.itemSize );
     }
 
     final line = three.Line( geometry, shaderMaterial );

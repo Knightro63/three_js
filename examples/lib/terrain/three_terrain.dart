@@ -154,7 +154,7 @@ class _State extends State<TerrainPage> {
       applySmoothing(val, lastOptions);
       scatterMeshes();
       if (lastOptions.heightmap != null) {
-        terrain.Terrain.toHeightmap(terrainScene!.children[0].geometry!.attributes['position'].array.toDartList(), lastOptions);
+        terrain.Terrain.toHeightmap(terrainScene!.children[0].geometry!.attributes['position'].array, lastOptions);
       }
     })
     ..addSlider(guiSettings,'segments', 7, 127).onFinishChange((){regenerate(blend);})
@@ -216,7 +216,7 @@ class _State extends State<TerrainPage> {
 
   void applySmoothing(smoothing, terrain.TerrainOptions o) {
     three.Object3D m = terrainScene!.children[0];
-    Float32List g = terrain.Terrain.toArray1D(m.geometry!.attributes['position'].array.toDartList());
+    Float32List g = terrain.Terrain.toArray1D(m.geometry!.attributes['position'].array);
     if (smoothing == 'Conservative (0.5)') terrain.Terrain.smoothConservative(g, o, 0.5);
     if (smoothing == 'Conservative (1)') terrain.Terrain.smoothConservative(g, o, 1);
     if (smoothing == 'Conservative (10)'){ terrain.Terrain.smoothConservative(g, o, 10);}
@@ -230,7 +230,7 @@ class _State extends State<TerrainPage> {
     else if (smoothing == 'Mean (1)'){ terrain.Terrain.smooth(g, o, 1);}
     else if (smoothing == 'Mean (8)'){ terrain.Terrain.smooth(g, o, 8);}
     else if (smoothing == 'Median'){ terrain.Terrain.smoothMedian(g, o);}
-    terrain.Terrain.fromArray1D(m.geometry!.attributes['position'].array.toDartList(), g);
+    terrain.Terrain.fromArray1D(m.geometry!.attributes['position'].array, g);
     terrain.Terrain.normalize(m, o);
   }
 
@@ -441,7 +441,7 @@ class _State extends State<TerrainPage> {
     // var he = document.getElementById('heightmap');
     // if (he != null) {
     //   o.heightmap = he;
-      heightMapImage = terrain.Terrain.toHeightmap(terrainScene!.children[0].geometry!.attributes['position'].array.toDartList(), o);
+      heightMapImage = terrain.Terrain.toHeightmap(terrainScene!.children[0].geometry!.attributes['position'].array, o);
     // }
     heightMapImage = rgba2bitmap(heightMapImage!, o.xSegments+1, o.ySegments+1);
     lastOptions = o;

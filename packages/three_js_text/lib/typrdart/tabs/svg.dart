@@ -31,7 +31,7 @@ class Typr_SVG {
       var svgDocLength = TyprBin.readUint(data, offset);
       offset += 4;
 
-      // var sbuf = new Uint8Array(data.buffer, offset0 + svgDocOffset + svgDocIndexOffset, svgDocLength);
+      // final sbuf = new Uint8List(data.buffer, offset0 + svgDocOffset + svgDocIndexOffset, svgDocLength);
       int _offset = offset0 + svgDocOffset + svgDocIndexOffset;
       int _length = svgDocLength;
       var sbuf = data.sublist(_offset, _offset + _length);

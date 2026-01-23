@@ -1,3 +1,7 @@
+## 0.3.0
+
+* Removed FlutterAngle
+
 ## 0.2.6
 
 * Added cloning support for Uint32BufferAttribute in BufferAttribute.clone

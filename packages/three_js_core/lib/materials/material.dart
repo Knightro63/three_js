@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:three_js_core/others/index.dart';
 
 import '../core/event_dispatcher.dart';
@@ -302,7 +303,7 @@ class Material with EventDispatcher {
   int? depthPacking;
   String? index0AttributeName;
   Map<String, dynamic>? extensions;
-  Map<String, dynamic>? defaultAttributeValues;
+  Map<String, Float32List>? defaultAttributeValues;
 
   bool? lights;
   bool? clipping;

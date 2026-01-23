@@ -1449,8 +1449,9 @@ class WebGLTextures {
     }
   }
 
-	final List<int> invalidationArrayRead = [];
-	final List<int> invalidationArrayDraw = [];
+	final Uint32List invalidationArrayDraw = Uint32List(1);
+  final Uint32List invalidationArrayRead = Uint32List(1);
+
   void updateMultisampleRenderTarget(RenderTarget renderTarget) {
 		if ( renderTarget.samples > 0 ) {
 			if ( !useMultisampledRTT( renderTarget )) {
@@ -1527,13 +1528,15 @@ class WebGLTextures {
 				state.bindFramebuffer( WebGL.DRAW_FRAMEBUFFER, renderTargetProperties['__webglMultisampledFramebuffer'] );
 			} else {
 				if ( renderTarget.depthBuffer && !renderTarget.resolveDepthBuffer && supportsInvalidateFramebuffer ) {
-					final depthStyle = renderTarget.stencilBuffer ? WebGL.DEPTH_STENCIL_ATTACHMENT : WebGL.DEPTH_ATTACHMENT;
-					_gl.invalidateFramebuffer( WebGL.DRAW_FRAMEBUFFER, [ depthStyle ] );
+					depthStyle[0] = renderTarget.stencilBuffer ? WebGL.DEPTH_STENCIL_ATTACHMENT : WebGL.DEPTH_ATTACHMENT;
+					_gl.invalidateFramebuffer( WebGL.DRAW_FRAMEBUFFER, depthStyle );
 				}
 			}
 		}
   }
-  
+
+  Uint32List depthStyle = Uint32List.fromList([WebGL.DEPTH_ATTACHMENT]);
+
   bool useMultisampledRenderToTexture(RenderTarget renderTarget) {
     final renderTargetProperties = properties.get(renderTarget);
 
