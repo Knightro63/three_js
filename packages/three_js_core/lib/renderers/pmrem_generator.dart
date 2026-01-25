@@ -439,13 +439,13 @@ class PMREMGenerator {
       console.warning("sigmaRadians, $sigmaRadians, is too large and will clip, as it requested $samples samples when the maximum is set to $maxSamples");
     }
 
-    List<double> weights = [];
+    Float32List weights = Float32List(maxSamples);
     double sum = 0;
 
     for (int i = 0; i < maxSamples; ++i) {
       final x = i / sigmaPixels;
       final weight = math.exp(-x * x / 2);
-      weights.add(weight);
+      weights[i] = weight;
 
       if (i == 0) {
         sum += weight;
@@ -460,7 +460,7 @@ class PMREMGenerator {
 
     blurUniforms['envMap']["value"] = targetIn?.texture;
     blurUniforms['samples']["value"] = samples;
-    blurUniforms['weights']["value"] = Float32List.fromList(weights);
+    blurUniforms['weights']["value"] = weights;
     blurUniforms['latitudinal']["value"] = direction == 'latitudinal';
 
     if (poleAxis != null) {

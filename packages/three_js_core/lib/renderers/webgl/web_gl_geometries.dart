@@ -75,7 +75,7 @@ class WebGLGeometries {
   }
 
   void updateWireframeAttribute(BufferGeometry geometry) {
-    List<int> indices = [];
+    Uint32List indices = Uint32List(0);
 
     final geometryIndex = geometry.index;
     final geometryPosition = geometry.attributes["position"];

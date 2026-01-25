@@ -58,7 +58,7 @@ class WebGLMorphtargets {
   }
 
   void update(Object3D object, BufferGeometry geometry, WebGLProgram program) {
-    List<num>? objectInfluences = object.morphTargetInfluences;
+    Float32List? objectInfluences = Float32List.fromList(object.morphTargetInfluences);
 
     final morphAttribute = geometry.morphAttributes["position"] ?? geometry.morphAttributes["normal"] ?? geometry.morphAttributes["color"];
     final morphTargetsCount = (morphAttribute != null) ? morphAttribute.length : 0;

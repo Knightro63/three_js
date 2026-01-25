@@ -133,8 +133,9 @@ class _MyAppState extends State<WebglLoaderSvg> {
         final strokeColor = path.userData?["style"]["stroke"];
 
         if (guiData["drawStrokes"] == true &&
-            strokeColor != null &&
-            strokeColor != 'none') {
+          strokeColor != null &&
+          strokeColor != 'none'
+        ) {
           three.MeshBasicMaterial material = three.MeshBasicMaterial.fromMap({
             "color": three.Color().setStyle(strokeColor).convertSRGBToLinear(),
             "opacity": path.userData?["style"]["strokeOpacity"],
@@ -146,8 +147,7 @@ class _MyAppState extends State<WebglLoaderSvg> {
 
           for (int j = 0, jl = path.subPaths.length; j < jl; j++) {
             three.Path subPath = path.subPaths[j];
-            final geometry = SVGLoader.pointsToStroke(
-                subPath.getPoints(), path.userData?["style"]);
+            final geometry = SVGLoader.pointsToStroke(subPath.getPoints(), path.userData?["style"]);
 
             if (geometry != null) {
               final mesh = three.Mesh(geometry, material);

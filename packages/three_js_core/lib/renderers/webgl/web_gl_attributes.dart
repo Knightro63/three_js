@@ -133,7 +133,7 @@ class WebGLAttributes {
 					f,
         );
 
-        f.dispose();
+        //f.dispose();
 			}
 
 			attribute.clearUpdateRanges();

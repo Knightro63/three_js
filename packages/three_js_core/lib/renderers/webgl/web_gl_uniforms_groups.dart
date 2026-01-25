@@ -7,7 +7,7 @@ class WebGLUniformsGroups{
   
 	Map buffers = {};
 	Map updateList = {};
-	List<int> allocatedBindingPoints = [];
+	late final Uint32List allocatedBindingPoints = Uint32List(maxBindingPoints);
   RenderingContext gl;
 
 	late final int maxBindingPoints; // binding points are global whereas block indices are per shader program
@@ -64,8 +64,8 @@ class WebGLUniformsGroups{
 
 	int allocateBindingPointIndex() {
 		for (int i = 0; i < maxBindingPoints; i ++ ) {
-			if (!allocatedBindingPoints.contains( i )) {
-				allocatedBindingPoints.add( i );
+			if (allocatedBindingPoints[i] == 0) {
+				allocatedBindingPoints[i] = 1;
 				return i;
 			}
 		}
@@ -271,7 +271,7 @@ class WebGLUniformsGroups{
 			gl.deleteBuffer( buffers[ id ] );
 		}
 
-		allocatedBindingPoints = [];
+		allocatedBindingPoints.clear();
 		buffers = {};
 		updateList = {};
 	}

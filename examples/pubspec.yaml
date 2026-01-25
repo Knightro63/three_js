@@ -104,7 +104,8 @@ dependency_overrides:
     path: ../packages/three_js_text
   three_js_geometry:
     path: ../packages/three_js_geometry
-
+  three_js_sensors:
+    path: ../packages/three_js_sensors
 
 flutter:
   uses-material-design: true

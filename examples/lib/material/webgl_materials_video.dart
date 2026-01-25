@@ -4,8 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:example/src/statistics.dart';
 import 'package:three_js/three_js.dart' as three;
 import 'package:three_js_postprocessing/post/effect_composer.dart';
-// import 'package:three_js_postprocessing/post/bloom_pass.dart';
-// import 'package:three_js_postprocessing/post/outpass.dart';
 import 'package:three_js_postprocessing/post/render_pass.dart';
 import 'package:three_js_video_texture/three_js_video_texture.dart';
 

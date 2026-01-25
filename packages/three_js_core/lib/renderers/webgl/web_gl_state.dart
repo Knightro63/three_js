@@ -123,8 +123,9 @@ class WebGLState {
     currentViewport = Vector4.identity();
   }
 
+  final data = Uint8List(4);
+
   WebGLTexture createTexture(int type, int target, int count) {
-    final data = Uint8List(4);
     // 4 is required to match default unpack alignment of 4.
     //
     final texture = gl.createTexture();
@@ -137,7 +138,7 @@ class WebGLState {
       gl.texImage2D(target + i, 0, WebGL.RGBA, 1, 1, 0, WebGL.RGBA, WebGL.UNSIGNED_BYTE, data);
     }
 
-    data.dispose();
+    //data.dispose();
 
     return texture;
   }
