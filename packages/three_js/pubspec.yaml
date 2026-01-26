@@ -17,6 +17,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  three_js_angle_renderer: ^0.0.1
   three_js_math: ^0.3.0
   three_js_advanced_loaders: ^0.3.0
   three_js_animations: ^0.3.0

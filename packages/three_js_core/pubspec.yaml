@@ -13,7 +13,6 @@ dependencies:
   logger: ^2.5.0
   three_js_math: ^0.3.0
   web: ^1.1.1
-  flutter_angle: ^0.3.9
 
 dev_dependencies:
   flutter_test:

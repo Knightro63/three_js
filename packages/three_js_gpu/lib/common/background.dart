@@ -15,16 +15,15 @@ class Background extends DataMap {
 
 	Background(this.renderer, this.nodes ):super();
 
-	/**
-	 * Updates the background for the given scene. Depending on how `Scene.background`
-	 * or `Scene.backgroundNode` are configured, this method might configure a simple clear
-	 * or add a mesh to the render list for rendering the background as a textured plane
-	 * or skybox.
-	 *
-	 * @param {Scene} scene - The scene.
-	 * @param {RenderList} renderList - The current render list.
-	 * @param {RenderContext} renderContext - The current render context.
-	 */
+	/// Updates the background for the given scene. Depending on how `Scene.background`
+	/// or `Scene.backgroundNode` are configured, this method might configure a simple clear
+	/// or add a mesh to the render list for rendering the background as a textured plane
+	/// or skybox.
+	///
+	/// @param {Scene} scene - The scene.
+	/// @param {RenderList} renderList - The current render list.
+	/// @param {RenderContext} renderContext - The current render context.
+	///
 	void update(Scene scene, RenderList renderList, RenderContext renderContext ) {
 		final renderer = this.renderer;
 		final background = this.nodes.getBackgroundNode( scene ) ?? scene.background;

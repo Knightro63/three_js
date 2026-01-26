@@ -815,7 +815,7 @@ class BatchedMesh extends Mesh {
 
   @override
 	OnRender? get onBeforeRender =>({
-    WebGLRenderer? renderer,
+    Renderer? renderer,
     RenderTarget? renderTarget,
     Object3D? mesh,
     Scene? scene,
@@ -940,7 +940,7 @@ class BatchedMesh extends Mesh {
 
   @override
   void onBeforeShadow({
-    WebGLRenderer? renderer,
+    Renderer? renderer,
     Object3D? scene,
     Camera? camera,
     Camera? shadowCamera,

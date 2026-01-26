@@ -1,141 +1,76 @@
 import 'package:three_js_gpu/common/backend.dart';
 import 'package:three_js_gpu/common/renderer.dart';
 
-/**
- * A backend implementation targeting WebGPU.
- *
- * @private
- * @augments Backend
- */
+///
+/// A backend implementation targeting WebGPU.
+///
+/// @private
+/// @augments Backend
+///
 class WebGPUBackend extends Backend {
   bool isWebGPUBackend = true;
+  bool logarithmicDepthBuffer = false;
+  bool alpha = true;
+  late bool compatibilityMode = this.parameters['compatibilityMode'];
+  bool depth = true;
+  bool stencil = false;
+  bool antialias = false;
+  int samples = 0;
+  bool forceWebGL = false;
+  bool trackTimestamp = false;
+  String powerPreference = '';
+  Object requiredLimits = {};
+  GPUDevice? device;
+  int outputType = 0;
+  GPUCanvasContext? context;
+  Object? defaultRenderPassdescriptor;
+  GPUTexture? colorBuffer;
+  GPUTexture? depthBuffer;
+  GPUTexture? stencilBuffer;
+  late WebGPUUtils utils = WebGPUUtils(this);
+  late WebGPUAttributeUtils attributeUtils = WebGPUAttributeUtils(this);
+  late WebGPUBindingUtils bindingUtils = WebGPUBindingUtils(this);
+  late WebGPUPipelineUtils pipelineUtils = WebGPUPipelineUtils(this);
+  late WebGPUTextureUtils textureUtils = WebGPUTextureUtils(this);
+  Map<int, GPUBuffer> occludedResolveCache = new Map();
 
-	/**
-	 * WebGPUBackend options.
-	 *
-	 * @typedef {Object} WebGPUBackend~Options
-	 * @property {boolean} [logarithmicDepthBuffer=false] - Whether logarithmic depth buffer is enabled or not.
-	 * @property {boolean} [alpha=true] - Whether the default framebuffer (which represents the final contents of the canvas) should be transparent or opaque.
-	 * @property {boolean} [compatibilityMode=false] - Whether the backend should be in compatibility mode or not.
-	 * @property {boolean} [depth=true] - Whether the default framebuffer should have a depth buffer or not.
-	 * @property {boolean} [stencil=false] - Whether the default framebuffer should have a stencil buffer or not.
-	 * @property {boolean} [antialias=false] - Whether MSAA as the default anti-aliasing should be enabled or not.
-	 * @property {number} [samples=0] - When `antialias` is `true`, `4` samples are used by default. Set this parameter to any other integer value than 0 to overwrite the default.
-	 * @property {boolean} [forceWebGL=false] - If set to `true`, the renderer uses a WebGL 2 backend no matter if WebGPU is supported or not.
-	 * @property {boolean} [trackTimestamp=false] - Whether to track timestamps with a Timestamp Query API or not.
-	 * @property {string} [powerPreference=null] - The power preference.
-	 * @property {Object} [requiredLimits=null] - Specifies the limits that are required by the device request. The request will fail if the adapter cannot provide these limits.
-	 * @property {GPUDevice} [device=null] - If there is an existing GPU device on app level, it can be passed to the renderer as a parameter.
-	 * @property {number} [outputType=null] - Texture type for output to canvas. By default, device's preferred format is used; other formats may incur overhead.
-	 */
+	/// WebGPUBackend options.
+	///
+	/// @typedef {Object} WebGPUBackend~Options
+	/// @property {boolean} [logarithmicDepthBuffer=false] - Whether logarithmic depth buffer is enabled or not.
+	/// @property {boolean} [alpha=true] - Whether the default framebuffer (which represents the final contents of the canvas) should be transparent or opaque.
+	/// @property {boolean} [compatibilityMode=false] - Whether the backend should be in compatibility mode or not.
+	/// @property {boolean} [depth=true] - Whether the default framebuffer should have a depth buffer or not.
+	/// @property {boolean} [stencil=false] - Whether the default framebuffer should have a stencil buffer or not.
+	/// @property {boolean} [antialias=false] - Whether MSAA as the default anti-aliasing should be enabled or not.
+	/// @property {number} [samples=0] - When `antialias` is `true`, `4` samples are used by default. Set this parameter to any other integer value than 0 to overwrite the default.
+	/// @property {boolean} [forceWebGL=false] - If set to `true`, the renderer uses a WebGL 2 backend no matter if WebGPU is supported or not.
+	/// @property {boolean} [trackTimestamp=false] - Whether to track timestamps with a Timestamp Query API or not.
+	/// @property {string} [powerPreference=null] - The power preference.
+	/// @property {Object} [requiredLimits=null] - Specifies the limits that are required by the device request. The request will fail if the adapter cannot provide these limits.
+	/// @property {GPUDevice} [device=null] - If there is an existing GPU device on app level, it can be passed to the renderer as a parameter.
+	/// @property {number} [outputType=null] - Texture type for output to canvas. By default, device's preferred format is used; other formats may incur overhead.
 
-	/**
-	 * Constructs a new WebGPU backend.
-	 *
-	 * @param {WebGPUBackend~Options} [parameters] - The configuration parameter.
-	 */
+	/// Constructs a new WebGPU backend.
+	///
+	/// @param {WebGPUBackend~Options} [parameters] - The configuration parameter.
+	///
 	WebGPUBackend(super.parameters) {
 
 		// some parameters require default values other than "null"
-		this.parameters.alpha = ( parameters.alpha == null ) ? true : parameters.alpha;
-		this.parameters.compatibilityMode = ( parameters.compatibilityMode == null ) ? false : parameters.compatibilityMode;
+		this.parameters['alpha'] = ( parameters['alpha'] == null ) ? true : parameters['alpha'];
+		this.parameters['compatibilityMode'] = ( parameters['compatibilityMode'] == null ) ? false : parameters['compatibilityMode'];
 
-		this.parameters.requiredLimits = ( parameters.requiredLimits == null ) ? {} : parameters.requiredLimits;
-
-		/**
-		 * Indicates whether the backend is in compatibility mode or not.
-		 * @type {boolean}
-		 * @default false
-		 */
-		this.compatibilityMode = this.parameters.compatibilityMode;
-
-		/**
-		 * A reference to the device.
-		 *
-		 * @type {?GPUDevice}
-		 * @default null
-		 */
-		this.device = null;
-
-		/**
-		 * A reference to the context.
-		 *
-		 * @type {?GPUCanvasContext}
-		 * @default null
-		 */
-		this.context = null;
-
-		/**
-		 * A reference to the color attachment of the default framebuffer.
-		 *
-		 * @type {?GPUTexture}
-		 * @default null
-		 */
-		this.colorBuffer = null;
-
-		/**
-		 * A reference to the default render pass descriptor.
-		 *
-		 * @type {?Object}
-		 * @default null
-		 */
-		this.defaultRenderPassdescriptor = null;
-
-		/**
-		 * A reference to a backend module holding common utility functions.
-		 *
-		 * @type {WebGPUUtils}
-		 */
-		this.utils = new WebGPUUtils( this );
-
-		/**
-		 * A reference to a backend module holding shader attribute-related
-		 * utility functions.
-		 *
-		 * @type {WebGPUAttributeUtils}
-		 */
-		this.attributeUtils = new WebGPUAttributeUtils( this );
-
-		/**
-		 * A reference to a backend module holding shader binding-related
-		 * utility functions.
-		 *
-		 * @type {WebGPUBindingUtils}
-		 */
-		this.bindingUtils = new WebGPUBindingUtils( this );
-
-		/**
-		 * A reference to a backend module holding shader pipeline-related
-		 * utility functions.
-		 *
-		 * @type {WebGPUPipelineUtils}
-		 */
-		this.pipelineUtils = new WebGPUPipelineUtils( this );
-
-		/**
-		 * A reference to a backend module holding shader texture-related
-		 * utility functions.
-		 *
-		 * @type {WebGPUTextureUtils}
-		 */
-		this.textureUtils = new WebGPUTextureUtils( this );
-
-		/**
-		 * A map that manages the resolve buffers for occlusion queries.
-		 *
-		 * @type {Map<number,GPUBuffer>}
-		 */
-		this.occludedResolveCache = new Map();
-
+		this.parameters['requiredLimits'] = ( parameters['requiredLimits'] == null ) ? {} : parameters['requiredLimits'];
 	}
 
-	/**
-	 * Initializes the backend so it is ready for usage.
-	 *
-	 * @async
-	 * @param {Renderer} renderer - The renderer.
-	 * @return {Promise} A Promise that resolves when the backend has been initialized.
-	 */
+	///
+	/// Initializes the backend so it is ready for usage.
+	///
+	/// @async
+	/// @param {Renderer} renderer - The renderer.
+	/// @return {Promise} A Promise that resolves when the backend has been initialized.
+	///
 	Future init(Renderer renderer ) async{
 		await super.init( renderer );
 
@@ -143,13 +78,13 @@ class WebGPUBackend extends Backend {
 
 		// create the device if it is not passed with parameters
 
-		let device;
+		GPUDevice? device;
 
 		if ( parameters.device == null ) {
 
 			final adapterOptions = {
-				powerPreference: parameters.powerPreference,
-				featureLevel: parameters.compatibilityMode ? 'compatibility' : null
+				'powerPreference': parameters.powerPreference,
+				'featureLevel': parameters.compatibilityMode ? 'compatibility' : null
 			};
 
 			final adapter = ( typeof navigator != 'null' ) ? await navigator.gpu.requestAdapter( adapterOptions ) : null;
@@ -166,19 +101,19 @@ class WebGPUBackend extends Backend {
 
 			final supportedFeatures = [];
 
-			for ( final name of features ) {
+			for ( final name in features ) {
 
 				if ( adapter.features.has( name ) ) {
 
-					supportedFeatures.push( name );
+					supportedFeatures.add( name );
 
 				}
 
 			}
 
 			final deviceDescriptor = {
-				requiredFeatures: supportedFeatures,
-				requiredLimits: parameters.requiredLimits
+				'requiredFeatures': supportedFeatures,
+				'requiredLimits': parameters.requiredLimits
 			};
 
 			device = await adapter.requestDevice( deviceDescriptor );
@@ -189,13 +124,13 @@ class WebGPUBackend extends Backend {
 
 		}
 
-		device.lost.then( ( info ) => {
+		device.lost.then( ( info ){
 
 			final deviceLossInfo = {
-				api: 'WebGPU',
-				message: info.message || 'Unknown reason',
-				reason: info.reason || null,
-				originalEvent: info
+				'api': 'WebGPU',
+				'message': info.message || 'Unknown reason',
+				'reason': info.reason || null,
+				'originalEvent': info
 			};
 
 			renderer.onDeviceLost( deviceLossInfo );
@@ -212,63 +147,59 @@ class WebGPUBackend extends Backend {
 		this.trackTimestamp = this.trackTimestamp && this.hasFeature( GPUFeatureName.TimestampQuery );
 
 		this.context.configure( {
-			device: this.device,
-			format: this.utils.getPreferredCanvasFormat(),
-			usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC,
-			alphaMode: alphaMode
+			'device': this.device,
+			'format': this.utils.getPreferredCanvasFormat(),
+			'usage': GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC,
+			'alphaMode': alphaMode
 		} );
 
 		this.updateSize();
 
 	}
 
-	/**
-	 * The coordinate system of the backend.
-	 *
-	 * @type {number}
-	 * @readonly
-	 */
-	get coordinateSystem() {
+	///
+	/// The coordinate system of the backend.
+	///
+	/// @type {number}
+	/// @readonly
+	///
+	get coordinateSystem => WebGPUCoordinateSystem;
 
-		return WebGPUCoordinateSystem;
-
-	}
-
-	/**
-	 * This method performs a readback operation by moving buffer data from
-	 * a storage buffer attribute from the GPU to the CPU.
-	 *
-	 * @async
-	 * @param {StorageBufferAttribute} attribute - The storage buffer attribute.
-	 * @return {Promise<ArrayBuffer>} A promise that resolves with the buffer data when the data are ready.
-	 */
-	async getArrayBufferAsync( attribute ) {
+	///
+	/// This method performs a readback operation by moving buffer data from
+	/// a storage buffer attribute from the GPU to the CPU.
+	///
+	/// @async
+	/// @param {StorageBufferAttribute} attribute - The storage buffer attribute.
+	/// @return {Promise<ArrayBuffer>} A promise that resolves with the buffer data when the data are ready.
+	///
+	Future<ArrayBuffer> getArrayBufferAsync( StorageBufferAttribute attribute ) async{
 
 		return await this.attributeUtils.getArrayBufferAsync( attribute );
 
 	}
 
-	/**
-	 * Returns the backend's rendering context.
-	 *
-	 * @return {GPUCanvasContext} The rendering context.
-	 */
-	getContext() {
+	///
+	/// Returns the backend's rendering context.
+	///
+	/// @return {GPUCanvasContext} The rendering context.
+	///
+	GPUCanvasContext getContext() {
 
 		return this.context;
 
 	}
 
-	/**
-	 * Returns the default render pass descriptor.
-	 *
-	 * In WebGPU, the default framebuffer must be configured
-	 * like custom framebuffers so the backend needs a render
-	 * pass descriptor even when rendering directly to screen.
-	 *
-	 * @private
-	 * @return {Object} The render pass descriptor.
-	 */
+	///
+	/// Returns the default render pass descriptor.
+	///
+	/// In WebGPU, the default framebuffer must be configured
+	/// like custom framebuffers so the backend needs a render
+	/// pass descriptor even when rendering directly to screen.
+	///
+	/// @private
+	/// @return {Object} The render pass descriptor.
+	///
 	_getDefaultRenderPassDescriptor() {
 
 		let descriptor = this.defaultRenderPassdescriptor;
@@ -278,22 +209,22 @@ class WebGPUBackend extends Backend {
 			final renderer = this.renderer;
 
 			descriptor = {
-				colorAttachments: [ {
-					view: null
+				'colorAttachments': [ {
+					'view': null
 				} ],
 			};
 
-			if ( this.renderer.depth == true || this.renderer.stencil == true ) {
+			if ( this.renderer?.depth == true || this.renderer?.stencil == true ) {
 
 				descriptor.depthStencilAttachment = {
-					view: this.textureUtils.getDepthBuffer( renderer.depth, renderer.stencil ).createView()
+					'view': this.textureUtils.getDepthBuffer( renderer.depth, renderer.stencil ).createView()
 				};
 
 			}
 
 			final colorAttachment = descriptor.colorAttachments[ 0 ];
 
-			if ( this.renderer.samples > 0 ) {
+			if ( (this.renderer?.samples ?? 0) > 0 ) {
 
 				colorAttachment.view = this.colorBuffer.createView();
 
@@ -309,7 +240,7 @@ class WebGPUBackend extends Backend {
 
 		final colorAttachment = descriptor.colorAttachments[ 0 ];
 
-		if ( this.renderer.samples > 0 ) {
+		if ( (this.renderer?.samples ?? 0) > 0 ) {
 
 			colorAttachment.resolveTarget = this.context.getCurrentTexture().createView();
 
@@ -394,17 +325,17 @@ class WebGPUBackend extends Backend {
 
 			final isRenderCameraDepthArray = this._isRenderCameraDepthArray( renderContext );
 
-			for ( let i = 0; i < textures.length; i ++ ) {
+			for ( int i = 0; i < textures.length; i ++ ) {
 
 				final textureData = this.get( textures[ i ] );
 
 				final viewDescriptor = {
-					label: `colorAttachment_${ i }`,
-					baseMipLevel: renderContext.activeMipmapLevel,
-					mipLevelCount: 1,
-					baseArrayLayer: renderContext.activeCubeFace,
-					arrayLayerCount: 1,
-					dimension: GPUTextureViewDimension.TwoD
+					'label': 'colorAttachment_$i',
+					'baseMipLevel': renderContext.activeMipmapLevel,
+					'mipLevelCount': 1,
+					'baseArrayLayer': renderContext.activeCubeFace,
+					'arrayLayerCount': 1,
+					'dimension': GPUTextureViewDimension.TwoD
 				};
 
 				if ( renderTarget.isRenderTarget3D ) {
@@ -420,19 +351,19 @@ class WebGPUBackend extends Backend {
 					if ( isRenderCameraDepthArray == true ) {
 
 						final cameras = renderContext.camera.cameras;
-						for ( let layer = 0; layer < cameras.length; layer ++ ) {
+						for ( int layer = 0; layer < cameras.length; layer ++ ) {
 
 							final layerViewDescriptor = {
 								...viewDescriptor,
-								baseArrayLayer: layer,
-								arrayLayerCount: 1,
-								dimension: GPUTextureViewDimension.TwoD
+								'baseArrayLayer': layer,
+								'arrayLayerCount': 1,
+								'dimension': GPUTextureViewDimension.TwoD
 							};
 							final textureView = textureData.texture.createView( layerViewDescriptor );
-							textureViews.push( {
-								view: textureView,
-								resolveTarget: null,
-								depthSlice: null
+							textureViews.add( {
+								'view': textureView,
+								'resolveTarget': null,
+								'depthSlice': null
 							} );
 
 						}
@@ -450,7 +381,8 @@ class WebGPUBackend extends Backend {
 
 					final textureView = textureData.texture.createView( viewDescriptor );
 
-					let view, resolveTarget;
+					GPUTextureView view;
+					GPUTextureView? resolveTarget;
 
 					if ( textureData.msaaTexture != null ) {
 
@@ -464,17 +396,17 @@ class WebGPUBackend extends Backend {
 
 					}
 
-					textureViews.push( {
-						view,
-						resolveTarget,
-						depthSlice: sliceIndex
+					textureViews.add( {
+						'view': view,
+						'resolveTarget': resolveTarget,
+						'depthSlice': sliceIndex
 					} );
 
 				}
 
 			}
 
-			descriptorBase = { textureViews };
+			descriptorBase = { 'textureViews': textureViews };
 
 			if ( renderContext.depth ) {
 
@@ -482,9 +414,9 @@ class WebGPUBackend extends Backend {
 				final options = {};
 				if ( renderContext.depthTexture.isArrayTexture ) {
 
-					options.dimension = GPUTextureViewDimension.TwoD;
-					options.arrayLayerCount = 1;
-					options.baseArrayLayer = renderContext.activeCubeFace;
+					options['dimension'] = GPUTextureViewDimension.TwoD;
+					options['arrayLayerCount'] = 1;
+					options['baseArrayLayer'] = renderContext.activeCubeFace;
 
 				}
 
@@ -504,28 +436,28 @@ class WebGPUBackend extends Backend {
 		}
 
 		final descriptor = {
-			colorAttachments: []
+			'colorAttachments': []
 		};
 
 		// Apply dynamic properties to cached views
-		for ( let i = 0; i < descriptorBase.textureViews.length; i ++ ) {
+		for ( int i = 0; i < descriptorBase.textureViews.length; i ++ ) {
 
 			final viewInfo = descriptorBase.textureViews[ i ];
 
-			let clearValue = { r: 0, g: 0, b: 0, a: 1 };
+			let clearValue = { 'r': 0, 'g': 0, 'b': 0, 'a': 1 };
 			if ( i == 0 && colorAttachmentsConfig.clearValue ) {
 
 				clearValue = colorAttachmentsConfig.clearValue;
 
 			}
 
-			descriptor.colorAttachments.push( {
-				view: viewInfo.view,
-				depthSlice: viewInfo.depthSlice,
-				resolveTarget: viewInfo.resolveTarget,
-				loadOp: colorAttachmentsConfig.loadOp || GPULoadOp.Load,
-				storeOp: colorAttachmentsConfig.storeOp || GPUStoreOp.Store,
-				clearValue: clearValue
+			descriptor.colorAttachments.add( {
+				'view': viewInfo.view,
+				'depthSlice': viewInfo.depthSlice,
+				'resolveTarget': viewInfo.resolveTarget,
+				'loadOp': colorAttachmentsConfig.loadOp || GPULoadOp.Load,
+				'storeOp': colorAttachmentsConfig.storeOp || GPUStoreOp.Store,
+				'clearValue': clearValue
 			} );
 
 		}
@@ -533,7 +465,7 @@ class WebGPUBackend extends Backend {
 		if ( descriptorBase.depthStencilView ) {
 
 			descriptor.depthStencilAttachment = {
-				view: descriptorBase.depthStencilView
+				'view': descriptorBase.depthStencilView
 			};
 
 		}
@@ -602,13 +534,13 @@ class WebGPUBackend extends Backend {
 
 			final colorAttachments = descriptor.colorAttachments;
 
-			for ( let i = 0; i < colorAttachments.length; i ++ ) {
+			for ( int i = 0; i < colorAttachments.length; i ++ ) {
 
 				final colorAttachment = colorAttachments[ i ];
 
 				if ( renderContext.clearColor ) {
 
-					colorAttachment.clearValue = i == 0 ? renderContext.clearColorValue : { r: 0, g: 0, b: 0, a: 1 };
+					colorAttachment.clearValue = i == 0 ? renderContext.clearColorValue : { 'r': 0, 'g': 0, 'b': 0, 'a': 1 };
 					colorAttachment.loadOp = GPULoadOp.Clear;
 
 				} else {

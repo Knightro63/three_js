@@ -4,7 +4,7 @@ import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 
 typedef OnRender = void Function({
-  WebGLRenderer? renderer,
+  Renderer? renderer,
   RenderTarget? renderTarget,
   Object3D? mesh,
   Scene? scene,
@@ -1024,7 +1024,7 @@ class Object3D with EventDispatcher {
   OnRender? customRender;
 
   void onBeforeShadow({
-    WebGLRenderer? renderer,
+    Renderer? renderer,
     Object3D? scene,
     Camera? camera,
     Camera? shadowCamera,
@@ -1036,7 +1036,7 @@ class Object3D with EventDispatcher {
   }
 
   void onAfterShadow({
-    WebGLRenderer? renderer,
+    Renderer? renderer,
     Object3D? scene,
     Camera? camera,
     Camera? shadowCamera,

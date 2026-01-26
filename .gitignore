@@ -15,6 +15,7 @@
 *.ipr
 *.iws
 .idea/
+.renderers/
 
 .metadata
 analysis_options.yaml

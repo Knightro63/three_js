@@ -31,7 +31,7 @@ import 'perspective_camera.dart';
 /// ```
 class CubeCamera extends Object3D {
   /// The destination cube render target.
-  late WebGLCubeRenderTarget renderTarget;
+  late CubeRenderTarget renderTarget;
 
   late PerspectiveCamera cameraPX;
   late PerspectiveCamera cameraNX;
@@ -88,7 +88,7 @@ class CubeCamera extends Object3D {
 	/// [scene]: The current scene
   /// 
   /// Call this to update the [renderTarget].
-  void update(WebGLRenderer renderer, Object3D scene) {
+  void update(Renderer renderer, Object3D scene) {
     if (parent == null) updateMatrixWorld(false);
 
     final currentRenderTarget = renderer.getRenderTarget();

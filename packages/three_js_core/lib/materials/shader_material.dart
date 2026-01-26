@@ -1,8 +1,6 @@
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:three_js_core/three_js_core.dart';
-import '../renderers/shaders/shader_chunk/default_fragment.glsl.dart';
-import '../renderers/shaders/shader_chunk/default_vertex.glsl.dart';
 
 /// A material rendered with custom shaders. A shader is a small program
 /// written in
@@ -109,8 +107,16 @@ class ShaderMaterial extends Material {
     uniforms = <String,dynamic>{};
     uniformsGroups = [];
 
-    vertexShader = defaultVertex;
-    fragmentShader = defaultFragment;
+    vertexShader = """
+      void main() {
+        gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+      }
+    """;
+    fragmentShader = """
+      void main() {
+        gl_FragColor = vec4( 1.0, 0.0, 0.0, 1.0 );
+      }
+    """;
 
     linewidth = 1;
 
