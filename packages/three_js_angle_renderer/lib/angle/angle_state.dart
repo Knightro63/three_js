@@ -1,6 +1,6 @@
 part of three_webgl;
 
-class AngleState {
+class AngleState extends State {
   bool _didDispose = false;
   RenderingContext gl;
 
@@ -14,6 +14,7 @@ class AngleState {
   late Map<int, int> equationToGL;
   late Map<int, int> factorToGL;
 
+  @override
   Map<String, dynamic> get buffers => {"color": colorBuffer, "depth": depthBuffer, "stencil": stencilBuffer};
   Map<int, bool> enabledCapabilities = <int, bool>{};
 
@@ -143,6 +144,7 @@ class AngleState {
     return texture;
   }
 
+  @override
   void enable(id) {
     if (enabledCapabilities[id] != true) {
       gl.enable(id);
@@ -150,6 +152,7 @@ class AngleState {
     }
   }
 
+  @override
   void disable(id) {
     if (enabledCapabilities[id] != false) {
       gl.disable(id);
@@ -616,6 +619,7 @@ class AngleState {
     gl.texImage3D(target, level, internalformat, width, height, depth, border, format, type, offset);
   }
 
+  @override
   void scissor(Vector4 scissor) {
     if (!currentScissor.equals(scissor)) {
       gl.scissor(scissor.x.toInt(), scissor.y.toInt(), scissor.z.toInt(), scissor.w.toInt());
@@ -623,6 +627,7 @@ class AngleState {
     }
   }
 
+  @override
   void viewport(Vector4 viewport) {
     if (!currentViewport.equals(viewport)) {
       gl.viewport(viewport.x.toInt(), viewport.y.toInt(), viewport.z.toInt(), viewport.w.toInt());
@@ -656,6 +661,7 @@ class AngleState {
 		}
 	}
 
+  @override
   void reset() {
     gl.disable(WebGL.BLEND);
     gl.disable(WebGL.CULL_FACE);
@@ -735,6 +741,7 @@ class AngleState {
     stencilBuffer.reset();
   }
 
+  @override
   void dispose(){
     if(_didDispose) return;
     _didDispose = true;
@@ -792,7 +799,7 @@ class ColorBuffer {
       currentColorClear.setFrom(color);
     }
   }
-
+  
   void reset() {
     locked = false;
 

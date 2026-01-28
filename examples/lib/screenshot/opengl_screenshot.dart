@@ -17,7 +17,7 @@ class _State extends State<OpenglScreenshot> {
   late Timer timer;
   late three.ThreeJS threeJs;
   late final Uint8List buffer;
-  late final three.WebGLRenderTarget rt;
+  late final three.RenderTarget rt;
 
   @override
   void initState() {
@@ -90,7 +90,7 @@ class _State extends State<OpenglScreenshot> {
 
   Future<void> setup() async {
     buffer = Uint8List( desiredWidth * desiredHeight * 4 );
-    rt = three.WebGLRenderTarget( desiredWidth, desiredHeight, three.WebGLRenderTargetOptions({
+    rt = three.RenderTarget( desiredWidth, desiredHeight, three.RenderTargetOptions({
       'colorSpace': three.SRGBColorSpace,
       'samples': 4,
     }) );

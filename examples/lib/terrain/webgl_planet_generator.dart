@@ -80,14 +80,31 @@ class _State extends State<WebglPlanetGenerator> {
     final controls = three.OrbitControls(threeJs.camera, threeJs.globalKey);
     threeJs.camera.position.z = 50;
 
-    final composer = EffectComposer(threeJs.renderer!);
+    final double dpr = 0.5; // Half resolution for processing
+    final int width = (threeJs.width * dpr).toInt();
+    final int height = (threeJs.height * dpr).toInt();
+
+    final renderTarget = three.RenderTarget(width, height, three.RenderTargetOptions({
+      'minFilter': three.LinearFilter,
+      'magFilter': three.LinearFilter,
+      'format': three.RGBAFormat,
+      'type': three.HalfFloatType,
+      'stencilBuffer': false, // Turn off for speed
+      'depthBuffer': true,
+    }));
+
+    final composer = EffectComposer(threeJs.renderer!, renderTarget);
+    
     final renderPass = RenderPass(threeJs.scene, threeJs.camera);
+    // Explicitly clear to fix those "weird drawing" artifacts
+    renderPass.clear = true; 
     composer.addPass(renderPass);
   
-    final bloomPass = UnrealBloomPass(null,0.0,0.2,0.5);
+    // Only keep this if you actually want the glow effect
+    final bloomPass = UnrealBloomPass(three.Vector2(width.toDouble(), height.toDouble()), 0.0, 0.2, 0.5);
     composer.addPass(bloomPass);
 
-    final outputPass = new OutputPass();
+    final outputPass = OutputPass();
     composer.addPass(outputPass);
 
     final texLoader = three.TextureLoader();
@@ -96,17 +113,19 @@ class _State extends State<WebglPlanetGenerator> {
     PlanetGenerator planet = PlanetGenerator(cloudTexture: cloudTex);
     threeJs.scene.add(planet);
 
+    threeJs.renderer!.setPixelRatio(1.0); 
+
     threeJs.addAnimationEvent((dt) {
-      planet.atmosphere.material?.uniforms['time']['value'] = threeJs.clock.getElapsedTime();
+      planet.atmosphere.material?.uniforms['time']['value'] += dt;
       planet.atmosphere.rotation.y += 0.0002;
       controls.update();
       composer.render();
     });
 
-    createUI(planet, bloomPass);
+    createUI(planet);
   }
 
-  void createUI(PlanetGenerator planet,UnrealBloomPass bloomPass) {
+  void createUI(PlanetGenerator planet) {
     final planetParams = planet.planetParams.json;
     final atmosphereParams = planet.atmosphereParams.json;
     Atmosphere atmosphere = planet.atmosphere;

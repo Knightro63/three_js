@@ -133,7 +133,8 @@ class MaterialLoader extends Loader {
       material = HexTilingMaterial(
         HexTilingParams.fromJson(json['hexTiling'] ?? {}),
       );
-    } else if (json["type"] == "ProjectedMaterial") {
+    } 
+    else if (json["type"] == "ProjectedMaterial") {
       material = ProjectedMaterial.fromJson(json['projected']);
     } else {
       throw (" MaterialLoader ${json["type"]} is not support  ");

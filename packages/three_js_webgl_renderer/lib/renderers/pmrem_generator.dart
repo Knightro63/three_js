@@ -106,7 +106,7 @@ class PMREMGenerator {
 	/// * and far planes ensure the scene is rendered in its entirety (the cubeCamera
 	/// * is placed at the origin).
 	/// *
-  WebGLRenderTarget fromScene(Scene scene, {double sigma = 0, double near = 0.1, double far = 100, PMREMGeneratorOptions? options}) {
+  RenderTarget fromScene(Scene scene, {double sigma = 0, double near = 0.1, double far = 100, PMREMGeneratorOptions? options}) {
     options ??= PMREMGeneratorOptions();
 
     _oldTarget = _renderer.getRenderTarget();
@@ -239,7 +239,7 @@ class PMREMGenerator {
     return cubeUVRenderTarget;
   }
 
-  WebGLRenderTarget _allocateTargets() {
+  RenderTarget _allocateTargets() {
     int width = 3 * math.max(_cubeSize, 16 * 7);
     int height = 4 * _cubeSize;
 
@@ -554,8 +554,8 @@ class PMREMGenerator {
     return {"lodPlanes": lodPlanes, "sizeLods": sizeLods, "sigmas": sigmas};
   }
 
-  WebGLRenderTarget _createRenderTarget(int width, int height, Map<String,dynamic> params) {
-    final cubeUVRenderTarget = WebGLRenderTarget(width, height, RenderTargetOptions(params));
+  RenderTarget _createRenderTarget(int width, int height, Map<String,dynamic> params) {
+    final cubeUVRenderTarget = RenderTarget(width, height, RenderTargetOptions(params));
     cubeUVRenderTarget.texture.mapping = CubeUVReflectionMapping;
     cubeUVRenderTarget.texture.name = 'PMREM.cubeUv';
     cubeUVRenderTarget.scissorTest = true;

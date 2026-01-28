@@ -1,4 +1,4 @@
-String lightsParsBegin = """
+String angleLightsParsBegin = """
 uniform bool receiveShadow;
 uniform vec3 ambientLightColor;
 

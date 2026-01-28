@@ -284,7 +284,7 @@ class WebGLTextures {
       properties.remove( renderTarget.depthTexture );
     }
 
-    if (renderTarget is WebGLCubeRenderTarget) {
+    if (renderTarget is CubeRenderTarget) {
       for (int i = 0; i < 6; i++) {
         gl.deleteFramebuffer(renderTargetProperties["__webglFramebuffer"][i]);
 				if (renderTargetProperties['__webglFramebuffer'][ i ] is List) {
@@ -1055,7 +1055,7 @@ class WebGLTextures {
   // Setup resources for a Depth Texture for a FBO (needs an extension)
   void setupDepthTexture(framebuffer, RenderTarget renderTarget) {
 		final renderTargetProperties = properties.get( renderTarget );
-		final isCube = renderTarget is WebGLCubeRenderTarget;
+		final isCube = renderTarget is CubeRenderTarget;
 
 		// if the bound depth texture has changed
 		if ( renderTargetProperties['__boundDepthTexture'] != renderTarget.depthTexture ) {
@@ -1122,7 +1122,7 @@ class WebGLTextures {
   // Setup GL resources for a non-texture depth buffer
   void setupDepthRenderbuffer(RenderTarget renderTarget) {
 		final renderTargetProperties = properties.get( renderTarget );
-		final isCube = ( renderTarget is WebGLCubeRenderTarget == true );
+		final isCube = ( renderTarget is CubeRenderTarget == true );
 
 		// if the bound depth texture has changed
 		if ( renderTargetProperties['__boundDepthTexture'] != renderTarget.depthTexture ) {
@@ -1210,7 +1210,7 @@ class WebGLTextures {
 
 		final textures = renderTarget.textures;
 
-		final isCube = renderTarget is WebGLCubeRenderTarget;
+		final isCube = renderTarget is CubeRenderTarget;
 		final isMultipleRenderTargets = ( textures.length > 1 );
 
 		if ( ! isMultipleRenderTargets ) {
@@ -1368,7 +1368,7 @@ class WebGLTextures {
       final texture = textures[i];
 
       if (textureNeedsGenerateMipmaps(texture)) {
-        final target = renderTarget is WebGLCubeRenderTarget ? WebGL.TEXTURE_CUBE_MAP : WebGL.TEXTURE_2D;
+        final target = renderTarget is CubeRenderTarget ? WebGL.TEXTURE_CUBE_MAP : WebGL.TEXTURE_2D;
         final webglTexture = properties.get(texture)["__webglTexture"];
 
         state.bindTexture(target, webglTexture);

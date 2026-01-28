@@ -43,8 +43,8 @@ Map<String, dynamic> cloneUniforms(Map<String, dynamic> src) {
 Map<String, dynamic> mergeUniforms(uniforms) {
   Map<String, dynamic> merged = <String, dynamic>{};
 
-  for (int u = 0; u < uniforms.length; u++) {
-    final tmp = cloneUniforms(uniforms[u]);
+  for (final u in uniforms) {
+    final tmp = cloneUniforms(u);
 
     for (final p in tmp.keys) {
       merged[p] = tmp[p];

@@ -15,7 +15,7 @@ class AngleProgram extends DefaultProgram with AngleProgramExtra {
   AngleBindingStates bindingStates;
   int usedTimes = 1;
   late RenderingContext gl;
-  AngleParameters parameters;
+  Parameters parameters;
   late Program? program;
 
   late String vertexShader;

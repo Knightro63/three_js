@@ -1,4 +1,4 @@
-import 'package:three_js_core/renderers/shaders/shader_chunk/index.dart';
+import 'package:three_js_core/renderers/shaders/shader_lib.dart';
 
 final csmShader = {
 	'lights_fragment_begin': /* glsl */'''

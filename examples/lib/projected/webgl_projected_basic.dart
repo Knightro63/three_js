@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:example/src/statistics.dart';
 import 'package:three_js/three_js.dart' as three;
@@ -64,7 +65,7 @@ class _State extends State<WebglProjectedBasic> {
     threeJs.camera.lookAt(three.Vector3(0, 0, 0));
 
     // load the example texture
-    final texture = await three.TextureLoader().fromAsset('assets/textures/uv_grid_directx.jpg');
+    final texture = await three.TextureLoader(flipY: !kIsWeb).fromAsset('assets/textures/uv_grid_directx.jpg');
     final camera = three.PerspectiveCamera(45, 1, 0.01, 3);
     camera.position.setValues(-1, 1.2, 2);
     camera.lookAt(three.Vector3(0, 0, 0));
@@ -82,6 +83,7 @@ class _State extends State<WebglProjectedBasic> {
     );
     final box = three.Mesh(geometry, material);
     threeJs.scene.add(box);
+    material.needsUpdate = true;
 
     // move the mesh any way you want!
     box.rotation.y = -math.pi / 4;
@@ -92,6 +94,11 @@ class _State extends State<WebglProjectedBasic> {
     // add lights
     final ambientLight = three.AmbientLight(0xffffff, 0.8);
     threeJs.scene.add(ambientLight);
+
+    final dirLight = three.DirectionalLight( 0xFFFFFF, 3 );
+    dirLight.position.setValues( - 0.5, 1, 0.8 );
+    dirLight.castShadow = true;
+    threeJs.scene.add( dirLight );
 
     controls = three.OrbitControls(threeJs.camera, threeJs.globalKey);
   }

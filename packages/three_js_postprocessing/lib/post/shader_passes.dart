@@ -10,7 +10,7 @@ class ShaderPasses extends Pass {
   late bool oldAutoClear;
   late Color clearColor;
   List<dynamic>? passes;
-  late Map<int, WebGLRenderTarget> renderTargetsPass;
+  late Map<int, RenderTarget> renderTargetsPass;
 
   late int resx;
   late int resy;
@@ -38,7 +38,7 @@ class ShaderPasses extends Pass {
   }
 
   @override
-  void render(WebGLRenderer renderer, WebGLRenderTarget writeBuffer, WebGLRenderTarget readBuffer,{double? deltaTime, bool? maskActive}) {
+  void render(Renderer renderer, RenderTarget writeBuffer, RenderTarget readBuffer,{double? deltaTime, bool? maskActive}) {
     renderer.getClearColor(oldClearColor);
     oldClearAlpha = renderer.getClearAlpha();
     oldAutoClear = renderer.autoClear;
@@ -54,7 +54,7 @@ class ShaderPasses extends Pass {
 
     if (passes != null) {
       int lastPass = passes!.length - 1;
-      WebGLRenderTarget? lastRenderTarget;
+      RenderTarget? lastRenderTarget;
       for (int i = 0; i <  passes!.length; i++) {
         material.uniforms["acPass"] = {"value": i};
         if (lastRenderTarget != null) {
@@ -66,13 +66,13 @@ class ShaderPasses extends Pass {
        material.needsUpdate = true;
 
         if (renderTargetsPass[i] == null) {
-          final pars = WebGLRenderTargetOptions({
+          final pars = RenderTargetOptions({
             "minFilter": LinearFilter,
             "magFilter": LinearFilter,
             "format": RGBAFormat
           });
           final renderTargetPass =
-              WebGLRenderTarget(readBuffer.width, readBuffer.height, pars);
+              RenderTarget(readBuffer.width, readBuffer.height, pars);
           renderTargetPass.texture.name = 'renderTargetPass $i';
           renderTargetPass.texture.generateMipmaps = false;
           renderTargetsPass[i] = renderTargetPass;
@@ -102,7 +102,7 @@ class ShaderPasses extends Pass {
     }
   }
 
-  void renderPass(WebGLRenderer renderer, Material passMaterial, [WebGLRenderTarget? renderTarget, Color? clearColor, double? clearAlpha, bool clear = false]) {
+  void renderPass(Renderer renderer, Material passMaterial, [RenderTarget? renderTarget, Color? clearColor, double? clearAlpha, bool clear = false]) {
     // setup pass state
     renderer.autoClear = false;
 

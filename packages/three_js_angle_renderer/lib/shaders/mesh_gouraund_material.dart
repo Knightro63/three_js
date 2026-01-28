@@ -1,6 +1,5 @@
-import "package:three_js_angle/shaders/index.dart";
 import "package:three_js_math/three_js_math.dart";
-import "package:three_js_core/renderers/uniforms_utils.dart";
+import "package:three_js_core/three_js_core.dart";
 
 final Map<String,dynamic> gouraudShader = {
 	'name': 'GouraudShader',

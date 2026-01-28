@@ -27,7 +27,6 @@ part 'angle_lights.dart';
 part 'angle_materials.dart';
 part 'angle_morphtargets.dart';
 part 'angle_objects.dart';
-part 'angle_parameters.dart';
 part 'angle_program.dart';
 part 'angle_program_extra.dart';
 part 'angle_programs.dart';

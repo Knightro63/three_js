@@ -1,6 +1,7 @@
-part of three_shaders;
+import 'shader_chunk/index.dart';
+import 'shader_lib/index.dart';
 
-Map<String, String> shaderChunk = {
+Map<String, String> webglShaderChunk = {
 	'alphahash_fragment': alphahashFragment,
 	'alphahash_pars_fragment': alphahashParsFragment,
   "alphamap_fragment": alphamapFragment,
@@ -57,14 +58,14 @@ Map<String, String> shaderChunk = {
   "lights_lambert_vertex": lightsLambertVertex,
 	'lights_lambert_fragment': lightsLambertFragment,
   'lights_lambert_pars_fragment': lightsLambertParsFragment,
-  "lights_pars_begin": lightsParsBegin,
+  "lights_pars_begin": webGlLightsParsBegin,
   "lights_toon_fragment": lightsToonFragment,
   "lights_toon_pars_fragment": lightsToonParsFragment,
   "lights_phong_fragment": lightsPhongFragment,
   "lights_phong_pars_fragment": lightsPhongParsFragment,
   "lights_physical_fragment": lightsPhysicalFragment,
   "lights_physical_pars_fragment": lightsPhysicalParsFragment,
-  "lights_fragment_begin": lightsFragmentBegin,
+  "lights_fragment_begin": webGlLightsFragmentBegin,
   "lights_fragment_maps": lightsFragmentMaps,
   "lights_fragment_end": lightsFragmentEnd,
   "logdepthbuf_fragment": logdepthbufFragment,

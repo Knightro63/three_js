@@ -98,7 +98,7 @@ class _State extends State<WebglSimpleGi> {
 
   void Function([double?])? compute;
 
-  void simpleGI(three.WebGLRenderer renderer, three.Scene scene) {
+  void simpleGI(three.Renderer renderer, three.Scene scene) {
 
     final SIZE = 32, SIZE2 = SIZE * SIZE;
 
@@ -109,7 +109,7 @@ class _State extends State<WebglSimpleGi> {
     three.Object3D clone = scene.clone();
     clone.matrixAutoUpdate = false;
 
-    final rt = three.WebGLRenderTarget( SIZE, SIZE );
+    final rt = three.RenderTarget( SIZE, SIZE );
     final normalMatrix = three.Matrix3.identity();
 
     final position = three.Vector3();

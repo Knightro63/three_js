@@ -17,8 +17,8 @@ dependencies:
   css:
     git:
       url: https://github.com/Knightro63/css.git
-  three_js: ^0.2.7
-    #path: ../packages/three_js
+  three_js: 
+    path: ../packages/three_js
   three_js_helpers: ^0.2.3
   three_js_transform_controls: ^0.2.1
   three_js_svg: ^0.2.1
@@ -106,6 +106,10 @@ dependency_overrides:
     path: ../packages/three_js_geometry
   three_js_sensors:
     path: ../packages/three_js_sensors
+  three_js_angle_renderer:
+    path: ../packages/three_js_angle_renderer
+  # three_js_webgl_renderer:
+  #   path: ../packages/three_js_webgl_renderer
 
 flutter:
   uses-material-design: true

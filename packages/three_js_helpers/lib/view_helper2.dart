@@ -253,7 +253,7 @@ class ViewHelper2 extends Object3D{
     //_pointerPos!.x += -4*(_pointerPos!.x/(size.width-(_offset.x+screenSize.width)))+2;
     _pointerPos!.y += 4*(_pointerPos!.y/(size.height-screenSize.height-_offset.y))+3;
   }
-  void render(WebGLRenderer renderer){
+  void render(Renderer renderer){
     quaternion.setFrom( camera.quaternion ).invert();
     updateMatrixWorld();
 

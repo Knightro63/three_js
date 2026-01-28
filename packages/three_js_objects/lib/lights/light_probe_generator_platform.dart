@@ -79,7 +79,7 @@ class LightProbeGenerator {
 		return LightProbe( sh );
 	}
 
-	static LightProbe fromCubeRenderTarget(WebGLRenderer renderer,WebGLCubeRenderTarget cubeRenderTarget ) {
+	static LightProbe fromCubeRenderTarget(Renderer renderer, CubeRenderTarget cubeRenderTarget ) {
 		// The renderTarget must be set to RGBA in order to make readRenderTargetPixels works
 		double totalWeight = 0;
 		final coord = Vector3();

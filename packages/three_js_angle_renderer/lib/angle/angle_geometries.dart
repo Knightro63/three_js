@@ -75,7 +75,7 @@ class AngleGeometries {
   }
 
   void updateWireframeAttribute(BufferGeometry geometry) {
-    Uint32List indices = Uint32List(0);
+    List<int> indices = [];
 
     final geometryIndex = geometry.index;
     final geometryPosition = geometry.attributes["position"];

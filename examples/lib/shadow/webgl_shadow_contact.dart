@@ -52,8 +52,8 @@ class _MyAppState extends State<WebglShadowContact> {
   }
 
   late three.Mesh blurPlane;
-  late three.WebGLRenderTarget renderTarget;
-  late three.WebGLRenderTarget renderTargetBlur;
+  late three.RenderTarget renderTarget;
+  late three.RenderTarget renderTargetBlur;
 
   final meshes = [];
 
@@ -210,13 +210,13 @@ class _MyAppState extends State<WebglShadowContact> {
     shadowGroup.position.y = -0.3;
     threeJs.scene.add(shadowGroup);
 
-    final pars = three.WebGLRenderTargetOptions({"format": three.RGBAFormat});
+    final pars = three.RenderTargetOptions({"format": three.RGBAFormat});
     // the render target that will show the shadows in the plane texture
-    renderTarget = three.WebGLRenderTarget(512, 512, pars);
+    renderTarget = three.RenderTarget(512, 512, pars);
     renderTarget.texture.generateMipmaps = false;
 
     // the render target that we will use to blur the first render target
-    renderTargetBlur = three.WebGLRenderTarget(512, 512, pars);
+    renderTargetBlur = three.RenderTarget(512, 512, pars);
     renderTargetBlur.texture.generateMipmaps = false;
 
     // make a plane and make it face up

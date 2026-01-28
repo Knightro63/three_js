@@ -63,7 +63,7 @@ class WebGLPrograms {
 		return 'uv$value';
 	}
 
-  WebGLParameters getParameters(Material material, LightState lights, List<Light> shadows, Scene scene, Object3D object) {
+  Parameters getParameters(Material material, LightState lights, List<Light> shadows, Scene scene, Object3D object) {
     final fog = scene.fog;
     final geometry = object.geometry;
     final environment = material is MeshStandardMaterial ? scene.environment : null;
@@ -121,7 +121,7 @@ class WebGLPrograms {
     final useAlphaTest = material.alphaTest > 0;
     final useClearcoat = material.clearcoat > 0;
 
-    final parameters = WebGLParameters(
+    final parameters = Parameters(
 			shaderID: shaderID,
 			shaderType: material.type,
 			shaderName: "${material.type} - ${material.name}",
@@ -319,7 +319,7 @@ class WebGLPrograms {
     return parameters;
   }
 
-  String getProgramCacheKey(WebGLParameters parameters) {
+  String getProgramCacheKey(Parameters parameters) {
     List<dynamic> array = [];
 
     if (parameters.shaderID != null) {
@@ -347,7 +347,7 @@ class WebGLPrograms {
     return array.join();
   }
 
-  void getProgramCacheKeyParameters(List array, WebGLParameters parameters) {
+  void getProgramCacheKeyParameters(List array, Parameters parameters) {
 		array.add( parameters.precision );
 		array.add( parameters.outputColorSpace );
 		array.add( parameters.envMapMode );
@@ -398,7 +398,7 @@ class WebGLPrograms {
 		array.add( parameters.depthPacking );
   }
 
-  void getProgramCacheKeyBooleans(List array, WebGLParameters parameters) {
+  void getProgramCacheKeyBooleans(List array, Parameters parameters) {
 
 		_programLayers.disableAll();
 
@@ -468,7 +468,7 @@ class WebGLPrograms {
     return uniforms;
   }
 
-  WebGLProgram? acquireProgram(WebGLParameters parameters, String cacheKey) {
+  WebGLProgram? acquireProgram(Parameters parameters, String cacheKey) {
     WebGLProgram? program;
 
     // Check if code has been already compiled

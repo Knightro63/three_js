@@ -63,7 +63,7 @@ class AnglePrograms {
 		return 'uv$value';
 	}
 
-  AngleParameters getParameters(Material material, LightState lights, List<Light> shadows, Scene scene, Object3D object) {
+  Parameters getParameters(Material material, LightState lights, List<Light> shadows, Scene scene, Object3D object) {
     final fog = scene.fog;
     final geometry = object.geometry;
     final environment = material is MeshStandardMaterial ? scene.environment : null;
@@ -121,7 +121,7 @@ class AnglePrograms {
     final useAlphaTest = material.alphaTest > 0;
     final useClearcoat = material.clearcoat > 0;
 
-    final parameters = AngleParameters(
+    final parameters = Parameters(
 			shaderID: shaderID,
 			shaderType: material.type,
 			shaderName: "${material.type} - ${material.name}",
@@ -319,7 +319,7 @@ class AnglePrograms {
     return parameters;
   }
 
-  String getProgramCacheKey(AngleParameters parameters) {
+  String getProgramCacheKey(Parameters parameters) {
     List<dynamic> array = [];
 
     if (parameters.shaderID != null) {
@@ -347,7 +347,7 @@ class AnglePrograms {
     return array.join();
   }
 
-  void getProgramCacheKeyParameters(List array, AngleParameters parameters) {
+  void getProgramCacheKeyParameters(List array, Parameters parameters) {
 		array.add( parameters.precision );
 		array.add( parameters.outputColorSpace );
 		array.add( parameters.envMapMode );
@@ -398,7 +398,7 @@ class AnglePrograms {
 		array.add( parameters.depthPacking );
   }
 
-  void getProgramCacheKeyBooleans(List array, AngleParameters parameters) {
+  void getProgramCacheKeyBooleans(List array, Parameters parameters) {
 
 		_programLayers.disableAll();
 
@@ -468,7 +468,7 @@ class AnglePrograms {
     return uniforms;
   }
 
-  AngleProgram? acquireProgram(AngleParameters parameters, String cacheKey) {
+  AngleProgram? acquireProgram(Parameters parameters, String cacheKey) {
     AngleProgram? program;
 
     // Check if code has been already compiled

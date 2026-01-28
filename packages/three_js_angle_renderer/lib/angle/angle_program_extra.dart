@@ -123,7 +123,7 @@ mixin AngleProgramExtra {
     return 'vec3 $functionName( vec3 color ) { return ${toneMappingName}ToneMapping( color ); }';
   }
 
-  String generateVertexExtensions(AngleParameters parameters) {
+  String generateVertexExtensions(Parameters parameters) {
     final chunks = [
       parameters.extensionClipCullDistance ? '#extension GL_ANGLE_clip_cull_distance : require' : '',
       parameters.extensionMultiDraw ? '#extension GL_ANGLE_multi_draw : require' : '',
@@ -183,7 +183,7 @@ mixin AngleProgramExtra {
     return string != '';
   }
 
-  String replaceLightNums(String string, AngleParameters parameters) {
+  String replaceLightNums(String string, Parameters parameters) {
     final numSpotLightCoords = parameters.numSpotLightShadows + parameters.numSpotLightMaps - parameters.numSpotLightShadowsWithMaps;
 
 		string = string.replaceAll("NUM_DIR_LIGHTS", parameters.numDirLights.toString() );
@@ -201,7 +201,7 @@ mixin AngleProgramExtra {
     return string;
   }
 
-  String replaceClippingPlaneNums(String string, AngleParameters parameters) {
+  String replaceClippingPlaneNums(String string, Parameters parameters) {
     string = string.replaceAll("NUM_CLIPPING_PLANES", parameters.numClippingPlanes.toString());
     string = string.replaceAll("UNION_CLIPPING_PLANES", (parameters.numClippingPlanes - parameters.numClipIntersection).toString());
 
@@ -309,7 +309,7 @@ mixin AngleProgramExtra {
 
 //
 
-  String generatePrecision(AngleParameters parameters) {
+  String generatePrecision(Parameters parameters) {
     String precisionstring = '''precision ${parameters.precision} float;
     precision ${parameters.precision} int;
     precision ${parameters.precision} sampler2D;
@@ -340,7 +340,7 @@ mixin AngleProgramExtra {
     return precisionstring;
   }
 
-  String generateShadowMapTypeDefine(AngleParameters parameters) {
+  String generateShadowMapTypeDefine(Parameters parameters) {
     String shadowMapTypeDefine = 'SHADOWMAP_TYPE_BASIC';
 
     if (parameters.shadowMapType == PCFShadowMap) {
@@ -354,7 +354,7 @@ mixin AngleProgramExtra {
     return shadowMapTypeDefine;
   }
 
-  String generateEnvMapTypeDefine(AngleParameters parameters) {
+  String generateEnvMapTypeDefine(Parameters parameters) {
     String envMapTypeDefine = 'ENVMAP_TYPE_CUBE';
 
     if (parameters.envMap) {
@@ -373,7 +373,7 @@ mixin AngleProgramExtra {
     return envMapTypeDefine;
   }
 
-   String generateEnvMapModeDefine (AngleParameters parameters) {
+   String generateEnvMapModeDefine (Parameters parameters) {
     String envMapModeDefine = 'ENVMAP_MODE_REFLECTION';
 
     if (parameters.envMap) {
@@ -387,7 +387,7 @@ mixin AngleProgramExtra {
     return envMapModeDefine;
   }
 
-   String generateEnvMapBlendingDefine(AngleParameters parameters) {
+   String generateEnvMapBlendingDefine(Parameters parameters) {
      String envMapBlendingDefine = 'ENVMAP_BLENDING_NONE';
 
     if (parameters.envMap) {
@@ -409,7 +409,7 @@ mixin AngleProgramExtra {
     return envMapBlendingDefine;
   }
 
-  Map<String,dynamic>? generateCubeUVSize(AngleParameters parameters) {
+  Map<String,dynamic>? generateCubeUVSize(Parameters parameters) {
     final imageHeight = parameters.envMapCubeUVHeight;
 
     if (imageHeight == null) return null;

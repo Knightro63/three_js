@@ -24,10 +24,10 @@ class UnrealBloomPass extends Pass {
   late double radius;
   late double threshold;
   late Color clearColor;
-  late List<WebGLRenderTarget> renderTargetsHorizontal;
-  late List<WebGLRenderTarget> renderTargetsVertical;
+  late List<RenderTarget> renderTargetsHorizontal;
+  late List<RenderTarget> renderTargetsVertical;
   late num nMips;
-  late WebGLRenderTarget renderTargetBright;
+  late RenderTarget renderTargetBright;
   late Map<String, dynamic> highPassUniforms;
   late ShaderMaterial materialHighPassFilter;
   late List<ShaderMaterial> separableBlurMaterials;
@@ -53,7 +53,7 @@ class UnrealBloomPass extends Pass {
     clearColor = Color(0, 0, 0);
 
     // render targets
-    final pars = WebGLRenderTargetOptions({
+    final pars = RenderTargetOptions({
       "minFilter": LinearFilter,
       "magFilter": LinearFilter,
       "format": RGBAFormat,
@@ -65,19 +65,19 @@ class UnrealBloomPass extends Pass {
     int resx = (this.resolution.x ~/ 2);
     int resy = (this.resolution.y ~/ 2);
 
-    renderTargetBright = WebGLRenderTarget(resx, resy, pars);
+    renderTargetBright = RenderTarget(resx, resy, pars);
     renderTargetBright.texture.name = 'UnrealBloomPass.bright';
     renderTargetBright.texture.generateMipmaps = false;
 
     for (int i = 0; i < nMips; i++) {
-      final renderTargetHorizonal = WebGLRenderTarget(resx, resy, pars);
+      final renderTargetHorizonal = RenderTarget(resx, resy, pars);
 
       renderTargetHorizonal.texture.name = 'UnrealBloomPass.h $i';
       renderTargetHorizonal.texture.generateMipmaps = false;
 
       renderTargetsHorizontal.add(renderTargetHorizonal);
 
-      final renderTargetVertical = WebGLRenderTarget(resx, resy, pars);
+      final renderTargetVertical = RenderTarget(resx, resy, pars);
 
       renderTargetVertical.texture.name = 'UnrealBloomPass.v $i';
       renderTargetVertical.texture.generateMipmaps = false;
@@ -205,7 +205,7 @@ class UnrealBloomPass extends Pass {
   }
 
   @override
-  void render(WebGLRenderer renderer, WebGLRenderTarget writeBuffer, WebGLRenderTarget readBuffer,{double? deltaTime, bool? maskActive}) {
+  void render(Renderer renderer, RenderTarget writeBuffer, RenderTarget readBuffer,{double? deltaTime, bool? maskActive}) {
     renderer.getClearColor(oldClearColor);
     oldClearAlpha = renderer.getClearAlpha();
     final oldAutoClear = renderer.autoClear;

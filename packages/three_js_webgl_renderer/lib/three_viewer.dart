@@ -117,7 +117,7 @@ class ThreeJS with WidgetsBindingObserver{
   FlutterAngleTexture? texture;
   RenderingContext? gl;
 
-  WebGLRenderTarget? renderTarget;
+  RenderTarget? renderTarget;
   WebGLRenderer? renderer;
   final core.Clock clock = core.Clock();
 
@@ -309,7 +309,7 @@ class ThreeJS with WidgetsBindingObserver{
 
     if(settings.useSourceTexture){
       final RenderTargetOptions pars = RenderTargetOptions(settings.renderOptions);
-      renderTarget = WebGLRenderTarget((width * _resolution!).toInt(), (height * _resolution!).toInt(), pars);
+      renderTarget = RenderTarget((width * _resolution!).toInt(), (height * _resolution!).toInt(), pars);
       renderer!.setRenderTarget(renderTarget);
       sourceTexture = renderer!.getRenderTargetGLTexture(renderTarget!);
     }

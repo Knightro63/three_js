@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 import './shaders/index.dart';
@@ -104,7 +106,7 @@ class AtmosphereParameters{
 class Atmosphere extends Points {
   final AtmosphereParameters atmosphereParams;
   
-  Atmosphere(this.atmosphereParams, [Texture? cloudTexture]):super(null,null){
+  Atmosphere(this.atmosphereParams, [Texture? cloudTexture]):super(){
     this.material = ShaderMaterial.fromMap({
       'uniforms': {
         'time': { 'value': 0.0 },
@@ -121,7 +123,9 @@ class Atmosphere extends Points {
       'depthWrite': false,
       'transparent': true
     });
-
+    material?.polygonOffset = true;
+    material?.polygonOffsetFactor = -1.0;
+    material?.polygonOffsetUnits = -4.0;
     update();
   }
 
@@ -133,9 +137,7 @@ class Atmosphere extends Points {
 
     final geometry = BufferGeometry();
     
-    final verts = <double>[];
-    final uvs = <double>[];
-    final sizes = <double>[];
+    final Float32List combinedData = Float32List(atmosphereParams.particles * 6);
     
     // Sample points within the atmosphere
     for(int i = 0; i < atmosphereParams.particles; i++) {
@@ -158,15 +160,18 @@ class Atmosphere extends Points {
       final maxSize = atmosphereParams.maxParticleSize;
       final size = math.Random().nextDouble() * (maxSize - minSize) + minSize;
 
-      verts.addAll([p.x, p.y, p.z]);
-      uvs.addAll([0.5, 0.5]);
-      sizes.add(size);
+      combinedData.setAll(i * 6, [p.x, p.y, p.z, 0.5, 0.5, size]);
     }
 
-    geometry.setAttributeFromString('position', Float32BufferAttribute.fromList(verts, 3));
-    geometry.setAttributeFromString('uv', Float32BufferAttribute.fromList(uvs, 2));
-    geometry.setAttributeFromString('size', Float32BufferAttribute.fromList(sizes, 1));
+    final interleavedBuffer = InterleavedBuffer(combinedData, 6);
+
+    geometry.setAttributeFromString('position', InterleavedBufferAttribute(interleavedBuffer, 3, 0));
+    geometry.setAttributeFromString('uv', InterleavedBufferAttribute(interleavedBuffer, 2, 3));
+    geometry.setAttributeFromString('size', InterleavedBufferAttribute(interleavedBuffer, 1, 5));    
 
     this.geometry = geometry;
+
+    geometry.computeBoundingSphere();
+    geometry.computeBoundingBox();
   }
 }

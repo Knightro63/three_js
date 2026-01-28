@@ -24,7 +24,7 @@ class SSAARenderPass extends Pass {
   late Map<String, dynamic> copyUniforms;
   late ShaderMaterial copyMaterial;
 
-  WebGLRenderTarget? sampleRenderTarget;
+  RenderTarget? sampleRenderTarget;
 
   SSAARenderPass(Scene scene, Camera camera, [Color? clearColor, this.clearAlpha = 0]) : super() {
     this.scene = scene;
@@ -69,12 +69,12 @@ class SSAARenderPass extends Pass {
   }
 
   @override
-  void render(WebGLRenderer renderer, WebGLRenderTarget writeBuffer, WebGLRenderTarget readBuffer, {num? deltaTime, bool? maskActive}) {
+  void render(Renderer renderer, RenderTarget writeBuffer, RenderTarget readBuffer, {num? deltaTime, bool? maskActive}) {
     if (sampleRenderTarget == null) {
-      sampleRenderTarget = WebGLRenderTarget(
+      sampleRenderTarget = RenderTarget(
           readBuffer.width,
           readBuffer.height,
-          WebGLRenderTargetOptions({
+          RenderTargetOptions({
             "minFilter": LinearFilter,
             "magFilter": LinearFilter,
             "format": RGBAFormat

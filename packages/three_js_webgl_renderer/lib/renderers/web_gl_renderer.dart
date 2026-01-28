@@ -1,7 +1,5 @@
 part of three_renderers;
 
-enum RenderType{after,before,custom}
-
 class WebGLRendererParameters{
   double width;
   double height;
@@ -98,31 +96,20 @@ class WebGLRenderer extends Renderer{
   };
 
   // clearing
-
-  bool autoClear = true;
-  bool autoClearColor = true;
-  bool autoClearDepth = true;
-  bool autoClearStencil = true;
   bool useLegacyLights = false;
 
-  // scene graph
-  bool sortObjects = true;
-
   // user-defined clipping
-
   List<Plane> clippingPlanes = [];
   bool localClippingEnabled = false;
   String _outputColorSpace = SRGBColorSpace;
-  // physically based shading
 
+  // physically based shading
   int outputEncoding = LinearEncoding;
 
   // physical lights
-
   bool physicallyCorrectLights = false;
 
   // tone mapping
-
   int toneMapping = NoToneMapping;
   double toneMappingExposure = 1.0;
 
@@ -180,6 +167,7 @@ class WebGLRenderer extends Renderer{
 
   final _emptyScene = Scene();
 
+  @override
   double getTargetPixelRatio() => _currentRenderTarget == null ? _pixelRatio : 1.0;
 
   // initialize
@@ -190,8 +178,7 @@ class WebGLRenderer extends Renderer{
 
   final animation = WebGLAnimation();
   late WebGLExtensions extensions;
-  late WebGLCapabilities capabilities;
-  late WebGLState state;
+  late Capabilities capabilities;
   late WebGLInfo info;
   late WebGLProperties properties;
   late WebGLTextures textures;
@@ -217,13 +204,15 @@ class WebGLRenderer extends Renderer{
 
   late XRManager xr;
   late WebGLUniformsGroups uniformsGroups;
-  late WebGLShadowMap shadowMap;
 
   late final Framebuffer _scratchFrameBuffer;
   late final Framebuffer _srcFramebuffer;
 	late final Framebuffer _dstFramebuffer;
 
   WebGLRenderer(this.parameters) {
+    shaderChunk = webglShaderChunk;
+    lightsFragmentBegin = webGlLightsFragmentBegin;
+    lightsParsBegin = webGlLightsParsBegin;
     _width = this.parameters.width;
     _height = this.parameters.height;
 
@@ -258,28 +247,28 @@ class WebGLRenderer extends Renderer{
     capabilities = WebGLCapabilities(_gl, extensions, parameters, utils);
     state = WebGLState(_gl,extensions);
 
-    if ( capabilities.reverseDepthBuffer && reverseDepthBuffer ) {
+    if ( (capabilities as WebGLCapabilities).reverseDepthBuffer && reverseDepthBuffer ) {
       state.buffers['depth'].setReversed( true );
     }
 
     info = WebGLInfo(_gl);
     properties = WebGLProperties();
-    textures = WebGLTextures(_gl, extensions, state, properties, capabilities, utils, info);
+    textures = WebGLTextures(_gl, extensions, state as WebGLState, properties, capabilities as WebGLCapabilities, utils, info);
     cubemaps = WebGLCubeMaps(this);
     cubeuvmaps = WebGLCubeUVMaps(this);
     attributes = WebGLAttributes(_gl);
     bindingStates = WebGLBindingStates(_gl, attributes);
     geometries = WebGLGeometries(_gl, attributes, info, bindingStates);
     objects = WebGLObjects(_gl, geometries, attributes, info);
-    morphtargets = WebGLMorphtargets(_gl, capabilities, textures);
+    morphtargets = WebGLMorphtargets(_gl, capabilities as WebGLCapabilities, textures);
     clipping = WebGLClipping(properties);
-    programCache = WebGLPrograms(this, cubemaps, cubeuvmaps, extensions, capabilities, bindingStates, clipping);
+    programCache = WebGLPrograms(this, cubemaps, cubeuvmaps, extensions, capabilities as WebGLCapabilities, bindingStates, clipping);
     materials = WebGLMaterials(this, properties);
     renderLists = WebGLRenderLists();
     renderStates = WebGLRenderStates(extensions);
-    background = WebGLBackground(this, cubemaps, cubeuvmaps, state, objects, alpha, premultipliedAlpha);
-    shadowMap = WebGLShadowMap(this, objects, capabilities);
-    uniformsGroups = WebGLUniformsGroups( _gl, info, capabilities, state );
+    background = WebGLBackground(this, cubemaps, cubeuvmaps, state as WebGLState, objects, alpha, premultipliedAlpha);
+    shadowMap = WebGLShadowMap(this, objects, capabilities as WebGLCapabilities);
+    uniformsGroups = WebGLUniformsGroups( _gl, info, capabilities as WebGLCapabilities, state as WebGLState );
 
     bufferRenderer = WebGLBufferRenderer(_gl, extensions, info);
     indexedBufferRenderer = WebGLIndexedBufferRenderer(_gl, extensions, info);
@@ -292,8 +281,8 @@ class WebGLRenderer extends Renderer{
   }
 
   // API
-
-  dynamic getContext() {
+  @override
+  RenderingContext getContext() {
     return _gl;
   }
 
@@ -311,6 +300,7 @@ class WebGLRenderer extends Renderer{
     if (extension) extension.restoreContext();
   }
 
+  @override
   double getPixelRatio() {
     return _pixelRatio;
   }
@@ -320,6 +310,7 @@ class WebGLRenderer extends Renderer{
     setSize(width, height, false);
   }
 
+  @override
   Vector2 getSize(Vector2 target) {
     return target.setValues(width.toDouble(), height.toDouble());
   }
@@ -346,14 +337,16 @@ class WebGLRenderer extends Renderer{
     setViewport(0, 0, width, height);
   }
 
+  @override
   Vector4 getCurrentViewport(Vector4 target) {
     return target.setFrom(_currentViewport);
   }
 
+  @override
   Vector4 getViewport(Vector4 target) {
     return target.setFrom(_viewport);
   }
-
+  @override
   void setViewport(double x, double y, double width, double height) {
     _viewport.setValues(x, y, width, height);
     _currentViewport.setFrom(_viewport);
@@ -379,7 +372,7 @@ class WebGLRenderer extends Renderer{
   }
 
   void setScissorTest(bool boolean) {
-    state.setScissorTest(_scissorTest = boolean);
+    (state as WebGLState).setScissorTest(_scissorTest = boolean);
   }
 
   void setOpaqueSort(Function? method) {
@@ -391,21 +384,24 @@ class WebGLRenderer extends Renderer{
   }
 
   // Clearing
-
+  @override
   Color getClearColor(Color target) {
     target.setFrom(background.getClearColor());
     return target;
   }
 
   // color same as Color.set
+  @override
   void setClearColor(Color color, [double alpha = 1.0]) {
     background.setClearColor(color, alpha);
   }
 
+  @override
   double getClearAlpha() {
     return background.getClearAlpha();
   }
 
+  @override
   void setClearAlpha(double alpha) {
     background.setClearAlpha(alpha);
   }
@@ -471,18 +467,6 @@ class WebGLRenderer extends Renderer{
 			}
 
 			_gl.clear( bits );
-  }
-
-  void clearColor() {
-    clear(true, false, false);
-  }
-
-  void clearDepth() {
-    clear(false, true, false);
-  }
-
-  void clearStencil() {
-    clear(false, false, true);
   }
 
   //
@@ -593,6 +577,7 @@ class WebGLRenderer extends Renderer{
     }
   }
 
+  @override
   void renderBufferDirect(
     Camera camera,
     Object3D? scene,
@@ -608,7 +593,7 @@ class WebGLRenderer extends Renderer{
 
     WebGLProgram program = setProgram(camera, scene, geometry, material, object);
 
-    state.setMaterial(material, frontFaceCW);
+    (state as WebGLState).setMaterial(material, frontFaceCW);
 
     BufferAttribute? index = geometry.index;
     int rangeFactor = 1;
@@ -659,7 +644,7 @@ class WebGLRenderer extends Renderer{
 
     if (object is Mesh) {
       if (material.wireframe) {
-        state.setLineWidth(material.wireframeLinewidth! * getTargetPixelRatio());
+        (state as WebGLState).setLineWidth(material.wireframeLinewidth! * getTargetPixelRatio());
         renderer.setMode(WebGL.LINES);
       } 
       else {
@@ -671,7 +656,7 @@ class WebGLRenderer extends Renderer{
 
       lineWidth ??= 1; // Not using Line*Material
 
-      state.setLineWidth(lineWidth * getTargetPixelRatio());
+      (state as WebGLState).setLineWidth(lineWidth * getTargetPixelRatio());
 
       if (object is LineSegments) {
         renderer.setMode(WebGL.LINES);
@@ -1077,7 +1062,7 @@ class WebGLRenderer extends Renderer{
     state.buffers["depth"].setMask(true);
     state.buffers["color"].setMask(true);
 
-    state.setPolygonOffset(false);
+    (state as WebGLState).setPolygonOffset(false);
   }
 
   void renderTransmissionPass(List<RenderItem> opaqueObjects, List<RenderItem> transmissiveObjects, Object3D scene, Camera camera) {
@@ -1089,7 +1074,7 @@ class WebGLRenderer extends Renderer{
 
 			if ( currentRenderState?.state.transmissionRenderTarget[ camera.id ] == null ) {
 
-				currentRenderState?.state.transmissionRenderTarget[ camera.id ] = WebGLRenderTarget( 1, 1, RenderTargetOptions({
+				currentRenderState?.state.transmissionRenderTarget[ camera.id ] = RenderTarget( 1, 1, RenderTargetOptions({
 					'generateMipmaps': true,
 					'type': ( extensions.has( 'EXT_color_buffer_half_float' ) || extensions.has( 'EXT_color_buffer_float' ) ) ? HalfFloatType : UnsignedByteType,
 					'minFilter': LinearMipmapLinearFilter,
@@ -1334,7 +1319,7 @@ class WebGLRenderer extends Renderer{
 
     return materialProperties['uniformsList'];
   }
-  void updateCommonMaterialProperties(Material material, WebGLParameters parameters) {
+  void updateCommonMaterialProperties(Material material, Parameters parameters) {
     final materialProperties = properties.get(material);
 
     materialProperties['outputColorSpace'] = parameters.outputColorSpace;
@@ -1468,7 +1453,7 @@ class WebGLRenderer extends Renderer{
     final WebGLUniforms? pUniformS = program?.getUniforms();
     final Map<String, dynamic> mUniformS = materialProperties['uniforms'];
 
-    if (state.useProgram( program?.program ) ) {
+    if ((state as WebGLState).useProgram( program?.program ) ) {
       refreshProgram = true;
       refreshMaterial = true;
       refreshLights = true;
@@ -1705,7 +1690,7 @@ class WebGLRenderer extends Renderer{
 
       if (renderTargetProperties["__useDefaultFramebuffer"] != null) {
         // We need to make sure to rebind the framebuffer.
-        state.bindFramebuffer(WebGL.FRAMEBUFFER, null);
+        (state as WebGLState).bindFramebuffer(WebGL.FRAMEBUFFER, null);
         useDefaultFramebuffer = false;
       } 
       else if (renderTargetProperties["__webglFramebuffer"] == null) {
@@ -1741,7 +1726,7 @@ class WebGLRenderer extends Renderer{
 
       final webglFramebuffer = properties.get(renderTarget)["__webglFramebuffer"];
 
-      if (renderTarget is WebGLCubeRenderTarget) {
+      if (renderTarget is CubeRenderTarget) {
         if (webglFramebuffer[ activeCubeFace ] is List) {
           framebuffer = webglFramebuffer[ activeCubeFace ][ activeMipmapLevel ];
         } 
@@ -1777,15 +1762,15 @@ class WebGLRenderer extends Renderer{
       framebuffer = _scratchFrameBuffer;
     }
 
-    final framebufferBound = state.bindFramebuffer(WebGL.FRAMEBUFFER, framebuffer);
+    final framebufferBound = (state as WebGLState).bindFramebuffer(WebGL.FRAMEBUFFER, framebuffer);
     
     if (framebufferBound && capabilities.drawBuffers && useDefaultFramebuffer) {
-      state.drawBuffers(renderTarget, framebuffer);
+      (state as WebGLState).drawBuffers(renderTarget, framebuffer);
     }
 
-    state.viewport(_currentViewport);
-    state.scissor(_currentScissor);
-    state.setScissorTest(_currentScissorTest!);
+    (state as WebGLState).viewport(_currentViewport);
+    (state as WebGLState).scissor(_currentScissor);
+    (state as WebGLState).setScissorTest(_currentScissorTest!);
 
     if (isCube) {
       final textureProperties = properties.get(renderTarget!.texture);
@@ -1806,15 +1791,16 @@ class WebGLRenderer extends Renderer{
     _currentMaterialId = -1; // reset current material to ensure correct uniform bindings
   }
 
-  void readRenderTargetPixels(WebGLRenderTarget renderTarget, int x, int y, int width, int height, TypedDataList buffer, [activeCubeFaceIndex]) {
+  @override
+  void readRenderTargetPixels(RenderTarget renderTarget, int x, int y, int width, int height, TypedData buffer, [int? activeCubeFaceIndex]) {
     dynamic framebuffer = properties.get(renderTarget)["__webglFramebuffer"]; //can be Map or int
 
-    if (renderTarget is WebGLCubeRenderTarget && activeCubeFaceIndex != null) {
+    if (renderTarget is CubeRenderTarget && activeCubeFaceIndex != null) {
       framebuffer = framebuffer?[activeCubeFaceIndex];
     }
 
     if (framebuffer != null) {
-      state.bindFramebuffer(WebGL.FRAMEBUFFER, framebuffer);
+      (state as WebGLState).bindFramebuffer(WebGL.FRAMEBUFFER, framebuffer);
 
       try {
         final texture = renderTarget.texture;
@@ -1849,11 +1835,12 @@ class WebGLRenderer extends Renderer{
         }
       } finally {
         final framebuffer = (_currentRenderTarget != null) ? properties.get(_currentRenderTarget)["__webglFramebuffer"] : null;
-        state.bindFramebuffer(WebGL.FRAMEBUFFER, framebuffer);
+        (state as WebGLState).bindFramebuffer(WebGL.FRAMEBUFFER, framebuffer);
       }
     }
   }
 
+  @override
   void copyFramebufferToTexture(Vector? position, Texture? texture, {int level = 0}) {
     //console.warning('copyFramebufferToTexture not supported');
     if (texture is! FramebufferTexture) {
@@ -1870,7 +1857,7 @@ class WebGLRenderer extends Renderer{
 
     textures.setTexture2D(texture, 0);
     _gl.copyTexSubImage2D(WebGL.TEXTURE_2D, level, 0, 0, x, y, width, height);
-    state.unbindTexture(WebGLTexture(WebGL.TEXTURE_2D));
+    (state as WebGLState).unbindTexture(WebGLTexture(WebGL.TEXTURE_2D));
   }
 
   void copyTextureToTexture(Texture srcTexture, Texture dstTexture, {srcRegion, dstPosition, int srcLevel = 0, dstLevel}) {
@@ -1971,8 +1958,8 @@ class WebGLRenderer extends Renderer{
       final dstTextureProperties = properties.get( dstTexture );
       final srcRenderTargetProperties = properties.get( srcTextureProperties['__renderTarget'] );
       final dstRenderTargetProperties = properties.get( dstTextureProperties['__renderTarget'] );
-      state.bindFramebuffer( WebGL.READ_FRAMEBUFFER, srcRenderTargetProperties['__webglFramebuffer'] );
-      state.bindFramebuffer( WebGL.DRAW_FRAMEBUFFER, dstRenderTargetProperties['__webglFramebuffer'] );
+      (state as WebGLState).bindFramebuffer( WebGL.READ_FRAMEBUFFER, srcRenderTargetProperties['__webglFramebuffer'] );
+      (state as WebGLState).bindFramebuffer( WebGL.DRAW_FRAMEBUFFER, dstRenderTargetProperties['__webglFramebuffer'] );
 
       for (int i = 0; i < depth; i ++ ) {
         // if the source or destination are a 3d target then a layer needs to be bound
@@ -1984,8 +1971,8 @@ class WebGLRenderer extends Renderer{
         _gl.blitFramebuffer( minX, minY, width, height, dstX, dstY, width, height, WebGL.DEPTH_BUFFER_BIT, WebGL.NEAREST );
       }
 
-      state.bindFramebuffer( WebGL.READ_FRAMEBUFFER, null );
-      state.bindFramebuffer( WebGL.DRAW_FRAMEBUFFER, null );
+      (state as WebGLState).bindFramebuffer( WebGL.READ_FRAMEBUFFER, null );
+      (state as WebGLState).bindFramebuffer( WebGL.DRAW_FRAMEBUFFER, null );
 
     } 
     else if ( srcLevel != 0 || srcTexture.isRenderTargetTexture || properties.has( srcTexture ) ) {
@@ -1994,8 +1981,8 @@ class WebGLRenderer extends Renderer{
       final dstTextureProperties = properties.get( dstTexture );
 
       // bind the frame buffer targets
-      state.bindFramebuffer( WebGL.READ_FRAMEBUFFER, _srcFramebuffer );
-      state.bindFramebuffer( WebGL.DRAW_FRAMEBUFFER, _dstFramebuffer );
+      (state as WebGLState).bindFramebuffer( WebGL.READ_FRAMEBUFFER, _srcFramebuffer );
+      (state as WebGLState).bindFramebuffer( WebGL.DRAW_FRAMEBUFFER, _dstFramebuffer );
 
       for (int i = 0; i < depth; i ++ ) {
 
@@ -2025,8 +2012,8 @@ class WebGLRenderer extends Renderer{
       }
 
       // unbind read, draw buffers
-      state.bindFramebuffer( WebGL.READ_FRAMEBUFFER, null );
-      state.bindFramebuffer( WebGL.DRAW_FRAMEBUFFER, null );
+      (state as WebGLState).bindFramebuffer( WebGL.READ_FRAMEBUFFER, null );
+      (state as WebGLState).bindFramebuffer( WebGL.DRAW_FRAMEBUFFER, null );
     } 
     else {
 
@@ -2068,7 +2055,7 @@ class WebGLRenderer extends Renderer{
       _gl.generateMipmap( glTarget );
     }
 
-    state.unbindTexture();
+    (state as WebGLState).unbindTexture();
   }
 
   void copyTextureToTexture3D(
@@ -2101,7 +2088,7 @@ class WebGLRenderer extends Renderer{
       textures.setTexture2D(texture, 0);
     }
 
-    state.unbindTexture();
+    (state as WebGLState).unbindTexture();
   }
 
   WebGLTexture getRenderTargetGLTexture(RenderTarget renderTarget) {

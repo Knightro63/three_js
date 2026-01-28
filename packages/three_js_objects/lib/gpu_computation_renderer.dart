@@ -114,13 +114,13 @@ class GPUComputationRenderer {
   late void Function(Material,RenderTarget) doRenderTarget;
   late void Function(Texture,RenderTarget) renderTexture;
   late DataTexture Function() createTexture;
-  late WebGLRenderTarget Function(dynamic,dynamic,dynamic,dynamic,dynamic,dynamic) createRenderTarget;
+  late RenderTarget Function(dynamic,dynamic,dynamic,dynamic,dynamic,dynamic) createRenderTarget;
   late void Function(Map<String,dynamic>,dynamic) setVariableDependencies;
-  late WebGLRenderTarget Function(Map<String,dynamic>) getCurrentRenderTarget;
-  late WebGLRenderTarget Function(Map<String,dynamic>) getAlternateRenderTarget;
+  late RenderTarget Function(Map<String,dynamic>) getCurrentRenderTarget;
+  late RenderTarget Function(Map<String,dynamic>) getAlternateRenderTarget;
   late void Function(dynamic) addResolutionDefine;
 
-	GPUComputationRenderer(int sizeX, int sizeY, WebGLRenderer renderer ) {
+	GPUComputationRenderer(int sizeX, int sizeY, Renderer renderer ) {
 		int dataType = FloatType;
 		camera.position.z = 1;
 
@@ -314,7 +314,7 @@ class GPUComputationRenderer {
 			minFilter = minFilter ?? NearestFilter;
 			magFilter = magFilter ?? NearestFilter;
 
-			final renderTarget = WebGLRenderTarget( sizeXTexture, sizeYTexture, WebGLRenderTargetOptions({
+			final renderTarget = RenderTarget( sizeXTexture, sizeYTexture, RenderTargetOptions({
 				'wrapS': wrapS,
 				'wrapT': wrapT,
 				'minFilter': minFilter,

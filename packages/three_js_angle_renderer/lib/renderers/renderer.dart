@@ -96,30 +96,19 @@ class AngleRenderer extends Renderer{
   };
 
   // clearing
-
-  bool autoClear = true;
-  bool autoClearColor = true;
-  bool autoClearDepth = true;
-  bool autoClearStencil = true;
   bool useLegacyLights = false;
 
-  // scene graph
-  bool sortObjects = true;
-
   // user-defined clipping
-
   List<Plane> clippingPlanes = [];
   bool localClippingEnabled = false;
-  // physically based shading
 
+  // physically based shading
   int outputEncoding = LinearEncoding;
 
   // physical lights
-
   bool physicallyCorrectLights = false;
 
   // tone mapping
-
   late double _width;
   late double _height;
 
@@ -137,7 +126,7 @@ class AngleRenderer extends Renderer{
 
   int _currentActiveCubeFace = 0;
   int _currentActiveMipmapLevel = 0;
-  AngleRenderTarget? _currentRenderTarget;
+  RenderTarget? _currentRenderTarget;
 
   int _currentMaterialId = -1;
   Camera? _currentCamera;
@@ -174,6 +163,7 @@ class AngleRenderer extends Renderer{
 
   final _emptyScene = Scene();
 
+  @override
   double getTargetPixelRatio() => _currentRenderTarget == null ? _pixelRatio : 1.0;
 
   // initialize
@@ -184,8 +174,7 @@ class AngleRenderer extends Renderer{
 
   final animation = AngleAnimation();
   late AngleExtensions extensions;
-  late AngleCapabilities capabilities;
-  late AngleState state;
+  late Capabilities capabilities;
   late AngleInfo info;
   late AngleProperties properties;
   late AngleTextures textures;
@@ -211,12 +200,15 @@ class AngleRenderer extends Renderer{
 
   late XRManager Function(AngleRenderer renderer, dynamic gl)? _setXR;
   late AngleUniformsGroups uniformsGroups;
-  late AngleShadowMap shadowMap;
 
   late final Framebuffer _scratchFrameBuffer;
   late final Framebuffer _srcFramebuffer;
 	late final Framebuffer _dstFramebuffer;
   AngleRenderer(this.parameters) {
+    shaderChunk = angleShaderChunk;
+    lightsFragmentBegin = angleLightsFragmentBegin;
+    lightsParsBegin = angleLightsParsBegin;
+
     _width = this.parameters.width;
     _height = this.parameters.height;
 
@@ -255,28 +247,28 @@ class AngleRenderer extends Renderer{
     capabilities = AngleCapabilities(_gl, extensions, parameters, utils);
     state = AngleState(_gl,extensions);
 
-    if ( capabilities.reverseDepthBuffer && reverseDepthBuffer ) {
+    if ( (capabilities as AngleCapabilities).reverseDepthBuffer && reverseDepthBuffer ) {
       state.buffers['depth'].setReversed( true );
     }
 
     info = AngleInfo(_gl);
     properties = AngleProperties();
-    textures = AngleTextures(_gl, extensions, state, properties, capabilities, utils, info);
+    textures = AngleTextures(_gl, extensions, state as AngleState, properties, capabilities as AngleCapabilities, utils, info);
     cubemaps = AngleCubeMaps(this);
     cubeuvmaps = AngleCubeUVMaps(this);
     attributes = AngleAttributes(_gl);
     bindingStates = AngleBindingStates(_gl, attributes);
     geometries = AngleGeometries(_gl, attributes, info, bindingStates);
     objects = AngleObjects(_gl, geometries, attributes, info);
-    morphtargets = AngleMorphtargets(_gl, capabilities, textures);
+    morphtargets = AngleMorphtargets(_gl, capabilities as AngleCapabilities, textures);
     clipping = AngleClipping(properties);
-    programCache = AnglePrograms(this, cubemaps, cubeuvmaps, extensions, capabilities, bindingStates, clipping);
+    programCache = AnglePrograms(this, cubemaps, cubeuvmaps, extensions, capabilities as AngleCapabilities, bindingStates, clipping);
     materials = AngleMaterials(this, properties);
     renderLists = AngleRenderLists();
     renderStates = AngleRenderStates(extensions);
-    background = AngleBackground(this, cubemaps, cubeuvmaps, state, objects, alpha, premultipliedAlpha);
-    shadowMap = AngleShadowMap(this, objects, capabilities);
-    uniformsGroups = AngleUniformsGroups( _gl, info, capabilities, state );
+    background = AngleBackground(this, cubemaps, cubeuvmaps, state as AngleState, objects, alpha, premultipliedAlpha);
+    shadowMap = AngleShadowMap(this, objects, capabilities as AngleCapabilities);
+    uniformsGroups = AngleUniformsGroups( _gl, info, capabilities as AngleCapabilities, state as AngleState );
 
     bufferRenderer = AngleBufferRenderer(_gl, extensions, info);
     indexedBufferRenderer = AngleIndexedBufferRenderer(_gl, extensions, info);
@@ -290,7 +282,7 @@ class AngleRenderer extends Renderer{
   }
 
   // API
-
+  @override
   RenderingContext getContext() {
     return _gl;
   }
@@ -309,6 +301,7 @@ class AngleRenderer extends Renderer{
     if (extension) extension.restoreContext();
   }
 
+  @override
   double getPixelRatio() {
     return _pixelRatio;
   }
@@ -318,6 +311,7 @@ class AngleRenderer extends Renderer{
     setSize(width, height, false);
   }
 
+  @override
   Vector2 getSize(Vector2 target) {
     return target.setValues(width.toDouble(), height.toDouble());
   }
@@ -344,14 +338,17 @@ class AngleRenderer extends Renderer{
     setViewport(0, 0, width, height);
   }
 
+  @override
   Vector4 getCurrentViewport(Vector4 target) {
     return target.setFrom(_currentViewport);
   }
 
+  @override
   Vector4 getViewport(Vector4 target) {
     return target.setFrom(_viewport);
   }
 
+  @override
   void setViewport(double x, double y, double width, double height) {
     _viewport.setValues(x, y, width, height);
     _currentViewport.setFrom(_viewport);
@@ -377,7 +374,7 @@ class AngleRenderer extends Renderer{
   }
 
   void setScissorTest(bool boolean) {
-    state.setScissorTest(_scissorTest = boolean);
+    (state as AngleState).setScissorTest(_scissorTest = boolean);
   }
 
   void setOpaqueSort(Function? method) {
@@ -389,21 +386,24 @@ class AngleRenderer extends Renderer{
   }
 
   // Clearing
-
+  @override
   Color getClearColor(Color target) {
     target.setFrom(background.getClearColor());
     return target;
   }
 
   // color same as Color.set
+  @override
   void setClearColor(Color color, [double alpha = 1.0]) {
     background.setClearColor(color, alpha);
   }
 
+  @override
   double getClearAlpha() {
     return background.getClearAlpha();
   }
 
+  @override
   void setClearAlpha(double alpha) {
     background.setClearAlpha(alpha);
   }
@@ -470,18 +470,6 @@ class AngleRenderer extends Renderer{
 			}
 
 			_gl.clear( bits );
-  }
-
-  void clearColor() {
-    clear(true, false, false);
-  }
-
-  void clearDepth() {
-    clear(false, true, false);
-  }
-
-  void clearStencil() {
-    clear(false, false, true);
   }
 
   //
@@ -594,6 +582,7 @@ class AngleRenderer extends Renderer{
     }
   }
 
+  @override
   void renderBufferDirect(
     Camera camera,
     Object3D? scene,
@@ -609,7 +598,7 @@ class AngleRenderer extends Renderer{
 
     AngleProgram program = setProgram(camera, scene, geometry, material, object);
 
-    state.setMaterial(material, frontFaceCW);
+    (state as AngleState).setMaterial(material, frontFaceCW);
 
     BufferAttribute? index = geometry.index;
     int rangeFactor = 1;
@@ -660,7 +649,7 @@ class AngleRenderer extends Renderer{
 
     if (object is Mesh) {
       if (material.wireframe) {
-        state.setLineWidth(material.wireframeLinewidth! * getTargetPixelRatio());
+        (state as AngleState).setLineWidth(material.wireframeLinewidth! * getTargetPixelRatio());
         renderer.setMode(WebGL.LINES);
       } 
       else {
@@ -672,7 +661,7 @@ class AngleRenderer extends Renderer{
 
       lineWidth ??= 1; // Not using Line*Material
 
-      state.setLineWidth(lineWidth * getTargetPixelRatio());
+      (state as AngleState).setLineWidth(lineWidth * getTargetPixelRatio());
 
       if (object is LineSegments) {
         renderer.setMode(WebGL.LINES);
@@ -1079,7 +1068,7 @@ class AngleRenderer extends Renderer{
     state.buffers["depth"].setMask(true);
     state.buffers["color"].setMask(true);
 
-    state.setPolygonOffset(false);
+    (state as AngleState).setPolygonOffset(false);
   }
 
   void renderTransmissionPass(List<RenderItem> opaqueObjects, List<RenderItem> transmissiveObjects, Object3D scene, Camera camera) {
@@ -1089,14 +1078,14 @@ class AngleRenderer extends Renderer{
 				return;
 			}
 
-      AngleRenderTarget? transmissionRenderTarget = currentRenderState?.state.transmissionRenderTarget[ camera.id ];
+      RenderTarget? transmissionRenderTarget = currentRenderState?.state.transmissionRenderTarget[ camera.id ];
       final activeViewport = camera.viewport ?? _currentViewport;
 
 			if ( currentRenderState?.state.transmissionRenderTarget[ camera.id ] == null ||
         (activeViewport.w.toInt() != transmissionRenderTarget?.height || activeViewport.z.toInt() != transmissionRenderTarget?.width)
       ) {
         transmissionRenderTarget?.dispose();
-        currentRenderState?.state.transmissionRenderTarget[ camera.id ] = AngleRenderTarget( 1, 1, RenderTargetOptions({
+        currentRenderState?.state.transmissionRenderTarget[ camera.id ] = RenderTarget( 1, 1, RenderTargetOptions({
           'generateMipmaps': true,
           'type': ( extensions.has( 'EXT_color_buffer_half_float' ) || extensions.has( 'EXT_color_buffer_float' ) ) ? HalfFloatType : UnsignedByteType,
           'minFilter': LinearMipmapLinearFilter,
@@ -1338,7 +1327,7 @@ class AngleRenderer extends Renderer{
 
     return materialProperties['uniformsList'];
   }
-  void updateCommonMaterialProperties(Material material, AngleParameters parameters) {
+  void updateCommonMaterialProperties(Material material, Parameters parameters) {
     final materialProperties = properties.get(material);
 
     materialProperties['outputColorSpace'] = parameters.outputColorSpace;
@@ -1472,7 +1461,7 @@ class AngleRenderer extends Renderer{
     final AngleUniforms? pUniformS = program?.getUniforms();
     final Map<String, dynamic> mUniformS = materialProperties['uniforms'];
 
-    if (state.useProgram( program?.program ) ) {
+    if ((state as AngleState).useProgram( program?.program ) ) {
       refreshProgram = true;
       refreshMaterial = true;
       refreshLights = true;
@@ -1689,7 +1678,7 @@ class AngleRenderer extends Renderer{
     //}
   }
 
-  void setRenderTargetFramebuffer(AngleRenderTarget renderTarget, Framebuffer? defaultFramebuffer) {
+  void setRenderTargetFramebuffer(RenderTarget renderTarget, Framebuffer? defaultFramebuffer) {
     final renderTargetProperties = properties.get(renderTarget);
     renderTargetProperties["__webglFramebuffer"] = defaultFramebuffer;
     renderTargetProperties["__useDefaultFramebuffer"] = defaultFramebuffer == null;
@@ -1697,7 +1686,6 @@ class AngleRenderer extends Renderer{
 
   @override
   void setRenderTarget(RenderTarget? renderTarget, [int activeCubeFace = 0, int activeMipmapLevel = 0]) {
-    renderTarget as AngleRenderTarget?;
     _currentRenderTarget = renderTarget;
     _currentActiveCubeFace = activeCubeFace;
     _currentActiveMipmapLevel = activeMipmapLevel;
@@ -1712,7 +1700,7 @@ class AngleRenderer extends Renderer{
 
       if (renderTargetProperties["__useDefaultFramebuffer"] != null) {
         // We need to make sure to rebind the framebuffer.
-        state.bindFramebuffer(WebGL.FRAMEBUFFER, null);
+        (state as AngleState).bindFramebuffer(WebGL.FRAMEBUFFER, null);
         useDefaultFramebuffer = false;
       } 
       else if (renderTargetProperties["__webglFramebuffer"] == null) {
@@ -1783,16 +1771,16 @@ class AngleRenderer extends Renderer{
     if ( activeMipmapLevel != 0 ) {
       framebuffer = _scratchFrameBuffer;
     }
-
-    final framebufferBound = state.bindFramebuffer(WebGL.FRAMEBUFFER, framebuffer);
+    final angleState = state as AngleState;
+    final framebufferBound = angleState.bindFramebuffer(WebGL.FRAMEBUFFER, framebuffer);
     
     if (framebufferBound && capabilities.drawBuffers && useDefaultFramebuffer) {
-      state.drawBuffers(renderTarget, framebuffer);
+      angleState.drawBuffers(renderTarget, framebuffer);
     }
 
-    state.viewport(_currentViewport);
-    state.scissor(_currentScissor);
-    state.setScissorTest(_currentScissorTest!);
+    angleState.viewport(_currentViewport);
+    angleState.scissor(_currentScissor);
+    angleState.setScissorTest(_currentScissorTest!);
 
     if (isCube) {
       final textureProperties = properties.get(renderTarget!.texture);
@@ -1813,7 +1801,7 @@ class AngleRenderer extends Renderer{
     _currentMaterialId = -1; // reset current material to ensure correct uniform bindings
   }
 
-  void readRenderTargetPixels(AngleRenderTarget renderTarget, int x, int y, int width, int height, TypedData buffer, [int? activeCubeFaceIndex]) {
+  void readRenderTargetPixels(RenderTarget renderTarget, int x, int y, int width, int height, TypedData buffer, [int? activeCubeFaceIndex]) {
     dynamic framebuffer = properties.get(renderTarget)["__webglFramebuffer"]; //can be Map or int
 
     if (renderTarget is CubeRenderTarget && activeCubeFaceIndex != null) {
@@ -1821,7 +1809,7 @@ class AngleRenderer extends Renderer{
     }
 
     if (framebuffer != null) {
-      state.bindFramebuffer(WebGL.FRAMEBUFFER, framebuffer);
+      (state as AngleState).bindFramebuffer(WebGL.FRAMEBUFFER, framebuffer);
 
       try {
         final texture = renderTarget.texture;
@@ -1855,11 +1843,12 @@ class AngleRenderer extends Renderer{
         }
       } finally {
         final framebuffer = (_currentRenderTarget != null) ? properties.get(_currentRenderTarget)["__webglFramebuffer"] : null;
-        state.bindFramebuffer(WebGL.FRAMEBUFFER, framebuffer);
+        (state as AngleState).bindFramebuffer(WebGL.FRAMEBUFFER, framebuffer);
       }
     }
   }
 
+  @override
   void copyFramebufferToTexture(Vector? position, Texture? texture, {int level = 0}) {
     //console.warning('copyFramebufferToTexture not supported');
     if (texture is! FramebufferTexture) {
@@ -1876,7 +1865,7 @@ class AngleRenderer extends Renderer{
 
     textures.setTexture2D(texture, 0);
     _gl.copyTexSubImage2D(WebGL.TEXTURE_2D, level, 0, 0, x, y, width, height);
-    state.unbindTexture(WebGLTexture(WebGL.TEXTURE_2D));
+    (state as AngleState).unbindTexture(WebGLTexture(WebGL.TEXTURE_2D));
   }
 
   void copyTextureToTexture(Texture srcTexture, Texture dstTexture, {srcRegion, dstPosition, int srcLevel = 0, dstLevel}) {
@@ -1971,14 +1960,15 @@ class AngleRenderer extends Renderer{
     // set up the src texture
     final isSrc3D = srcTexture is DataArrayTexture || srcTexture is Data3DTexture;
     final isDst3D = dstTexture is DataArrayTexture || dstTexture is Data3DTexture;
+    final angleState = state as AngleState; 
     if ( srcTexture.isDepthTexture ) {
 
       final srcTextureProperties = properties.get( srcTexture );
       final dstTextureProperties = properties.get( dstTexture );
       final srcRenderTargetProperties = properties.get( srcTextureProperties['__renderTarget'] );
       final dstRenderTargetProperties = properties.get( dstTextureProperties['__renderTarget'] );
-      state.bindFramebuffer( WebGL.READ_FRAMEBUFFER, srcRenderTargetProperties['__webglFramebuffer'] );
-      state.bindFramebuffer( WebGL.DRAW_FRAMEBUFFER, dstRenderTargetProperties['__webglFramebuffer'] );
+      angleState.bindFramebuffer( WebGL.READ_FRAMEBUFFER, srcRenderTargetProperties['__webglFramebuffer'] );
+      angleState.bindFramebuffer( WebGL.DRAW_FRAMEBUFFER, dstRenderTargetProperties['__webglFramebuffer'] );
 
       for (int i = 0; i < depth; i ++ ) {
         // if the source or destination are a 3d target then a layer needs to be bound
@@ -1990,8 +1980,8 @@ class AngleRenderer extends Renderer{
         _gl.blitFramebuffer( minX, minY, width, height, dstX, dstY, width, height, WebGL.DEPTH_BUFFER_BIT, WebGL.NEAREST );
       }
 
-      state.bindFramebuffer( WebGL.READ_FRAMEBUFFER, null );
-      state.bindFramebuffer( WebGL.DRAW_FRAMEBUFFER, null );
+      angleState.bindFramebuffer( WebGL.READ_FRAMEBUFFER, null );
+      angleState.bindFramebuffer( WebGL.DRAW_FRAMEBUFFER, null );
 
     } 
     else if ( srcLevel != 0 || srcTexture.isRenderTargetTexture || properties.has( srcTexture ) ) {
@@ -2000,8 +1990,8 @@ class AngleRenderer extends Renderer{
       final dstTextureProperties = properties.get( dstTexture );
 
       // bind the frame buffer targets
-      state.bindFramebuffer( WebGL.READ_FRAMEBUFFER, _srcFramebuffer );
-      state.bindFramebuffer( WebGL.DRAW_FRAMEBUFFER, _dstFramebuffer );
+      angleState.bindFramebuffer( WebGL.READ_FRAMEBUFFER, _srcFramebuffer );
+      angleState.bindFramebuffer( WebGL.DRAW_FRAMEBUFFER, _dstFramebuffer );
 
       for (int i = 0; i < depth; i ++ ) {
 
@@ -2031,8 +2021,8 @@ class AngleRenderer extends Renderer{
       }
 
       // unbind read, draw buffers
-      state.bindFramebuffer( WebGL.READ_FRAMEBUFFER, null );
-      state.bindFramebuffer( WebGL.DRAW_FRAMEBUFFER, null );
+      angleState.bindFramebuffer( WebGL.READ_FRAMEBUFFER, null );
+      angleState.bindFramebuffer( WebGL.DRAW_FRAMEBUFFER, null );
     } 
     else {
 
@@ -2074,7 +2064,7 @@ class AngleRenderer extends Renderer{
       _gl.generateMipmap( glTarget );
     }
 
-    state.unbindTexture();
+    angleState.unbindTexture();
   }
 
   void copyTextureToTexture3D(
@@ -2107,7 +2097,7 @@ class AngleRenderer extends Renderer{
       textures.setTexture2D(texture, 0);
     }
 
-    state.unbindTexture();
+    (state as AngleState).unbindTexture();
   }
 
   WebGLTexture getRenderTargetGLTexture(RenderTarget renderTarget) {

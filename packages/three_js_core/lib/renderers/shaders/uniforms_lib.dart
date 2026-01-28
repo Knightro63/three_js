@@ -1,4 +1,4 @@
-part of three_shaders;
+import 'package:three_js_math/three_js_math.dart';
 
 Map<String, dynamic> uniformsLib = {
   "common": {

@@ -1,9 +1,9 @@
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 
-class RenderTarget with EventDispatcher {
+class BaseRenderTarget with EventDispatcher {
   String? name;
-  
+  bool _didDispose = false;
   late int width;
   late int height;
   int depth = 1;
@@ -52,7 +52,7 @@ class RenderTarget with EventDispatcher {
 
 	DepthTexture? get depthTexture => _depthTexture;
 
-  RenderTarget([this.width = 1, this.height = 1, RenderTargetOptions? options]):super(){
+  BaseRenderTarget([this.width = 1, this.height = 1, RenderTargetOptions? options]):super(){
     scissor = Vector4(0, 0, width.toDouble(), height.toDouble());
     scissorTest = false;
 
@@ -102,11 +102,11 @@ class RenderTarget with EventDispatcher {
     multiview = this.options.multiview;
   }
 
-  RenderTarget clone() {
-    return RenderTarget()..copy( this );
+  BaseRenderTarget clone() {
+    return BaseRenderTarget()..copy( this );
   }
 
-  RenderTarget copy(RenderTarget source){
+  BaseRenderTarget copy(BaseRenderTarget source){
 		height = source.height;
     width = source.width;
 		depth = source.depth;
@@ -170,6 +170,42 @@ class RenderTarget with EventDispatcher {
       t.dispose();
     });
     textures.clear();
+  }
+}
+
+class RenderTarget extends BaseRenderTarget {
+  
+  RenderTarget(super.width, super.height, [super.options]);
+
+  @override
+  RenderTarget clone() {
+    return RenderTarget(width, height, options)..copy(this);
+  }
+
+  @override
+  RenderTarget copy(BaseRenderTarget source) {
+    super.copy(source);
+    return this;
+  }
+
+  @override
+  bool is3D() {
+    return texture is Data3DTexture || texture is DataArrayTexture;
+  }
+
+  @override
+  void dispose() {
+    if(_didDispose) return;
+    _didDispose = true;
+    dispatchEvent(Event(type: "dispose"));
+    depthTexture?.dispose();
+    texture.dispose();
+    options.dispose();
+
+    // textures.forEach((t){
+    //   t.dispose();
+    // });
+    // textures.clear();
   }
 }
 

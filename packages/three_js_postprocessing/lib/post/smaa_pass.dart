@@ -8,8 +8,8 @@ import 'package:three_js_postprocessing/shaders/smaa_shader.dart';
 import 'pass.dart';
 
 class SMAAPass extends Pass {
-  late WebGLRenderTarget edgesRT;
-  late WebGLRenderTarget weightsRT;
+  late RenderTarget edgesRT;
+  late RenderTarget weightsRT;
   late Texture searchTexture;
   late Texture areaTexture;
   late Map<String, dynamic> uniformsEdges;
@@ -21,16 +21,16 @@ class SMAAPass extends Pass {
 
 	SMAAPass() : super() {
 		// render targets
-		this.edgesRT = new WebGLRenderTarget( 1, 1, 
-      WebGLRenderTargetOptions({
+		this.edgesRT = new RenderTarget( 1, 1, 
+      RenderTargetOptions({
         "depthBuffer": false,
         'type': HalfFloatType
       }) 
     );
 		this.edgesRT.texture.name = 'SMAAPass.edges';
 
-		this.weightsRT = new WebGLRenderTarget( 1, 1, 
-      WebGLRenderTargetOptions({
+		this.weightsRT = new RenderTarget( 1, 1, 
+      RenderTargetOptions({
         "depthBuffer": false,
         'type': HalfFloatType
       })
@@ -106,7 +106,7 @@ class SMAAPass extends Pass {
 		this.fsQuad = new FullScreenQuad();
 	}
 
-	void render(WebGLRenderer renderer, WebGLRenderTarget writeBuffer, WebGLRenderTarget readBuffer, {num? deltaTime, bool? maskActive}) {
+	void render(Renderer renderer, RenderTarget writeBuffer, RenderTarget readBuffer, {num? deltaTime, bool? maskActive}) {
 
 		// pass 1
 

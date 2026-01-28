@@ -36,7 +36,7 @@ class GlitchPass extends Pass {
     return low + (math.Random().nextDouble() * (high - low + 1)).floor();
   }
   @override
-  void render(renderer, writeBuffer, readBuffer,{double? deltaTime, bool? maskActive}) {
+  void render(Renderer renderer, RenderTarget writeBuffer, RenderTarget readBuffer,{double? deltaTime, bool? maskActive}) {
     uniforms['tDiffuse']["value"] = readBuffer.texture;
     uniforms['seed']["value"] = math.Random().nextDouble(); //default seeding
     uniforms['byp']["value"] = 0;

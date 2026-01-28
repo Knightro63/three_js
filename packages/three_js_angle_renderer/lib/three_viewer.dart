@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:three_js_angle/renderers/index.dart';
+import '../renderers/index.dart';
 import 'package:three_js_core/others/index.dart';
 import 'package:three_js_core/renderers/index.dart';
 import 'package:three_js_core/three_js_core.dart' as core;
@@ -117,7 +117,7 @@ class ThreeJS with WidgetsBindingObserver{
   FlutterAngleTexture? texture;
   RenderingContext? gl;
 
-  AngleRenderTarget? renderTarget;
+  RenderTarget? renderTarget;
   AngleRenderer? renderer;
   final core.Clock clock = core.Clock();
 
@@ -309,7 +309,7 @@ class ThreeJS with WidgetsBindingObserver{
 
     if(settings.useSourceTexture){
       final RenderTargetOptions pars = RenderTargetOptions(settings.renderOptions);
-      renderTarget = AngleRenderTarget((width * _resolution!).toInt(), (height * _resolution!).toInt(), pars);
+      renderTarget = RenderTarget((width * _resolution!).toInt(), (height * _resolution!).toInt(), pars);
       renderer!.setRenderTarget(renderTarget);
       sourceTexture = renderer!.getRenderTargetGLTexture(renderTarget!);
     }

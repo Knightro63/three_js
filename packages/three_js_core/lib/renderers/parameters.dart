@@ -1,6 +1,6 @@
-part of three_webgl;
+import 'package:three_js_math/three_js_math.dart';
 
-class AngleParameters {
+class Parameters{
   int? customVertexShaderID;
   int? customFragmentShaderID;
 
@@ -190,13 +190,13 @@ class AngleParameters {
   bool uvsVertexOnly = false;
   int outputEncoding = 0;
 
-  AngleParameters.create();
+  Parameters.create();
 
   void dispose(){
     uniforms?.clear();
   }
 
-  AngleParameters({
+  Parameters({
     this.shaderID,
     this.shaderType,
     this.shaderName = '',
@@ -367,7 +367,7 @@ class AngleParameters {
     this.customProgramCacheKey,
   });
 
-  AngleParameters.fromJson(Map<String, dynamic> json) {
+  Parameters.fromJson(Map<String, dynamic> json) {
     shaderID = json['shaderID'];
     shaderType = json['shaderType'];
     shaderName = json['shaderName'] ?? '';

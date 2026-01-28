@@ -203,7 +203,7 @@ class _State extends State<WebglVolumeInstancing> {
           three.Material? material, 
           three.Object3D? mesh, 
           three.RenderTarget? renderTarget, 
-          three.WebGLRenderer? renderer, 
+          three.Renderer? renderer, 
          three. Scene? scene
         }) {
           material?.uniforms['cameraPos']['value'].setFrom( threeJs.camera.position );

@@ -128,7 +128,7 @@ class ProjectedMaterial extends MeshPhysicalMaterial {
       console.warning('You have to pass "transparent: true" to the ProjectedMaterial for the backgroundOpacity option to work');
     }
 
-    type = "ProjectedMaterial";
+    //type = "ProjectedMaterial";
 
     //Object.defineProperty(this, 'isProjectedMaterial', { 'value': true });
 

@@ -1,4 +1,10 @@
-part of three_shaders;
+import 'uniforms_lib.dart';
+import 'uniforms_utils.dart';
+import 'package:three_js_math/three_js_math.dart';
+
+Map<String, String> shaderChunk = {};
+String lightsFragmentBegin = '';
+String lightsParsBegin = '';
 
 Map<String, dynamic> shaderLibStandard = {
   "uniforms": mergeUniforms([
@@ -170,8 +176,8 @@ Map<String, dynamic> shaderLib = {
 		'uniforms': {
 			'envMap': <String,dynamic>{ 'value': null },
 			'flipEnvMap': { 'value': - 1 },
-			'backgroundBlurriness': { 'value': 0 },
-			'backgroundIntensity': { 'value': 1 },
+			'backgroundBlurriness': { 'value': 0.0 },
+			'backgroundIntensity': { 'value': 1.0 },
 			'backgroundRotation': { 'value': Matrix3.identity() }
 		},
 

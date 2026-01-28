@@ -1,37 +1,16 @@
 part of three_webgl;
 
-class AngleShadowMap {
+class AngleShadowMap extends ShadowMap {
   bool _didDispose = false;
   Frustum _frustum = Frustum();
   final _shadowMapSize = Vector2.zero();
   final _viewportSize = Vector2.zero();
   final _viewport = Vector4.identity();
 
-  final shadowSide = {0: BackSide, 1: FrontSide, 2: DoubleSide};
-
-  // HashMap<int, Material> _depthMaterials = HashMap<int, Material>();
-  // HashMap<int, Material> _distanceMaterials = HashMap<int, Material>();
-
   late MeshDepthMaterial _depthMaterial;
   late MeshDistanceMaterial _distanceMaterial;
 
   final _materialCache = {};
-
-  late ShaderMaterial shadowMaterialVertical;
-  late ShaderMaterial shadowMaterialHorizontal;
-
-  BufferGeometry fullScreenTri = BufferGeometry();
-
-  late Mesh fullScreenMesh;
-
-  bool enabled = false;
-
-  bool autoUpdate = true;
-  bool needsUpdate = false;
-
-  int type = PCFShadowMap;
-
-  late AngleShadowMap scope;
 
   final AngleRenderer _renderer;
   final AngleObjects _objects;
@@ -151,7 +130,7 @@ class AngleShadowMap {
 					shadow.map?.dispose();
 				}
 
-        shadow.map = AngleRenderTarget(_shadowMapSize.x.toInt(), _shadowMapSize.y.toInt(), RenderTargetOptions(pars));
+        shadow.map = RenderTarget(_shadowMapSize.x.toInt(), _shadowMapSize.y.toInt(), RenderTargetOptions(pars));
         shadow.map!.texture.name = '${light.name}.shadowMap';
 
         shadow.camera!.updateProjectionMatrix();
@@ -196,7 +175,7 @@ class AngleShadowMap {
       shadowMaterialHorizontal.needsUpdate = true;
     }
 
-		shadow.mapPass ??= AngleRenderTarget( _shadowMapSize.x.toInt(), _shadowMapSize.y.toInt() );
+		shadow.mapPass ??= RenderTarget( _shadowMapSize.x.toInt(), _shadowMapSize.y.toInt() );
 
     // vertical pass
 

@@ -33,7 +33,7 @@ class Texture with EventDispatcher {
   bool isOpenGLTexture = false;
   bool isRenderTargetTexture = false; // indicates whether a texture belongs to a render target or not
   // bool needsPMREMUpdate = false; // indicates whether this texture should be processed by PMREMGenerator or not (only relevant for render target textures)
-  RenderTarget? renderTarget;
+  BaseRenderTarget? renderTarget;
 
 	int pmremVersion = 0;
 

@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:three_js_core/renderers/webgl/index.dart';
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'dart:math' as math;
@@ -1573,11 +1572,11 @@ class Terrain{
 
     final mat = material ?? MeshLambertMaterial();
     Function? hexOnBeforeCompile;
-    if(mat is HexTilingMaterial){
+    if(mat.runtimeType.toString() == 'HexTilingMaterial'){
       hexOnBeforeCompile = mat.onBeforeCompile;
     }
 
-    mat.onBeforeCompile = (WebGLParameters shader, WebGLRenderer renderer) {
+    mat.onBeforeCompile = (shader, renderer) {
       hexOnBeforeCompile?.call(shader, renderer);
       // Patch vertexShader to setup MyUv, vPosition, and myNormal
       shader.vertexShader = shader.vertexShader.replaceAll('#include <common>',
@@ -1596,7 +1595,7 @@ class Terrain{
         };
       }
 
-      if(mat is HexTilingMaterial){
+      if(mat.runtimeType.toString() == 'HexTilingMaterial'){
         shader.fragmentShader = shader.fragmentShader.replaceAll(
           'texture2D', 
           'textureNoTileNeyret'

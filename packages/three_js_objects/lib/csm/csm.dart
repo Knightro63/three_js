@@ -1,5 +1,3 @@
-import 'package:three_js_core/renderers/shaders/shader_chunk/index.dart';
-import 'package:three_js_core/renderers/webgl/index.dart';
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'package:three_js_objects/csm/csm_shaders.dart';
@@ -246,7 +244,6 @@ class CSM{
 		final shaders = this.shaders;
 
 		material.onBeforeCompile = ( shader,target ) {
-      shader as WebGLParameters;
 			final far = math.min( scope.camera.far, scope.maxFar );
 			getExtendedBreaks( breaksVec2 );
 
@@ -265,7 +262,6 @@ class CSM{
 		final shaders = this.shaders;
 
 		shaders.forEach((material,shader ) {
-      shader as WebGLParameters?;
       material as Material;
 			if ( shader != null ) {
 				final uniforms = shader.uniforms;
@@ -318,7 +314,6 @@ class CSM{
 	void dispose() {
 		final shaders = this.shaders;
 		shaders.forEach((material,shader ) {
-      shader as WebGLParameters?;
       material as Material;
 			//material.onBeforeCompile;
 			material.defines?.remove('USE_CSM');

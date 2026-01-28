@@ -15,7 +15,7 @@ class WebGLProgram extends DefaultProgram with WebGLProgramExtra {
   WebGLBindingStates bindingStates;
   int usedTimes = 1;
   late RenderingContext gl;
-  WebGLParameters parameters;
+  Parameters parameters;
   late Program? program;
 
   late String vertexShader;

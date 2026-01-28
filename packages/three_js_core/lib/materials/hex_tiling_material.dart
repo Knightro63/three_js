@@ -1,6 +1,3 @@
-import 'package:three_js_angle/shaders/index.dart';
-
-import '../angle/index.dart';
 import 'package:three_js_core/three_js_core.dart';
 import 'dart:math' as math;
 
@@ -145,7 +142,7 @@ class HexTilingMaterial extends MeshPhysicalMaterial {
   String get genRandomStringID => generateId()+generateId();
 
   HexTilingMaterial(this.hexTiling,[ Map<String,dynamic>? options]):super.fromMap(options){
-    type = "HexTilingMaterial";
+    //type = "HexTilingMaterial";
     if(hexTiling != null){
       patchMeshPhysicalMaterial();
       patchMaterial();
@@ -169,9 +166,9 @@ class HexTilingMaterial extends MeshPhysicalMaterial {
   }
 
   void patchMaterial(){
-    final shaderMap = new Map<String, AngleParameters>();
+    final shaderMap = new Map<String, Parameters>();
 
-    this.onBeforeCompile = (shader, Renderer renderer) {
+    this.onBeforeCompile = (Parameters shader, Renderer renderer) {
       final hexTilingID = genRandomStringID;
       this.hexTilingID = hexTilingID;
       shaderMap[hexTilingID] = shader;

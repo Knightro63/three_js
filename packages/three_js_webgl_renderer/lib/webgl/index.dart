@@ -27,7 +27,6 @@ part 'web_gl_lights.dart';
 part 'web_gl_materials.dart';
 part 'web_gl_morphtargets.dart';
 part 'web_gl_objects.dart';
-part 'web_gl_parameters.dart';
 part 'web_gl_program.dart';
 part 'web_gl_program_extra.dart';
 part 'web_gl_programs.dart';

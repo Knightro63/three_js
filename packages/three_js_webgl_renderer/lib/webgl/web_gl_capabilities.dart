@@ -1,34 +1,12 @@
 part of three_webgl;
 
-class WebGLCapabilities {
+class WebGLCapabilities extends Capabilities {
   bool _didDispose = false;
-  bool isWebGL2 = true;
 
   WebGLRendererParameters parameters;
   RenderingContext gl;
   WebGLExtensions extensions;
   WebGLUtils utils;
-
-  String precision = 'highp';
-  String maxPrecision = "highp";
-
-  bool logarithmicDepthBuffer = false;
-  late int maxTextures;
-  late int maxVertexTextures;
-  late int maxTextureSize;
-  late int maxCubemapSize;
-  late int maxAttributes;
-  late int maxVertexUniforms;
-  late int maxVaryings;
-  late int maxFragmentUniforms;
-  late bool reverseDepthBuffer;
-
-  num? maxAnisotropy;
-
-  late bool vertexTextures;
-  late int maxSamples;
-
-  bool drawBuffers = true;
 
   WebGLCapabilities(this.gl, this.extensions, this.parameters, this.utils) {
     precision = parameters.precision.name;

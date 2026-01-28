@@ -13,7 +13,7 @@ class MaskPass extends Pass {
   }
 
   @override
-  void render(WebGLRenderer renderer, WebGLRenderTarget writeBuffer, WebGLRenderTarget readBuffer,{double? deltaTime, bool? maskActive}) {
+  void render(Renderer renderer, RenderTarget writeBuffer, RenderTarget readBuffer,{double? deltaTime, bool? maskActive}) {
     final context = renderer.getContext();
     final state = renderer.state;
 
@@ -75,7 +75,7 @@ class ClearMaskPass extends Pass {
     needsSwap = false;
   }
   @override
-  void render(WebGLRenderer renderer, writeBuffer, readBuffer,{double? deltaTime, bool? maskActive}) {
+  void render(Renderer renderer, RenderTarget writeBuffer, RenderTarget readBuffer,{double? deltaTime, bool? maskActive}) {
     renderer.state.buffers["stencil"].setLocked(false);
     renderer.state.buffers["stencil"].setTest(false);
   }

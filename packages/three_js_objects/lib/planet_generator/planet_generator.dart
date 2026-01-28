@@ -69,7 +69,7 @@ class PlanetGeneratorParameters{
     this.period = 0.6,
     this.persistence = 0.484,
     this.lacunarity = 1.8,
-    this.octaves = 10,
+    this.octaves = 8,
     this.undulation = 0,
     this.ambientIntensity = 0.02,
     this.diffuseIntensity = 1,
@@ -321,9 +321,15 @@ class PlanetGenerator extends Mesh{
     this.geometry?.computeTangents();
     
     atmosphere = Atmosphere(atmosphereParams, cloudTexture);
+    atmosphere.renderOrder = 1;
     this.add(atmosphere);
 
     type = "Mesh";
     updateMorphTargets();
+
+    geometry?.computeBoundingSphere();
+    geometry?.computeBoundingBox();
+
+    this.renderOrder = 0;
   }
 }

@@ -5,4 +5,3 @@ export 'renderers/index.dart';
 export 'shaders/shader_lib/index.dart';
 export 'renderers/pmrem_generator.dart';
 export 'three_viewer.dart';
-export 'materials/hex_tiling_material.dart';

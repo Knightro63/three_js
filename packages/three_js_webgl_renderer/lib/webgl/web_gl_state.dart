@@ -1,6 +1,6 @@
 part of three_webgl;
 
-class WebGLState {
+class WebGLState extends State{
   bool _didDispose = false;
   RenderingContext gl;
 
@@ -14,6 +14,7 @@ class WebGLState {
   late Map<int, int> equationToGL;
   late Map<int, int> factorToGL;
 
+  @override
   Map<String, dynamic> get buffers => {"color": colorBuffer, "depth": depthBuffer, "stencil": stencilBuffer};
   Map<int, bool> enabledCapabilities = <int, bool>{};
 
@@ -144,6 +145,7 @@ class WebGLState {
     return texture;
   }
 
+  @override
   void enable(id) {
     if (enabledCapabilities[id] != true) {
       gl.enable(id);
@@ -151,6 +153,7 @@ class WebGLState {
     }
   }
 
+  @override
   void disable(id) {
     if (enabledCapabilities[id] != false) {
       gl.disable(id);
@@ -619,6 +622,7 @@ class WebGLState {
     gl.texImage3D(target, level, internalformat, width, height, depth, border, format, type, offset);
   }
 
+  @override
   void scissor(Vector4 scissor) {
     if (!currentScissor.equals(scissor)) {
       gl.scissor(scissor.x.toInt(), scissor.y.toInt(), scissor.z.toInt(), scissor.w.toInt());
@@ -626,6 +630,7 @@ class WebGLState {
     }
   }
 
+  @override
   void viewport(Vector4 viewport) {
     if (!currentViewport.equals(viewport)) {
       gl.viewport(viewport.x.toInt(), viewport.y.toInt(), viewport.z.toInt(), viewport.w.toInt());
@@ -659,6 +664,7 @@ class WebGLState {
 		}
 	}
 
+  @override
   void reset() {
     gl.disable(WebGL.BLEND);
     gl.disable(WebGL.CULL_FACE);
@@ -738,6 +744,7 @@ class WebGLState {
     stencilBuffer.reset();
   }
 
+  @override
   void dispose(){
     if(_didDispose) return;
     _didDispose = true;

@@ -275,7 +275,7 @@ class AngleTextures {
       properties.remove( renderTarget.depthTexture );
     }
 
-    if (renderTarget is AngleCubeRenderTarget) {
+    if (renderTarget is CubeRenderTarget) {
       for (int i = 0; i < 6; i++) {
         gl.deleteFramebuffer(renderTargetProperties["__webglFramebuffer"][i]);
 				if (renderTargetProperties['__webglFramebuffer'][ i ] is List) {
@@ -1131,9 +1131,9 @@ class AngleTextures {
 
 
   // Setup resources for a Depth Texture for a FBO (needs an extension)
-  void setupDepthTexture(framebuffer, AngleRenderTarget renderTarget) {
+  void setupDepthTexture(framebuffer, RenderTarget renderTarget) {
 		final renderTargetProperties = properties.get( renderTarget );
-		final isCube = renderTarget is AngleCubeRenderTarget;
+		final isCube = renderTarget is CubeRenderTarget;
 
 		// if the bound depth texture has changed
 		if ( renderTargetProperties['__boundDepthTexture'] != renderTarget.depthTexture ) {
@@ -1198,9 +1198,9 @@ class AngleTextures {
   }
 
   // Setup GL resources for a non-texture depth buffer
-  void setupDepthRenderbuffer(AngleRenderTarget renderTarget) {
+  void setupDepthRenderbuffer(RenderTarget renderTarget) {
 		final renderTargetProperties = properties.get( renderTarget );
-		final isCube = ( renderTarget is AngleCubeRenderTarget == true );
+		final isCube = ( renderTarget is CubeRenderTarget == true );
 
 		// if the bound depth texture has changed
 		if ( renderTargetProperties['__boundDepthTexture'] != renderTarget.depthTexture ) {
@@ -1264,7 +1264,7 @@ class AngleTextures {
   }
 
   // rebind framebuffer with external textures
-  void rebindTextures(AngleRenderTarget renderTarget, dynamic colorTexture, dynamic depthTexture) {
+  void rebindTextures(RenderTarget renderTarget, dynamic colorTexture, dynamic depthTexture) {
     final renderTargetProperties = properties.get(renderTarget);
 
     if (colorTexture != null) {
@@ -1278,7 +1278,7 @@ class AngleTextures {
   }
 
   // Set up GL resources for the render target
-  void setupRenderTarget(AngleRenderTarget renderTarget) {
+  void setupRenderTarget(RenderTarget renderTarget) {
 		final texture = renderTarget.texture;
 
 		final renderTargetProperties = properties.get( renderTarget );
@@ -1288,7 +1288,7 @@ class AngleTextures {
 
 		final textures = renderTarget.textures;
 
-		final isCube = renderTarget is AngleCubeRenderTarget;
+		final isCube = renderTarget is CubeRenderTarget;
 		final isMultipleRenderTargets = ( textures.length > 1 );
 
 		if ( ! isMultipleRenderTargets ) {
@@ -1433,13 +1433,13 @@ class AngleTextures {
 		}
   }
 
-  void updateRenderTargetMipmap(AngleRenderTarget renderTarget) {
+  void updateRenderTargetMipmap(RenderTarget renderTarget) {
     final textures = renderTarget.textures;
     for (int i = 0, il = textures.length; i < il; i++) {
       final texture = textures[i];
 
       if (textureNeedsGenerateMipmaps(texture)) {
-        final target = renderTarget is AngleCubeRenderTarget ? WebGL.TEXTURE_CUBE_MAP : WebGL.TEXTURE_2D;
+        final target = renderTarget is CubeRenderTarget ? WebGL.TEXTURE_CUBE_MAP : WebGL.TEXTURE_2D;
         final webglTexture = properties.get(texture)["__webglTexture"];
 
         state.bindTexture(target, webglTexture);
@@ -1452,7 +1452,7 @@ class AngleTextures {
 	final Uint32List invalidationArrayDraw = Uint32List(1);
   final Uint32List invalidationArrayRead = Uint32List(1);
 
-  void updateMultisampleRenderTarget(AngleRenderTarget renderTarget) {
+  void updateMultisampleRenderTarget(RenderTarget renderTarget) {
 		if ( renderTarget.samples > 0 ) {
 			if ( !useMultisampledRTT( renderTarget )) {
 				final textures = renderTarget.textures;
