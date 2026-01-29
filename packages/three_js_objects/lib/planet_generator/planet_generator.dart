@@ -336,7 +336,6 @@ class PlanetGenerator extends Mesh{
   PlanetGenerator({PlanetGeneratorParameters? planetParams, this.atmosphere}):super(){
     this.planetParams = planetParams ?? PlanetGeneratorParameters();
 
-
     this.material = ShaderMaterial.fromMap({
       'uniforms': this.planetParams.uniforms,
       'vertexShader': vertexShader.replaceAll(
@@ -358,7 +357,7 @@ class PlanetGenerator extends Mesh{
       // if(atmosphere!.atmosphereParams.radius <= this.planetParams.radius) {
       //   atmosphere!.atmosphereParams.radius = this.planetParams.radius+1;
       // }
-      atmosphere!.atmosphereParams.lightDirection = this.planetParams.lightDirection;
+      //atmosphere!.atmosphereParams.lightDirection = this.planetParams.lightDirection;
       atmosphere!.renderOrder = 1;
       atmosphere!.update();
       this.add(atmosphere);

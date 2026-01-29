@@ -136,13 +136,19 @@ class Atmosphere extends Points {
         '''${noiseFunctions}
          void main() {'''
       ),
-      'blending': NormalBlending,
+      //'size': atmosphereParams?.maxParticleSize ?? 1,
+      //'blending': NormalBlending,
       'depthWrite': false,
-      'transparent': true
+      //'depthTest': true,
+      'transparent': true,
+      'blending': AdditiveBlending,
+      //'sizeAttenuation': true
     });
     material?.polygonOffset = true;
     material?.polygonOffsetFactor = -1.0;
     material?.polygonOffsetUnits = -4.0;
+    this.renderOrder = 1;
+    // material?.sizeAttenuation = true;
     update();
   }
 
