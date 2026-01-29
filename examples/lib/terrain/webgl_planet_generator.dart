@@ -61,6 +61,225 @@ class _State extends State<WebglPlanetGenerator> {
     );
   }
 
+  Map<String,dynamic> mercury = {
+  "type": 1,
+  "radius": 2.44 * 3,
+  "amplitude": 0.8,
+  "sharpness": 3.5,
+  "offset": 0.1,
+  "period": 0.4,
+  "persistence": 0.6,
+  "lacunarity": 2.2,
+  "octaves": 6,
+  "undulation": 0.05,
+  "ambientIntensity": 0.02,
+  "diffuseIntensity": 0.8,
+  "specularIntensity": 0.1,
+  "shininess": 2.0,
+  "lightDirection": [1.0, 1.0, 1.0],
+  "lightColor": 0xffffff,
+  "bumpStrength": 1.5,
+  "bumpOffset": 0.002,
+  "color1": 0x1a1a1a,
+  "color2": 0x333333,
+  "color3": 0x4d4d4d,
+  "color4": 0x666666,
+  "color5": 0x999999,
+  "transition2": 0.1,
+  "transition3": 0.3,
+  "transition4": 0.6,
+  "transition5": 1.0,
+  "blend12": 0.1,
+  "blend23": 0.1,
+  "blend34": 0.1,
+  "blend45": 0.1
+};
+
+Map<String,dynamic> venus = {
+  "type": 1,
+  "radius": 6.05 * 3,
+  "amplitude": 0.5,
+  "sharpness": 1.2,
+  "offset": 0.05,
+  "period": 0.8,
+  "persistence": 0.4,
+  "lacunarity": 2.0,
+  "octaves": 4,
+  "undulation": 0.2,
+  "ambientIntensity": 0.05,
+  "diffuseIntensity": 1.0,
+  "specularIntensity": 0.1,
+  "shininess": 1.0,
+  "lightDirection": [1.0, 1.0, 1.0],
+  "lightColor": 0xffedbc,
+  "bumpStrength": 0.4,
+  "bumpOffset": 0.001,
+  "color1": 0x4b3621,
+  "color2": 0x8b4513,
+  "color3": 0xd2b48c,
+  "color4": 0xe2bc5a,
+  "color5": 0xfffacd,
+  "transition2": 0.2,
+  "transition3": 0.4,
+  "transition4": 0.7,
+  "transition5": 1.1,
+  "blend12": 0.2,
+  "blend23": 0.2,
+  "blend34": 0.2,
+  "blend45": 0.2
+};
+
+Map<String,dynamic> earth = {
+  "type": 2,//"terrestrial",
+  "radius": 6.37*3,
+  "amplitude": 1.19,
+  "sharpness": 2.6,
+  "offset": -0.016,
+  "period": 0.6,
+  "persistence": 0.484,
+  "lacunarity": 1.8,
+  "octaves": 6,
+  "undulation": 0.0,
+  "ambientIntensity": 0.02,
+  "diffuseIntensity": 1.0,
+  "specularIntensity": 2.0,
+  "shininess": 6.0,
+  "lightDirection": [1.0, 1.0, 1.0],
+  "lightColor": 0xffffff,
+  "bumpStrength": 1.0,
+  "bumpOffset": 0.001,
+  "color1": 0x001050,
+  "color2": 0xc2b280,
+  "color3": 0x228b22,
+  "color4": 0x1b5e20,
+  "color5": 0xffffff,
+  "transition2": 0.071,
+  "transition3": 0.215,
+  "transition4": 0.373,
+  "transition5": 1.2,
+  "blend12": 0.152,
+  "blend23": 0.152,
+  "blend34": 0.104,
+  "blend45": 0.168
+};
+
+Map<String,dynamic> gas = {
+  "type": 3,
+  "radius": 12.0 * 3,
+  "amplitude": 0.15,
+  "sharpness": 0.5,
+  "offset": 0.0,
+  "period": 3.0,
+  "persistence": 0.3,
+  "lacunarity": 2.0,
+  "octaves": 3,
+  "undulation": 0.01,
+  "ambientIntensity": 0.1,
+  "diffuseIntensity": 0.8,
+  "specularIntensity": 0.0,
+  "shininess": 1.0,
+  "lightDirection": [1.0, 1.0, 1.0],
+  "lightColor": 0xffffff,
+  "bumpStrength": 0.1,
+  "bumpOffset": 0.0,
+  "color1": 0x5c4033,
+  "color2": 0x966f33,
+  "color3": 0xd2b48c,
+  "color4": 0xffe4c4,
+  "color5": 0x8b4513,
+  "transition2": 0.2,
+  "transition3": 0.4,
+  "transition4": 0.6,
+  "transition5": 0.8,
+  "blend12": 0.4,
+  "blend23": 0.4,
+  "blend34": 0.4,
+  "blend45": 0.4
+};
+
+Map<String,dynamic> mars = {
+  "type": 1,
+  "radius": 3.39 * 3,
+  "amplitude": 1.3,
+  "sharpness": 2.8,
+  "offset": -0.05,
+  "period": 0.5,
+  "persistence": 0.55,
+  "lacunarity": 2.1,
+  "octaves": 7,
+  "undulation": 0.0,
+  "ambientIntensity": 0.02,
+  "diffuseIntensity": 0.9,
+  "specularIntensity": 0.05,
+  "shininess": 4.0,
+  "lightDirection": [1.0, 1.0, 1.0],
+  "lightColor": 0xffdbac,
+  "bumpStrength": 1.2,
+  "bumpOffset": 0.002,
+  "color1": 0x4a0e0e,
+  "color2": 0x8b0000,
+  "color3": 0xb22222,
+  "color4": 0xcd5c5c,
+  "color5": 0xf4a460,
+  "transition2": 0.15,
+  "transition3": 0.35,
+  "transition4": 0.55,
+  "transition5": 1.0,
+  "blend12": 0.1,
+  "blend23": 0.1,
+  "blend34": 0.1,
+  "blend45": 0.1,
+  "atmosphere": {
+    "particles": 2000,
+    "minParticleSize": 30,
+    "maxParticleSize": 80,
+    "radius": 10.17,
+    "thickness": 1.2,
+    "density": 0.0,
+    "opacity": 0.2,
+    "scale": 5.0,
+    "color": 0xe27b58,
+    "speed": 0.05,
+    "lightDirection": <double>[1, 1, 1]
+  }
+};
+
+Map<String,dynamic> sun = {
+  "type": 4, 
+  "radius": 25.0 * 3,
+  "amplitude": 3.5,
+  "sharpness": 1.2,
+  "offset": 0.0,
+  "period": 4.5,
+  "persistence": 0.4,
+  "lacunarity": 2.0,
+  "octaves": 4,
+  "undulation": 0.8,
+  "ambientIntensity": 2.0, // Glows even without external light
+  "diffuseIntensity": 0.0,
+  "specularIntensity": 0.0,
+  "shininess": 0.0,
+  "lightDirection": [0.0, 0.0, 0.0],
+  "lightColor": 0xffffff,
+  "bumpStrength": 0.0,
+  "bumpOffset": 0.0,
+  "color1": 0xff4500, // Deep orange
+  "color2": 0xff8c00, // Darker gold
+  "color3": 0xffd700, // Pure gold
+  "color4": 0xffff00, // Bright yellow
+  "color5": 0xffffff, // White hot spots
+  "transition2": 0.1,
+  "transition3": 0.3,
+  "transition4": 0.6,
+  "transition5": 0.9,
+  "blend12": 0.5,
+  "blend23": 0.5,
+  "blend34": 0.5,
+  "blend45": 0.5
+};
+
+
+
   Future<void> setup() async {
     threeJs.scene = three.Scene();
 
@@ -82,12 +301,15 @@ class _State extends State<WebglPlanetGenerator> {
     final texLoader = three.TextureLoader();
     final cloudTex = await texLoader.fromAsset('assets/textures/planet_generator/cloud.png');
 
-    PlanetGenerator planet = PlanetGenerator(cloudTexture: cloudTex);
+    PlanetGenerator planet = PlanetGenerator(
+      planetParams: PlanetGeneratorParameters.fromMap(mars), 
+      atmosphere: Atmosphere(cloudTexture: cloudTex, atmosphereParams: AtmosphereParameters.fromMap(mars['atmosphere']))
+    );
     threeJs.scene.add(planet);
 
     threeJs.addAnimationEvent((dt) {
-      planet.atmosphere.material?.uniforms['time']['value'] += dt;
-      planet.atmosphere.rotation.y += 0.0002;
+      planet.atmosphere?.material?.uniforms['time']['value'] += dt;
+      planet.atmosphere?.rotation.y += 0.0002;
       controls.update();
     });
 
@@ -96,8 +318,8 @@ class _State extends State<WebglPlanetGenerator> {
 
   void createUI(PlanetGenerator planet) {
     final planetParams = planet.planetParams.json;
-    final atmosphereParams = planet.atmosphereParams.json;
-    Atmosphere atmosphere = planet.atmosphere;
+    final atmosphereParams = planet.atmosphereParams?.json;
+    Atmosphere? atmosphere = planet.atmosphere;
 
     final terrainFolder = gui.addFolder('Terrain')..open();
     terrainFolder.onChange((name,value){
@@ -110,13 +332,13 @@ class _State extends State<WebglPlanetGenerator> {
       else{
         planet.material?.uniforms[name]['value'] = value;
       }
-      atmosphere.update();
+      atmosphere?.update();
     });
     terrainFolder.addDropDown(planetParams, 'type', ['1', '2', '3'])..name = 'Type';
-    terrainFolder.addSlider(planetParams, 'amplitude', 0.1, 1.5,0.1)..name ='Amplitude';
+    terrainFolder.addSlider(planetParams, 'amplitude', 0.01, 1.5,0.01)..name ='Amplitude';
     terrainFolder.addSlider(planetParams, 'sharpness', 0, 5,0.1)..name = 'Sharpness';
     terrainFolder.addSlider(planetParams, 'offset', -2, 2,0.1)..name = 'Offset';
-    terrainFolder.addSlider(planetParams, 'period', 0.1, 2,0.1)..name = 'Period';
+    terrainFolder.addSlider(planetParams, 'period', 0.1, 3,0.1)..name = 'Period';
     terrainFolder.addSlider(planetParams, 'persistence', 0, 1,0.1)..name = 'Persistence';
     terrainFolder.addSlider(planetParams, 'lacunarity', 1, 3,0.1)..name = 'Lacunarity';
     terrainFolder.addSlider(planetParams, 'octaves', 1, 10, 1)..name = 'Octaves';
@@ -180,34 +402,36 @@ class _State extends State<WebglPlanetGenerator> {
     layer5Folder.addSlider(planetParams, 'blend45', 0, 1, 0.1)..name = 'Blend Factor (4->5)';
     layer5Folder.addColor(planetParams, 'color5')..name = 'Color';
     
-    final atmosphereFolder = gui.addFolder('Atmosphere')..open()..onChange((name,value){
-      if(name == 'Atmosphere'){
-        planet.atmosphere.material?.uniforms['speed']['value'] = value;
-      }
-      else{
-        if(name == 'particles'||name == 'minParticleSize'||name == 'maxParticleSize'){
-          planet.atmosphere.material?.uniforms[name]['value'] = value.toInt();
+    if(planet.atmosphere != null){
+      final atmosphereFolder = gui.addFolder('Atmosphere')..open()..onChange((name,value){
+        if(name == 'Atmosphere'){
+          planet.atmosphere?.material?.uniforms['speed']['value'] = value;
         }
         else{
-          planet.atmosphere.material?.uniforms[name]['value'] = value;
+          if(name == 'particles'||name == 'minParticleSize'||name == 'maxParticleSize'){
+            planet.atmosphere?.material?.uniforms[name]['value'] = value.toInt();
+          }
+          else{
+            planet.atmosphere?.material?.uniforms[name]['value'] = value;
+          }
         }
-      }
-      atmosphere.update();
-    });
-    atmosphereFolder.addSlider(atmosphereParams, 'thickness', 0.1, 5, 0.1)..name = 'Thickness';
-    atmosphereFolder.addSlider(atmosphereParams, 'particles', 1, 50000, 1)..name = 'Particle Count';
-    atmosphereFolder.addSlider(atmosphereParams, 'minParticleSize', 0, 200)..name = 'Min Particle Size';
-    atmosphereFolder.addSlider(atmosphereParams, 'maxParticleSize', 0, 200)..name = 'Max Particle Size';
-    atmosphereFolder.addSlider(atmosphereParams, 'density', -2, 2, 0.1)..name = 'Density';
-    atmosphereFolder.addSlider(atmosphereParams, 'opacity', 0, 1, 0.1)..name = 'Opacity';
-    atmosphereFolder.addSlider(atmosphereParams, 'scale', 1, 30)..name = 'Scale';
-    atmosphereFolder.addSlider(atmosphereParams, 'speed', 0, 0.1, 0.001)..name = 'Speed';
+        atmosphere?.update();
+      });
+      atmosphereFolder.addSlider(atmosphereParams!, 'thickness', 0.1, 5, 0.1)..name = 'Thickness';
+      atmosphereFolder.addSlider(atmosphereParams, 'particles', 1, 50000, 1)..name = 'Particle Count';
+      atmosphereFolder.addSlider(atmosphereParams, 'minParticleSize', 0, 200)..name = 'Min Particle Size';
+      atmosphereFolder.addSlider(atmosphereParams, 'maxParticleSize', 0, 200)..name = 'Max Particle Size';
+      atmosphereFolder.addSlider(atmosphereParams, 'density', -2, 2, 0.1)..name = 'Density';
+      atmosphereFolder.addSlider(atmosphereParams, 'opacity', 0, 1, 0.1)..name = 'Opacity';
+      atmosphereFolder.addSlider(atmosphereParams, 'scale', 1, 30)..name = 'Scale';
+      atmosphereFolder.addSlider(atmosphereParams, 'speed', 0, 0.1, 0.001)..name = 'Speed';
 
-    final atmosphereColorFolder = gui.addFolder('Color')..open();
-    atmosphereColorFolder.addColor(atmosphereParams, 'color')..name = 'Color'..onChange((value){
-      planet.atmosphere.material?.uniforms['color']['value'] = three.Color.fromHex32(value);
-      atmosphere.update();
-    });
+      final atmosphereColorFolder = gui.addFolder('Color')..open();
+      atmosphereColorFolder.addColor(atmosphereParams, 'color')..name = 'Color'..onChange((value){
+        planet.atmosphere?.material?.uniforms['color']['value'] = three.Color.fromHex32(value);
+        atmosphere?.update();
+      });
+    }
 
     final lightingFolder = gui.addFolder('Lighting')..open();
     lightingFolder.onChange((name,value){
@@ -244,7 +468,7 @@ class _State extends State<WebglPlanetGenerator> {
         planet.material?.uniforms[name]['value'] = value;
       }
     });
-    bumpMapFolder.addSlider(planetParams, 'bumpStrength', 0, 1,0.1)..name = 'Bump Strength';
-    bumpMapFolder.addSlider(planetParams, 'bumpOffset', 0.0001, 0.1,0.0001)..name = 'Bump Offset';
+    bumpMapFolder.addSlider(planetParams, 'bumpStrength', 0, 2,0.1)..name = 'Bump Strength';
+    bumpMapFolder.addSlider(planetParams, 'bumpOffset', 0.0, 0.1,0.0001)..name = 'Bump Offset';
   }
 }

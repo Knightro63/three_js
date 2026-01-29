@@ -6,23 +6,38 @@ import './shaders/index.dart';
 import 'dart:math' as math;
 
 class AtmosphereParameters{
-  int particles;
-  int minParticleSize;
-  int maxParticleSize;
-  double radius;
-  double thickness;
-  double density;
-  double opacity;
-  double scale;
+  late int particles;
+  late int minParticleSize;
+  late int maxParticleSize;
+  late double radius;
+  late double thickness;
+  late double density;
+  late double opacity;
+  late double scale;
   late Color color;
-  double speed;
+  late double speed;
   late Vector3 lightDirection;
+
+  AtmosphereParameters.fromMap([Map<String,dynamic>? map]){
+    map = map ?? {};
+    particles = map['particles'] ?? 4000;
+    minParticleSize = map['minParticleSize'] ?? 50;
+    maxParticleSize = map['maxParticleSize'] ?? 100;
+    radius = map['radius'] ?? 0.0;
+    thickness = map['thickness'] ?? 1.5;
+    density = map['density'] ?? 0.0;
+    opacity = map['opacity'] ?? 0.35;
+    scale = map['scale'] ?? 8.0;
+    color = map['color'] != null ? Color.fromHex32(map['color']) : Color.fromHex32(0xffffff);
+    speed = map['speed'] ?? 0.03;
+    lightDirection = map['lightDirection'] != null ? Vector3(map['lightDirection'][0], map['lightDirection'][1], map['lightDirection'][2]) : Vector3(1,1,1);
+  }
 
   AtmosphereParameters({
     this.particles = 4000,
     this.minParticleSize = 50,
     this.maxParticleSize = 100,
-    this.radius = 21.0,
+    this.radius = 0.0,
     this.thickness = 1.5,
     this.density = 0,
     this.opacity = 0.35,
@@ -104,9 +119,11 @@ class AtmosphereParameters{
 }
 
 class Atmosphere extends Points {
-  final AtmosphereParameters atmosphereParams;
+  late final AtmosphereParameters atmosphereParams;
   
-  Atmosphere(this.atmosphereParams, [Texture? cloudTexture]):super(){
+  Atmosphere({AtmosphereParameters? atmosphereParams, Texture? cloudTexture}):super(){
+    this.atmosphereParams = atmosphereParams ?? AtmosphereParameters();
+
     this.material = ShaderMaterial.fromMap({
       'uniforms': {
         'time': { 'value': 0.0 },

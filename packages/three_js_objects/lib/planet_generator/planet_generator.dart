@@ -28,37 +28,72 @@ SOFTWARE.
 */
 
 class PlanetGeneratorParameters{
-  int type;
-  double radius;
-  double amplitude;
-  double sharpness;
-  double offset;
-  double period;
-  double persistence;
-  double lacunarity;
-  int octaves;
-  double undulation;
-  double ambientIntensity;
-  double diffuseIntensity;
-  double specularIntensity;
-  double shininess;
+  late int type;
+  late double radius;
+  late double amplitude;
+  late double sharpness;
+  late double offset;
+  late double period;
+  late double persistence;
+  late double lacunarity;
+  late int octaves;
+  late double undulation;
+  late double ambientIntensity;
+  late double diffuseIntensity;
+  late double specularIntensity;
+  late double shininess;
   late final Vector3 lightDirection;
   late final Color lightColor;
-  double bumpStrength;
-  double bumpOffset;
+  late double bumpStrength;
+  late double bumpOffset;
   late final Color color1;
   late final Color color2;
   late final Color color3;
   late final Color color4;
   late final Color color5;
-  double transition2;
-  double transition3;
-  double transition4;
-  double transition5;
-  double blend12;
-  double blend23;
-  double blend34;
-  double blend45;
+  late double transition2;
+  late double transition3;
+  late double transition4;
+  late double transition5;
+  late double blend12;
+  late double blend23;
+  late double blend34;
+  late double blend45;
+
+  PlanetGeneratorParameters.fromMap([Map<String,dynamic>? map]){
+    map = map ?? {};
+    type = map['type'] ?? 2;
+    radius = map['radius'] ?? 20.1;
+    amplitude = map['amplitude'] ?? 1.19;
+    sharpness = map['sharpness'] ?? 2.6;
+    offset = map['offset'] ?? -0.016;
+    period = map['period'] ?? 0.6;
+    persistence = map['persistence'] ?? 0.484;
+    lacunarity = map['lacunarity'] ?? 1.8;
+    octaves = map['octaves'] ?? 8;
+    undulation = map['undulation'] ?? 0;
+    ambientIntensity = map['ambientIntensity'] ?? 0.02;
+    diffuseIntensity = map['diffuseIntensity'] ?? 1;
+    specularIntensity = map['specularIntensity'] ?? 2;
+    shininess = map['shininess'] ?? 6;
+    lightDirection = map['lightDirection'] != null ? Vector3(map['lightDirection'][0], map['lightDirection'][1], map['lightDirection'][2]) : Vector3(1,1,1);
+    lightColor = map['lightColor'] != null ? Color.fromHex32(map['lightColor']) : Color.fromHex32(0xffffff);
+    bumpStrength = map['bumpStrength'] ?? 1;
+    bumpOffset = map['bumpOffset'] ?? 0.001;
+    color1 = map['color1'] != null ? Color.fromHex32(map['color1']) : Color(0.014, 0.117, 0.279);
+    color2 = map['color2'] != null ? Color.fromHex32(map['color2']) : Color(0.080, 0.527, 0.351);
+    color3 = map['color3'] != null ? Color.fromHex32(map['color3']) : Color(0.620, 0.516, 0.372);
+    color4 = map['color4'] != null ? Color.fromHex32(map['color4']) : Color(0.149, 0.254, 0.084);
+    color5 = map['color5'] != null ? Color.fromHex32(map['color5']) : Color(0.150, 0.150, 0.150);
+    transition2 = map['transition2'] ?? 0.071;
+    transition3 = map['transition3'] ?? 0.215;
+    transition4 = map['transition4'] ?? 0.372;
+    transition5 = map['transition5'] ?? 1.2;
+    blend12 = map['blend12'] ?? 0.152;
+    blend23 = map['blend23'] ?? 0.152;
+    blend34 = map['blend34'] ?? 0.104;
+    blend45 = map['blend45'] ?? 0.168;
+  }
 
   PlanetGeneratorParameters({
     this.type = 2,
@@ -101,6 +136,8 @@ class PlanetGeneratorParameters{
     this.color4 = color4 ?? Color(0.149, 0.254, 0.084);
     this.color5 = color5 ?? Color(0.150, 0.150, 0.150);
   }
+
+  
 
   dynamic operator [] (key) => uniforms[key]['value'];
   void operator []=(String key, dynamic value) => setProperty(key, value);
@@ -292,16 +329,13 @@ class PlanetGeneratorParameters{
 }
 
 class PlanetGenerator extends Mesh{
-  AtmosphereParameters get atmosphereParams => atmosphere.atmosphereParams;
+  AtmosphereParameters? get atmosphereParams => atmosphere?.atmosphereParams;
   late final PlanetGeneratorParameters planetParams;
-  late final Atmosphere atmosphere;
+  Atmosphere? atmosphere;
 
-  PlanetGenerator({PlanetGeneratorParameters? planetParams,AtmosphereParameters? atmosphereParams, Texture? cloudTexture}):super(){
+  PlanetGenerator({PlanetGeneratorParameters? planetParams, this.atmosphere}):super(){
     this.planetParams = planetParams ?? PlanetGeneratorParameters();
-    atmosphereParams ??= AtmosphereParameters();
 
-    atmosphereParams.radius = this.planetParams.radius+1;
-    atmosphereParams.lightDirection = this.planetParams.lightDirection;
 
     this.material = ShaderMaterial.fromMap({
       'uniforms': this.planetParams.uniforms,
@@ -320,9 +354,15 @@ class PlanetGenerator extends Mesh{
     this.geometry = SphereGeometry(1, 128, 128);
     this.geometry?.computeTangents();
     
-    atmosphere = Atmosphere(atmosphereParams, cloudTexture);
-    atmosphere.renderOrder = 1;
-    this.add(atmosphere);
+    if(atmosphere != null){
+      // if(atmosphere!.atmosphereParams.radius <= this.planetParams.radius) {
+      //   atmosphere!.atmosphereParams.radius = this.planetParams.radius+1;
+      // }
+      atmosphere!.atmosphereParams.lightDirection = this.planetParams.lightDirection;
+      atmosphere!.renderOrder = 1;
+      atmosphere!.update();
+      this.add(atmosphere);
+    }
 
     type = "Mesh";
     updateMorphTargets();
