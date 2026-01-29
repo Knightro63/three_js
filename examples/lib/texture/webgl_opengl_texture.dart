@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:example/src/statistics.dart';
 import 'package:three_js/three_js.dart' as three;
 import 'package:flutter_angle/flutter_angle.dart';
-import 'package:flutter_angle/flutter_angle.dart';
 
 class WebglOpenglTexture extends StatefulWidget {
   const WebglOpenglTexture({super.key});

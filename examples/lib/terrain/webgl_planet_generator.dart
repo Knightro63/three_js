@@ -3,7 +3,6 @@ import 'package:example/src/gui.dart';
 import 'package:flutter/material.dart';
 import 'package:example/src/statistics.dart';
 import 'package:three_js/three_js.dart' as three;
-import 'package:three_js_postprocessing/three_js_postprocessing.dart';
 import 'package:three_js_objects/three_js_objects.dart';
 
 class WebglPlanetGenerator extends StatefulWidget {
@@ -80,46 +79,16 @@ class _State extends State<WebglPlanetGenerator> {
     final controls = three.OrbitControls(threeJs.camera, threeJs.globalKey);
     threeJs.camera.position.z = 50;
 
-    final double dpr = 0.5; // Half resolution for processing
-    final int width = (threeJs.width * dpr).toInt();
-    final int height = (threeJs.height * dpr).toInt();
-
-    final renderTarget = three.RenderTarget(width, height, three.RenderTargetOptions({
-      'minFilter': three.LinearFilter,
-      'magFilter': three.LinearFilter,
-      'format': three.RGBAFormat,
-      'type': three.HalfFloatType,
-      'stencilBuffer': false, // Turn off for speed
-      'depthBuffer': true,
-    }));
-
-    final composer = EffectComposer(threeJs.renderer!, renderTarget);
-    
-    final renderPass = RenderPass(threeJs.scene, threeJs.camera);
-    // Explicitly clear to fix those "weird drawing" artifacts
-    renderPass.clear = true; 
-    composer.addPass(renderPass);
-  
-    // Only keep this if you actually want the glow effect
-    final bloomPass = UnrealBloomPass(three.Vector2(width.toDouble(), height.toDouble()), 0.0, 0.2, 0.5);
-    composer.addPass(bloomPass);
-
-    final outputPass = OutputPass();
-    composer.addPass(outputPass);
-
     final texLoader = three.TextureLoader();
     final cloudTex = await texLoader.fromAsset('assets/textures/planet_generator/cloud.png');
 
     PlanetGenerator planet = PlanetGenerator(cloudTexture: cloudTex);
     threeJs.scene.add(planet);
 
-    threeJs.renderer!.setPixelRatio(1.0); 
-
     threeJs.addAnimationEvent((dt) {
       planet.atmosphere.material?.uniforms['time']['value'] += dt;
       planet.atmosphere.rotation.y += 0.0002;
       controls.update();
-      composer.render();
     });
 
     createUI(planet);
@@ -277,10 +246,5 @@ class _State extends State<WebglPlanetGenerator> {
     });
     bumpMapFolder.addSlider(planetParams, 'bumpStrength', 0, 1,0.1)..name = 'Bump Strength';
     bumpMapFolder.addSlider(planetParams, 'bumpOffset', 0.0001, 0.1,0.0001)..name = 'Bump Offset';
-
-    // final bloomFolder = gui.addFolder('Bloom');
-    // bloomFolder.addSlider(bloomPass, 'threshold', 0, 1,0.1);
-    // bloomFolder.addSlider(bloomPass, 'strength', 0, 1,0.1);
-    // bloomFolder.addSlider(bloomPass, 'radius', 0, 2,0.1);
   }
 }

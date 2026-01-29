@@ -74,7 +74,7 @@ class PlanetGeneratorParameters{
     this.ambientIntensity = 0.02,
     this.diffuseIntensity = 1,
     this.specularIntensity = 2,
-    this.shininess = 10,
+    this.shininess = 6,
     Vector3? lightDirection,
     Color? lightColor,
     this.bumpStrength = 1,
