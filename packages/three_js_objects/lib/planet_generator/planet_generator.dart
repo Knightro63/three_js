@@ -59,6 +59,7 @@ class PlanetGeneratorParameters{
   late double blend23;
   late double blend34;
   late double blend45;
+  int segments = 128;
 
   PlanetGeneratorParameters.fromMap([Map<String,dynamic>? map]){
     map = map ?? {};
@@ -93,6 +94,7 @@ class PlanetGeneratorParameters{
     blend23 = map['blend23'] ?? 0.152;
     blend34 = map['blend34'] ?? 0.104;
     blend45 = map['blend45'] ?? 0.168;
+    segments = map['segments'] ?? 128;
   }
 
   PlanetGeneratorParameters({
@@ -127,6 +129,7 @@ class PlanetGeneratorParameters{
     this.blend23 = 0.152,
     this.blend34 = 0.104,
     this.blend45 = 0.168,
+    this.segments = 128,
   }){
     this.lightDirection = lightDirection ?? Vector3(1,1,1);
     this.lightColor = lightColor ?? Color.fromHex32(0xffffff);
@@ -257,6 +260,9 @@ class PlanetGeneratorParameters{
     else if(key == 'blend45'){
       blend45 = value;
     }
+    else if(key == 'segments'){
+      segments = value;
+    }
   }
 
   Map<String,dynamic> get json => { 
@@ -290,7 +296,8 @@ class PlanetGeneratorParameters{
     'blend12': blend12,
     'blend23': blend23,
     'blend34': blend34,
-    'blend45': blend45
+    'blend45': blend45,
+    'segments': segments
   };
 
   Map<String,dynamic> get uniforms => { 
@@ -350,7 +357,7 @@ class PlanetGenerator extends Mesh{
       ),
     });
 
-    this.geometry = SphereGeometry(1, 128, 128);
+    this.geometry = SphereGeometry(1, this.planetParams.segments, this.planetParams.segments);
     this.geometry?.computeTangents();
     
     if(atmosphere != null){
@@ -359,7 +366,6 @@ class PlanetGenerator extends Mesh{
       // }
       //atmosphere!.atmosphereParams.lightDirection = this.planetParams.lightDirection;
       atmosphere!.renderOrder = 1;
-      atmosphere!.update();
       this.add(atmosphere);
     }
 

@@ -121,14 +121,20 @@ class AtmosphereParameters{
 class Atmosphere extends Points {
   late final AtmosphereParameters atmosphereParams;
   
-  Atmosphere({AtmosphereParameters? atmosphereParams, Texture? cloudTexture}):super(){
-    this.atmosphereParams = atmosphereParams ?? AtmosphereParameters();
+  Atmosphere._(super.geometry, super.material, this.atmosphereParams, int renderOrder){
+    this.renderOrder = renderOrder;
+  }
 
-    this.material = ShaderMaterial.fromMap({
+  factory Atmosphere({AtmosphereParameters? atmosphereParams, Texture? cloudTexture, int renderOrder = 2}){
+    atmosphereParams ??= AtmosphereParameters();
+
+    final material = ShaderMaterial.fromMap({
       'uniforms': {
         'time': { 'value': 0.0 },
         'pointTexture': { 'value': cloudTexture },
-        ...this.atmosphereParams.uniforms
+        'radius': { 'value': atmosphereParams.radius },
+        'thickness': { 'value': atmosphereParams.thickness },
+        ...atmosphereParams.uniforms
       },
       'vertexShader': atosphereVertexShader,
       'fragmentShader': atmosphereFragmentShader.replaceAll(
@@ -136,43 +142,28 @@ class Atmosphere extends Points {
         '''${noiseFunctions}
          void main() {'''
       ),
-      //'size': atmosphereParams?.maxParticleSize ?? 1,
-      //'blending': NormalBlending,
       'depthWrite': false,
-      //'depthTest': true,
       'transparent': true,
       'blending': AdditiveBlending,
-      //'sizeAttenuation': true
     });
-    material?.polygonOffset = true;
-    material?.polygonOffsetFactor = -1.0;
-    material?.polygonOffsetUnits = -4.0;
-    this.renderOrder = 1;
-    // material?.sizeAttenuation = true;
-    update();
-  }
+    material.polygonOffset = true;
+    material.polygonOffsetFactor = -1.0;
+    material.polygonOffsetUnits = -4.0;
 
-  void update(){
-    if (this.geometry != null) {
-      this.geometry?.dispose();
-      this.geometry = null;
-    }
-
-    final geometry = BufferGeometry();
     
-    final Float32List combinedData = Float32List(atmosphereParams.particles * 6);
-    
-    // Sample points within the atmosphere
-    for(int i = 0; i < atmosphereParams.particles; i++) {
-      double r = math.Random().nextDouble() * atmosphereParams.thickness + atmosphereParams.radius;
+    final int count = atmosphereParams.particles;
+    final Float32List combinedData = Float32List(count * 6);
+    final random = math.Random();
+    for(int i = 0; i < count; i++) {
+      double r = random.nextDouble() * atmosphereParams.thickness + atmosphereParams.radius;
 
       // Pick a random point within a cube of size [-1, 1]
       // This approach works better than parameterizing the spherical coordinates
       // since it doesn't have the issue of particles being bunched at the poles
       final p = Vector3(
-        2 * math.Random().nextDouble() - 1,
-        2 * math.Random().nextDouble() - 1,
-        2 * math.Random().nextDouble() - 1
+        2 * random.nextDouble() - 1,
+        2 * random.nextDouble() - 1,
+        2 * random.nextDouble() - 1
       );
 
       // Project onto the surface of a sphere
@@ -181,20 +172,24 @@ class Atmosphere extends Points {
 
       final minSize = atmosphereParams.minParticleSize;
       final maxSize = atmosphereParams.maxParticleSize;
-      final size = math.Random().nextDouble() * (maxSize - minSize) + minSize;
+      final size = random.nextDouble() * (maxSize - minSize) + minSize;
 
-      combinedData.setAll(i * 6, [p.x, p.y, p.z, 0.5, 0.5, size]);
+      combinedData.setAll(i * 4, [p.x, p.y, p.z, size]);
     }
 
-    final interleavedBuffer = InterleavedBuffer(combinedData, 6);
+    final geometry = BufferGeometry();
+    final interleavedBuffer = InterleavedBuffer(combinedData, 4);
 
     geometry.setAttributeFromString('position', InterleavedBufferAttribute(interleavedBuffer, 3, 0));
-    geometry.setAttributeFromString('uv', InterleavedBufferAttribute(interleavedBuffer, 2, 3));
-    geometry.setAttributeFromString('size', InterleavedBufferAttribute(interleavedBuffer, 1, 5));    
-
-    this.geometry = geometry;
+    geometry.setAttributeFromString('size', InterleavedBufferAttribute(interleavedBuffer, 1, 3));   
 
     geometry.computeBoundingSphere();
     geometry.computeBoundingBox();
+
+    return Atmosphere._(geometry, material, atmosphereParams, renderOrder);
+  }
+
+  void update(double dt){
+    material?.uniforms['time']['value'] += dt;
   }
 }

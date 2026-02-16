@@ -77,28 +77,71 @@ final String noiseFunctions = '''
                                   dot(p2,x2), dot(p3,x3) ) );
   }
 
-  float fractal3(      
-    vec3 v,
-    float sharpness,
-    float period,
-    float persistence,
-    float lacunarity,
-    int octaves
-  ) {
-    float n = 0.0;
-    float a = 1.0; // Amplitude for current octave
-    float max_amp = 0.0; // Accumulate max amplitude so we can normalize after
-    float P = period;  // Period for current octave
+  // float fractal3(      
+  //   vec3 v,
+  //   float sharpness,
+  //   float period,
+  //   float persistence,
+  //   float lacunarity,
+  //   int octaves
+  // ) {
+  //   float n = 0.0;
+  //   float a = 1.0; // Amplitude for current octave
+  //   float max_amp = 0.0; // Accumulate max amplitude so we can normalize after
+  //   float P = period;  // Period for current octave
 
-    for(int i = 0; i < octaves; i++) {
-        n += a * simplex3(v / P);
-        a *= persistence;
-        max_amp += a;
-        P /= lacunarity;
-    }
+  //   for(int i = 0; i < octaves; i++) {
+  //       n += a * simplex3(v / P);
+  //       a *= persistence;
+  //       max_amp += a;
+  //       P /= lacunarity;
+  //   }
 
-    // Normalize noise between [0.0, amplitude]
-    return n / max_amp;
+  //   // Normalize noise between [0.0, amplitude]
+  //   return n / max_amp;
+  // }
+
+  // float fractal3(vec3 p, float sharp, float per, float pers, float lac, int lodLimit) {
+  //   float total = 0.0;
+  //   float frequency = 1.0 / per;
+  //   float amplitude = 1.0;
+    
+  //   // Use a constant max (e.g., 12) so the shader compiles everywhere
+  //   for (int i = 0; i < 12; i++) {
+  //     if (i >= lodLimit) break; // This is the performance "Magic"
+      
+  //     total += simplex3(p * frequency) * amplitude;
+      
+  //     frequency *= lac;
+  //     amplitude *= pers;
+  //   }
+  //   return total;
+  // }
+
+  float fractal3(vec3 p, float sharp, float per, float pers, float lac, float lodLimit) {
+      float total = 0.0;
+      float frequency = 1.0 / per;
+      float amplitude = 1.0;
+      
+      // We still loop to a constant max
+      for (int i = 0; i < 12; i++) {
+          float fi = float(i);
+          
+          // SMOOTH TRANSITION LOGIC
+          // If we are below the floor of the limit, add full noise.
+          // If we are at the limit, add a fraction of the noise.
+          // If we are above, stop.
+          float multiplier = clamp(lodLimit - fi, 0.0, 1.0);
+          
+          if (multiplier > 0.0) {
+              total += simplex3(p * frequency) * amplitude * multiplier;
+              frequency *= lac;
+              amplitude *= pers;
+          } else {
+              break;
+          }
+      }
+      return total;
   }
 
   float terrainHeight(
@@ -110,13 +153,14 @@ final String noiseFunctions = '''
     float period,
     float persistence,
     float lacunarity,
-    int octaves
+    float octaves
   ) {
     float h = 0.0;
 
     if (type == 1) {
       h = amplitude * simplex3(v / period);
-    } else if (type == 2) {
+    } 
+    else if (type == 2) {
       h = amplitude * fractal3(
         v,
         sharpness,
@@ -125,7 +169,8 @@ final String noiseFunctions = '''
         lacunarity, 
         octaves);
       h = amplitude * pow(max(0.0, (h + 1.0) / 2.0), sharpness);
-    } else if (type == 3) {
+    } 
+    else if (type == 3) {
       h = fractal3(
         v,
         sharpness,
