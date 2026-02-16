@@ -646,6 +646,9 @@ class Material with EventDispatcher {
     else if (key == 'emissiveIntensity') {
       emissiveIntensity = newValue.toDouble();
     }
+    else if (key == 'specularIntensityMap') {
+      specularIntensityMap = newValue;
+    }
     else {
       console.error("Material.setValues key: $key newValue: $newValue is not support");
     }

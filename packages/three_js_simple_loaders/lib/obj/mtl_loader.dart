@@ -431,7 +431,7 @@ class MaterialCreator {
     pos = items.indexOf('-bm');
 
     if (pos >= 0) {
-      matParams.bumpScale = double.parse(items[pos + 1]);
+      matParams['bumpScale'] = double.parse(items[pos + 1]);
       items.removeRange(pos, pos+2);
     }
 
