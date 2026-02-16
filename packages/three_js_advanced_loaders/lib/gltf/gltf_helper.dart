@@ -101,7 +101,7 @@ class GLTypeData {
     } else if (array is Float32List) {
       return Float32BufferAttribute.fromList(array, itemSize, normalized);
     } else {
-      throw ("GLTFHelper createBufferAttribute  array.runtimeType : ${array.runtimeType} is not support yet");
+      throw ("GLTFHelper createBufferAttribute  array: ${array} is not support yet");
     }
   }
 }

@@ -586,7 +586,7 @@ class WebGLRenderer extends Renderer{
     Object3D object,
     Map<String, dynamic>? group,
   ) {
-    // print("renderBufferDirect .............material: ${material.runtimeType}  ");
+    // print("renderBufferDirect .............material: ${material}  ");
     // renderBufferDirect second parameter used to be fog (could be null)
     scene ??= _emptyScene;
     final frontFaceCW = (object is Mesh && object.matrixWorld.determinant() < 0);

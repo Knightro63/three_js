@@ -112,7 +112,7 @@ class _State extends State<WebglPlanetGenerator> {
       else{
         planet.material?.uniforms[name]['value'] = value;
       }
-      atmosphere?.update();
+      atmosphere?.update(0.0);
     });
     terrainFolder.addDropDown(planetParams, 'type', ['1', '2', '3'])..name = 'Type';
     terrainFolder.addSlider(planetParams, 'amplitude', 0.01, 1.5,0.01)..name ='Amplitude';
@@ -195,7 +195,7 @@ class _State extends State<WebglPlanetGenerator> {
             planet.atmosphere?.material?.uniforms[name]['value'] = value;
           }
         }
-        atmosphere?.update();
+        atmosphere?.update(0.0);
       });
       atmosphereFolder.addSlider(atmosphereParams!, 'thickness', 0.1, 5, 0.1)..name = 'Thickness';
       atmosphereFolder.addSlider(atmosphereParams, 'particles', 1, 50000, 1)..name = 'Particle Count';
@@ -209,7 +209,7 @@ class _State extends State<WebglPlanetGenerator> {
       final atmosphereColorFolder = gui.addFolder('Color')..open();
       atmosphereColorFolder.addColor(atmosphereParams, 'color')..name = 'Color'..onChange((value){
         planet.atmosphere?.material?.uniforms['color']['value'] = three.Color.fromHex32(value);
-        atmosphere?.update();
+        atmosphere?.update(0.0);
       });
     }
 

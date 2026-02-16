@@ -251,6 +251,6 @@ BufferAttribute getTypedAttribute(TypedData array, int itemSize,
   } else if (array is Float32List) {
     return Float32BufferAttribute(array, itemSize, normalized);
   } else {
-    throw (" Util.dart getTypedArray type: ${array.runtimeType} is not support ");
+    throw (" Util.dart getTypedArray type: $array is not support ");
   }
 }

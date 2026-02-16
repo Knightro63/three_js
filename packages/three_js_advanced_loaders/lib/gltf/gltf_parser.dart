@@ -467,25 +467,25 @@ class GLTFParser {
         final int stride = byteStride ~/ elementBytes;
         int totalLen = array.length;
         if(array is Uint8List){
-          ib = InterleavedBuffer(Uint8List(totalLen).set(array.buffer.asUint8List()), 1);
+          ib = InterleavedBuffer(Uint8List(totalLen)..set(array.buffer.asUint8List()), 1);
         }
         else if(array is Int8List){
-          ib = InterleavedBuffer(Int8List(totalLen).set(array.buffer.asInt8List()), 1);
+          ib = InterleavedBuffer(Int8List(totalLen)..set(array.buffer.asInt8List()), 1);
         }
         else if(array is Int16List){
-          ib = InterleavedBuffer(Int16List(totalLen).set(array.buffer.asInt16List()), 1);
+          ib = InterleavedBuffer(Int16List(totalLen)..set(array.buffer.asInt16List()), 1);
         }
         else if(array is Int32List){
-          ib = InterleavedBuffer(Int32List(totalLen).set(array.buffer.asInt32List()), 1);
+          ib = InterleavedBuffer(Int32List(totalLen)..set(array.buffer.asInt32List()), 1);
         }
         else if(array is Uint16List){
-          ib = InterleavedBuffer(Uint16List(totalLen).set(array.buffer.asUint16List()), 1);
+          ib = InterleavedBuffer(Uint16List(totalLen)..set(array.buffer.asUint16List()), 1);
         }
         else if(array is Uint32List){
-          ib = InterleavedBuffer(Uint32List(totalLen).set(array.buffer.asUint32List()), 1);
+          ib = InterleavedBuffer(Uint32List(totalLen)..set(array.buffer.asUint32List()), 1);
         }
         else{
-          ib = InterleavedBuffer(Float32List(totalLen).set(array.buffer.asFloat32List()), stride);
+          ib = InterleavedBuffer(Float32List(totalLen)..set(array.buffer.asFloat32List()), stride);
         }
 
         parser.cache.add(ibCacheKey, ib);
@@ -941,7 +941,7 @@ class GLTFParser {
     } else if (materialType == MeshStandardMaterial) {
       return MeshStandardMaterial.fromMap(materialParams);
     } else {
-      throw ("GLTFParser createMaterialType materialType: ${materialType.runtimeType.toString()} is not support ");
+      throw ("GLTFParser createMaterialType materialType: $materialType is not support ");
     }
   }
 

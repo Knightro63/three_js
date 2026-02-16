@@ -269,7 +269,7 @@ class Curve {
     final pt2 = getPoint(t2);
 
     final tangent = optionalTarget ??
-      ((pt1.runtimeType == Vector2)?Vector2(): Vector3());
+      ((pt1 is Vector2)?Vector2(): Vector3());
 
     if(pt2 != null && pt1 != null){
       tangent.setFrom(pt2).sub(pt1).normalize();

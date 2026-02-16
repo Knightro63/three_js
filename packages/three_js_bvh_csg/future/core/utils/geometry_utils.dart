@@ -16,7 +16,7 @@ TypedData convertToSharedArrayBuffer(TypedData array) {
     return array;
   }
 
-  //final cons = array.runtimeType;
+  //final cons = array;
   final buffer = array.buffer;
   final sharedBuffer = SharedArrayBuffer(buffer.lengthInBytes);
 

@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:math' as math;
-import 'dart:io';
 
 import 'package:css/css.dart';
 import 'package:flutter/foundation.dart';
@@ -167,16 +166,16 @@ class _UIPageState extends State<UIScreen> {
     setState(() {});
   }
 
-  static Future<void>? _writeToFile(String path, {String? spark, Uint8List? image}){
-    final file = File(path);
-    if(spark != null){
-      return file.writeAsString(spark);
-    }
-    else if(image != null){
-      return file.writeAsBytes(image);
-    }
-    return null;
-  }
+  // static Future<void>? _writeToFile(String path, {String? spark, Uint8List? image}){
+  //   final file = File(path);
+  //   if(spark != null){
+  //     return file.writeAsString(spark);
+  //   }
+  //   else if(image != null){
+  //     return file.writeAsBytes(image);
+  //   }
+  //   return null;
+  // }
 
   Future<void> setup() async{
     const frustumSize = 5.0;
@@ -972,11 +971,11 @@ class _UIPageState extends State<UIScreen> {
                                     onChanged:(value){
                                       setState(() {
                                         selectedValue = value;
-                                        three.Mesh mesh;
+                                        //three.Mesh mesh;
                                         int n = int.parse(selectedValue.split('|').last);
                                         for(final m in threeJs.scene.children){
                                           if(m.id == n){
-                                            mesh = m as three.Mesh;
+                                            //mesh = m as three.Mesh;
                                             break;
                                           }
                                         }

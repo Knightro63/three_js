@@ -549,7 +549,7 @@ class Terrain{
       options.heightmap(zs, options);
     }
     else {
-      console.warning('An invalid value was passed for `options.heightmap`: ${options.heightmap.runtimeType}');
+      console.warning('An invalid value was passed for `options.heightmap`: ${options.heightmap}');
     }
 
     fromArray1D(mesh.geometry!.attributes['position'].array, zs);
@@ -1572,7 +1572,7 @@ class Terrain{
 
     final mat = material ?? MeshLambertMaterial();
     Function? hexOnBeforeCompile;
-    if(mat.runtimeType.toString() == 'HexTilingMaterial'){
+    if(mat is HexTilingMaterial){
       hexOnBeforeCompile = mat.onBeforeCompile;
     }
 
@@ -1595,7 +1595,7 @@ class Terrain{
         };
       }
 
-      if(mat.runtimeType.toString() == 'HexTilingMaterial'){
+      if(mat is HexTilingMaterial){
         shader.fragmentShader = shader.fragmentShader.replaceAll(
           'texture2D', 
           'textureNoTileNeyret'

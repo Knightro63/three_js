@@ -472,7 +472,7 @@ class Material with EventDispatcher {
     } else if (key == "dithering") {
       dithering = newValue;
     } else if (key == "emissive") {
-      if (newValue.runtimeType == Color) {
+      if (newValue is Color) {
         emissive = newValue;
       } else {
         emissive = Color.fromHex32(newValue);

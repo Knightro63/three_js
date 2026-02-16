@@ -482,7 +482,7 @@ class AnimationMixer with EventDispatcher {
     final root = optionalRoot ?? this.root;
     final rootUuid = root.uuid;
 
-    final clipObject = clip;//clip.runtimeType.toString() == 'String'? AnimationClip.findByName(root, clip):clip,
+    final clipObject = clip;//clip is String? AnimationClip.findByName(root, clip):clip,
     final clipUuid = clipObject.uuid;//clipObject ? clipObject.uuid : clip;
     final actionsForClip = actionsByClip[clipUuid];
 
