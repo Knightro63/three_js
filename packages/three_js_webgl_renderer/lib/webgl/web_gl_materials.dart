@@ -91,43 +91,92 @@ class WebGLMaterials {
     }
 
     if (material.map != null) {
-      uniforms["map"]["value"] = material.map;
+      if(uniforms['map'] == null){
+        uniforms["map"] = {
+          "value": material.map
+        };
+      }
+      else {
+        uniforms["map"]["value"] = material.map;
+      }
       refreshTransformUniform( material.map, uniforms['mapTransform'] );
     }
 
     if (material.alphaMap != null) {
-      uniforms["alphaMap"]["value"] = material.alphaMap;
+      if(uniforms['alphaMap'] == null){
+        uniforms["alphaMap"] = {
+          "value": material.alphaMap
+        };
+      }
+      else {
+        uniforms["alphaMap"]["value"] = material.alphaMap;
+      }
       refreshTransformUniform( material.alphaMap!, uniforms['alphaMapTransform'] );
     }
 
     if (material.bumpMap != null) {
-      uniforms["bumpMap"]["value"] = material.bumpMap;
+      if(uniforms['bumpMap'] == null){
+        uniforms["bumpMap"] = {
+          "value": material.bumpMap
+        };
+      }
+      else {
+        uniforms["bumpMap"]["value"] = material.bumpMap;
+      }
       refreshTransformUniform( material.bumpMap!, uniforms['bumpMapTransform'] );
       uniforms["bumpScale"]["value"] = material.bumpScale;
       if (material.side == BackSide) uniforms["bumpScale"]["value"] *= -1;
     }
 
     if (material.displacementMap != null) {
-      uniforms["displacementMap"]["value"] = material.displacementMap;
+      if(uniforms['displacementMap'] == null){
+        uniforms["displacementMap"] = {
+          "value": material.displacementMap
+        };
+      }
+      else {
+        uniforms["displacementMap"]["value"] = material.displacementMap;
+      }
       refreshTransformUniform( material.displacementMap!, uniforms['displacementMapTransform'] );
       uniforms["displacementScale"]["value"] = material.displacementScale;
       uniforms["displacementBias"]["value"] = material.displacementBias;
     }
 
     if (material.emissiveMap != null) {
-      uniforms["emissiveMap"]["value"] = material.emissiveMap;
+      if(uniforms['emissiveMap'] == null){
+        uniforms["emissiveMap"] = {
+          "value": material.emissiveMap
+        };
+      }
+      else {
+        uniforms["emissiveMap"]["value"] = material.emissiveMap;
+      }
       refreshTransformUniform( material.emissiveMap!, uniforms['emissiveMapTransform'] );
     }
 
     if (material.normalMap != null) {
-      uniforms["normalMap"]["value"] = material.normalMap;
+      if(uniforms["normalMap"] == null){
+        uniforms["normalMap"] = {
+          "value": material.normalMap
+        };
+      }
+      else{
+        uniforms["normalMap"]["value"] = material.normalMap;
+      }
       refreshTransformUniform( material.normalMap!, uniforms['normalMapTransform'] );
       uniforms["normalScale"]["value"].setFrom(material.normalScale);
       if (material.side == BackSide) uniforms["normalScale"]["value"].negate();
     }
 
     if (material.specularMap != null) {
-      uniforms["specularMap"]["value"] = material.specularMap;
+      if(uniforms["specularMap"] == null){
+        uniforms["specularMap"] = {
+          "value": material.specularMap
+        };
+      }
+      else{
+        uniforms["specularMap"]["value"] = material.specularMap;
+      }
       refreshTransformUniform( material.specularMap!, uniforms['specularMapTransform'] );
     }
 
