@@ -649,6 +649,9 @@ class Material with EventDispatcher {
     else if (key == 'specularIntensityMap') {
       specularIntensityMap = newValue;
     }
+    else if (key == 'clearcoatMap') {
+      clearcoatMap = newValue;
+    }
     else {
       console.error("Material.setValues key: $key newValue: $newValue is not support");
     }

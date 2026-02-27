@@ -53,7 +53,7 @@ class Source {
       return meta.images[uuid];
 		}
 
-		final output = {
+		final output = <String,dynamic>{
 			"uuid": uuid,
 			"url": ''
 		};

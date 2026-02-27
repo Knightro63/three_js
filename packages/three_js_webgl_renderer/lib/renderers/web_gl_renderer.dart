@@ -591,7 +591,7 @@ class WebGLRenderer extends Renderer{
     scene ??= _emptyScene;
     final frontFaceCW = (object is Mesh && object.matrixWorld.determinant() < 0);
 
-    WebGLProgram program = setProgram(camera, scene, geometry, material, object);
+    final program = setProgram(camera, scene, geometry, material, object);
 
     (state as WebGLState).setMaterial(material, frontFaceCW);
 
