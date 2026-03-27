@@ -55,8 +55,8 @@ class Line extends Object3D {
   Line copy(Object3D source, [bool? recursive]) {
     super.copy(source);
 
-    material = source.material;
-    geometry = source.geometry;
+    material = source.material?.clone();
+    geometry = source.geometry?.clone();
 
     return this;
   }
