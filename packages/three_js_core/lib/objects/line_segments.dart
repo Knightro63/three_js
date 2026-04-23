@@ -56,4 +56,9 @@ class LineSegments extends Line {
 
     return this;
   }
+
+  @override
+  LineSegments clone([bool? recursive = true]) {
+    return LineSegments(this.geometry)..copy(this, recursive);
+  }
 }
