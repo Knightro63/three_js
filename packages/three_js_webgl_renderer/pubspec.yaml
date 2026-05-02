@@ -20,11 +20,3 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
-
-dependency_overrides:
-  three_js_math:
-    path: ../three_js_math
-  three_js_core:
-    path: ../three_js_core
-  flutter_angle:
-    path: ../../../flutter_angle/flutter_angle
