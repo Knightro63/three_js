@@ -3,7 +3,7 @@ import 'package:three_js_math/three_js_math.dart';
 
 class StereoEffect {
   final _stereo = StereoCamera();
-  WebGLRenderer renderer;
+  dynamic renderer;
   final size = Vector2();
 
 	StereoEffect(this.renderer) {
