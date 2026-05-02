@@ -16,6 +16,7 @@ dependencies:
   three_js_geometry: ^0.3.0
   three_js_core_loaders: ^0.3.0
   three_js_sensors: ^0.2.0
+  three_js_angle_renderer: ^0.0.1
   web: ^1.1.1
 
 dev_dependencies:

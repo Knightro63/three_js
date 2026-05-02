@@ -1678,7 +1678,7 @@ class AngleRenderer extends Renderer{
     //}
   }
 
-  void setRenderTargetFramebuffer(RenderTarget renderTarget, Framebuffer? defaultFramebuffer) {
+  void setRenderTargetFramebuffer(RenderTarget renderTarget, defaultFramebuffer) {
     final renderTargetProperties = properties.get(renderTarget);
     renderTargetProperties["__webglFramebuffer"] = defaultFramebuffer;
     renderTargetProperties["__useDefaultFramebuffer"] = defaultFramebuffer == null;

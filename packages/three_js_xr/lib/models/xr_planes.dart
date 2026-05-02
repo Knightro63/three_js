@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'package:three_js_angle_renderer/three_js_angle_renderer.dart';
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'package:three_js_xr/app/index.dart';
@@ -6,7 +7,7 @@ import 'package:three_js_xr/renderer/index.dart';
 
 class XRPlanes extends Object3D {
 
-	XRPlanes(WebGLRenderer renderer ):super(){
+	XRPlanes(AngleRenderer renderer ):super(){
 		final matrix = Matrix4();
 		final currentPlanes = {};
 		final xr = renderer.xr as WebXRWorker;

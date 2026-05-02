@@ -1,8 +1,9 @@
 import 'dart:js_interop';
 import 'dart:math' as math;
+import 'package:three_js_angle_renderer/angle/index.dart';
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
-import 'package:three_js_core/renderers/webgl/index.dart';
+import 'package:flutter_angle/flutter_angle.dart';
 import '../../app/web/xr_webgl_bindings.dart';
 import 'web_xr_controller.dart';
 import 'web_xr_depth_sensing.dart';
@@ -16,7 +17,7 @@ import 'web_xr_depth_sensing.dart';
 /// @augments EventDispatcher
 /// @hideconstructor
 ////
-class WebXRWorker extends WebXRManager {
+class WebXRWorker extends XRManager {
   XRSession? session;
   double framebufferScaleFactor = 1.0;
   XRReferenceSpace? referenceSpace;
@@ -57,7 +58,7 @@ class WebXRWorker extends WebXRManager {
   final cameraLPos = Vector3();
   final cameraRPos = Vector3();
 
-  final animation = WebGLAnimation();
+  final animation = AngleAnimation();
   dynamic onAnimationFrameCallback;
 
 	WebXRWorker(super.renderer, super.gl):super(){
@@ -351,10 +352,10 @@ class WebXRWorker extends WebXRManager {
         renderer.setPixelRatio( 1 );
         renderer.setSize( glBaseLayer!.framebufferWidth.toDouble(), glBaseLayer!.framebufferHeight.toDouble(), false );
 
-        newRenderTarget = WebGLRenderTarget(
+        newRenderTarget = RenderTarget(
           glBaseLayer!.framebufferWidth,
           glBaseLayer!.framebufferHeight,
-          WebGLRenderTargetOptions({
+          RenderTargetOptions({
             'format': RGBFormat,
             'type': UnsignedByteType,
             'colorSpace': renderer.outputColorSpace,
@@ -390,10 +391,10 @@ class WebXRWorker extends WebXRManager {
         renderer.setPixelRatio( 1 );
         renderer.setSize( glProjLayer!.textureWidth.toDouble(), glProjLayer!.textureHeight.toDouble(), false );
 
-        newRenderTarget = WebGLRenderTarget(
+        newRenderTarget = RenderTarget(
           glProjLayer!.textureWidth,
           glProjLayer!.textureHeight,
-          WebGLRenderTargetOptions({
+          RenderTargetOptions({
             'format': RGBAFormat,
             'type': UnsignedByteType,
             'depthTexture': DepthTexture( glProjLayer!.textureWidth, glProjLayer!.textureHeight, depthType, null, null, null, null, null, null, depthFormat ),

@@ -69,6 +69,12 @@ abstract class Renderer {
   }
   void setClearColor(Color color, [double alpha = 1.0]);
   Color getClearColor(Color target);
+  void setPixelRatio(double value);
+  void setSize(double width, double height, [bool updateStyle = false]);
+  void setRenderTargetFramebuffer(RenderTarget renderTarget, defaultFramebuffer);
+  void setRenderTargetTextures(RenderTarget renderTarget, colorTexture, depthTexture);
+  void setScissorTest(bool boolean);
+  void setScissor(double x, double y, double width, double height);
   void render(Object3D scene, Camera camera);
   void setRenderTarget(RenderTarget? renderTarget, [int activeCubeFace = 0, int activeMipmapLevel = 0]);
   void readRenderTargetPixels(RenderTarget renderTarget, int x, int y, int width, int height, TypedData buffer, [int? activeCubeFaceIndex]) ;

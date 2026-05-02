@@ -1,21 +1,22 @@
 import 'package:flutter/services.dart';
+import 'package:three_js_angle_renderer/angle/index.dart';
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
-import 'package:three_js_core/renderers/webgl/index.dart';
+import 'package:flutter_angle/flutter_angle.dart';
 import 'package:three_js_xr/app/index.dart';
 import 'package:three_js_xr/other/constants.dart';
 import 'package:three_js_xr/renderer/platform/distortion_shader.dart';
 import 'package:three_js_xr/renderer/platform/head_pose.dart';
 import 'package:three_js_xr/renderer/web/web_xr_controller.dart';
 
-class WebXRWorker extends WebXRManager{
+class WebXRWorker extends XRManager{
   XRSession? session;
-  late final WebGLState state;
+  late final AngleState state;
   dynamic onAnimationFrameCallback;
-  WebGLRenderTarget? renderTargetLeft;
-  WebGLRenderTarget? renderTargetRight;
+  RenderTarget? renderTargetLeft;
+  RenderTarget? renderTargetRight;
 
-  final WebGLAnimation animation = WebGLAnimation();
+  final AngleAnimation animation = AngleAnimation();
   final StereoCamera stereoCamera = StereoCamera();
 
   final Camera _camera = OrthographicCamera(-1, 1, 1, -1, 0, 1);
@@ -50,22 +51,22 @@ class WebXRWorker extends WebXRManager{
     _mat.uniforms['lensSize']['value'] = options.lensSize;
     _mat.uniforms['type']['value'] = options.distorsionType.index;
 
-    final WebGLRenderTargetOptions pars = WebGLRenderTargetOptions({
+    final RenderTargetOptions pars = RenderTargetOptions({
       "format": RGBAFormat,
       'colorSpace': SRGBColorSpace,
       "samples": 4
     });
 
-    renderTargetLeft = WebGLRenderTarget((width * dpr)~/2, (height * dpr).toInt(), pars);
+    renderTargetLeft = RenderTarget((width * dpr)~/2, (height * dpr).toInt(), pars);
     renderer.setRenderTarget(renderTargetLeft);
 
-    renderTargetRight = WebGLRenderTarget((width * dpr)~/2, (height * dpr).toInt(), pars);
+    renderTargetRight = RenderTarget((width * dpr)~/2, (height * dpr).toInt(), pars);
     renderer.setRenderTarget(renderTargetRight);
   }
 
   @override
   void init(){
-    state = renderer.state;
+    state = renderer.state as AngleState;
     animation.setAnimationLoop( onAnimationFrame );
   }
 

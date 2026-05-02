@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:three_js_core/three_js_core.dart';
+import 'package:three_js_angle_renderer/three_js_angle_renderer.dart';
 import 'package:three_js_xr/three_js_xr.dart';
 
 class XRButton extends StatefulWidget{
-  const XRButton({super.key,required this.threeJs});
-  final ThreeJS threeJs;
+  const XRButton({super.key,required this.renderer});
+  final AngleRenderer renderer;
 
   @override
   createState() => _State();
@@ -48,8 +48,8 @@ class _State extends State<VRButton>{
   }
 
   Future<void> onSessionStarted(XRSession session) async{
-    await (widget.threeJs.renderer!.xr as WebXRWorker).setSession(currentSession);
-    widget.threeJs.renderer?.onXRSessionStart(null);
+    await (widget.renderer!.xr as WebXRWorker).setSession(currentSession);
+    widget.renderer?.onXRSessionStart(null);
     session.addListener( 'end', onSessionEnded );
     started = true;
   }

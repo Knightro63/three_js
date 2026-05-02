@@ -6,6 +6,8 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:three_js_core/three_js_core.dart' as core;
 import 'package:three_js_math/three_js_math.dart' as tmath;
+import 'package:three_js_angle_renderer/three_js_angle_renderer.dart' as ren;
+import 'package:flutter_angle/flutter_angle.dart';
 import './distortion_shader.dart';
 
 enum DistorsionType{pincushion,barrel}
@@ -14,7 +16,7 @@ enum DistorsionType{pincushion,barrel}
 class VrViewer{
   void Function() onSetupComplete;
   VrViewer({
-    core.Settings? settings,
+    ren.Settings? settings,
     required this.onSetupComplete, 
     required this.setup,
     this.loadingWidget,
@@ -27,7 +29,7 @@ class VrViewer{
   }){
     this.lensSize = lensSize ?? tmath.Vector2(0.9,0.9);
     this.eyeOffset = eyeOffset ?? tmath.Vector2(0,0);
-    this.settings = settings ?? core.Settings();
+    this.settings = settings ?? ren.Settings();
     stereoCamera.eyeSep = eyeSep;
 
     _mat.uniforms['k1']['value'] = k1;
@@ -46,18 +48,18 @@ class VrViewer{
   Timer? _debounceTimer;
 
   Widget? loadingWidget;
-  late final core.Settings settings;
+  late final ren.Settings settings;
   final GlobalKey<core.PeripheralsState> globalKey = GlobalKey<core.PeripheralsState>();
   core.PeripheralsState get domElement => globalKey.currentState!;
 
   bool visible = true;
 
-  tmath.FlutterAngleTexture? texture;
-  tmath.RenderingContext? gl;
+  FlutterAngleTexture? texture;
+  RenderingContext? gl;
 
-  core.WebGLRenderTarget? renderTargetLeft;
-  core.WebGLRenderTarget? renderTargetRight;
-  core.WebGLRenderer? renderer;
+  core.RenderTarget? renderTargetLeft;
+  core.RenderTarget? renderTargetRight;
+  ren.AngleRenderer? renderer;
   final core.Clock clock = core.Clock();
 
   late final core.Scene scene;
@@ -87,7 +89,7 @@ class VrViewer{
   List<Function(double dt)> events = [];
   List<Function()> disposeEvents = [];
 
-  tmath.FlutterAngle? angle = tmath.FlutterAngle();
+  FlutterAngle? angle = FlutterAngle();
 
   void addAnimationEvent(Function(double dt) event){
     events.add(event);
@@ -118,8 +120,6 @@ class VrViewer{
     stereoCamera.dispose();
     events.clear();
     disposeEvents.clear();
-
-    tmath.allNativeData.dispose();
 
     angle?.dispose([texture]);
     loadingWidget = null;
@@ -202,7 +202,7 @@ class VrViewer{
   }
   
   void initRenderer() {
-    core.WebGLRendererParameters options = core.WebGLRendererParameters(
+    ren.AngleRendererParameters options = ren.AngleRendererParameters(
       width: width,
       height: height,
       gl: gl!,
@@ -222,7 +222,7 @@ class VrViewer{
       precision: settings.precision,
     );
     
-    renderer = core.WebGLRenderer(options);
+    renderer = ren.AngleRenderer(options);
     renderer!.setPixelRatio(_resolution!);
     renderer!.setSize(width, height, false);
     renderer!.alpha = settings.alpha;
@@ -242,12 +242,12 @@ class VrViewer{
     renderer!.toneMapping = settings.toneMapping;
     renderer!.toneMappingExposure = settings.toneMappingExposure;
 
-    final core.WebGLRenderTargetOptions pars = core.WebGLRenderTargetOptions(settings.renderOptions);
+    final core.RenderTargetOptions pars = core.RenderTargetOptions(settings.renderOptions);
 
-    renderTargetLeft = core.WebGLRenderTarget((width * _resolution!)~/2, (height * _resolution!).toInt(), pars);
+    renderTargetLeft = core.RenderTarget((width * _resolution!)~/2, (height * _resolution!).toInt(), pars);
     renderer!.setRenderTarget(renderTargetLeft);
 
-    renderTargetRight = core.WebGLRenderTarget((width * _resolution!)~/2, (height * _resolution!).toInt(), pars);
+    renderTargetRight = core.RenderTarget((width * _resolution!)~/2, (height * _resolution!).toInt(), pars);
     renderer!.setRenderTarget(renderTargetRight);
   }
   Future<void> initScene() async{
@@ -263,7 +263,7 @@ class VrViewer{
   }
 
   Future<void> initPlatformState() async {
-    final options = tmath.AngleOptions(
+    final options = AngleOptions(
       width: width.toInt(), 
       height: height.toInt(), 
       dpr: _resolution!,

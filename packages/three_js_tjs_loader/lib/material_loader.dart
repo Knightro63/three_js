@@ -105,9 +105,9 @@ class MaterialLoader extends Loader {
     else if (json["type"] == "MeshMatcapMaterial") {
       material = MeshMatcapMaterial();
     }
-    else if (json["type"] == "MeshGouraudMaterial") {
-      material = MeshGouraudMaterial();
-    } 
+    // else if (json["type"] == "MeshGouraudMaterial") {
+    //   material = MeshGouraudMaterial();
+    // } 
     else if (json["type"] == "MeshNormalMaterial") {
       material = MeshNormalMaterial();
     } 
@@ -135,7 +135,7 @@ class MaterialLoader extends Loader {
       );
     } 
     else if (json["type"] == "ProjectedMaterial") {
-      material = ProjectedMaterial.fromJson(json['projected']);
+      material = ProjectedMaterial.fromMap(json['projected']);
     } else {
       throw (" MaterialLoader ${json["type"]} is not support  ");
     }
