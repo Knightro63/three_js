@@ -1,4 +1,4 @@
-library three_js;
+library three_js_webgl;
 
 /// Export all the packages that relies on Three_JS to work
 export 'package:three_js_math/three_js_math.dart';
