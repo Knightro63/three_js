@@ -41,7 +41,8 @@ class Settings{
     this.failIfMajorPerformanceCaveat = false,
     this.reverseDepthBuffer = false,
     this.precision = core.Precision.highp,
-    this.screenResolution
+    this.screenResolution,
+    this.useSurfaceProducer = true
   }){
     this.renderOptions = renderOptions ?? {
       "format": RGBAFormat,
@@ -55,6 +56,7 @@ class Settings{
   bool reverseDepthBuffer;
   bool failIfMajorPerformanceCaveat;
   bool depth = true;
+  bool useSurfaceProducer;
   Precision precision;
   bool alpha;
   bool stencil;
@@ -371,7 +373,7 @@ class ThreeJS with WidgetsBindingObserver{
           alpha: settings.alpha,
           antialias: settings.antialias,
           customRenderer: !settings.useSourceTexture,
-          useSurfaceProducer: true
+          useSurfaceProducer: settings.useSurfaceProducer
         )
       );
     }
