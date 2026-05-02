@@ -8,8 +8,8 @@ class AnimationUtils {
   // same as Array.prototype.slice, but also works on typed arrays
   static List<T> arraySlice<T>(List<T> array, [int from = 0, int? to]) {
     // if ( AnimationUtils.isTypedArray( array ) ) {
-    if (array.runtimeType.toString() != "List<num>") {
-      console.info(" AnimationUtils.arraySlice array: ${array.runtimeType} ");
+    if (array.runtimeType != List<num>) {
+      console.info(" AnimationUtils.arraySlice array: $array");
       // 	// in ios9 array.subarray(from, null) will return empty array
       // 	// but array.subarray(from) or array.subarray(from, len) is correct
       // 	return new array.constructor( array.subarray( from, to != null ? to : array.length ) );
@@ -158,8 +158,8 @@ class AnimationUtils {
 
       if (times.isEmpty) continue;
 
-      track.times = times;//AnimationUtils.convertArray(times, track.times.runtimeType.toString());
-      track.values = values;//AnimationUtils.convertArray(values, track.values.runtimeType.toString());
+      track.times = times;//AnimationUtils.convertArray(times, track.times);
+      track.values = values;//AnimationUtils.convertArray(values, track.values);
 
       tracks.add(track);
     }

@@ -1,6 +1,5 @@
 import 'dart:math' as math;
 import 'dart:typed_data';
-import 'package:flutter/foundation.dart';
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 
@@ -14,28 +13,6 @@ int sortOpaque(Pool a, Pool b ) {
 
 int sortTransparent(Pool a, Pool b ) {
 	return b.z - a.z;
-}
-
-extension on NativeArray{
-  NativeArray constructure(int s){
-    switch (this.runtimeType) {
-      case Int8Array:
-        return Int8Array(s);
-      case Int16Array:
-        return Int16Array(s);
-      case Int32Array:
-        return Int32Array(s);
-      case Uint8Array:
-        return Uint8Array(s);
-      case Uint16Array:
-        return Uint16Array(s);
-      case Uint32Array:
-        return Uint32Array(s);
-      case Float32Array:
-      default:
-        return Float32Array(s);
-    }
-  }
 }
 
 class Bounds{
@@ -235,7 +212,7 @@ class BatchedMesh extends Mesh {
 		int size = ( sizeSqrt / 4 ).ceil() * 4;
 		size = math.max( size, 4 );
 
-		final matricesArray = Float32Array( size * size * 4 ); // 4 floats per RGBA pixel
+		final matricesArray = Float32List( size * size * 4 ); // 4 floats per RGBA pixel
 		final matricesTexture = DataTexture( matricesArray, size, size, RGBAFormat, FloatType );
 
 		this.matricesTexture = matricesTexture;
@@ -243,7 +220,7 @@ class BatchedMesh extends Mesh {
 	void _initIndirectTexture() {
 		int size = math.sqrt( maxInstanceCount ).ceil();
 
-		final indirectArray = Uint32Array( size * size );
+		final indirectArray = Uint32List( size * size );
 		indirectTexture = DataTexture( indirectArray, size, size, RedIntegerFormat, UnsignedIntType );
 	}
   
@@ -259,21 +236,20 @@ class BatchedMesh extends Mesh {
         final int itemSize = srcAttribute.itemSize;
         final normalized = srcAttribute.normalized;
 
-				final dstArray = (array as NativeArray).constructure( maxVertexCount * itemSize);
-				final dstAttribute = BufferAttribute.fromUnknown( dstArray, itemSize, normalized );
+				final dstAttribute = BufferAttribute.fromUnknown( array, itemSize, normalized );
 
 				geometry?.setAttributeFromString( attributeName, dstAttribute );
 			}
 
 			if ( reference.getIndex() != null ) {
 				final indexArray = maxVertexCount > 65536
-					? Uint32Array( maxIndexCount )
-					: Uint16Array( maxIndexCount );
+					? Uint32List( maxIndexCount )
+					: Uint16List( maxIndexCount );
 
-        if(indexArray is Uint32Array){
+        if(indexArray is Uint32List){
 			    geometry?.setIndex( Uint32BufferAttribute( indexArray, 1 ) );
         }
-        else if(indexArray is Uint16Array){
+        else if(indexArray is Uint16List){
           geometry?.setIndex( Uint16BufferAttribute( indexArray, 1 ) );
         }
 			}
@@ -416,7 +392,7 @@ class BatchedMesh extends Mesh {
 
 		final colorsTexture = this.colorsTexture;
 		if ( colorsTexture != null) {
-			_whiteColor.copyIntoArray( colorsTexture.image.data, drawId * 4 );
+			_whiteColor.copyIntoList( colorsTexture.image.data, drawId * 4 );
 			colorsTexture.needsUpdate = true;
 		}
 
@@ -839,7 +815,7 @@ class BatchedMesh extends Mesh {
 
   @override
 	OnRender? get onBeforeRender =>({
-    WebGLRenderer? renderer,
+    Renderer? renderer,
     RenderTarget? renderTarget,
     Object3D? mesh,
     Scene? scene,
@@ -857,7 +833,7 @@ class BatchedMesh extends Mesh {
 		// the indexed version of the multi draw function requires specifying the start
 		// offset in bytes.
 		final index = geometry!.getIndex();
-		final bytesPerElement = index == null ? 1 : index.array.BYTES_PER_ELEMENT;
+		final int bytesPerElement = index == null ? 1 : index.array.elementSizeInBytes;
 
 		final instanceInfo = _instanceInfo;
 		final multiDrawStarts = this.multiDrawStarts;
@@ -964,7 +940,7 @@ class BatchedMesh extends Mesh {
 
   @override
   void onBeforeShadow({
-    WebGLRenderer? renderer,
+    Renderer? renderer,
     Object3D? scene,
     Camera? camera,
     Camera? shadowCamera,

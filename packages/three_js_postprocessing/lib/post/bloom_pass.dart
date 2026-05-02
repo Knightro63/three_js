@@ -4,8 +4,8 @@ import 'package:three_js_postprocessing/shaders/convolution_shader.dart';
 import "pass.dart";
 
 class BloomPass extends Pass {
-  late WebGLRenderTarget renderTargetX;
-  late WebGLRenderTarget renderTargetY;
+  late RenderTarget renderTargetX;
+  late RenderTarget renderTargetY;
   late ShaderMaterial materialCopy;
   late Map<String, dynamic> convolutionUniforms;
   late ShaderMaterial materialConvolution;
@@ -25,9 +25,9 @@ class BloomPass extends Pass {
       'type': HalfFloatType
     };
 
-    renderTargetX = WebGLRenderTarget(resolution, resolution, WebGLRenderTargetOptions(pars));
+    renderTargetX = RenderTarget(resolution, resolution, RenderTargetOptions(pars));
     renderTargetX.texture.name = 'BloomPass.x';
-    renderTargetY = WebGLRenderTarget(resolution, resolution, WebGLRenderTargetOptions(pars));
+    renderTargetY = RenderTarget(resolution, resolution, RenderTargetOptions(pars));
     renderTargetY.texture.name = 'BloomPass.y';
 
     uniforms = UniformsUtils.clone(CombineShader["uniforms"]);
@@ -65,7 +65,7 @@ class BloomPass extends Pass {
   }
 
   @override
-  void render(WebGLRenderer renderer, WebGLRenderTarget writeBuffer, WebGLRenderTarget readBuffer,{double? deltaTime, bool? maskActive}) {
+  void render(Renderer renderer, RenderTarget writeBuffer, RenderTarget readBuffer,{double? deltaTime, bool? maskActive}) {
     if (maskActive == true) renderer.state.buffers['stencil'].setTest(false);
 
     // Render quad with blured scene into texture (convolution pass 1)

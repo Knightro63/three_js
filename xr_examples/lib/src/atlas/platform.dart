@@ -1,7 +1,6 @@
 import 'package:three_js/three_js.dart' as three;
 import 'dart:typed_data';
 import 'package:image/image.dart' hide Color;
-import 'package:three_js_math/three_js_math.dart';
 
 class Atlas{
   List<three.Texture> getTexturesFromAtlasFile(String atlasImgUrl, int tilesNum ) {
@@ -15,7 +14,7 @@ class Atlas{
     loader.fromAsset(atlasImgUrl).then(( imageObj ) {
       final int tileWidth = imageObj!.height.toInt();
       
-      ByteBuffer bytes = Uint8List.fromList((imageObj.data as Uint8Array).toDartList()).buffer;
+      final ByteBuffer bytes = imageObj.data.buffer;
       Image image = Image.fromBytes(
         bytes: bytes,
         width: imageObj.width.toInt(),
@@ -33,7 +32,7 @@ class Atlas{
         ).getBytes();
         textures[ i ].colorSpace = three.SRGBColorSpace;
         textures[ i ].image = three.ImageElement(
-          data: Uint8Array.fromList(canvas),
+          data: Uint8List.fromList(canvas),
           width: tileWidth,
           height: tileWidth
         );

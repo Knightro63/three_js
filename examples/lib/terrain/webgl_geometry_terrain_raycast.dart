@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:example/src/statistics.dart';
 import 'package:three_js/three_js.dart' as three;
@@ -111,7 +112,7 @@ class _State extends State<WebglGeometryTerrainRaycast> {
     threeJs.domElement.addEventListener(three.PeripheralType.pointerHover, onPointerMove );
   }
 
-  three.Uint8Array generateHeight(int width,int height ) {
+  Uint8List generateHeight(int width,int height ) {
     double seed = math.pi / 4;
     double random() {
       final x = math.sin( seed ++ ) * 10000;
@@ -119,7 +120,7 @@ class _State extends State<WebglGeometryTerrainRaycast> {
     }
 
     int size = width * height;
-    final data = three.Uint8Array( size );
+    final data = Uint8List( size );
     final perlin = ImprovedNoise();
     double z = random() * 100;
 
@@ -138,12 +139,12 @@ class _State extends State<WebglGeometryTerrainRaycast> {
     return data;
   }
 
-  three.ImageElement generateTexture(three.Uint8Array data,int width,int height ) {
+  three.ImageElement generateTexture(Uint8List data,int width,int height ) {
     final vector3 = three.Vector3( 0, 0, 0 );
     final sun = three.Vector3( 1, 1, 1 );
     sun.normalize();
 
-    final imageData = three.Uint8Array.fromList(List.filled(width*height*4, 255));
+    final imageData = Uint8List.fromList(List.filled(width*height*4, 255));
 
     for (int i = 0, j = 0; i < imageData.length; i += 4, j ++ ) {
       vector3.x = data[ j - 2 ] - data[ j + 2 ] *1.0;

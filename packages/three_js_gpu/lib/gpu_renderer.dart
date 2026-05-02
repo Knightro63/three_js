@@ -48,7 +48,7 @@ class WebGPURenderer extends Renderer{
 			BackendClass = WebGPUBackend;
 			parameters.getFallback = (){
 				console.warning( 'THREE.WebGPURenderer: WebGPU is not available, running under WebGL2 backend.' );
-				return new WebGLBackend( parameters );
+				return WebGLBackend( parameters );
 			};
 		}
 

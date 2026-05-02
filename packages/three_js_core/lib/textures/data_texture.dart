@@ -1,6 +1,7 @@
+import 'dart:typed_data';
+
 import 'image_element.dart';
 import './texture.dart';
-import 'package:three_js_math/three_js_math.dart';
 
 /// Creates a texture directly from raw data, width and height.
 class DataTexture extends Texture {
@@ -18,7 +19,7 @@ class DataTexture extends Texture {
   /// 
   /// For the packed types, UnsignedShort4444Type and
   /// UnsignedShort5551Type all color components of one texel can be
-  /// addressed as bitfields within an integer element of a Uint16Array.
+  /// addressed as bitfields within an integer element of a Uint16List.
   /// 
   /// In order to use the types FloatType and HalfFloatType, the
   /// WebGL implementation must support the respective extensions
@@ -51,7 +52,7 @@ class DataTexture extends Texture {
   /// texture.needsUpdate = true;
   /// ```
   DataTexture([
-    NativeArray? data,
+    TypedDataList? data,
     int? width,
     int? height,
     int? format,

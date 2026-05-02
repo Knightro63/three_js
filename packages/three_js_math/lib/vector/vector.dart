@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-import 'package:flutter_angle/flutter_angle.dart';
 import '../buffer/index.dart';
 import '../matrix/matrix3.dart';
 
@@ -52,10 +51,12 @@ abstract class Vector {
   Vector normalize();
   //double angle();
   Vector setLength(double length);
-  Vector fromNativeArray(NativeArray array, [int offset = 0]);
+  //Vector fromNativeArray(NativeArray array, [int offset = 0]);
+  Vector fromArray(List<num> array, [int offset = 0]);
   Vector copyFromUnknown(array, [int offset = 0]);
   List<num> toNumArray(List<num> array, [int offset = 0]);
-  NativeArray copyIntoNativeArray(NativeArray array, [int offset = 0]);
+  //NativeArray copyIntoNativeArray(NativeArray array, [int offset = 0]);
+  Float32List copyIntoList(Float32List array, [int offset = 0]);
   Vector copyFromArray(List<double> array, [int offset = 0]);
   List<double> copyIntoArray([List<double> array, int offset = 0]);
 

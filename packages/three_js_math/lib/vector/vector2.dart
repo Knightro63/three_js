@@ -1,8 +1,9 @@
+import 'dart:typed_data';
+
 import '../buffer/index.dart';
 import 'dart:math' as math;
 import '../matrix/matrix3.dart';
 import 'vector.dart';
-import 'package:flutter_angle/flutter_angle.dart';
 
 class Vector2 extends Vector{
   
@@ -331,7 +332,7 @@ class Vector2 extends Vector{
     return array;
   }
   @override
-  NativeArray copyIntoNativeArray(NativeArray array, [int offset = 0]) {
+  Float32List copyIntoList(Float32List array, [int offset = 0]) {
     array[offset] = storage[0];
     array[offset + 1] = storage[1];
 
@@ -352,7 +353,7 @@ class Vector2 extends Vector{
     return this;
   }
   @override
-  Vector2 fromNativeArray(NativeArray array, [int offset = 0]) {
+  Vector2 fromArray(List<num> array, [int offset = 0]) {
     x = array[offset].toDouble();
     y = array[offset + 1].toDouble();
 

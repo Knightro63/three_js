@@ -20,7 +20,7 @@ class Ranges{
 /// [Vector3],
 /// [Vector4], and
 /// [Color] classes may be helpful.
-abstract class BufferAttribute<TData extends NativeArray> extends BaseBufferAttribute<TData> {
+abstract class BufferAttribute<TData extends TypedDataList> extends BaseBufferAttribute<TData> {
   final _vector = Vector3.zero();
   final _vector2 = Vector2.zero();
   List<Ranges> updateRanges = [];
@@ -47,9 +47,9 @@ abstract class BufferAttribute<TData extends NativeArray> extends BaseBufferAttr
   /// [normalized] -- (optional) Applies to integer data only.
   /// Indicates how the underlying data in the buffer maps to the values in the
   /// GLSL code. For instance, if [array] is an instance of
-  /// UInt16Array, and [normalized] is true, the values `0 -
+  /// Uint16List, and [normalized] is true, the values `0 -
   /// +65535` in the array data will be mapped to 0.0f - +1.0f in the GLSL
-  /// attribute. An Int16Array (signed) would map from -32768 - +32767 to -1.0f
+  /// attribute. An Int16List (signed) would map from -32768 - +32767 to -1.0f
   /// - +1.0f. If [normalized] is false, the values will be
   /// converted to floats unmodified, i.e. 32767 becomes 32767.0f.
   BufferAttribute(TData arrayList, int itemSize, [bool normalized = false]) {
@@ -384,16 +384,16 @@ abstract class BufferAttribute<TData extends NativeArray> extends BaseBufferAttr
     //   return BufferAttribute(array, itemSize, false).copy(this);
     // } else
     if (type == "Float32BufferAttribute") {
-      final typed = array as Float32Array;
+      final typed = array as Float32List;
       return Float32BufferAttribute.fromList(Float32List(typed.length), itemSize, false).copy(this);
     } else if (type == "Uint8BufferAttribute") {
-      final typed = array as Uint8Array;
+      final typed = array as Uint8List;
       return Uint8BufferAttribute.fromList(Uint8List(typed.length), itemSize, false).copy(this);
     } else if (type == "Uint16BufferAttribute") {
-      final typed = array as Uint16Array;
+      final typed = array as Uint16List;
       return Uint16BufferAttribute.fromList(Uint16List(typed.length), itemSize, false).copy(this);
     } else if (type == "Uint32BufferAttribute") {
-      final typed = array as Uint32Array;
+      final typed = array as Uint32List;
       return Uint32BufferAttribute.fromList(Uint32List(typed.length), itemSize, false).copy(this);
     } else {
       throw ("BufferAttribute type: $type clone need support ....  ");
@@ -417,32 +417,32 @@ abstract class BufferAttribute<TData extends NativeArray> extends BaseBufferAttr
     return result;
   }
 
-  static BufferAttribute fromUnknown(NativeArray arrayList, int itemSize, [bool normalized = false]){
-    if(arrayList is Int8Array){
+  static BufferAttribute fromUnknown(TypedData arrayList, int itemSize, [bool normalized = false]){
+    if(arrayList is Int8List){
       return Int8BufferAttribute(arrayList,itemSize,normalized);
     }
-    else if(arrayList is Uint8Array){
+    else if(arrayList is Uint8List){
       return Uint8BufferAttribute(arrayList,itemSize,normalized);
     }
-    else if(arrayList is Int16Array){
+    else if(arrayList is Int16List){
       return Int16BufferAttribute(arrayList,itemSize,normalized);
     }
-    else if(arrayList is Uint16Array){
+    else if(arrayList is Uint16List){
       return Uint16BufferAttribute(arrayList,itemSize,normalized);
     }
-    else if(arrayList is Int32Array){
+    else if(arrayList is Int32List){
       return Int32BufferAttribute(arrayList,itemSize,normalized);
     }
-    else if(arrayList is Uint32Array){
+    else if(arrayList is Uint32List){
       return Uint32BufferAttribute(arrayList,itemSize,normalized);
     }
-    else if(arrayList is Float32Array){
+    else if(arrayList is Float32List){
       return Float16BufferAttribute(arrayList,itemSize,normalized);
     }
-    else if(arrayList is Float32Array){
+    else if(arrayList is Float32List){
       return Float32BufferAttribute(arrayList,itemSize,normalized);
     }
-    else if(arrayList is Float64Array){
+    else if(arrayList is Float64List){
       return Float64BufferAttribute(arrayList,itemSize,normalized);
     }
     else{
@@ -451,69 +451,69 @@ abstract class BufferAttribute<TData extends NativeArray> extends BaseBufferAttr
   }
 }
 
-class Int8BufferAttribute extends BufferAttribute<Int8Array> {
+class Int8BufferAttribute extends BufferAttribute<Int8List> {
   Int8BufferAttribute(super.array, super.itemSize, [super.normalized = false]){
     type = "Int8BufferAttribute";
   }
   factory Int8BufferAttribute.fromList(List<int> list, int itemSize,[bool normalized = false]){
-    return Int8BufferAttribute(Int8Array.fromList(list),itemSize,normalized);
+    return Int8BufferAttribute(Int8List.fromList(list),itemSize,normalized);
   }
 }
 
-class Uint8BufferAttribute extends BufferAttribute<Uint8Array> {
+class Uint8BufferAttribute extends BufferAttribute<Uint8List> {
   Uint8BufferAttribute(super.array, super.itemSize,[super.normalized = false]){
     type = "Uint8BufferAttribute";
   }
   factory Uint8BufferAttribute.fromList(List<int> list, int itemSize,[bool normalized = false]){
-    return Uint8BufferAttribute(Uint8Array.fromList(list),itemSize,normalized);
+    return Uint8BufferAttribute(Uint8List.fromList(list),itemSize,normalized);
   }
 }
 
-class Uint8ClampedBufferAttribute extends BufferAttribute<Uint8Array> {
+class Uint8ClampedBufferAttribute extends BufferAttribute<Uint8List> {
   Uint8ClampedBufferAttribute(super.array, super.itemSize,[super.normalized = false]){
     type = "Uint8ClampedBufferAttribute";
   }
   factory Uint8ClampedBufferAttribute.fromList(List<int> list, int itemSize,[bool normalized = false]){
-    return Uint8ClampedBufferAttribute(Uint8Array.fromList(list),itemSize,normalized);
+    return Uint8ClampedBufferAttribute(Uint8List.fromList(list),itemSize,normalized);
   }
 }
 
-class Int16BufferAttribute extends BufferAttribute<Int16Array> {
+class Int16BufferAttribute extends BufferAttribute<Int16List> {
   Int16BufferAttribute(super.array, super.itemSize,[super.normalized = false]){
     type = "Int16BufferAttribute";
   }
   factory Int16BufferAttribute.fromList(List<int> list, int itemSize,[bool normalized = false]){
-    return Int16BufferAttribute(Int16Array.fromList(list),itemSize,normalized);
+    return Int16BufferAttribute(Int16List.fromList(list),itemSize,normalized);
   }
 }
 
 // Int16BufferAttribute.prototype = Object.create( BufferAttribute.prototype );
 // Int16BufferAttribute.prototype.constructor = Int16BufferAttribute;
 
-class Uint16BufferAttribute extends BufferAttribute<Uint16Array> {
+class Uint16BufferAttribute extends BufferAttribute<Uint16List> {
   Uint16BufferAttribute(super.array, super.itemSize,[super.normalized = false]){
     type = "Uint16BufferAttribute";
   }
   factory Uint16BufferAttribute.fromList(List<int> list, int itemSize,[bool normalized = false]){
-    return Uint16BufferAttribute(Uint16Array.fromList(list),itemSize,normalized);
+    return Uint16BufferAttribute(Uint16List.fromList(list),itemSize,normalized);
   }
 }
 
-class Int32BufferAttribute extends BufferAttribute<Int32Array> {
+class Int32BufferAttribute extends BufferAttribute<Int32List> {
   Int32BufferAttribute(super.array, super.itemSize,[super.normalized = false]){
     type = "Int32BufferAttribute";
   }
   factory Int32BufferAttribute.fromList(List<int> list, int itemSize,[bool normalized = false]){
-    return Int32BufferAttribute(Int32Array.fromList(list),itemSize,normalized);
+    return Int32BufferAttribute(Int32List.fromList(list),itemSize,normalized);
   }
 }
 
-class Uint32BufferAttribute extends BufferAttribute<Uint32Array> {
+class Uint32BufferAttribute extends BufferAttribute<Uint32List> {
   Uint32BufferAttribute(super.array, super.itemSize,[super.normalized = false]){
     type = "Uint32BufferAttribute";
   }
   factory Uint32BufferAttribute.fromList(List<int> list, int itemSize,[bool normalized = false]){
-    return Uint32BufferAttribute(Uint32Array.fromList(list),itemSize,normalized);
+    return Uint32BufferAttribute(Uint32List.fromList(list),itemSize,normalized);
   }
 }
 
@@ -522,24 +522,24 @@ class Float16BufferAttribute extends BufferAttribute {
     type = "Float16BufferAttribute";
   }
   factory Float16BufferAttribute.fromList(List<double> list, int itemSize,[bool normalized = false]){
-    return Float16BufferAttribute(Float32Array.fromList(list),itemSize,normalized);
+    return Float16BufferAttribute(Float32List.fromList(list),itemSize,normalized);
   }
 }
 
-class Float32BufferAttribute extends BufferAttribute<Float32Array> {
+class Float32BufferAttribute extends BufferAttribute<Float32List> {
   Float32BufferAttribute(super.array, super.itemSize,[super.normalized = false]){
     type = "Float32BufferAttribute";
   }
   factory Float32BufferAttribute.fromList(List<double> list, int itemSize,[bool normalized = false]){
-    return Float32BufferAttribute(Float32Array.fromList(list),itemSize,normalized);
+    return Float32BufferAttribute(Float32List.fromList(list),itemSize,normalized);
   }
 }
 
-class Float64BufferAttribute extends BufferAttribute<Float64Array> {
+class Float64BufferAttribute extends BufferAttribute<Float64List> {
   Float64BufferAttribute(super.array, super.itemSize,[super.normalized = false]){
     type = "Float64BufferAttribute";
   }
   factory Float64BufferAttribute.fromList(List<double> list, int itemSize,[bool normalized = false]){
-    return Float64BufferAttribute(Float64Array.fromList(list),itemSize,normalized);
+    return Float64BufferAttribute(Float64List.fromList(list),itemSize,normalized);
   }
 }

@@ -1,4 +1,5 @@
-part of three_shaders;
+import 'package:three_js_core/three_js_core.dart';
+import 'package:three_js_math/three_js_math.dart';
 
 List cloneUniformsGroups<T>( src ) {
 	final dst = <T>[];
@@ -42,8 +43,8 @@ Map<String, dynamic> cloneUniforms(Map<String, dynamic> src) {
 Map<String, dynamic> mergeUniforms(uniforms) {
   Map<String, dynamic> merged = <String, dynamic>{};
 
-  for (int u = 0; u < uniforms.length; u++) {
-    final tmp = cloneUniforms(uniforms[u]);
+  for (final u in uniforms) {
+    final tmp = cloneUniforms(u);
 
     for (final p in tmp.keys) {
       merged[p] = tmp[p];
@@ -53,7 +54,7 @@ Map<String, dynamic> mergeUniforms(uniforms) {
   return merged;
 }
 
-String getUnlitUniformColorSpace(WebGLRenderer renderer ) {
+String getUnlitUniformColorSpace(Renderer renderer ) {
 	final currentRenderTarget = renderer.getRenderTarget();
 
 	if ( currentRenderTarget == null ) {

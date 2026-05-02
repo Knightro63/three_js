@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:example/src/statistics.dart';
 import 'package:three_js/three_js.dart' as three;
@@ -110,8 +111,8 @@ class _State extends State<WebglInteractiveRaycastingPoints> {
     final geometry = three.BufferGeometry();
     final numPoints = (width * length).toInt();
 
-    final positions = three.Float32Array( numPoints * 3 );
-    final colors = three.Float32Array( numPoints * 3 );
+    final positions = Float32List( numPoints * 3 );
+    final colors = Float32List( numPoints * 3 );
 
     int k = 0;
 
@@ -153,7 +154,7 @@ class _State extends State<WebglInteractiveRaycastingPoints> {
   three.Points generateIndexedPointcloud(three.Color color, int width, int length ) {
     final geometry = generatePointCloudGeometry( color, width, length );
     final numPoints = (width * length).toInt();
-    final indices = three.Uint16Array( numPoints );
+    final indices = Uint16List( numPoints );
 
     int k = 0;
 
@@ -172,7 +173,7 @@ class _State extends State<WebglInteractiveRaycastingPoints> {
   three.Points generateIndexedWithOffsetPointcloud(three.Color color, int width, int length ) {
     final geometry = generatePointCloudGeometry( color, width, length );
     final numPoints = (width * length).toInt();
-    final indices = three.Uint16Array( numPoints );
+    final indices = Uint16List( numPoints );
 
     int k = 0;
 

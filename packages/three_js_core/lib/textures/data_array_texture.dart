@@ -19,7 +19,7 @@ class DataArrayTexture extends Texture {
   /// 
   /// For the packed types, UnsignedShort4444Type and
   /// UnsignedShort5551Type all color components of one texel can be
-  /// addressed as bitfields within an integer element of a Uint16Array.
+  /// addressed as bitfields within an integer element of a Uint16List.
   /// 
   /// In order to use the types FloatType and HalfFloatType, the
   /// WebGL implementation must support the respective extensions

@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:three_js_core/others/index.dart';
 import 'package:three_js_core/textures/index.dart';
 import 'package:three_js_math/three_js_math.dart';
@@ -24,7 +26,7 @@ class Source {
   void dispose(){
     if(data is List){
       for(final temp in data){
-        if(temp is NativeArray){
+        if(temp is TypedDataList){
           temp.dispose();
         }
         else if(temp is ImageElement){
@@ -35,8 +37,8 @@ class Source {
     else if(data is ImageElement){
       (data as ImageElement).dispose();
     }
-    else if(data is NativeArray){
-      (data as NativeArray).dispose();
+    else if(data is TypedDataList){
+      (data as TypedDataList).dispose();
     }
   }
 
@@ -51,7 +53,7 @@ class Source {
       return meta.images[uuid];
 		}
 
-		final output = {
+		final output = <String,dynamic>{
 			"uuid": uuid,
 			"url": ''
 		};

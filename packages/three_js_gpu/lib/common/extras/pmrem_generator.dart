@@ -644,18 +644,18 @@ class PMREMGenerator {
     final CUBEUV_MAX_MIP = float( lodMax );
 
     final materialUniforms = {
-      n,
-      latitudinal,
-      weights,
-      poleAxis,
-      outputDirection: _outputDirection,
-      dTheta,
-      samples,
-      envMap,
-      mipInt,
-      CUBEUV_TEXEL_WIDTH,
-      CUBEUV_TEXEL_HEIGHT,
-      CUBEUV_MAX_MIP
+      'n': n,
+      'latitudinal': latitudinal,
+      'weights': weights,
+      'poleAxis': poleAxis,
+      'outputDirection': _outputDirection,
+      'dTheta': dTheta,
+      'samples': samples,
+      'envMap': envMap,
+      'mipInt': mipInt,
+      'CUBEUV_TEXEL_WIDTH': CUBEUV_TEXEL_WIDTH,
+      'CUBEUV_TEXEL_HEIGHT': CUBEUV_TEXEL_HEIGHT,
+      'CUBEUV_MAX_MIP': CUBEUV_MAX_MIP
     };
 
     final material = _getMaterial( 'blur' );

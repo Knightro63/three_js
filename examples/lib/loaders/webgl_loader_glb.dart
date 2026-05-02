@@ -84,6 +84,7 @@ class _MyAppState extends State<WebglLoaderGlb> {
     three.GLTFData? result = await loader.fromAsset( 'dash.glb' );
 
     final object = result!.scene;
+    object.frustumCulled = false;
     threeJs.scene.add(object);
     mixer = three.AnimationMixer(object);
     mixer.clipAction(result.animations![4], null, null)!.play();

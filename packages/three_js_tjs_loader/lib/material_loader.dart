@@ -89,19 +89,52 @@ class MaterialLoader extends Loader {
 
     if (json["type"] == "MeshBasicMaterial") {
       material = MeshBasicMaterial();
-    } else if (json["type"] == "MeshLambertMaterial") {
+    } 
+    else if (json["type"] == "MeshLambertMaterial") {
       material = MeshLambertMaterial();
-    } else if (json["type"] == "MeshPhongMaterial") {
+    }
+    else if (json["type"] == "MeshDepthMaterial") {
+      material = MeshDepthMaterial();
+    }
+    else if (json["type"] == "MeshDistanceMaterial") {
+      material = MeshDistanceMaterial();
+    }
+    else if (json["type"] == "MeshPhongMaterial") {
       material = MeshPhongMaterial();
-    } else if (json["type"] == "MeshMatcapMaterial") {
+    } 
+    else if (json["type"] == "MeshMatcapMaterial") {
       material = MeshMatcapMaterial();
-    } else if (json["type"] == "MeshPhysicalMaterial") {
+    }
+    else if (json["type"] == "MeshGouraudMaterial") {
+      material = MeshGouraudMaterial();
+    } 
+    else if (json["type"] == "MeshNormalMaterial") {
+      material = MeshNormalMaterial();
+    } 
+    else if (json["type"] == "MeshStandardMaterial") {
+      material = MeshStandardMaterial();
+    } 
+    else if (json["type"] == "MeshPhysicalMaterial") {
       material = MeshPhysicalMaterial();
-    } else if (json["type"] == "HexTilingMaterial") {
+    } 
+    else if (json["type"] == "MeshToonMaterial") {
+      material = MeshToonMaterial();
+    } 
+    else if (json["type"] == "PointsMaterial") {
+      material = PointsMaterial();
+    } 
+    else if (json["type"] == "LineDashedMaterial") {
+      material = LineDashedMaterial();
+    } 
+    else if (json["type"] == "LineBasicMaterial") {
+      material = LineBasicMaterial();
+    } 
+    else if (json["type"] == "HexTilingMaterial") {
       material = HexTilingMaterial(
         HexTilingParams.fromJson(json['hexTiling'] ?? {}),
       );
-    } else if (json["type"] == "ProjectedMaterial") {
+    } 
+    else if (json["type"] == "ProjectedMaterial") {
       material = ProjectedMaterial.fromJson(json['projected']);
     } else {
       throw (" MaterialLoader ${json["type"]} is not support  ");

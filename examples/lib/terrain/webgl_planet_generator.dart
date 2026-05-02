@@ -3,7 +3,6 @@ import 'package:example/src/gui.dart';
 import 'package:flutter/material.dart';
 import 'package:example/src/statistics.dart';
 import 'package:three_js/three_js.dart' as three;
-import 'package:three_js_postprocessing/three_js_postprocessing.dart';
 import 'package:three_js_objects/three_js_objects.dart';
 
 class WebglPlanetGenerator extends StatefulWidget {
@@ -80,36 +79,27 @@ class _State extends State<WebglPlanetGenerator> {
     final controls = three.OrbitControls(threeJs.camera, threeJs.globalKey);
     threeJs.camera.position.z = 50;
 
-    final composer = EffectComposer(threeJs.renderer!);
-    final renderPass = RenderPass(threeJs.scene, threeJs.camera);
-    composer.addPass(renderPass);
-  
-    final bloomPass = UnrealBloomPass(null,0.0,0.2,0.5);
-    composer.addPass(bloomPass);
-
-    final outputPass = new OutputPass();
-    composer.addPass(outputPass);
-
     final texLoader = three.TextureLoader();
     final cloudTex = await texLoader.fromAsset('assets/textures/planet_generator/cloud.png');
 
-    PlanetGenerator planet = PlanetGenerator(cloudTexture: cloudTex);
+    PlanetGenerator planet = PlanetGenerator(
+      atmosphere: Atmosphere(cloudTexture: cloudTex)
+    );
     threeJs.scene.add(planet);
 
     threeJs.addAnimationEvent((dt) {
-      planet.atmosphere.material?.uniforms['time']['value'] = threeJs.clock.getElapsedTime();
-      planet.atmosphere.rotation.y += 0.0002;
+      planet.atmosphere?.material?.uniforms['time']['value'] += dt;
+      planet.atmosphere?.rotation.y += 0.0002;
       controls.update();
-      composer.render();
     });
 
-    createUI(planet, bloomPass);
+    createUI(planet);
   }
 
-  void createUI(PlanetGenerator planet,UnrealBloomPass bloomPass) {
+  void createUI(PlanetGenerator planet) {
     final planetParams = planet.planetParams.json;
-    final atmosphereParams = planet.atmosphereParams.json;
-    Atmosphere atmosphere = planet.atmosphere;
+    final atmosphereParams = planet.atmosphereParams?.json;
+    Atmosphere? atmosphere = planet.atmosphere;
 
     final terrainFolder = gui.addFolder('Terrain')..open();
     terrainFolder.onChange((name,value){
@@ -122,13 +112,13 @@ class _State extends State<WebglPlanetGenerator> {
       else{
         planet.material?.uniforms[name]['value'] = value;
       }
-      atmosphere.update();
+      atmosphere?.update(0.0);
     });
     terrainFolder.addDropDown(planetParams, 'type', ['1', '2', '3'])..name = 'Type';
-    terrainFolder.addSlider(planetParams, 'amplitude', 0.1, 1.5,0.1)..name ='Amplitude';
+    terrainFolder.addSlider(planetParams, 'amplitude', 0.01, 1.5,0.01)..name ='Amplitude';
     terrainFolder.addSlider(planetParams, 'sharpness', 0, 5,0.1)..name = 'Sharpness';
     terrainFolder.addSlider(planetParams, 'offset', -2, 2,0.1)..name = 'Offset';
-    terrainFolder.addSlider(planetParams, 'period', 0.1, 2,0.1)..name = 'Period';
+    terrainFolder.addSlider(planetParams, 'period', 0.1, 3,0.1)..name = 'Period';
     terrainFolder.addSlider(planetParams, 'persistence', 0, 1,0.1)..name = 'Persistence';
     terrainFolder.addSlider(planetParams, 'lacunarity', 1, 3,0.1)..name = 'Lacunarity';
     terrainFolder.addSlider(planetParams, 'octaves', 1, 10, 1)..name = 'Octaves';
@@ -192,34 +182,36 @@ class _State extends State<WebglPlanetGenerator> {
     layer5Folder.addSlider(planetParams, 'blend45', 0, 1, 0.1)..name = 'Blend Factor (4->5)';
     layer5Folder.addColor(planetParams, 'color5')..name = 'Color';
     
-    final atmosphereFolder = gui.addFolder('Atmosphere')..open()..onChange((name,value){
-      if(name == 'Atmosphere'){
-        planet.atmosphere.material?.uniforms['speed']['value'] = value;
-      }
-      else{
-        if(name == 'particles'||name == 'minParticleSize'||name == 'maxParticleSize'){
-          planet.atmosphere.material?.uniforms[name]['value'] = value.toInt();
+    if(planet.atmosphere != null){
+      final atmosphereFolder = gui.addFolder('Atmosphere')..open()..onChange((name,value){
+        if(name == 'Atmosphere'){
+          planet.atmosphere?.material?.uniforms['speed']['value'] = value;
         }
         else{
-          planet.atmosphere.material?.uniforms[name]['value'] = value;
+          if(name == 'particles'||name == 'minParticleSize'||name == 'maxParticleSize'){
+            planet.atmosphere?.material?.uniforms[name]['value'] = value.toInt();
+          }
+          else{
+            planet.atmosphere?.material?.uniforms[name]['value'] = value;
+          }
         }
-      }
-      atmosphere.update();
-    });
-    atmosphereFolder.addSlider(atmosphereParams, 'thickness', 0.1, 5, 0.1)..name = 'Thickness';
-    atmosphereFolder.addSlider(atmosphereParams, 'particles', 1, 50000, 1)..name = 'Particle Count';
-    atmosphereFolder.addSlider(atmosphereParams, 'minParticleSize', 0, 200)..name = 'Min Particle Size';
-    atmosphereFolder.addSlider(atmosphereParams, 'maxParticleSize', 0, 200)..name = 'Max Particle Size';
-    atmosphereFolder.addSlider(atmosphereParams, 'density', -2, 2, 0.1)..name = 'Density';
-    atmosphereFolder.addSlider(atmosphereParams, 'opacity', 0, 1, 0.1)..name = 'Opacity';
-    atmosphereFolder.addSlider(atmosphereParams, 'scale', 1, 30)..name = 'Scale';
-    atmosphereFolder.addSlider(atmosphereParams, 'speed', 0, 0.1, 0.001)..name = 'Speed';
+        atmosphere?.update(0.0);
+      });
+      atmosphereFolder.addSlider(atmosphereParams!, 'thickness', 0.1, 5, 0.1)..name = 'Thickness';
+      atmosphereFolder.addSlider(atmosphereParams, 'particles', 1, 50000, 1)..name = 'Particle Count';
+      atmosphereFolder.addSlider(atmosphereParams, 'minParticleSize', 0, 200)..name = 'Min Particle Size';
+      atmosphereFolder.addSlider(atmosphereParams, 'maxParticleSize', 0, 200)..name = 'Max Particle Size';
+      atmosphereFolder.addSlider(atmosphereParams, 'density', -2, 2, 0.1)..name = 'Density';
+      atmosphereFolder.addSlider(atmosphereParams, 'opacity', 0, 1, 0.1)..name = 'Opacity';
+      atmosphereFolder.addSlider(atmosphereParams, 'scale', 1, 30)..name = 'Scale';
+      atmosphereFolder.addSlider(atmosphereParams, 'speed', 0, 0.1, 0.001)..name = 'Speed';
 
-    final atmosphereColorFolder = gui.addFolder('Color')..open();
-    atmosphereColorFolder.addColor(atmosphereParams, 'color')..name = 'Color'..onChange((value){
-      planet.atmosphere.material?.uniforms['color']['value'] = three.Color.fromHex32(value);
-      atmosphere.update();
-    });
+      final atmosphereColorFolder = gui.addFolder('Color')..open();
+      atmosphereColorFolder.addColor(atmosphereParams, 'color')..name = 'Color'..onChange((value){
+        planet.atmosphere?.material?.uniforms['color']['value'] = three.Color.fromHex32(value);
+        atmosphere?.update(0.0);
+      });
+    }
 
     final lightingFolder = gui.addFolder('Lighting')..open();
     lightingFolder.onChange((name,value){
@@ -256,12 +248,7 @@ class _State extends State<WebglPlanetGenerator> {
         planet.material?.uniforms[name]['value'] = value;
       }
     });
-    bumpMapFolder.addSlider(planetParams, 'bumpStrength', 0, 1,0.1)..name = 'Bump Strength';
-    bumpMapFolder.addSlider(planetParams, 'bumpOffset', 0.0001, 0.1,0.0001)..name = 'Bump Offset';
-
-    // final bloomFolder = gui.addFolder('Bloom');
-    // bloomFolder.addSlider(bloomPass, 'threshold', 0, 1,0.1);
-    // bloomFolder.addSlider(bloomPass, 'strength', 0, 1,0.1);
-    // bloomFolder.addSlider(bloomPass, 'radius', 0, 2,0.1);
+    bumpMapFolder.addSlider(planetParams, 'bumpStrength', 0, 2,0.1)..name = 'Bump Strength';
+    bumpMapFolder.addSlider(planetParams, 'bumpOffset', 0.0, 0.1,0.0001)..name = 'Bump Offset';
   }
 }

@@ -1,4 +1,3 @@
-import 'package:flutter_angle/flutter_angle.dart';
 import 'package:uuid/uuid.dart';
 import 'dart:typed_data';
 import 'dart:math' as math;
@@ -7,8 +6,16 @@ final _floatView = Float32List(1);
 final _int32View = Int32List.view(_floatView.buffer);
 
 extension ListExtension on List{
-  void set<T>(List<T> newList, [int index = 0]) {
-   setAll(index, newList.sublist(0, math.min(newList.length, length)));
+  void dispose(){}
+  
+  dynamic set<T>(List<T> newList, [int index = 0]) {
+    this.setAll(index, newList.sublist(0, math.min(newList.length, length)));
+
+    return this;
+  }
+
+  dynamic copy<T>(List<T> newList){
+    return set(newList);
   }
 
   T? getMinValue<T extends num>() {
@@ -211,21 +218,21 @@ class MathUtils{
   /// @param {TypedArray} array - The typed array that defines the data type of the value.
   /// @return {number} The denormalize (float) value in the range `[0,1]`.
   ///
-  static double denormalize(num value, NativeArray array ) {
+  static double denormalize(num value, TypedData array ) {
     switch (array.runtimeType) {
-      case Float32Array:
+      case Float32List:
         return value*1.0;
-      case Uint32Array:
+      case Uint32List:
         return value / 4294967295.0;
-      case Uint16Array:
+      case Uint16List:
         return value / 65535.0;
-      case Uint8Array:
+      case Uint8List:
         return value / 255.0;
-      case Int32Array:
+      case Int32List:
         return math.max( value / 2147483647.0, - 1.0 );
-      case Int16Array:
+      case Int16List:
         return math.max( value / 32767.0, - 1.0 );
-      case Int8Array:
+      case Int8List:
         return math.max( value / 127.0, - 1.0 );
       default:
         throw( 'Invalid component type.' );
@@ -239,21 +246,21 @@ class MathUtils{
   /// @param {TypedArray} array - The typed array that defines the data type of the value.
   /// @return {number} The normalize value.
   ///
-  static double normalize( num value, NativeArray array ) {
+  static double normalize( num value, TypedData array ) {
     switch ( array.runtimeType ) {
-      case Float32Array:
+      case Float32List:
         return value.toDouble();
-      case Uint32Array:
+      case Uint32List:
         return ( value * 4294967295.0 ).roundToDouble();
-      case Uint16Array:
+      case Uint16List:
         return ( value * 65535.0 ).roundToDouble();
-      case Uint8Array:
+      case Uint8List:
         return ( value * 255.0 ).roundToDouble();
-      case Int32Array:
+      case Int32List:
         return ( value * 2147483647.0 ).roundToDouble();
-      case Int16Array:
+      case Int16List:
         return ( value * 32767.0 ).roundToDouble();
-      case Int8Array:
+      case Int8List:
         return ( value * 127.0 ).roundToDouble();
       default:
         throw( 'Invalid component type.' );

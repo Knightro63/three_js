@@ -44,7 +44,7 @@ class _MyAppState extends State<WebglCamera> {
   void dispose() {
     timer.cancel();
     threeJs.dispose();
-    threeJs.renderer!.setScissor( 0, 0, threeJs.width , threeJs.height);
+    threeJs.renderer?.setScissor( 0, 0, threeJs.width , threeJs.height);
     super.dispose();
 
     cameraPerspective.dispose();

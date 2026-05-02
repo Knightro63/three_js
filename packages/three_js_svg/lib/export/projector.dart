@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'dart:typed_data';
 import 'package:three_js_math/three_js_math.dart';
 import 'package:three_js_core/three_js_core.dart';
 
@@ -386,7 +387,7 @@ class Projector{
         Map<String,dynamic> attributes = geometry!.attributes;
         List<Map<String, dynamic>> groups = geometry.groups;
         if (attributes['position'] == null) continue;
-        NativeArray<double> positions = attributes['position'].array;
+        List<double> positions = attributes['position'].array;
         for(int i = 0; i < positions.length; i += 3) {
           double x = positions[i];
           double y = positions[i + 1];
@@ -418,28 +419,28 @@ class Projector{
         }
 
         if (attributes['normal'] != null){
-          NativeArray<double> normals = attributes['normal'].array;
-          this.normals += normals.toDartList();
+          List<double> normals = attributes['normal'].array;
+          this.normals += normals;
           // for (int i = 0; i < normals.length; i += 3) {
           //   pushNormal(normals[i],normals[i+1], normals[i+2]);
           // }
         }
         if ( attributes['color'] != null){
-          NativeArray<double> colors = attributes['color'].array;
-          this.colors += colors.toDartList();
+          List<double> colors = attributes['color'].array;
+          this.colors += colors;
           // for(int i = 0; i < colors.length; i += 3 ) {
           //   pushColor( colors[ i ], colors[ i + 1 ], colors[ i + 2 ] );
           // }
         }
         if(attributes['uv'] != null ) {
-          NativeArray<double> uvs = attributes['uv'].array;
-          this.uvs += uvs.toDartList();
+          List<double> uvs = attributes['uv'].array;
+          this.uvs += uvs;
           // for (int i = 0; i < uvs.length; i += 2 ) {
           //   pushUv( uvs[i], uvs[i + 1]);
           // }
         }
         if ( geometry.index != null){
-          NativeArray<num> indices = geometry.index!.array;
+          TypedDataList indices = geometry.index!.array;
           if(groups.isNotEmpty){
             for(int g = 0; g < groups.length; g++) {
               Map<String, dynamic> group = groups[g];
@@ -479,21 +480,21 @@ class Projector{
         Map<String, dynamic> attributes = geometry!.attributes;
 
         if(attributes['position'] != null){
-          NativeArray<num> positions = attributes['position'].array;
+          List<double> positions = attributes['position'].array;
           for ( int i = 0, l = positions.length; i < l; i += 3 ) {
             pushVertex( positions[i].toDouble(), positions[i + 1].toDouble(), positions[i + 2].toDouble());
           }
 
           if (attributes['color'] != null ) {
-            NativeArray<double> colors = attributes['color'].array;
+            List<double> colors = attributes['color'].array;
             // for (int i = 0, l = colors.length; i < l; i += 3 ) {
             //   pushColor( colors[ i ].toDouble(), colors[ i + 1 ].toDouble(), colors[ i + 2 ].toDouble());
             // }
-            this.colors += colors.toDartList();
+            this.colors += colors;
           }
 
           if (geometry.index != null){
-            NativeArray indices = geometry.index!.array;
+            TypedDataList indices = geometry.index!.array;
             for (int i = 0, l = indices.length; i < l; i += 2 ) {
               pushLine( indices[i], indices[ i + 1 ] );
             }
@@ -509,7 +510,7 @@ class Projector{
         _modelViewProjectionMatrix.multiply2( _viewProjectionMatrix, _modelMatrix );
         Map<String, dynamic> attributes = geometry!.attributes;
         if ( attributes['position'] != null ) {
-          NativeArray<num> positions = attributes['position'].array;
+          List<double> positions = attributes['position'].array;
           for ( int i = 0, l = positions.length; i < l; i += 3 ) {
             _vector4.setValues( positions[ i ].toDouble(), positions[ i + 1 ].toDouble(), positions[ i + 2 ].toDouble(), 1 );
             _vector4.applyMatrix4( _modelViewProjectionMatrix );

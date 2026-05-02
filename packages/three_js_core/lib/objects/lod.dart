@@ -23,7 +23,7 @@ final _v2 = Vector3.zero();
 ///   lod.addLevel( mesh, i * 75 );
 /// }
 //// 
-/// ∂scene.add( lod );
+/// scene.add( lod );
 /// ```
 /// 
 class LOD extends Object3D{

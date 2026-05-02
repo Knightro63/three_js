@@ -169,10 +169,10 @@ class _State extends State<Webgl2MultipleRendertargets> {
   Future<void> setup() async {
     // Create a multi render target with Float buffers
 
-    final renderTarget = three.WebGLRenderTarget(
+    final renderTarget = three.RenderTarget(
       (threeJs.width * threeJs.dpr).toInt(),
       (threeJs.height * threeJs.dpr).toInt(),
-      three.WebGLRenderTargetOptions({
+      three.RenderTargetOptions({
         'count': 2,
         'minFilter': three.NearestFilter,
         'magFilter': three.NearestFilter

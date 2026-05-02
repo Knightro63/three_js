@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:three_cad/src/cad/constraints.dart';
 import 'package:three_cad/src/cad/sketchTypes/sketch_point.dart';
 import 'package:three_cad/src/cad/sketchTypes/sketch_spline.dart';
@@ -228,7 +230,7 @@ enum DrawType{
     final geometry = BufferGeometry();
     geometry.setAttributeFromString(
       'position',
-      segments == 0?Float32BufferAttribute.fromList(position.storage+position.storage,3):Float32BufferAttribute( Float32Array( segments * 3 ), 3 )
+      segments == 0?Float32BufferAttribute.fromList(position.storage+position.storage,3):Float32BufferAttribute( Float32List( segments * 3 ), 3 )
     );
 
     return Line( geometry, matLine..color.setFromHex32(color))

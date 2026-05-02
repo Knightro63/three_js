@@ -64,7 +64,7 @@ class SimplifyModifier {
 
 		// add faces
 
-		BufferAttribute<NativeArray<num>>? index = geometry.getIndex();
+		BufferAttribute? index = geometry.getIndex();
 
 		if ( index != null ) {
 			for (int i = 0; i < index.count; i += 3 ) {

@@ -40,4 +40,10 @@ class MeshNormalMaterial extends Material {
 
     return this;
   }
+
+  /// Return a new material with the same parameters as this material.
+  @override
+  MeshNormalMaterial clone() {
+    return MeshNormalMaterial()..copy(this);
+  }
 }

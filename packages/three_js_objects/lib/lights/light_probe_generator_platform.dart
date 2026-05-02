@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'dart:typed_data';
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 
@@ -78,7 +79,7 @@ class LightProbeGenerator {
 		return LightProbe( sh );
 	}
 
-	static LightProbe fromCubeRenderTarget(WebGLRenderer renderer,WebGLCubeRenderTarget cubeRenderTarget ) {
+	static LightProbe fromCubeRenderTarget(Renderer renderer, CubeRenderTarget cubeRenderTarget ) {
 		// The renderTarget must be set to RGBA in order to make readRenderTargetPixels works
 		double totalWeight = 0;
 		final coord = Vector3();
@@ -93,14 +94,14 @@ class LightProbeGenerator {
 		for (int faceIndex = 0; faceIndex < 6; faceIndex ++ ) {
 			final imageWidth = cubeRenderTarget.width; // assumed to be square
 
-			NativeArray data;
+			TypedDataList data;
 
 			if ( dataType == HalfFloatType ) {
-				data = Uint16Array( imageWidth * imageWidth * 4 );
+				data = Uint16List( imageWidth * imageWidth * 4 );
 			} 
       else {
 				// assuming UnsignedByteType
-				data = Uint8Array( imageWidth * imageWidth * 4 );
+				data = Uint8List( imageWidth * imageWidth * 4 );
 			}
 
 			renderer.readRenderTargetPixels( cubeRenderTarget, 0, 0, imageWidth, imageWidth, data, faceIndex );

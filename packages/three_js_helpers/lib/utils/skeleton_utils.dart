@@ -487,7 +487,7 @@ class SkeletonUtils {
     });
 
     clone.traverse((node) {
-      if (!node.runtimeType.toString().contains("SkinnedMesh")) return;
+      if (node is!SkinnedMesh) return;
 
       final clonedMesh = node;
       final Object3D sourceMesh = sourceLookup[node];
@@ -500,9 +500,9 @@ class SkeletonUtils {
         return cloneLookup[bone];
       }).toList());
       
-      if(clonedMesh is SkinnedMesh){
+      //if(clonedMesh is SkinnedMesh){
         clonedMesh.bind(clonedMesh.skeleton!, clonedMesh.bindMatrix);
-      }
+      //}
     });
 
     return clone;

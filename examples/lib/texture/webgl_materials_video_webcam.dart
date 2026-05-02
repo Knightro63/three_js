@@ -24,7 +24,7 @@ class _State extends State<WebglMaterialsVideoWebcam> {
   bool loading = true;
   three.ThreeJS? threeJs;
   three.CanvasTexture? texture;
-  late three.Uint8Array image;
+  late Uint8List image;
   Size imageSize = const Size(640,480);
 
   @override
@@ -37,7 +37,7 @@ class _State extends State<WebglMaterialsVideoWebcam> {
       await camera.startLiveFeed((InputImage i){
         if(threeJs == null){
           imageSize = i.metadata!.size;
-          image = three.Uint8Array((imageSize.width*imageSize.height*4).toInt());
+          image = Uint8List((imageSize.width*imageSize.height*4).toInt());
           threeJs = three.ThreeJS(
             onSetupComplete: (){setState(() {});},
             setup: setup,

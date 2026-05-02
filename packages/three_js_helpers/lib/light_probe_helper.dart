@@ -90,7 +90,7 @@ class LightProbeHelper extends Mesh {
 
   @override
 	OnRender get onBeforeRender => ({
-    WebGLRenderer? renderer,
+    Renderer? renderer,
     RenderTarget? renderTarget,
     Object3D? mesh,
     Scene? scene,

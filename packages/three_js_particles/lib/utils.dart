@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:three_js/three_js.dart';
 import 'bezier.dart';
 import 'enums.dart';
@@ -211,7 +213,7 @@ class Utils{
   static CanvasTexture? createDefaultParticleTexture(){
     int width = 12;
     int height = 12;
-    Uint8Array rgbaData = Uint8Array(width * height * 4);
+    Uint8List rgbaData = Uint8List(width * height * 4);
     double radius = 6;
     double centerX = (width - 1) / 2;
     double centerY = (height - 1) / 2;

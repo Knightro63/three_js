@@ -146,7 +146,7 @@ class Lensflare extends Mesh {
 		final viewport = Vector4();
 
 		onBeforeRender = ({
-      WebGLRenderer? renderer,
+      Renderer? renderer,
       RenderTarget? renderTarget,
       Object3D? mesh,
       Scene? scene,

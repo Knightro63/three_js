@@ -7,15 +7,15 @@ class TAARenderPass extends SSAARenderPass {
   int sampleLevel = 0;
   bool accumulate = false;
   int accumulateIndex = - 1;
-  WebGLRenderTarget? _sampleRenderTarget;
-  WebGLRenderTarget? _holdRenderTarget;
+  RenderTarget? _sampleRenderTarget;
+  RenderTarget? _holdRenderTarget;
   late Map<String, dynamic> copyUniforms;
   Color _oldClearColor = Color(0, 0, 0);
 
 	TAARenderPass(super.scene, super.camera, [super.clearColor, super.clearAlpha ]);
 
   @override
-  void render(WebGLRenderer renderer, WebGLRenderTarget writeBuffer, WebGLRenderTarget readBuffer, {num? deltaTime, bool? maskActive}) {
+  void render(Renderer renderer, RenderTarget writeBuffer, RenderTarget readBuffer, {num? deltaTime, bool? maskActive}) {
 
 		if ( this.accumulate == false ) {
 			super.render( renderer, writeBuffer, readBuffer, deltaTime: deltaTime );
@@ -26,12 +26,12 @@ class TAARenderPass extends SSAARenderPass {
 		final jitterOffsets = _JitterVectors[ 5 ];
 
 		if ( this._sampleRenderTarget == null ) {
-			this._sampleRenderTarget = new WebGLRenderTarget( readBuffer.width, readBuffer.height, WebGLRenderTargetOptions({'type': HalfFloatType}));
+			this._sampleRenderTarget = new RenderTarget( readBuffer.width, readBuffer.height, RenderTargetOptions({'type': HalfFloatType}));
 			this._sampleRenderTarget?.texture.name = 'TAARenderPass.sample';
 		}
 
 		if ( this._holdRenderTarget == null ) {
-			this._holdRenderTarget = new WebGLRenderTarget( readBuffer.width, readBuffer.height, WebGLRenderTargetOptions({'type': HalfFloatType}));
+			this._holdRenderTarget = new RenderTarget( readBuffer.width, readBuffer.height, RenderTargetOptions({'type': HalfFloatType}));
 			this._holdRenderTarget?.texture.name = 'TAARenderPass.hold';
 		}
 

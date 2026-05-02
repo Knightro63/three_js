@@ -60,7 +60,7 @@ class _State extends State<WebglLightprobeCubeCamera> {
     threeJs.camera = three.PerspectiveCamera( 40, threeJs.width / threeJs.height, 1, 1000 );
     threeJs.camera.position.setValues( 0, 0, 30 );
 
-    final cubeRenderTarget = three.WebGLCubeRenderTarget( 256 );
+    final cubeRenderTarget = three.CubeRenderTarget( 256 );
     final cubeCamera = three.CubeCamera( 1, 1000, cubeRenderTarget );
 
     // controls

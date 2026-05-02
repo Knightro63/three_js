@@ -57,6 +57,7 @@ This is a dart conversion of three.js and three_dart, originally created by [@mr
  - WebGL2 supported. please add `<script src="https://cdn.jsdelivr.net/gh/Knightro63/flutter_angle/assets/gles_bindings.js"></script>` to your index.html to load the js_interop file.
 
 **Linux**
+ - Currenlty only works for flutter < 3.27
  - Ubuntu supported (Tested on Linux Mint)
  - OpenGL supported
 
@@ -68,6 +69,12 @@ Please use [Permission Handler](https://pub.dev/packages/permission_handler) pac
 ## Usage
 
 This project is a simple 3D rendering engine for flutter to view, edit, or manipulate 3D models.
+
+## Legacy
+
+Please use [three_js_webgl](https://pub.dev/packages/three_js_webgl) for three_dart type renderer. 
+
+As this project moves twards impeller renderer google's ANGLE will be removed and this version will be moved to three_js_angle, which currenly does not exists.
 
 ## Example
 

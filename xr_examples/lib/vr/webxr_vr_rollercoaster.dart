@@ -7,15 +7,6 @@ import 'package:three_js/three_js.dart' as three;
 import 'package:three_js_geometry/three_js_geometry.dart';
 import 'package:three_js_xr/three_js_xr.dart';
 
-extension on three.Vector3{
-  three.Float32Array toNativeArray(three.Float32Array array, [int offset = 0]) {
-    array[offset] = storage[0];
-    array[offset + 1] = storage[1];
-    array[offset + 2] = storage[2];
-    return array;
-  }
-}
-
 class WebXRVRRollercoaster extends StatefulWidget {
   const WebXRVRRollercoaster({super.key, required this.fullScreen});
   final void Function(bool) fullScreen;
@@ -127,7 +118,7 @@ class _State extends State<WebXRVRRollercoaster> {
       final distance = ( vertex.distanceTo( threeJs.scene.position ) / 5 ) - 25;
       vertex.y = math.Random().nextDouble() * math.max( 0, distance );
 
-      vertex.toNativeArray( positions, i );
+      vertex.copyFromUnknown( positions, i );
     }
 
     geometry.computeVertexNormals();

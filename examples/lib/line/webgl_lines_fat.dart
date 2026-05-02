@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 import 'package:example/src/geometry_utils.dart';
 import 'package:example/src/gui.dart';
 import 'package:flutter/material.dart';
@@ -106,8 +107,8 @@ class _State extends State<WebglLinesFat> {
     // Line2 ( LineGeometry, LineMaterial )
 
     final geometry = LineGeometry();
-    geometry.setPositions(three.Float32Array.fromList(positions));
-    geometry.setColors(three.Float32Array.fromList(colors));
+    geometry.setPositions(Float32List.fromList(positions));
+    geometry.setColors(Float32List.fromList(colors));
 
     matLine = LineMaterial.fromMap( {
       'color': 0xffffff,

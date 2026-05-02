@@ -68,7 +68,7 @@ class _State extends State<WebglBuffergeometryInstancingBillboards> {
 
     const particleCount = 75000;
 
-    final translateArray = three.Float32Array( particleCount * 3 );
+    final translateArray = Float32List( particleCount * 3 );
 
     for ( int i = 0, i3 = 0, l = particleCount; i < l; i ++, i3 += 3 ) {
       translateArray[ i3 + 0 ] = math.Random().nextDouble() * 2 - 1;

@@ -5,7 +5,7 @@ import 'reflector.dart';
 class Refractor extends Mesh {
   final bool isRefractor = true;
   RenderType renderType = RenderType.after;
-  late WebGLRenderTarget renderTarget;
+  late RenderTarget renderTarget;
   PerspectiveCamera camera = PerspectiveCamera();
 
 	Refractor(super.geometry, [Map<String,dynamic>? options] ) {
@@ -31,7 +31,7 @@ class Refractor extends Mesh {
 
 		// render target
 
-		renderTarget = WebGLRenderTarget( textureWidth, textureHeight, WebGLRenderTargetOptions({'samples': multisample, 'type': HalfFloatType}));
+		renderTarget = RenderTarget( textureWidth, textureHeight, RenderTargetOptions({'samples': multisample, 'type': HalfFloatType}));
 
 		// material
 
@@ -153,7 +153,7 @@ class Refractor extends Mesh {
 
 		//
 
-		void _render(WebGLRenderer renderer, Object3D scene, Camera camera ) {
+		void _render(Renderer renderer, Object3D scene, Camera camera ) {
 			scope.visible = false;
 
 			final currentRenderTarget = renderer.getRenderTarget();
@@ -182,7 +182,7 @@ class Refractor extends Mesh {
 			scope.visible = true;
 		}
 
-    void render(WebGLRenderer? renderer, Object3D? scene, Camera camera){
+    void render(Renderer? renderer, Object3D? scene, Camera camera){
 			if ( camera.userData['refractor'] == true ) return;
 			// avoid rendering when the refractor is viewed from behind
 			if ( !visible( camera ) == true ) return;
@@ -193,24 +193,24 @@ class Refractor extends Mesh {
 			_render( renderer!, scene!, camera );
    	};
 
-    onAfterRender = ({Camera? camera, BufferGeometry? geometry, Map<String, dynamic>? group, Material? material, Object3D? mesh, RenderTarget? renderTarget, WebGLRenderer? renderer, Scene? scene}){
+    onAfterRender = ({Camera? camera, BufferGeometry? geometry, Map<String, dynamic>? group, Material? material, Object3D? mesh, RenderTarget? renderTarget, Renderer? renderer, Scene? scene}){
       if(renderType == RenderType.after){
         render(renderer,scene,camera!);
       }
     };
-    onBeforeRender = ({Camera? camera, BufferGeometry? geometry, Map<String, dynamic>? group, Material? material, Object3D? mesh, RenderTarget? renderTarget, WebGLRenderer? renderer, Scene? scene}){
+    onBeforeRender = ({Camera? camera, BufferGeometry? geometry, Map<String, dynamic>? group, Material? material, Object3D? mesh, RenderTarget? renderTarget, Renderer? renderer, Scene? scene}){
       if(renderType == RenderType.before){
         render(renderer,scene,camera!);
       }
     };
-    customRender = ({Camera? camera, BufferGeometry? geometry, Map<String, dynamic>? group, Material? material, Object3D? mesh, RenderTarget? renderTarget, WebGLRenderer? renderer, Scene? scene}){
+    customRender = ({Camera? camera, BufferGeometry? geometry, Map<String, dynamic>? group, Material? material, Object3D? mesh, RenderTarget? renderTarget, Renderer? renderer, Scene? scene}){
       if(renderType == RenderType.custom){
         render(renderer,scene,camera!);
       }
     };
 	}
 
-  WebGLRenderTarget getRenderTarget() {
+  RenderTarget getRenderTarget() {
     return renderTarget;
   }
 

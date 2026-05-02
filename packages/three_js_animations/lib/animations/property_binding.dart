@@ -1,4 +1,5 @@
 import 'package:three_js_core/three_js_core.dart';
+import 'package:three_js_math/three_js_math.dart';
 import 'animation_object_group.dart';
 
 // Characters [].:/ are reserved for track binding syntax.
@@ -491,7 +492,7 @@ class PropertyBinding extends AnimationBinding{
     this.targetObject = targetObject;
 
     // if ( targetObject.needsUpdate != null ) { // material
-    if (targetObject.runtimeType.toString().endsWith("Material")) {
+    if (targetObject is Material) {
       versioning = Versioning.needsUpdate;
     } 
     else if (targetObject?.matrixWorldNeedsUpdate != null) {
@@ -536,7 +537,7 @@ class PropertyBinding extends AnimationBinding{
       this.propertyIndex = propertyIndex;
       // } else if ( nodeProperty.fromArray != null && nodeProperty.toArray != null ) {
     } 
-    else if (["Color", "Vector3", "Quaternion"].contains(nodeProperty.runtimeType.toString())) {
+    else if (nodeProperty is Color || nodeProperty is Vector3 || nodeProperty is Quaternion) {
       // must use copy for Object3D.Euler/Quaternion
       bindingType = BindingType.hasFromToArray;
       resolvedProperty = nodeProperty;

@@ -6,8 +6,8 @@ import "pass.dart";
 class AfterimagePass extends Pass {
   late Map<String, dynamic> shader;
   late ShaderMaterial shaderMaterial;
-  late WebGLRenderTarget textureComp;
-  late WebGLRenderTarget textureOld;
+  late RenderTarget textureComp;
+  late RenderTarget textureOld;
   late FullScreenQuad compFsQuad;
   late FullScreenQuad copyFsQuad;
 
@@ -18,19 +18,19 @@ class AfterimagePass extends Pass {
 
     uniforms['damp']["value"] = damp != null ? damp : 0.96;
 
-    textureComp = WebGLRenderTarget(
+    textureComp = RenderTarget(
         bufferSizeMap["width"],
         bufferSizeMap["height"],
-        WebGLRenderTargetOptions({
+        RenderTargetOptions({
           "minFilter": LinearFilter,
           "magFilter": NearestFilter,
           "format": RGBAFormat
         }));
 
-    textureOld = WebGLRenderTarget(
+    textureOld = RenderTarget(
         bufferSizeMap["width"],
         bufferSizeMap["height"],
-        WebGLRenderTargetOptions({
+        RenderTargetOptions({
           "minFilter": LinearFilter,
           "magFilter": NearestFilter,
           "format": RGBAFormat
@@ -48,7 +48,7 @@ class AfterimagePass extends Pass {
     copyFsQuad = FullScreenQuad(material);
   }
 
-  void render(WebGLRenderer renderer, WebGLRenderTarget writeBuffer, WebGLRenderTarget readBuffer,{double? deltaTime, bool? maskActive}) {
+  void render(Renderer renderer, RenderTarget writeBuffer, RenderTarget readBuffer,{double? deltaTime, bool? maskActive}) {
     uniforms['tOld']["value"] = textureOld.texture;
     uniforms['tNew']["value"] = readBuffer.texture;
 

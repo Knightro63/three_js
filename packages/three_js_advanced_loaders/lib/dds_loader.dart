@@ -157,10 +157,10 @@ class DDSLoader extends CompressedTextureLoader {
 			]);
 		}
 
-		Uint8Array loadARGBMip(ByteBuffer buffer, int dataOffset, int width, int height ) {
+		Uint8List loadARGBMip(ByteBuffer buffer, int dataOffset, int width, int height ) {
 			final dataLength = width * height * 4;
-			final srcBuffer = new Uint8Array.fromList( buffer.asUint8List(dataOffset, dataLength));
-			final byteArray = new Uint8Array( dataLength );
+			final srcBuffer = Uint8List.fromList( buffer.asUint8List(dataOffset, dataLength));
+			final byteArray = Uint8List( dataLength );
 			int dst = 0;
 			int src = 0;
 
@@ -177,14 +177,14 @@ class DDSLoader extends CompressedTextureLoader {
 				}
 			}
 
-      srcBuffer.dispose();
+      //srcBuffer.dispose();
 			return byteArray;
 		}
 
-		Uint8Array loadRGBMip(ByteBuffer buffer, int dataOffset, int width, int height ) {
+		Uint8List loadRGBMip(ByteBuffer buffer, int dataOffset, int width, int height ) {
 			final dataLength = width * height * 3;
-			final srcBuffer = new Uint8Array.fromList(buffer.asUint8List(dataOffset, dataLength));
-			final byteArray = new Uint8Array( width * height * 4 );
+			final srcBuffer = Uint8List.fromList(buffer.asUint8List(dataOffset, dataLength));
+			final byteArray = Uint8List( width * height * 4 );
 			int dst = 0;
 			int src = 0;
 
@@ -241,7 +241,7 @@ class DDSLoader extends CompressedTextureLoader {
 
 		// Parse header
 
-		final header = new Int32Array.fromList(buffer.asInt32List(0, headerLengthInt));
+		final header = new Int32List.fromList(buffer.asInt32List(0, headerLengthInt));
 
 		if ( header[ off_magic ] != DDS_MAGIC ) {
 			console.error( 'THREE.DDSLoader.parse: Invalid magic number in DDS header.' );
@@ -275,7 +275,7 @@ class DDSLoader extends CompressedTextureLoader {
 			}
 			else if(FOURCC_DX10 == fourCC){
 				dataOffset += extendedHeaderLengthInt * 4;
-				final extendedHeader = new Int32Array.fromList( buffer.asInt32List(( headerLengthInt + 1 ) * 4, extendedHeaderLengthInt));
+				final extendedHeader = new Int32List.fromList( buffer.asInt32List(( headerLengthInt + 1 ) * 4, extendedHeaderLengthInt));
 				final dxgiFormat = extendedHeader[ off_dxgiFormat ];
 
         if( DXGI_FORMAT_BC6H_SF16 == dxgiFormat){
@@ -351,7 +351,7 @@ class DDSLoader extends CompressedTextureLoader {
 			int height = dds.height;
 
 			for (int i = 0; i < dds.mipmapCount; i ++ ) {
-				NativeArray byteArray;
+				TypedDataList byteArray;
         int dataLength;
 
 				if ( isRGBAUncompressed ) {
@@ -364,7 +364,7 @@ class DDSLoader extends CompressedTextureLoader {
 				} 
         else {
 					dataLength = (math.max( 4, width ) / 4 * math.max( 4, height ) / 4 * blockBytes).toInt();
-					byteArray = new Uint8Array.fromList( buffer.asUint8List(dataOffset, dataLength));
+					byteArray = Uint8List.fromList( buffer.asUint8List(dataOffset, dataLength));
 				}
 
 				final mipmap = { 'data': byteArray, 'width': width, 'height': height };

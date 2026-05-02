@@ -23,7 +23,7 @@ class Pass {
 
   void setSize(int width, int height){}
 
-  void render(WebGLRenderer renderer, WebGLRenderTarget writeBuffer, WebGLRenderTarget readBuffer,{double? deltaTime, bool? maskActive}) {
+  void render(Renderer renderer, RenderTarget writeBuffer, RenderTarget readBuffer,{double? deltaTime, bool? maskActive}) {
     throw ('Pass: .render() must be implemented in derived pass.');
   }
 
@@ -49,7 +49,7 @@ class FullScreenQuad {
     _mesh.material = value;
   }
 
-  void render(WebGLRenderer renderer) {
+  void render(Renderer renderer) {
     renderer.render(_mesh, camera);
   }
 

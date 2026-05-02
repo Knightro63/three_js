@@ -23,7 +23,7 @@ class DotScreenPass extends Pass {
   }
 
   @override
-  void render(WebGLRenderer renderer, WebGLRenderTarget writeBuffer, WebGLRenderTarget readBuffer,{double? deltaTime, bool? maskActive}) {
+  void render(Renderer renderer, RenderTarget writeBuffer, RenderTarget readBuffer,{double? deltaTime, bool? maskActive}) {
     uniforms['tDiffuse']["value"] = readBuffer.texture;
     uniforms['tSize']["value"].set(readBuffer.width, readBuffer.height);
 

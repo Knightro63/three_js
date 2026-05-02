@@ -1,4 +1,3 @@
-import 'package:three_js_core/renderers/webgl/index.dart';
 import 'package:three_js_core/three_js_core.dart';
 import 'dart:math' as math;
 
@@ -143,7 +142,7 @@ class HexTilingMaterial extends MeshPhysicalMaterial {
   String get genRandomStringID => generateId()+generateId();
 
   HexTilingMaterial(this.hexTiling,[ Map<String,dynamic>? options]):super.fromMap(options){
-    type = "HexTilingMaterial";
+    //type = "HexTilingMaterial";
     if(hexTiling != null){
       patchMeshPhysicalMaterial();
       patchMaterial();
@@ -167,9 +166,9 @@ class HexTilingMaterial extends MeshPhysicalMaterial {
   }
 
   void patchMaterial(){
-    final shaderMap = new Map<String, WebGLParameters>();
+    final shaderMap = new Map<String, Parameters>();
 
-    this.onBeforeCompile = (WebGLParameters shader, WebGLRenderer renderer) {
+    this.onBeforeCompile = (Parameters shader, Renderer renderer) {
       final hexTilingID = genRandomStringID;
       this.hexTilingID = hexTilingID;
       shaderMap[hexTilingID] = shader;
@@ -186,7 +185,7 @@ class HexTilingMaterial extends MeshPhysicalMaterial {
     // internal ID used to match the shader to the material so that the custom uniforms can be updated
     // from the material
     this.onBeforeRender = (
-      WebGLRenderer? renderer,
+      Renderer? renderer,
       Scene? scene,
       Camera? camera,
       BufferGeometry? geometry,

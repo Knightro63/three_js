@@ -1,3 +1,8 @@
+## 0.3.0
+
+* Removed NativeArray for Zero-Allocation Updates.
+* Added: three_js_angle_renderer
+
 ## 0.2.8
 
 * Updated to the latest version of three_js apis

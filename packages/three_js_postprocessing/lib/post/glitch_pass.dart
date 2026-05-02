@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'package:three_js_postprocessing/post/index.dart';
@@ -34,7 +36,7 @@ class GlitchPass extends Pass {
     return low + (math.Random().nextDouble() * (high - low + 1)).floor();
   }
   @override
-  void render(renderer, writeBuffer, readBuffer,{double? deltaTime, bool? maskActive}) {
+  void render(Renderer renderer, RenderTarget writeBuffer, RenderTarget readBuffer,{double? deltaTime, bool? maskActive}) {
     uniforms['tDiffuse']["value"] = readBuffer.texture;
     uniforms['seed']["value"] = math.Random().nextDouble(); //default seeding
     uniforms['byp']["value"] = 0;
@@ -77,7 +79,7 @@ class GlitchPass extends Pass {
   }
 
   DataTexture generateHeightmap(int dtSize) {
-    final dataArr = Float32Array(dtSize * dtSize * 3);
+    final dataArr = Float32List(dtSize * dtSize * 3);
     final length = dtSize * dtSize;
 
     for (int i = 0; i < length; i++) {

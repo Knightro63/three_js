@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:typed_data';
 import 'package:example/src/statistics.dart';
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
@@ -156,7 +157,7 @@ class _MyAppState extends State<WebglMultiViews> {
     final geometry1 = IcosahedronGeometry( radius, 1 );
 
     final count = geometry1.attributes['position'].count;
-    geometry1.setAttributeFromString( 'color', three.Float32BufferAttribute( three.Float32Array( count * 3 ), 3 ) );
+    geometry1.setAttributeFromString( 'color', three.Float32BufferAttribute( Float32List( count * 3 ), 3 ) );
 
     final geometry2 = geometry1.clone();
     final geometry3 = geometry1.clone();

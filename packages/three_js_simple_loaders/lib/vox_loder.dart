@@ -274,7 +274,7 @@ class VOXData3DTexture extends Data3DTexture {
 		final offsety = size.x;
 		final offsetz = size.x * size.y;
 
-		final array = Uint8Array( (size.x * size.y * size.z).toInt() );
+		final array = Uint8List( (size.x * size.y * size.z).toInt() );
 
 		for (int j = 0; j < data!.length; j += 4 ) {
 			final x = data[ j + 0 ];

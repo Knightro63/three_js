@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:three_js_core/others/index.dart';
 
 import '../core/event_dispatcher.dart';
@@ -302,7 +303,7 @@ class Material with EventDispatcher {
   int? depthPacking;
   String? index0AttributeName;
   Map<String, dynamic>? extensions;
-  Map<String, dynamic>? defaultAttributeValues;
+  Map<String, Float32List>? defaultAttributeValues;
 
   bool? lights;
   bool? clipping;
@@ -471,7 +472,7 @@ class Material with EventDispatcher {
     } else if (key == "dithering") {
       dithering = newValue;
     } else if (key == "emissive") {
-      if (newValue.runtimeType == Color) {
+      if (newValue is Color) {
         emissive = newValue;
       } else {
         emissive = Color.fromHex32(newValue);
@@ -644,6 +645,12 @@ class Material with EventDispatcher {
     }
     else if (key == 'emissiveIntensity') {
       emissiveIntensity = newValue.toDouble();
+    }
+    else if (key == 'specularIntensityMap') {
+      specularIntensityMap = newValue;
+    }
+    else if (key == 'clearcoatMap') {
+      clearcoatMap = newValue;
     }
     else {
       console.error("Material.setValues key: $key newValue: $newValue is not support");

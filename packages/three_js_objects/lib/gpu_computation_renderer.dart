@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 
@@ -112,13 +114,13 @@ class GPUComputationRenderer {
   late void Function(Material,RenderTarget) doRenderTarget;
   late void Function(Texture,RenderTarget) renderTexture;
   late DataTexture Function() createTexture;
-  late WebGLRenderTarget Function(dynamic,dynamic,dynamic,dynamic,dynamic,dynamic) createRenderTarget;
+  late RenderTarget Function(dynamic,dynamic,dynamic,dynamic,dynamic,dynamic) createRenderTarget;
   late void Function(Map<String,dynamic>,dynamic) setVariableDependencies;
-  late WebGLRenderTarget Function(Map<String,dynamic>) getCurrentRenderTarget;
-  late WebGLRenderTarget Function(Map<String,dynamic>) getAlternateRenderTarget;
+  late RenderTarget Function(Map<String,dynamic>) getCurrentRenderTarget;
+  late RenderTarget Function(Map<String,dynamic>) getAlternateRenderTarget;
   late void Function(dynamic) addResolutionDefine;
 
-	GPUComputationRenderer(int sizeX, int sizeY, WebGLRenderer renderer ) {
+	GPUComputationRenderer(int sizeX, int sizeY, Renderer renderer ) {
 		int dataType = FloatType;
 		camera.position.z = 1;
 
@@ -312,7 +314,7 @@ class GPUComputationRenderer {
 			minFilter = minFilter ?? NearestFilter;
 			magFilter = magFilter ?? NearestFilter;
 
-			final renderTarget = WebGLRenderTarget( sizeXTexture, sizeYTexture, WebGLRenderTargetOptions({
+			final renderTarget = RenderTarget( sizeXTexture, sizeYTexture, RenderTargetOptions({
 				'wrapS': wrapS,
 				'wrapT': wrapT,
 				'minFilter': minFilter,
@@ -326,7 +328,7 @@ class GPUComputationRenderer {
 		};
 
 		createTexture = () {
-			final data = Float32Array( sizeX * sizeY * 4 );
+			final data = Float32List( sizeX * sizeY * 4 );
 			final texture = DataTexture( data, sizeX, sizeY, RGBAFormat, FloatType );
 			texture.needsUpdate = true;
 			return texture;

@@ -231,7 +231,7 @@ class RenderObject {
 		final nodeAttributes = this.getNodeBuilderState().nodeAttributes;
 		final geometry = this.geometry;
 
-		final List<BufferAttribute<NativeArray<num>>> attributes = [];
+		final List<BufferAttribute> attributes = [];
 		final vertexBuffers = new Set();
 
 		final attributesId = {};

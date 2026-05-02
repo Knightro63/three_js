@@ -63,11 +63,11 @@ class KeyframeTrack {
   /// [name] - the identifier for the `KeyframeTrack`.
   /// 
   /// [times] - an array of keyframe times, converted internally to a
-  /// [Float32Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Float32Array).
+  /// [Float32List](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Float32List).
   /// 
   /// [values] - an array with the values related to the times array,
   /// converted internally to a
-  /// [Float32Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Float32Array ).
+  /// [Float32List](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Float32List ).
   /// 
   /// [interpolation] - the type of interpolation to use. See [Constants] for possible values. Default is [InterpolateLinear].
   KeyframeTrack(this.name,List<num> times,List<num> values, [int? interpolation]) {
@@ -115,7 +115,7 @@ class KeyframeTrack {
 
   /// Creates a new [DiscreteInterpolant] from the
   /// [times] and [values]. A
-  /// Float32Array can be passed which will receive the results. Otherwise a new
+  /// Float32List can be passed which will receive the results. Otherwise a new
   /// array with the appropriate size will be created automatically.
   Interpolant? interpolantFactoryMethodDiscrete(result) {
     return DiscreteInterpolant(
@@ -128,7 +128,7 @@ class KeyframeTrack {
 
   /// Creates a new [LinearInterpolant] from the
   /// [times] and [values]. A
-  /// Float32Array can be passed which will receive the results. Otherwise a new
+  /// Float32List can be passed which will receive the results. Otherwise a new
   /// array with the appropriate size will be created automatically.
   Interpolant? interpolantFactoryMethodLinear(result) {
     return LinearInterpolant(
@@ -141,7 +141,7 @@ class KeyframeTrack {
 
   /// Create a new [CubicInterpolant] from the
   /// [times] and [values]. A
-  /// Float32Array can be passed which will receive the results. Otherwise a new
+  /// Float32List can be passed which will receive the results. Otherwise a new
   /// array with the appropriate size will be created automatically.
   Interpolant? interpolantFactoryMethodSmooth(result) {
     return CubicInterpolant(times, values, getValueSize(), result);

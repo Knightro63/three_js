@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'line_material.dart';
 import 'line_segments_geometry.dart';
 import 'package:three_js_core/three_js_core.dart';
@@ -26,7 +28,7 @@ class Wireframe extends Mesh {
 
 		final instanceStart = geometry.attributes['instanceStart'];
 		final instanceEnd = geometry.attributes['instanceEnd'];
-		final lineDistances = Float32Array( (2 * instanceStart.count).toInt() );
+		final lineDistances = Float32List( (2 * instanceStart.count).toInt() );
 
 		for (int i = 0, j = 0, l = instanceStart.count; i < l; i ++, j += 2 ) {
 			_start.fromBuffer( instanceStart, i );

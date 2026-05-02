@@ -159,7 +159,7 @@ class ViewHelper extends Object3D {
       _scissorPos.y = _viewport.w/2-screenSize.height+oy;
     }
   }
-  void render(WebGLRenderer renderer) {
+  void render(Renderer renderer) {
     quaternion.setFrom( camera.quaternion ).invert();
     updateMatrixWorld();
 

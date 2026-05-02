@@ -1,26 +1,43 @@
+import 'dart:typed_data';
+
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 import './shaders/index.dart';
 import 'dart:math' as math;
 
 class AtmosphereParameters{
-  int particles;
-  int minParticleSize;
-  int maxParticleSize;
-  double radius;
-  double thickness;
-  double density;
-  double opacity;
-  double scale;
+  late int particles;
+  late int minParticleSize;
+  late int maxParticleSize;
+  late double radius;
+  late double thickness;
+  late double density;
+  late double opacity;
+  late double scale;
   late Color color;
-  double speed;
+  late double speed;
   late Vector3 lightDirection;
+
+  AtmosphereParameters.fromMap([Map<String,dynamic>? map]){
+    map = map ?? {};
+    particles = map['particles'] ?? 4000;
+    minParticleSize = map['minParticleSize'] ?? 50;
+    maxParticleSize = map['maxParticleSize'] ?? 100;
+    radius = map['radius'] ?? 0.0;
+    thickness = map['thickness'] ?? 1.5;
+    density = map['density'] ?? 0.0;
+    opacity = map['opacity'] ?? 0.35;
+    scale = map['scale'] ?? 8.0;
+    color = map['color'] != null ? Color.fromHex32(map['color']) : Color.fromHex32(0xffffff);
+    speed = map['speed'] ?? 0.03;
+    lightDirection = map['lightDirection'] != null ? Vector3(map['lightDirection'][0], map['lightDirection'][1], map['lightDirection'][2]) : Vector3(1,1,1);
+  }
 
   AtmosphereParameters({
     this.particles = 4000,
     this.minParticleSize = 50,
     this.maxParticleSize = 100,
-    this.radius = 21.0,
+    this.radius = 0.0,
     this.thickness = 1.5,
     this.density = 0,
     this.opacity = 0.35,
@@ -102,14 +119,22 @@ class AtmosphereParameters{
 }
 
 class Atmosphere extends Points {
-  final AtmosphereParameters atmosphereParams;
+  late final AtmosphereParameters atmosphereParams;
   
-  Atmosphere(this.atmosphereParams, [Texture? cloudTexture]):super(null,null){
-    this.material = ShaderMaterial.fromMap({
+  Atmosphere._(super.geometry, super.material, this.atmosphereParams, int renderOrder){
+    this.renderOrder = renderOrder;
+  }
+
+  factory Atmosphere({AtmosphereParameters? atmosphereParams, Texture? cloudTexture, int renderOrder = 2}){
+    atmosphereParams ??= AtmosphereParameters();
+
+    final material = ShaderMaterial.fromMap({
       'uniforms': {
         'time': { 'value': 0.0 },
         'pointTexture': { 'value': cloudTexture },
-        ...this.atmosphereParams.uniforms
+        'radius': { 'value': atmosphereParams.radius },
+        'thickness': { 'value': atmosphereParams.thickness },
+        ...atmosphereParams.uniforms
       },
       'vertexShader': atosphereVertexShader,
       'fragmentShader': atmosphereFragmentShader.replaceAll(
@@ -117,37 +142,28 @@ class Atmosphere extends Points {
         '''${noiseFunctions}
          void main() {'''
       ),
-      'blending': NormalBlending,
       'depthWrite': false,
-      'transparent': true
+      'transparent': true,
+      'blending': AdditiveBlending,
     });
+    material.polygonOffset = true;
+    material.polygonOffsetFactor = -1.0;
+    material.polygonOffsetUnits = -4.0;
 
-    update();
-  }
-
-  void update(){
-    if (this.geometry != null) {
-      this.geometry?.dispose();
-      this.geometry = null;
-    }
-
-    final geometry = BufferGeometry();
     
-    final verts = <double>[];
-    final uvs = <double>[];
-    final sizes = <double>[];
-    
-    // Sample points within the atmosphere
-    for(int i = 0; i < atmosphereParams.particles; i++) {
-      double r = math.Random().nextDouble() * atmosphereParams.thickness + atmosphereParams.radius;
+    final int count = atmosphereParams.particles;
+    final Float32List combinedData = Float32List(count * 6);
+    final random = math.Random();
+    for(int i = 0; i < count; i++) {
+      double r = random.nextDouble() * atmosphereParams.thickness + atmosphereParams.radius;
 
       // Pick a random point within a cube of size [-1, 1]
       // This approach works better than parameterizing the spherical coordinates
       // since it doesn't have the issue of particles being bunched at the poles
       final p = Vector3(
-        2 * math.Random().nextDouble() - 1,
-        2 * math.Random().nextDouble() - 1,
-        2 * math.Random().nextDouble() - 1
+        2 * random.nextDouble() - 1,
+        2 * random.nextDouble() - 1,
+        2 * random.nextDouble() - 1
       );
 
       // Project onto the surface of a sphere
@@ -156,17 +172,24 @@ class Atmosphere extends Points {
 
       final minSize = atmosphereParams.minParticleSize;
       final maxSize = atmosphereParams.maxParticleSize;
-      final size = math.Random().nextDouble() * (maxSize - minSize) + minSize;
+      final size = random.nextDouble() * (maxSize - minSize) + minSize;
 
-      verts.addAll([p.x, p.y, p.z]);
-      uvs.addAll([0.5, 0.5]);
-      sizes.add(size);
+      combinedData.setAll(i * 4, [p.x, p.y, p.z, size]);
     }
 
-    geometry.setAttributeFromString('position', Float32BufferAttribute.fromList(verts, 3));
-    geometry.setAttributeFromString('uv', Float32BufferAttribute.fromList(uvs, 2));
-    geometry.setAttributeFromString('size', Float32BufferAttribute.fromList(sizes, 1));
+    final geometry = BufferGeometry();
+    final interleavedBuffer = InterleavedBuffer(combinedData, 4);
 
-    this.geometry = geometry;
+    geometry.setAttributeFromString('position', InterleavedBufferAttribute(interleavedBuffer, 3, 0));
+    geometry.setAttributeFromString('size', InterleavedBufferAttribute(interleavedBuffer, 1, 3));   
+
+    geometry.computeBoundingSphere();
+    geometry.computeBoundingBox();
+
+    return Atmosphere._(geometry, material, atmosphereParams, renderOrder);
+  }
+
+  void update(double dt){
+    material?.uniforms['time']['value'] += dt;
   }
 }

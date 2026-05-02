@@ -5,13 +5,13 @@ import 'package:three_js_postprocessing/post/index.dart';
 import 'package:three_js_postprocessing/shaders/copy_shader.dart';
 
 class EffectComposer {
-  late WebGLRenderer renderer;
-  late WebGLRenderTarget renderTarget1;
-  late WebGLRenderTarget renderTarget2;
+  late Renderer renderer;
+  late RenderTarget renderTarget1;
+  late RenderTarget renderTarget2;
 
-  late WebGLRenderTarget writeBuffer;
-  late WebGLRenderTarget readBuffer;
-  final FlutterAngleTexture? texture;
+  late RenderTarget writeBuffer;
+  late RenderTarget readBuffer;
+  final dynamic texture;
 
   bool renderToScreen = true;
 
@@ -25,7 +25,7 @@ class EffectComposer {
 
   late Pass copyPass;
 
-  EffectComposer(this.renderer, [WebGLRenderTarget? renderTarget, this.texture]) {
+  EffectComposer(this.renderer, [RenderTarget? renderTarget, this.texture]) {
     _pixelRatio = renderer.getPixelRatio();
 
     if (renderTarget == null) {
@@ -38,10 +38,10 @@ class EffectComposer {
       _width = size.width;
       _height = size.height;
 
-      renderTarget = WebGLRenderTarget(
+      renderTarget = RenderTarget(
         (_width * _pixelRatio).toInt(),
         (_height * _pixelRatio).toInt(),
-        WebGLRenderTargetOptions(parameters)
+        RenderTargetOptions(parameters)
       );
 
       renderTarget.texture.name = 'EffectComposer.rt1';
@@ -156,7 +156,7 @@ class EffectComposer {
     renderer.setRenderTarget(currentRenderTarget);
   }
 
-  void reset([WebGLRenderTarget? renderTarget]) {
+  void reset([RenderTarget? renderTarget]) {
     if (renderTarget == null) {
       final size = renderer.getSize(Vector2());
       _pixelRatio = renderer.getPixelRatio();

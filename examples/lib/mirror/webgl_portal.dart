@@ -97,14 +97,14 @@ class _State extends State<WebglPortal> {
     final topLeftCorner = three.Vector3();
     final reflectedPosition = three.Vector3();
 
-    final leftPortalTexture = three.WebGLRenderTarget( 256, 256 );
+    final leftPortalTexture = three.RenderTarget( 256, 256 );
     final leftPortal = three.Mesh( planeGeo, three.MeshBasicMaterial.fromMap( { 'map': leftPortalTexture.texture } ) );
     leftPortal.position.x = - 30;
     leftPortal.position.y = 20;
     leftPortal.scale.setValues( 0.35, 0.35, 0.35 );
     threeJs.scene.add( leftPortal );
 
-    final rightPortalTexture = three.WebGLRenderTarget( 256, 256 );
+    final rightPortalTexture = three.RenderTarget( 256, 256 );
     final rightPortal = three.Mesh( planeGeo, three.MeshBasicMaterial.fromMap( { 'map': rightPortalTexture.texture } ) );
     rightPortal.position.x = 30;
     rightPortal.position.y = 20;
@@ -162,7 +162,7 @@ class _State extends State<WebglPortal> {
     blueLight.position.setValues( 0, 50, 550 );
     threeJs.scene.add( blueLight );
 
-    void renderPortal(three.Mesh thisPortalMesh,three.Mesh otherPortalMesh,three.WebGLRenderTarget thisPortalTexture ) {
+    void renderPortal(three.Mesh thisPortalMesh,three.Mesh otherPortalMesh,three.RenderTarget thisPortalTexture ) {
       thisPortalMesh.worldToLocal( reflectedPosition.setFrom( threeJs.camera.position ) );
       reflectedPosition.x *= - 1.0; reflectedPosition.z *= - 1.0;
       otherPortalMesh.localToWorld( reflectedPosition );

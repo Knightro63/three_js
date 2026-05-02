@@ -179,7 +179,6 @@ class PositionalAudio extends Object3D {
   }
 
   void setVolume(double volume) {
-    print(volume);
     audioSource.setVolume(volume);
   }
 

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:typed_data';
 import 'package:example/src/statistics.dart';
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
@@ -153,7 +154,7 @@ class _State extends State<WebglShadowmapPointlight> {
     return three.ImageElement(
       width: 2,
       height: 2,
-      data: three.Uint8Array.fromList([0,0,0,0,0,0,0,0,255,255,255,255,255,255,255,255])
+      data: Uint8List.fromList([0,0,0,0,0,0,0,0,255,255,255,255,255,255,255,255])
     );
   }
 }

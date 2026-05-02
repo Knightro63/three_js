@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:three_js_core/renderers/webgl/index.dart';
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'dart:math' as math;
@@ -542,7 +541,7 @@ class Terrain{
     );
 
     // Assign elevation data to the terrain plane from a heightmap or function.
-    final zs = toArray1D(mesh.geometry!.attributes['position'].array.toDartList());
+    final zs = toArray1D(mesh.geometry!.attributes['position'].array);
     if (options.heightmap is Uint8List) {
       fromHeightmap(zs, options);
     }
@@ -550,10 +549,10 @@ class Terrain{
       options.heightmap(zs, options);
     }
     else {
-      console.warning('An invalid value was passed for `options.heightmap`: ${options.heightmap.runtimeType}');
+      console.warning('An invalid value was passed for `options.heightmap`: ${options.heightmap}');
     }
 
-    fromArray1D(mesh.geometry!.attributes['position'].array.toDartList(), zs);
+    fromArray1D(mesh.geometry!.attributes['position'].array, zs);
     normalize(mesh, options);
 
     // lod.addLevel(mesh, options.unit*10*Math.pow(2, lodLevel));
@@ -576,7 +575,7 @@ class Terrain{
   ///   displayed. Valid options are the same as for {@link Terrain}().
   /// 
   static void normalize(Object3D mesh, TerrainOptions options) {
-    final zs = toArray1D(mesh.geometry!.attributes['position'].array.toDartList());
+    final zs = toArray1D(mesh.geometry!.attributes['position'].array);
     if (options.turbulent) {
       turbulence(zs, options);
     }
@@ -590,7 +589,7 @@ class Terrain{
 
     // Call the "after" callback
     options.after?.call(zs, options);
-    fromArray1D(mesh.geometry!.attributes['position'].array.toDartList(), zs);
+    fromArray1D(mesh.geometry!.attributes['position'].array, zs);
 
     // Mark the geometry as having changed and needing updates.
     mesh.geometry?.computeBoundingSphere();
@@ -1577,7 +1576,7 @@ class Terrain{
       hexOnBeforeCompile = mat.onBeforeCompile;
     }
 
-    mat.onBeforeCompile = (WebGLParameters shader, WebGLRenderer renderer) {
+    mat.onBeforeCompile = (shader, renderer) {
       hexOnBeforeCompile?.call(shader, renderer);
       // Patch vertexShader to setup MyUv, vPosition, and myNormal
       shader.vertexShader = shader.vertexShader.replaceAll('#include <common>',

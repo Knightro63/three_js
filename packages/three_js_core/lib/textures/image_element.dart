@@ -1,5 +1,3 @@
-import 'package:three_js_math/three_js_math.dart';
-
 class ImageElement {
   String? uuid;
   dynamic url;
@@ -8,7 +6,7 @@ class ImageElement {
   String? src;
   bool complete = true;
 
-  // NativeArray or ImageElement
+  // TypedeData or ImageElement
   dynamic data;
   int depth;
 
@@ -21,17 +19,13 @@ class ImageElement {
     this.depth = 0,
   });
 
-  void dispose() {
-    if(data is NativeArray){
-      data?.dispose();
-    }
-  }
+  void dispose() {}
 
   @override
   String toString(){
     return {
       'uuid': uuid,
-      'widht': width,
+      'width': width,
       'height': height,
       'src': src,
       'complete': complete,

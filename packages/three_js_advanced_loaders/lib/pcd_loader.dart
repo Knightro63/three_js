@@ -406,9 +406,9 @@ class PCDLoader extends Loader {
 					if ( rgb_type == 'F' ) {
 						// treat float values as int
 						// https://github.com/daavoo/pyntcloud/pull/204/commits/7b4205e64d5ed09abe708b2e91b615690c24d518
-						final farr = new Float32Array( 1 );
+						final farr = new Float32List( 1 );
 						farr[ 0 ] = float;
-						rgb = new Int32Array.fromList( farr.toDartList().buffer.asInt32List() )[ 0 ];
+						rgb = new Int32List.fromList( farr.buffer.asInt32List() )[ 0 ];
 					}
 
 					final r = ( ( rgb >> 16 ) & 0x0000ff ) / 255;

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
@@ -7,8 +8,8 @@ import 'package:three_js_postprocessing/shaders/smaa_shader.dart';
 import 'pass.dart';
 
 class SMAAPass extends Pass {
-  late WebGLRenderTarget edgesRT;
-  late WebGLRenderTarget weightsRT;
+  late RenderTarget edgesRT;
+  late RenderTarget weightsRT;
   late Texture searchTexture;
   late Texture areaTexture;
   late Map<String, dynamic> uniformsEdges;
@@ -20,16 +21,16 @@ class SMAAPass extends Pass {
 
 	SMAAPass() : super() {
 		// render targets
-		this.edgesRT = new WebGLRenderTarget( 1, 1, 
-      WebGLRenderTargetOptions({
+		this.edgesRT = new RenderTarget( 1, 1, 
+      RenderTargetOptions({
         "depthBuffer": false,
         'type': HalfFloatType
       }) 
     );
 		this.edgesRT.texture.name = 'SMAAPass.edges';
 
-		this.weightsRT = new WebGLRenderTarget( 1, 1, 
-      WebGLRenderTargetOptions({
+		this.weightsRT = new RenderTarget( 1, 1, 
+      RenderTargetOptions({
         "depthBuffer": false,
         'type': HalfFloatType
       })
@@ -38,7 +39,7 @@ class SMAAPass extends Pass {
 
 
 		// final areaTextureImage = ImageElement(
-    //   data: Uint8Array.fromList(base64Decode(this.getAreaTexture().split(',').last)),
+    //   data: Uint8List.fromList(base64Decode(this.getAreaTexture().split(',').last)),
     //   width: 256,
     //   height: 256
     // );
@@ -52,7 +53,7 @@ class SMAAPass extends Pass {
     this.areaTexture.needsUpdate = true;
 
 		final searchTextureImage = ImageElement(
-      data: Uint8Array.fromList(base64Decode(this.getSearchTexture().split(',').last)),
+      data: Uint8List.fromList(base64Decode(this.getSearchTexture().split(',').last)),
       width: 256,
       height: 256
     );    
@@ -105,7 +106,7 @@ class SMAAPass extends Pass {
 		this.fsQuad = new FullScreenQuad();
 	}
 
-	void render(WebGLRenderer renderer, WebGLRenderTarget writeBuffer, WebGLRenderTarget readBuffer, {num? deltaTime, bool? maskActive}) {
+	void render(Renderer renderer, RenderTarget writeBuffer, RenderTarget readBuffer, {num? deltaTime, bool? maskActive}) {
 
 		// pass 1
 

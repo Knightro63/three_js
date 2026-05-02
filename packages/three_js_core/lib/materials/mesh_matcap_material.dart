@@ -86,4 +86,10 @@ class MeshMatcapMaterial extends Material {
 
     return this;
   }
+
+    /// Return a new material with the same parameters as this material.
+  @override
+  MeshMatcapMaterial clone() {
+    return MeshMatcapMaterial()..copy(this);
+  }
 }

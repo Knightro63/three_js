@@ -1,9 +1,9 @@
 import 'package:flutter/foundation.dart';
+import 'package:three_js_core/cameras/index.dart';
 
 import '../core/index.dart';
 import 'package:three_js_math/three_js_math.dart';
 import '../renderers/index.dart';
-import 'perspective_camera.dart';
 
 /// Creates 6 cameras that render to a [page:WebGLCubeRenderTarget].
 /// 
@@ -29,9 +29,9 @@ import 'perspective_camera.dart';
 /// car.visible = true;
 /// renderer.render( scene, camera );
 /// ```
-class CubeCamera extends Object3D {
+class CubeCamera extends Camera {
   /// The destination cube render target.
-  late WebGLCubeRenderTarget renderTarget;
+  late CubeRenderTarget renderTarget;
 
   late PerspectiveCamera cameraPX;
   late PerspectiveCamera cameraNX;
@@ -88,7 +88,7 @@ class CubeCamera extends Object3D {
 	/// [scene]: The current scene
   /// 
   /// Call this to update the [renderTarget].
-  void update(WebGLRenderer renderer, Object3D scene) {
+  void update(Renderer renderer, Object3D scene) {
     if (parent == null) updateMatrixWorld(false);
 
     final currentRenderTarget = renderer.getRenderTarget();

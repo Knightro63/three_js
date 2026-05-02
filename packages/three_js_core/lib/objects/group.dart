@@ -30,4 +30,18 @@ class Group extends Object3D {
   Group.fromJson(Map<String, dynamic> json, Map<String, dynamic> rootJson):super.fromJson(json, rootJson) {
     type = 'Group';
   }
+
+  @override
+  Group clone ([bool? recursive = true]) {
+    return Group()..copy(this, recursive);
+  }
+
+  @override
+  Group copy(Object3D source, [bool? recursive]) {
+    super.copy(source, recursive);
+    if(source is Group) {
+      this.userData = Map<String, dynamic>.from(source.userData);
+    }
+    return this;
+  }
 }

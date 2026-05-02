@@ -273,9 +273,9 @@ class USDZLoader extends Loader {
 		}
 
 		Float32BufferAttribute toFlatBufferAttribute(Float32BufferAttribute attribute, List<int> indices ) {
-			final Float32Array array = attribute.array;
+			final Float32List array = attribute.array;
 			final itemSize = attribute.itemSize;
-			late final Float32Array array2 = Float32Array(indices.length * itemSize);//array.constructor( indices.length * itemSize );
+			late final Float32List array2 = Float32List(indices.length * itemSize);//array.constructor( indices.length * itemSize );
 
 			int index = 0, index2 = 0;
 			for ( int i = 0, l = indices.length; i < l; i ++ ) {

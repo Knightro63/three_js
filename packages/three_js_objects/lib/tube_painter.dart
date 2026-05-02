@@ -1,6 +1,7 @@
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'dart:math' as math;
+import 'dart:typed_data';
 
 class TubePainter{
 	int BUFFER_SIZE = 1000000 * 3;
@@ -30,13 +31,13 @@ class TubePainter{
 	final matrix2 = new Matrix4();
 
   TubePainter(){
-    positions = Float32BufferAttribute( new Float32Array( BUFFER_SIZE ), 3 );
+    positions = Float32BufferAttribute(Float32List( BUFFER_SIZE ), 3 );
     positions.usage = DynamicDrawUsage;
 
-    normals = Float32BufferAttribute( new Float32Array( BUFFER_SIZE ), 3 );
+    normals = Float32BufferAttribute(Float32List( BUFFER_SIZE ), 3 );
     normals.usage = DynamicDrawUsage;
 
-    colors = Float32BufferAttribute( new Float32Array( BUFFER_SIZE ), 3 );
+    colors = Float32BufferAttribute(Float32List( BUFFER_SIZE ), 3 );
     colors.usage = DynamicDrawUsage;
 
     geometry.setAttributeFromString( 'position', positions );
@@ -79,13 +80,13 @@ class TubePainter{
 			vector3.setFrom( vertex2 ).applyMatrix4( matrix1 ).add( position1 );
 			vector4.setFrom( vertex1 ).applyMatrix4( matrix1 ).add( position1 );
 
-			vector1.copyIntoNativeArray( positions.array, ( count + 0 ) * 3 );
-			vector2.copyIntoNativeArray( positions.array, ( count + 1 ) * 3 );
-			vector4.copyIntoNativeArray( positions.array, ( count + 2 ) * 3 );
+			vector1.copyIntoList( positions.array, ( count + 0 ) * 3 );
+			vector2.copyIntoList( positions.array, ( count + 1 ) * 3 );
+			vector4.copyIntoList( positions.array, ( count + 2 ) * 3 );
 
-			vector2.copyIntoNativeArray( positions.array, ( count + 3 ) * 3 );
-			vector3.copyIntoNativeArray( positions.array, ( count + 4 ) * 3 );
-			vector4.copyIntoNativeArray( positions.array, ( count + 5 ) * 3 );
+			vector2.copyIntoList( positions.array, ( count + 3 ) * 3 );
+			vector3.copyIntoList( positions.array, ( count + 4 ) * 3 );
+			vector4.copyIntoList( positions.array, ( count + 5 ) * 3 );
 
 			// normals
 
@@ -94,13 +95,13 @@ class TubePainter{
 			vector3.setFrom( vertex2 ).applyMatrix4( matrix1 ).normalize();
 			vector4.setFrom( vertex1 ).applyMatrix4( matrix1 ).normalize();
 
-			vector1.copyIntoNativeArray( normals.array, ( count + 0 ) * 3 );
-			vector2.copyIntoNativeArray( normals.array, ( count + 1 ) * 3 );
-			vector4.copyIntoNativeArray( normals.array, ( count + 2 ) * 3 );
+			vector1.copyIntoList( normals.array, ( count + 0 ) * 3 );
+			vector2.copyIntoList( normals.array, ( count + 1 ) * 3 );
+			vector4.copyIntoList( normals.array, ( count + 2 ) * 3 );
 
-			vector2.copyIntoNativeArray( normals.array, ( count + 3 ) * 3 );
-			vector3.copyIntoNativeArray( normals.array, ( count + 4 ) * 3 );
-			vector4.copyIntoNativeArray( normals.array, ( count + 5 ) * 3 );
+			vector2.copyIntoList( normals.array, ( count + 3 ) * 3 );
+			vector3.copyIntoList( normals.array, ( count + 4 ) * 3 );
+			vector4.copyIntoList( normals.array, ( count + 5 ) * 3 );
 
 			// colors
 			color.copyIntoArray( colors.array, ( count + 0 ) * 3 );

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:typed_data';
 import 'package:example/rollercoster/rollercoaster.dart';
 import 'package:flutter/material.dart';
 import 'package:example/src/statistics.dart';
@@ -7,7 +8,7 @@ import 'package:three_js/three_js.dart' as three;
 import 'package:three_js_geometry/three_js_geometry.dart';
 
 extension on three.Vector3{
-  three.Float32Array toNativeArray(three.Float32Array array, [int offset = 0]) {
+  Float32List toNativeArray(Float32List array, [int offset = 0]) {
     array[offset] = storage[0];
     array[offset + 1] = storage[1];
     array[offset + 2] = storage[2];
@@ -94,7 +95,7 @@ class _State extends State<WebXRVRRollercoaster> {
     final vertex = three.Vector3();
 
     for (int i = 0; i < positions.length; i += 3 ) {
-      vertex.fromNativeArray( positions, i );
+      vertex.fromArray( positions, i );
 
       vertex.x += math.Random().nextDouble() * 10 - 5;
       vertex.z += math.Random().nextDouble() * 10 - 5;

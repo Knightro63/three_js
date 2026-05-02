@@ -1,5 +1,6 @@
-## 0.2.1
+## 0.3.0
 
+* Removed NativeArray for Zero-Allocation Updates.
 * Added HexTilingMaterial Support.
 
 ## 0.2.0
