@@ -1,0 +1,24 @@
+{
+  "shaders": [
+    {
+      "name": "MeshPhysicalMaterialVertex",
+      "type": "vertex",
+      "file": "path/to/mesh_physical.vert"
+    },
+    {
+      "name": "MeshPhysicalMaterialFragment",
+      "type": "fragment",
+      "file": "path/to/mesh_physical.frag"
+    },
+    {
+      "name": "MeshToonMaterialVertex",
+      "type": "vertex",
+      "file": "path/to/mesh_toon.vert"
+    },
+    {
+      "name": "MeshToonMaterialFragment",
+      "type": "fragment",
+      "file": "path/to/mesh_toon.frag"
+    }
+  ]
+}

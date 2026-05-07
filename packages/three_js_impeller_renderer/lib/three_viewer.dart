@@ -3,12 +3,11 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:three_js_angle/renderers/index.dart';
+import '../renderers/index.dart';
 import 'package:three_js_core/others/index.dart';
 import 'package:three_js_core/renderers/index.dart';
 import 'package:three_js_core/three_js_core.dart' as core;
 import 'package:three_js_math/three_js_math.dart';
-import 'package:flutter_angle/flutter_angle.dart';
 
 class Settings{
   Settings({

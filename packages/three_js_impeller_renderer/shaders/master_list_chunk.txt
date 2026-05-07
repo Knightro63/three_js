@@ -1,0 +1,287 @@
+Binding;Type;Name;Purpose
+0;Uniform Block (UBO);FrameUniforms;Global data: uModelViewProjection, uTime, uResolution.
+1;Uniform Block (UBO);MaterialUniforms;Material params: uDiffuseColor, uAlphaTest, aoMapIntensity, roughness.
+2;Sampler2D;alphaMap;Used in alphamap.frag. Reads .g channel.
+3;Sampler2D;aoMap;Used in aomap.frag. Reads .r channel (ORM compatible).
+4;Sampler2D;batchingTexture;Texture used to store and fetch instance matrices.
+5;Sampler2D;bumpMap;Height map for bump mapping.
+6;Sampler2D;clearcoatNormalMap;Normal map for the clearcoat layer.
+7;Sampler2D;clearcoatMap;Intensity/thickness map for the clearcoat layer.
+8;Sampler2D;clearcoatRoughnessMap;Roughness map specifically for clearcoat.
+9;Uniform Block (UBO);ClippingUniforms;Array of vec4 planes and count/union integers.
+10;Sampler2D;envMap;Atlas-style environment map for PMREM reflections.
+11;Sampler2D;displacementMap;Grayscale map used to displace vertex positions along normals.
+12;Sampler2D;emissiveMap;Texture for self-illumination (emissive) colors.
+13;Sampler2D;gradientMap;Ramp texture for Cel/Toon shading irradiance.
+14;Sampler2D;iridescenceMap;Texture for iridescence effect intensity.
+15;Sampler2D;iridescenceThicknessMap;Texture for varying thin-film thickness across the mesh.
+16;Sampler2D;lightMap;Baked light map texture for static global illumination.
+17;Sampler2D;specularColorMap;PBR specular color tint map.
+18;Sampler2D;specularIntensityMap;PBR specular intensity (alpha channel).
+19;Sampler2D;sheenColorMap;PBR sheen color map.
+20;Sampler2D;sheenRoughnessMap;PBR sheen roughness (alpha channel).
+21;Sampler2D;anisotropyMap;PBR anisotropy direction and strength map.
+22;Sampler2D;ltc_1;LTC matrix LUT for analytical area lighting.
+23;Sampler2D;ltc_2;LTC fresnel/amplitude LUT for analytical area lighting.
+24;Sampler2D;metalnessMap;Texture for metalness values (reads .b channel).
+25;Sampler2D;morphInfluenceTexture;Texture storing morph weights per instance (row = instanceID).
+26;Sampler2DArray;morphTargetsTexture;Texture array storing morph data per target layer.
+27;Sampler2D;normalMap;Texture for normal mapping (Tangent or Object space).
+28;Sampler2D;roughnessMap;Texture for roughness values (reads .g channel).
+29;Sampler2D[4];directionalShadowMap;Shadow maps for directional lights.
+33;Sampler2D[4];spotShadowMap;Shadow maps for spot lights.
+37;Sampler2D[4];pointShadowMap;Shadow maps for point lights.
+41;Uniform Block (UBO);DirectionalShadowUniforms;Matrices for directional shadows (4 slots).
+45;Uniform Block (UBO);SpotShadowUniforms;Matrices for spot shadows (4 slots).
+49;Uniform Block (UBO);PointShadowUniforms;Matrices for point shadows (4 slots).
+53;Sampler2D;boneTexture;Texture or buffer for bone matrices (Sequential jump).
+54;Sampler2D;specularMap;Texture for specular intensity (reads .r channel).
+55;Sampler2D;transmissionMap;Texture for transmission intensity.
+56;Sampler2D;thicknessMap;Texture for volume thickness (reads .g channel).
+57;Sampler2D;transmissionSamplerMap;Refraction buffer (framebuffer copy) for glass effects.
+58;Sampler2D;t2D;Dedicated background texture map to avoid binding collisions.
+59;Sampler2D;tCube;Dedicated background cube texture map.
+60;Sampler2D;map;Dedicated background texture map.
+61;Sampler2D;tEquirect;Dedicated texture map for equirectangular environment projections.
+
+Stage;Location;Type;Name;Purpose
+Vertex;0;vec3;inPosition;Mesh positions.
+Vertex;1;vec3;inNormal;Raw vertex normal.
+Vertex;2;vec4;inTangent;Raw tangent.
+Vertex;3;float;batchId;Instance ID for batching.
+Vertex;4;vec4;color;Raw vertex color attribute from mesh.
+Vertex;5;vec3;instanceColor;Color attribute per-instance for instancing.
+Vertex;6;vec3;vWorldPosition;Output: Calculated world position for reflections.
+Vertex;7;vec3;vReflect;Output: Pre-calculated reflection vector.
+Vertex;8;float;vFogDepth;Output: Distance from camera for fog (Sequential).
+Vertex;9;float;vIsPerspective;Output: Toggle for depth math (Sequential).
+Vertex;10;float;vFragDepth;Output: High-precision depth value (Sequential).
+Vertex;11;vec3;morphNormal0;Raw morph target normal 0.
+Vertex;12;vec3;morphNormal1;Raw morph target normal 1.
+Vertex;13;vec3;morphNormal2;Raw morph target normal 2.
+Vertex;14;vec3;morphNormal3;Raw morph target normal 3.
+Vertex;15;vec4;vColor;Output: Interpolated vertex color (Sequential).
+Vertex;16;vec3;morphTarget0;Raw morph target position 0.
+Vertex;17;vec3;morphTarget1;Raw morph target position 1.
+Vertex;18;vec3;morphTarget2;Raw morph target position 2.
+Vertex;19;vec3;morphTarget3;Raw morph target position 3.
+Vertex;20;vec3;morphTarget4;Raw morph target position 4.
+Vertex;21;vec3;morphTarget5;Raw morph target position 5.
+Vertex;22;vec3;morphTarget6;Raw morph target position 6.
+Vertex;23;vec3;morphTarget7;Raw morph target position 7.
+Vertex;24;vec3;vNormal;Output: View-space normal (Sequential).
+Vertex;25;vec3;vTangent;Output: View-space tangent (Sequential).
+Vertex;26;vec3;vBitangent;Output: View-space bitangent (Sequential).
+Vertex;27;ivec4;skinIndex;Indices of bones affecting this vertex.
+Vertex;28;vec4;skinWeight;Weights of bone influences for this vertex.
+Vertex;29;vec2;inUv;Primary UV attribute from mesh.
+Vertex;30;vec2;inUv2;Secondary UV attribute (AO, Light, etc.).
+Vertex;31;vec2;vUv;Output: Interpolated UV for background.
+Vertex;32;float;lineDistance;Input: Raw line distance attribute from mesh (Location 32).
+Vertex;33;float;vLineDistance;Output: Scaled line distance for fragment discarding (Synced with Frag 55).
+
+Frag;0;vec3;vPosition;Interpolated position for Hashing.
+Frag;1;vec2;vAlphaMapUv;UV for Alpha Map.
+Frag;2;vec2;vAoMapUv;UV for AO Map.
+Frag;3;vec3;vNormal;Normal for lighting logic.
+Frag;4;vec3;vViewDir;Camera direction.
+Frag;5;vec2;vBumpMapUv;UV coordinates for the Bump Map.
+Frag;6;vec2;vClearcoatNormalMapUv;UV coordinates for Clearcoat Normal mapping.
+Frag;7;vec3;vClipPosition;Position in clipping space (usually world or view space).
+Frag;8;vec4;vColor;Interpolated vertex color (RGB or RGBA).
+Frag;9;vec2;vEmissiveMapUv;UV coordinates specifically for Emissive mapping.
+Frag;10;vec3;vWorldPosition;Interpolated world-space position for environment mapping.
+Frag;11;vec3;vReflect;Pre-calculated reflection vector from vertex shader.
+Frag;12;float;vFogDepth;Interpolated distance to camera for fog calculation.
+Frag;13;vec3;vViewPosition;Fragment position in view space for lighting calculations.
+Frag;14;vec3;vLightFront;Direct light irradiance for front faces.
+Frag;15;vec3;vIndirectFront;Indirect light irradiance for front faces.
+Frag;16;vec3;vLightBack;Direct light irradiance for back faces.
+Frag;17;vec3;vIndirectBack;Indirect light irradiance for back faces.
+Frag;18;vec2;vSpecularColorMapUv;UV for Specular maps.
+Frag;19;vec2;vSheenColorMapUv;UV for Sheen maps.
+Frag;20;vec2;vAnisotropyMapUv;UV for Anisotropy maps.
+Frag;21;float;vIsPerspective;Toggle for perspective vs orthographic depth math.
+Frag;22;float;vFragDepth;High-precision depth value (w + 1.0) from vertex shader.
+Frag;23;vec2;vMapUv;UV coordinates for the Diffuse Map (Sequential).
+Frag;24;vec2;vMetalnessMapUv;UV coordinates for the Metalness Map (Sequential).
+Frag;25;vec3;vTangent;Interpolated tangent for TBN calculation.
+Frag;26;vec3;vBitangent;Interpolated bitangent for TBN calculation.
+Frag;27;vec2;vNormalMapUv;UV coordinates for the Normal Map (Sequential).
+Frag;28;vec2;vRoughnessMapUv;UV coordinates for the Roughness Map (Sequential).
+Frag;29;vec4[4];vDirectionalShadowCoord;Clip-space coords for directional shadows.
+Frag;33;vec4[4];vSpotLightCoord;Clip-space coords for spot shadows.
+Frag;37;vec4[4];vPointShadowCoord;World-space vectors light-to-frag for point shadows.
+Frag;41;vec2;vSpecularMapUv;UV coordinates for the Specular Map (Sequential).
+Frag;42;vec2;vTransmissionMapUv;UV coordinates for Transmission (Sequential).
+Frag;43;vec2;vThicknessMapUv;UV coordinates for Thickness (Sequential).
+Frag;44;vec2;vLightMapUv;Unique UV for Lightmaps.
+Frag;45;vec2;vClearcoatMapUv;Unique UV for Clearcoat thickness.
+Frag;46;vec2;vClearcoatRoughnessMap;Unique UV for Clearcoat roughness.
+Frag;47;vec2;vIridescenceMapUv;Unique UV for Iridescence.
+Frag;48;vec2;vIridescenceThicknessMap;Unique UV for Iridescence thickness.
+Frag;49;vec2;vSheenRoughnessMap;Unique UV for Sheen roughness.
+Frag;50;vec2;vSpecularIntensityMap;Unique UV for Specular intensity.
+Frag;51;vec2;vAnisotropyVectorMapUv;Unique UV for Anisotropy Vector.
+Frag;52;vec2;vUv2;Shared secondary UV input for general AO/Lightmap access.
+Frag;53;vec2;vUv;Input: Interpolated UV for background (Synced with Vertex 53).
+Frag;54;vec4;pc_fragColor;Output: Final fragment color redirected for custom pipelines (e.g. post-processing).
+Frag;55;float;vLineDistance;Input: Interpolated line distance (Synced with Vertex 55).
+
+Shader File Manifest (Converted)
+alpha_hash.frag: The discard logic based on position.
+alpha_hash_pars.frag: Core math for noise and hashing threshold.
+alpha_map_pars.frag: Uniform declaration for the alpha texture.
+alpha_map.frag: Logic for multiplying alpha by texture green channel.
+alpha_test_pars.frag: Uniform declaration for uAlphaTest.
+alpha_test.frag: Logic for hard cutoffs and Alpha-to-Coverage.
+aomap.frag: Logic for indirect light occlusion and specular attenuation.
+aomap_pars.frag
+batching_pars.vert;Converted;Logic for fetching 4x4 matrices from a texture for batching.
+batching.vert;Converted;Main execution call to retrieve the mat4 batchingMatrix.
+begin.vert;Converted;Initializes local 'transformed' vec3 and sets vPosition for hashing.
+beginnormal.vert;Converted;Initializes objectNormal and objectTangent from vertex attributes.
+bsdfs.frag;Converted;Blinn-Phong BRDF functions (G, D, and BRDF_BlinnPhong).
+bumpmap_pars.frag;Converted;Mikkelsen bump mapping math (dHdxy_fwd, perturbNormalArb).
+clearcoat_normal_begin.frag;Converted;Initializes clearcoatNormal using the base non-perturbed normal.
+clearcoat_normal_maps.frag;Converted;Applies clearcoat normal map and scales it via TBN matrix.
+clearcoat_pars.frag;Converted;Uniform declarations for all clearcoat-related textures and scales.
+clipping_planes_fragment.frag;Converted;Handles union and intersection clipping planes with optional alpha-to-coverage.
+clipping_planes_pars.frag;Converted;Declarations for clipping plane uniforms and the vClipPosition input.
+clipping_planes_pars.vert;Converted;Declaration for the vClipPosition output in the vertex shader.
+clipping_planes.vert;Converted;Vertex-side assignment of vClipPosition based on model-view coordinates.
+color.frag;Converted;Applies vertex-based coloring to the diffuseColor variable.
+color_pars.frag;Converted;Declaration for the interpolated vColor input.
+color.vert;Converted;Vertex logic to combine mesh color and instance color.
+colorspace.frag;Converted;Final color space conversion step for the output fragment.
+colorspace_utils.frag;Converted;OETF transfer functions and matrix conversions (sRGB, P3).
+common.frag;Updated;Comprehensive core math, constants, structs, and OETF helpers.
+cube_uv_reflection.frag;Converted;Manual cubemap sampling logic for atlas-based environment maps.
+default.frag;Converted;Standard red output fragment shader; replaces gl_FragColor with fragColor.
+default_normal.vert;Converted;Transforms objectNormal to vNormal including batching/instancing math.
+default.vert;Converted;Standard vertex entry point; transforms local position to clip space.
+displacementmap_pars.vert;Converted;Uniform declarations for displacement mapping textures and scales.
+displacementmap.vert;Converted;Displaces vertex positions using the displacement map and scale.
+dithering.frag;Converted;Final pass to apply dithering to the output RGB channels.
+dithering_pars.frag;Converted;Dithering math utility; uses gl_FragCoord and rand() for noise.
+emissivemap.frag;Converted;Samples the emissiveMap and modifies totalEmissiveRadiance.
+emissivemap_pars.frag;Converted;Uniform declaration for the emissive texture.
+encodings.frag;Converted;Final color encoding step; wraps output in linearToOutputTexel logic.
+encodings.frag;Converted;Final color encoding step; wraps output in linearToOutputTexel logic.
+encodings_pars.frag;Converted;Math functions for Linear-to-Linear and Linear-to-sRGB color encodings.
+envmap_common_pars.frag;Converted;Uniform declarations for environment map intensity, rotation, and sampler.
+envmap.frag;Converted;Logic for calculating reflection vectors and sampling/blending environment maps.
+envmap_pars.frag;Converted;Declarations for reflectivity, refractionRatio, and reflection varyings.
+envmap_pars.vert;Converted;Vertex declarations for world position and reflection varyings.
+envmap_physical_pars.frag;Converted;PBR IBL logic for Irradiance, Radiance, and Anisotropy.
+envmap.vert;Converted;Vertex-side calculation of world position or reflection vectors.
+fog.frag;Converted;Blends fragment color with fog based on depth and density.
+fog_pars.frag;Converted;Declarations for fog uniforms and depth varying.
+fog_pars.vert;Converted;Vertex declaration for fog depth output.
+fog.vert;Converted;Vertex-side assignment of fog depth based on view-space Z.
+gradientmap_pars.frag;Converted;Logic for fetching irradiance from a gradient ramp or a procedural fallback.
+iridescence.frag;Converted;Thin-film interference math including XYZ-to-RGB and sensitivity evaluation.
+iridescence_pars.frag;Converted;Uniform declarations for iridescence and thickness textures.
+lightmap.frag;Converted;Samples lightMap and adds intensity-scaled irradiance to indirectDiffuse.
+lightmap_pars.frag;Converted;Uniform declarations for the lightMap texture and intensity.
+lights_fragment_begin.frag;Converted;Main lighting loop for Point, Spot, and Directional lights.
+lights_fragment_end.frag;Converted;Finalizes indirect diffuse and specular lighting contributions.
+lights_fragment_maps.frag;Converted;Integrates lightmaps and IBL (Radiance/Irradiance) into the lighting flow.
+lights_lambert.frag;Converted;Initializes the LambertMaterial struct for diffuse-only lighting.
+lights_lambert_pars.frag;Converted;Direct and indirect Render Equations (RE) for Lambert materials.
+lights_lambert.vert;Converted;Vertex-side Lambert lighting (Gouraud) calculation.
+lights_pars_begin.frag;Converted;Declarations for Point, Spot, Directional, and Hemi lights with PBR attenuation.
+lights_phong.frag;Converted;Initializes BlinnPhongMaterial properties for specular-inclusive lighting.
+lights_phong_pars.frag;Converted;Direct and indirect Render Equations (RE) for Blinn-Phong materials.
+lights_physical.frag;Converted;Complex PBR state initialization for Physical materials.
+lights_toon.frag;Converted;Initializes ToonMaterial properties for cel-shaded diffuse lighting.
+lights_toon_pars.frag;Converted;Direct and indirect Render Equations (RE) for Toon materials using gradient irradiance.
+lights_physical_pars_3.frag;Converted;Main PBR GGX BRDF (Isotropic/Anisotropic) and LTC math utilities.
+logdepthbuf.frag;Converted;Calculates and writes gl_FragDepth for logarithmic depth buffers.
+logdepthbuf_pars.frag;Converted;Declarations for logarithmic depth uniforms and varyings.
+logdepthbuf_pars.vert;Converted;Vertex declarations for logarithmic depth buffer outputs.
+logdepthbuf.vert;Converted;Vertex-side assignment of log depth values for fragment scaling.
+map.frag;Converted;Samples the diffuse map and applies optional video texture sRGB decoding.
+map_pars.frag;Converted;Uniform declaration for the main diffuse/base color map.
+map_particle.frag;Converted;Particle-specific texture sampling using gl_PointCoord or vertex UVs.
+map_particle_pars.frag;Converted;Declarations for particle maps, uvTransform, and vertex UV inputs.
+metalnessmap.frag;Converted;Samples the metalnessMap and returns the adjusted factor.
+metalnessmap_pars.frag;Converted;Uniform declaration for the metalness map.
+morphcolor.vert;Converted;Blends vertex colors with morph target data using gl_VertexID.
+morphinstance.vert;Converted;Fetches per-instance morph weights from a texture using gl_InstanceID.
+morphnormal.vert;Converted;Blends objectNormal with morph target data using texture or attributes.
+color_pars.vert;Converted;Vertex declaration for the color varying output.
+morphtarget_pars.vert;Converted;Utility for fetching morph data (Pos/Norm/Color) from a texture array.
+morphtarget.vert;Converted;Displaces vertex positions using morph target data from texture array or attributes.
+normal_fragment_begin.frag;Converted;Initializes surface normal and TBN matrices for normal/clearcoat mapping.
+normal_fragment_maps.frag;Converted;Samples normalMap and transforms result into view space using TBN or normalMatrix.
+normal_pars.frag;Converted;Declarations for surface normal and tangent/bitangent varyings.
+normal_pars.vert;Converted;Vertex declarations for normal, tangent, and bitangent outputs.
+normal.vert;Converted;Vertex-side normalization and bitangent calculation for TBN.
+normalmap_pars.frag;Converted;Declarations for normalMap and procedural getTangentFrame() utility.
+opaque.frag;Converted;Finalizes alpha and writes the final vec4 to fragColor (Location 0).
+output.frag;Converted;Alternative final output pass with transmission alpha offset (+0.1).
+packing.frag;Converted;Utilities for packing/unpacking high-precision depth and normal data into RGBA.
+premultiplied_alpha.frag;Converted;Multiplies fragment RGB by Alpha for premultiplied blending.
+project_vertex.vert;Converted;Finalizes gl_Position by applying Batching, Instancing, and Projection matrices.
+roughnessmap.frag;Converted;Samples the roughnessMap and returns the adjusted factor.
+roughnessmap_pars.frag;Converted;Uniform declaration for the roughness map.
+shadowmap_pars.frag;Converted;Shadow mapping core utilities (PCF, VSM, Point shadows).
+shadowmap_pars.vert;Converted;Vertex declarations for shadow matrices and coordinate outputs.
+shadowmap.vert;Converted;Vertex logic for calculating shadow coordinates using normal bias and light matrices.
+shadowmask_pars.frag;Converted;Aggregates shadow contributions from Directional, Spot, and Point lights into a single float mask.
+skinbase.vert;Converted;Retrieves bone matrices for the four weight-influencing bones.
+skinning_pars.vert;Converted;Utility to fetch 4x4 bone matrices from a texture using integer indexing.
+skinning.vert;Converted;Calculates skinned vertex position by blending bone matrices with weights.
+skinnormal.vert;Converted;Transforms objectNormal and objectTangent using the calculated skinMatrix.
+specularmap.frag;Converted;Samples specularMap and returns the adjusted specularStrength at Location 41.
+tonemapping.frag;Converted;Applies selected tone mapping curve to the output RGB channels.
+tonemapping_pars.frag;Converted;Math library for Linear, Reinhard, Cineon, ACES, AgX, and Neutral tone mapping.
+transmission.frag;Converted;Calculates volume refraction and blends transmitted light into diffuse.
+transmission_pars.frag;Converted;Core volume refraction utilities including Bicubic filtering and Beer's law.
+uv_pars.frag;Converted;Comprehensive UV input declarations for all material maps.
+uv.vert;Converted;Calculates transformed UV coordinates for all 20+ material maps using dedicated mat3 matrices.
+uv2_pars.frag;Converted;Fragment declaration for the shared secondary UV set at Location 52.
+uv2_pars.vert;Converted;Vertex declaration for the shared secondary UV set at Location 52.
+uv2.vert;Converted;Vertex-side transformation of the secondary UV set.
+worldpos_vertex.vert;Converted;Calculates world-space position including batching and instancing; populates vWorldPosition.
+
+background_cube.frag;Converted;Removed #ifdef blocks, transitioned to bool branching, and synced vWorldPosition to Location 10.
+background_cube.vert;Converted;Implemented transformDirection logic and forced depth to w (z=w) for far-plane rendering.
+background.frag;Converted;Removed #ifdef DECODE_VIDEO_TEXTURE, synced UV to Location 23, and mapped texture to Binding 57.
+background.frag;Converted;Removed #ifdef DECODE_VIDEO_TEXTURE, synced UV to Location 23, and mapped texture to Binding 57.
+background.vert;Updated;Moved vUv output location to 53 as requested.
+cube.frag;Updated;Moved pc_fragColor to Location 54 and assigned tCube to Binding 59.
+cube.vert;Converted;Implemented transformDirection and forced depth to w (z=w) for far-plane rendering.
+depth.frag;Updated;Moved diffuse map to Binding 60 and maintained pc_fragColor at Location 54.
+depth.vert;Converted;Removed #ifdefs, implemented displacement branching, and synced precision depth to Location 22.
+distance_rgba.frag;Converted;Removed #ifdefs, inlined packing, and synced world position to Location 10.
+distance_rgba.vert;Converted;Implemented worldPosition logic, displacement branching, and synced output to Location 6.
+equirect.frag;Converted;Inlined equirectUv logic, assigned to Binding 61, and synced direction to Location 10.
+equirect.vert;Converted;Implemented transformDirection logic and synced output to world direction location.
+horizontal_blur.frag;Converted;Implemented 9-tap Gaussian blur logic and synced UV/Color locations.
+linedashed.frag;Converted;Implemented mod-based discard logic for dashes and synced line distance to Location 8.
+linedashed.vert;Updated;Moved lineDistance input to 32 and vLineDistance output to 55 to maintain custom sequential list.
+meshbasic.frag;Converted;Removed all #include and #ifdef blocks; implemented bool-based branching and mapped to Location 54.
+meshbasic.vert;Converted;Implemented envMap/Skinning branching, synced UVs, Color, and Normal to Fragment locations.
+meshlambert.frag;Converted;Removed all #include headers; inlined Lambertian diffuse accumulation logic; synced to Location 54.
+meshlambert.vert;Converted;Implemented view-space position/normal transforms and displacement map branching.
+meshmatcap.frag;Converted;Removed #ifdef blocks, inlined Matcap UV math, and assigned matcap to Binding 62.
+meshmatcap.vert;Converted;Synced view-space vectors for Matcap UV generation; implemented displacement branching.
+meshnormal.frag;Converted;Removed #ifdefs, inlined packNormalToRGB, and synced output to Location 54.
+meshnormal.vert;Converted;Implemented displacement mapping and conditional vViewPosition output for SPIR-V compliance.
+meshphong.frag;Converted;Removed all #ifdefs/includes; inlined Phong accumulation structure; synced UVs and Output.
+meshphong.vert;Converted;Implemented view-space transforms, displacement branching, and synced BumpMap UVs to Location 5.
+meshphysical.frag;Converted;Removed all PHYSICAL/IOR #ifdefs; transitioned to bool uniforms; synced complex PBR texture bindings.
+meshphysical.vert;Converted;Implemented displacement branching and conditional vWorldPosition output for Transmission; synced to Master List.
+meshtoon.vert;Converted;Synced view-space vectors for Toon lighting; implemented displacement branching.
+meshtoon.frag;Converted;Removed #ifdef blocks; inlined toon light structure; synced gradientMap to Binding 13.
+points.frag;Converted;Removed #ifdefs, used gl_PointCoord for particle mapping, and synced output to Location 54.
+points.vert;Converted;Implemented size attenuation logic with SPIR-V branching; synced outputs to custom Master List.
+shadow.frag;Converted;Synced shadow sampler blocks (29-37) and input coordinates (29-37) to Master List.
+shadow.vert;Converted;Implemented shadow matrix transformations for all 3 shadow blocks (29, 33, 37).
+sprite.frag;Converted;Removed #ifdefs, synced UV to Location 53, and mapped output to Location 54.
+sprite.vert;Converted;Implemented billboarding and rotation logic; removed #ifdefs; synced UV to Location 31.
+vertical_blur.frag;Converted;Implemented 9-tap vertical Gaussian blur; synced UV to Location 53 and Output to 54.
+vsm.frag;Converted;Removed #ifdefs, inlined packing/unpacking, and implemented SPIR-V compatible loop/branching.
+vsm.vert;Converted;Direct clip-space pass-through for VSM post-processing.
