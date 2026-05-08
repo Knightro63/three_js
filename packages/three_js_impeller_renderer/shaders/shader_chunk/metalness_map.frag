@@ -1,4 +1,3 @@
-#version 460 core
 
 // Binding 24: Dedicated sampler for the Metalness map
 layout(set = 0, binding = 24) uniform sampler2D metalnessMap;

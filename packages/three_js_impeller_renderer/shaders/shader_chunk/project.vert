@@ -1,4 +1,3 @@
-#version 460 core
 
 // Binding 0: Standard Frame Uniforms
 layout(set = 0, binding = 0) uniform FrameUniforms {

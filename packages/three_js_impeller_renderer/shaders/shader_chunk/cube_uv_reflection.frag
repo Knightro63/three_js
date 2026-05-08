@@ -1,4 +1,3 @@
-#version 460 core
 
 // Binding 10: The pre-filtered environment map (atlas)
 layout(set = 0, binding = 10) uniform sampler2D envMap;

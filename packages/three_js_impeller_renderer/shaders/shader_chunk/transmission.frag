@@ -1,4 +1,3 @@
-#version 460 core
 
 // Bindings - Sequential after SpecularMap (54)
 layout(set = 0, binding = 55) uniform sampler2D transmissionMap;

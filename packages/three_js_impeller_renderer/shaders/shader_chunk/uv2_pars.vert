@@ -1,4 +1,3 @@
-#version 460 core
 
 /**
  * Location 30: Raw secondary UV attribute (inUv2) from the mesh.

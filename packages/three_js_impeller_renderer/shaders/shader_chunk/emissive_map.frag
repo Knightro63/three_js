@@ -1,4 +1,3 @@
-#version 460 core
 
 // Binding 12: Dedicated sampler for the Emissive map
 layout(set = 0, binding = 12) uniform sampler2D emissiveMap;

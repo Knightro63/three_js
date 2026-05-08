@@ -1,4 +1,3 @@
-#version 460 core
 
 /**
  * Binding 50: Texture for bone matrices.

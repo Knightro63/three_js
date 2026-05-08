@@ -1,4 +1,3 @@
-#version 460 core
 
 /**
  * See: https://casual-effects.com/research/Wyman2017Hashed/index.html

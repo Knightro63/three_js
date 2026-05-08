@@ -1,4 +1,3 @@
-#version 460 core
 
 // Binding 4: Primary Diffuse Map (Standard Base Color)
 layout(set = 0, binding = 4) uniform sampler2D map;

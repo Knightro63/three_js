@@ -1,4 +1,3 @@
-#version 460 core
 
 /**
  * Binding 13: Dedicated sampler for the Gradient Map.

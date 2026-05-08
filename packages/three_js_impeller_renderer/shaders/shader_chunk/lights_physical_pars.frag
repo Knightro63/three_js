@@ -1,4 +1,3 @@
-#version 460 core
 
 /**
  * PhysicalMaterial struct and core PBR math (Part 1).

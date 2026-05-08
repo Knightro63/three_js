@@ -1,4 +1,3 @@
-#version 460 core
 
 // Binding 11: From displacementmap_pars.vert
 layout(set = 0, binding = 11) uniform sampler2D displacementMap;

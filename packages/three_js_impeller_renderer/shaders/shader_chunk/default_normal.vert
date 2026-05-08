@@ -1,4 +1,3 @@
-#version 460 core
 
 // Output to Fragment Shader (Location 3 per Master List)
 layout(location = 3) out vec3 vNormal;

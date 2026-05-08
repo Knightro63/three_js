@@ -1,14 +1,20 @@
 Binding;Type;Name;Purpose
 0;Uniform Block (UBO);FrameUniforms;Global data: uModelViewProjection, uTime, uResolution.
 1;Uniform Block (UBO);MaterialUniforms;Material params: uDiffuseColor, uAlphaTest, aoMapIntensity, roughness.
+2;Uniform Block (UBO);ClippingUniforms;Array of vec4 planes and count/union integers.
+3;Uniform Block (UBO);DirectionalShadowUniforms;Matrices for directional shadows (4 slots).
+4;Uniform Block (UBO);SpotShadowUniforms;Matrices for spot shadows (4 slots).
+5;Uniform Block (UBO);PointShadowUniforms;Matrices for point shadows (4 slots).
+6;Sampler2D; Map
+7:Sampler2D; Lighting
+
 2;Sampler2D;alphaMap;Used in alphamap.frag. Reads .g channel.
 3;Sampler2D;aoMap;Used in aomap.frag. Reads .r channel (ORM compatible).
-4;Sampler2D;batchingTexture;Texture used to store and fetch instance matrices.
+60;Sampler2D;map;Dedicated background texture map.
 5;Sampler2D;bumpMap;Height map for bump mapping.
 6;Sampler2D;clearcoatNormalMap;Normal map for the clearcoat layer.
 7;Sampler2D;clearcoatMap;Intensity/thickness map for the clearcoat layer.
 8;Sampler2D;clearcoatRoughnessMap;Roughness map specifically for clearcoat.
-9;Uniform Block (UBO);ClippingUniforms;Array of vec4 planes and count/union integers.
 10;Sampler2D;envMap;Atlas-style environment map for PMREM reflections.
 11;Sampler2D;displacementMap;Grayscale map used to displace vertex positions along normals.
 12;Sampler2D;emissiveMap;Texture for self-illumination (emissive) colors.
@@ -21,28 +27,26 @@ Binding;Type;Name;Purpose
 19;Sampler2D;sheenColorMap;PBR sheen color map.
 20;Sampler2D;sheenRoughnessMap;PBR sheen roughness (alpha channel).
 21;Sampler2D;anisotropyMap;PBR anisotropy direction and strength map.
-22;Sampler2D;ltc_1;LTC matrix LUT for analytical area lighting.
-23;Sampler2D;ltc_2;LTC fresnel/amplitude LUT for analytical area lighting.
 24;Sampler2D;metalnessMap;Texture for metalness values (reads .b channel).
-25;Sampler2D;morphInfluenceTexture;Texture storing morph weights per instance (row = instanceID).
-26;Sampler2DArray;morphTargetsTexture;Texture array storing morph data per target layer.
 27;Sampler2D;normalMap;Texture for normal mapping (Tangent or Object space).
 28;Sampler2D;roughnessMap;Texture for roughness values (reads .g channel).
 29;Sampler2D[4];directionalShadowMap;Shadow maps for directional lights.
 33;Sampler2D[4];spotShadowMap;Shadow maps for spot lights.
 37;Sampler2D[4];pointShadowMap;Shadow maps for point lights.
-41;Uniform Block (UBO);DirectionalShadowUniforms;Matrices for directional shadows (4 slots).
-45;Uniform Block (UBO);SpotShadowUniforms;Matrices for spot shadows (4 slots).
-49;Uniform Block (UBO);PointShadowUniforms;Matrices for point shadows (4 slots).
-53;Sampler2D;boneTexture;Texture or buffer for bone matrices (Sequential jump).
 54;Sampler2D;specularMap;Texture for specular intensity (reads .r channel).
 55;Sampler2D;transmissionMap;Texture for transmission intensity.
 56;Sampler2D;thicknessMap;Texture for volume thickness (reads .g channel).
 57;Sampler2D;transmissionSamplerMap;Refraction buffer (framebuffer copy) for glass effects.
+25;Sampler2D;morphInfluenceTexture;Texture storing morph weights per instance (row = instanceID).
+26;Sampler2DArray;morphTargetsTexture;Texture array storing morph data per target layer.
+53;Sampler2D;boneTexture;Texture or buffer for bone matrices (Sequential jump).
+4;Sampler2D;batchingTexture;Texture used to store and fetch instance matrices.
 58;Sampler2D;t2D;Dedicated background texture map to avoid binding collisions.
 59;Sampler2D;tCube;Dedicated background cube texture map.
-60;Sampler2D;map;Dedicated background texture map.
 61;Sampler2D;tEquirect;Dedicated texture map for equirectangular environment projections.
+
+22;Sampler2D;ltc_1;LTC matrix LUT for analytical area lighting.
+23;Sampler2D;ltc_2;LTC fresnel/amplitude LUT for analytical area lighting.
 
 Stage;Location;Type;Name;Purpose
 Vertex;0;vec3;inPosition;Mesh positions.
@@ -127,6 +131,7 @@ Frag;52;vec2;vUv2;Shared secondary UV input for general AO/Lightmap access.
 Frag;53;vec2;vUv;Input: Interpolated UV for background (Synced with Vertex 53).
 Frag;54;vec4;pc_fragColor;Output: Final fragment color redirected for custom pipelines (e.g. post-processing).
 Frag;55;float;vLineDistance;Input: Interpolated line distance (Synced with Vertex 55).
+Frag;56;vec2;vHighPrecisionZW;Input: High precision depth coordinates (Sequential).
 
 Shader File Manifest (Converted)
 alpha_hash.frag: The discard logic based on position.

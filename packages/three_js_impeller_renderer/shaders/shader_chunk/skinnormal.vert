@@ -1,4 +1,3 @@
-#version 460 core
 
 /**
  * Note: Requires boneMatX..W, skinWeight, bindMatrix, and bindMatrixInverse.

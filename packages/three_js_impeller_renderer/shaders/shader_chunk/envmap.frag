@@ -1,4 +1,3 @@
-#version 460 core
 
 // Binding 10: From master list
 layout(set = 0, binding = 10) uniform sampler2D envMap;

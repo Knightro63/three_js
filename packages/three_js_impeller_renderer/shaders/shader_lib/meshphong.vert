@@ -1,62 +1,63 @@
 #version 460 core
 
-// Binding 0: FrameUniforms
-layout(std140, binding = 0) uniform FrameUniforms {
-    mat4 uModelViewProjection;
-    mat4 uModelMatrix;
-    mat4 uViewMatrix;
-    mat3 uNormalMatrix;
-    float uTime;
-    vec2 uResolution;
-};
+/**
+ * Stage: Vertex
+ * Purpose: Master template for specular-inclusive materials (Phong).
+ */
 
-// Binding 1: MaterialUniforms
-layout(std140, binding = 1) uniform MaterialUniforms {
-    bool useDisplacementMap;
-    float displacementScale;
-    float displacementBias;
-};
+#define PHONG
 
-// Binding 11: displacementMap
-layout(binding = 11) uniform sampler2D displacementMap;
+// 1. INCLUDE DECLARATIONS (The "Pars" snippets)
+#include "../shader_chunk/common.vert"
+#include "../shader_chunk/batching_pars.vert"
+#include "../shader_chunk/uv_pars.vert"
+#include "../shader_chunk/displacementmap_pars.vert"
+#include "../shader_chunk/envmap_pars.vert"
+#include "../shader_chunk/color_pars.vert"
+#include "../shader_chunk/fog_pars.vert"
+#include "../shader_chunk/normal_pars.vert"
+#include "../shader_chunk/morphtarget_pars.vert"
+#include "../shader_chunk/skinning_pars.vert"
+#include "../shader_chunk/shadowmap_pars.vert"
+#include "../shader_chunk/logdepthbuf_pars.vert"
+#include "../shader_chunk/clipping_planes_pars.vert"
 
-// Stage Inputs
-layout(location = 0) in vec3 inPosition;
-layout(location = 1) in vec3 inNormal;
-layout(location = 4) in vec4 color;
-layout(location = 29) in vec2 inUv;
-
-// Stage Outputs (Synced with Frag Master List)
-layout(location = 23) out vec2 vMapUv;         // Frag 23
-layout(location = 8)  out vec4 vColor;         // Frag 8
-layout(location = 3)  out vec3 vNormal;        // Frag 3 (View-space normal)
-layout(location = 13) out vec3 vViewPosition;   // Frag 13
-layout(location = 10) out vec3 vWorldPosition; // Frag 10
-layout(location = 5)  out vec2 vBumpMapUv;     // Frag 5 (Synced with Vertex 29/inUv)
+// Location 13: vViewPosition synced with Frag 13 per Master List
+layout(location = 13) out vec3 vViewPosition;
 
 void main() {
-    vMapUv = inUv;
-    vBumpMapUv = inUv; // Sequential sync for Phong bump mapping
-    vColor = color;
+    // 2. SETUP & BATCHING
+    #include "../shader_chunk/uv_vertex.vert"
+    #include "../shader_chunk/color_vertex.vert"
+    #include "../shader_chunk/morphcolor.vert"
+    #include "../shader_chunk/batching.vert"
 
-    vec3 transformed = vec3(inPosition);
-    vec3 objectNormal = inNormal;
+    // 3. NORMAL PROCESSING
+    #include "../shader_chunk/beginnormal.vert"
+    #include "../shader_chunk/morphinstance.vert"
+    #include "../shader_chunk/morphnormal.vert"
+    #include "../shader_chunk/skinbase.vert"
+    #include "../shader_chunk/skinnormal.vert"
+    #include "../shader_chunk/defaultnormal.vert"
+    #include "../shader_chunk/normal.vert"
 
-    // Displacement Mapping Branching
-    if (useDisplacementMap) {
-        transformed += normalize(objectNormal) * (texture(displacementMap, inUv).x * displacementScale + displacementBias);
-    }
+    // 4. GEOMETRY DEFORMATION
+    #include "../shader_chunk/begin.vert"
+    #include "../shader_chunk/morphtarget.vert"
+    #include "../shader_chunk/skinning.vert"
+    #include "../shader_chunk/displacementmap.vert"
 
-    // Normal Transformation (View Space)
-    vNormal = normalize(uNormalMatrix * objectNormal);
+    // 5. PROJECTION & DEPTH
+    #include "../shader_chunk/project_vertex.vert"
+    #include "../shader_chunk/logdepthbuf_vertex.vert"
+    #include "../shader_chunk/clipping_planes.vert"
 
-    // World and View Position
-    vec4 worldPosition = uModelMatrix * vec4(transformed, 1.0);
-    vWorldPosition = worldPosition.xyz;
-
-    vec4 mvPosition = uViewMatrix * worldPosition;
+    // View-space position for fragment-side lighting
     vViewPosition = -mvPosition.xyz;
 
-    // Standard Projection
-    gl_Position = uModelViewProjection * vec4(transformed, 1.0);
+    // 6. VARYINGS FOR FRAGMENT
+    #include "../shader_chunk/worldpos_vertex.vert"
+    #include "../shader_chunk/envmap_vertex.vert"
+    #include "../shader_chunk/shadowmap.vert"
+    #include "../shader_chunk/fog.vert"
 }

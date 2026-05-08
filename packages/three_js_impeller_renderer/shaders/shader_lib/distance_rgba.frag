@@ -1,55 +1,52 @@
 #version 460 core
 
-// Binding 1: MaterialUniforms
+/**
+ * Stage: Fragment
+ * Purpose: Pack distance from light source into RGBA (Point Light Shadows).
+ */
+
+#define DISTANCE
+
+// 1. INCLUDE DECLARATIONS
+#include "../shader_chunk/common.frag"
+#include "../shader_chunk/packing.frag"
+#include "../shader_chunk/uv_pars.frag"
+#include "../shader_chunk/map_pars.frag"
+#include "../shader_chunk/alphamap_pars.frag"
+#include "../shader_chunk/alphatest_pars.frag"
+#include "../shader_chunk/alpha_hash_pars.frag"
+#include "../shader_chunk/clipping_planes_pars.frag"
+
 layout(std140, binding = 1) uniform MaterialUniforms {
-    vec3 referencePosition;
+    vec3 referencePosition; // Light position
     float nearDistance;
     float farDistance;
-    float uAlphaTest;
-    bool useMap;
-    bool useAlphaMap;
+    // ... other material uniforms
 };
 
-// Binding 60: map
-layout(binding = 60) uniform sampler2D map;
-
-// Binding 2: alphaMap
-layout(binding = 2) uniform sampler2D alphaMap;
-
-// Location 10: vWorldPosition (Synced with Vertex 6)
+// Location 10: Interpolated world position per Master List
 layout(location = 10) in vec3 vWorldPosition;
-// Location 23: vMapUv
-layout(location = 23) in vec2 vMapUv;
-// Location 1: vAlphaMapUv
-layout(location = 1) in vec2 vAlphaMapUv;
 
-// Location 54: pc_fragColor
-layout(location = 54) out vec4 pc_fragColor;
-
-// Helper: packDepthToRGBA
-vec4 packDepthToRGBA(float v) {
-    vec4 enc = vec4(1.0, 255.0, 65025.0, 16581375.0) * v;
-    enc = fract(enc);
-    enc -= enc.yzww * vec4(1.0/255.0, 1.0/255.0, 1.0/255.0, 0.0);
-    return enc;
-}
+// Final Output per Master List
+layout(location = 0) out vec4 pc_fragColor;
 
 void main() {
-    vec4 diffuseColor = vec4(1.0);
+    #include "../shader_chunk/clipping_planes_fragment.frag"
 
-    if (useMap) {
-        diffuseColor *= texture(map, vMapUv);
-    }
+    vec4 diffuseColor = vec4( 1.0 );
 
-    if (useAlphaMap) {
-        diffuseColor.a *= texture(alphaMap, vAlphaMapUv).g;
-    }
+    #include "../shader_chunk/map.frag"
+    #include "../shader_chunk/alphamap.frag"
+    #include "../shader_chunk/alphatest.frag"
+    #include "../shader_chunk/alpha_hash_fragment.frag"
 
-    if (diffuseColor.a < uAlphaTest) discard;
+    // Calculate linear distance from the light reference point
+    float dist = length( vWorldPosition - referencePosition );
+    
+    // Normalize to [0.0, 1.0] range
+    dist = ( dist - nearDistance ) / ( farDistance - nearDistance );
+    dist = saturate( dist ); 
 
-    float dist = length(vWorldPosition - referencePosition);
-    dist = (dist - nearDistance) / (farDistance - nearDistance);
-    dist = clamp(dist, 0.0, 1.0); // saturate equivalent
-
-    pc_fragColor = packDepthToRGBA(dist);
+    // Pack 32-bit float into 8-bit RGBA channels for the shadow map
+    pc_fragColor = packDepthToRGBA( dist );
 }

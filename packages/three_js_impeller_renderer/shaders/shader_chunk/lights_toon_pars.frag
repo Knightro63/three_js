@@ -1,4 +1,3 @@
-#version 460 core
 
 /**
  * Location 13: Fragment position in view space (Sequential).

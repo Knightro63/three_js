@@ -1,27 +1,21 @@
 #version 460 core
 
-// Binding 0: FrameUniforms
-layout(std140, binding = 0) uniform FrameUniforms {
-    mat4 uModelViewProjection;
-    mat4 uModelMatrix; // Added for transformDirection logic
-    float uTime;
-    vec2 uResolution;
-};
+// 1. INCLUDE DECLARATIONS
+#include "../shader_chunk/common.vert"
 
-// Stage Inputs
-layout(location = 0) in vec3 inPosition;
-
-// Stage Outputs (Synced with Frag 10)
-layout(location = 6) out vec3 vWorldPosition; // vWorldDirection equivalent
+// Location 10: vWorldPosition/Direction per Master List
+layout(location = 10) out vec3 vWorldPosition;
 
 void main() {
-    // transformDirection logic: normalize( ( modelMatrix * vec4( position, 0.0 ) ).xyz )
-    // In background shaders, the world position acts as the lookup direction
-    vWorldPosition = normalize((uModelMatrix * vec4(inPosition, 0.0)).xyz);
+    // 2. CALCULATE DIRECTION
+    // transformDirection is provided by common.vert
+    vWorldPosition = transformDirection(inPosition, modelMatrix);
 
-    // Standard projection
-    vec4 mvPosition = uModelViewProjection * vec4(inPosition, 1.0);
-    
-    // Set z to camera far (z = w)
-    gl_Position = mvPosition.xyww;
+    // 3. CORE GEOMETRY
+    #include "../shader_chunk/begin_vertex.vert"
+    #include "../shader_chunk/project_vertex.vert"
+
+    // 4. DEPTH TRICK
+    // Set z to w so that the background is always at the far clipping plane (1.0 in NDC)
+    gl_Position.z = gl_Position.w;
 }

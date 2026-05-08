@@ -1,4 +1,3 @@
-#version 460 core
 
 /**
  * Note: Requires boneMatX..W from skinbase.vert and matrices from skinning_pars.vert.

@@ -1,4 +1,3 @@
-#version 460 core
 
 /**
  * Binding 16: Dedicated sampler for the Light Map.

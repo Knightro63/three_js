@@ -1,4 +1,3 @@
-#version 460 core
 
 // Vertex attribute for color (Location 4 follows batchId at 3)
 layout(location = 4) in vec4 color;

@@ -1,32 +1,42 @@
 #version 460 core
 
-// Binding 1: MaterialUniforms
+// 1. INCLUDE DECLARATIONS
+#include "../shader_chunk/common.frag"
+#include "../shader_chunk/tonemapping_pars.frag"
+
 layout(std140, binding = 1) uniform MaterialUniforms {
     float backgroundIntensity;
-    bool decodeVideoTexture; // SPIR-V replacement for DECODE_VIDEO_TEXTURE
+    bool decodeVideoTexture; // Replacement for DECODE_VIDEO_TEXTURE
 };
 
-// Binding 54: Using specularMap slot for generic background t2D to avoid conflicts
-// Alternatively, if this is a diffuse background, Binding 57 (transmissionSamplerMap) 
-// or a new generic slot could be used. Standardizing to Binding 57.
-layout(binding = 58) uniform sampler2D t2D;
+// Binding 58: Dedicated background texture map per Master List
+layout(set = 0, binding = 58) uniform sampler2D t2D;
 
-// Location 31: vMapUv (Standard Diffuse/Map UV)
+// Location 53: vUv synced with Vertex 53 per Master List
 layout(location = 53) in vec2 vUv;
+
+// Final Output per Master List (Synced with pc_fragColor)
 layout(location = 0) out vec4 pc_fragColor;
 
 void main() {
     vec4 texColor = texture(t2D, vUv);
 
     if (decodeVideoTexture) {
-        // Inline sRGB decode logic
-        vec3 mid = pow(texColor.rgb * 0.9478672986 + vec3(0.0521327014), vec3(2.4));
-        vec3 low = texColor.rgb * 0.0773993808;
-        texColor.rgb = mix(mid, low, vec3(lessThanEqual(texColor.rgb, vec3(0.04045))));
+        // Inline sRGB decode logic for video textures
+        texColor = vec4(mix(
+            pow(texColor.rgb * 0.9478672986 + vec3(0.0521327014), vec3(2.4)),
+            texColor.rgb * 0.0773993808,
+            vec3(lessThanEqual(texColor.rgb, vec3(0.04045)))
+        ), texColor.w);
     }
 
     texColor.rgb *= backgroundIntensity;
 
-    // Tonemapping and Colorspace conversion applied here
-    pc_fragColor = texColor;
+    // Use outgoingLight to interface with tonemapping/colorspace chunks
+    vec3 outgoingLight = texColor.rgb;
+
+    #include "../shader_chunk/tonemapping.frag"
+    #include "../shader_chunk/colorspace.frag"
+
+    pc_fragColor = vec4(outgoingLight, texColor.a);
 }

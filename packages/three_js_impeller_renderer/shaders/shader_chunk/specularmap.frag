@@ -1,4 +1,3 @@
-#version 460 core
 
 /**
  * Binding 54: Dedicated sampler for the Specular map.

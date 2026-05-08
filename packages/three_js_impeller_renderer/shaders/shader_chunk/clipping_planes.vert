@@ -1,4 +1,3 @@
-#version 460 core
 
 /**
  * Location 7: Output to Fragment Shader

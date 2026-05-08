@@ -1,4 +1,3 @@
-#version 460 core
 
 /**
  * Location 7: Position used for clipping math.

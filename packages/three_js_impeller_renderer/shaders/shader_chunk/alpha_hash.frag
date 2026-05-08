@@ -1,4 +1,3 @@
-#version 460 core
 
 // Input from vertex shader (World or Local position)
 layout(location = 0) in vec3 vPosition;

@@ -1,4 +1,3 @@
-#version 460 core
 
 /**
  * Stage: Vertex

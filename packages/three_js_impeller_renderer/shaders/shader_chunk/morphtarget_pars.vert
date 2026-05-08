@@ -1,4 +1,3 @@
-#version 460 core
 
 /**
  * Binding 26: Texture Array containing morph data (Position, Normal, Color).

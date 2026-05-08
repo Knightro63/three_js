@@ -1,4 +1,3 @@
-#version 460 core
 
 /**
  * Binding 24: Dedicated sampler for the Metalness map.

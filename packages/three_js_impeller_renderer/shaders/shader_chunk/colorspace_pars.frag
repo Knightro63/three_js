@@ -1,4 +1,3 @@
-#version 460 core
 
 // http://www.russellcottrell.com/photo/matrixCalculator.htm
 

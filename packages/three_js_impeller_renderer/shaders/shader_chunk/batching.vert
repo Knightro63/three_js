@@ -1,4 +1,3 @@
-#version 460 core
 
 /**
  * Converts the batchingVertex snippet.

@@ -1,42 +1,56 @@
 #version 460 core
 
-// Binding 1: MaterialUniforms
+/**
+ * Stage: Fragment
+ * Purpose: Renders dashed lines by discarding fragments based on cumulative distance.
+ */
+
+// 1. INCLUDE DECLARATIONS
+#include "../shader_chunk/common.frag"
+#include "../shader_chunk/color_pars.frag"
+#include "../shader_chunk/uv_pars.frag"
+#include "../shader_chunk/map_pars.frag"
+#include "../shader_chunk/fog_pars.frag"
+#include "../shader_chunk/logdepthbuf_pars.frag"
+#include "../shader_chunk/clipping_planes_pars.frag"
+
 layout(std140, binding = 1) uniform MaterialUniforms {
     vec3 diffuse;
     float opacity;
     float dashSize;
     float totalSize;
-    bool useMap;
 };
 
-// Binding 60: map
-layout(binding = 60) uniform sampler2D map;
-
-// Location 55: vLineDistance (Synced with Vertex 8 - Reusing FogDepth slot for line math)
+// Location 55: vLineDistance synced with Vertex 55 per Master List
 layout(location = 55) in float vLineDistance;
-// Location 23: vMapUv
-layout(location = 23) in vec2 vMapUv;
-// Location 8: vColor (Interpolated vertex color)
-layout(location = 8) in vec4 vColor;
 
-// Location 54: Final color output
-layout(location = 54) out vec4 pc_fragColor;
+// Final Output per Master List
+layout(location = 0) out vec4 pc_fragColor;
 
 void main() {
-    // Dash discard logic
-    if (mod(vLineDistance, totalSize) > dashSize) {
+    #include "../shader_chunk/clipping_planes_fragment.frag"
+
+    // Initialize base color
+    vec4 diffuseColor = vec4( diffuse, opacity );
+
+    // 2. DASH LOGIC
+    // Discard fragment if it falls within the 'gap' part of the dash cycle
+    if ( mod( vLineDistance, totalSize ) > dashSize ) {
         discard;
     }
 
-    vec4 diffuseColor = vec4(diffuse, opacity);
+    #include "../shader_chunk/logdepthbuf_fragment.frag"
+    #include "../shader_chunk/map.frag"
+    #include "../shader_chunk/color.frag"
 
-    if (useMap) {
-        diffuseColor *= texture(map, vMapUv);
-    }
+    // 3. LIGHTING & FINALIZE
+    // Dashed lines are typically unlit (Basic/Lambert style)
+    vec3 outgoingLight = diffuseColor.rgb;
 
-    // Mix vertex colors if applicable
-    diffuseColor *= vColor;
+    #include "../shader_chunk/tonemapping.frag"
+    #include "../shader_chunk/colorspace.frag"
+    #include "../shader_chunk/fog.frag"
+    #include "../shader_chunk/premultiplied_alpha.frag"
 
-    // Standard simple lighting/opaque logic
-    pc_fragColor = diffuseColor;
+    pc_fragColor = vec4( outgoingLight, diffuseColor.a );
 }

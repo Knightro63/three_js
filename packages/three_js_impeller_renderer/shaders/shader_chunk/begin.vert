@@ -1,4 +1,3 @@
-#version 460 core
 
 // Input attribute from your mesh data
 layout(location = 0) in vec3 inPosition;

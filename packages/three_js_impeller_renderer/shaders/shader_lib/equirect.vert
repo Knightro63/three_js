@@ -1,23 +1,26 @@
 #version 460 core
 
-// Binding 0: FrameUniforms
-layout(std140, binding = 0) uniform FrameUniforms {
-    mat4 uModelViewProjection;
-    mat4 uModelMatrix;
-    float uTime;
-    vec2 uResolution;
-};
+/**
+ * Stage: Vertex
+ * Purpose: Transforms position to world-space direction for equirectangular lookup.
+ */
 
-// Stage Inputs
-layout(location = 0) in vec3 inPosition;
+// 1. INCLUDE DECLARATIONS
+#include "../shader_chunk/common.vert"
 
-// Stage Outputs (Synced with Frag 10)
-layout(location = 6) out vec3 vWorldPosition; 
+// 2. VARYINGS (Outputs)
+// Location 10: vWorldPosition per Master List (Synced with Frag 10)
+layout(location = 10) out vec3 vWorldPosition;
 
 void main() {
-    // transformDirection logic: normalize( ( modelMatrix * vec4( position, 0.0 ) ).xyz )
-    vWorldPosition = normalize((uModelMatrix * vec4(inPosition, 0.0)).xyz);
+    // transformDirection is provided by common.vert
+    // It applies modelMatrix rotation to derive the world-space direction
+    vWorldPosition = transformDirection(inPosition, modelMatrix);
 
-    // Standard projection
-    gl_Position = uModelViewProjection * vec4(inPosition, 1.0);
+    // 3. CORE GEOMETRY
+    #include "../shader_chunk/begin_vertex.vert"
+    #include "../shader_chunk/project_vertex.vert"
+    
+    // Note: Unlike Cube backgrounds, we don't force gl_Position.z = w here 
+    // unless this is being used specifically as a background.
 }

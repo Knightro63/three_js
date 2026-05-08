@@ -1,4 +1,3 @@
-#version 460 core
 
 /**
  * Binding 28: Dedicated sampler for the Roughness map.

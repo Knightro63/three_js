@@ -1,4 +1,3 @@
-#version 460 core
 
 /**
  * Binding 3: Dedicated sampler for the Ambient Occlusion map.

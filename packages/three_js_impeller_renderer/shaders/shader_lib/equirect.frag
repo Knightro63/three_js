@@ -1,36 +1,37 @@
 #version 460 core
 
-// Binding 1: MaterialUniforms
-layout(std140, binding = 1) uniform MaterialUniforms {
-    float backgroundIntensity; // For consistency with other background shaders
-};
+/**
+ * Stage: Fragment
+ * Purpose: Equirectangular environment projection.
+ */
 
-// Binding 61: tEquirect (New dedicated binding for Equirectangular maps)
-layout(binding = 61) uniform sampler2D tEquirect;
+// 1. INCLUDE DECLARATIONS
+#include "../shader_chunk/common.frag"
+#include "../shader_chunk/tonemapping_pars.frag"
 
-// Location 10: vWorldPosition (Received from Vertex 6)
+// Binding 61: Dedicated texture map for equirectangular projections per Master List
+layout(set = 0, binding = 61) uniform sampler2D tEquirect;
+
+// Location 10: vWorldPosition/Direction per Master List (Synced with Vertex 10)
 layout(location = 10) in vec3 vWorldPosition;
 
-// Location 54: Final color redirected
-layout(location = 54) out vec4 pc_fragColor;
-
-// Helper: equirectUv (Inlined from <common>)
-vec2 equirectUv(vec3 dir) {
-    float PI = 3.141592653589793;
-    float tPI = 6.283185307179586;
-    vec2 uv = vec2(atan(dir.z, dir.x) / tPI + 0.5, acos(dir.y) / PI);
-    return uv;
-}
+// Final Output per Master List
+layout(location = 0) out vec4 pc_fragColor;
 
 void main() {
-    vec3 direction = normalize(vWorldPosition);
-    vec2 sampleUV = equirectUv(direction);
+    // direction logic
+    vec3 direction = normalize( vWorldPosition );
     
-    vec4 texColor = texture(tEquirect, sampleUV);
+    // equirectUv is provided by common.frag
+    vec2 sampleUV = equirectUv( direction );
+    
+    vec4 texColor = texture( tEquirect, sampleUV );
 
-    // Apply background intensity if needed
-    // texColor.rgb *= backgroundIntensity;
+    // Apply lighting chain to outgoingLight
+    vec3 outgoingLight = texColor.rgb;
 
-    // Tonemapping and Colorspace conversion applied here
-    pc_fragColor = texColor;
+    #include "../shader_chunk/tonemapping.frag"
+    #include "../shader_chunk/colorspace.frag"
+
+    pc_fragColor = vec4( outgoingLight, texColor.a );
 }

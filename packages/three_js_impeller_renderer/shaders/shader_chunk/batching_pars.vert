@@ -1,4 +1,3 @@
-#version 460 core
 
 /**
  * Binding 4: Texture containing matrix data for batching/instancing.

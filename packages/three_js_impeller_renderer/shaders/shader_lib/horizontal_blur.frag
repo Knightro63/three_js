@@ -1,22 +1,27 @@
 #version 460 core
 
-// Binding 1: MaterialUniforms
+/**
+ * Stage: Fragment
+ * Purpose: Horizontal Gaussian Blur (9 samples).
+ */
+
+// Binding 58: tDiffuse (using t2D slot) per Master List
+layout(set = 0, binding = 58) uniform sampler2D tDiffuse;
+
 layout(std140, binding = 1) uniform MaterialUniforms {
     float h; // 1.0 / width
 };
 
-// Binding 60: tDiffuse (Reusing map slot for post-processing source)
-layout(binding = 60) uniform sampler2D tDiffuse;
-
-// Location 53: vUv (Synced with Vertex 53 for background/post-processing isolation)
+// Location 53: Interpolated UV per Master List
 layout(location = 53) in vec2 vUv;
 
-// Location 54: Final color redirected
-layout(location = 54) out vec4 pc_fragColor;
+// Final Output per Master List
+layout(location = 0) out vec4 pc_fragColor;
 
 void main() {
     vec4 sum = vec4( 0.0 );
 
+    // 9-tap Gaussian filter
     sum += texture( tDiffuse, vec2( vUv.x - 4.0 * h, vUv.y ) ) * 0.051;
     sum += texture( tDiffuse, vec2( vUv.x - 3.0 * h, vUv.y ) ) * 0.0918;
     sum += texture( tDiffuse, vec2( vUv.x - 2.0 * h, vUv.y ) ) * 0.12245;

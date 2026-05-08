@@ -1,4 +1,3 @@
-#version 460 core
 
 // Bindings from Master List
 layout(set = 0, binding = 4) uniform sampler2D map;      // Diffuse Map

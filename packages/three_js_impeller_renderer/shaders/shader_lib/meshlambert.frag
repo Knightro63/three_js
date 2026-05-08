@@ -1,69 +1,87 @@
 #version 460 core
 
-// Binding 1: MaterialUniforms
+/**
+ * Stage: Fragment
+ * Purpose: Master template for diffuse-only materials (Lambert).
+ */
+
+#define LAMBERT
+
+// 1. DECLARATIONS (The "Pars" snippets)
+#include "../shader_chunk/common.frag"
+#include "../shader_chunk/packing.frag"
+#include "../shader_chunk/dithering_pars.frag"
+#include "../shader_chunk/color_pars.frag"
+#include "../shader_chunk/uv_pars.frag"
+#include "../shader_chunk/map_pars.frag"
+#include "../shader_chunk/alphamap_pars.frag"
+#include "../shader_chunk/alphatest_pars.frag"
+#include "../shader_chunk/alpha_hash_pars.frag"
+#include "../shader_chunk/aomap_pars.frag"
+#include "../shader_chunk/lightmap_pars.frag"
+#include "../shader_chunk/emissivemap_pars.frag"
+#include "../shader_chunk/envmap_common_pars.frag"
+#include "../shader_chunk/envmap_pars.frag"
+#include "../shader_chunk/fog_pars.frag"
+#include "../shader_chunk/bsdfs.frag"
+#include "../shader_chunk/lights_pars_begin.frag"
+#include "../shader_chunk/normal_pars.frag"
+#include "../shader_chunk/lights_lambert_pars.frag"
+#include "../shader_chunk/shadowmap_pars.frag"
+#include "../shader_chunk/bumpmap_pars.frag"
+#include "../shader_chunk/normalmap_pars.frag"
+#include "../shader_chunk/specularmap_pars.frag"
+#include "../shader_chunk/logdepthbuf_pars.frag"
+#include "../shader_chunk/clipping_planes_pars.frag"
+
+// Uniforms from Binding 1
 layout(std140, binding = 1) uniform MaterialUniforms {
     vec3 diffuse;
     vec3 emissive;
     float opacity;
-    float uAlphaTest;
-    float aoMapIntensity;
-    float lightMapIntensity;
-    bool useMap;
-    bool useAlphaMap;
-    bool useEmissiveMap;
-    bool useAoMap;
-    bool useLightMap;
-    bool useSpecularMap;
-    bool useNormalMap;
+    // ... rest of UBO
 };
 
-// Bindings
-layout(binding = 60) uniform sampler2D map;
-layout(binding = 2)  uniform sampler2D alphaMap;
-layout(binding = 12) uniform sampler2D emissiveMap;
-layout(binding = 3)  uniform sampler2D aoMap;
-layout(binding = 16) uniform sampler2D lightMap;
-layout(binding = 54) uniform sampler2D specularMap;
-layout(binding = 27) uniform sampler2D normalMap;
-
-// Inputs (Synced with Master List)
-layout(location = 3)  in vec3 vNormal;         
-layout(location = 13) in vec3 vViewPosition;   
-layout(location = 8)  in vec4 vColor;          
-layout(location = 23) in vec2 vMapUv;          
-layout(location = 1)  in vec2 vAlphaMapUv;     
-layout(location = 9)  in vec2 vEmissiveMapUv;  
-layout(location = 2)  in vec2 vAoMapUv;        
-layout(location = 44) in vec2 vLightMapUv;     
-layout(location = 41) in vec2 vSpecularMapUv;  
-layout(location = 27) in vec2 vNormalMapUv;    
-
-// Output 54
-layout(location = 54) out vec4 pc_fragColor;
+// Final Output per Master List
+layout(location = 0) out vec4 pc_fragColor;
 
 void main() {
-    vec4 diffuseColor = vec4(diffuse, opacity);
-    diffuseColor *= vColor;
+    #include "../shader_chunk/clipping_planes_fragment.frag"
 
-    if (useMap) diffuseColor *= texture(map, vMapUv);
-    if (useAlphaMap) diffuseColor.a *= texture(alphaMap, vAlphaMapUv).g;
-    if (diffuseColor.a < uAlphaTest) discard;
-
+    vec4 diffuseColor = vec4( diffuse, opacity );
+    ReflectedLight reflectedLight = ReflectedLight( vec3( 0.0 ), vec3( 0.0 ), vec3( 0.0 ), vec3( 0.0 ) );
     vec3 totalEmissiveRadiance = emissive;
-    if (useEmissiveMap) totalEmissiveRadiance *= texture(emissiveMap, vEmissiveMapUv).rgb;
 
-    // Lambertian Lighting Calculation (Simplified for template)
-    // reflectedLight.directDiffuse and indirectDiffuse logic 
-    // would be inlined here from <lights_lambert_fragment>
-    vec3 indirectDiffuse = vec3(1.0); 
-    if (useLightMap) indirectDiffuse = texture(lightMap, vLightMapUv).rgb * lightMapIntensity;
+    #include "../shader_chunk/logdepthbuf_fragment.frag"
+    #include "../shader_chunk/map.frag"
+    #include "../shader_chunk/color.frag"
+    #include "../shader_chunk/alphamap.frag"
+    #include "../shader_chunk/alphatest.frag"
+    #include "../shader_chunk/alpha_hash_fragment.frag"
+    #include "../shader_chunk/specularmap.frag"
+    
+    // Normal handling
+    #include "../shader_chunk/normal_fragment_begin.frag"
+    #include "../shader_chunk/normal_fragment_maps.frag"
+    #include "../shader_chunk/emissivemap.frag"
 
-    if (useAoMap) {
-        float ambientOcclusion = (texture(aoMap, vAoMapUv).r - 1.0) * aoMapIntensity + 1.0;
-        indirectDiffuse *= ambientOcclusion;
-    }
+    // 2. ACCUMULATION (Lighting Execution)
+    #include "../shader_chunk/lights_lambert_fragment.frag"
+    #include "../shader_chunk/lights_fragment_begin.frag"
+    #include "../shader_chunk/lights_fragment_maps.frag"
+    #include "../shader_chunk/lights_fragment_end.frag"
 
-    vec3 outgoingLight = (indirectDiffuse * diffuseColor.rgb) + totalEmissiveRadiance;
+    // 3. MODULATION & FINAL ASSEMBLY
+    #include "../shader_chunk/aomap.frag"
+    
+    vec3 outgoingLight = reflectedLight.directDiffuse + reflectedLight.indirectDiffuse + totalEmissiveRadiance;
 
-    pc_fragColor = vec4(outgoingLight, diffuseColor.a);
+    #include "../shader_chunk/envmap.frag"
+    #include "../shader_chunk/tonemapping.frag"
+    #include "../shader_chunk/colorspace.frag"
+    #include "../shader_chunk/fog.frag"
+    #include "../shader_chunk/premultiplied_alpha.frag"
+    #include "../shader_chunk/dithering.frag"
+
+    pc_fragColor = vec4( outgoingLight, diffuseColor.a );
 }

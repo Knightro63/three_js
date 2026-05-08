@@ -1,44 +1,42 @@
 #version 460 core
 
-// Binding 0: FrameUniforms
-layout(std140, binding = 0) uniform FrameUniforms {
-    mat4 uModelViewProjection;
-    float uTime;
-    vec2 uResolution;
-};
+// 1. INCLUDE DECLARATIONS (The "Pars" snippets)
+#include "../shader_chunk/common.vert"
+#include "../shader_chunk/batching_pars.vert"
+#include "../shader_chunk/uv_pars.vert"
+#include "../shader_chunk/displacementmap_pars.vert"
+#include "../shader_chunk/morphtarget_pars.vert"
+#include "../shader_chunk/skinning_pars.vert"
+#include "../shader_chunk/logdepthbuf_pars.vert"
+#include "../shader_chunk/clipping_planes_pars.vert"
 
-// Binding 1: MaterialUniforms
-layout(std140, binding = 1) uniform MaterialUniforms {
-    bool useDisplacementMap;
-    float displacementScale;
-    float displacementBias;
-};
-
-// Binding 11: displacementMap
-layout(binding = 11) uniform sampler2D displacementMap;
-
-// Stage Inputs
-layout(location = 0) in vec3 inPosition;
-layout(location = 1) in vec3 inNormal;
-layout(location = 29) in vec2 inUv;
-
-// Stage Outputs
-layout(location = 23) out vec2 vMapUv;      // Synced to Frag 23
-layout(location = 22) out float vFragDepth; // Synced to Frag 22 (vHighPrecisionZW replacement)
+// Location 56: High precision ZW synced with Frag 56
+layout(location = 56) out vec2 vHighPrecisionZW;
 
 void main() {
-    vMapUv = inUv;
+    // 2. INITIALIZATION & SETUP
+    #include "../shader_chunk/uv_vertex.vert"
+    #include "../shader_chunk/batching.vert"
+    #include "../shader_chunk/skinbase.vert"
+    #include "../shader_chunk/morphinstance.vert"
 
-    vec3 transformed = vec3(inPosition);
+    // 3. NORMAL PROCESSING (Required for Displacement Mapping)
+    // Only executed if Displacement Mapping is active
+    #include "../shader_chunk/beginnormal.vert"
+    #include "../shader_chunk/morphnormal.vert"
+    #include "../shader_chunk/skinnormal.vert"
 
-    // SPIR-V branching for Displacement Map
-    if (useDisplacementMap) {
-        transformed += normalize(inNormal) * (texture(displacementMap, inUv).x * displacementScale + displacementBias);
-    }
+    // 4. GEOMETRY TRANSFORMATION
+    #include "../shader_chunk/begin.vert"
+    #include "../shader_chunk/morphtarget.vert"
+    #include "../shader_chunk/skinning.vert"
+    #include "../shader_chunk/displacementmap.vert"
+    #include "../shader_chunk/project_vertex.vert"
 
-    // Standard Project Vertex
-    gl_Position = uModelViewProjection * vec4(transformed, 1.0);
+    // 5. DEPTH & CLIPPING
+    #include "../shader_chunk/logdepthbuf_vertex.vert"
+    #include "../shader_chunk/clipping_planes.vert"
 
-    // High precision depth equivalent: 0.5 * z / w + 0.5
-    vFragDepth = 0.5 * gl_Position.z / gl_Position.w + 0.5;
+    // High precision equivalent of gl_FragCoord.z
+    vHighPrecisionZW = gl_Position.zw;
 }

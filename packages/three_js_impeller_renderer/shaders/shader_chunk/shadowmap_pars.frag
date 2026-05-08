@@ -1,4 +1,3 @@
-#version 460 core
 
 /**
  * Note: Requires packing.frag for unpackRGBAToDepth and unpackRGBATo2Half.

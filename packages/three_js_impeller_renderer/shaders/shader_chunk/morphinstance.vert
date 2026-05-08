@@ -1,4 +1,3 @@
-#version 460 core
 
 /**
  * Binding 25: A texture containing influence weights per instance.

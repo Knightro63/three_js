@@ -1,4 +1,3 @@
-#version 460 core
 
 /**
  * Converts: vec3 clearcoatNormal = nonPerturbedNormal;

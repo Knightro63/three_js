@@ -1,24 +1,214 @@
 {
   "shaders": [
     {
-      "name": "MeshPhysicalMaterialVertex",
+      "name": "meshtoon_vert",
       "type": "vertex",
-      "file": "path/to/mesh_physical.vert"
+      "file": "shader_lib/meshtoon.vert"
     },
     {
-      "name": "MeshPhysicalMaterialFragment",
+      "name": "vertical_blur_frag",
       "type": "fragment",
-      "file": "path/to/mesh_physical.frag"
+      "file": "shader_lib/vertical_blur.frag"
     },
     {
-      "name": "MeshToonMaterialVertex",
+      "name": "equirect_vert",
       "type": "vertex",
-      "file": "path/to/mesh_toon.vert"
+      "file": "shader_lib/equirect.vert"
     },
     {
-      "name": "MeshToonMaterialFragment",
+      "name": "points_vert",
+      "type": "vertex",
+      "file": "shader_lib/points.vert"
+    },
+    {
+      "name": "background_frag",
       "type": "fragment",
-      "file": "path/to/mesh_toon.frag"
+      "file": "shader_lib/background.frag"
+    },
+    {
+      "name": "meshlambert_vert",
+      "type": "vertex",
+      "file": "shader_lib/meshlambert.vert"
+    },
+    {
+      "name": "cube_frag",
+      "type": "fragment",
+      "file": "shader_lib/cube.frag"
+    },
+    {
+      "name": "depth_vert",
+      "type": "vertex",
+      "file": "shader_lib/depth.vert"
+    },
+    {
+      "name": "background_cube_vert",
+      "type": "vertex",
+      "file": "shader_lib/background_cube.vert"
+    },
+    {
+      "name": "meshbasic_frag",
+      "type": "fragment",
+      "file": "shader_lib/meshbasic.frag"
+    },
+    {
+      "name": "shadow_vert",
+      "type": "vertex",
+      "file": "shader_lib/shadow.vert"
+    },
+    {
+      "name": "sprite_vert",
+      "type": "vertex",
+      "file": "shader_lib/sprite.vert"
+    },
+    {
+      "name": "distance_rgba_frag",
+      "type": "fragment",
+      "file": "shader_lib/distance_rgba.frag"
+    },
+    {
+      "name": "meshphong_vert",
+      "type": "vertex",
+      "file": "shader_lib/meshphong.vert"
+    },
+    {
+      "name": "meshmatcap_vert",
+      "type": "vertex",
+      "file": "shader_lib/meshmatcap.vert"
+    },
+    {
+      "name": "linedashed_frag",
+      "type": "fragment",
+      "file": "shader_lib/linedashed.frag"
+    },
+    {
+      "name": "vsm_frag",
+      "type": "fragment",
+      "file": "shader_lib/vsm.frag"
+    },
+    {
+      "name": "mesh_gouraund_frag",
+      "type": "fragment",
+      "file": "shader_lib/mesh_gouraund.frag"
+    },
+    {
+      "name": "horizontal_blur_vert",
+      "type": "vertex",
+      "file": "shader_lib/horizontal_blur.vert"
+    },
+    {
+      "name": "meshnormal_vert",
+      "type": "vertex",
+      "file": "shader_lib/meshnormal.vert"
+    },
+    {
+      "name": "meshphysical_frag",
+      "type": "fragment",
+      "file": "shader_lib/meshphysical.frag"
+    },
+    {
+      "name": "meshbasic_vert",
+      "type": "vertex",
+      "file": "shader_lib/meshbasic.vert"
+    },
+    {
+      "name": "background_cube_frag",
+      "type": "fragment",
+      "file": "shader_lib/background_cube.frag"
+    },
+    {
+      "name": "depth_frag",
+      "type": "fragment",
+      "file": "shader_lib/depth.frag"
+    },
+    {
+      "name": "cube_vert",
+      "type": "vertex",
+      "file": "shader_lib/cube.vert"
+    },
+    {
+      "name": "meshlambert_frag",
+      "type": "fragment",
+      "file": "shader_lib/meshlambert.frag"
+    },
+    {
+      "name": "background_vert",
+      "type": "vertex",
+      "file": "shader_lib/background.vert"
+    },
+    {
+      "name": "points_frag",
+      "type": "fragment",
+      "file": "shader_lib/points.frag"
+    },
+    {
+      "name": "vertical_blur_vert",
+      "type": "vertex",
+      "file": "shader_lib/vertical_blur.vert"
+    },
+    {
+      "name": "meshtoon_frag",
+      "type": "fragment",
+      "file": "shader_lib/meshtoon.frag"
+    },
+    {
+      "name": "equirect_frag",
+      "type": "fragment",
+      "file": "shader_lib/equirect.frag"
+    },
+    {
+      "name": "meshphysical_vert",
+      "type": "vertex",
+      "file": "shader_lib/meshphysical.vert"
+    },
+    {
+      "name": "meshnormal_frag",
+      "type": "fragment",
+      "file": "shader_lib/meshnormal.frag"
+    },
+    {
+      "name": "horizontal_blur_frag",
+      "type": "fragment",
+      "file": "shader_lib/horizontal_blur.frag"
+    },
+    {
+      "name": "mesh_gouraund_vert",
+      "type": "vertex",
+      "file": "shader_lib/mesh_gouraund.vert"
+    },
+    {
+      "name": "linedashed_vert",
+      "type": "vertex",
+      "file": "shader_lib/linedashed.vert"
+    },
+    {
+      "name": "vsm_vert",
+      "type": "vertex",
+      "file": "shader_lib/vsm.vert"
+    },
+    {
+      "name": "meshmatcap_frag",
+      "type": "fragment",
+      "file": "shader_lib/meshmatcap.frag"
+    },
+    {
+      "name": "meshphong_frag",
+      "type": "fragment",
+      "file": "shader_lib/meshphong.frag"
+    },
+    {
+      "name": "sprite_frag",
+      "type": "fragment",
+      "file": "shader_lib/sprite.frag"
+    },
+    {
+      "name": "distance_rgba_vert",
+      "type": "vertex",
+      "file": "shader_lib/distance_rgba.vert"
+    },
+    {
+      "name": "shadow_frag",
+      "type": "fragment",
+      "file": "shader_lib/shadow.frag"
     }
   ]
 }

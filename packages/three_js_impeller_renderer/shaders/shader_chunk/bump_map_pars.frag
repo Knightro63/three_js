@@ -1,4 +1,3 @@
-#version 460 core
 
 // Binding 6: Dedicated sampler for the Bump (Height) map.
 layout(set = 0, binding = 5) uniform sampler2D bumpMap;

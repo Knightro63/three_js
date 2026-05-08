@@ -1,4 +1,3 @@
-#version 460 core
 
 // Binding 9: Dedicated block for clipping planes
 // Using a fixed max size (e.g., 8) as GLSL 4.60 requires constant array sizes.

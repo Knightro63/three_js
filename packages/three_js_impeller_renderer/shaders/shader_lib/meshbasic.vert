@@ -1,49 +1,53 @@
 #version 460 core
 
-// Binding 0: FrameUniforms
-layout(std140, binding = 0) uniform FrameUniforms {
-    mat4 uModelViewProjection;
-    mat4 uModelMatrix;
-    float uTime;
-    vec2 uResolution;
-};
+/**
+ * Stage: Vertex
+ * Purpose: Master template for unlit materials (Basic).
+ */
 
-// Binding 1: MaterialUniforms
-layout(std140, binding = 1) uniform MaterialUniforms {
-    bool useEnvMap;
-    bool useSkinning;
-};
-
-// Stage Inputs
-layout(location = 0)  in vec3 inPosition;
-layout(location = 1)  in vec3 inNormal;
-layout(location = 4)  in vec4 color;
-layout(location = 29) in vec2 inUv;
-layout(location = 30) in vec2 inUv2;
-
-// Stage Outputs (Synced with Frag Master List)
-layout(location = 23) out vec2 vMapUv;         // Frag 23
-layout(location = 52) out vec2 vUv2;           // Frag 52 (Shared AO/Lightmap)
-layout(location = 8)  out vec4 vColor;         // Frag 8
-layout(location = 3)  out vec3 vNormal;        // Frag 3
-layout(location = 10) out vec3 vWorldPosition; // Frag 10 (for EnvMap)
+// 1. INCLUDE DECLARATIONS (The "Pars" snippets)
+#include "../shader_chunk/common.vert"
+#include "../shader_chunk/batching_pars.vert"
+#include "../shader_chunk/uv_pars.vert"
+#include "../shader_chunk/envmap_pars.vert"
+#include "../shader_chunk/color_pars.vert"
+#include "../shader_chunk/fog_pars.vert"
+#include "../shader_chunk/morphtarget_pars.vert"
+#include "../shader_chunk/skinning_pars.vert"
+#include "../shader_chunk/logdepthbuf_pars.vert"
+#include "../shader_chunk/clipping_planes_pars.vert"
 
 void main() {
-    vMapUv = inUv;
-    vUv2 = inUv2;
-    vColor = color;
-
-    vec3 transformedNormal = inNormal;
-    vec4 worldPosition = uModelMatrix * vec4(inPosition, 1.0);
+    // 2. UV & COLOR SETUP
+    #include "../shader_chunk/uv_vertex.vert"
+    #include "../shader_chunk/color_vertex.vert"
     
-    // SPIR-V branching for Normals (EnvMap requirement)
-    if (useEnvMap || useSkinning) {
-        // Simple world normal transform (non-uniform scale not handled for Basic)
-        vNormal = normalize(mat3(uModelMatrix) * transformedNormal);
-    }
+    // 3. ANIMATION SETUP
+    #include "../shader_chunk/morphinstance.vert"
+    #include "../shader_chunk/morphcolor.vert"
+    #include "../shader_chunk/batching.vert"
 
-    vWorldPosition = worldPosition.xyz;
+    // 4. NORMAL PROCESSING
+    // Required even for Basic materials if using EnvMaps or Skinning
+    // Toggles handled by uniforms inside the chunks
+    #include "../shader_chunk/beginnormal.vert"
+    #include "../shader_chunk/morphnormal.vert"
+    #include "../shader_chunk/skinbase.vert"
+    #include "../shader_chunk/skinnormal.vert"
+    #include "../shader_chunk/defaultnormal.vert"
 
-    // Standard projection
-    gl_Position = uModelViewProjection * vec4(inPosition, 1.0);
+    // 5. CORE GEOMETRY
+    #include "../shader_chunk/begin.vert"
+    #include "../shader_chunk/morphtarget.vert"
+    #include "../shader_chunk/skinning.vert"
+    #include "../shader_chunk/project_vertex.vert"
+
+    // 6. DEPTH & CLIPPING
+    #include "../shader_chunk/logdepthbuf_vertex.vert"
+    #include "../shader_chunk/clipping_planes.vert"
+
+    // 7. VARYINGS FOR FRAGMENT
+    #include "../shader_chunk/worldpos_vertex.vert"
+    #include "../shader_chunk/envmap_vertex.vert"
+    #include "../shader_chunk/fog_vertex.vert"
 }

@@ -1,4 +1,3 @@
-#version 460 core
 
 /**
  * Note: Requires 'uv2' (Attr 30), 'vUv2' (Out 52), 

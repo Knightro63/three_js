@@ -1,4 +1,3 @@
-#version 460 core
 
 // Input for bitangent calculation
 layout(location = 2) in vec4 inTangent; // inTangent.w is the sign

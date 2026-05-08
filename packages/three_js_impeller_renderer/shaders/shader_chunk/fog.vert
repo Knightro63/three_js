@@ -1,4 +1,3 @@
-#version 460 core
 
 /**
  * Location 8: Output to Fragment Shader (Vertex Stage).

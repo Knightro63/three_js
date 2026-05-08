@@ -1,4 +1,3 @@
-#version 460 core
 
 /**
  * Binding 9: Dedicated block for clipping planes.

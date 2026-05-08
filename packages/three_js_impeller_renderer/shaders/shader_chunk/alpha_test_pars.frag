@@ -1,4 +1,3 @@
-#version 460 core
 
 /**
  * Flutter GPU requires uniforms to be in blocks for efficiency.

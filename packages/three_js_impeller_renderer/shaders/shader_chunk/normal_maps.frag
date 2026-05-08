@@ -1,4 +1,3 @@
-#version 460 core
 
 // Binding 27: Dedicated sampler for the Normal Map
 layout(set = 0, binding = 27) uniform sampler2D normalMap;

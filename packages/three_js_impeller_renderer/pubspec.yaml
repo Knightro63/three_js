@@ -1,7 +1,7 @@
-name: three_js_angle_renderer
-description: "This is a renderer for three_js using angle."
+name: three_js_impeller_renderer
+description: "This is a renderer for three_js using impeller."
 version: 0.0.1
-homepage: https://github.com/Knightro63/three_js/tree/main/packages/three_js_angle_renderer
+homepage: https://github.com/Knightro63/three_js/tree/main/packages/three_js_impeller_renderer
 
 environment:
   sdk: '>=3.5.0 <4.0.0'
@@ -21,3 +21,48 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
+
+flutter:
+  shaders:
+   - shaders/shader_lib/meshtoon.vert
+  #  - shaders/shader_lib/vertical_blur.frag
+  #  - shaders/shader_lib/equirect.vert
+  #  - shaders/shader_lib/points.vert
+  #  - shaders/shader_lib/background.frag
+  #  - shaders/shader_lib/meshlambert.vert
+  #  - shaders/shader_lib/cube.frag
+  #  - shaders/shader_lib/depth.vert
+  #  - shaders/shader_lib/background_cube.vert
+  #  - shaders/shader_lib/meshbasic.frag
+  #  - shaders/shader_lib/shadow.vert
+  #  - shaders/shader_lib/sprite.vert
+  #  - shaders/shader_lib/distance_rgba.frag
+  #  - shaders/shader_lib/meshphong.vert
+  #  - shaders/shader_lib/meshmatcap.vert
+  #  - shaders/shader_lib/linedashed.frag
+  #  - shaders/shader_lib/vsm.frag
+  #  - shaders/shader_lib/mesh_gouraund.frag
+  #  - shaders/shader_lib/horizontal_blur.vert
+  #  - shaders/shader_lib/meshnormal.vert
+  #  - shaders/shader_lib/meshphysical.frag
+  #  - shaders/shader_lib/meshbasic.vert
+  #  - shaders/shader_lib/background_cube.frag
+  #  - shaders/shader_lib/depth.frag
+  #  - shaders/shader_lib/cube.vert
+  #  - shaders/shader_lib/meshlambert.frag
+  #  - shaders/shader_lib/background.vert
+  #  - shaders/shader_lib/points.frag
+  #  - shaders/shader_lib/vertical_blur.vert
+  #  - shaders/shader_lib/meshtoon.frag
+  #  - shaders/shader_lib/equirect.frag
+  #  - shaders/shader_lib/meshphysical.vert
+  #  - shaders/shader_lib/meshnormal.frag
+  #  - shaders/shader_lib/horizontal_blur.frag
+  #  - shaders/shader_lib/mesh_gouraund.vert
+  #  - shaders/shader_lib/linedashed.vert
+  #  - shaders/shader_lib/vsm.vert
+  #  - shaders/shader_lib/meshmatcap.frag
+  #  - shaders/shader_lib/meshphong.frag
+  #  - shaders/shader_lib/sprite.frag
+  #  - shaders/shader_lib/distance_rgba.vert
+  #  - shaders/shader_lib/shadow.frag

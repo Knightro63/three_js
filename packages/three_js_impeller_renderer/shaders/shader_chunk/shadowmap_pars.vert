@@ -1,4 +1,3 @@
-#version 460 core
 
 /**
  * Binding 41, 45, 49: Blocks of mat4 for shadow projection.

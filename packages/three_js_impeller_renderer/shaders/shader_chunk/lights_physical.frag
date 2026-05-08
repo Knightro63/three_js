@@ -1,4 +1,3 @@
-#version 460 core
 
 // Textures - Continuing sequential bindings after LightMap (16)
 layout(set = 0, binding = 17) uniform sampler2D specularColorMap;

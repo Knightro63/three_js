@@ -1,4 +1,3 @@
-#version 460 core
 
 // Input attributes from mesh
 layout(location = 1) in vec3 inNormal;   // Standard vertex normal

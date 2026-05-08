@@ -1,4 +1,3 @@
-#version 460 core
 
 // Output to Fragment Shader (Vertex Locations per your update)
 layout(location = 6) out vec3 vWorldPosition;

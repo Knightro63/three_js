@@ -1,4 +1,3 @@
-#version 460 core
 
 // XYZ to linear-sRGB color space
 const mat3 XYZ_TO_REC709 = mat3(

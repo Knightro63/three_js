@@ -1,4 +1,3 @@
-#version 460 core
 
 #define RECIPROCAL_PI 0.3183098861837907
 

@@ -1,39 +1,43 @@
 #version 460 core
 
-// Binding 1: Material parameters
+/**
+ * Stage: Fragment
+ * Purpose: Master template for "Shadow Catcher" materials.
+ */
+
+// 1. INCLUDE DECLARATIONS
+#include "../shader_chunk/common.frag"
+#include "../shader_chunk/packing.frag"
+#include "../shader_chunk/fog_pars.frag"
+#include "../shader_chunk/bsdfs.frag"
+#include "../shader_chunk/lights_pars_begin.frag"
+#include "../shader_chunk/logdepthbuf_pars.frag"
+#include "../shader_chunk/shadowmap_pars.frag"   // Blocks 29, 33, 37
+#include "../shader_chunk/shadowmask_pars.frag"  // Provides getShadowMask()
+
 layout(std140, binding = 1) uniform MaterialUniforms {
     vec3 color;
     float opacity;
 };
 
-// Bindings 29, 33, 37: Shadow Maps (Blocks of 4)
-layout(binding = 29) uniform sampler2D directionalShadowMap[4];
-layout(binding = 33) uniform sampler2D spotShadowMap[4];
-layout(binding = 37) uniform sampler2D pointShadowMap[4];
-
-// Bindings 41, 45, 49: Shadow Uniforms
-layout(std140, binding = 41) uniform DirectionalShadowUniforms { mat4 directionalShadowMatrix[4]; };
-layout(std140, binding = 45) uniform SpotShadowUniforms { mat4 spotShadowMatrix[4]; };
-layout(std140, binding = 49) uniform PointShadowUniforms { mat4 pointShadowMatrix[4]; };
-
-// Shadow Coords from Vertex (Locations 29, 33, 37)
-layout(location = 29) in vec4 vDirectionalShadowCoord[4];
-layout(location = 33) in vec4 vSpotLightCoord[4];
-layout(location = 37) in vec4 vPointShadowCoord[4];
-
-// Output 54: Final fragment color
-layout(location = 54) out vec4 pc_fragColor;
-
-// Simplified Shadow Mask Logic (Replacement for getShadowMask)
-float getShadowMask() {
-    float shadow = 1.0;
-    // Implementation would iterate through shadow maps and compare depth
-    // using vDirectionalShadowCoord, vSpotLightCoord, etc.
-    return shadow; 
-}
+// Final Output per Master List
+layout(location = 0) out vec4 pc_fragColor;
 
 void main() {
-    float shadowMask = getShadowMask();
-    
-    pc_fragColor = vec4(color, opacity * (1.0 - shadowMask));
+    #include "../shader_chunk/logdepthbuf_fragment.frag"
+
+    /**
+     * The shadow mask returns 1.0 (no shadow) to 0.0 (full shadow).
+     * We invert it (1.0 - mask) so that shadowed areas become opaque.
+     */
+    float shadowAlpha = opacity * (1.0 - getShadowMask());
+
+    // outgoingLight is used by tonemapping and fog chunks
+    vec3 outgoingLight = color;
+
+    #include "../shader_chunk/tonemapping.frag"
+    #include "../shader_chunk/colorspace.frag"
+    #include "../shader_chunk/fog.frag"
+
+    pc_fragColor = vec4(outgoingLight, shadowAlpha);
 }

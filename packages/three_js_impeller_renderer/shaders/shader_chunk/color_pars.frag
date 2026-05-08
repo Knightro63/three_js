@@ -1,4 +1,3 @@
-#version 460 core
 
 /**
  * Location 8: Interpolated color from the vertex shader.

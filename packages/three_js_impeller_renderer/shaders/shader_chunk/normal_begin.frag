@@ -1,4 +1,3 @@
-#version 460 core
 
 /**
  * Note: Requires getTangentFrame() utility if not using vertex tangents.

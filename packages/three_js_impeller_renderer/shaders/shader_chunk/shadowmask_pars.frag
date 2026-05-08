@@ -1,4 +1,3 @@
-#version 460 core
 
 /**
  * Aggregates all shadow contributions into a single mask.

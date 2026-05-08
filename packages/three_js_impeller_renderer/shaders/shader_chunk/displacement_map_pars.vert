@@ -1,4 +1,3 @@
-#version 460 core
 
 /**
  * Binding 11: Dedicated sampler for the Displacement Map.

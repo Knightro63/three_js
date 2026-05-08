@@ -1,4 +1,3 @@
-#version 460 core
 
 layout(set = 0, binding = 1) uniform MaterialUniforms {
     vec4 uDiffuseColor;

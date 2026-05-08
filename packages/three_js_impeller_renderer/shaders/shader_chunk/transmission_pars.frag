@@ -1,4 +1,3 @@
-#version 460 core
 
 /**
  * Binding 57: The Transmission Sampler Map (usually a copy of the framebuffer).

@@ -1,4 +1,3 @@
-#version 460 core
 
 /**
  * Location 3: Interpolated view-space normal.

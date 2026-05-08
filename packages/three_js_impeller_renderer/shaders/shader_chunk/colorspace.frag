@@ -1,4 +1,3 @@
-#version 460 core
 
 // Your main fragment output
 layout(location = 0) out vec4 fragColor;

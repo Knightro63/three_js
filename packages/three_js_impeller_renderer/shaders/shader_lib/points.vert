@@ -1,49 +1,58 @@
 #version 460 core
 
-// Binding 0: FrameUniforms
-layout(std140, binding = 0) uniform FrameUniforms {
-    mat4 uModelViewProjection;
-    mat4 uViewMatrix;
-    mat4 uModelMatrix;
-    float uTime;
-    vec2 uResolution;
-};
+/**
+ * Stage: Vertex
+ * Purpose: Master template for Point materials.
+ */
 
-// Binding 1: MaterialUniforms
+// 1. INCLUDE DECLARATIONS
+#include "../shader_chunk/common.vert"
+#include "../shader_chunk/color_pars.vert"
+#include "../shader_chunk/fog_pars.vert"
+#include "../shader_chunk/morphtarget_pars.vert"
+#include "../shader_chunk/logdepthbuf_pars.vert"
+#include "../shader_chunk/clipping_planes_pars.vert"
+
+// Optional UV Output (Synced with Frag 23)
+layout(location = 23) out vec2 vUv;
+
 layout(std140, binding = 1) uniform MaterialUniforms {
-    mat3 uvTransform;
     float size;
     float scale;
+    mat3 uvTransform;
     bool usePointsUv;
     bool useSizeAttenuation;
-    bool isPerspective; // Passed to replace isPerspectiveMatrix()
 };
 
-// Stage Inputs
-layout(location = 0) in vec3 inPosition;
-layout(location = 4) in vec4 color;
-layout(location = 29) in vec2 inUv;
-
-// Stage Outputs
-layout(location = 15) out vec4 vColor; // Synced with Frag 8
-layout(location = 31) out vec2 vUv;    // Synced with Frag 53 (Background/Point UV slot)
-
 void main() {
-    // 1. Color and UV
-    vColor = color;
+    // 2. UV & COLOR SETUP
     if (usePointsUv) {
         vUv = (uvTransform * vec3(inUv, 1.0)).xy;
     }
 
-    // 2. Projection
-    vec4 mvPosition = uViewMatrix * uModelMatrix * vec4(inPosition, 1.0);
-    gl_Position = uModelViewProjection * vec4(inPosition, 1.0);
+    #include "../shader_chunk/color_vertex.vert"
+    #include "../shader_chunk/morphinstance.vert"
+    #include "../shader_chunk/morphcolor.vert"
 
-    // 3. Point Size & Attenuation
+    // 3. CORE GEOMETRY
+    #include "../shader_chunk/begin_vertex.vert"
+    #include "../shader_chunk/morphtarget.vert"
+    #include "../shader_chunk/project_vertex.vert"
+
+    // 4. POINT SIZE LOGIC
     gl_PointSize = size;
+
     if (useSizeAttenuation) {
+        // isPerspectiveMatrix helper from common.vert
+        bool isPerspective = isPerspectiveMatrix(projectionMatrix);
         if (isPerspective) {
             gl_PointSize *= (scale / -mvPosition.z);
         }
     }
+
+    // 5. FINALIZE
+    #include "../shader_chunk/logdepthbuf_vertex.vert"
+    #include "../shader_chunk/clipping_planes.vert"
+    #include "../shader_chunk/worldpos_vertex.vert"
+    #include "../shader_chunk/fog_vertex.vert"
 }

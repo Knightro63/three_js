@@ -1,4 +1,3 @@
-#version 460 core
 
 /**
  * Binding 10: Standard Environment Map sampler.

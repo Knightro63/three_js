@@ -1,4 +1,3 @@
-#version 460 core
 
 /**
  * Flutter GPU requires explicit binding locations. 

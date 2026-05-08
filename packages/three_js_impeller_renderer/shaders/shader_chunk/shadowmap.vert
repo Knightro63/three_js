@@ -1,4 +1,3 @@
-#version 460 core
 
 /**
  * Note: Requires inverseTransformDirection from common.frag.

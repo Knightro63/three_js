@@ -1,56 +1,53 @@
 #version 460 core
 
-// Binding 0: FrameUniforms
-layout(std140, binding = 0) uniform FrameUniforms {
-    mat4 uModelViewProjection;
-    mat4 uModelMatrix;
-    mat4 uViewMatrix;
-    mat3 uNormalMatrix;
-    float uTime;
-    vec2 uResolution;
-};
+/**
+ * Stage: Vertex
+ * Purpose: Master template for Normal materials.
+ */
 
-// Binding 1: MaterialUniforms
-layout(std140, binding = 1) uniform MaterialUniforms {
-    bool useDisplacementMap;
-    float displacementScale;
-    float displacementBias;
-    bool needsViewPosition; // SPIR-V replacement for FLAT_SHADED || USE_BUMPMAP || etc.
-};
+#define NORMAL
 
-// Binding 11: displacementMap
-layout(binding = 11) uniform sampler2D displacementMap;
+// 1. INCLUDE DECLARATIONS (The "Pars" snippets)
+#include "../shader_chunk/common.vert"
+#include "../shader_chunk/batching_pars.vert"
+#include "../shader_chunk/uv_pars.vert"
+#include "../shader_chunk/displacementmap_pars.vert"
+#include "../shader_chunk/normal_pars.vert"
+#include "../shader_chunk/morphtarget_pars.vert"
+#include "../shader_chunk/skinning_pars.vert"
+#include "../shader_chunk/logdepthbuf_pars.vert"
+#include "../shader_chunk/clipping_planes_pars.vert"
 
-// Stage Inputs
-layout(location = 0) in vec3 inPosition;
-layout(location = 1) in vec3 inNormal;
-layout(location = 29) in vec2 inUv;
-
-// Stage Outputs (Synced with Master List)
-layout(location = 3)  out vec3 vNormal;       // View-space normal (Frag 3)
-layout(location = 13) out vec3 vViewPosition;  // View-space position (Frag 13)
-layout(location = 23) out vec2 vMapUv;        // Primary UV (Frag 23)
+// Location 13: vViewPosition synced with Frag 13
+layout(location = 13) out vec3 vViewPosition;
 
 void main() {
-    vMapUv = inUv;
-    vec3 transformed = vec3(inPosition);
-    vec3 objectNormal = inNormal;
+    // 2. SETUP & BATCHING
+    #include "../shader_chunk/uv_vertex.vert"
+    #include "../shader_chunk/batching.vert"
+    #include "../shader_chunk/morphinstance.vert"
 
-    // Displacement Mapping
-    if (useDisplacementMap) {
-        transformed += normalize(objectNormal) * (texture(displacementMap, inUv).x * displacementScale + displacementBias);
-    }
+    // 3. NORMAL PROCESSING
+    // Essential for visualizing the basis vectors
+    #include "../shader_chunk/beginnormal.vert"
+    #include "../shader_chunk/morphnormal.vert"
+    #include "../shader_chunk/skinbase.vert"
+    #include "../shader_chunk/skinnormal.vert"
+    #include "../shader_chunk/defaultnormal.vert"
+    #include "../shader_chunk/normal.vert"
 
-    // Normal Transformation (View Space)
-    vNormal = normalize(uNormalMatrix * objectNormal);
+    // 4. GEOMETRY DEFORMATION
+    #include "../shader_chunk/begin.vert"
+    #include "../shader_chunk/morphtarget.vert"
+    #include "../shader_chunk/skinning.vert"
+    #include "../shader_chunk/displacementmap.vert"
 
-    // Project and View Position
-    vec4 worldPosition = uModelMatrix * vec4(transformed, 1.0);
-    vec4 mvPosition = uViewMatrix * worldPosition;
-    
-    if (needsViewPosition) {
-        vViewPosition = -mvPosition.xyz;
-    }
+    // 5. PROJECTION
+    #include "../shader_chunk/project_vertex.vert"
+    #include "../shader_chunk/logdepthbuf_vertex.vert"
+    #include "../shader_chunk/clipping_planes.vert"
 
-    gl_Position = uModelViewProjection * vec4(transformed, 1.0);
+    // 6. VIEW POSITION
+    // Required for Bump/Normal mapping in the fragment stage
+    vViewPosition = -mvPosition.xyz;
 }

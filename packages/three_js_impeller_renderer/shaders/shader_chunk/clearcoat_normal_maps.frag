@@ -1,4 +1,3 @@
-#version 460 core
 
 // Binding 6: Dedicated sampler for the Clearcoat Normal map
 layout(set = 0, binding = 6) uniform sampler2D clearcoatNormalMap;

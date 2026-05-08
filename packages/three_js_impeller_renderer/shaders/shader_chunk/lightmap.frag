@@ -1,4 +1,3 @@
-#version 460 core
 
 // Binding 16: Dedicated sampler for the Light Map
 layout(set = 0, binding = 16) uniform sampler2D lightMap;

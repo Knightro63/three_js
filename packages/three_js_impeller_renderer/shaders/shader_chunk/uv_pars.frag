@@ -1,4 +1,3 @@
-#version 460 core
 
 /**
  * UV Declarations - Fragment Stage
@@ -6,7 +5,6 @@
  */
 
 // Primary UVs
-#version 460 core
 
 // 1. Established Base UVs (from your Master List)
 layout(location = 1)  in vec2 vAlphaMapUv;

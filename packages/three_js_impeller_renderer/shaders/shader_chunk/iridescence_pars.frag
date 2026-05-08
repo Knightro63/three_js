@@ -1,4 +1,3 @@
-#version 460 core
 
 /**
  * Binding 14: Map for iridescence intensity/base effect.

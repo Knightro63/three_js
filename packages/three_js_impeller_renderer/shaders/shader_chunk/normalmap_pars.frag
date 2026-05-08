@@ -1,4 +1,3 @@
-#version 460 core
 
 /**
  * Normal Map Parameters and Procedural Tangent Utility.

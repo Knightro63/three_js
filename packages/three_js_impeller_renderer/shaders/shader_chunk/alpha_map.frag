@@ -1,4 +1,3 @@
-#version 460 core
 
 // Binding indices should be adjusted based on your final pipeline layout
 layout(set = 0, binding = 2) uniform sampler2D alphaMap;

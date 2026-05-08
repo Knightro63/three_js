@@ -1,4 +1,3 @@
-#version 460 core
 
 /**
  * Note: Requires getMorph() utility and MORPHTARGETS_COUNT constant.

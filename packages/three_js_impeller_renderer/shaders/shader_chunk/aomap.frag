@@ -1,4 +1,3 @@
-#version 460 core
 
 // Textures and Uniforms
 layout(set = 0, binding = 3) uniform sampler2D aoMap;
