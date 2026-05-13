@@ -1,4 +1,4 @@
-
+import 'package:three_js_gpu/nodes/wgsl_node_function.dart';
 
 /**
  * A WGSL node parser.

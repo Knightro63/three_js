@@ -10,16 +10,14 @@ import 'package:three_js_gpu/common/nodes/nodes.dart';
 import 'package:three_js_gpu/common/pipelines.dart';
 import 'package:three_js_gpu/common/render_object.dart';
 import 'package:three_js_gpu/common/sampled_texture.dart';
+import 'package:three_js_gpu/common/sampler.dart';
 import 'package:three_js_gpu/common/storage_buffer.dart';
+import 'package:three_js_gpu/common/storage_texture.dart';
 import 'package:three_js_gpu/common/textures.dart';
+import 'package:three_js_gpu/common/uniform_buffer.dart';
 import 'package:three_js_gpu/gpu_backend.dart';
+import 'package:three_js_gpu/src/core/node.dart';
 
-/**
- * This renderer module manages the bindings of the renderer.
- *
- * @private
- * @augments DataMap
- */
 class Bindings extends DataMap {
   Backend backend;
   Textures textures;
@@ -29,18 +27,18 @@ class Bindings extends DataMap {
   Nodes nodes;
 
 	Bindings(this.backend, this.nodes, this.textures, this.attributes, this.pipelines, this.info ):super() {
-		this.pipelines.bindings = this; // assign bindings to pipelines
+		pipelines.bindings = this; // assign bindings to pipelines
 	}
 
 	List<BindGroup> getForRender(RenderObject renderObject ) {
 		final bindings = renderObject.getBindings();
 
 		for ( final bindGroup in bindings ) {
-			final groupData = this.get( bindGroup );
+			final groupData = get( bindGroup );
 
 			if ( groupData.bindGroup == null ) {
-				this._init( bindGroup );
-				this.backend.createBindings( bindGroup, bindings, 0 );
+				_init( bindGroup );
+				backend.createBindings( bindGroup, bindings, 0 );
 				groupData.bindGroup = bindGroup;
 			}
 		}
@@ -49,16 +47,14 @@ class Bindings extends DataMap {
 	}
 
 	List<BindGroup> getForCompute(Node computeNode ) {
-		final bindings = this.nodes.getForCompute( computeNode ).bindings;
+		final bindings = nodes.getForCompute( computeNode ).bindings;
 
 		for ( final bindGroup in bindings ) {
-
-			final groupData = this.get( bindGroup );
+			final groupData = get( bindGroup );
 
 			if ( groupData.bindGroup == null ) {
-
-				this._init( bindGroup );
-				this.backend.createBindings( bindGroup, bindings, 0 );
+				_init( bindGroup );
+				backend.createBindings( bindGroup, bindings, 0 );
 				groupData.bindGroup = bindGroup;
 			}
 		}
@@ -67,45 +63,40 @@ class Bindings extends DataMap {
 	}
 
 	void updateForCompute(Node computeNode ) {
-		this._updateBindings( this.getForCompute( computeNode ) );
+		_updateBindings(getForCompute( computeNode ) );
 	}
 
 	void updateForRender(RenderObject renderObject ) {
-		this._updateBindings( this.getForRender( renderObject ) );
+		_updateBindings( getForRender( renderObject ) );
 	}
 
 	void _updateBindings(List<BindGroup> bindings ) {
 		for (final bindGroup in bindings ) {
-			this._update( bindGroup, bindings );
+			_update( bindGroup, bindings );
 		}
 	}
 
 	/**
 	 * Initializes the given bind group.
-	 *
-	 * @param {BindGroup} bindGroup - The bind group to initialize.
 	 */
-	_init( bindGroup ) {
+	void _init(BindGroup bindGroup ) {
 		for ( final binding in bindGroup.bindings ) {
 			if ( binding is SampledTexture ) {
-				this.textures.updateTexture( binding.texture );
+				textures.updateTexture( binding.texture );
 			} 
       else if ( binding is StorageBuffer ) {
 				final attribute = binding.attribute;
 				final attributeType = attribute.isIndirectStorageBufferAttribute ? AttributeType.indirect : AttributeType.storage;
 
-				this.attributes.update( attribute, attributeType );
+				attributes.update( attribute, attributeType );
 			}
 		}
 	}
 
 	/**
 	 * Updates the given bind group.
-	 *
-	 * @param {BindGroup} bindGroup - The bind group to update.
-	 * @param {Array<BindGroup>} bindings - The bind groups.
 	 */
-	_update( bindGroup, bindings ) {
+	void _update(BindGroup bindGroup, List<BindGroup> bindings ) {
 		final backend = this;
 
 		bool needsBindingsUpdate = false;
@@ -117,33 +108,33 @@ class Bindings extends DataMap {
 
 		for ( final binding in bindGroup.bindings ) {
 			if ( binding is NodeUniformsGroup ) {
-				final updated = this.nodes.updateGroup( binding );
+				final updated = nodes.updateGroup( binding );
 
 				// every uniforms group is a uniform buffer. So if no update is required,
 				// we move one with the next binding. Otherwise the next if block will update the group.
 				if ( updated == false ) continue;
 			}
 
-			if ( binding.isStorageBuffer ) {
+			if ( binding is StorageBuffer ) {
 				final attribute = binding.attribute;
 				final attributeType = attribute.isIndirectStorageBufferAttribute ? AttributeType.indirect : AttributeType.storage;
 
-				this.attributes.update( attribute, attributeType );
+				attributes.update( attribute, attributeType );
 			}
 
-			if ( binding.isUniformBuffer ) {
+			if ( binding is UniformBuffer ) {
 				final updated = binding.update();
 
 				if ( updated ) {
 					backend.updateBinding( binding );
 				}
 			} 
-      else if ( binding.isSampler ) {
+      else if ( binding is Sampler ) {
 				binding.update();
 			} 
-      else if ( binding.isSampledTexture ) {
+      else if ( binding is SampledTexture ) {
 
-				final texturesTextureData = this.textures.get( binding.texture );
+				final texturesTextureData = textures.get( binding.texture );
 
 				if ( binding.needsBindingsUpdate( texturesTextureData.generation ) ) needsBindingsUpdate = true;
 
@@ -152,7 +143,7 @@ class Bindings extends DataMap {
 				final texture = binding.texture;
 
 				if ( updated ) {
-					this.textures.updateTexture( texture );
+					textures.updateTexture( texture );
 				}
 
 				final textureData = backend.get( texture );
@@ -168,17 +159,17 @@ class Bindings extends DataMap {
 					// TODO: Remove this once we found why updated === false isn't bound to a texture in the WebGPU backend
 					console.error( 'Bindings._update: binding should be available:', binding, updated, texture, binding.textureNode.value, needsBindingsUpdate );
 
-					this.textures.updateTexture( texture );
+					textures.updateTexture( texture );
 					needsBindingsUpdate = true;
 				}
 
-				if ( texture.isStorageTexture == true ) {
-					final textureData = this.get( texture );
+				if ( texture is StorageTexture ) {
+					final textureData = get( texture );
 
 					if ( binding.store == true ) {
 						textureData.needsMipmap = true;
 					} 
-          else if ( this.textures.needsMipmaps( texture ) && textureData.needsMipmap == true ) {
+          else if ( textures.needsMipmaps( texture ) && textureData.needsMipmap == true ) {
 						this.backend.generateMipmaps( texture );
 						textureData.needsMipmap = false;
 					}

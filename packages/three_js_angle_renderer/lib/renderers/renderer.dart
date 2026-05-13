@@ -327,6 +327,7 @@ class AngleRenderer extends Renderer{
     setViewport(0, 0, width, height);
   }
 
+  @override
   Vector2 getDrawingBufferSize(Vector2 target) {
     return target.setValues(width * _pixelRatio, height * _pixelRatio).floor();
   }
@@ -736,6 +737,8 @@ class AngleRenderer extends Renderer{
     }
 
   }
+
+  @override
   Set compile(Object3D scene, Camera camera, [Object3D? targetScene]) {
     targetScene ??= scene;
 
@@ -1646,10 +1649,12 @@ class AngleRenderer extends Renderer{
         (material is ShaderMaterial && material.lights == true);
   }
 
+  @override
   int getActiveCubeFace() {
     return _currentActiveCubeFace;
   }
 
+  @override
   int getActiveMipmapLevel() {
     return _currentActiveMipmapLevel;
   }

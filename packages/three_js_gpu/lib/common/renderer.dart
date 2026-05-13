@@ -5,6 +5,7 @@ import 'package:three_js_gpu/common/geometries.dart';
 import 'package:three_js_gpu/common/info.dart';
 import 'package:three_js_gpu/common/lighting.dart';
 import 'package:three_js_gpu/common/nodes/node_library.dart';
+import 'package:three_js_gpu/src/core/node.dart';
 import 'package:three_js_math/three_js_math.dart';
 
 final _scene = /*@__PURE__*/ new Scene();
@@ -45,7 +46,7 @@ class RendererParameters{
 /**
  * Base class for renderers.
  */
-class Renderer {
+class GPURenderer extends Renderer{
   bool isRenderer = true;
   bool autoClear = true;
   bool autoClearColor = true;
@@ -78,7 +79,7 @@ class Renderer {
   Attributes? _attributes;
   Geometries? _geometries;
 
-	Renderer(this.backend, [RendererParameters? parameters]) {
+	GPURenderer(this.backend, [RendererParameters? parameters]) {
     parameters ??= RendererParameters(); 
 
 		/**

@@ -3,18 +3,11 @@ import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_gpu/common/backend.dart';
 import 'package:three_js_gpu/common/data_map.dart';
 import 'package:three_js_gpu/common/info.dart';
-import 'package:three_js_gpu/common/renderer.dart';
 import 'package:three_js_gpu/common/storage_texture.dart';
 import 'package:three_js_math/three_js_math.dart';
 
-final _size = /*@__PURE__*/ Vector3.fromJson();
+final _size = Vector3.fromJson();
 
-/**
- * This module manages the textures of the renderer.
- *
- * @private
- * @augments DataMap
- */
 class Textures extends DataMap {
   Renderer renderer; 
   Backend backend; 
@@ -22,26 +15,21 @@ class Textures extends DataMap {
 
 	Textures(this.renderer, this.backend, this.info ):super();
 
-	/**
-	 * Updates the given render target. Based on the given render target configuration,
-	 * it updates the texture states representing the attachments of the framebuffer.
-	 *
-	 * @param {RenderTarget} renderTarget - The render target to update.
-	 * @param {number} [activeMipmapLevel=0] - The active mipmap level.
-	 */
-	updateRenderTarget(RenderTarget renderTarget, [int activeMipmapLevel = 0 ]) {
+	/// Updates the given render target. Based on the given render target configuration,
+	/// it updates the texture states representing the attachments of the framebuffer.
+	void updateRenderTarget(RenderTarget renderTarget, [int activeMipmapLevel = 0 ]) {
 
-		final renderTargetData = this.get( renderTarget );
+		final renderTargetData = get( renderTarget );
 
 		final sampleCount = renderTarget.samples == 0 ? 1 : renderTarget.samples;
 		final depthTextureMips = renderTargetData.depthTextureMips ?? ( renderTargetData.depthTextureMips = {} );
 
 		final textures = renderTarget.textures;
 
-		final size = this.getSize( textures[ 0 ] );
+		final size = getSize( textures[ 0 ] );
 
-		final mipWidth = size.width >> activeMipmapLevel;
-		final mipHeight = size.height >> activeMipmapLevel;
+		final mipWidth = size.x.toInt() >> activeMipmapLevel;
+		final mipHeight = size.y.toInt() >> activeMipmapLevel;
 
 		DepthTexture? depthTexture = renderTarget.depthTexture ?? depthTextureMips[ activeMipmapLevel ];
 		final useDepthTexture = renderTarget.depthBuffer == true || renderTarget.stencilBuffer == true;
@@ -55,13 +43,13 @@ class Textures extends DataMap {
 			depthTexture.type = renderTarget.stencilBuffer ? UnsignedInt248Type : UnsignedIntType; // FloatType
 			depthTexture.image.width = mipWidth;
 			depthTexture.image.height = mipHeight;
-			depthTexture.image.depth = size.depth;
-			depthTexture is ArrayTexture = renderTarget.multiview == true && size.depth > 1;
+			depthTexture.image.depth = size.z;
+			depthTexture is ArrayTexture = renderTarget.multiview == true && size.z > 1;
 
 			depthTextureMips[ activeMipmapLevel ] = depthTexture;
 		}
 
-		if ( renderTargetData.width != size.width || size.height != renderTargetData.height ) {
+		if ( renderTargetData.width != size.x || size.y != renderTargetData.height ) {
 			textureNeedsUpdate = true;
 
 			if ( depthTexture != null) {
@@ -72,8 +60,8 @@ class Textures extends DataMap {
 			}
 		}
 
-		renderTargetData.width = size.width;
-		renderTargetData.height = size.height;
+		renderTargetData.width = size.x;
+		renderTargetData.height = size.y;
 		renderTargetData.textures = textures;
 		renderTargetData.depthTexture = depthTexture ?? null;
 		renderTargetData.depth = renderTarget.depthBuffer;
@@ -99,11 +87,11 @@ class Textures extends DataMap {
 			for ( var i = 0; i < textures.length; i ++ ) {
 				final texture = textures[ i ];
 				if ( textureNeedsUpdate ) texture.needsUpdate = true;
-				this.updateTexture( texture, options );
+				updateTexture( texture, options );
 			}
 
 			if ( depthTexture != null) {
-				this.updateTexture( depthTexture, options );
+				updateTexture( depthTexture, options );
 			}
 		}
 
@@ -114,38 +102,32 @@ class Textures extends DataMap {
 
 			// dispose
 
-			final onDispose = (){
+		  onDispose(){
 				renderTarget.removeEventListener( 'dispose', onDispose );
 
 				for ( var i = 0; i < textures.length; i ++ ) {
-					this._destroyTexture( textures[ i ] );
+					_destroyTexture( textures[ i ] );
 				}
 
 				if ( depthTexture != null) {
-					this._destroyTexture( depthTexture );
+					_destroyTexture( depthTexture );
 				}
 
-				this.delete( renderTarget );
-			};
+				delete( renderTarget );
+			}
 
 			renderTarget.addEventListener( 'dispose', onDispose );
 
 		}
-
 	}
 
-	/**
-	 * Updates the given texture. Depending on the texture state, this method
-	 * triggers the upload of texture data to the GPU memory. If the texture data are
-	 * not yet ready for the upload, it uses default texture data for as a placeholder.
-	 *
-	 * @param {Texture} texture - The texture to update.
-	 * @param {Object} [options={}] - The options.
-	 */
-	updateTexture(Texture texture, [Map<String,dynamic>? options]) {
+	/// Updates the given texture. Depending on the texture state, this method
+	/// triggers the upload of texture data to the GPU memory. If the texture data are
+	/// not yet ready for the upload, it uses default texture data for as a placeholder.
+	void updateTexture(Texture texture, [Map<String,dynamic>? options]) {
     options ??= {};
 
-		final textureData = this.get( texture );
+		final textureData = get( texture );
 		if ( textureData.initialized == true && textureData.version == texture.version ) return;
 
 		final isRenderTarget = texture.isRenderTargetTexture || texture.isDepthTexture || texture is FramebufferTexture;
@@ -159,7 +141,7 @@ class Textures extends DataMap {
 		//
 
 		if ( texture is FramebufferTexture ) {
-			final renderTarget = this.renderer.getRenderTarget();
+			final renderTarget = renderer.getRenderTarget();
 
 			if ( renderTarget != null) {
 				texture.type = renderTarget.texture.type;
@@ -171,15 +153,15 @@ class Textures extends DataMap {
 
 		//
 
-		final width = this.getSize( texture ).width;
-    final height = this.getSize( texture ).height;
-    final depth = this.getSize( texture ).depth;
+		final width = getSize( texture ).x;
+    final height = getSize( texture ).y;
+    final depth = getSize( texture ).z;
 
 		options['width'] = width;
 		options['height'] = height;
 		options['depth'] = depth;
-		options['needsMipmaps'] = this.needsMipmaps( texture );
-		options['levels'] = options['needsMipmaps'] == true? this.getMipLevels( texture, width, height ) : 1;
+		options['needsMipmaps'] = needsMipmaps( texture );
+		options['levels'] = options['needsMipmaps'] == true? getMipLevels( texture, width, height ) : 1;
 
 		if ( isRenderTarget || texture is StorageTexture) {
 			backend.createSampler( texture );
@@ -223,7 +205,7 @@ class Textures extends DataMap {
 					}
 
 					if ( texture.source.dataReady == true ) backend.updateTexture( texture, options );
-					if ( options['needsMipmaps'] && texture.mipmaps.length == 0 ) backend.generateMipmaps( texture );
+					if ( options['needsMipmaps'] && texture.mipmaps.isEmpty) backend.generateMipmaps( texture );
 				}
 			} else {
 				backend.createDefaultTexture( texture );
@@ -235,50 +217,37 @@ class Textures extends DataMap {
 		// dispose handler
 
 		if ( textureData.initialized != true ) {
-
 			textureData.initialized = true;
 			textureData.generation = texture.version;
 
 			//
-			this.info.memory.textures ++;
+			info.memory['textures'] = info.memory['textures']! + 1;
 
 			// dispose
-			final onDispose = (){
+			onDispose(){
 				texture.removeEventListener( 'dispose', onDispose );
-				this._destroyTexture( texture );
-			};
+				_destroyTexture( texture );
+			}
 
 			texture.addEventListener( 'dispose', onDispose );
 		}
 
-		//
-
 		textureData.version = texture.version;
 	}
 
-	/**
-	 * Computes the size of the given texture and writes the result
-	 * into the target vector. This vector is also returned by the
-	 * method.
-	 *
-	 * If no texture data are available for the compute yet, the method
-	 * returns default size values.
-	 *
-	 * @param {Texture} texture - The texture to compute the size for.
-	 * @param {Vector3} target - The target vector.
-	 * @return {Vector3} The target vector.
-	 */
-	getSize( texture, target = _size ) {
+	/// Computes the size of the given texture and writes the result
+	/// into the target vector. This vector is also returned by the
+	/// method.
+	///
+	/// If no texture data are available for the compute yet, the method
+	/// returns default size values.
+	Vector3 getSize(Texture texture, [Vector3? target]) {
+    target ??= _size;
 		var image = texture.images ? texture.images[ 0 ] : texture.image;
 
 		if ( image ) {
 			if ( image.image != null ) image = image.image;
-			if ( image is HTMLVideoElement ) {
-				target.width = image.videoWidth ?? 1;
-				target.height = image.videoHeight ?? 1;
-				target.depth = 1;
-			} 
-      else if ( image is VideoFrame ) {
+			if ( image is VideoFrame ) {
 				target.width = image.displayWidth ?? 1;
 				target.height = image.displayHeight ?? 1;
 				target.depth = 1;
@@ -296,15 +265,8 @@ class Textures extends DataMap {
 		return target;
 	}
 
-	/**
-	 * Computes the number of mipmap levels for the given texture.
-	 *
-	 * @param {Texture} texture - The texture.
-	 * @param {number} width - The texture's width.
-	 * @param {number} height - The texture's height.
-	 * @return {number} The number of mipmap levels.
-	 */
-	getMipLevels(Texture texture, width, height ) {
+	/// Computes the number of mipmap levels for the given texture.
+	int getMipLevels(Texture texture, double width, double height ) {
 		var mipLevelCount;
 
 		if ( texture.isCompressedTexture ) {
@@ -327,13 +289,13 @@ class Textures extends DataMap {
 	}
 
 	void _destroyTexture(Texture texture ) {
-		if ( this.has( texture ) == true ) {
-			this.backend.destroySampler( texture );
-			this.backend.destroyTexture( texture );
+		if ( has( texture ) == true ) {
+			backend.destroySampler( texture );
+			backend.destroyTexture( texture );
 
-			this.delete( texture );
+			delete( texture );
 
-			this.info.memory['textures'] = this.info.memory['textures']!-1;
+			info.memory['textures'] = info.memory['textures']!-1;
 		}
 	}
 }

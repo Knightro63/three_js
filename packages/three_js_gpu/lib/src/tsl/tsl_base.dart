@@ -1,6 +1,8 @@
 // Non-PURE exports list, side-effects are required here.
 // TSL Base Syntax
 
+import 'package:three_js_core/three_js_core.dart';
+
 export './tsl_core.dart'; // float(), vec2(), vec3(), vec4(), mat3(), mat4(), Fn(), If(), element(), nodeObject(), nodeProxy(), ...
 export '../core/array_node.dart'; // array(), .toArray()
 export '../core/uniform_node.dart'; // uniform()
@@ -27,5 +29,5 @@ export '../utils/debug_node.dart'; // debug()
 export '../core/sub_build_node.dart'; // subBuild()
 
 addNodeElement( name/*, nodeElement*/ ) {
-	console.warn( 'THREE.TSL: AddNodeElement has been removed in favor of tree-shaking. Trying add', name );
+	console.warning( 'THREE.TSL: AddNodeElement has been removed in favor of tree-shaking. Trying add $name' );
 }

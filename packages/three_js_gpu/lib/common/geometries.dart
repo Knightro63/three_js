@@ -208,18 +208,13 @@ class Geometries extends DataMap {
 	 * @param {RenderObject} renderObject - The render object.
 	 * @return {?BufferAttribute} The indirect attribute. `null` if no indirect drawing is used.
 	 */
-	getIndirect( renderObject ) {
-
+	BufferAttribute? getIndirect(RenderObject renderObject ) {
 		return renderObject.geometry.indirect;
-
 	}
 
 	/**
 	 * Returns the index of the given render object's geometry. This is implemented
 	 * in a method to return a wireframe index if necessary.
-	 *
-	 * @param {RenderObject} renderObject - The render object.
-	 * @return {?BufferAttribute} The index. Returns `null` for non-indexed geometries.
 	 */
 	BufferAttribute? getIndex(RenderObject renderObject ) {
 		final geometry = renderObject.geometry;
@@ -237,7 +232,7 @@ class Geometries extends DataMap {
 				wireframes.set( geometry, wireframeAttribute );
 			} 
       else if (geometry != null && wireframeAttribute.version != getWireframeVersion( geometry ) ) {
-				this.attributes.delete( wireframeAttribute );
+				attributes.delete( wireframeAttribute );
 				wireframeAttribute = getWireframeIndex( geometry );
 				wireframes.set( geometry, wireframeAttribute );
 			}

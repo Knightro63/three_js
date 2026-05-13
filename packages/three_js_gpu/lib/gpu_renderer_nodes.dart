@@ -4,19 +4,15 @@ import 'package:three_js_gpu/nodes/basic_node_library.dart';
 import './gpu_backend.dart';
 import './gpu_renderer.dart';
 
-/**
- * This alternative version of {@link WebGPURenderer} only supports node materials.
- * So classes like `MeshBasicMaterial` are not compatible.
- *
- * @private
- * @augments Renderer
- */
+///
+/// This alternative version of {@link WebGPURenderer} only supports node materials.
+/// So classes like `MeshBasicMaterial` are not compatible.
+///
 class WebGPURenderer extends Renderer {
   bool isWebGPURenderer = true;
+  final library = BasicNodeLibrary();
 
-  WebGPURenderer(super.backend, super.parameters){
-    library = BasicNodeLibrary();
-  }
+  WebGPURenderer(super.backend, super.parameters);
 
 	/**
 	 * Constructs a new WebGPU renderer.

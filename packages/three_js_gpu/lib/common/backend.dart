@@ -1,12 +1,15 @@
 import 'dart:typed_data';
+import 'package:flutter/widgets.dart' as wid;
 import 'package:three_js_core/others/weak_map.dart';
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_gpu/common/bind_group.dart';
+import 'package:three_js_gpu/common/buffer.dart';
 import 'package:three_js_gpu/common/compute_pipeline.dart';
 import 'package:three_js_gpu/common/programmable_stage.dart';
 import 'package:three_js_gpu/common/render_context.dart';
 import 'package:three_js_gpu/common/render_object.dart';
 import 'package:three_js_gpu/common/renderer.dart';
+import 'package:three_js_gpu/src/code/node_builder.dart';
 import 'package:three_js_math/three_js_math.dart';
 
 Vector2? _vector2;
@@ -27,7 +30,7 @@ abstract class Backend {
   late final Map parameters;
   final data = WeakMap();
   Renderer? renderer;
-  GlobalKey? domElement;
+  wid.GlobalKey? domElement;
 
   final Map<String,dynamic> timestampQueryPool = {
     'render': null,
@@ -76,15 +79,6 @@ abstract class Backend {
 	/// @param {RenderContext} renderContext - The render context.
 	///
 	void finishRender() {}
-
-	/// This method is executed at the beginning of a compute call and
-	/// can be used by the backend to prepare the state for upcoming
-	/// compute tasks.
-	///
-	/// @abstract
-	/// @param {Node|Array<Node>} computeGroup - The compute node(s).
-	///
-	void beginCompute() {}
 
 	/// This method is executed at the beginning of a compute call and
 	/// can be used by the backend to prepare the state for upcoming
@@ -216,7 +210,7 @@ abstract class Backend {
 	/// @param {Renderer} renderer - The renderer.
 	/// @return {NodeBuilder} The node builder.
 	///
-	NodeBuilder createNodeBuilder(RenderObject renderObject, Renderer renderer ) { }
+	NodeBuilder createNodeBuilder(RenderObject renderObject, Renderer renderer );
 
 	// textures
 
@@ -388,20 +382,18 @@ abstract class Backend {
 	/// @return {Promise<number>} A Promise that resolves with the time stamp.
 	///
 	Future<num> resolveTimestampsAsync([String type = 'render' ]) async{
-		if (!this.trackTimestamp) {
-			warnOnce( 'WebGPURenderer: Timestamp tracking is disabled.' );
-			return;
+		if (!trackTimestamp) {
+			throw( 'WebGPURenderer: Timestamp tracking is disabled.' );
 		}
 
-		final queryPool = this.timestampQueryPool[ type ];
+		final queryPool = timestampQueryPool[ type ];
 		if (queryPool == null) {
-			warnOnce( 'WebGPURenderer: No timestamp query pool for type "${type}" found.' );
-			return;
+			throw( 'WebGPURenderer: No timestamp query pool for type "$type" found.' );
 		}
 
 		final duration = await queryPool.resolveQueriesAsync();
 
-		this.renderer.info[ type ].timestamp = duration;
+		renderer.info[ type ].timestamp = duration;
 
 		return duration;
 	}
@@ -454,8 +446,8 @@ abstract class Backend {
 	/// @return {Vector2} The drawing buffer size.
 	///
 	Vector2 getDrawingBufferSize() {
-		_vector2 = _vector2 ?? new Vector2();
-		return this.renderer?.getDrawingBufferSize( _vector2 );
+		_vector2 = _vector2 ?? Vector2();
+		return renderer?.getDrawingBufferSize( _vector2! ) ?? Vector2();
 	}
 
 	/// Defines the scissor test.
@@ -474,7 +466,7 @@ abstract class Backend {
 		final renderer = this.renderer;
 
 		_color4 = _color4 ?? Color();
-		renderer?.getClearColor( _color4 );
+		renderer?.getClearColor( _color4! );
 		_color4?.getRGB( _color4! );
 		return _color4;
 	}
@@ -485,17 +477,17 @@ abstract class Backend {
 	/// @return {HTMLCanvasElement} The DOM element.
 	///
 	getDomElement() {
-		let domElement = this.domElement;
+		final domElement = this.domElement;
 
 		if ( domElement == null ) {
-
-			domElement = ( this.parameters.canvas != null ) ? this.parameters.canvas : createCanvasElement();
+			domElement = ( parameters['canvas'] != null ) ? parameters['canvas'] : createCanvasElement();
 
 			// OffscreenCanvas does not have setAttribute, see #22811
-			if ( 'setAttribute' in domElement ) domElement.setAttribute( 'data-engine', 'three.js r${REVISION} webgpu' );
+			if ( 'setAttribute' in domElement ){
+        domElement.setAttribute( 'data-engine', 'three.js r$REVISION webgpu' );
+      }
 
 			this.domElement = domElement;
-
 		}
 
 		return domElement;
@@ -517,22 +509,22 @@ abstract class Backend {
 	/// @return {Object} The object's dictionary.
 	///
 	Map? get( object ) {
-		Map? map = this.data.get( object );
+		Map? map = data.get( object );
 
 		if ( map == null ) {
 			map = {};
-			this.data.set( object, map );
+			data.set( object, map );
 		}
 
 		return map;
 	}
 
 	bool has( object ) {
-		return this.data.has( object );
+		return data.has( object );
 	}
 
 	void delete( object ) {
-		this.data.delete( object );
+		data.delete( object );
 	}
 
 	void dispose() { }

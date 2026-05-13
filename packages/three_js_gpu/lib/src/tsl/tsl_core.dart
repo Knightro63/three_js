@@ -782,7 +782,7 @@ addMethodChaining( 'toStack', Stack );
 final color = new ConvertType( 'color' );
 
 final float = new ConvertType( 'float', cacheMaps.float );
-final int = new ConvertType( 'int', cacheMaps.ints );
+final Int = new ConvertType( 'int', cacheMaps.ints );
 final uint = new ConvertType( 'uint', cacheMaps.uint );
 final bool = new ConvertType( 'bool', cacheMaps.bool );
 

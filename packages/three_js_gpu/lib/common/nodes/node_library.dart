@@ -7,9 +7,9 @@ import 'package:three_js_core/three_js_core.dart';
 ///
 /// @private
 class NodeLibrary {
-  WeakMap lightNodes = new WeakMap();
-  Map<String,Type> materialNodes = new Map();
-  Map<int,Function> toneMappingNodes = new Map();
+  WeakMap lightNodes = WeakMap();
+  Map<String,Type> materialNodes = {};
+  Map<int,Function> toneMappingNodes = {};
 
 	NodeLibrary();
 
@@ -25,7 +25,7 @@ class NodeLibrary {
 		if ( material is NodeMaterial ) return material;
 
 		dynamic nodeMaterial;
-		final nodeMaterialClass = this.getMaterialNodeClass( material.type );
+		final nodeMaterialClass = getMaterialNodeClass( material.type );
 		
     if ( nodeMaterialClass != null ) {
 			nodeMaterial = nodeMaterialClass();
@@ -44,11 +44,11 @@ class NodeLibrary {
 	/// @param {number} toneMapping - The tone mapping.
 	///
 	void addToneMapping(Function toneMappingNode, int toneMapping ) {
-		this.addType( toneMappingNode, toneMapping, this.toneMappingNodes );
+		addType( toneMappingNode, toneMapping, toneMappingNodes );
 	}
 
 	Function? getToneMappingFunction(int toneMapping ) {
-		return this.toneMappingNodes[toneMapping];
+		return toneMappingNodes[toneMapping];
 	}
 
 	/// Returns a node material class definition for a material type.
@@ -56,7 +56,7 @@ class NodeLibrary {
 	/// @param {string} materialType - The material type.
 	/// @return {?NodeMaterial.constructor} The node material class definition. Returns `null` if no node material is found.
 	Type? getMaterialNodeClass(String materialType ) {
-		return this.materialNodes[materialType];
+		return materialNodes[materialType];
 	}
 
 	/// Adds a node material class definition for a given material type.
@@ -65,7 +65,7 @@ class NodeLibrary {
 	/// @param {string} materialClassType - The material type.
 	///
 	void addMaterial(Type materialNodeClass,String materialClassType ) {
-		this.addType( materialNodeClass, materialClassType, this.materialNodes );
+		addType( materialNodeClass, materialClassType, materialNodes );
 	}
 
 	/// Returns a light node class definition for a light class definition.
@@ -74,7 +74,7 @@ class NodeLibrary {
 	/// @return {?AnalyticLightNode.constructor} The light node class definition. Returns `null` if no light node is found.
 	///
 	Type? getLightNodeClass(Type light ) {
-		return this.lightNodes[light];
+		return lightNodes[light];
 	}
 
 	/// Adds a light node class definition for a given light class definition.
@@ -83,7 +83,7 @@ class NodeLibrary {
 	/// @param {Light.constructor} lightClass - The light class definition.
 	///
 	void addLight(Type lightNodeClass, Type lightClass ) {
-		this.addClass( lightNodeClass, lightClass, this.lightNodes );
+		addClass( lightNodeClass, lightClass, lightNodes );
 	}
 
 	/// Adds a node class definition for the given type to the provided type library.
@@ -94,12 +94,12 @@ class NodeLibrary {
 	///
 	void addType(dynamic nodeClass, type, Map library ) {
 		if ( library.containsKey( type ) ) {
-			console.warning( 'Redefinition of node ${ type }' );
+			console.warning( 'Redefinition of node $type' );
 			return;
 		}
 
 		if (nodeClass is! Function ) throw( 'Node class ${ nodeClass.name } is not a class.' );
-		if (type is Function || typeof type == 'object' ) throw( 'Base class ${ type } is not a class.' );
+		if (type is Function || type.runtimeType.toString() == 'object' ) throw( 'Base class $type is not a class.' );
 
 		library[type] = nodeClass;
 	}

@@ -14,7 +14,7 @@ class Buffer extends Binding {
   Float32List? _buffer;
   Float32List? get buffer => _buffer;
 
-	Buffer(super.name,[Float32List? buffer]) {
+	Buffer(super.name, [Float32List? buffer]) {
 		_buffer = buffer;
 	}
 

@@ -1,11 +1,10 @@
-import "package:three_js_math/three_js_math.dart";
-/**
- * Represents a uniform buffer binding type.
- *
- * @private
- * @augments Buffer
- */
+import "package:three_js_gpu/common/buffer.dart";
+
+///
+/// Represents a uniform buffer binding type.
+///
 class UniformBuffer extends Buffer {
-  String name;
-	UniformBuffer(this.name, [super.buffer]);
+	UniformBuffer(String name, [super.buffer]){
+    this.name = name;
+  }
 }

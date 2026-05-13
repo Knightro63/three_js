@@ -5,6 +5,7 @@ import 'package:three_js_gpu/common/bundle_group.dart';
 import 'package:three_js_gpu/common/clipping_context.dart';
 import 'package:three_js_gpu/common/geometries.dart';
 import 'package:three_js_gpu/common/nodes/node_builder_state.dart';
+import 'package:three_js_gpu/common/nodes/nodes.dart';
 import 'package:three_js_gpu/common/render_context.dart';
 import 'package:three_js_gpu/common/render_pipeline.dart';
 import 'package:three_js_math/three_js_math.dart';
@@ -232,9 +233,9 @@ class RenderObject {
 		final geometry = this.geometry;
 
 		final List<BufferAttribute> attributes = [];
-		final vertexBuffers = new Set();
+		final vertexBuffers = <String,dynamic>{};
 
-		final attributesId = {};
+		final attributesId = <String,dynamic>{};
 
 		for ( final nodeAttribute in nodeAttributes ) {
 			dynamic attribute;
@@ -259,7 +260,7 @@ class RenderObject {
 
 		this.attributes = attributes;
 		this.attributesId = attributesId;
-		this.vertexBuffers = Array.from( vertexBuffers.values() );
+		this.vertexBuffers = vertexBuffers.values.toList();
 
 		return attributes;
 	}
@@ -363,7 +364,7 @@ class RenderObject {
 		for ( final name in geometry!.attributes.keys.toList()..sort() ) {
 			final attribute = geometry.attributes[ name ];
 
-			cacheKey += name + ',';
+			cacheKey += '$name,';
 
 			if ( attribute.data ) cacheKey += attribute.data.stride + ',';
 			if ( attribute.offset ) cacheKey += attribute.offset + ',';
@@ -377,7 +378,7 @@ class RenderObject {
 
 		for ( final name in geometry.morphAttributes.keys.toList()..sort() ) {
 			final targets = geometry.morphAttributes[ name ];
-			cacheKey += 'morph-' + name + ',';
+			cacheKey += 'morph-$name,';
 
 			for (int i = 0, l = targets!.length; i < l; i ++ ) {
 				final attribute = targets[ i ];
@@ -467,12 +468,9 @@ class RenderObject {
 		return hashString( cacheKey );
 	}
 
-	/**
-	 * Whether the geometry requires an update or not.
-	 *
-	 * @type {boolean}
-	 * @readonly
-	 */
+	///
+	/// Whether the geometry requires an update or not.
+	///
 	bool get needsGeometryUpdate => _needsGeometryUpdate();
   bool _needsGeometryUpdate() {
 		if ( this.geometry?.id != this.object.geometry?.id ) return true;
@@ -528,11 +526,11 @@ class RenderObject {
 		}
 
 		if ( this.camera is ArrayCamera ) {
-			cacheKey = hash( cacheKey, (camera as ArrayCamera).cameras.length );
+			cacheKey = Object.hash( cacheKey, (camera as ArrayCamera).cameras.length );
 		}
 
 		if ( this.object.receiveShadow ) {
-			cacheKey = hash( cacheKey, 1 );
+			cacheKey = Object.hash( cacheKey, 1 );
 		}
 
 		return cacheKey;

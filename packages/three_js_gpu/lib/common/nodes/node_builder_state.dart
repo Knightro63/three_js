@@ -1,4 +1,5 @@
 import "package:three_js_gpu/common/bind_group.dart";
+import "package:three_js_gpu/src/core/node.dart";
 
 /**
  * This module represents the state of a node builder after it was
@@ -19,7 +20,7 @@ class NodeBuilderState {
   List<Node> updateBeforeNodes; 
   List<Node> updateAfterNodes;
   NodeMaterialObserver observer; 
-  List transforms;
+  late List transforms;
   int usedTimes = 0;
 
 	NodeBuilderState(
@@ -37,21 +38,17 @@ class NodeBuilderState {
 		this.transforms = transforms ?? [];
 	}
 
-	/**
-	 * This method is used to create a array of bind groups based
-	 * on the existing bind groups of this state. Shared groups are
-	 * not cloned.
-	 *
-	 * @return {Array<BindGroup>} A array of bind groups.
-	 */
+	/// This method is used to create a array of bind groups based
+	/// on the existing bind groups of this state. Shared groups are
+	/// not cloned.
 	List<BindGroup> createBindings() {
-		final bindings = [];
+		final bindings = <BindGroup>[];
 
 		for ( final instanceGroup in this.bindings ) {
 			final shared = instanceGroup.bindings[ 0 ].groupNode.shared; // All bindings in the group must have the same groupNode.
 
 			if ( shared != true ) {
-				final bindingsGroup = new BindGroup( instanceGroup.name, [], instanceGroup.index, instanceGroup );
+				final bindingsGroup = BindGroup( instanceGroup.name, [], instanceGroup.index, instanceGroup );
 				bindings.add( bindingsGroup );
 
 				for ( final instanceBinding in instanceGroup.bindings ) {

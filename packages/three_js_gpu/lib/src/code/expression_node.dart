@@ -1,28 +1,17 @@
+import 'package:three_js_gpu/src/code/node_builder.dart';
 import '../core/node.dart';
 import '../tsl/tsl_core.dart';
 
-enum NodeType{void}
-
-/**
- * This class can be used to implement basic expressions in shader code.
- * Basic examples for that are `return`, `continue` or `discard` statements.
- *
- * @augments Node
- */
+/// This class can be used to implement basic expressions in shader code.
+/// Basic examples for that are `return`, `continue` or `discard` statements.
 class ExpressionNode extends Node {
   String snippet;
-  NodeType nodeType = NodeType.void;
 
-	/**
-	 * constructs a new expression node.
-	 *
-	 * @param {string} [snippet=''] - The native code snippet.
-	 * @param {string} [nodeType='void'] - The node type.
-	 */
-	ExpressionNode([this.snippet = '', this.nodeType = 'void' ]):super( nodeType );
+	ExpressionNode([this.snippet = '', super.nodeType = 'void' ]);
 
-	generate(NodeBuilder builder, output ) {
-		final type = this.getNodeType( builder );
+	@override
+	String? generate(NodeBuilder builder, String? output ) {
+		final type = getNodeType( builder );
 		final snippet = this.snippet;
 
 		if ( type == 'void' ) {
@@ -31,6 +20,8 @@ class ExpressionNode extends Node {
     else {
 			return builder.format( snippet, type, output );
 		}
+
+    return null;
 	}
 }
 
@@ -43,4 +34,4 @@ class ExpressionNode extends Node {
  * @param {?string} [nodeType='void'] - The node type.
  * @returns {ExpressionNode}
  */
-export final expression = /*@__PURE__*/ nodeProxy( ExpressionNode ).setParameterLength( 1, 2 );
+final expression = /*@__PURE__*/ nodeProxy( ExpressionNode ).setParameterLength( 1, 2 );

@@ -1,3 +1,4 @@
+import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_gpu/common/timestamp_query_pool.dart';
 
 /**
@@ -12,8 +13,8 @@ class WebGPUTimestampQueryPool extends TimestampQueryPool {
 
 	late final querySet = device.createQuerySet( {
     'type': 'timestamp',
-    'count': this.maxQueries,
-    'label': 'queryset_global_timestamp_${type}'
+    'count': maxQueries,
+    'label': 'queryset_global_timestamp_$type'
   } );
 
   late final bufferSize = maxQueries * 8;
@@ -203,44 +204,31 @@ class WebGPUTimestampQueryPool extends TimestampQueryPool {
 	 * @async
 	 * @returns {Promise} A Promise that resolves when the dispose has been executed.
 	 */
-	async dispose() {
-
-		if ( this.isDisposed ) {
-
+	void dispose() async{
+		if ( isDisposed ) {
 			return;
-
 		}
 
-		this.isDisposed = true;
+		isDisposed = true;
 
 		// Wait for pending resolve operation
-		if ( this.pendingResolve ) {
-
+		if ( pendingResolve ) {
 			try {
-
-				await this.pendingResolve;
-
-			} catch ( error ) {
-
+				await pendingResolve;
+			} 
+      catch ( error ) {
 				console.error( 'Error waiting for pending resolve:', error );
-
 			}
-
 		}
 
 		// Ensure buffer is unmapped before destroying
-		if ( this.resultBuffer && this.resultBuffer.mapState === 'mapped' ) {
-
+		if (resultBuffer && resultBuffer.mapState == 'mapped' ) {
 			try {
-
-				this.resultBuffer.unmap();
-
-			} catch ( error ) {
-
+				resultBuffer.unmap();
+			} 
+      catch ( error ) {
 				console.error( 'Error unmapping buffer:', error );
-
 			}
-
 		}
 
 		// Destroy resources

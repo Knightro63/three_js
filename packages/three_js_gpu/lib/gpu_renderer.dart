@@ -27,10 +27,9 @@ const debugHandler = {
  */
 class WebGPURenderer extends Renderer{
   bool isWebGPURenderer = true;
+  final library = StandardNodeLibrary();
 
-  WebGPURenderer(super.backend, super.parameters){
-    library = StandardNodeLibrary();
-  }
+  WebGPURenderer(super.backend, super.parameters);
 
 	/**
 	 * Constructs a new WebGPU renderer.
@@ -55,7 +54,7 @@ class WebGPURenderer extends Renderer{
 		final backend = BackendClass( parameters );
 
 		if ( typeof __THREE_DEVTOOLS__ != null ) {
-			__THREE_DEVTOOLS__.dispatchEvent( new CustomEvent( 'observe', { detail: this } ) );
+			__THREE_DEVTOOLS__.dispatchEvent( new CustomEvent( 'observe', { 'detail': this } ) );
 		}
 
     return WebGPURenderer(backend,parameters);

@@ -19,15 +19,17 @@ class NodeSampledTexture extends SampledTexture {
 	///
 	NodeSampledTexture(String name, this.textureNode, this.groupNode, [this.access]):super( name, textureNode != null? textureNode.value : null );
 
+  @override
 	bool needsBindingsUpdate(int generation ) {
-		return this.textureNode.value != this.texture || super.needsBindingsUpdate( generation );
+		return textureNode.value != texture || super.needsBindingsUpdate( generation );
 	}
 
+  @override
 	bool update() {
 		final textureNode = this.textureNode;
 
-		if ( this.texture != textureNode.value ) {
-			this.texture = textureNode.value;
+		if ( texture != textureNode.value ) {
+			texture = textureNode.value;
 			return true;
 		}
 

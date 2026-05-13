@@ -1,5 +1,3 @@
-
-
 import 'package:three_js_core/three_js_core.dart';
 
 /**
@@ -12,7 +10,7 @@ import 'package:three_js_core/three_js_core.dart';
  * @param {Object} [state={}] - The state.
  * @return {Object} The state.
  */
-saveRendererState( renderer, state = {} ) {
+saveRendererState(RenderTarget renderer, state = {} ) {
 
 	state.toneMapping = renderer.toneMapping;
 	state.toneMappingExposure = renderer.toneMappingExposure;
@@ -23,7 +21,7 @@ saveRendererState( renderer, state = {} ) {
 	state.renderObjectFunction = renderer.getRenderObjectFunction();
 	state.pixelRatio = renderer.getPixelRatio();
 	state.mrt = renderer.getMRT();
-	state.clearColor = renderer.getClearColor( state.clearColor || new Color() );
+	state.clearColor = renderer.getClearColor( state.clearColor ?? Color() );
 	state.clearAlpha = renderer.getClearAlpha();
 	state.autoClear = renderer.autoClear;
 	state.scissorTest = renderer.getScissorTest();
@@ -43,7 +41,7 @@ saveRendererState( renderer, state = {} ) {
  * @param {Object} [state={}] - The state.
  * @return {Object} The state.
  */
-resetRendererState( renderer, state ) {
+resetRendererState(Renderer renderer, state ) {
 
 	state = saveRendererState( renderer, state );
 

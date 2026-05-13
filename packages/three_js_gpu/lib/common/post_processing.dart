@@ -1,5 +1,6 @@
 
 
+import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_gpu/common/quad_mesh.dart';
 import 'package:three_js_gpu/common/renderer.dart';
 import 'package:three_js_math/three_js_math.dart';
@@ -43,7 +44,7 @@ class PostProcessing {
 		 */
 		this.outputNode = outputNode;
 		material.name = 'PostProcessing';
-		this._quadMesh = new QuadMesh( material );
+		_quadMesh = QuadMesh( material );
 	}
 
 	/**
@@ -68,7 +69,7 @@ class PostProcessing {
 		final currentXR = renderer.xr.enabled;
 		renderer.xr.enabled = false;
 
-		this._quadMesh.render( renderer );
+		_quadMesh.render( renderer );
 
 		renderer.xr.enabled = currentXR;
 
@@ -77,23 +78,21 @@ class PostProcessing {
 		renderer.toneMapping = toneMapping;
 		renderer.outputColorSpace = outputColorSpace;
 
-		this._context?['onAfterPostProcessing']?.call();
+		_context?['onAfterPostProcessing']?.call();
 	}
 
-	get context => this._context;
+	get context => _context;
 
 
 	void dispose() {
-		this._quadMesh.material?.dispose();
+		_quadMesh.material?.dispose();
 	}
 
 	/**
 	 * Updates the state of the module.
-	 *
-	 * @private
 	 */
 	void _update() {
-		if ( this.needsUpdate == true ) {
+		if (needsUpdate == true ) {
 
 			final renderer = this.renderer;
 
@@ -108,7 +107,7 @@ class PostProcessing {
 
 			let outputNode = this.outputNode;
 
-			if ( this.outputColorTransform == true ) {
+			if ( outputColorTransform == true ) {
 				outputNode = outputNode.context( context );
 				outputNode = renderOutput( outputNode, toneMapping, outputColorSpace );
 			} 
@@ -118,12 +117,12 @@ class PostProcessing {
 				outputNode = outputNode.context( context );
 			}
 
-			this._context = context;
+			_context = context;
 
-			this._quadMesh.material.fragmentNode = outputNode;
-			this._quadMesh.material?.needsUpdate = true;
+			_quadMesh.material.fragmentNode = outputNode;
+			_quadMesh.material?.needsUpdate = true;
 
-			this.needsUpdate = false;
+			needsUpdate = false;
 		}
 	}
 
@@ -131,14 +130,11 @@ class PostProcessing {
 	 * When `PostProcessing` is used to apply post processing effects,
 	 * the application must use this version of `renderAsync()` inside
 	 * its animation loop (not the one from the renderer).
-	 *
-	 * @async
-	 * @return {Promise} A Promise that resolves when the render has been finished.
 	 */
 	Future<void> renderAsync() async{
-		this._update();
+		_update();
 
-		this._context?['onBeforePostProcessing']?.call();
+		_context?['onBeforePostProcessing']?.call();
 
 		final renderer = this.renderer;
 
@@ -149,19 +145,17 @@ class PostProcessing {
 		renderer.outputColorSpace = LinearSRGBColorSpace;
 
 		//
-
 		final currentXR = renderer.xr.enabled;
 		renderer.xr.enabled = false;
 
-		await this._quadMesh.renderAsync( renderer );
+		await _quadMesh.renderAsync( renderer );
 
 		renderer.xr.enabled = currentXR;
 
 		//
-
 		renderer.toneMapping = toneMapping;
 		renderer.outputColorSpace = outputColorSpace;
 
-		this._context?['onAfterPostProcessing']?.call();
+		_context?['onAfterPostProcessing']?.call();
 	}
 }

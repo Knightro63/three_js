@@ -4,6 +4,7 @@ import 'package:three_js_gpu/common/nodes/nodes.dart';
 import 'package:three_js_gpu/common/render_context.dart';
 import 'package:three_js_gpu/common/render_list.dart';
 import 'package:three_js_gpu/common/renderer.dart';
+import 'package:three_js_gpu/src/core/node.dart';
 import 'package:three_js_math/three_js_math.dart';
 
 final _clearColor = Color();
@@ -26,7 +27,7 @@ class Background extends DataMap {
 	///
 	void update(Scene scene, RenderList renderList, RenderContext renderContext ) {
 		final renderer = this.renderer;
-		final background = this.nodes.getBackgroundNode( scene ) ?? scene.background;
+		final background = nodes.getBackgroundNode( scene ) ?? scene.background;
 
 		bool forceClear = false;
 
@@ -45,7 +46,7 @@ class Background extends DataMap {
 		} 
     else if ( background is Node ) {
 
-			final sceneData = this.get( scene );
+			final sceneData = get( scene );
 			final backgroundNode = background;
 
 			_clearColor.setFrom( renderer._clearColor );
@@ -63,7 +64,7 @@ class Background extends DataMap {
 				let viewProj = modelViewProjection;
 				viewProj = viewProj.setZ( viewProj.w );
 
-				final nodeMaterial = new NodeMaterial();
+				final nodeMaterial = NodeMaterial();
 				nodeMaterial.name = 'Background.material';
 				nodeMaterial.side = BackSide;
 				nodeMaterial.depthTest = false;

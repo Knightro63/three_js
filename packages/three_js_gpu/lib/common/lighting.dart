@@ -6,16 +6,11 @@ import './chain_map.dart';
 final _defaultLights = LightsNode();
 final _chainKeys = [];
 
-/**
- * This renderer module manages the lights nodes which are unique
- * per scene and camera combination.
- *
- * The lights node itself is later configured in the render list
- * with the actual lights from the scene.
- *
- * @private
- * @augments ChainMap
- */
+/// This renderer module manages the lights nodes which are unique
+/// per scene and camera combination.
+///
+/// The lights node itself is later configured in the render list
+/// with the actual lights from the scene.
 class Lighting extends ChainMap {
 	Lighting():super();
 

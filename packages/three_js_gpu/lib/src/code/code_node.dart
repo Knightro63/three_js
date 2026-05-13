@@ -1,26 +1,19 @@
+import 'package:three_js_gpu/src/code/node_builder.dart';
 import '../core/node.dart';
 import '../tsl/tsl_base.dart';
 
-/**
- * This class represents native code sections. It is the base
- * class for modules like {@link FunctionNode} which allows to implement
- * functions with native shader languages.
- *
- * @augments Node
- */
+/// This class represents native code sections. It is the base
+/// class for modules like {@link FunctionNode} which allows to implement
+/// functions with native shader languages.
 class CodeNode extends Node {
   String code;
-  List<Node> includes;
+  late List<Node> includes;
   String language;
-  bool global = true;
-	/**
-	 * finalructs a new code node.
-	 *
-	 * @param {string} [code=''] - The native code.
-	 * @param {Array<Node>} [includes=[]] - An array of includes.
-	 * @param {('js'|'wgsl'|'glsl')} [language=''] - The used language.
-	 */
-	CodeNode([ this.code = '', this.includes = [], this.language = '' ]):super( 'code' );
+
+	CodeNode([ this.code = '', List<Node>? includes, this.language = '' ]):super( 'code' ){
+    this.includes = includes ?? [];
+    global = true;
+  }
 
 	/**
 	 * Sets the includes of this code node.
@@ -34,41 +27,37 @@ class CodeNode extends Node {
 		return this;
 	}
 
-	/**
-	 * Returns the includes of this code node.
-	 *
-	 * @param {NodeBuilder} builder - The current node builder.
-	 * @return {Array<Node>} The includes.
-	 */
+	/// Returns the includes of this code node.
 	List<Node> getIncludes([NodeBuilder? builder]) {
-		return this.includes;
+		return includes;
 	}
 
-	generate(NodeBuilder builder ) {
-		final includes = this.getIncludes( builder );
+  @override
+	String? generate(NodeBuilder builder, [String? output] ) {
+		final includes = getIncludes( builder );
 
 		for ( final include in includes ) {
 			include.build( builder );
 		}
 
-		final nodeCode = builder.getCodeFromNode( this, this.getNodeType( builder ) );
-		nodeCode.code = this.code;
+		final nodeCode = builder.getCodeFromNode( this, getNodeType( builder ) );
+		nodeCode.code = code;
 
 		return nodeCode.code;
 	}
 
+  @override
 	serialize( data ) {
 		super.serialize( data );
-
-		data.code = this.code;
-		data.language = this.language;
+		data.code = code;
+		data.language = language;
 	}
 
+  @override
 	deserialize( data ) {
 		super.deserialize( data );
-
-		this.code = data.code;
-		this.language = data.language;
+		code = data.code;
+		language = data.language;
 	}
 }
 
@@ -82,7 +71,7 @@ class CodeNode extends Node {
  * @param {?('js'|'wgsl'|'glsl')} [language=''] - The used language.
  * @returns {CodeNode}
  */
-export final code = /*@__PURE__*/ nodeProxy( CodeNode ).setParameterLength( 1, 3 );
+final code = /*@__PURE__*/ nodeProxy( CodeNode ).setParameterLength( 1, 3 );
 
 /**
  * TSL function for creating a JS code node.
@@ -93,7 +82,7 @@ export final code = /*@__PURE__*/ nodeProxy( CodeNode ).setParameterLength( 1, 3
  * @param {Array<Node>} includes - An array of includes.
  * @returns {CodeNode}
  */
-export final js = ( src, includes ) => code( src, includes, 'js' );
+final js = ( src, includes ) => code( src, includes, 'js' );
 
 /**
  * TSL function for creating a WGSL code node.
@@ -104,7 +93,7 @@ export final js = ( src, includes ) => code( src, includes, 'js' );
  * @param {Array<Node>} includes - An array of includes.
  * @returns {CodeNode}
  */
-export final wgsl = ( src, includes ) => code( src, includes, 'wgsl' );
+final wgsl = ( src, includes ) => code( src, includes, 'wgsl' );
 
 /**
  * TSL function for creating a GLSL code node.
@@ -115,4 +104,4 @@ export final wgsl = ( src, includes ) => code( src, includes, 'wgsl' );
  * @param {Array<Node>} includes - An array of includes.
  * @returns {CodeNode}
  */
-export final glsl = ( src, includes ) => code( src, includes, 'glsl' );
+final glsl = ( src, includes ) => code( src, includes, 'glsl' );

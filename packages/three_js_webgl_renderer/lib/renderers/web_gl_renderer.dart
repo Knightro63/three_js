@@ -326,6 +326,7 @@ class WebGLRenderer extends Renderer{
     setViewport(0, 0, width, height);
   }
 
+  @override
   Vector2 getDrawingBufferSize(Vector2 target) {
     return target.setValues(width * _pixelRatio, height * _pixelRatio).floor();
   }
@@ -711,9 +712,7 @@ class WebGLRenderer extends Renderer{
 
   // Compile
   void prepareMaterial(Material material, Object3D? scene, Object3D object ) {
-
     if ( material.transparent == true && material.side == DoubleSide && material.forceSinglePass == false ) {
-
       material.side = BackSide;
       material.needsUpdate = true;
       getProgram( material, scene, object );
@@ -723,14 +722,13 @@ class WebGLRenderer extends Renderer{
       getProgram( material, scene, object );
 
       material.side = DoubleSide;
-
-    } else {
-
+    } 
+    else {
       getProgram( material, scene, object );
-
     }
-
   }
+
+  @override
   Set compile(Object3D scene, Camera camera, [Object3D? targetScene]) {
     targetScene ??= scene;
 
@@ -1638,14 +1636,17 @@ class WebGLRenderer extends Renderer{
         (material is ShaderMaterial && material.lights == true);
   }
 
+  @override
   int getActiveCubeFace() {
     return _currentActiveCubeFace;
   }
 
+  @override
   int getActiveMipmapLevel() {
     return _currentActiveMipmapLevel;
   }
 
+  @override
   RenderTarget? getRenderTarget() {
     return _currentRenderTarget;
   }

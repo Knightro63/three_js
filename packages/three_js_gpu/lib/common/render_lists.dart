@@ -11,17 +11,11 @@ class RenderLists {
 
 	/**
 	 * Constructs a render lists management component.
-	 *
-	 * @param {Lighting} lighting - The lighting management component.
 	 */
 	RenderLists(this.lighting );
 
 	/**
 	 * Returns a render list for the given scene and camera.
-	 *
-	 * @param {Scene} scene - The scene.
-	 * @param {Camera} camera - The camera.
-	 * @return {RenderList} The render list.
 	 */
 	RenderList get(Scene scene, Camera camera ) {
 		final lists = this.lists;
@@ -32,7 +26,7 @@ class RenderLists {
 		dynamic list = lists.get( _chainKeys );
 
 		if ( list == null ) {
-			list = new RenderList( this.lighting, scene, camera );
+			list = RenderList( lighting, scene, camera );
 			lists.set( _chainKeys, list );
 		}
 

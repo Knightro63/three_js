@@ -4,21 +4,16 @@ import 'package:three_js_math/three_js_math.dart';
 
 int _id = 0;
 
-/**
- * Any render or compute command is executed in a specific context that defines
- * the state of the renderer and its backend. Typical examples for such context
- * data are the current clear values or data from the active framebuffer. This
- * module is used to represent these contexts as objects.
- *
- * @private
- */
+/// Any render or compute command is executed in a specific context that defines
+/// the state of the renderer and its backend. Typical examples for such context
+/// data are the current clear values or data from the active framebuffer. This
+/// module is used to represent these contexts as objects.
 class RenderContext {
   late int id;
   bool color = true;
   bool clearColor = true;
 
 	Map<String,dynamic> clearColorValue = { 'r': 0, 'g': 0, 'b': 0, 'a': 1 };
-
 
 	bool depth = true;
 	bool clearDepth = true;
@@ -27,11 +22,11 @@ class RenderContext {
 	bool clearStencil = true;
 	double clearStencilValue = 1;
 	bool viewport = false;
-	Vector4 viewportValue = new Vector4();
+	Vector4 viewportValue = Vector4();
 	bool scissor = false;
-	Vector4 scissorValue = new Vector4();
+	Vector4 scissorValue =  Vector4();
 
-	RenderTarget? renderTarget = null;
+	RenderTarget? renderTarget;
 	List<Texture>? textures;
 	DepthTexture? depthTexture;
 	int activeCubeFace = 0;
@@ -44,31 +39,18 @@ class RenderContext {
 	ClippingContext? clippingContext;
 	bool isRenderContext = true;
 
-	/**
-	 * Constructs a new render context.
-	 */
 	RenderContext() {
-		this.id = _id ++;
+		id = _id ++;
 	}
 
-	/**
-	 * Returns the cache key of this render context.
-	 *
-	 * @return {number} The cache key.
-	 */
 	int getCacheKey() {
 		return _getCacheKey( this );
 	}
 }
 
-/**
- * Computes a cache key for the given render context. This key
- * should identify the render target state so it is possible to
- * configure the correct attachments in the respective backend.
- *
- * @param {RenderContext} renderContext - The render context.
- * @return {number} The cache key.
- */
+/// Computes a cache key for the given render context. This key
+/// should identify the render target state so it is possible to
+/// configure the correct attachments in the respective backend.
 int _getCacheKey( renderContext ) {
   final textures = renderContext.textures;
 	final activeCubeFace = renderContext.activeCubeFace;

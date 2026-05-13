@@ -10,6 +10,7 @@ class Attributes extends DataMap {
 
 	Attributes(this.backend ):super();
 
+  @override
 	Map? delete(dynamic attribute ) {
     if(attribute is! BufferAttribute ){
       throw('Attribute must be BufferAttribute');

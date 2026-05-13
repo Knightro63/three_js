@@ -1,31 +1,19 @@
-
-
 import 'package:three_js_core/three_js_core.dart';
 
-/**
- * A special type of render target that is used when rendering
- * with the WebXR Device API.
- *
- * @private
- * @augments RenderTarget
- */
+/// A special type of render target that is used when rendering
+/// with the WebXR Device API.
 class XRRenderTarget extends RenderTarget {
   bool _hasExternalTextures = false;
   bool _autoAllocateDepthBuffer = true;
   bool _isOpaqueFramebuffer = false;
-	/**
-	 * Constructs a new XR render target.
-	 *
-	 * @param {number} [width=1] - The width of the render target.
-	 * @param {number} [height=1] - The height of the render target.
-	 * @param {Object} [options={}] - The configuration options.
-	 */
-	XRRenderTarget([super.width = 1, super.height = 1, WebGLRenderTargetOptions? options]) {
-    this.options = options ?? WebGLRenderTargetOptions();
+
+	/// Constructs a new XR render target.
+	XRRenderTarget([super.width = 1, super.height = 1, RenderTargetOptions? options]) {
+    this.options = options ?? RenderTargetOptions();
 	}
 
   @override
-	XRRenderTarget copy(RenderTarget source ) {
+	XRRenderTarget copy(BaseRenderTarget source ) {
     source as XRRenderTarget;
 		super.copy( source );
 

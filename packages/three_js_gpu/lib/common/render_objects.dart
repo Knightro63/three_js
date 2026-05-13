@@ -1,3 +1,4 @@
+import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_gpu/common/bindings.dart';
 import 'package:three_js_gpu/common/chain_map.dart';
 import 'package:three_js_gpu/common/geometries.dart';
@@ -5,15 +6,12 @@ import 'package:three_js_gpu/common/info.dart';
 import 'package:three_js_gpu/common/nodes/nodes.dart';
 import 'package:three_js_gpu/common/pipelines.dart';
 import 'package:three_js_gpu/common/render_object.dart';
-import 'package:three_js_gpu/common/renderer.dart';
 
 final _chainKeys = [];
 
-/**
- * This module manages the render objects of the renderer.
- *
- * @private
- */
+///
+/// This module manages the render objects of the renderer.
+///
 class RenderObjects {
   Renderer renderer;
   Nodes nodes;

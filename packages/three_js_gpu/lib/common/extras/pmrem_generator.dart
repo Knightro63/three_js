@@ -119,11 +119,11 @@ class PMREMGenerator {
     options ??= PMREMGeneratorOptions();
     _setSize(options.size);
 
-		if ( this._hasInitialized == false ) {
+		if (_hasInitialized == false ) {
 			console.warning( 'THREE.PMREMGenerator: .fromScene() called before the backend is initialized. Try using .fromSceneAsync() instead.' );
-			final cubeUVRenderTarget = options.renderTarget ?? this._allocateTarget();
+			final cubeUVRenderTarget = options.renderTarget ?? _allocateTarget();
 			options.renderTarget = cubeUVRenderTarget;
-			this.fromSceneAsync( scene, sigma:sigma, near:near, far:far, options:options );
+			fromSceneAsync( scene, sigma:sigma, near:near, far:far, options:options );
 			return cubeUVRenderTarget;
 		}
 
@@ -132,7 +132,7 @@ class PMREMGenerator {
 		_oldActiveMipmapLevel = _renderer.getActiveMipmapLevel();
 
 
-    final cubeUVRenderTarget = options.renderTarget ?? this._allocateTarget();
+    final cubeUVRenderTarget = options.renderTarget ?? _allocateTarget();
     cubeUVRenderTarget.depthBuffer = true;
 
     _init( cubeUVRenderTarget );
@@ -150,8 +150,8 @@ class PMREMGenerator {
   
   Future<RenderTarget> fromSceneAsync(Scene scene, {double sigma = 0, double near = 0.1, double far = 100, PMREMGeneratorOptions? options}) async{
     options ??= PMREMGeneratorOptions();
-		if ( this._hasInitialized == false ) await this._renderer.init();
-		return this.fromScene( scene, sigma: sigma, near: near, far:far , options:options );
+		if ( _hasInitialized == false ) await _renderer.init();
+		return fromScene( scene, sigma: sigma, near: near, far:far , options:options );
 	}
 
   /// *
@@ -160,11 +160,11 @@ class PMREMGenerator {
 	/// * as this matches best with the 256 x 256 cubemap output.
 	/// *
   RenderTarget fromEquirectangular(Texture equirectangular, [RenderTarget? renderTarget]) {
-		if ( this._hasInitialized == false ) {
+		if ( _hasInitialized == false ) {
 			console.warning( 'THREE.PMREMGenerator: .fromEquirectangular() called before the backend is initialized. Try using .fromEquirectangularAsync() instead.' );
-			this._setSizeFromTexture( equirectangular );
-			final cubeUVRenderTarget = renderTarget ?? this._allocateTarget();
-			this.fromEquirectangularAsync( equirectangular, cubeUVRenderTarget );
+			_setSizeFromTexture( equirectangular );
+			final cubeUVRenderTarget = renderTarget ?? _allocateTarget();
+			fromEquirectangularAsync( equirectangular, cubeUVRenderTarget );
 			
       return cubeUVRenderTarget;
 		}
@@ -172,8 +172,8 @@ class PMREMGenerator {
   }
 
 	Future<RenderTarget> fromEquirectangularAsync(Texture equirectangular, [RenderTarget?renderTarget]) async{
-		if ( this._hasInitialized == false ) await this._renderer.init();
-		return this._fromTexture( equirectangular, renderTarget );
+		if ( _hasInitialized == false ) await _renderer.init();
+		return _fromTexture( equirectangular, renderTarget );
 	}
 
   /// *
@@ -182,19 +182,19 @@ class PMREMGenerator {
 	/// * as this matches best with the 256 x 256 cubemap output.
 	/// *
   RenderTarget fromCubemap(Texture cubemap, [RenderTarget? renderTarget]) {
-		if ( this._hasInitialized == false ) {
+		if ( _hasInitialized == false ) {
 			console.warning( 'THREE.PMREMGenerator: .fromCubemap() called before the backend is initialized. Try using .fromCubemapAsync() instead.' );
-			this._setSizeFromTexture( cubemap );
-			final cubeUVRenderTarget = renderTarget ?? this._allocateTarget();
-			this.fromCubemapAsync( cubemap, renderTarget );
+			_setSizeFromTexture( cubemap );
+			final cubeUVRenderTarget = renderTarget ?? _allocateTarget();
+			fromCubemapAsync( cubemap, renderTarget );
 			return cubeUVRenderTarget;
 		}
     return _fromTexture(cubemap, renderTarget);
   }
 
 	Future<RenderTarget> fromCubemapAsync(Texture cubemap, [RenderTarget? renderTarget]) async{
-		if ( this._hasInitialized == false ) await this._renderer.init();
-		return this._fromTexture( cubemap, renderTarget );
+		if ( _hasInitialized == false ) await _renderer.init();
+		return _fromTexture( cubemap, renderTarget );
 	}
 
   /// *
@@ -246,9 +246,9 @@ class PMREMGenerator {
 
 	_setSizeFromTexture(Texture texture ) {
 		if ( texture.mapping == CubeReflectionMapping || texture.mapping == CubeRefractionMapping ) {
-			this._setSize( texture.image.length == 0 ? 16 : ( texture.image[ 0 ].width ?? texture.image[ 0 ].image.width ) );
+			_setSize( texture.image.length == 0 ? 16 : ( texture.image[ 0 ].width ?? texture.image[ 0 ].image.width ) );
 		} else { // Equirectangular
-			this._setSize( texture.image.width / 4 );
+			_setSize( texture.image.width / 4 );
 		}
 	}
 
@@ -273,14 +273,14 @@ class PMREMGenerator {
   }
 
   RenderTarget _fromTexture(Texture texture, [RenderTarget? renderTarget]) {
-    this._setSizeFromTexture( texture );
+    _setSizeFromTexture( texture );
 
     _oldTarget = _renderer.getRenderTarget();
 		_oldActiveCubeFace = _renderer.getActiveCubeFace();
 		_oldActiveMipmapLevel = _renderer.getActiveMipmapLevel();
 
     final cubeUVRenderTarget = renderTarget ?? _allocateTarget();
-    this._init( cubeUVRenderTarget );
+    _init( cubeUVRenderTarget );
     _textureToCubeUV(texture, cubeUVRenderTarget);
     _applyPMREM(cubeUVRenderTarget);
     _cleanup(cubeUVRenderTarget);
@@ -288,7 +288,7 @@ class PMREMGenerator {
     return cubeUVRenderTarget;
   }
 
-  WebGLRenderTarget _allocateTarget() {
+  RenderTarget _allocateTarget() {
     int width = 3 * math.max(_cubeSize, 16 * 7);
     int height = 4 * _cubeSize;
 
@@ -297,7 +297,7 @@ class PMREMGenerator {
   }
 
   _init(RenderTarget renderTarget){
-    if (this._pingPongRenderTarget == null || this._pingPongRenderTarget.width != renderTarget.width || this._pingPongRenderTarget.height != renderTarget.height ) {
+    if (_pingPongRenderTarget == null || _pingPongRenderTarget.width != renderTarget.width || _pingPongRenderTarget.height != renderTarget.height ) {
       if (_pingPongRenderTarget != null) {
         _dispose();
       }
@@ -335,7 +335,7 @@ class PMREMGenerator {
     final originalAutoClear = renderer.autoClear;
     renderer.getClearColor(_clearColor);
 
-    Mesh? backgroundBox = this._backgroundBox;
+    Mesh? backgroundBox = _backgroundBox;
     renderer.autoClear = false;
     if ( backgroundBox == null ) {
       final backgroundMaterial = MeshBasicMaterial.fromMap({
@@ -402,15 +402,10 @@ class PMREMGenerator {
         texture.mapping == CubeRefractionMapping);
 
 		if ( isCubeTexture ) {
-			if ( this._cubemapMaterial == null ) {
-				this._cubemapMaterial = _getCubemapMaterial( texture );
-			}
-
+			_cubemapMaterial ??= _getCubemapMaterial( texture );
 		} 
     else {
-			if ( this._equirectMaterial == null ) {
-				this._equirectMaterial = _getEquirectMaterial( texture );
-			}
+			_equirectMaterial ??= _getEquirectMaterial( texture );
 		}
 
     final material = isCubeTexture ? _cubemapMaterial : _equirectMaterial;
@@ -516,7 +511,7 @@ class PMREMGenerator {
 
     final double outputSize = _sizeLods[lodOut].toDouble();
     final x = 3 * outputSize *(lodOut > _lodMax - lodMin ? lodOut - _lodMax + lodMin : 0);
-    final y = 4 * (this._cubeSize - outputSize);
+    final y = 4 * (_cubeSize - outputSize);
 
     _setViewport(targetOut, x, y, 3 * outputSize, 2 * outputSize);
     renderer.setRenderTarget(targetOut);
@@ -598,7 +593,7 @@ class PMREMGenerator {
     return {"lodPlanes": lodPlanes, "sizeLods": sizeLods, "sigmas": sigmas};
   }
 
-  WebGLRenderTarget _createRenderTarget(int width, int height) {
+  RenderTarget _createRenderTarget(int width, int height) {
     final params = {
       'magFilter': LinearFilter,
       'minFilter': LinearFilter,
@@ -609,7 +604,7 @@ class PMREMGenerator {
       //depthBuffer: false
     };
     
-    final cubeUVRenderTarget = WebGLRenderTarget(width, height, WebGLRenderTargetOptions(params));
+    final cubeUVRenderTarget = RenderTarget(width, height, RenderTargetOptions(params));
     cubeUVRenderTarget.texture.mapping = CubeUVReflectionMapping;
     cubeUVRenderTarget.texture.name = 'PMREM.cubeUv';
     cubeUVRenderTarget.scissorTest = true;
@@ -626,7 +621,7 @@ class PMREMGenerator {
     material.depthTest = false;
     material.depthWrite = false;
     material.blending = NoBlending;
-    material.name = 'PMREM_${ type }';
+    material.name = 'PMREM_$type';
     return material;
   }
 
@@ -634,14 +629,14 @@ class PMREMGenerator {
     final weights = uniformArray( new Array( MAX_SAMPLES ).fill( 0 ) );
     final poleAxis = uniform( new Vector3( 0, 1, 0 ) );
     final dTheta = uniform( 0 );
-    final n = float( MAX_SAMPLES );
+    final n = maxSamples;
     final latitudinal = uniform( 0 ); // false, bool
     final samples = uniform( 1 ); // int
     final envMap = texture( null );
     final mipInt = uniform( 0 ); // int
-    final CUBEUV_TEXEL_WIDTH = float( 1 / width );
-    final CUBEUV_TEXEL_HEIGHT = float( 1 / height );
-    final CUBEUV_MAX_MIP = float( lodMax );
+    final cubeuvTexelWidth = ( 1 / width );
+    final cubeuvTexelHeight = ( 1 / height );
+    final cubeuvMaxMip = ( lodMax );
 
     final materialUniforms = {
       'n': n,
@@ -653,9 +648,9 @@ class PMREMGenerator {
       'samples': samples,
       'envMap': envMap,
       'mipInt': mipInt,
-      'CUBEUV_TEXEL_WIDTH': CUBEUV_TEXEL_WIDTH,
-      'CUBEUV_TEXEL_HEIGHT': CUBEUV_TEXEL_HEIGHT,
-      'CUBEUV_MAX_MIP': CUBEUV_MAX_MIP
+      'CUBEUV_TEXEL_WIDTH': cubeuvTexelWidth,
+      'CUBEUV_TEXEL_HEIGHT': cubeuvTexelHeight,
+      'CUBEUV_MAX_MIP': cubeuvMaxMip
     };
 
     final material = _getMaterial( 'blur' );

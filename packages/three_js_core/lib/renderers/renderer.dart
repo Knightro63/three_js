@@ -81,4 +81,10 @@ abstract class Renderer {
   void copyFramebufferToTexture(Vector? position, Texture? texture, {int level = 0});
   void renderBufferDirect(Camera camera,Object3D? scene,BufferGeometry geometry,Material material,Object3D object,Map<String, dynamic>? group);
   RenderTarget? getRenderTarget();
+
+  int getActiveCubeFace();
+  int getActiveMipmapLevel();
+  Set compile(Object3D scene, Camera camera, [Object3D? targetScene]);
+
+  Vector2 getDrawingBufferSize(Vector2 target);
 }

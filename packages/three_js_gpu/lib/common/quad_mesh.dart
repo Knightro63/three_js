@@ -1,5 +1,4 @@
 import "package:three_js_core/three_js_core.dart";
-import "package:three_js_gpu/common/renderer.dart";
 import "package:three_js_math/buffer/buffer_attribute.dart";
 
 OrthographicCamera _camera = OrthographicCamera( - 1, 1, 1, - 1, 0, 1 );

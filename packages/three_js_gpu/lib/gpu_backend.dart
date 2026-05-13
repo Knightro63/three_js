@@ -1,3 +1,4 @@
+import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_gpu/common/backend.dart';
 import 'package:three_js_gpu/common/renderer.dart';
 
