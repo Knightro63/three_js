@@ -1,12 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:three_js_core/three_js_core.dart' as core;
-import 'package:three_js_angle_renderer/three_js_angle_renderer.dart';
 import 'package:three_js_xr/three_js_xr.dart';
 
 class VRButton extends StatefulWidget{
   const VRButton({super.key,required this.renderer});
-  final AngleRenderer? renderer;
+  final core.Renderer? renderer;
 
   @override
   createState() => _State();

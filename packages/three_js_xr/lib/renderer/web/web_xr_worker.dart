@@ -1,6 +1,5 @@
 import 'dart:js_interop';
 import 'dart:math' as math;
-import 'package:three_js_angle_renderer/angle/index.dart';
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'package:flutter_angle/flutter_angle.dart';
@@ -58,7 +57,7 @@ class WebXRWorker extends XRManager {
   final cameraLPos = Vector3();
   final cameraRPos = Vector3();
 
-  final animation = AngleAnimation();
+  final animation = Animation();
   dynamic onAnimationFrameCallback;
 
 	WebXRWorker(super.renderer, super.gl):super(){

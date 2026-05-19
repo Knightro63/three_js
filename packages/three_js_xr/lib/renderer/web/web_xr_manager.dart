@@ -1,5 +1,4 @@
 import 'dart:js_interop';
-import 'package:three_js_angle_renderer/angle/index.dart';
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'package:flutter_angle/flutter_angle.dart';
@@ -9,7 +8,7 @@ import 'web_xr_controller.dart';
 import 'web_xr_depth_sensing.dart';
 
 class WebXRWorker extends XRManager{
-  late final AngleState state;
+  late final State state;
   final WebXRDepthSensing depthSensing = WebXRDepthSensing();
   late final ArrayCamera cameraXR = ArrayCamera([]);
   
@@ -45,7 +44,7 @@ class WebXRWorker extends XRManager{
   double? _currentDepthNear;
   double? _currentDepthFar;
 
-  final AngleAnimation animation = AngleAnimation();
+  final Animation animation = Animation();
   late final ArrayCamera cameraVR;
   final PerspectiveCamera cameraL = PerspectiveCamera();
   final PerspectiveCamera cameraR = PerspectiveCamera();
@@ -61,7 +60,7 @@ class WebXRWorker extends XRManager{
   @override
   void init(){
   // final scope = this;
-    state = renderer.state as AngleState;
+    state = renderer.state;
     cameraL.layers.enable( 1 );
     cameraL.viewport = Vector4.zero();
 

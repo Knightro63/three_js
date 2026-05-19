@@ -1,4 +1,3 @@
-import 'package:three_js_angle_renderer/three_js_angle_renderer.dart';
 import 'package:three_js_core/three_js_core.dart';
 import '../../app/index.dart';
 
@@ -55,7 +54,7 @@ class WebXRDepthSensing {
 		}
 	}
 
-	void render(AngleRenderer renderer, cameraXR ) {
+	void render(Renderer renderer, cameraXR ) {
 		if ( texture != null ) {
 			if ( mesh == null ) {
 				final viewport = cameraXR.cameras[ 0 ].viewport;

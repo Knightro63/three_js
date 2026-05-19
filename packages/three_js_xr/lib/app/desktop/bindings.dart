@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:three_js_core/core/event_dispatcher.dart';
 
 XRSystem? xrSystem = XRSystem();

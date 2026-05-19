@@ -12,11 +12,11 @@ dependencies:
     sdk: flutter
   three_js_math: ^0.3.0
   three_js_advanced_loaders: ^0.3.0
-  three_js_core: ^0.3.0
+  three_js_core: #^0.3.0
+    path: ../three_js_core
   three_js_geometry: ^0.3.0
   three_js_core_loaders: ^0.3.0
   three_js_sensors: ^0.2.0
-  three_js_angle_renderer: ^0.0.1
   web: ^1.1.1
 
 dev_dependencies:

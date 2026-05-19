@@ -1,5 +1,4 @@
 import 'package:flutter/services.dart';
-import 'package:three_js_angle_renderer/angle/index.dart';
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'package:flutter_angle/flutter_angle.dart';
@@ -11,12 +10,12 @@ import 'package:three_js_xr/renderer/web/web_xr_controller.dart';
 
 class WebXRWorker extends XRManager{
   XRSession? session;
-  late final AngleState state;
+  late final State state;
   dynamic onAnimationFrameCallback;
   RenderTarget? renderTargetLeft;
   RenderTarget? renderTargetRight;
 
-  final AngleAnimation animation = AngleAnimation();
+  final Animation animation = Animation();
   final StereoCamera stereoCamera = StereoCamera();
 
   final Camera _camera = OrthographicCamera(-1, 1, 1, -1, 0, 1);
@@ -45,7 +44,7 @@ class WebXRWorker extends XRManager{
     dpr = options.dpr;
 
     _mat.uniforms['k1']['value'] = options.k1;
-    _mat.uniforms['k2']['value'] = options.k1;
+    _mat.uniforms['k2']['value'] = options.k2;
     _mat.uniforms['eyeTextureOffsetX']['value'] = options.eyeOffset.x.toInt();
     _mat.uniforms['eyeTextureOffsetY']['value'] = options.eyeOffset.y.toInt();
     _mat.uniforms['lensSize']['value'] = options.lensSize;
@@ -66,7 +65,7 @@ class WebXRWorker extends XRManager{
 
   @override
   void init(){
-    state = renderer.state as AngleState;
+    state = renderer.state;
     animation.setAnimationLoop( onAnimationFrame );
   }
 
@@ -132,9 +131,11 @@ class WebXRWorker extends XRManager{
     stereoCamera.update( camera );
 
     renderer.setRenderTarget(renderTargetLeft);
+    renderer.clear();
     renderer.render(scene, stereoCamera.cameraL);
 
     renderer.setRenderTarget(renderTargetRight);
+    renderer.clear();
     renderer.render(scene, stereoCamera.cameraR);
 
     texture.activate();
@@ -147,12 +148,19 @@ class WebXRWorker extends XRManager{
     renderer.setScissor( 0, 0, width/2, height);
     renderer.setViewport(0, 0, width/2, height);
     _mat.uniforms['tDiffuse']['value'] = renderTargetLeft?.texture;
+    _mat.uniforms['eyeTextureOffsetX']['value'] = 0.0;
+    _mat.needsUpdate = true;
+
     renderer.render(_scene, _camera);
     
     renderer.setRenderTarget(null);
     renderer.setScissor( width / 2, 0, width / 2, height);
     renderer.setViewport(width / 2, 0, width / 2, height);
+
     _mat.uniforms['tDiffuse']['value'] = renderTargetRight?.texture;
+    _mat.uniforms['eyeTextureOffsetX']['value'] = 0.5; // Right side center tracking adjustment
+    _mat.needsUpdate = true; // Force matrix bindings to flush into the GPU batch immediately
+    
     renderer.render(_scene, _camera);
 
     renderer.setScissorTest( false );
