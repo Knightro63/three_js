@@ -48,7 +48,7 @@ class _State extends State<WebXRARCones> {
       body: Stack(
         children: [
           threeJs.build(),
-          if(threeJs.mounted) ARButton(threeJs: threeJs)
+          if(threeJs.mounted) ARButton(renderer: threeJs.renderer)
         ],
       ) 
     );
@@ -56,7 +56,7 @@ class _State extends State<WebXRARCones> {
 
   WebXRController? controller; 
 
-  WebXRWorker xrSetup(three.WebGLRenderer renderer, dynamic gl){
+  WebXRWorker xrSetup(three.AngleRenderer renderer, dynamic gl){
     return WebXRWorker(renderer,gl);
   }
 

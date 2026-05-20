@@ -1,39 +1,27 @@
 #version 460 core
 
 // 1. INCLUDE DECLARATIONS
-#include "../shader_chunk/common.frag"
-#include "../shader_chunk/tonemapping_pars.frag"
+#include "../shader_chunk/common.vert"
 
-layout(std140, binding = 1) uniform MaterialUniforms {
-    float tFlip;
-    float opacity;
+// 2. INPUT MESH ATTRIBUTES
+in vec3 position;
+
+// 3. UNIFORMS BLOCK (Index tracking from top-to-bottom)
+uniform ObjectUniforms {
+    mat4 modelMatrix; // Float Indices 0 through 15 (Takes 16 float slots)
 };
 
-// Binding 59: Dedicated background cube texture map per Master List
-layout(set = 0, binding = 59) uniform sampler2D tCube; // Atlas-style for Flutter GPU
-
-// Location 10: vWorldPosition synced with Vertex 10 per Master List
-layout(location = 10) in vec3 vWorldPosition;
-
-// Final Output per Master List
-layout(location = 0) out vec4 pc_fragColor;
+// 4. PIPELINE OUTPUTS (Implicit varying matching)
+// Match this exact name as an 'in vec3 vWorldDirection;' inside your fragment shader.
+out vec3 vWorldDirection;
 
 void main() {
-    // Calculate direction from interpolated position
-    vec3 vWorldDirection = normalize(vWorldPosition);
+    // Calculate direction vectors by transforming local vertices via the model matrix
+    vWorldDirection = transformDirection(position, modelMatrix);
 
-    // Standard Cube sampling using the 2D Atlas helper
-    // textureCube() from cube_uv_reflection.frag handles the Atlas lookup
-    vec3 lookupDir = vec3(tFlip * vWorldDirection.x, vWorldDirection.yz);
-    vec4 texColor = textureCube(tCube, lookupDir);
+    #include "../shader_chunk/begin_vertex.vert"
+    #include "../shader_chunk/project_vertex.vert"
 
-    texColor.a *= opacity;
-
-    // Interface with tonemapping/colorspace chunks
-    vec3 outgoingLight = texColor.rgb;
-
-    #include "../shader_chunk/tonemapping.frag"
-    #include "../shader_chunk/colorspace.frag"
-
-    pc_fragColor = vec4(outgoingLight, texColor.a);
+    // Force the object depth to the maximum far clipping boundary (1.0 in NDC)
+    gl_Position.z = gl_Position.w;
 }

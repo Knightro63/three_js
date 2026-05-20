@@ -3,19 +3,28 @@
 // 1. INCLUDE DECLARATIONS
 #include "../shader_chunk/common.vert"
 
-// Location 10: vWorldPosition/Direction per Master List
-layout(location = 10) out vec3 vWorldPosition;
+// Standard Three.js mesh input attributes mapped to clean Impeller vertex buffers
+in vec3 position;
+
+// Uniform structural grouping to replace loose WebGL/Three.js global bindings
+uniform ObjectUniforms {
+    mat4 modelMatrix;
+};
+
+// CRITICAL IMPELLER CHANGE: Implicit varying matching (Replaces legacy layout numbers or manual locations)
+// Match this exact name as an 'in vec3 vWorldDirection;' inside your fragment shader.
+out vec3 vWorldDirection;
 
 void main() {
     // 2. CALCULATE DIRECTION
-    // transformDirection is provided by common.vert
-    vWorldPosition = transformDirection(inPosition, modelMatrix);
+    // transformDirection maps local mesh vectors into world coordinates via the modelMatrix
+    vWorldDirection = transformDirection(position, modelMatrix);
 
     // 3. CORE GEOMETRY
     #include "../shader_chunk/begin_vertex.vert"
     #include "../shader_chunk/project_vertex.vert"
 
     // 4. DEPTH TRICK
-    // Set z to w so that the background is always at the far clipping plane (1.0 in NDC)
-    gl_Position.z = gl_Position.w;
+    // Forces the calculated depth to maximum depth (1.0 in NDC space)
+    gl_Position.z = gl_Position.w; 
 }

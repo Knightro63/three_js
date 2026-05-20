@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:three_js_core/three_js_core.dart' as core;
 import 'package:three_js_xr/three_js_xr.dart';
+import 'package:three_js_angle_renderer/three_js_angle_renderer.dart';
 
 class ARButton extends StatefulWidget{
   const ARButton({super.key,required this.renderer});
-  final core.Renderer? renderer;
+  final AngleRenderer? renderer;
 
   @override
   createState() => _State();

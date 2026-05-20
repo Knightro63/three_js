@@ -1,5 +1,5 @@
 import 'package:three_js_core/three_js_core.dart';
-import '../../app/index.dart';
+import 'package:three_js_angle_renderer/three_js_angle_renderer.dart';
 
 const occlusionVertex = '''
 void main() {
@@ -38,7 +38,7 @@ class WebXRDepthSensing {
 
 	WebXRDepthSensing();
 
-	void init(Renderer renderer, XRWebGLDepthInformation depthData, XRRenderState renderState ) {
+	void init(AngleRenderer renderer, depthData, renderState ) {
 		if (texture == null ) {
 			final texture = Texture();
 

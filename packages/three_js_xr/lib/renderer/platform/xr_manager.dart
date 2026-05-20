@@ -1,4 +1,6 @@
 import 'package:flutter/services.dart';
+import 'package:three_js_angle_renderer/angle/index.dart';
+import 'package:three_js_angle_renderer/three_js_angle_renderer.dart';
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'package:flutter_angle/flutter_angle.dart';
@@ -15,7 +17,7 @@ class WebXRWorker extends XRManager{
   RenderTarget? renderTargetLeft;
   RenderTarget? renderTargetRight;
 
-  final Animation animation = Animation();
+  final AngleAnimation animation = AngleAnimation();
   final StereoCamera stereoCamera = StereoCamera();
 
   final Camera _camera = OrthographicCamera(-1, 1, 1, -1, 0, 1);
@@ -45,8 +47,8 @@ class WebXRWorker extends XRManager{
 
     _mat.uniforms['k1']['value'] = options.k1;
     _mat.uniforms['k2']['value'] = options.k2;
-    _mat.uniforms['eyeTextureOffsetX']['value'] = options.eyeOffset.x.toInt();
-    _mat.uniforms['eyeTextureOffsetY']['value'] = options.eyeOffset.y.toInt();
+    _mat.uniforms['eyeTextureOffsetX']?['value'] = options.eyeOffset.x;
+    _mat.uniforms['eyeTextureOffsetY']?['value'] = options.eyeOffset.y;
     _mat.uniforms['lensSize']['value'] = options.lensSize;
     _mat.uniforms['type']['value'] = options.distorsionType.index;
 
@@ -112,6 +114,8 @@ class WebXRWorker extends XRManager{
   void updateCamera(Camera camera ) {}
 
   Future<void> render(Scene scene, Camera camera, FlutterAngleTexture texture, [double? dt]) async{
+    final renderer = this.renderer as AngleRenderer;
+    
     final width = texture.options.width.toDouble();
     final height = texture.options.height.toDouble();
     
@@ -148,7 +152,7 @@ class WebXRWorker extends XRManager{
     renderer.setScissor( 0, 0, width/2, height);
     renderer.setViewport(0, 0, width/2, height);
     _mat.uniforms['tDiffuse']['value'] = renderTargetLeft?.texture;
-    _mat.uniforms['eyeTextureOffsetX']['value'] = 0.0;
+    _mat.uniforms['eyeTextureOffsetX']?['value'] = 0.0;
     _mat.needsUpdate = true;
 
     renderer.render(_scene, _camera);
@@ -158,7 +162,7 @@ class WebXRWorker extends XRManager{
     renderer.setViewport(width / 2, 0, width / 2, height);
 
     _mat.uniforms['tDiffuse']['value'] = renderTargetRight?.texture;
-    _mat.uniforms['eyeTextureOffsetX']['value'] = 0.5; // Right side center tracking adjustment
+    _mat.uniforms['eyeTextureOffsetX']?['value'] = 0.0; // Right side center tracking adjustment
     _mat.needsUpdate = true; // Force matrix bindings to flush into the GPU batch immediately
     
     renderer.render(_scene, _camera);

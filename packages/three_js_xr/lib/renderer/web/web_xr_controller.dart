@@ -96,7 +96,7 @@ class WebXRController extends Object3D{
 		return this;
 	}
 
-	WebXRController update(XRInputSource? inputSource, XRFrame frame, XRReferenceSpace? referenceSpace ) {
+	WebXRController update(inputSource, frame, referenceSpace ) {
 		XRPose? inputPose;
 		XRPose? gripPose;
 		bool handPose = false;

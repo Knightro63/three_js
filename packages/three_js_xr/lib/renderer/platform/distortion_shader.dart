@@ -8,8 +8,8 @@ final distortionShader = {
     'k2': { 'value': 0.022 }, // Adjust for desired distortion
     'lensSize': {'value': Vector2(1,1)},
     'cornerRadius': { 'value': 0.25 },
-    'eyeTextureOffsetX': {'value': 0},
-    'eyeTextureOffsetY': {'value': 0},
+    'eyeTextureOffsetX': {'value': 0.0},
+    'eyeTextureOffsetY': {'value': 0.0},
     'type': {'value': 1}
   },
   'vertexShader': '''

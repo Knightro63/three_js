@@ -51,7 +51,7 @@ class _State extends State<WebXRVRRollercoaster> {
       body: Stack(
         children: [
           threeJs.build(),
-          if(threeJs.mounted) VRButton(threeJs: threeJs)
+          if(threeJs.mounted) VRButton(renderer: threeJs.renderer)
         ],
       ) 
     );
@@ -69,7 +69,7 @@ class _State extends State<WebXRVRRollercoaster> {
   double progress = 0;
   int prevTime = DateTime.now().millisecond;
 
-  WebXRWorker xrSetup(three.WebGLRenderer renderer, dynamic gl){
+  WebXRWorker xrSetup(three.AngleRenderer renderer, dynamic gl){
     return WebXRWorker(renderer,gl);
   }
 
@@ -110,7 +110,7 @@ class _State extends State<WebXRVRRollercoaster> {
     final vertex = three.Vector3();
 
     for (int i = 0; i < positions.length; i += 3 ) {
-      vertex.fromNativeArray( positions, i );
+      vertex.fromArray( positions, i );
 
       vertex.x += math.Random().nextDouble() * 10 - 5;
       vertex.z += math.Random().nextDouble() * 10 - 5;

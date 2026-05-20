@@ -1670,7 +1670,7 @@ class WebGLRenderer extends Renderer{
     //}
   }
 
-  void setRenderTargetFramebuffer(RenderTarget renderTarget, defaultFramebuffer) {
+  void setRenderTargetFramebuffer(RenderTarget renderTarget, Framebuffer? defaultFramebuffer) {
     final renderTargetProperties = properties.get(renderTarget);
     renderTargetProperties["__webglFramebuffer"] = defaultFramebuffer;
     renderTargetProperties["__useDefaultFramebuffer"] = defaultFramebuffer == null;

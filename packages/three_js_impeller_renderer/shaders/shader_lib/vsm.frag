@@ -1,61 +1,60 @@
 #version 460 core
 
-/**
- * Stage: Fragment
- * Purpose: VSM Shadow blur/pre-filter pass. 
- * Calculates Mean and Standard Deviation for soft shadows.
- */
-
 // 1. INCLUDE DECLARATIONS
-#include "../shader_chunk/common.frag"
 #include "../shader_chunk/packing.frag"
 
-layout(std140, binding = 1) uniform MaterialUniforms {
-    vec2 resolution;
-    float radius;
-    int vsmSamples;      // Replacement for VSM_SAMPLES
-    bool isHorizontal;   // Replacement for HORIZONTAL_PASS
+// 2. UNIFORMS BLOCKS
+// Sequential memory block stacking immediately behind your 32-slot vertex matrices.
+uniform MaterialUniforms {
+    float radius;            // Float Index 32
+    float vsmSamples;        // Float Index 33 (Replaces compile-time VSM_SAMPLES macro)
+    bool isHorizontalPass;   // Float Index 34 (Replaces compile-time HORIZONTAL_PASS macro)
 };
 
-// Binding 58: shadow_pass (using t2D slot) per Master List
-layout(set = 0, binding = 58) uniform sampler2D shadow_pass;
+// 3. TEXTURE SAMPLERS
+uniform sampler2D shadow_pass; // Sampler Index 0 (De-coupled from flat float array)
 
-// Final Output per Master List
-layout(location = 0) out vec4 pc_fragColor;
+// 4. PIPELINE INPUTS (Normalized coordinates matching texture space [0.0 - 1.0])
+in vec2 vUv;
+
+// 5. PIPELINE OUTPUTS
+layout(location = 0) out vec4 fragColor;
 
 void main() {
-    float samples = float(vsmSamples);
     float mean = 0.0;
     float squared_mean = 0.0;
     
-    // Calculate sampling offsets
-    float uvStride = samples <= 1.0 ? 0.0 : 2.0 / (samples - 1.0);
-    float uvStart = samples <= 1.0 ? 0.0 : -1.0;
+    // Protection fallback check to prevent zero division loop lockouts
+    float samplesCount = max(vsmSamples, 1.0);
+    float uvStride = samplesCount <= 1.0 ? 0.0 : 2.0 / (samplesCount - 1.0);
+    float uvStart = samplesCount <= 1.0 ? 0.0 : -1.0;
 
-    for (float i = 0.0; i < samples; i++) {
+    for (float i = 0.0; i < 64.0; i++) { // Set a clean fixed max-loop ceiling for AOT compiler bounds
+        if (i >= samplesCount) break;
+
         float uvOffset = uvStart + i * uvStride;
         
-        if (isHorizontal) {
-            // Horizontal blur: reads already packed RGBA 2-half data
-            vec2 distribution = unpackRGBATo2Half(texture(shadow_pass, (gl_FragCoord.xy + vec2(uvOffset, 0.0) * radius) / resolution));
+        if (isHorizontalPass) {
+            // Directly utilize normalized UV steps instead of dividing gl_FragCoord by resolution
+            vec2 sampleCoord = vUv + vec2(uvOffset * radius, 0.0);
+            vec2 distribution = unpackRGBATo2Half(texture(shadow_pass, sampleCoord));
+            
             mean += distribution.x;
-            // variance = E[x^2] - E[x]^2. We accumulate raw squared values here.
-            squared_mean += (distribution.y * distribution.y + distribution.x * distribution.x);
+            squared_mean += distribution.y * distribution.y + distribution.x * distribution.x;
         } else {
-            // Vertical/Initial pass: reads raw packed RGBA depth
-            float depth = unpackRGBAToDepth(texture(shadow_pass, (gl_FragCoord.xy + vec2(0.0, uvOffset) * radius) / resolution));
+            vec2 sampleCoord = vUv + vec2(0.0, uvOffset * radius);
+            float depth = unpackRGBAToDepth(texture(shadow_pass, sampleCoord));
+            
             mean += depth;
             squared_mean += depth * depth;
         }
     }
 
-    mean = mean / samples;
-    squared_mean = squared_mean / samples;
+    mean = mean / samplesCount;
+    squared_mean = squared_mean / samplesCount;
     
-    // Variance/StdDev calculation
-    float variance = max(0.0, squared_mean - mean * mean);
-    float std_dev = sqrt(variance);
-
-    // Pack into RGBA for the VSM shadow map
-    pc_fragColor = pack2HalfToRGBA(vec2(mean, std_dev));
+    float std_dev = sqrt(max(squared_mean - mean * mean, 0.0)); // Prevent negative square root crashes
+    
+    // pack2HalfToRGBA is loaded out of packing.frag under the hood
+    fragColor = pack2HalfToRGBA(vec2(mean, std_dev));
 }

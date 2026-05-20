@@ -1,52 +1,52 @@
 #version 460 core
 
-/**
- * Stage: Fragment
- * Purpose: Pack distance from light source into RGBA (Point Light Shadows).
- */
-
-#define DISTANCE
-
 // 1. INCLUDE DECLARATIONS
 #include "../shader_chunk/common.frag"
 #include "../shader_chunk/packing.frag"
-#include "../shader_chunk/uv_pars.frag"
-#include "../shader_chunk/map_pars.frag"
-#include "../shader_chunk/alphamap_pars.frag"
-#include "../shader_chunk/alphatest_pars.frag"
-#include "../shader_chunk/alpha_hash_pars.frag"
-#include "../shader_chunk/clipping_planes_pars.frag"
+#include "../shader_chunk/uv_pars_fragment.frag"
+#include "../shader_chunk/map_pars_fragment.frag"
+#include "../shader_chunk/alphamap_pars_fragment.frag"
+#include "../shader_chunk/alphatest_pars_fragment.frag"
+#include "../shader_chunk/alphahash_pars_fragment.frag"
+#include "../shader_chunk/clipping_planes_pars_fragment.frag"
 
-layout(std140, binding = 1) uniform MaterialUniforms {
-    vec3 referencePosition; // Light position
-    float nearDistance;
-    float farDistance;
-    // ... other material uniforms
+// 2. UNIFORMS BLOCK (Shared continuous layout tracker across your app pipeline)
+uniform ObjectUniforms {
+    mat4 modelMatrix;       // Vertex stage memory overhead (Indices 0 through 15)
 };
 
-// Location 10: Interpolated world position per Master List
-layout(location = 10) in vec3 vWorldPosition;
+uniform DistanceUniforms {
+    vec3 referencePosition;  // Float Indices 16, 17, 18 (Point light coordinates)
+    float nearDistance;      // Float Index 19
+    float farDistance;       // Float Index 20
+};
 
-// Final Output per Master List
-layout(location = 0) out vec4 pc_fragColor;
+// 3. PIPELINE INPUTS (Implicit varying matching)
+// Variable name must match the 'out vec3 vWorldPosition;' declaration in your vertex shader
+in vec3 vWorldPosition;
 
-void main() {
+// 4. PIPELINE OUTPUTS
+layout(location = 0) out vec4 fragColor;
+
+void main () {
+    vec4 diffuseColor = vec4(1.0);
+
     #include "../shader_chunk/clipping_planes_fragment.frag"
+    #include "../shader_chunk/map_fragment.frag"
+    #include "../shader_chunk/alphamap_fragment.frag"
+    #include "../shader_chunk/alphatest_fragment.frag"
+    #include "../shader_chunk/alphahash_fragment.frag"
 
-    vec4 diffuseColor = vec4( 1.0 );
-
-    #include "../shader_chunk/map.frag"
-    #include "../shader_chunk/alphamap.frag"
-    #include "../shader_chunk/alphatest.frag"
-    #include "../shader_chunk/alpha_hash_fragment.frag"
-
-    // Calculate linear distance from the light reference point
-    float dist = length( vWorldPosition - referencePosition );
+    // Calculate distance from the current vertex point to the reference point light source
+    float dist = length(vWorldPosition - referencePosition);
     
-    // Normalize to [0.0, 1.0] range
-    dist = ( dist - nearDistance ) / ( farDistance - nearDistance );
-    dist = saturate( dist ); 
+    // Normalize distance between your custom linear clipping boundary bounds
+    dist = (dist - nearDistance) / (farDistance - nearDistance);
+    
+    // WebGL 'saturate' maps to standard GLSL 'clamp' functionality
+    dist = clamp(dist, 0.0, 1.0); 
 
-    // Pack 32-bit float into 8-bit RGBA channels for the shadow map
-    pc_fragColor = packDepthToRGBA( dist );
+    // Encode the single floating point depth into 4-channel byte space
+    // 'packDepthToRGBA' is provided directly via the 'packing.frag' include file
+    fragColor = packDepthToRGBA(dist);
 }

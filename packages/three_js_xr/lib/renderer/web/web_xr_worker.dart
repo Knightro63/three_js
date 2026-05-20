@@ -1,5 +1,7 @@
 import 'dart:js_interop';
 import 'dart:math' as math;
+import 'package:three_js_angle_renderer/angle/index.dart';
+import 'package:three_js_angle_renderer/three_js_angle_renderer.dart';
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'package:flutter_angle/flutter_angle.dart';
@@ -57,7 +59,7 @@ class WebXRWorker extends XRManager {
   final cameraLPos = Vector3();
   final cameraRPos = Vector3();
 
-  final animation = Animation();
+  final animation = AngleAnimation();
   dynamic onAnimationFrameCallback;
 
 	WebXRWorker(super.renderer, super.gl):super(){
@@ -195,8 +197,8 @@ class WebXRWorker extends XRManager {
 
     isPresenting = false;
 
-    renderer.setPixelRatio( currentPixelRatio ?? 1.0 );
-    renderer.setSize( currentSize.width, currentSize.height, false );
+    (renderer as AngleRenderer).setPixelRatio( currentPixelRatio ?? 1.0 );
+    (renderer as AngleRenderer).setSize( currentSize.width, currentSize.height, false );
     dispatchEvent(Event(type: 'sessionend'));
   }
 
@@ -348,8 +350,8 @@ class WebXRWorker extends XRManager {
 
         glBaseLayer = XRWebGLLayer( session!, gl.gl.gl, layerInit.jsify() );
         session?.updateRenderState( { 'baseLayer': glBaseLayer }.jsify() );
-        renderer.setPixelRatio( 1 );
-        renderer.setSize( glBaseLayer!.framebufferWidth.toDouble(), glBaseLayer!.framebufferHeight.toDouble(), false );
+        (renderer as AngleRenderer).setPixelRatio( 1 );
+        (renderer as AngleRenderer).setSize( glBaseLayer!.framebufferWidth.toDouble(), glBaseLayer!.framebufferHeight.toDouble(), false );
 
         newRenderTarget = RenderTarget(
           glBaseLayer!.framebufferWidth,
@@ -387,8 +389,8 @@ class WebXRWorker extends XRManager {
 
         session?.updateRenderState( { 'layers': [ glProjLayer ] }.jsify() );
 
-        renderer.setPixelRatio( 1 );
-        renderer.setSize( glProjLayer!.textureWidth.toDouble(), glProjLayer!.textureHeight.toDouble(), false );
+        (renderer as AngleRenderer).setPixelRatio( 1 );
+        (renderer as AngleRenderer).setSize( glProjLayer!.textureWidth.toDouble(), glProjLayer!.textureHeight.toDouble(), false );
 
         newRenderTarget = RenderTarget(
           glProjLayer!.textureWidth,
@@ -653,7 +655,7 @@ class WebXRWorker extends XRManager {
   /// @return {ArrayCamera} The XR camera.
   ////
   @override
-  Camera getCamera() {
+  ArrayCamera getCamera() {
     return cameraXR;
   }
 
@@ -712,7 +714,7 @@ class WebXRWorker extends XRManager {
       final views = pose?.views.toDart;
 
       if ( glBaseLayer != null) {
-        renderer.setRenderTargetFramebuffer( newRenderTarget!, Framebuffer(glBaseLayer!.framebuffer));
+        (renderer as AngleRenderer).setRenderTargetFramebuffer( newRenderTarget!, Framebuffer(glBaseLayer!.framebuffer));
         renderer.setRenderTarget( newRenderTarget );
       }
 
@@ -737,7 +739,7 @@ class WebXRWorker extends XRManager {
 
           // For side-by-side projection, we only produce a single texture for both eyes.
           if ( i == 0 ) {
-            renderer.setRenderTargetTextures(
+            (renderer as AngleRenderer).setRenderTargetTextures(
               newRenderTarget!,
               glSubImage!.colorTexture,
               glSubImage.depthStencilTexture 
@@ -782,7 +784,7 @@ class WebXRWorker extends XRManager {
         final depthData = glBinding?.getDepthInformation( views![ 0 ] );
 
         if ( depthData != null && depthData.isValid) {
-          depthSensing.init( renderer, depthData, session!.renderState );
+          depthSensing.init( renderer as AngleRenderer, depthData, session!.renderState );
         }
       }
     }

@@ -1,4 +1,3 @@
-
 /**
  * See: https://casual-effects.com/research/Wyman2017Hashed/index.html
  */

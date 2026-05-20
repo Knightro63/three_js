@@ -1,37 +1,33 @@
 #version 460 core
 
-/**
- * Stage: Fragment
- * Purpose: Equirectangular environment projection.
- */
-
 // 1. INCLUDE DECLARATIONS
 #include "../shader_chunk/common.frag"
-#include "../shader_chunk/tonemapping_pars.frag"
 
-// Binding 61: Dedicated texture map for equirectangular projections per Master List
-layout(set = 0, binding = 61) uniform sampler2D tEquirect;
+// 2. UNIFORMS BLOCK
+// Keeping this block identical to your vertex setup preserves unified indexing
+uniform ObjectUniforms {
+    mat4 modelMatrix;       // Vertex stage memory overhead (Indices 0 through 15)
+};
 
-// Location 10: vWorldPosition/Direction per Master List (Synced with Vertex 10)
-layout(location = 10) in vec3 vWorldPosition;
+// 3. TEXTURE SAMPLERS
+uniform sampler2D tEquirect; // Sampler Index 0
 
-// Final Output per Master List
-layout(location = 0) out vec4 pc_fragColor;
+// 4. PIPELINE INPUTS (Implicit varying matching)
+// This matches your vertex shader 'out vec3 vWorldDirection;' variable name exactly.
+in vec3 vWorldDirection;
+
+// 5. PIPELINE OUTPUTS
+layout(location = 0) out vec4 fragColor;
 
 void main() {
-    // direction logic
-    vec3 direction = normalize( vWorldPosition );
+    vec3 direction = normalize(vWorldDirection);
     
-    // equirectUv is provided by common.frag
-    vec2 sampleUV = equirectUv( direction );
+    // equirectUv is provided directly by the common.frag / equirect chunks under the hood
+    vec2 sampleUV = equirectUv(direction);
     
-    vec4 texColor = texture( tEquirect, sampleUV );
-
-    // Apply lighting chain to outgoingLight
-    vec3 outgoingLight = texColor.rgb;
+    // Modern GLSL handles standard 'texture' lookups dynamically based on type definitions
+    fragColor = texture(tEquirect, sampleUV);
 
     #include "../shader_chunk/tonemapping.frag"
     #include "../shader_chunk/colorspace.frag"
-
-    pc_fragColor = vec4( outgoingLight, texColor.a );
 }

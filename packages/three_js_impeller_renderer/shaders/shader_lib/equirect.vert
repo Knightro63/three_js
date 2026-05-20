@@ -1,26 +1,25 @@
 #version 460 core
 
-/**
- * Stage: Vertex
- * Purpose: Transforms position to world-space direction for equirectangular lookup.
- */
-
 // 1. INCLUDE DECLARATIONS
 #include "../shader_chunk/common.vert"
 
-// 2. VARYINGS (Outputs)
-// Location 10: vWorldPosition per Master List (Synced with Frag 10)
-layout(location = 10) out vec3 vWorldPosition;
+// 2. INPUT MESH ATTRIBUTES
+in vec3 position;
+
+// 3. UNIFORMS BLOCK
+// Keeping this block identical across files maintains unified layout indexes
+uniform ObjectUniforms {
+    mat4 modelMatrix; // Float Indices 0 through 15 (Takes up 16 float slots)
+};
+
+// 4. PIPELINE OUTPUTS (Implicit varying matching)
+// Matches your fragment shader 'in vec3 vWorldDirection;' variable name exactly.
+out vec3 vWorldDirection;
 
 void main() {
-    // transformDirection is provided by common.vert
-    // It applies modelMatrix rotation to derive the world-space direction
-    vWorldPosition = transformDirection(inPosition, modelMatrix);
+    // Transform mesh vertex directions into world coordinate space
+    vWorldDirection = transformDirection(position, modelMatrix);
 
-    // 3. CORE GEOMETRY
     #include "../shader_chunk/begin_vertex.vert"
     #include "../shader_chunk/project_vertex.vert"
-    
-    // Note: Unlike Cube backgrounds, we don't force gl_Position.z = w here 
-    // unless this is being used specifically as a background.
 }

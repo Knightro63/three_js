@@ -47,13 +47,13 @@ class _State extends State<WebXRXRCubes> {
       body: Stack(
         children: [
           threeJs.build(),
-          if(threeJs.mounted) VRButton(threeJs: threeJs)
+          if(threeJs.mounted) VRButton(renderer: threeJs.renderer)
         ],
       ) 
     );
   }
 
-  WebXRWorker xrSetup(three.WebGLRenderer renderer, dynamic gl){
+  WebXRWorker xrSetup(three.AngleRenderer renderer, dynamic gl){
     return WebXRWorker(renderer,gl);
   }
 

@@ -68,7 +68,7 @@ class PMREMGenerator {
 
   late int _lodMax;
   late int _cubeSize;
-	bool get _hasInitialized => _renderer.hasInitialized();
+	bool get _hasInitialized => _renderer.hasInitialized;
 
   final List<int> _faceLib = [
     3, 1, 5,

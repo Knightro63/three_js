@@ -1,43 +1,42 @@
 #version 460 core
 
-/**
- * Stage: Fragment
- * Purpose: Master template for "Shadow Catcher" materials.
- */
-
 // 1. INCLUDE DECLARATIONS
 #include "../shader_chunk/common.frag"
 #include "../shader_chunk/packing.frag"
-#include "../shader_chunk/fog_pars.frag"
+#include "../shader_chunk/fog_pars_fragment.frag"
 #include "../shader_chunk/bsdfs.frag"
 #include "../shader_chunk/lights_pars_begin.frag"
-#include "../shader_chunk/logdepthbuf_pars.frag"
-#include "../shader_chunk/shadowmap_pars.frag"   // Blocks 29, 33, 37
-#include "../shader_chunk/shadowmask_pars.frag"  // Provides getShadowMask()
+#include "../shader_chunk/logdepthbuf_pars_fragment.frag"
+#include "../shader_chunk/shadowmap_pars_fragment.frag"
+#include "../shader_chunk/shadowmask_pars_fragment.frag"
 
-layout(std140, binding = 1) uniform MaterialUniforms {
-    vec3 color;
-    float opacity;
+// 2. UNIFORMS BLOCKS
+// Stacking this directly behind your 32-slot base vertex projection matrix sequence.
+uniform MaterialUniforms {
+    vec3 color;      // Float Indices 32, 33, 34 (Usually pure black: [0.0, 0.0, 0.0])
+    float opacity;   // Float Index 35           (Maximum shadow transparency intensity)
 };
 
-// Final Output per Master List
-layout(location = 0) out vec4 pc_fragColor;
+// 3. PIPELINE INPUTS (Interpolated layout space values from the vertex stage)
+in vec3 vNormal;
+in vec2 vUv;
+
+// 4. PIPELINE OUTPUTS
+layout(location = 0) out vec4 fragColor;
 
 void main() {
     #include "../shader_chunk/logdepthbuf_fragment.frag"
 
-    /**
-     * The shadow mask returns 1.0 (no shadow) to 0.0 (full shadow).
-     * We invert it (1.0 - mask) so that shadowed areas become opaque.
-     */
-    float shadowAlpha = opacity * (1.0 - getShadowMask());
+    // The getShadowMask() calculation function is pulled directly from shadowmask_pars_fragment.frag
+    // It returns 1.0 for full shadow (completely unlit) and 0.0 for full exposure (light completely hits mesh)
+    float shadowIntensity = 1.0 - getShadowMask();
+    vec4 diffuseColor = vec4(color, opacity * shadowIntensity);
 
-    // outgoingLight is used by tonemapping and fog chunks
-    vec3 outgoingLight = color;
+    // Run core color space conversion chunks over the calculated transparent pixels
+    #include "../shader_chunk/tonemapping_fragment.frag"
+    #include "../shader_chunk/colorspace_fragment.frag"
+    #include "../shader_chunk/fog_fragment.frag"
 
-    #include "../shader_chunk/tonemapping.frag"
-    #include "../shader_chunk/colorspace.frag"
-    #include "../shader_chunk/fog.frag"
-
-    pc_fragColor = vec4(outgoingLight, shadowAlpha);
+    // Route the shadow matrix overlay straight to the screen frame buffer layout
+    fragColor = diffuseColor;
 }

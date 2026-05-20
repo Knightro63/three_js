@@ -49,7 +49,7 @@ class _State extends State<WebXRVRPanoramaDepth> {
       body: Stack(
         children: [
           threeJs.build(),
-          if(threeJs.mounted) VRButton(threeJs: threeJs)
+          if(threeJs.mounted) VRButton(renderer: threeJs.renderer)
         ],
       ) 
     );
@@ -67,7 +67,7 @@ class _State extends State<WebXRVRPanoramaDepth> {
   double progress = 0;
   int prevTime = DateTime.now().millisecond;
 
-  WebXRWorker xrSetup(three.WebGLRenderer renderer, dynamic gl){
+  WebXRWorker xrSetup(three.AngleRenderer renderer, dynamic gl){
     return WebXRWorker(renderer,gl);
   }
 

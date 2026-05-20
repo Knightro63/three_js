@@ -1,19 +1,23 @@
 #version 460 core
 
-/**
- * Stage: Vertex
- * Purpose: Pass-through for vertical blur post-processing.
- */
+// 1. INPUT MESH ATTRIBUTES
+in vec3 position;
+in vec2 uv;
 
-#include "../shader_chunk/common.vert"
+// 2. UNIFORMS BLOCK
+// Bundled inside a structured object layout to give Flutter predictable, continuous array indexes.
+uniform ObjectUniforms {
+    mat4 projectionMatrix;   // Float Indices 0 through 15 (16 float slots)
+    mat4 modelViewMatrix;    // Float Indices 16 through 31 (16 float slots)
+};
 
-// Location 53: vUv per Master List (Synced with Frag 53)
-layout(location = 53) out vec2 vUv;
+// 3. PIPELINE OUTPUTS (Implicit varying matching)
+// Matches your destination fragment shader 'in vec2 vUv;' variable name exactly.
+out vec2 vUv;
 
 void main() {
-    // Pass raw UV attribute (Location 29) to varying
-    vUv = inUv;
-
-    // Standard projection for screen-space quads
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(inPosition, 1.0);
+    vUv = uv;
+    
+    // Process standard projection coordinate output using the structured matrices
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
 }

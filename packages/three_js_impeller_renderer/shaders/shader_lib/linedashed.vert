@@ -1,47 +1,45 @@
 #version 460 core
 
-/**
- * Stage: Vertex
- * Purpose: Prepares geometry and distance data for dashed lines.
- */
-
 // 1. INCLUDE DECLARATIONS
 #include "../shader_chunk/common.vert"
-#include "../shader_chunk/uv_pars.vert"
-#include "../shader_chunk/color_pars.vert"
-#include "../shader_chunk/fog_pars.vert"
-#include "../shader_chunk/morphtarget_pars.vert"
-#include "../shader_chunk/logdepthbuf_pars.vert"
-#include "../shader_chunk/clipping_planes_pars.vert"
+#include "../shader_chunk/uv_pars_vertex.vert"
+#include "../shader_chunk/color_pars_vertex.vert"
+#include "../shader_chunk/fog_pars_vertex.vert"
+#include "../shader_chunk/morphtarget_pars_vertex.vert"
+#include "../shader_chunk/logdepthbuf_pars_vertex.vert"
+#include "../shader_chunk/clipping_planes_pars_vertex.vert"
 
-// 2. INPUTS & OUTPUTS
-// Location 32: lineDistance attribute from mesh per Master List
-layout(location = 32) in float lineDistance;
+// 2. INPUT MESH ATTRIBUTES (From your Flutter geometric vertex buffer data stream)
+in vec3 position;
+in vec2 uv;
+in float lineDistance; // Replaced legacy WebGL 'attribute float'
 
-// Location 55: vLineDistance synced with Frag 55 per Master List
-layout(location = 55) out float vLineDistance;
-
-layout(set = 0, binding = 1) uniform MaterialUniforms {
-    float scale; // Scaling factor for the dash pattern
+// 3. UNIFORMS BLOCKS
+uniform ObjectUniforms {
+    mat4 projectionMatrix;   // Float Indices 0 through 15 (16 float slots)
+    mat4 modelViewMatrix;    // Float Indices 16 through 31 (16 float slots)
 };
 
+uniform LineConfigUniforms {
+    float scale;             // Float Index 32 (Sits directly behind your 32 matrix slots)
+};
+
+// 4. PIPELINE OUTPUTS (Implicit varying matching)
+// Matches your companion dashed-line fragment shader 'in float vLineDistance;' exactly.
+out float vLineDistance;
+
 void main() {
-    // Calculate the scaled distance along the line
+    // Apply structural line scale scaling factor transformations
     vLineDistance = scale * lineDistance;
 
-    // 3. SETUP VARYINGS
     #include "../shader_chunk/uv_vertex.vert"
     #include "../shader_chunk/color_vertex.vert"
-    #include "../shader_chunk/morphinstance.vert"
-    #include "../shader_chunk/morphcolor.vert"
-
-    // 4. CORE GEOMETRY
+    #include "../shader_chunk/morphinstance_vertex.vert"
+    #include "../shader_chunk/morphcolor_vertex.vert"
     #include "../shader_chunk/begin_vertex.vert"
-    #include "../shader_chunk/morphtarget.vert"
+    #include "../shader_chunk/morphtarget_vertex.vert"
     #include "../shader_chunk/project_vertex.vert"
-
-    // 5. DEPTH & CLIPPING
     #include "../shader_chunk/logdepthbuf_vertex.vert"
-    #include "../shader_chunk/clipping_planes.vert"
+    #include "../shader_chunk/clipping_planes_vertex.vert"
     #include "../shader_chunk/fog_vertex.vert"
 }

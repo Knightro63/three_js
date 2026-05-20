@@ -1,61 +1,65 @@
 #version 460 core
 
-/**
- * Stage: Vertex
- * Purpose: Master template for cel-shaded materials (Toon).
- */
-
-#define TOON
-
-// 1. INCLUDE DECLARATIONS (The "Pars" snippets)
+// 1. INCLUDE DECLARATIONS
 #include "../shader_chunk/common.vert"
-#include "../shader_chunk/batching_pars.vert"
-#include "../shader_chunk/uv_pars.vert"
-#include "../shader_chunk/displacementmap_pars.vert"
-#include "../shader_chunk/color_pars.vert"
-#include "../shader_chunk/fog_pars.vert"
-#include "../shader_chunk/normal_pars.vert"
-#include "../shader_chunk/morphtarget_pars.vert"
-#include "../shader_chunk/skinning_pars.vert"
-#include "../shader_chunk/shadowmap_pars.vert"
-#include "../shader_chunk/logdepthbuf_pars.vert"
-#include "../shader_chunk/clipping_planes_pars.vert"
+#include "../shader_chunk/batching_pars_vertex.vert"
+#include "../shader_chunk/uv_pars_vertex.vert"
+#include "../shader_chunk/displacementmap_pars_vertex.vert"
+#include "../shader_chunk/color_pars_vertex.vert"
+#include "../shader_chunk/fog_pars_vertex.vert"
+#include "../shader_chunk/normal_pars_vertex.vert"
+#include "../shader_chunk/morphtarget_pars_vertex.vert"
+#include "../shader_chunk/skinning_pars_vertex.vert"
+#include "../shader_chunk/shadowmap_pars_vertex.vert"
+#include "../shader_chunk/logdepthbuf_pars_vertex.vert"
+#include "../shader_chunk/clipping_planes_pars_vertex.vert"
 
-// Location 13: vViewPosition synced with Frag 13
-layout(location = 13) out vec3 vViewPosition;
+// 2. INPUT MESH ATTRIBUTES
+in vec3 position;
+in vec3 normal;
+in vec2 uv;
+
+// 3. UNIFORMS BLOCK
+// Kept consistent with your previous shaders to maintain index slots 0 through 31
+uniform ObjectUniforms {
+    mat4 projectionMatrix;   // Float Indices 0 through 15 (16 float slots)
+    mat4 modelViewMatrix;    // Float Indices 16 through 31 (16 float slots)
+};
+
+// 4. PIPELINE OUTPUTS (Implicit varying matching)
+// These link straight to your MeshToon fragment shader inputs by string variable name
+out vec3 vViewPosition;
+out vec3 vNormal; // Populated by normal_vertex.vert chunk under the hood
+out vec2 vUv;
 
 void main() {
-    // 2. SETUP & BATCHING
     #include "../shader_chunk/uv_vertex.vert"
     #include "../shader_chunk/color_vertex.vert"
-    #include "../shader_chunk/morphinstance.vert"
-    #include "../shader_chunk/morphcolor.vert"
-    #include "../shader_chunk/batching.vert"
-
-    // 3. NORMAL PROCESSING (Critical for Toon Lighting Step)
-    #include "../shader_chunk/beginnormal.vert"
-    #include "../shader_chunk/morphnormal.vert"
-    #include "../shader_chunk/skinbase.vert"
-    #include "../shader_chunk/skinnormal.vert"
-    #include "../shader_chunk/defaultnormal.vert"
-    #include "../shader_chunk/normal.vert"
-
-    // 4. GEOMETRY DEFORMATION
-    #include "../shader_chunk/begin.vert"
-    #include "../shader_chunk/morphtarget.vert"
-    #include "../shader_chunk/skinning.vert"
-    #include "../shader_chunk/displacementmap.vert"
-
-    // 5. PROJECTION & DEPTH
+    #include "../shader_chunk/morphinstance_vertex.vert"
+    #include "../shader_chunk/morphcolor_vertex.vert"
+    #include "../shader_chunk/batching_vertex.vert"
+    
+    // Evaluate geometry normals
+    #include "../shader_chunk/beginnormal_vertex.vert"
+    #include "../shader_chunk/morphnormal_vertex.vert"
+    #include "../shader_chunk/skinbase_vertex.vert"
+    #include "../shader_chunk/skinnormal_vertex.vert"
+    #include "../shader_chunk/defaultnormal_vertex.vert"
+    #include "../shader_chunk/normal_vertex.vert"
+    
+    // Process core vertex geometry positions
+    #include "../shader_chunk/begin_vertex.vert"
+    #include "../shader_chunk/morphtarget_vertex.vert"
+    #include "../shader_chunk/skinning_vertex.vert"
+    #include "../shader_chunk/displacementmap_vertex.vert"
     #include "../shader_chunk/project_vertex.vert"
     #include "../shader_chunk/logdepthbuf_vertex.vert"
-    #include "../shader_chunk/clipping_planes.vert"
+    #include "../shader_chunk/clipping_planes_vertex.vert"
 
-    // Set view position for toon specular highlights
+    // Note: mvPosition (ModelView position) is calculated inside project_vertex.vert
     vViewPosition = -mvPosition.xyz;
 
-    // 6. VARYINGS FOR FRAGMENT
     #include "../shader_chunk/worldpos_vertex.vert"
-    #include "../shader_chunk/shadowmap.vert"
-    #include "../shader_chunk/fog.vert"
+    #include "../shader_chunk/shadowmap_vertex.vert"
+    #include "../shader_chunk/fog_vertex.vert"
 }

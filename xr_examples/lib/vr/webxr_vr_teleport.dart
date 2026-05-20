@@ -48,7 +48,7 @@ class _State extends State<WebXRVRTeleport> {
       body: Stack(
         children: [
           threeJs.build(),
-          if(threeJs.mounted) VRButton(threeJs: threeJs)
+          if(threeJs.mounted) VRButton(renderer: threeJs.renderer)
         ],
       ) 
     );
@@ -57,7 +57,7 @@ class _State extends State<WebXRVRTeleport> {
   late three.Raycaster raycaster;
   XRReferenceSpace? baseReferenceSpace;
 
-  WebXRWorker xrSetup(three.WebGLRenderer renderer, dynamic gl){
+  WebXRWorker xrSetup(three.AngleRenderer renderer, dynamic gl){
     return WebXRWorker(renderer,gl);
   }
 

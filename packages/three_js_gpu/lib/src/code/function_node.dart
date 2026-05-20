@@ -96,7 +96,7 @@ nativeFn( code, [List<Node>? includes, language = '' ]){
 
 		// TSL Function: glslFn, wgslFn
 
-		if ( typeof include == 'function' ) {
+		if ( include is Function ) {
 			includes[ i ] = include.functionNode;
 		}
 	}

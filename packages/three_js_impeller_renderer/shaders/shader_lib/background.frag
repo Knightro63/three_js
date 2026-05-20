@@ -1,42 +1,37 @@
 #version 460 core
 
-// 1. INCLUDE DECLARATIONS
-#include "../shader_chunk/common.frag"
-#include "../shader_chunk/tonemapping_pars.frag"
-
-layout(std140, binding = 1) uniform MaterialUniforms {
-    float backgroundIntensity;
-    bool decodeVideoTexture; // Replacement for DECODE_VIDEO_TEXTURE
+// FLOATS & BOOLS LIST (Index order determined from top to bottom)
+uniform ConfigUniforms {
+  float backgroundIntensity; // Float Index 0
+  bool decodeVideoTexture;   // Float Index 1 (Bools use 1.0/0.0 in Dart)
 };
 
-// Binding 58: Dedicated background texture map per Master List
-layout(set = 0, binding = 58) uniform sampler2D t2D;
+// TEXTURE SAMPLERS LIST
+uniform sampler2D t2D;       // Sampler Index 0
 
-// Location 53: vUv synced with Vertex 53 per Master List
-layout(location = 53) in vec2 vUv;
+// Inputs from vertex shader (Name must match vertex output)
+in vec2 vUv;
 
-// Final Output per Master List (Synced with pc_fragColor)
-layout(location = 0) out vec4 pc_fragColor;
+// Explicit fragment pipeline output
+layout(location = 0) out vec4 fragColor;
 
 void main() {
-    vec4 texColor = texture(t2D, vUv);
+  vec4 texColor = texture(t2D, vUv);
 
-    if (decodeVideoTexture) {
-        // Inline sRGB decode logic for video textures
-        texColor = vec4(mix(
-            pow(texColor.rgb * 0.9478672986 + vec3(0.0521327014), vec3(2.4)),
-            texColor.rgb * 0.0773993808,
-            vec3(lessThanEqual(texColor.rgb, vec3(0.04045)))
-        ), texColor.w);
-    }
+  // Replaced #ifdef macro with a runtime branch for Flutter compatibility
+  if (decodeVideoTexture) {
+    vec3 condition = vec3(lessThanEqual(texColor.rgb, vec3(0.04045)));
+    vec3 trueBranch = texColor.rgb * 0.0773993808;
+    vec3 falseBranch = pow(texColor.rgb * 0.9478672986 + vec3(0.0521327014), vec3(2.4));
+    
+    texColor = vec4(mix(falseBranch, trueBranch, condition), texColor.w);
+  }
 
-    texColor.rgb *= backgroundIntensity;
+  texColor.rgb *= backgroundIntensity;
+  fragColor = texColor;
 
-    // Use outgoingLight to interface with tonemapping/colorspace chunks
-    vec3 outgoingLight = texColor.rgb;
-
-    #include "../shader_chunk/tonemapping.frag"
-    #include "../shader_chunk/colorspace.frag"
-
-    pc_fragColor = vec4(outgoingLight, texColor.a);
+  // Note: Ensure your local include paths are correct, or paste the raw GLSL 
+  // contents of tonemapping and colorspace blocks directly here.
+  #include "../shader_chunk/tonemapping.frag"
+  #include "../shader_chunk/colorspace.frag"
 }
