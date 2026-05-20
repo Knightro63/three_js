@@ -33,12 +33,20 @@ public class ThreeJsArPlugin: NSObject, FlutterPlugin {
     case "stopStream":
       arManager.pauseSession()
     case "handleTap":
-      guard let args = call.arguments as? [String: Double],
-        let x = args["x"], let y = args["y"] else {
-        result(FlutterError(code: "invalid_argument", message: "Invalid tap coordinates", details: nil))
-        return
-      }
-      result(arManager.performRaycast(at: CGPoint(x: x, y: y)))
+        guard let args = call.arguments as? [String: Double],
+              let x = args["x"],
+              let y = args["y"],
+              let width = args["width"],
+              let height = args["height"] else {
+            result(FlutterError(code: "invalid_argument", message: "Missing coordinates or widget size", details: nil))
+            return
+        }
+        
+        let point = CGPoint(x: x, y: y)
+        let size = CGSize(width: width, height: height)
+        
+        let raycastResults = arManager.performRaycast(at: point, flutterWidgetSize: size)
+        result(raycastResults)
     case "textureFrameAvailable":
       arManager.texture?.textureFrameAvailable()
     default:
@@ -108,7 +116,7 @@ class ARManager: NSObject, ARSessionDelegate {
     sendFrameData(frame)
   }
 
-  func performRaycast(at point: CGPoint) -> [Float]?{
+  func performRaycast1(at point: CGPoint) -> [Float]?{
     guard let latestFrame = latestFrame else { return nil}
 
     // First, prioritize existing planes using their geometry.
@@ -132,7 +140,40 @@ class ARManager: NSObject, ARSessionDelegate {
       
     return nil
   }
+    // Change this line in your arManager file to include the second parameter:
+    public func performRaycast(at point: CGPoint, flutterWidgetSize: CGSize) -> [[Float]]? {
+        guard let currentFrame = arSession.currentFrame else { return nil }
 
+        // Normalized coordinates (0.0 to 1.0)
+        let normalizedPoint = CGPoint(
+            x: point.x / flutterWidgetSize.width,
+            y: point.y / flutterWidgetSize.height
+        )
+        
+        // Transform coordinates based on screen orientation
+        let displayTransform = currentFrame.displayTransform(
+            for: UIInterfaceOrientation.landscapeRight,
+            viewportSize: flutterWidgetSize
+        )
+        let cameraPoint = normalizedPoint.applying(displayTransform.inverted())
+        
+        let query = currentFrame.raycastQuery(
+            from: cameraPoint,
+            allowing: ARRaycastQuery.Target.existingPlaneInfinite,
+            alignment: ARRaycastQuery.TargetAlignment.any
+        )
+        
+        // Map transforms to an array of dictionaries for Flutter compatibility
+        return arSession.raycast(query).map { hit in
+            let transform = hit.worldTransform
+            return [
+                    transform.columns.0.x, transform.columns.0.y, transform.columns.0.z, transform.columns.0.w,
+                    transform.columns.1.x, transform.columns.1.y, transform.columns.1.z, transform.columns.1.w,
+                    transform.columns.2.x, transform.columns.2.y, transform.columns.2.z, transform.columns.2.w,
+                    transform.columns.3.x, transform.columns.3.y, transform.columns.3.z, transform.columns.3.w
+            ]
+        }
+    }
   // Send data to Flutter via the event sink
   private func sendFrameData(_ frame: ARFrame) {
     let cameraTransform = frame.camera.transform

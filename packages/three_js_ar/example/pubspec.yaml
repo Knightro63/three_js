@@ -10,7 +10,7 @@ dependencies:
   three_js_ar:
     path: ../
   cupertino_icons: ^1.0.8
-  three_js: ^0.2.0
+  three_js: ^0.3.0
 
 dev_dependencies:
   integration_test:

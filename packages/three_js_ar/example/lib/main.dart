@@ -30,6 +30,7 @@ class _MyAppState extends State<MyApp> {
       )
     );
     threeJsAR.createTexture();
+    threeJsAR.startStream();
     super.initState();
   }
   @override
@@ -78,9 +79,9 @@ class _MyAppState extends State<MyApp> {
       final atPoint = three.Vector3();
       atPoint.setFrom(threeJs!.camera.position).add(cameraDirection);
 
-      threeJsAR.hitTest(event.clientX,event.clientY).then((onValue){
-        final lookAtPoint = onValue == null?atPoint:three.Vector3().copyFromArray(onValue);
-
+      threeJsAR.hitTest(event.clientX,event.clientY, event.pageX, event.pageY).then((onValue){
+        if(onValue == null || onValue.isEmpty) return;
+        final lookAtPoint = three.Vector3().copyFromUnknown(onValue);
         mesh.position.setFrom(lookAtPoint);
         mesh.rotation.x = -math.pi/2;
         threeJs!.scene.add( mesh );

@@ -20,6 +20,14 @@ class ThreeJsAr {
 
   Stream<ARTransformData>? _arManagerEvent;
 
+  Future<void> startStream() async {
+    await _methodChannel.invokeMethod('startStream');
+  }
+
+  Future<void> stopStream() async {
+    await _methodChannel.invokeMethod('stopStream');
+  }
+
   Future<int> createTexture() async {
     textureId = (await _methodChannel.invokeMethod('createTexture'))['textureId'];
     return textureId!;
@@ -29,14 +37,15 @@ class ThreeJsAr {
     await _methodChannel.invokeMethod('textureFrameAvailable');
   }
 
-  Future<List<double>?> hitTest(double x, double y) async {
-    return await _methodChannel.invokeMethod('handleTap',  {"x": x, "y": y});
+  Future<dynamic> hitTest(double x, double y, double w, double h) async {
+    final t =  await _methodChannel.invokeMethod('handleTap',  {"x": x, "y": y, "width": w, "height": h});
+    print(t);
+    return t;
   }
 
   /// Determines whether sensor is available.
   Future<bool> isSupported() async {
-    final available = await _methodChannel.invokeMethod('isSupported');
-    return available;
+    return await _methodChannel.invokeMethod('isSupported');
   }
 
   /// A broadcast stream of events from the device accelerometer.
