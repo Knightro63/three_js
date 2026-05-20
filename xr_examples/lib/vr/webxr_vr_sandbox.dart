@@ -59,6 +59,7 @@ class _State extends State<WebXRVRSandbox> {
 
   late three.Raycaster raycaster;
   XRReferenceSpace? baseReferenceSpace;
+  late three.OrbitControls controls;
 
   WebXRWorker xrSetup(three.AngleRenderer renderer, dynamic gl){
     return WebXRWorker(renderer,gl);

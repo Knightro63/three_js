@@ -1,7 +1,7 @@
 import 'dart:async';
+import 'package:examples/src/files_json.dart';
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
-import 'package:three_js_xr/other/constants.dart';
 import 'package:three_js_xr/three_js_xr.dart';
 import '../src/atlas/index.dart';
 
@@ -56,6 +56,7 @@ class _State extends State<WebXRVRPanorama> {
   late three.Mesh mesh; 
   late three.Material material;
   late three.BufferGeometry geometry;
+  late three.OrbitControls controls;
   
   final position = three.Vector3();
   final tangent = three.Vector3();
@@ -82,6 +83,7 @@ class _State extends State<WebXRVRPanorama> {
     threeJs.scene = three.Scene();
 
     threeJs.camera = three.PerspectiveCamera( 70, threeJs.width / threeJs.height, 1, 1000 );
+    if(!actualVR) threeJs.camera.position.z = 2.5;
     threeJs.camera.layers.enable( 1 );
 
     final geometry = three.BoxGeometry( 100, 100, 100 );
@@ -108,6 +110,11 @@ class _State extends State<WebXRVRPanorama> {
     skyBoxR.layers.set( 2 );
     threeJs.scene.add( skyBoxR );
 
+    controls = three.OrbitControls(threeJs.camera, threeJs.globalKey);
     threeJs.customRenderer = (threeJs.renderer?.xr as WebXRWorker).render;
+
+    threeJs.addAnimationEvent((dt){
+      controls.update();
+    });
   }
 }

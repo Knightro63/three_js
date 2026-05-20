@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:math' as math;
-import 'package:three_js_xr/other/constants.dart';
 import '../rollercoster/rollercoaster.dart';
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
@@ -60,6 +59,7 @@ class _State extends State<WebXRVRRollercoaster> {
   late three.Mesh mesh; 
   late three.Material material;
   late three.BufferGeometry geometry;
+  late three.OrbitControls controls;
   
   final position = three.Vector3();
   final tangent = three.Vector3();
@@ -220,8 +220,10 @@ class _State extends State<WebXRVRRollercoaster> {
     funfairs.add( mesh );
 
     threeJs.customRenderer = (threeJs.renderer?.xr as WebXRWorker).render;
+    controls = three.OrbitControls(threeJs.camera, threeJs.globalKey);
 
     threeJs.addAnimationEvent((st){
+      controls.update();
       final time = DateTime.now().millisecond;
       final delta = time - prevTime;
 

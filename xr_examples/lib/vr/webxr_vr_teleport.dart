@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
-import 'package:three_js_xr/other/constants.dart';
 import 'package:three_js_xr/three_js_xr.dart';
 import 'package:three_js_geometry/three_js_geometry.dart';
 import 'dart:math' as math;

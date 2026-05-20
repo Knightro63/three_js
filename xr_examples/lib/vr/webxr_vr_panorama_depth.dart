@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:math' as math;
+import 'package:examples/src/files_json.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:three_js/three_js.dart' as three;
-import 'package:three_js_xr/other/constants.dart';
 import 'package:three_js_xr/three_js_xr.dart';
 
 class WebXRVRPanoramaDepth extends StatefulWidget {
@@ -58,6 +58,7 @@ class _State extends State<WebXRVRPanoramaDepth> {
   late three.Mesh mesh; 
   late three.Material material;
   late three.BufferGeometry geometry;
+  late three.OrbitControls controls;
   
   final position = three.Vector3();
   final tangent = three.Vector3();
@@ -92,6 +93,7 @@ class _State extends State<WebXRVRPanoramaDepth> {
     threeJs.scene.add( light );
 
     threeJs.camera = three.PerspectiveCamera( 70, threeJs.width / threeJs.height, 1, 2000 );
+    if(!actualVR) threeJs.camera.position.z = 2.5;
     threeJs.camera.layers.enable( 1 );
 
     // Create the panoramic sphere geometry
@@ -124,8 +126,10 @@ class _State extends State<WebXRVRPanoramaDepth> {
 
     threeJs.scene.add( sphere );
     threeJs.customRenderer = (threeJs.renderer?.xr as WebXRWorker).render;
-    
+    controls = three.OrbitControls(threeJs.camera, threeJs.globalKey);
+
     threeJs.addAnimationEvent((dt){
+      controls.update();
       if (threeJs.renderer?.xr.isPresenting == false ) {
         final time = threeJs.clock.getElapsedTime();
         sphere.rotation.y += 0.001;

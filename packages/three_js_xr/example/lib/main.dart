@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:math' as math;
@@ -74,6 +76,7 @@ class _State extends State<WebXRXRCubes> {
   WebXRController? controllerGrip;
   three.Object3D? intersected;
   final three.Matrix4 tempMatrix = three.Matrix4();
+  late three.OrbitControls controls;
 
   Future<void> setup() async {
     threeJs.renderer?.xr.enabled = true;
@@ -151,8 +154,10 @@ class _State extends State<WebXRXRCubes> {
     threeJs.scene.add( controllerGrip );
 
     threeJs.customRenderer = (threeJs.renderer?.xr as WebXRWorker).render;
+    controls = three.OrbitControls(threeJs.camera, threeJs.globalKey);
 
     threeJs.addAnimationEvent((dt){
+      if(!kIsWeb && Platform.isMacOS) controls.update();
       render();
     });
   }

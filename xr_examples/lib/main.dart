@@ -1,4 +1,5 @@
 import 'package:examples/ar/webxr_ar_cones.dart';
+import 'package:examples/vr/webxr_vr_cardboard.dart';
 import 'package:examples/vr/webxr_vr_handinput_cubes.dart';
 import 'package:examples/vr/webxr_vr_panorama_depth.dart';
 import 'package:examples/vr/webxr_vr_teleport.dart';
@@ -79,6 +80,9 @@ class MyAppState extends State<MyApp> {
               },
               '/webxr_ar_cones':(BuildContext context) {
                 return const WebXRARCones();
+              },
+              '/webxr_vr_cardboard':(BuildContext context) {
+                return const WebXRVRCardboard();
               },
               '/webxr_vr_handinput_cubes':(BuildContext context) {
                 return const WebXRVRHandInputCubes();

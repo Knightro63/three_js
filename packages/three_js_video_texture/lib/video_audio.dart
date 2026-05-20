@@ -47,8 +47,17 @@ class VideoAudio extends Audio{
   @override
   void dispose(){
     _delay?.cancel();
-    _player?.dispose();
+    _disposePlayer();
     super.dispose();
+  }
+
+  Future<void> _disposePlayer() async {
+    try {
+      // Await native channel closures before freeing resources
+      await _player?.dispose(); 
+    } catch (e) {
+      print("Error during video disposal: $e");
+    }
   }
 
   /// Plays a single run of the given [file], with a given [volume].
