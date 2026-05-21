@@ -1,4 +1,5 @@
 import 'package:three_js_core/three_js_core.dart';
+import 'package:three_js_core_loaders/three_js_core_loaders.dart';
 
 /**
  * A loader for loading node objects in the three.js JSON Object/Scene format.
@@ -57,26 +58,27 @@ class NodeLoader extends Loader {
 	 * @param {Array<Object>} [json] - The JSON definition
 	 * @return {Object<string,Node>} A dictionary with node dependencies.
 	 */
-	parseNodes( json ) {
-		const nodes = {};
+	Map<String,dynamic> parseNodes(Map<String,dynamic>? json ) {
+		final nodes = <String, Node>{};
 
-		if ( json !== undefined ) {
-			for ( const nodeJSON of json ) {
-				const { uuid, type } = nodeJSON;
+		if ( json != null ) {
+			for ( final nodeJSON in json ) {
+				final uuid = nodeJSON['uuid'] as String;
+				final type = nodeJSON['type'] as String;
 
-				nodes[ uuid ] = this.createNodeFromType( type );
+				nodes[ uuid ] = createNodeFromType( type );
 				nodes[ uuid ].uuid = uuid;
 			}
 
-			const meta = { nodes, textures: this.textures };
+			final meta = { 'nodes': nodes, 'textures': textures };
 
-			for ( const nodeJSON of json ) {
-				nodeJSON.meta = meta;
+			for ( final nodeJSON in json ) {
+				nodeJSON['meta'] = meta;
 
-				const node = nodes[ nodeJSON.uuid ];
+				final node = nodes[ nodeJSON['uuid'] as String ]!;
 				node.deserialize( nodeJSON );
 
-				delete nodeJSON.meta;
+				nodeJSON.remove('meta');
 			}
 		}
 
@@ -93,18 +95,18 @@ class NodeLoader extends Loader {
 	 * @param {Object} [json.meta] - The meta data.
 	 * @return {Node} The parsed node.
 	 */
-	parse( json ) {
-		const node = this.createNodeFromType( json.type );
-		node.uuid = json.uuid;
+	Node parse(Map<String,dynamic> json ) {
+		final node = createNodeFromType( json['type'] as String );
+		node.uuid = json['uuid'] as String;
 
-		const nodes = this.parseNodes( json.nodes );
-		const meta = { nodes, textures: this.textures };
+		final nodes = parseNodes( json['nodes'] as List<Map<String,dynamic>>? );
+		final meta = { 'nodes': nodes, 'textures': textures };
 
-		json.meta = meta;
+		json['meta'] = meta;
 
 		node.deserialize( json );
 
-		delete json.meta;
+		json.remove('meta');
 
 		return node;
 	}
@@ -115,19 +117,13 @@ class NodeLoader extends Loader {
 	 * @param {Object<string,Texture>} value - The texture library defines as `<uuid,texture>`.
 	 * @return {NodeLoader} A reference to this loader.
 	 */
-	setTextures( value ) {
-		this.textures = value;
+	NodeLoader setTextures( Map<String, Texture> value ) {
+		textures = value;
 		return this;
 	}
 
-	/**
-	 * Defines the dictionary of node types.
-	 *
-	 * @param {Object<string,Node.constructor>} value - The node library defined as `<classname,class>`.
-	 * @return {NodeLoader} A reference to this loader.
-	 */
-	setNodes( value ) {
-		this.nodes = value;
+	NodeLoader setNodes(Map<String, dynamic> value ) {
+		nodes = value;
 		return this;
 	}
 
@@ -137,12 +133,12 @@ class NodeLoader extends Loader {
 	 * @param {string} type - The node type.
 	 * @return {Node} The created node instance.
 	 */
-	createNodeFromType( type ) {
-		if ( this.nodes[ type ] === undefined ) {
+	Node createNodeFromType(String type ) {
+		if ( this.nodes[ type ] == null ) {
 			error( 'NodeLoader: Node type not found:', type );
 			return float();
 		}
 
-		return new this.nodes[ type ]();
+		return this.nodes[ type ]();
 	}
 }

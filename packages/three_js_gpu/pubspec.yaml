@@ -12,7 +12,8 @@ dependencies:
     sdk: flutter
   three_js_core: ^0.3.0
   three_js_math: ^0.3.0
-  flutter_gpu_shaders: ^0.4.0
+  three_js_core_loaders: ^0.3.0
+  gpux: ^0.1.0
 
 dev_dependencies:
   flutter_test:

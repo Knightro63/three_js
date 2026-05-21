@@ -1,6 +1,7 @@
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_gpu/common/nodes/node_library.dart';
 import 'package:three_js_math/three_js_math.dart';
+import '../../materials/node_materials.dart';
 
 /**
  * This version of a node library represents the standard version
@@ -12,39 +13,36 @@ import 'package:three_js_math/three_js_math.dart';
  */
 class StandardNodeLibrary extends NodeLibrary {
 
-	/**
-	 * Constructs a new standard node library.
-	 */
 	StandardNodeLibrary():super() {
-		this.addMaterial( MeshPhongNodeMaterial, 'MeshPhongMaterial' );
-		this.addMaterial( MeshStandardNodeMaterial, 'MeshStandardMaterial' );
-		this.addMaterial( MeshPhysicalNodeMaterial, 'MeshPhysicalMaterial' );
-		this.addMaterial( MeshToonNodeMaterial, 'MeshToonMaterial' );
-		this.addMaterial( MeshBasicNodeMaterial, 'MeshBasicMaterial' );
-		this.addMaterial( MeshLambertNodeMaterial, 'MeshLambertMaterial' );
-		this.addMaterial( MeshNormalNodeMaterial, 'MeshNormalMaterial' );
-		this.addMaterial( MeshMatcapNodeMaterial, 'MeshMatcapMaterial' );
-		this.addMaterial( LineBasicNodeMaterial, 'LineBasicMaterial' );
-		this.addMaterial( LineDashedNodeMaterial, 'LineDashedMaterial' );
-		this.addMaterial( PointsNodeMaterial, 'PointsMaterial' );
-		this.addMaterial( SpriteNodeMaterial, 'SpriteMaterial' );
-		this.addMaterial( ShadowNodeMaterial, 'ShadowMaterial' );
+		addMaterial( MeshPhongNodeMaterial, 'MeshPhongMaterial' );
+		addMaterial( MeshStandardNodeMaterial, 'MeshStandardMaterial' );
+		addMaterial( MeshPhysicalNodeMaterial, 'MeshPhysicalMaterial' );
+		addMaterial( MeshToonNodeMaterial, 'MeshToonMaterial' );
+		addMaterial( MeshBasicNodeMaterial, 'MeshBasicMaterial' );
+		addMaterial( MeshLambertNodeMaterial, 'MeshLambertMaterial' );
+		addMaterial( MeshNormalNodeMaterial, 'MeshNormalMaterial' );
+		addMaterial( MeshMatcapNodeMaterial, 'MeshMatcapMaterial' );
+		addMaterial( LineBasicNodeMaterial, 'LineBasicMaterial' );
+		addMaterial( LineDashedNodeMaterial, 'LineDashedMaterial' );
+		addMaterial( PointsNodeMaterial, 'PointsMaterial' );
+		addMaterial( SpriteNodeMaterial, 'SpriteMaterial' );
+		addMaterial( ShadowNodeMaterial, 'ShadowMaterial' );
 
-		this.addLight( PointLightNode, PointLight );
-		this.addLight( DirectionalLightNode, DirectionalLight );
-		this.addLight( RectAreaLightNode, RectAreaLight );
-		this.addLight( SpotLightNode, SpotLight );
-		this.addLight( AmbientLightNode, AmbientLight );
-		this.addLight( HemisphereLightNode, HemisphereLight );
-		this.addLight( LightProbeNode, LightProbe );
-		this.addLight( IESSpotLightNode, IESSpotLight );
-		this.addLight( ProjectorLightNode, ProjectorLight );
+		addLight( PointLightNode, PointLight );
+		addLight( DirectionalLightNode, DirectionalLight );
+		addLight( RectAreaLightNode, RectAreaLight );
+		addLight( SpotLightNode, SpotLight );
+		addLight( AmbientLightNode, AmbientLight );
+		addLight( HemisphereLightNode, HemisphereLight );
+		addLight( LightProbeNode, LightProbe );
+		addLight( IESSpotLightNode, IESSpotLight );
+		addLight( ProjectorLightNode, ProjectorLight );
 
-		this.addToneMapping( linearToneMapping, LinearToneMapping );
-		this.addToneMapping( reinhardToneMapping, ReinhardToneMapping );
-		this.addToneMapping( cineonToneMapping, CineonToneMapping );
-		this.addToneMapping( acesFilmicToneMapping, ACESFilmicToneMapping );
-		this.addToneMapping( agxToneMapping, AgXToneMapping );
-		this.addToneMapping( neutralToneMapping, NeutralToneMapping );
+		addToneMapping( linearToneMapping, LinearToneMapping );
+		addToneMapping( reinhardToneMapping, ReinhardToneMapping );
+		addToneMapping( cineonToneMapping, CineonToneMapping );
+		addToneMapping( acesFilmicToneMapping, ACESFilmicToneMapping );
+		addToneMapping( agxToneMapping, AgXToneMapping );
+		addToneMapping( neutralToneMapping, NeutralToneMapping );
 	}
 }

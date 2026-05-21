@@ -1,21 +1,24 @@
 // @TODO: We can simplify "export { default as SomeNode, other, exports } from '...'" to just "export * from '...'" if we will use only named exports
 
-export { default as NodeMaterialObserver } from './manager/NodeMaterialObserver.js';
+export './manager/NodeMaterialObserver.dart';
 
-export { default as NodeMaterial } from './NodeMaterial.js';
-export { default as LineBasicNodeMaterial } from './LineBasicNodeMaterial.js';
-export { default as LineDashedNodeMaterial } from './LineDashedNodeMaterial.js';
-export { default as Line2NodeMaterial } from './Line2NodeMaterial.js';
-export { default as MeshNormalNodeMaterial } from './MeshNormalNodeMaterial.js';
-export { default as MeshBasicNodeMaterial } from './MeshBasicNodeMaterial.js';
-export { default as MeshLambertNodeMaterial } from './MeshLambertNodeMaterial.js';
-export { default as MeshPhongNodeMaterial } from './MeshPhongNodeMaterial.js';
-export { default as MeshStandardNodeMaterial } from './MeshStandardNodeMaterial.js';
-export { default as MeshPhysicalNodeMaterial } from './MeshPhysicalNodeMaterial.js';
-export { default as MeshSSSNodeMaterial } from './MeshSSSNodeMaterial.js';
-export { default as MeshToonNodeMaterial } from './MeshToonNodeMaterial.js';
-export { default as MeshMatcapNodeMaterial } from './MeshMatcapNodeMaterial.js';
-export { default as PointsNodeMaterial } from './PointsNodeMaterial.js';
-export { default as SpriteNodeMaterial } from './SpriteNodeMaterial.js';
-export { default as ShadowNodeMaterial } from './ShadowNodeMaterial.js';
-export { default as VolumeNodeMaterial } from './VolumeNodeMaterial.js';
+export './node_material.dart';
+export './line_basic_node_material.dart';
+export './line_dashed_node_material.dart';
+export './line2_node_material.dart';
+export './mesh_normal_node_material.dart';
+export './mesh_basic_node_material.dart';
+export './mesh_lambert_node_material.dart';
+export './mesh_phong_node_material.dart';
+export './mesh_standard_node_material.dart';
+export './mesh_physical_node_material.dart';
+export './mesh_sss_node_material.dart';
+export './mesh_toon_node_material.dart';
+export './mesh_matcap_node_material.dart';
+export './points_node_material.dart';
+export './sprite_node_material.dart';
+export './shadow_node_material.dart';
+export './volume_node_material.dart';
+
+export '../lights/ies_spot_light.dart';
+export '../lights/projector_light.dart';
