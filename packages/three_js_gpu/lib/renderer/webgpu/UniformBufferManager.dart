@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 import 'package:gpux/gpux.dart'; // Adjust based on your exact gpux library paths
 import 'package:three_js_core/three_js_core.dart';
+import '../material/MaterialDescriptionRegistry.dart';
 import 'RenderStatsTracker.dart';
 import 'WebGPUBuffer.dart'; // To interface with Mesh, Camera, Vector3, etc.
 
@@ -136,8 +137,7 @@ class UniformBufferManager {
     uniformData[79] = mainLightColor.length > 3 ? mainLightColor[3] : 0.0;
 
     // Morph Target Influences parsing step
-    final List<double> morphInfluenceSource = mesh.morphTargetInfluences ?? 
-        (mesh.userData["morphTargetInfluences"] as List<double>?) ?? const [];
+    final List<double> morphInfluenceSource = mesh.morphTargetInfluences;// ?? (mesh.userData["morphTargetInfluences"] as List<double>?) ?? const [];
         
     for (int i = 0; i < _maxMorphTargets; i++) {
       uniformData[80 + i] = i < morphInfluenceSource.length ? morphInfluenceSource[i] : 0.0;
@@ -170,13 +170,11 @@ class UniformBufferManager {
     final bindGroup = gpuDevice.createBindGroup(
       layout: layout,
       entries: [
-        GpuBindGroupEntry(
+        GpuBindGroupEntry.buffer(
           binding: 0,
-          resource: GpuBindingResourceBuffer(
-            buffer: internalBuffer,
-            offset: 0,
-            size: objectBytes,
-          ),
+          buffer: internalBuffer,
+          offset: 0,
+          size: objectBytes,
         ),
       ],
       label: "Uniform Bind Group (Dynamic Offsets)",
@@ -258,15 +256,13 @@ class UniformBufferManager {
 
   GpuBindGroupLayout _createUniformBindGroupLayout(GpuDevice device) {
     return device.createBindGroupLayout(
-      entries: [
-        GpuBindGroupLayoutEntry(
+      [
+        GpuBufferBindingLayout(
           binding: 0,
           visibility: GpuShaderStage.vertex | GpuShaderStage.fragment,
-          buffer: GpuBufferBindingLayout(
-            type: GpuBufferBindingType.uniform,
-            hasDynamicOffset: true,
-            minBindingSize: objectBytes,
-          ),
+          type: GpuBufferBindingType.uniform,
+          hasDynamicOffset: true,
+          minBindingSize: objectBytes,
         ),
       ],
       label: "Uniform Bind Group Layout (Dynamic Offsets)",
@@ -335,9 +331,4 @@ class MaterialUniformData {
     required this.mainLightDirection,
     required this.mainLightColor,
   });
-}
-
-// Global mockup descriptor if missing from three_js package properties
-class MaterialDescriptorRegistry {
-  static int uniformBlockSizeBytes() => 352; // 88 floats * 4 bytes
 }

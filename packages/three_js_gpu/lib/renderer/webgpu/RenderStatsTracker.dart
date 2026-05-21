@@ -1,6 +1,8 @@
 import 'dart:collection';
 import 'dart:core';
 
+import '../../lighting/ibl/IBLConvolutionProfiler.dart';
+
 /// Render statistics tracking.
 /// T041: Track draw calls, triangles, and GPU memory usage.
 ///
@@ -282,11 +284,4 @@ class ExtendedRenderStats {
     required this.totalMemory,
     required this.vertices,
   });
-}
-
-class IBLConvolutionMetrics {
-  final double prefilterMs;
-  final double irradianceMs;
-  final int prefilterMipCount;
-  const IBLConvolutionMetrics({required this.prefilterMs, required this.irradianceMs, required this.prefilterMipCount});
 }

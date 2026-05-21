@@ -119,7 +119,7 @@ class BatchKey {
     state = (state * 31 + material.stencilWriteMask) & 0xFFFFFFFF;
     state = (state * 31 + material.stencilFuncMask) & 0xFFFFFFFF;
     state = (state * 31 + material.stencilRef) & 0xFFFFFFFF;
-    state = (state * 31 + (material.precision ?? -1)) & 0xFFFFFFFF;
+    state = (state * 31 + (int.tryParse(material.precision ?? '') ?? -1)) & 0xFFFFFFFF;
     state = (state * 31 + _doubleToBits(material.alphaTest)) & 0xFFFFFFFF;
     return state;
   }

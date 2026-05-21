@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'package:three_js_core/three_js_core.dart';
+import '../RendererConfig.dart';
+import 'WebGPURenderer.dart';
 import 'WebGPUDetector.dart'; // Adjust to your project's interface locations
 
 /// Factory for creating WebGPU or WebGL/OpenGL renderer with automatic fallback.
@@ -28,28 +30,11 @@ class WebGPURendererFactory {
         print("INFO: WebGPURenderer initialized successfully");
         return renderer;
       } catch (e) {
-        print("WARNING: WebGPU initialization failed: ${e.toString()}");
-        print("WARNING: Falling back to legacy backend renderer");
-        return await _createWebGLFallback(surfaceHandle);
+        throw("WARNING: WebGPU initialization failed: ${e.toString()}");
       }
-    } else {
-      print("INFO: WebGPU not available - using legacy renderer pipeline");
-      return await _createWebGLFallback(surfaceHandle);
-    }
-  }
-
-  /// Creates a WebGL/OpenGL renderer as fallback target workspace.
-  static Future<Renderer> _createWebGLFallback(dynamic surfaceHandle) async {
-    try {
-      final renderer = WebGLRenderer(surfaceHandle);
-      final config = RendererConfig();
-      
-      await renderer.initialize(config);
-      print("INFO: WebGL/OpenGL renderer initialized successfully (fallback)");
-      return renderer;
-    } catch (e) {
-      print("ERROR: Fallback graphics framework initialization failed: ${e.toString()}");
-      rethrow; // Bounces the execution crash up to application layers
+    } 
+    else {
+      throw("INFO: WebGPU not available - using legacy renderer pipeline");
     }
   }
 }

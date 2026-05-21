@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:gpux/gpux.dart';
+import '../material/MaterialDescriptionRegistry.dart';
 import 'WebGPUPipeline.dart'; // Adjust based on your exact gpux library paths
 
 /// Pipeline cache key for identifying unique pipeline configurations.
@@ -10,9 +11,9 @@ class PipelineKey {
   final GpuPrimitiveTopology primitiveTopology;
   final GpuCullMode cullMode;
   final GpuFrontFace frontFace;
-  final GpuDepthStencilState? depthStencilState;
-  final GpuMultisampleState? multisampleState;
-  final GpuColorTargetDescriptor colorTarget;
+  final DepthStencilStateDescriptor? depthStencilState;
+  final MultisampleStateDescriptor? multisampleState;
+  final ColorTargetDescriptor colorTarget;
 
   const PipelineKey({
     required this.vertexShaderHash,

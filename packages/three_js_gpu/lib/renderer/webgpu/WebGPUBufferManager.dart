@@ -34,10 +34,6 @@ class WebGPUBufferManager implements BufferManager {
         label: "vertex_buffer_${data.length}",
       );
 
-      if (bufferWrapper == null) {
-        throw OutOfMemoryException("Failed to create vertex buffer");
-      }
-
       // Prepare raw binary payload view block
       final byteData = data.buffer.asByteData(data.offsetInBytes, data.lengthInBytes);
 
@@ -80,10 +76,6 @@ class WebGPUBufferManager implements BufferManager {
         label: "index_buffer_${data.length}",
       );
 
-      if (bufferWrapper == null) {
-        throw OutOfMemoryException("Failed to create index buffer");
-      }
-
       final byteData = data.buffer.asByteData(data.offsetInBytes, data.lengthInBytes);
 
       device.queue.writeBuffer(
@@ -120,10 +112,6 @@ class WebGPUBufferManager implements BufferManager {
         mappedAtCreation: false,
         label: "uniform_buffer_$sizeBytes",
       );
-
-      if (bufferWrapper == null) {
-        throw OutOfMemoryException("Failed to create uniform buffer");
-      }
 
       return BufferHandle(
         handle: bufferWrapper,

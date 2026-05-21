@@ -1,4 +1,8 @@
-import 'package:three_js_core/three_js_core.dart'; // Adjust imports to match your scene/camera locations
+import 'package:three_js_core/three_js_core.dart';
+import 'BackendType.dart';
+import 'RendererCapabilities.dart';
+import 'RendererConfig.dart';
+import 'webgpu/RenderStatsTracker.dart'; // Adjust imports to match your scene/camera locations
 
 /// T022: Renderer Actual (Dart/Flutter)
 /// Feature: 019-we-should-not

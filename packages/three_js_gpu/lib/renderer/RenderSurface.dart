@@ -32,7 +32,11 @@ class WebGPUSurface implements RenderSurface {
   });
 
   @override
-  dynamic getHandle() {
+  int getHandle() {
+    return flutterTextureId; // Returns the ID matching your custom GPU texture channel
+  }
+
+  int getSurfaceHandle() {
     return flutterTextureId; // Returns the ID matching your custom GPU texture channel
   }
 }

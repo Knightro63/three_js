@@ -73,9 +73,7 @@ GpuRenderPipeline? createBasicPipeline(GpuDevice device) {
       fragmentModule: shaderModule,
       fragmentEntryPoint: 'fs_main',
       colorTargets: [
-        GpuColorTargetState(
-          format: GpuTextureFormat.bgra8Unorm, // Maps to 'bgra8unorm' swapchain color target
-        ),
+        GpuColorTargetState(format: GpuTextureFormat.bgra8Unorm),
       ],
       primitiveTopology: GpuPrimitiveTopology.triangleList, // Maps to 'triangle-list'
     );

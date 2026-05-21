@@ -140,7 +140,7 @@ class WebGPUBuffer {
 class BufferDescriptor {
   final String label;
   final int size;
-  final int usage;
+  final GpuBufferUsageFlags usage;
   final bool mappedAtCreation;
 
   const BufferDescriptor({

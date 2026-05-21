@@ -1,11 +1,13 @@
-import 'package:gpux/gpux.dart'; // Adjust based on your exact gpux library paths
+import 'package:gpux/gpux.dart';
+import 'package:flutter_gpux/flutter_gpux.dart';
+import '../../feature020/SwapchainManager.dart'; // Adjust based on your exact gpux library paths
 
 /// WebGPU swapchain manager implementation.
 /// 
 /// Manages canvas context configuration and texture presentation.
 /// Note: WebGPU auto-presents, so presentImage() is essentially a no-op.
 class WebGPUSwapchain implements SwapchainManager {
-  final GpuContext context;
+  final dynamic context;
   final GpuDevice device;
 
   int _currentWidth = 800;
@@ -24,11 +26,11 @@ class WebGPUSwapchain implements SwapchainManager {
   void _configure(int width, int height) {
     try {
       // Replaces the dynamic JS literal string block with a safe declarative layout configuration
-      context.configure(GpuCanvasConfiguration(
-        format: GpuTextureFormat.bgra8Unorm, // Maps to 'bgra8unorm'
-        usage: GpuTextureUsage.renderAttachment, // Maps to GPUTextureUsage.RENDER_ATTACHMENT
-        alphaMode: GpuCanvasAlphaMode.premultiplied, // Maps to 'premultiplied'
-      ));
+      // context.configure(GpuCanvasConfiguration(
+      //   format: GpuTextureFormat.bgra8Unorm, // Maps to 'bgra8unorm'
+      //   usage: GpuTextureUsage.renderAttachment, // Maps to GPUTextureUsage.RENDER_ATTACHMENT
+      //   alphaMode: GpuCanvasAlphaMode.premultiplied, // Maps to 'premultiplied'
+      // ));
 
       _currentWidth = width;
       _currentHeight = height;
@@ -94,7 +96,7 @@ class WebGPUSwapchain implements SwapchainManager {
     // Unconfigure context allocations if previously active
     if (_configured) {
       try {
-        context.unconfigure();
+        //context.unconfigure();
       } catch (_) {
         // Ignore errors on unconfigure matching original paradigm
       }
@@ -115,7 +117,7 @@ class WebGPUSwapchain implements SwapchainManager {
   void dispose() {
     if (_configured) {
       try {
-        context.unconfigure();
+        //context.unconfigure();
         _configured = false;
       } catch (_) {
         // Ignore structural errors on cleanup cycles

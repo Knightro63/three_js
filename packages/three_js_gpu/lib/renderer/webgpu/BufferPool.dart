@@ -41,7 +41,7 @@ class BufferPool {
   }
 
   /// Acquires a buffer from the pool or creates a new one.
-  WebGPUBuffer acquire({required int size, required int usage, String? label}) {
+  WebGPUBuffer acquire({required int size, required GpuBufferUsageFlags usage, String? label}) {
     final sizeClass = _getSizeClass(size);
     final pool = _pools[sizeClass]!;
 

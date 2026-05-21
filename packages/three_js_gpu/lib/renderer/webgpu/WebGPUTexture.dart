@@ -7,21 +7,23 @@ class TextureDescriptor {
   final int width;
   final int height;
   final int depth;
-  final TextureFormat format;
-  final int usage;
+  final GpuTextureFormat format;
+  late final int usage;
   final int mipLevelCount;
   final int sampleCount;
 
-  const TextureDescriptor({
+  TextureDescriptor({
     this.label,
     required this.width,
     required this.height,
     this.depth = 1,
-    this.format = TextureFormat.rgba8Unorm,
-    this.usage = GpuTextureUsage.textureBinding | GpuTextureUsage.copyDst,
+    this.format = GpuTextureFormat.rgba8Unorm,
+    int? usage,
     this.mipLevelCount = 1,
     this.sampleCount = 1,
-  });
+  }){
+    this.usage = usage ?? (GpuTextureUsage.textureBinding | GpuTextureUsage.copyDst);
+  }
 }
 
 /// WebGPU texture implementation.
@@ -39,27 +41,7 @@ class WebGPUTexture {
   void create() {
     try {
       // Maps the standard Kotlin 'when' format translation down to gpux-native strong enums
-      final GpuTextureFormat gpuFormat;
-      switch (descriptor.format) {
-        case TextureFormat.rgba8Unorm:
-          gpuFormat = GpuTextureFormat.rgba8Unorm;
-          break;
-        case TextureFormat.rgba8Srgb:
-          gpuFormat = GpuTextureFormat.rgba8UnormSrgb;
-          break;
-        case TextureFormat.bgra8Unorm:
-          gpuFormat = GpuTextureFormat.bgra8Unorm;
-          break;
-        case TextureFormat.bgra8Srgb:
-          gpuFormat = GpuTextureFormat.bgra8UnormSrgb;
-          break;
-        case TextureFormat.depth24Plus:
-          gpuFormat = GpuTextureFormat.depth24Plus;
-          break;
-        case TextureFormat.depth32Float:
-          gpuFormat = GpuTextureFormat.depth32Float;
-          break;
-      }
+      final GpuTextureFormat gpuFormat = descriptor.format;
 
       final dimension = descriptor.depth > 1 
           ? GpuTextureDimension.d3 
@@ -75,7 +57,7 @@ class WebGPUTexture {
         sampleCount: descriptor.sampleCount,
         dimension: dimension,
         format: gpuFormat,
-        usage: descriptor.usage,
+        usage: GpuTextureUsageFlags(descriptor.usage),
       );
 
       if (_texture == null) {
@@ -165,7 +147,7 @@ class WebGPUTexture {
   }
 
   /// Gets baseline texture configuration format.
-  TextureFormat getFormat() => descriptor.format;
+  GpuTextureFormat getFormat() => descriptor.format;
 
   /// Disposes the texture and immediately releases hardware GPU space.
   void dispose() {
@@ -184,11 +166,11 @@ class TextureExtent {
 }
 
 /// Enum identifiers representing texture layout types
-enum TextureFormat {
-  rgba8Unorm,
-  rgba8Srgb,
-  bgra8Unorm,
-  bgra8Srgb,
-  depth24Plus,
-  depth32Float,
-}
+// enum TextureFormat {
+//   rgba8Unorm,
+//   rgba8Srgb,
+//   bgra8Unorm,
+//   bgra8Srgb,
+//   depth24Plus,
+//   depth32Float,
+// }

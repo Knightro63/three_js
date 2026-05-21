@@ -1,5 +1,4 @@
-import 'package:gpux/gpux.dart'; // Adjust based on your exact gpux package paths
-import 'package:three_js_core/three_js_core.dart'; // To extend RenderSurface interface
+import '../RenderSurface.dart'; // To extend RenderSurface interface
 
 /// WebGPU surface implementation wrapping a Flutter texture/surface platform resource.
 ///
@@ -37,17 +36,17 @@ class WebGPUSurface implements RenderSurface {
   /// Get surface handle (typed alternative accessor matching layout conventions).
   dynamic getPlatformHandle() => _platformHandle;
 
-  /// Get WebGPU context matching this surface handle hook.
-  /// @return [GpuContext] instance via gpux architecture hooks.
-  GpuContext? getWebGPUContext() {
-    try {
-      // Replaces canvas.getContext("webgpu") with cross-platform native context initialization
-      return Gpu.createContextFromNativeHandle(_platformHandle);
-    } catch (e) {
-      print("ERROR: Failed to create WebGPU canvas context: ${e.toString()}");
-      return null;
-    }
-  }
+  // /// Get WebGPU context matching this surface handle hook.
+  // /// @return [GpuContext] instance via gpux architecture hooks.
+  // GpuContext? getWebGPUContext() {
+  //   try {
+  //     // Replaces canvas.getContext("webgpu") with cross-platform native context initialization
+  //     return Gpu.createContextFromNativeHandle(_platformHandle);
+  //   } catch (e) {
+  //     print("ERROR: Failed to create WebGPU canvas context: ${e.toString()}");
+  //     return null;
+  //   }
+  // }
 
   /// Get WebGL2/OpenGL context (legacy rendering fallback).
   dynamic getWebGLContext() {

@@ -1,7 +1,10 @@
 import 'dart:async';
 import 'package:gpux/gpux.dart'; // Adjust based on your exact package architecture
 import 'package:three_js_core/three_js_core.dart';
+import './webgpu/WebGPURenderer.dart';
+import 'BackendType.dart';
 import 'RenderSurface.dart';
+import 'RendererConfig.dart';
 
 /// Dart implementation of RendererFactory with WebGPU → WebGL/OpenGL fallback.
 /// 
@@ -23,10 +26,7 @@ class RendererFactory {
   ) async {
     // 1. Check if surface is valid
     if (surface is! WebGPUSurface) {
-      throw RendererInitializationException(
-        BackendType.webgpu,
-        "Expected WebGPUSurface, got ${surface.runtimeType}",
-      );
+      throw ("Expected WebGPUSurface, got ${surface.runtimeType}",);
     }
 
     final nativeSurfaceHandle = surface.getSurfaceHandle();
@@ -41,7 +41,7 @@ class RendererFactory {
     if (preferWebGPU) {
       try {
         // Create WebGPURenderer instance
-        final renderer = _createWebGPURenderer(nativeSurfaceHandle);
+        final renderer = _createWebGPURenderer(nativeSurfaceHandle) as WebGPURenderer;
 
         // Initialize renderer context 
         await renderer.initialize(config);
@@ -55,22 +55,11 @@ class RendererFactory {
 
     // 4. Fallback to legacy pipelines (FR-003: fallback fallback)
     if (availableBackends.contains(BackendType.webgl)) {
-      try {
-        final renderer = _createWebGLRenderer(nativeSurfaceHandle);
-        await renderer.initialize(config);
-        
-        print("[Materia] Selected backend: WebGL 2.0 / OpenGL (fallback)");
-        return renderer;
-      } catch (e) {
-        throw RendererInitializationException(
-          BackendType.webgl,
-          "Device creation failed for WebGL context: ${e.toString()}",
-        );
-      }
+      throw ("Device creation failed for WebGL context: ${BackendType.webgl.toString()}",);
     }
 
     // 5. No graphics hardware engine context found 
-    throw NoGraphicsSupportException(
+    throw (
       platform: "Flutter/Dart",
       availableBackends: availableBackends,
       requiredFeatures: ["WebGPU or WebGL 2.0 / Native OpenGL"],
@@ -97,7 +86,8 @@ class RendererFactory {
   /// Check if WebGPU/WGPU abstraction layer can initialize.
   static bool _isWebGPUAvailable() {
     try {
-      return Gpu.isAvailable(); // Checks cross-platform hardware binding flags via gpux
+      Gpu().requestAdapter(); // Checks cross-platform hardware binding flags via gpux
+      return true;
     } catch (_) {
       return false;
     }
@@ -115,9 +105,5 @@ class RendererFactory {
 
   static Renderer _createWebGPURenderer(dynamic surfaceHandle) {
     return WebGPURenderer(surfaceHandle);
-  }
-
-  static Renderer _createWebGLRenderer(dynamic surfaceHandle) {
-    return WebGLRenderer(surfaceHandle);
   }
 }

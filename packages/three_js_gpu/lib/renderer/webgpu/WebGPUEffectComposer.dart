@@ -1,6 +1,6 @@
-import 'dart:typed_data';
 import 'package:gpux/gpux.dart'; // Adjust based on your exact gpux library paths
-import 'package:three_js_core/three_js_core.dart'; // To interface with FullScreenEffectPass, BlendMode, etc.
+import '../../effects/FullScreenEffect.dart';
+import '../../effects/FullScreenEffectPass.dart'; // To interface with FullScreenEffectPass, BlendMode, etc.
 
 /// Manages a chain of WebGPU post-processing effects.
 class WebGPUEffectComposer {
@@ -70,35 +70,30 @@ class WebGPUEffectComposer {
     _viewB = _textureB!.createView();
 
     // Create edge-clamped sampler for input textures
-    _inputSampler = device.createSampler(const GpuSamplerDescriptor(
-      magFilter: GpuSamplerFilter.linear,
-      minFilter: GpuSamplerFilter.linear,
+    _inputSampler = device.createSampler(
+      magFilter: GpuFilterMode.linear,
+      minFilter: GpuFilterMode.linear,
       addressModeU: GpuAddressMode.clampToEdge,
       addressModeV: GpuAddressMode.clampToEdge,
-    ));
-
-    // Create bind group layout for input texture mapping
-    final bindGroupLayoutDescriptor = GpuBindGroupLayoutDescriptor(
-      label: "WebGPUEffectComposer-InputBindGroupLayout",
-      entries: [
-        const GpuBindGroupLayoutEntry(
-          binding: 0,
-          visibility: GpuShaderStage.fragment,
-          texture: GpuTextureBindingLayout(
-            sampleType: GpuTextureSampleType.float,
-            viewDimension: GpuTextureViewDimension.twoD,
-          ),
-        ),
-        const GpuBindGroupLayoutEntry(
-          binding: 1,
-          visibility: GpuShaderStage.fragment,
-          sampler: GpuSamplerBindingLayout(GpuSamplerBindingType.filtering),
-        ),
-      ],
     );
 
-    _inputBindGroupLayoutA = device.createBindGroupLayout(bindGroupLayoutDescriptor);
-    _inputBindGroupLayoutB = device.createBindGroupLayout(bindGroupLayoutDescriptor);
+    // Create bind group layout for input texture mapping
+    final bindGroupLayoutDescriptor = [
+      const GpuBindGroupLayoutEntry.texture(
+        binding: 0,
+        visibility: GpuShaderStage.fragment,
+        sampleType: GpuTextureSampleType.float,
+        viewDimension: GpuTextureViewDimension.d2,
+      ),
+      const GpuSamplerBindingLayout(
+        binding: 1,
+        visibility: GpuShaderStage.fragment,
+        type: GpuSamplerBindingType.filtering,
+      )
+    ];
+
+    _inputBindGroupLayoutA = device.createBindGroupLayout(bindGroupLayoutDescriptor,label: "WebGPUEffectComposer-InputBindGroupLayout",);
+    _inputBindGroupLayoutB = device.createBindGroupLayout(bindGroupLayoutDescriptor,label: "WebGPUEffectComposer-InputBindGroupLayout",);
 
     _inputBindGroupA = _createInputBindGroup(_viewA!, _inputBindGroupLayoutA!, "InputBindGroup-A");
     _inputBindGroupB = _createInputBindGroup(_viewB!, _inputBindGroupLayoutB!, "InputBindGroup-B");
@@ -119,8 +114,8 @@ class WebGPUEffectComposer {
       label: label,
       layout: layout,
       entries: [
-        GpuBindGroupEntry(binding: 0, resource: GpuBindingResourceTexture(view)),
-        GpuBindGroupEntry(binding: 1, resource: GpuBindingResourceSampler(_inputSampler!)),
+        GpuBindGroupEntry.textureView(binding: 0, view: view),
+        GpuBindGroupEntry.sampler(binding: 1, sampler: _inputSampler!),
       ],
     );
   }
@@ -380,16 +375,16 @@ class WebGPUEffectComposer {
   }
 
   GpuBindGroupLayout _createUniformBindGroupLayout() {
-    return device.createBindGroupLayout(const GpuBindGroupLayoutDescriptor(
-      label: "WebGPUEffectComposer-UniformBindGroupLayout",
-      entries: [
-        GpuBindGroupLayoutEntry(
+    return device.createBindGroupLayout(
+      [
+        GpuBindGroupLayoutEntry.buffer(
           binding: 0,
           visibility: GpuShaderStage.vertex | GpuShaderStage.fragment,
-          buffer: GpuBufferBindingLayout(type: GpuBufferBindingType.uniform),
+          type: GpuBufferBindingType.uniform
         ),
       ],
-    ));
+      label: "WebGPUEffectComposer-UniformBindGroupLayout",
+    );
   }
 
   GpuBlendState? _createBlendState(BlendMode blendMode) {
@@ -399,7 +394,7 @@ class WebGPUEffectComposer {
       case BlendMode.alphaBlend:
         return const GpuBlendState(
           color: GpuBlendComponent(srcFactor: GpuBlendFactor.srcAlpha, dstFactor: GpuBlendFactor.oneMinusSrcAlpha, operation: GpuBlendOperation.add),
-          alpha: GpuBlendState(srcFactor: GpuBlendFactor.one, dstFactor: GpuBlendFactor.oneMinusSrcAlpha, operation: GpuBlendOperation.add) as GpuBlendComponent,
+          alpha: GpuBlendComponent(srcFactor: GpuBlendFactor.one, dstFactor: GpuBlendFactor.oneMinusSrcAlpha, operation: GpuBlendOperation.add),
         );
       case BlendMode.additive:
         return const GpuBlendState(
@@ -438,13 +433,13 @@ class WebGPUEffectComposer {
     final uniformBuffer = _getOrCreateUniformBuffer(pass);
     final bindGroupLayout = _createUniformBindGroupLayout();
 
-    final bindGroup = device.createBindGroup(GpuBindGroupDescriptor(
+    final bindGroup = device.createBindGroup(
       label: "WebGPUEffectComposer-UniformBindGroup",
       layout: bindGroupLayout,
       entries: [
-        GpuBindGroupEntry(binding: 0, resource: GpuBindingResourceBuffer(buffer: uniformBuffer)),
+        GpuBindGroupEntry.buffer(binding: 0, buffer: uniformBuffer),
       ],
-    ));
+    );
 
     _bindGroupCache[pass] = bindGroup;
     return bindGroup;
@@ -479,9 +474,9 @@ class WebGPUEffectComposer {
   void _uploadUniformBuffer(FullScreenEffectPass pass, GpuBuffer buffer) {
     final data = pass.effect.uniformBuffer;
     device.queue.writeBuffer(
-      buffer: buffer,
-      bufferOffset: 0,
-      data: data.buffer.asByteData(data.offsetInBytes, data.lengthInBytes),
+      buffer,
+      data.buffer.asByteData(data.offsetInBytes, data.lengthInBytes).buffer.asUint8List(),
+      bufferOffset: 0, 
     );
   }
 

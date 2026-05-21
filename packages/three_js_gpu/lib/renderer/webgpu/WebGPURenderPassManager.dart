@@ -1,6 +1,7 @@
 import 'dart:core';
 import 'package:gpux/gpux.dart';
-import 'package:three_js_gpu/renderer/webgpu/WebGPUBufferManager.dart';
+import 'package:three_js_math/three_js_math.dart';
+import 'WebGPUBufferManager.dart';
 import 'WebGPUFrameAttachments.dart'; // Adjust based on your exact gpux library paths
 
 /// WebGPU render pass manager implementation.
@@ -56,10 +57,10 @@ class WebGPURenderPassManager implements RenderPassManager {
         loadOp: GpuLoadOp.clear,
         storeOp: GpuStoreOp.store,
         clearValue: GpuColor(
-          clearColor.r,
-          clearColor.g,
-          clearColor.b,
-          clearColor.a,
+          clearColor.red,
+          clearColor.green,
+          clearColor.blue,
+          clearColor.alpha,
         ),
       );
 
@@ -77,7 +78,7 @@ class WebGPURenderPassManager implements RenderPassManager {
       if (enableDiagnostics) {
         print(
           "PASS-DESC: colorView type=${colorView.runtimeType}, "
-          "clear=[${clearColor.r}, ${clearColor.g}, ${clearColor.b}, ${clearColor.a}], "
+          "clear=[${clearColor.red}, ${clearColor.green}, ${clearColor.blue}, ${clearColor.alpha}], "
           "depthView=${depthView != null}, "
           "colorAttachments.length=1"
         );
@@ -257,11 +258,6 @@ abstract class RenderPassManager {
   void bindUniformBuffer(BufferHandle buffer, int group, int binding);
   void drawIndexed(int indexCount, int firstIndex, int instanceCount);
   void endRenderPass();
-}
-
-class Color {
-  final double r, g, b, a;
-  const Color({required this.r, required this.g, required this.b, required this.a});
 }
 
 class FramebufferHandle {

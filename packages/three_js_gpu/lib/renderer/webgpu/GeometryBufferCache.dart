@@ -1,6 +1,6 @@
-import 'dart:typed_data';
 import 'package:gpux/gpux.dart'; // Adjust based on your exact gpux library paths
 import 'package:three_js_core/three_js_core.dart';
+import '../geometry/GeometryDescriptor.dart';
 import 'RenderStatsTracker.dart';
 import 'WebGPUBuffer.dart'; // Adjust to where BufferGeometry lies
 
@@ -52,7 +52,7 @@ class GeometryBufferCache {
     }
 
     try {
-      final geometryBuffer = GeometryBuilder.build(geometry, options);
+      final geometryBuffer = GeometryBuilder.build(geometry, options: options);
       
       final List<StreamBuffer> vertexStreams = [];
       for (int index = 0; index < geometryBuffer.streams.length; index++) {
@@ -171,7 +171,7 @@ class GeometryBuffers {
 class StreamBuffer {
   final GpuBuffer buffer;
   final int sizeBytes;
-  final VertexBufferLayout layout;
+  final GpuVertexBufferLayout layout;
 
   StreamBuffer({
     required this.buffer,

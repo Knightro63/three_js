@@ -2,7 +2,8 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 import 'package:gpux/gpux.dart'; // Adjust based on your exact gpux library paths
 import 'package:three_js_core/three_js_core.dart';
-import 'package:three_js_gpu/renderer/webgpu/RenderStatsTracker.dart'; // To interface with CubeTexture, Texture2D, etc.
+import '../TextureTypes.dart';
+import 'RenderStatsTracker.dart'; // To interface with CubeTexture, Texture2D, etc.
 
 class EnvironmentBinding {
   final GpuBindGroup bindGroup;
@@ -33,10 +34,8 @@ class WebGPUEnvironmentManager {
   final RenderStatsTracker? _statsTracker;
   final GpuResourceRegistry _resourceRegistry = GpuResourceRegistry();
 
-  GpuTexture? _cubeTexture;
   GpuTextureView? _cubeView;
   GpuSampler? _sampler;
-  GpuTexture? _brdfTexture;
   GpuTextureView? _brdfView;
   GpuSampler? _brdfSampler;
   GpuBindGroupLayout? _bindGroupLayout;
@@ -96,10 +95,8 @@ class WebGPUEnvironmentManager {
     _resourceRegistry.disposeAll();
     _resourceRegistry.reset();
     
-    _cubeTexture = null;
     _cubeView = null;
     _sampler = null;
-    _brdfTexture = null;
     _brdfView = null;
     _brdfSampler = null;
     _bindGroup = null;
@@ -110,7 +107,6 @@ class WebGPUEnvironmentManager {
   }
 
   void _uploadEnvironment(GpuDevice device, CubeTexture cube) {
-    //final size = cube.size;
     final chain = _collectMipChain(cube);
     _mipCount = chain.mipCount;
 
@@ -121,36 +117,32 @@ class WebGPUEnvironmentManager {
 
     _resourceRegistry.disposeAll();
     _resourceRegistry.reset();
-    _cubeTexture = null;
     _cubeView = null;
     _bindGroup = null;
 
-    final descriptor = GpuTextureDescriptor(
-      width: size,
-      height: size,
+    final texture = device.createTexture(
+      width: cube.image.width,
+      height: cube.image.height,
       depthOrArrayLayers: 6,
       mipLevelCount: _mipCount,
       sampleCount: 1,
-      dimension: GpuTextureDimension.twoD,
-      format: GpuTextureFormat.rgba16float,
+      dimension: GpuTextureDimension.d2,
+      format: GpuTextureFormat.rgba16Float,
       usage: GpuTextureUsage.textureBinding | GpuTextureUsage.copyDst,
       label: "IBL Prefilter Cubemap",
     );
-
-    final texture = device.createTexture(descriptor);
     _resourceRegistry.trackTexture(texture);
-    _cubeTexture = texture;
-    _cubeView = texture.createView(GpuTextureViewDescriptor(
+    _cubeView = texture.createView(
       label: "IBL Prefilter Cube View",
       dimension: GpuTextureViewDimension.cube,
       mipLevelCount: _mipCount,
-    ));
+    );
 
     _trackedBytes = chain.totalBytes;
     _statsTracker?.recordTextureCreated(_trackedBytes);
 
     for (int level = 0; level < _mipCount; level++) {
-      final mipSize = math.max(1, size >> level);
+      final mipSize = math.max(1, cube.image.width >> level);
       final rowBytes = mipSize * _halfByteStride;
       final alignedRowBytes = _alignRowPitch(rowBytes);
 
@@ -163,29 +155,17 @@ class WebGPUEnvironmentManager {
             ? rawData
             : _padRows(rawData, rowBytes, alignedRowBytes, mipSize);
 
-        final destination = GpuImageCopyTexture(
+        device.queue.writeTexture(
           texture: texture,
           mipLevel: level,
-          origin: GpuOrigin3D(x: 0, y: 0, z: face),
-        );
-
-        final dataLayout = GpuTextureDataLayout(
-          offset: 0,
+          originX: 0, originY: 0, originZ: face,
+          data: uploadBytes.buffer.asByteData(uploadBytes.offsetInBytes, uploadBytes.lengthInBytes).buffer.asUint8List(),
+          dataOffset: 0,
           bytesPerRow: alignedRowBytes,
           rowsPerImage: mipSize,
-        );
-
-        final sizeDesc = GpuExtent3D(
           width: mipSize,
           height: mipSize,
           depthOrArrayLayers: 1,
-        );
-
-        device.queue.writeTexture(
-          destination: destination,
-          data: uploadBytes.buffer.asByteData(uploadBytes.offsetInBytes, uploadBytes.lengthInBytes),
-          dataLayout: dataLayout,
-          size: sizeDesc,
         );
       }
     }
@@ -201,43 +181,39 @@ class WebGPUEnvironmentManager {
       return;
     }
 
-    _brdfTexture = null;
     _brdfView = null;
     _brdfSampler = null;
 
     final width = brdf?.width ?? _fallbackBrdfSize;
     final height = brdf?.height ?? _fallbackBrdfSize;
-    final floatData = brdf?.getData() ?? _fallbackBrdfData(width, height);
+    final floatData = brdf?.getFloatData() ?? _fallbackBrdfData(width, height);
 
-    final descriptor = GpuTextureDescriptor(
+    final texture = device.createTexture(
       width: width,
       height: height,
       depthOrArrayLayers: 1,
       mipLevelCount: 1,
       sampleCount: 1,
-      dimension: GpuTextureDimension.twoD,
-      format: GpuTextureFormat.rg32float,
+      dimension: GpuTextureDimension.d2,
+      format: GpuTextureFormat.rg32Float,
       usage: GpuTextureUsage.textureBinding | GpuTextureUsage.copyDst,
       label: "IBL BRDF LUT",
     );
-
-    final texture = device.createTexture(descriptor);
     _resourceRegistry.trackTexture(texture);
-    _brdfTexture = texture;
     
-    _brdfView = texture.createView(GpuTextureViewDescriptor(
+    _brdfView = texture.createView(
       label: "IBL BRDF View",
-      dimension: GpuTextureViewDimension.twoD,
-    ));
+      dimension: GpuTextureViewDimension.d2,
+    );
 
-    _brdfSampler = device.createSampler(const GpuSamplerDescriptor(
-      magFilter: GpuSamplerFilter.linear,
-      minFilter: GpuSamplerFilter.linear,
-      mipmapFilter: GpuSamplerFilter.linear,
+    _brdfSampler = device.createSampler(
+      magFilter: GpuFilterMode.linear,
+      minFilter: GpuFilterMode.linear,
+      mipmapFilter: GpuMipmapFilterMode.linear,
       lodMinClamp: 0.0,
       lodMaxClamp: 0.0,
       label: "IBL BRDF Sampler",
-    ));
+    );
 
     _uploadBrdfData(device, texture, floatData, width, height);
     _trackedBrdfBytes = width * height * _brdfBytesPerPixel;
@@ -249,14 +225,14 @@ class WebGPUEnvironmentManager {
   }
 
   void _createSampler(GpuDevice device) {
-    _sampler = device.createSampler(GpuSamplerDescriptor(
-      magFilter: GpuSamplerFilter.linear,
-      minFilter: GpuSamplerFilter.linear,
-      mipmapFilter: GpuSamplerFilter.linear,
+    _sampler = device.createSampler(
+      magFilter: GpuFilterMode.linear,
+      minFilter: GpuFilterMode.linear,
+      mipmapFilter: GpuMipmapFilterMode.linear,
       lodMinClamp: 0.0,
       lodMaxClamp: math.max(0, _mipCount - 1).toDouble(),
       label: "IBL Prefilter Sampler",
-    ));
+    );
   }
 
   void _createBindGroup(GpuDevice device) {
@@ -268,53 +244,48 @@ class WebGPUEnvironmentManager {
 
     if (view == null || samplerHandle == null || brdfViewHandle == null || brdfSamplerHandle == null) return;
 
-    _bindGroup = device.createBindGroup(GpuBindGroupDescriptor(
+    _bindGroup = device.createBindGroup(
       layout: layout,
       entries: [
-        GpuBindGroupEntry(binding: 0, resource: GpuBindingResourceTexture(view)),
-        GpuBindGroupEntry(binding: 1, resource: GpuBindingResourceSampler(samplerHandle)),
-        GpuBindGroupEntry(binding: 2, resource: GpuBindingResourceTexture(brdfViewHandle)),
-        GpuBindGroupEntry(binding: 3, resource: GpuBindingResourceSampler(brdfSamplerHandle)),
+        GpuBindGroupEntry.textureView(binding: 0, view: view),
+        GpuBindGroupEntry.sampler(binding: 1, sampler: samplerHandle),
+        GpuBindGroupEntry.textureView(binding: 2, view: brdfViewHandle),
+        GpuBindGroupEntry.sampler(binding: 3, sampler: brdfSamplerHandle),
       ],
       label: "IBL Prefilter Bind Group",
-    ));
+    );
   }
 
   GpuBindGroupLayout _createBindGroupLayout(GpuDevice device) {
-    final descriptor = GpuBindGroupLayoutDescriptor(
-      entries: [
-        const GpuBindGroupLayoutEntry(
+    _bindGroupLayout = device.createBindGroupLayout(
+      [
+        const GpuBindGroupLayoutEntry.texture(
           binding: 0,
           visibility: GpuShaderStage.fragment,
-          texture: GpuTextureBindingLayout(
-            sampleType: GpuTextureSampleType.float,
-            viewDimension: GpuTextureViewDimension.cube,
-            multisampled: false,
-          ),
+          sampleType: GpuTextureSampleType.float,
+          viewDimension: GpuTextureViewDimension.cube,
+          multisampled: false,
         ),
-        const GpuBindGroupLayoutEntry(
+        const GpuBindGroupLayoutEntry.sampler(
           binding: 1,
           visibility: GpuShaderStage.fragment,
-          sampler: GpuSamplerBindingLayout(GpuSamplerBindingType.filtering),
+          type: GpuSamplerBindingType.filtering,
         ),
-        const GpuBindGroupLayoutEntry(
+        const GpuBindGroupLayoutEntry.texture(
           binding: 2,
           visibility: GpuShaderStage.fragment,
-          texture: GpuTextureBindingLayout(
-            sampleType: GpuTextureSampleType.float,
-            viewDimension: GpuTextureViewDimension.twoD,
-            multisampled: false,
-          ),
+          sampleType: GpuTextureSampleType.float,
+          viewDimension: GpuTextureViewDimension.d2,
+          multisampled: false,
         ),
-        const GpuBindGroupLayoutEntry(
+        const GpuBindGroupLayoutEntry.sampler(
           binding: 3,
           visibility: GpuShaderStage.fragment,
-          sampler: GpuSamplerBindingLayout(GpuSamplerBindingType.filtering),
+          type: GpuSamplerBindingType.filtering,
         ),
       ],
       label: "IBL Prefilter Bind Group Layout",
     );
-    _bindGroupLayout = device.createBindGroupLayout(descriptor);
     return _bindGroupLayout!;
   }
 
@@ -322,7 +293,7 @@ class WebGPUEnvironmentManager {
     final int mipCount = (cube is CubeTextureImpl) ? cube.maxMipLevel() + 1 : 1;
     final faceMipData = <_FaceMipKey, Uint8List>{};
     int totalBytes = 0;
-    final baseSize = cube.size;
+    final int baseSize = cube.image.width;
 
     for (int level = 0; level < mipCount; level++) {
       final mipSize = math.max(1, baseSize >> level);
@@ -333,7 +304,7 @@ class WebGPUEnvironmentManager {
       for (int face = 0; face < 6; face++) {
         Float32List? floatData;
         if (cube is CubeTextureImpl) {
-          floatData = cube.getFaceData(CubeFace.values[face], level);
+          floatData = cube.getFaceData(CubeFace.values[face], mip: level);
         } else {
           floatData = _getFaceFloatDataAlternative(cube, face);
         }
@@ -347,10 +318,10 @@ class WebGPUEnvironmentManager {
 
   Float32List? _getFaceFloatDataAlternative(CubeTexture cube, int face) {
     // Ported fallback image buffer pixel parsing alternative logic
-    final dynamic floatData = cube.getFaceFloatData(face);
+    final dynamic floatData = (cube.image.data as TypedDataList).buffer.asFloat32List(face);//.getFaceFloatData(face);
     if (floatData is Float32List) return floatData;
     
-    final Uint8List? bytes = cube.getFaceData(face);
+    final Uint8List? bytes = (cube.image.data as TypedDataList).buffer.asUint8List(face);//.getFaceData(face);
     if (bytes == null) return null;
     
     final result = Float32List(bytes.length);
@@ -415,29 +386,17 @@ class WebGPUEnvironmentManager {
   }
 
   void _uploadBrdfData(GpuDevice device, GpuTexture texture, Float32List data, int width, int height) {
-    final destination = GpuImageCopyTexture(
+    device.queue.writeTexture(
       texture: texture,
       mipLevel: 0,
-      origin: const GpuOrigin3D(x: 0, y: 0, z: 0),
-    );
-
-    final dataLayout = GpuTextureDataLayout(
-      offset: 0,
+      originX: 0, originY: 0, originZ: 0,
+      data: data.buffer.asByteData(data.offsetInBytes, data.lengthInBytes).buffer.asUint8List(),
+      dataOffset: 0,
       bytesPerRow: width * _brdfBytesPerPixel,
       rowsPerImage: height,
-    );
-
-    final sizeDesc = GpuExtent3D(
       width: width,
       height: height,
       depthOrArrayLayers: 1,
-    );
-
-    device.queue.writeTexture(
-      destination: destination,
-      data: data.buffer.asByteData(data.offsetInBytes, data.lengthInBytes),
-      dataLayout: dataLayout,
-      size: sizeDesc,
     );
   }
 

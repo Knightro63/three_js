@@ -12,7 +12,8 @@ class WebGPUDetector {
     try {
       // Replaces browser-bound js(" 'gpu' in navigator ") check.
       // gpux checks native library availability or canvas capabilities out of the box.
-      return Gpu.isAvailable();
+      Gpu().requestAdapter(); // Checks cross-platform hardware binding flags via gpux
+      return true;
     } catch (_) {
       return false;
     }

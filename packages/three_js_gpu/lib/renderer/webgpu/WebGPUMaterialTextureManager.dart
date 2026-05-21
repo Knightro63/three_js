@@ -1,8 +1,10 @@
 import 'dart:typed_data';
 import 'package:gpux/gpux.dart'; // Adjust based on your exact gpux library paths
 import 'package:three_js_core/three_js_core.dart';
-import 'package:three_js_gpu/renderer/webgpu/RenderStatsTracker.dart';
-import 'package:three_js_gpu/renderer/webgpu/WebGPUTexture.dart'; // To interface with Material classes
+import '../../material/StandardMaterial.dart';
+import '../TextureTypes.dart';
+import '../material/MaterialDescriptionRegistry.dart';
+import 'RenderStatsTracker.dart'; // To interface with Material classes
 
 class MaterialTextureBinding {
   final GpuBindGroup bindGroup;
@@ -225,32 +227,32 @@ class WebGPUMaterialTextureManager {
     final List<GpuBindGroupEntry> entries = [];
 
     if (useAlbedo) {
-      final textureBinding = _bindingFor(descriptor, MaterialBindingSource.albedoMap, MaterialBindingType.texture2D);
+      final textureBinding = _bindingFor(descriptor, MaterialBindingSource.albedoMap, MaterialBindingType.texture2d);
       final samplerBinding = _bindingFor(descriptor, MaterialBindingSource.albedoMap, MaterialBindingType.sampler);
       final textureView = albedoTexture?.view ?? _fallbackAlbedo?.view;
       if (textureBinding != null && samplerBinding != null && textureView != null) {
-        entries.add(GpuBindGroupEntry(binding: textureBinding.binding, resource: GpuBindingResourceTexture(textureView)));
-        entries.add(GpuBindGroupEntry(binding: samplerBinding.binding, resource: GpuBindingResourceSampler(sampler)));
+        entries.add(GpuBindGroupEntry.textureView(binding: textureBinding.binding, view: textureView));
+        entries.add(GpuBindGroupEntry.sampler(binding: samplerBinding.binding, sampler: sampler));
       }
     }
 
     if (useNormal) {
-      final textureBinding = _bindingFor(descriptor, MaterialBindingSource.normalMap, MaterialBindingType.texture2D);
+      final textureBinding = _bindingFor(descriptor, MaterialBindingSource.normalMap, MaterialBindingType.texture2d);
       final samplerBinding = _bindingFor(descriptor, MaterialBindingSource.normalMap, MaterialBindingType.sampler);
       final textureView = normalTexture?.view ?? _fallbackNormal?.view;
       if (textureBinding != null && samplerBinding != null && textureView != null) {
-        entries.add(GpuBindGroupEntry(binding: textureBinding.binding, resource: GpuBindingResourceTexture(textureView)));
-        entries.add(GpuBindGroupEntry(binding: samplerBinding.binding, resource: GpuBindingResourceSampler(sampler)));
+        entries.add(GpuBindGroupEntry.textureView(binding: textureBinding.binding, view: textureView));
+        entries.add(GpuBindGroupEntry.sampler(binding: samplerBinding.binding, sampler:sampler));
       }
     }
 
     if (useVolume) {
-      final textureBinding = _bindingFor(descriptor, MaterialBindingSource.volumeTexture, MaterialBindingType.texture3D);
+      final textureBinding = _bindingFor(descriptor, MaterialBindingSource.volumeTexture, MaterialBindingType.texture3d);
       final samplerBinding = _bindingFor(descriptor, MaterialBindingSource.volumeTexture, MaterialBindingType.sampler);
       final textureView = volumeTexture?.view ?? _fallbackVolume?.view;
       if (textureBinding != null && samplerBinding != null && textureView != null) {
-        entries.add(GpuBindGroupEntry(binding: textureBinding.binding, resource: GpuBindingResourceTexture(textureView)));
-        entries.add(GpuBindGroupEntry(binding: samplerBinding.binding, resource: GpuBindingResourceSampler(sampler)));
+        entries.add(GpuBindGroupEntry.textureView(binding: textureBinding.binding, view: textureView));
+        entries.add(GpuBindGroupEntry.sampler(binding: samplerBinding.binding, sampler: sampler));
       }
     }
 
@@ -300,18 +302,18 @@ class WebGPUMaterialTextureManager {
   }
 
   Texture2D? _albedoSource(EngineMaterial? material) {
-    if (material is MeshBasicMaterial) return material.map as Texture2D?;
-    if (material is MeshStandardMaterial) return material.map as Texture2D?;
+    if (material is MeshBasicMaterial) return material!.map as Texture2D?;
+    if (material is MeshStandardMaterial) return material!.map as Texture2D?;
     return null;
   }
 
   Texture2D? _normalSource(EngineMaterial? material) {
-    if (material is MeshStandardMaterial) return material.normalMap as Texture2D?;
+    if (material is MeshStandardMaterial) return material!.normalMap as Texture2D?;
     return null;
   }
 
   Data3DTexture? _volumeSource(EngineMaterial? material) {
-    if (material is MeshBasicMaterial) return material.map as Data3DTexture?;
+    if (material is MeshBasicMaterial) return material!.map as Data3DTexture?;
     return null;
   }
 
@@ -319,7 +321,7 @@ class WebGPUMaterialTextureManager {
     final List<GpuBindGroupLayoutEntry> entries = [];
 
     if (key.useAlbedo) {
-      final textureBinding = _bindingFor(descriptor, MaterialBindingSource.albedoMap, MaterialBindingType.texture2D);
+      final textureBinding = _bindingFor(descriptor, MaterialBindingSource.albedoMap, MaterialBindingType.texture2d);
       final samplerBinding = _bindingFor(descriptor, MaterialBindingSource.albedoMap, MaterialBindingType.sampler);
       if (textureBinding != null && samplerBinding != null) {
         entries.add(_textureLayoutEntry(textureBinding.binding));
@@ -328,7 +330,7 @@ class WebGPUMaterialTextureManager {
     }
 
     if (key.useNormal) {
-      final textureBinding = _bindingFor(descriptor, MaterialBindingSource.normalMap, MaterialBindingType.texture2D);
+      final textureBinding = _bindingFor(descriptor, MaterialBindingSource.normalMap, MaterialBindingType.texture2d);
       final samplerBinding = _bindingFor(descriptor, MaterialBindingSource.normalMap, MaterialBindingType.sampler);
       if (textureBinding != null && samplerBinding != null) {
         entries.add(_textureLayoutEntry(textureBinding.binding));
@@ -337,7 +339,7 @@ class WebGPUMaterialTextureManager {
     }
 
     if (key.useVolume) {
-      final textureBinding = _bindingFor(descriptor, MaterialBindingSource.volumeTexture, MaterialBindingType.texture3D);
+      final textureBinding = _bindingFor(descriptor, MaterialBindingSource.volumeTexture, MaterialBindingType.texture3d);
       final samplerBinding = _bindingFor(descriptor, MaterialBindingSource.volumeTexture, MaterialBindingType.sampler);
       if (textureBinding != null && samplerBinding != null) {
         entries.add(_textureLayoutEntry(textureBinding.binding, dimension: GpuTextureViewDimension.d3));
@@ -348,33 +350,31 @@ class WebGPUMaterialTextureManager {
     if (entries.isEmpty) return null;
     entries.sort((a, b) => a.binding.compareTo(b.binding));
 
-    return device.createBindGroupLayout(GpuBindGroupLayoutDescriptor(
-      entries: entries,
+    return device.createBindGroupLayout(
+      entries,
       label: "Material Texture Layout (${key.useAlbedo}, ${key.useNormal}, ${key.useVolume})",
-    ));
+    );
   }
 
   GpuBindGroupLayoutEntry _textureLayoutEntry(int binding, {GpuTextureViewDimension dimension = GpuTextureViewDimension.d2}) {
-    return GpuBindGroupLayoutEntry(
+    return GpuBindGroupLayoutEntry.texture(
       binding: binding,
       visibility: GpuShaderStage.fragment,
-      texture: GpuTextureBindingLayout(
-        sampleType: GpuTextureSampleType.float,
-        viewDimension: dimension,
-        multisampled: false,
-      ),
+      sampleType: GpuTextureSampleType.float,
+      viewDimension: dimension,
+      multisampled: false,
     );
   }
 
   GpuBindGroupLayoutEntry _samplerLayoutEntry(int binding) {
-    return GpuBindGroupLayoutEntry(
+    return GpuBindGroupLayoutEntry.sampler(
       binding: binding,
       visibility: GpuShaderStage.fragment,
-      sampler: const GpuSamplerBindingLayout(GpuSamplerBindingType.filtering),
+      type: GpuSamplerBindingType.filtering,
     );
   }
 
-  BindingElement? _bindingFor(MaterialDescriptor descriptor, MaterialBindingSource source, MaterialBindingType type) {
+  MaterialBinding? _bindingFor(MaterialDescriptor descriptor, MaterialBindingSource source, MaterialBindingType type) {
     for (final b in descriptor.bindings) {
       if (b.source == source && b.type == type) return b;
     }
@@ -438,18 +438,34 @@ class WebGPUMaterialTextureManager {
 
   _TextureUpload? _buildTextureUpload(Texture texture) {
     if (texture is Texture2D) {
-      final upload = _textureDataFor(texture.format, texture.getData(), texture.getFloatData(), null, texture.width, texture.height, 1);
+      final upload = _textureDataFor(
+        GpuTextureFormat.values[texture.format],
+        texture.getData(), 
+        texture.getFloatData(), 
+        null, 
+        texture.width, 
+        texture.height, 
+        1
+      );
       return upload?.copyWith(dimension: GpuTextureDimension.d2, viewDimension: GpuTextureViewDimension.d2);
     }
     if (texture is Data3DTexture) {
-      final upload = _textureDataFor(texture.format, texture.getData().isNotEmpty ? texture.getData() : null, texture.getFloatData(), texture.getIntData(), texture.width, texture.height, texture.depth);
+      final upload = _textureDataFor(
+        GpuTextureFormat.values[texture.format], 
+        (texture.image.data as TypedDataList).isNotEmpty ? (texture.image.data as TypedDataList).buffer.asUint8List() : null, 
+        (texture.image.data as TypedDataList).buffer.asFloat32List(), 
+        (texture.image.data as TypedDataList).buffer.asInt32List(), 
+        texture.image.width, 
+        texture.image.height, 
+        texture.image.depth
+      );
       return upload?.copyWith(dimension: GpuTextureDimension.d3, viewDimension: GpuTextureViewDimension.d3);
     }
     return null;
   }
 
   _TextureUpload? _textureDataFor(
-    TextureFormat format,
+    GpuTextureFormat format,
     Uint8List? byteData,
     Float32List? floatData,
     Int32List? intData,
@@ -459,7 +475,7 @@ class WebGPUMaterialTextureManager {
   ) {
     if (width <= 0 || height <= 0 || depth <= 0) return null;
 
-    if (floatData != null && format == TextureFormat.rgba32F) {
+    if (floatData != null && format == GpuTextureFormat.rgba32Float) {
       return _TextureUpload(
         width: width,
         height: height,
@@ -478,7 +494,7 @@ class WebGPUMaterialTextureManager {
         width: width,
         height: height,
         depth: depth,
-        format: (format == TextureFormat.srgb8Alpha8) ? "rgba8unorm-srgb" : "rgba8unorm",
+        format: (format == GpuTextureFormat.rgba8UnormSrgb) ? "rgba8unorm-srgb" : "rgba8unorm",
         dimension: GpuTextureDimension.d2,
         viewDimension: GpuTextureViewDimension.d2,
         bytesPerTexel: 4,
@@ -575,45 +591,17 @@ class WebGPUMaterialTextureManager {
   }
 
   void _writeTextureData(GpuDevice device, GpuTexture texture, _TextureUpload upload) {
-    final destination = GpuImageCopyTexture(
+    device.queue.writeTexture(
       texture: texture,
       mipLevel: 0,
-      origin: const GpuOrigin3D(x: 0, y: 0, z: 0),
-    );
-
-    final layout = GpuTextureDataLayout(
-      offset: 0,
+      originX: 0, originY: 0, originZ: 0,
+      data: upload.data.buffer.asByteData(upload.data.offsetInBytes, upload.data.lengthInBytes).buffer.asUint8List(),
+      dataOffset: 0,
       bytesPerRow: upload.width * upload.bytesPerTexel,
       rowsPerImage: upload.height,
-    );
-
-    final size = GpuExtent3D(
       width: upload.width,
       height: upload.height,
       depthOrArrayLayers: upload.depth,
     );
-
-    device.queue.writeTexture(
-      destination: destination,
-      data: upload.data.buffer.asByteData(upload.data.offsetInBytes, upload.data.lengthInBytes),
-      dataLayout: layout,
-      size: size,
-    );
   }
-}
-
-// Global mockup structures if missing from three_js core bindings
-enum MaterialBindingSource { albedoMap, normalMap, volumeTexture }
-enum MaterialBindingType { texture2D, texture3D, sampler }
-
-class MaterialDescriptor {
-  final List<BindingElement> bindings;
-  const MaterialDescriptor(this.bindings);
-}
-
-class BindingElement {
-  final int binding;
-  final MaterialBindingSource source;
-  final MaterialBindingType type;
-  const BindingElement({required this.binding, required this.source, required this.type});
 }
