@@ -29,7 +29,7 @@ import '../../lighting/SceneLightingUniforms.dart';
 import '../material/MaterialDescriptionRegistry.dart';
 
 class WebGPURenderer extends Renderer {
-  WebGPURenderer(this.context);
+  WebGPURenderer();
 
   // Linux presentation workaround tracks
   dynamic _presentationCanvas;
@@ -45,7 +45,7 @@ class WebGPURenderer extends Renderer {
   GpuQueue? _gpuQueue;
   
   // Note: GpuCanvasContext mirrors standard spec surface context tracking
-  GpuFrame context;
+  GpuFrame? context;
 
   GpuAdapter? _adapter;
 
@@ -92,7 +92,7 @@ class WebGPURenderer extends Renderer {
   RendererCapabilities? _rendererCapabilities;
 
   // Viewport mapping configurations variables
-  late Vector4 _viewport = Vector4(0, 0, context.width.toDouble(), context.height.toDouble());
+  late Vector4 _viewport = Vector4(0, 0, (context?.width.toDouble() ?? 0), (context?.height.toDouble() ?? 0));
 
   /// T033: Debug flag for verbose frame logging
   bool enableFrameLogging = false;
@@ -209,7 +209,7 @@ class WebGPURenderer extends Renderer {
       _canvasTextureFormat = GpuTextureFormat.bgra8Unorm;
 
       print('T033: Rebuilding depth attachments buffers targets...');
-      _ensureDepthTexture(context.width, context.height);
+      _ensureDepthTexture(context?.width ?? 0, context?.height ?? 0);
 
       print('T033: Allocating sub-system tracking memory buffer pools...');
       _bufferPool = BufferPool(_device!);
@@ -283,6 +283,10 @@ class WebGPURenderer extends Renderer {
     }
   }
 
+  void setContext(GpuFrame frame){
+    context = frame;
+  }
+
   /// Interface implementation tracking resize transformations layout adjustments.
   @override
   void resize(int width, int height) {
@@ -293,7 +297,7 @@ class WebGPURenderer extends Renderer {
     return 1.0;
   }
   Vector2 getSize(Vector2 target){
-    return target.setValues(context.width as double, context.height as double);
+    return target.setValues((context?.width ?? 0) as double, (context?.height ?? 0) as double);
   }
   dynamic getContext(){
 
@@ -435,7 +439,7 @@ class WebGPURenderer extends Renderer {
       _depthTexture = null;
       _depthTextureView = null;
 
-      context.device.destroy();
+      context?.device.destroy();
       
       _device?.destroy();
       _device = null;
@@ -477,7 +481,7 @@ class WebGPURenderer extends Renderer {
     _depthTextureHeight = 0;
     _contextLossRecovery.clear();
     
-    context.device.destroy();
+    context?.device.destroy();
     
     _device?.destroy();
     _device = null;
@@ -542,9 +546,9 @@ class WebGPURenderer extends Renderer {
       if (enableFrameLogging) {
         print('T033: [Frame $_frameCount] - Getting current texture from swap chain...');
       }
-      final textureView = context.targetView;
+      final textureView = context?.targetView;
 
-      _ensureDepthTexture(context.width, context.height);
+      _ensureDepthTexture((context?.width ?? 0), (context?.height ?? 0));
       final depthView = _depthTextureView;
       
       if (depthView == null && diag) {
@@ -572,7 +576,7 @@ class WebGPURenderer extends Renderer {
           label: 'Main Render Pass',
           colorAttachments: [
             GpuColorAttachment(
-              view: textureView,
+              view: textureView!,
               loadOp: GpuLoadOp.clear,
               clearValue: GpuColor(actualClearColor.red, actualClearColor.green, actualClearColor.blue, clearAlpha),
               storeOp: GpuStoreOp.store,
@@ -1190,8 +1194,8 @@ class WebGPURenderer extends Renderer {
 
   void setSize(int width, int height, bool updateStyle) {
     // Update structural tracking sizes on the host target canvas view bounds
-    context.width = width;
-    context.height = height;
+    context?.width = width;
+    context?.height = height;
     
     if (_presentationCanvas != null) {
       _presentationCanvas!.width = width;
@@ -1201,14 +1205,14 @@ class WebGPURenderer extends Renderer {
     // Reconfigure canvas context after dimension adjustments (required by WebGPU standards)
     final ctx = context;
     final dev = _device;
-    if (ctx != null && dev != null) {
-      ctx.configure(
-        device: dev,
-        format: _canvasFormat,
-        usage: GpuTextureUsage.renderAttachment,
-        //alphaMode: GpuCanvasAlphaMode.opaque,
-      );
-    }
+    // if (ctx != null && dev != null) {
+    //   ctx.configure(
+    //     device: dev,
+    //     format: _canvasFormat,
+    //     usage: GpuTextureUsage.renderAttachment,
+    //     //alphaMode: GpuCanvasAlphaMode.opaque,
+    //   );
+    // }
 
     _viewport = Vector4(0, 0, width.toDouble(), height.toDouble());
     _ensureDepthTexture(width, height);

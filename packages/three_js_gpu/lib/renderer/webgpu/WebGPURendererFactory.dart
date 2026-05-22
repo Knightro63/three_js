@@ -16,14 +16,14 @@ class WebGPURendererFactory {
   /// 
   /// @param surfaceHandle Platform-specific layer pointer (e.g., Flutter Texture ID channel)
   /// @return Renderer instance (WebGPURenderer or WebGLRenderer)
-  static Future<Renderer> create(dynamic surfaceHandle) async {
+  static Future<Renderer> create() async {
     // 1. Evaluate cross-platform hardware access capabilities
     final gpuAvailable = WebGPUDetector.isAvailable();
 
     if (gpuAvailable) {
       print("INFO: WebGPU available - creating WebGPURenderer");
       try {
-        final renderer = WebGPURenderer(surfaceHandle);
+        final renderer = WebGPURenderer();
         final config = RendererConfig();
         
         await renderer.initialize(config);

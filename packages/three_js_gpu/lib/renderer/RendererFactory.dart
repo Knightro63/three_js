@@ -104,6 +104,6 @@ class RendererFactory {
   }
 
   static Renderer _createWebGPURenderer(dynamic surfaceHandle) {
-    return WebGPURenderer(surfaceHandle);
+    return WebGPURenderer();
   }
 }
