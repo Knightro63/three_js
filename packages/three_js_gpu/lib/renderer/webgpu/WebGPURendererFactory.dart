@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter_gpux/flutter_gpux.dart';
 import 'package:three_js_core/three_js_core.dart';
 import '../RendererConfig.dart';
 import 'WebGPURenderer.dart';
@@ -16,14 +17,14 @@ class WebGPURendererFactory {
   /// 
   /// @param surfaceHandle Platform-specific layer pointer (e.g., Flutter Texture ID channel)
   /// @return Renderer instance (WebGPURenderer or WebGLRenderer)
-  static Future<Renderer> create() async {
+  static Future<Renderer> create(GpuFrame frame) async {
     // 1. Evaluate cross-platform hardware access capabilities
     final gpuAvailable = WebGPUDetector.isAvailable();
 
     if (gpuAvailable) {
       print("INFO: WebGPU available - creating WebGPURenderer");
       try {
-        final renderer = WebGPURenderer();
+        final renderer = WebGPURenderer(frame);
         final config = RendererConfig();
         
         await renderer.initialize(config);

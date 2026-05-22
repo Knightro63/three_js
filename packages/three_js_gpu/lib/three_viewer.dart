@@ -83,7 +83,7 @@ class Settings{
 }
 
 /// threeJs utility class. If you want to learn how to connect cannon.js with js, please look at the examples/threejs_* instead.
-class ThreeJS with WidgetsBindingObserver{
+class ThreeJS implements GpuRenderer{
   void Function() onSetupComplete;
   ThreeJS({
     Settings? settings,
@@ -103,9 +103,7 @@ class ThreeJS with WidgetsBindingObserver{
   }
 
   int renderNumber;
-
-  BuildContext? _context;
-  Timer? _debounceTimer;
+  final List<VoidCallback> _listeners = [];
 
   Widget? loadingWidget;
   Size? _fixedSize;
@@ -157,23 +155,9 @@ class ThreeJS with WidgetsBindingObserver{
     disposeEvents.add(event);
   }
 
-  @override
-  void didChangeMetrics() {
-    if (_disposed) return;
-    _debounceTimer?.cancel(); // Clear existing timer
-    _debounceTimer = Timer(Duration(milliseconds: 300+renderNumber*100), () { // Set a new timer
-      if (_context != null && _context!.mounted) {
-        _onWindowResize(_context!);
-      }
-    });
-  }
-
   void dispose(){
     if(_disposed) return;
     _disposed = true;
-    _debounceTimer?.cancel(); // Cancel timer if active
-    _debounceTimer = null;
-    WidgetsBinding.instance.removeObserver(this);
     ticker?.dispose();
     ticker = null;
     renderer?.dispose();
@@ -203,48 +187,41 @@ class ThreeJS with WidgetsBindingObserver{
     if (screenSize != null) {
       return;
     }
-    _context = context;
-    WidgetsBinding.instance.addObserver(this);
+    
     final mqd = MediaQuery.of(context);
 
     screenSize = _fixedSize ?? mqd.size;
     _resolution ??= mqd.devicePixelRatio;
 
-    Future.delayed(Duration(milliseconds: renderNumber*100), () async{
-      await init();
-    });
+    init();
   }
   
-  Future<void> animate(Duration duration) async {
-    if (!mounted || _disposed || updating || !isVisibleOnScreen || !visible) {
-      return;
-    }
-    _updating = true;
-    double dt = clock.getDelta();
+  // Future<void> animate(Duration duration) async {
+  //   if (!mounted || _disposed || updating || !isVisibleOnScreen || !visible) {
+  //     return;
+  //   }
+  //   _updating = true;
+  //   double dt = clock.getDelta();
     
-    if(settings.animate){
-      await (customRenderer?.call(scene,camera,dt) ?? render(scene,camera,dt));
-      if(!pause){
-        for(int i = 0; i < events.length;i++){
-          events[i].call(dt);
-        }
-      }
-    }
-    _updating = false;
-  }
+  //   if(settings.animate){
+  //     await (customRenderer?.call(scene,camera,dt) ?? render(scene,camera,dt));
+  //     if(!pause){
+  //       for(int i = 0; i < events.length;i++){
+  //         events[i].call(dt);
+  //       }
+  //     }
+  //   }
+  //   _updating = false;
+  // }
 
-  void setContext(GpuFrame frame){
-    renderer?.setContext(frame);
-  }
-
-  Future<void> render([core.Scene? scene, core.Camera? camera, double? dt]) async{
-    if(!_mounted) return;
-    scene ??= this.scene;
-    camera ??= this.camera;
-    renderer!.render(scene, camera);
-  }
+  // Future<void> render([core.Scene? scene, core.Camera? camera, double? dt]) async{
+  //   if(!_mounted) return;
+  //   scene ??= this.scene;
+  //   camera ??= this.camera;
+  //   renderer!.render(scene, camera);
+  // }
   
-  void executeFrameTick(GpuTextureView targetView) {
+  void executeFrameTick(GpuFrame frame) {
     if (!_mounted || _disposed || _updating || !visible) return;
     _updating = true;
 
@@ -259,22 +236,14 @@ class ThreeJS with WidgetsBindingObserver{
       }
 
       // 2. Direct your WebGPURenderer to compile down onto the active frame target texture channel
-      renderer!.render1(scene, camera, targetView);
+      renderer!.render1(scene, camera, frame);
     }
 
     _updating = false;
   }
 
-  Future<void> _onWindowResize(BuildContext context) async{
-    if (_disposed) return;
-  }
-
   Future<void> init() async{
-    if (renderer == null) {
-      renderer = WebGPURenderer();
-      renderer!.initialize(RendererConfig());
-      renderer?.enableFrameLogging = false;
-    }
+    if (_mounted) return;
     await setup?.call();
     _mounted = true;
     onSetupComplete();
@@ -286,42 +255,40 @@ class ThreeJS with WidgetsBindingObserver{
       return core.Peripherals(
         key: globalKey,
         builder: (BuildContext context) {
-          return SizedBox(
+          return Container(
+            color: Colors.white,
             width: !visible?0:width,
             height: !visible?0:height,
             child: DefaultGpu(
               child: GpuView(
-                // 2. Hook up your custom GpuRenderer drawing pipeline class
-                renderer: TriangleRenderer(this), 
+                renderer: this, 
               ),
             ),
           );
         });
     });
   }
-}
 
-class TriangleRenderer implements GpuRenderer {
-  TriangleRenderer(this.threeJs);
-  final ThreeJS threeJs;
-
-  final List<VoidCallback> _listeners = [];
-  
   @override
   bool render(GpuFrame frame) {
-    if (!threeJs.mounted || threeJs._disposed) return false;
+    if (!mounted || _disposed) return false;
 
-    // 1. Pass the active frame texture target view downstream into your WebGPURenderer 
-    final GpuTextureView frameTargetView = frame.targetView;
-    
-    // 2. Drive the game engine clock step forward natively synchronized with the Flutter frame tick
-    threeJs.executeFrameTick(frameTargetView);
-
-    // 3. Inform Flutter to continuously schedule the next repaint layer block
-    for (final listener in _listeners) {
-      listener();
+    // Lazy initialize renderer carefully without breaking state mappings
+    if (renderer == null) {
+      renderer = WebGPURenderer(frame);
+      renderer!.initialize(RendererConfig());
+      renderer?.enableFrameLogging = false;
     }
-    return true;
+
+    // Only kick off a frame pass execution trace if initialization has completed
+    if (mounted) {
+      executeFrameTick(frame);
+      return true;
+    }
+
+    // Return true to tell the hardware wrapper engine to keep checking for frames, 
+    // but don't draw yet because async setup is still processing.
+    return true; 
   }
 
   @override
@@ -329,9 +296,6 @@ class TriangleRenderer implements GpuRenderer {
 
   @override
   void removeListener(VoidCallback listener) => _listeners.remove(listener);
-
-  @override
-  void dispose() => _listeners.clear();
 
   @override
   bool shouldUpdate(GpuRenderer oldRenderer) => true;

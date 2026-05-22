@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter_gpux/flutter_gpux.dart';
 import 'package:gpux/gpux.dart'; // Adjust based on your exact package architecture
 import 'package:three_js_core/three_js_core.dart';
 import './webgpu/WebGPURenderer.dart';
@@ -103,7 +104,7 @@ class RendererFactory {
     }
   }
 
-  static Renderer _createWebGPURenderer(dynamic surfaceHandle) {
-    return WebGPURenderer();
+  static Renderer _createWebGPURenderer(GpuFrame frame) {
+    return WebGPURenderer(frame);
   }
 }
