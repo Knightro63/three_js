@@ -244,6 +244,27 @@ class ThreeJS with WidgetsBindingObserver{
     renderer!.render(scene, camera);
   }
   
+  void executeFrameTick(GpuTextureView targetView) {
+    if (!_mounted || _disposed || _updating || !visible) return;
+    _updating = true;
+
+    double dt = clock.getDelta();
+
+    if (settings.animate) {
+      // 1. Process custom game scene update event callbacks
+      if (!pause) {
+        for (int i = 0; i < events.length; i++) {
+          events[i].call(dt);
+        }
+      }
+
+      // 2. Direct your WebGPURenderer to compile down onto the active frame target texture channel
+      renderer!.render1(scene, camera, targetView);
+    }
+
+    _updating = false;
+  }
+
   Future<void> _onWindowResize(BuildContext context) async{
     if (_disposed) return;
   }
@@ -252,12 +273,10 @@ class ThreeJS with WidgetsBindingObserver{
     if (renderer == null) {
       renderer = WebGPURenderer();
       renderer!.initialize(RendererConfig());
-      renderer?.enableFrameLogging = true;
+      renderer?.enableFrameLogging = false;
     }
     await setup?.call();
     _mounted = true;
-    ticker = Ticker(animate);
-    ticker?.start();
     onSetupComplete();
   }
 
@@ -285,38 +304,40 @@ class ThreeJS with WidgetsBindingObserver{
 class TriangleRenderer implements GpuRenderer {
   TriangleRenderer(this.threeJs);
   final ThreeJS threeJs;
+
+  final List<VoidCallback> _listeners = [];
   
   @override
   bool render(GpuFrame frame) {
-    threeJs.setContext(frame);
-    threeJs.render();
+    if (!threeJs.mounted || threeJs._disposed) return false;
+
+    // 1. Pass the active frame texture target view downstream into your WebGPURenderer 
+    final GpuTextureView frameTargetView = frame.targetView;
+    
+    // 2. Drive the game engine clock step forward natively synchronized with the Flutter frame tick
+    threeJs.executeFrameTick(frameTargetView);
+
+    // 3. Inform Flutter to continuously schedule the next repaint layer block
+    for (final listener in _listeners) {
+      listener();
+    }
     return true;
   }
 
- @override
-  void dispose() {}
+  @override
+  void addListener(VoidCallback listener) => _listeners.add(listener);
 
   @override
-  void addListener(VoidCallback listener) {
-  }
+  void removeListener(VoidCallback listener) => _listeners.remove(listener);
 
   @override
-  void removeListener(VoidCallback listener) {
-  }
+  void dispose() => _listeners.clear();
 
   @override
-  bool shouldUpdate(GpuRenderer oldRenderer) {
-    // Return true if the engine needs to copy state or hot-reload configurations
-    // from a previous widget tree layout rebuild.
-    return true; 
-  }
+  bool shouldUpdate(GpuRenderer oldRenderer) => true;
 
   @override
-  bool get shouldSkipNextFrame {
-    // Return false so that the renderer continues drawing animations continuously.
-    // If you ever want to freeze rendering to save battery, switch this to true.
-    return false; 
-  }
+  bool get shouldSkipNextFrame => false;
 }
 
 

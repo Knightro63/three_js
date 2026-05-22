@@ -71,7 +71,7 @@ class _State extends State<WebglGeometries> {
     threeJs.camera.add(pointLight);
     threeJs.scene.add(threeJs.camera);
 
-    final material = three.MeshPhongMaterial.fromMap({
+    final material = three.MeshBasicMaterial.fromMap({
       "color": 0xffffff,
       "side": tmath.DoubleSide,
       "clipShadows": true

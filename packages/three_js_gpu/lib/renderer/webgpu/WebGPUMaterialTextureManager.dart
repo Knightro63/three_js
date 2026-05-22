@@ -179,7 +179,7 @@ class WebGPUMaterialTextureManager {
 
   MaterialTextureBinding? prepare({
     required MaterialDescriptor descriptor,
-    required EngineMaterial? material,
+    required Material? material,
     required bool useAlbedo,
     required bool useNormal,
     required bool useVolume,
@@ -301,19 +301,19 @@ class WebGPUMaterialTextureManager {
     _currentDevice = null;
   }
 
-  Texture2D? _albedoSource(EngineMaterial? material) {
-    if (material is MeshBasicMaterial) return material!.map as Texture2D?;
-    if (material is MeshStandardMaterial) return material!.map as Texture2D?;
+  Texture2D? _albedoSource(Material? material) {
+    if (material is MeshBasicMaterial) return material.map as Texture2D?;
+    if (material is MeshStandardMaterial) return material.map as Texture2D?;
     return null;
   }
 
-  Texture2D? _normalSource(EngineMaterial? material) {
-    if (material is MeshStandardMaterial) return material!.normalMap as Texture2D?;
+  Texture2D? _normalSource(Material? material) {
+    if (material is MeshStandardMaterial) return material.normalMap as Texture2D?;
     return null;
   }
 
-  Data3DTexture? _volumeSource(EngineMaterial? material) {
-    if (material is MeshBasicMaterial) return material!.map as Data3DTexture?;
+  Data3DTexture? _volumeSource(Material? material) {
+    if (material is MeshBasicMaterial) return material.map as Data3DTexture?;
     return null;
   }
 

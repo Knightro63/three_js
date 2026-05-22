@@ -500,8 +500,8 @@ class WebGPURenderer extends Renderer {
     _isInitialized = false;
     _statsTracker.reset();
   }
-
-  void render(Object3D scene, Camera camera) {
+  void render(Object3D scene, Camera camera){}
+  void render1(Object3D scene, Camera camera, GpuTextureView textureView) {
     // Validate that the system hardware and frame target state are healthy before evaluating instructions
     if (!_isInitialized || _device == null) {
       print('T033: Renderer not initialized, cannot render');
@@ -546,7 +546,7 @@ class WebGPURenderer extends Renderer {
       if (enableFrameLogging) {
         print('T033: [Frame $_frameCount] - Getting current texture from swap chain...');
       }
-      final textureView = context?.targetView;
+      //final textureView = context?.targetView;
 
       _ensureDepthTexture((context?.width ?? 0), (context?.height ?? 0));
       final depthView = _depthTextureView;
@@ -772,7 +772,7 @@ class WebGPURenderer extends Renderer {
     }
 
     final attributeOverrides = _buildAttributeOverrides(descriptor.key, buffers.metadata);
-    final materialOverrides = _buildMaterialOverrides(material as EngineMaterial?, descriptor, buffers.metadata);
+    final materialOverrides = _buildMaterialOverrides(material, descriptor, buffers.metadata);
 
     final combinedOverrides = _mergeShaderOverrides([
       descriptor.defines,
@@ -787,7 +787,7 @@ class WebGPURenderer extends Renderer {
     if (materialOverrides.usesAlbedoMap || materialOverrides.usesNormalMap || materialOverrides.usesVolumeMap) {
       materialTextureBinding = _materialTextureManager.prepare(
         descriptor: descriptor,
-        material: material as EngineMaterial?,
+        material: material,
         useAlbedo: materialOverrides.usesAlbedoMap,
         useNormal: materialOverrides.usesNormalMap,
         useVolume: materialOverrides.usesVolumeMap,
@@ -1037,7 +1037,7 @@ class WebGPURenderer extends Renderer {
   }
 
   _MaterialOverrideResult _buildMaterialOverrides(
-    EngineMaterial? material,
+    Material? material,
     MaterialDescriptor descriptor,
     GeometryMetadata metadata,
   ) {
