@@ -81,7 +81,7 @@ class _State extends State<WebglGeometries> {
     object.position.setValues(-300, 0, 200);
     threeJs.scene.add(object);
 
-    object = three.Mesh(three.PlaneGeometry(100, 100, 4, 4), material);
+    object = three.Mesh(three.PlaneGeometry(120, 100, 4, 4), material);
     object.position.setValues(-300, 0, 0);
     threeJs.scene.add(object);
 

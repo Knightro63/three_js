@@ -451,169 +451,6 @@ class WebGPURenderer extends Renderer {
   }
   void render(Object3D scene, Camera camera){}
 
-  GpuRenderPipeline? _pipeline;
-  GpuBuffer? _vertexBuffer;
-  GpuBuffer? _uniformBuffer;
-  GpuBindGroup? _bindGroup;
-  double _rotation = 0.0;
-
-  void _ensureResourcesInitialized(GpuDevice device, GpuTextureFormat canvasFormat) {
-    if (_pipeline != null) return;
-
-    final vertexData = Float32List.fromList([
-       0.0,  0.5, 0.0,  1.0, 0.0, 0.0, // Top Vertex
-      -0.5, -0.5, 0.0,  0.0, 1.0, 0.0, // Bottom Left
-       0.5, -0.5, 0.0,  0.0, 0.0, 1.0, // Bottom Right
-    ]);
-
-    _vertexBuffer = device.createBuffer(
-      label: 'Vertex Data Buffer',
-      size: vertexData.lengthInBytes,
-      usage: GpuBufferUsage.vertex,
-      mappedAtCreation: true,
-    );
-    _vertexBuffer!.getMappedRange().asFloat32List().setAll(0, vertexData);
-    _vertexBuffer!.unmap();
-
-    _uniformBuffer = device.createBuffer(
-      label: 'Rotation Uniform Buffer',
-      size: 16,
-      usage: GpuBufferUsage.uniform | GpuBufferUsage.copyDst,
-    );
-
-    const wgslShaderCode = '''
-      struct Uniforms {
-          rotation: f32,
-      }
-      @group(0) @binding(0) var<uniform> u: Uniforms;
-
-      struct VertexInput {
-          @location(0) pos: vec3<f32>,
-          @location(1) color: vec3<f32>,
-      }
-      struct VertexOutput {
-          @builtin(position) position: vec4<f32>,
-          @location(0) color: vec3<f32>,
-      }
-
-      @vertex fn vs_main(in: VertexInput) -> VertexOutput {
-          var out: VertexOutput;
-          let s = sin(u.rotation);
-          let c = cos(u.rotation);
-          let rotX = in.pos.x * c - in.pos.y * s;
-          let rotY = in.pos.x * s + in.pos.y * c;
-          out.position = vec4<f32>(rotX, rotY, in.pos.z, 1.0);
-          out.color = in.color;
-          return out;
-      }
-
-      @fragment fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
-          return vec4<f32>(in.color, 1.0);
-      }
-    ''';
-
-    final shaderModule = device.createShaderModule(
-      wgslShaderCode,
-      label: 'Shader Module Source',
-    );
-
-    // Fixed: Uses list array syntax matching your local GpuBindGroupLayout layout
-    final bindGroupLayout = device.createBindGroupLayout(
-      [
-        GpuBindGroupLayoutEntry.buffer(
-          binding: 0,
-          visibility: GpuShaderStage.vertex,
-        ),
-      ],
-      label: 'Uniforms Bind Layout',
-    );
-
-    _bindGroup = device.createBindGroup(
-      label: 'Uniforms Material Bind Group',
-      layout: bindGroupLayout,
-      entries: [
-        GpuBindGroupEntry.buffer(binding: 0, buffer: _uniformBuffer!),
-      ],
-    );
-
-    // Fixed: Pass layout array straight to pipeline constructor wrapper
-    final pipelineLayout = device.createPipelineLayout([bindGroupLayout]);
-
-    _pipeline = device.createRenderPipeline(
-      GpuRenderPipelineDescriptor(
-        label: 'Triangle Render Pipeline',
-        layout: pipelineLayout,
-        vertexModule: shaderModule,
-        vertexEntryPoint: 'vs_main',
-        vertexBuffers: [
-          GpuVertexBufferLayout(
-            arrayStride: 6 * 4,
-            attributes: const [
-              GpuVertexAttribute(shaderLocation: 0, format: GpuVertexFormat.float32x3, offset: 0),
-              GpuVertexAttribute(shaderLocation: 1, format: GpuVertexFormat.float32x3, offset: 3 * 4),
-            ],
-          ),
-        ],
-        fragmentModule: shaderModule,
-        fragmentEntryPoint: 'fs_main',
-        colorTargets: [GpuColorTargetState(format: canvasFormat)],
-        primitiveTopology: GpuPrimitiveTopology.triangleList,
-        cullMode: GpuCullMode.none,
-      ),
-    );
-  }
-  void render2(Object3D scene, Camera camera, GpuFrame frame) {
-    // 1. Lazy initialize GPU resources using the device provided by the GpuFrame context
-    // Fixed: Passing frame.device and pulling canvas format out cleanly
-    _ensureResourcesInitialized(frame.device, frame.format);
-
-    // 2. Animate and update uniform data using the Uint8List buffer view
-    _rotation += 0.01;
-    final uniformsData = Float32List.fromList([_rotation, 0.0, 0.0, 0.0]);
-    
-    // Fixed: Converting Float32List to Uint8List for buffer submission compatibility
-    frame.device.queue.writeBuffer(
-      _uniformBuffer!,
-      uniformsData.buffer.asUint8List(),
-    );
-
-    // 3. Allocate execution command encoder with direct label positional syntax
-    final commandEncoder = frame.device.createCommandEncoder(
-      label: 'Main Command Encoder',
-    );
-
-    // 4. Begin render pass using GpuColorAttachment structures matching your local package definitions
-    final renderPass = commandEncoder.beginRenderPass(
-      label: 'Primary Render Pass',
-      colorAttachments: [
-        GpuColorAttachment(
-          view: frame.targetView, // Fixed: Extracted correctly from the native frame context loop
-          loadOp: GpuLoadOp.clear,
-          clearValue: const GpuColor(0.05, 0.05, 0.1, 1.0),
-          storeOp: GpuStoreOp.store,
-        ),
-      ],
-    );
-
-    // 5. Bind Graphics Pipelines and buffers
-    renderPass.setPipeline(_pipeline!);
-    renderPass.setVertexBuffer(0, _vertexBuffer!);
-    renderPass.setBindGroup(0, _bindGroup!);
-    
-    // Fixed: Invoking named properties according to your parameter signature limits
-    renderPass.draw(
-      vertexCount: 3, 
-      instanceCount: 1, 
-      firstVertex: 0, 
-      firstInstance: 0,
-    );
-    renderPass.end();
-
-    // 6. Finalize commands and push right out onto the device frame timeline queue channel
-    final commandBuffer = commandEncoder.finish();
-    frame.device.queue.submit([commandBuffer]);
-  }
-
   void render1(Object3D scene, Camera camera, GpuFrame frame) {
     // Validate that the system hardware and frame target state are healthy before evaluating instructions
     if (!_isInitialized) {
@@ -684,42 +521,31 @@ class WebGPURenderer extends Renderer {
       }
 
       // Build specification attachment maps using gpux model descriptors arrays blocks
-      // final GpuRenderPassEncoder renderPass = commandEncoder.beginRenderPass(
-      //     label: 'Primary Render Pass',
-      //     colorAttachments: [
-      //       GpuColorAttachment(
-      //         view: frame.targetView,
-      //         loadOp: GpuLoadOp.clear,
-      //         clearValue: GpuColor(
-      //           scene.background.red, 
-      //           scene.background.green, 
-      //           scene.background.blue, 
-      //           clearAlpha
-      //         ),
-      //         storeOp: GpuStoreOp.store,
-      //       ),
-      //     ],
-      //     depthStencilAttachment: depthView != null
-      //         ? GpuDepthStencilAttachment(
-      //             view: depthView,
-      //             depthLoadOp: GpuLoadOp.clear,
-      //             depthClearValue: 1.0,
-      //             depthStoreOp: GpuStoreOp.store,
-      //           )
-      //         : null,
-      // );
-final GpuRenderPassEncoder renderPass = commandEncoder.beginRenderPass(
-  label: 'Main Render Pass',
-  colorAttachments: [
-    GpuColorAttachment(
-      view: frame.targetView,
-      loadOp: GpuLoadOp.clear,
-      clearValue: GpuColor(0.2, 0.2, 0.2, 1.0), // Dark Grey
-      storeOp: GpuStoreOp.store,
-    ),
-  ],
-  depthStencilAttachment: null, // Isolate depth attachment issues
-);
+      final GpuRenderPassEncoder renderPass = commandEncoder.beginRenderPass(
+        label: 'Primary Render Pass',
+        colorAttachments: [
+          GpuColorAttachment(
+            view: frame.targetView,
+            loadOp: GpuLoadOp.clear,
+            clearValue: GpuColor(
+              scene.background is Color? scene.background.red: actualClearColor.red, 
+              scene.background is Color? scene.background.green: actualClearColor.green,  
+              scene.background is Color? scene.background.blue: actualClearColor.blue, 
+              clearAlpha
+            ),      
+            storeOp: GpuStoreOp.store,
+          ),
+        ],
+        depthStencilAttachment: depthView != null
+            ? GpuDepthStencilAttachment(
+                view: depthView,
+                depthLoadOp: GpuLoadOp.clear,
+                depthClearValue: 1.0,
+                depthStoreOp: GpuStoreOp.store,
+              )
+            : null,
+      );
+
       if (diag) {
         print('RENDER[$_frameCount]: beginRenderPass OK');
       }
@@ -780,230 +606,7 @@ final GpuRenderPassEncoder renderPass = commandEncoder.beginRenderPass(
     }
   }
 
-void _renderMesh(
-  Mesh mesh,
-  Camera camera,
-  GpuRenderPassEncoder renderPass,
-  EnvironmentBinding? environmentBinding,
-  SceneLightingUniforms lightingUniforms,
-) {
-  final int maxMeshesPerFrame = UniformBufferManager.maxMeshesPerFrame;
-  if (_drawIndexInFrame >= maxMeshesPerFrame) return;
-
-  // 1. Force absolute parent-child matrix updates
-  mesh.updateMatrixWorld();
-  if (camera.matrixWorldInverse.storage[0] == 0.0 && camera.matrixWorldInverse.storage[5] == 0.0) {
-    camera.matrixWorldInverse.setFrom(camera.matrixWorld).invert();
-  }
-
-  final geometry = mesh.geometry;
-  if (geometry == null) return;
-
-  final Float32List cameraPosition = Float32List.fromList([
-    camera.position.x, 
-    camera.position.y, 
-    camera.position.z
-  ]);
-
-  final originalMaterial = mesh.material;
-  if (originalMaterial == null) return;
-
-  final bool hasEnvironment = environmentBinding != null;
-  final material = (!hasEnvironment && originalMaterial is MeshStandardMaterial)
-      ? toWebGpuBasicFallback(originalMaterial)
-      : originalMaterial;
-
-  final resolvedDescriptor = MaterialDescriptorRegistry.resolve(material);
-  if (resolvedDescriptor == null) return;
-  final descriptor = resolvedDescriptor.descriptor;
-
-  late final MaterialUniformData materialUniforms;
-
-  if (material is MeshStandardMaterial) {
-    final Float32List baseColor = Float32List.fromList([
-      material.color.red,
-      material.color.green,
-      material.color.blue,
-      material.opacity,
-    ]);
-    final double roughness = PrefilterMipSelector.clamp01(material.roughness);
-
-    materialUniforms = MaterialUniformData(
-      baseColor: baseColor,
-      roughness: roughness,
-      metalness: material.metalness,
-      envIntensity: hasEnvironment ? material.envMapIntensity ?? 0 : 0.0,
-      prefilterMipCount: environmentBinding?.mipCount ?? 1,
-      cameraPosition: cameraPosition,
-      ambientColor: lightingUniforms.ambientColor,
-      fogColor: lightingUniforms.fogColor,
-      fogParams: lightingUniforms.fogParams,
-      mainLightDirection: lightingUniforms.mainLightDirection,
-      mainLightColor: lightingUniforms.mainLightColor,
-    );
-    
-    if (hasEnvironment) {
-      _statsTracker.recordIBLMaterial(roughness, environmentBinding.mipCount);
-    }
-  } 
-  else if (material is MeshBasicMaterial) {
-    final Float32List baseColor = Float32List.fromList([
-      material.color.red,
-      material.color.green,
-      material.color.blue,
-      material.opacity,
-    ]);
-
-    materialUniforms = MaterialUniformData(
-      baseColor: baseColor,
-      roughness: 1.0,
-      metalness: 0.0,
-      envIntensity: 0.0,
-      prefilterMipCount: environmentBinding?.mipCount ?? 1,
-      cameraPosition: cameraPosition,
-      ambientColor: lightingUniforms.ambientColor,
-      fogColor: lightingUniforms.fogColor,
-      fogParams: lightingUniforms.fogParams,
-      mainLightDirection: lightingUniforms.mainLightDirection,
-      mainLightColor: lightingUniforms.mainLightColor,
-    );
-  } else {
-    return;
-  }
-
-  final buildOptions = descriptor.buildGeometryOptions(geometry);
-  final buffers = _geometryCache.getOrCreate(geometry: geometry, frameCount: _frameCount, options: buildOptions);
-  if (buffers == null) return;
-
-  final attributeOverrides = _buildAttributeOverrides(descriptor.key, buffers.metadata);
-  final materialOverrides = _buildMaterialOverrides(material, descriptor, buffers.metadata);
-
-  final combinedOverrides = _mergeShaderOverrides([
-    descriptor.defines,
-    resolvedDescriptor.shaderOverrides,
-    attributeOverrides,
-    materialOverrides.overrides,
-  ]);
-
-  final shaderDescriptor = descriptor.shader.withOverrides(combinedOverrides);
-
-  MaterialTextureBinding? materialTextureBinding;
-  if (materialOverrides.usesAlbedoMap || materialOverrides.usesNormalMap || materialOverrides.usesVolumeMap) {
-    materialTextureBinding = _materialTextureManager.prepare(
-      descriptor: descriptor,
-      material: material,
-      useAlbedo: materialOverrides.usesAlbedoMap,
-      useNormal: materialOverrides.usesNormalMap,
-      useVolume: materialOverrides.usesVolumeMap,
-    );
-
-    if (materialTextureBinding == null) {
-      print('Warning: Material ${descriptor.key} requires texture bindings but none were prepared; skipping mesh');
-      return;
-    }
-  }
-
-  // Extract layout configurations structurally across buffers streams list
-  final bufferLayouts = buffers.vertexStreams.map((e) => e.layout).toList();
-
-  final pipeline = _getOrCreateZeroUniform3dPipeline(_device, bufferLayouts);
-  if (pipeline == null) return;
-
-  // 3. RECORD COMMAND CHANNELS
-  renderPass.setPipeline(pipeline);
-
-  for (int slot = 0; slot < buffers.vertexStreams.length; slot++) {
-    renderPass.setVertexBuffer(slot, buffers.vertexStreams[slot].buffer);
-  }
-
-  final frameInfo = FrameDebugInfo(frameCount: _frameCount, drawCallCount: _drawCallCount);
-  if (!_uniformManager.updateUniforms(
-    mesh: mesh,
-    camera: camera,
-    drawIndex: _drawIndexInFrame,
-    frameInfo: frameInfo,
-    enableDiagnostics: enableFrameLogging,
-    materialUniforms: materialUniforms,
-  )) return;
-
-  // 3. Acquire Uniform Bind Group
-  final bindGroup = _uniformManager.bindGroup();
-  if (bindGroup == null) return;
-
-  final int dynamicOffset = _uniformManager.dynamicOffset(_drawIndexInFrame);
-  renderPass.setBindGroup(0, bindGroup, dynamicOffsets: [dynamicOffset]);
-
-  // // Bind additional custom shader pipeline groups
-  // _bindAdditionalGroups(descriptor, materialTextureBinding, environmentBinding, renderPass);
-
-  // final Float32List matrixData = Float32List(88);
-  // final projStorage = camera.projectionMatrix.storage;
-  // final viewStorage = camera.matrixWorldInverse.storage;
-  // final modelStorage = mesh.matrixWorld.storage;
-
-  // // Transpose column-major on-the-fly to row-major for WebGPU vector alignment [INDEX]
-  // for (int i = 0; i < 16; i++) {
-  //   matrixData[i] = projStorage[i];
-  //   matrixData[16 + i] = viewStorage[i];
-  //   matrixData[32 + i] = modelStorage[i];
-  // }
-
-  // // Lazy instantiate a clean 192-byte GPU Buffer on the first frame
-  // if (_manualUniformBuffer == null) {
-  //   _manualUniformBuffer = _device.createBuffer(
-  //     size: 512 * 100,
-  //     usage: GpuBufferUsage.uniform | GpuBufferUsage.copyDst,
-  //     label: 'Manual Sphere Uniform Buffer',
-  //   );
-
-  //   // Compile a local bind group pointing strictly to this buffer
-  //   final uniformEntry = GpuBindGroupLayoutEntry.buffer(
-  //     binding: 0,
-  //     visibility: GpuShaderStage.vertex,
-  //     type: GpuBufferBindingType.uniform,
-  //     hasDynamicOffset: true,
-  //     minBindingSize: 352,
-  //   );
-  //   final GpuBindGroupLayout groupLayout = _device.createBindGroupLayout([uniformEntry]);
-
-  //   _manualBindGroup = _device.createBindGroup(
-  //     layout: groupLayout,
-  //     entries: [
-  //       GpuBufferBinding(
-  //         binding: 0,
-  //         buffer: _manualUniformBuffer!,
-  //         offset: 0,
-  //         size: 352,
-  //       ),
-  //     ],
-  //   );
-  // }
-
-  // final int testDynamicOffset = 0; 
-  // // Upload your freshly calculated matrix data뷰 directly to the native hardware stream queue
-  // // Use your working framework upload function format, or native queue method:
-  // final byteData = matrixData.buffer.asByteData(matrixData.offsetInBytes, matrixData.lengthInBytes);
-  // _device.queue.writeBuffer(_manualUniformBuffer!, byteData.buffer.asUint8List(), bufferOffset: 0);
-
-  // // Bind our local safe bind group with no dynamic offsets array
-  // if (_manualBindGroup != null) {
-  //   renderPass.setBindGroup(0, _manualBindGroup!, dynamicOffsets: [testDynamicOffset]);
-  // }
-
-  // 4. DRAW
-  final int instanceCount = buffers.instanceCount > 0 ? buffers.instanceCount : 1;
-  if (buffers.indexBuffer != null && buffers.indexCount > 0) {
-    renderPass.setIndexBuffer(buffers.indexBuffer!, buffers.indexFormat);
-    renderPass.drawIndexed(indexCount: buffers.indexCount, instanceCount: instanceCount);
-  } else {
-    renderPass.draw(vertexCount: buffers.vertexCount, instanceCount: instanceCount);
-  }
-
-  _drawCallCount++;
-  _drawIndexInFrame++;
-}
-
-  void _renderMesh1(
+  void _renderMesh(
     Mesh mesh,
     Camera camera,
     GpuRenderPassEncoder renderPass,
@@ -1013,8 +616,8 @@ void _renderMesh(
     final int maxMeshesPerFrame = UniformBufferManager.maxMeshesPerFrame;
     if (_drawIndexInFrame >= maxMeshesPerFrame) return;
 
+    // 1. Force absolute parent-child matrix updates
     mesh.updateMatrixWorld();
-
     if (camera.matrixWorldInverse.storage[0] == 0.0 && camera.matrixWorldInverse.storage[5] == 0.0) {
       camera.matrixWorldInverse.setFrom(camera.matrixWorld).invert();
     }
@@ -1137,8 +740,19 @@ void _renderMesh(
       bufferLayouts,
     );
     if (pipeline == null) return;
+    
+    // final pipeline = _getOrCreateZeroUniform3dPipeline1(_device, bufferLayouts);
+    // if (pipeline == null) return;
+
+    // 3. RECORD COMMAND CHANNELS
+    renderPass.setPipeline(pipeline);
+
+    for (int slot = 0; slot < buffers.vertexStreams.length; slot++) {
+      renderPass.setVertexBuffer(slot, buffers.vertexStreams[slot].buffer);
+    }
 
     final frameInfo = FrameDebugInfo(frameCount: _frameCount, drawCallCount: _drawCallCount);
+
     if (!_uniformManager.updateUniforms(
       mesh: mesh,
       camera: camera,
@@ -1147,27 +761,20 @@ void _renderMesh(
       enableDiagnostics: enableFrameLogging,
       materialUniforms: materialUniforms,
     )) return;
+    
+    _manualBindGroup = _uniformManager.bindGroup();
+    if (_manualBindGroup == null) return;
 
-  // ====================================================================
-    // 1. Bind Render Pipeline
-    renderPass.setPipeline(pipeline);
-
-    // 2. Bind Vertex Buffers slots
-    for (int slot = 0; slot < buffers.vertexStreams.length; slot++) {
-      renderPass.setVertexBuffer(slot, buffers.vertexStreams[slot].buffer);
+    // Bind our local safe bind group with no dynamic offsets array
+    if (_manualBindGroup != null) {
+      final int dynamicOffset = _uniformManager.dynamicOffset(_drawIndexInFrame);
+      renderPass.setBindGroup(0, _manualBindGroup!, dynamicOffsets: [dynamicOffset]);
     }
-
-    // 3. Acquire Uniform Bind Group
-    final bindGroup = _uniformManager.bindGroup();
-    if (bindGroup == null) return;
-
-    final int dynamicOffset = _uniformManager.dynamicOffset(_drawIndexInFrame);
-    renderPass.setBindGroup(0, bindGroup, dynamicOffsets: [dynamicOffset]);
 
     // Bind additional custom shader pipeline groups
     _bindAdditionalGroups(descriptor, materialTextureBinding, environmentBinding, renderPass);
 
-    // 5. TRIGGER DRAWING
+    // 4. DRAW
     final int instanceCount = buffers.instanceCount > 0 ? buffers.instanceCount : 1;
     if (buffers.indexBuffer != null && buffers.indexCount > 0) {
       renderPass.setIndexBuffer(buffers.indexBuffer!, buffers.indexFormat);
@@ -1379,7 +986,7 @@ void _renderMesh(
     bool usesVolumeMap = false;
 
     if (material is MeshBasicMaterial) {
-      final texture = material?.map;
+      final texture = material.map;
       if (texture is Data3DTexture) {
         final textureBinding = findBinding(MaterialBindingSource.volumeTexture, MaterialBindingType.texture3d);
         final samplerBinding = findBinding(MaterialBindingSource.volumeTexture, MaterialBindingType.sampler);
@@ -1407,7 +1014,7 @@ void _renderMesh(
         }
       }
     } else if (material is MeshStandardMaterial) {
-      if (material?.map != null && hasUv) {
+      if (material.map != null && hasUv) {
         final textureBinding = findBinding(MaterialBindingSource.albedoMap, MaterialBindingType.texture2d);
         final samplerBinding = findBinding(MaterialBindingSource.albedoMap, MaterialBindingType.sampler);
 
@@ -1420,7 +1027,7 @@ void _renderMesh(
         }
       }
 
-      if (material?.normalMap != null && hasUv) {
+      if (material.normalMap != null && hasUv) {
         if (hasTangent) {
           final textureBinding = findBinding(MaterialBindingSource.normalMap, MaterialBindingType.texture2d);
           final samplerBinding = findBinding(MaterialBindingSource.normalMap, MaterialBindingType.sampler);
@@ -1437,7 +1044,7 @@ void _renderMesh(
             usesNormalMap = true;
           }
         } else {
-          print('Warning: Normal map assigned to ${material?.name} but geometry lacks tangents; falling back to vertex normals.');
+          print('Warning: Normal map assigned to ${material.name} but geometry lacks tangents; falling back to vertex normals.');
         }
       }
     }
@@ -1516,80 +1123,151 @@ void _renderMesh(
     _viewport = Vector4(0, 0, width.toDouble(), height.toDouble());
     _ensureDepthTexture(width, height);
   }
-
-GpuRenderPipeline _getOrCreateZeroUniform3dPipeline(GpuDevice device, List<GpuVertexBufferLayout?> vertexLayouts) {
+GpuRenderPipeline _getOrCreateZeroUniform3dPipeline(
+  GpuDevice device, 
+  List<GpuVertexBufferLayout?> vertexLayouts,
+  [bool hasDepthStencil = true]
+) {
   if (_zeroUniform3dPipeline != null) return _zeroUniform3dPipeline!;
 
-  const String vertexWgsl = '''
+  // 1. Shared header matching your exact memory signature footprint
+  const String sharedUniformHeader = '''
     struct Uniforms {
-      projectionMatrix: mat4x4<f32>, // 64 bytes
-      viewMatrix: mat4x4<f32>,       // 64 bytes
-      modelMatrix: mat4x4<f32>,      // 64 bytes
-      
-      // Padding slots to scale your shader description up to match your 352-byte uniform manager allocation exactly
-      padding0: vec4<f32>,           // baseColor (16 bytes)
-      padding1: vec4<f32>,           // pbrParams (16 bytes)
-      padding2: vec4<f32>,           // cameraPosition (16 bytes)
-      padding3: vec4<f32>,           // ambientColor (16 bytes)
-      padding4: vec4<f32>,           // fogColor (16 bytes)
-      padding5: vec4<f32>,           // fogParams (16 bytes)
-      padding6: vec4<f32>,           // mainLightDirection (16 bytes)
-      padding7: vec4<f32>,           // mainLightColor (16 bytes)
-      padding8: vec4<f32>,           // morphInfluences0 (16 bytes)
-      padding9: vec4<f32>,           // morphInfluences1 (16 bytes)
+        projectionMatrix: mat4x4<f32>,
+        viewMatrix: mat4x4<f32>,
+        modelMatrix: mat4x4<f32>,
+        baseColor: vec4<f32>,
+        pbrParams: vec4<f32>,
+        cameraPosition: vec4<f32>,
+        ambientColor: vec4<f32>,
+        fogColor: vec4<f32>,
+        fogParams: vec4<f32>,
+        mainLightDirection: vec4<f32>,
+        mainLightColor: vec4<f32>,
+        morphInfluences0: vec4<f32>,
+        morphInfluences1: vec4<f32>,
     }
     @group(0) @binding(0) var<uniform> uniforms: Uniforms;
+  ''';
 
+  const String vertexWgsl = '''
+    $sharedUniformHeader
 
     struct VertexInput {
-      @location(0) position: vec3<f32>,
+        @location(0) position: vec3<f32>,
+    }
+    struct PbrVertexOutput {
+        @builtin(position) position: vec4<f32>,
+        @location(0) worldNormal: vec3<f32>,
+        @location(1) viewDir: vec3<f32>,
+        @location(2) albedo: vec3<f32>,
     }
 
     @vertex
-    fn vs_main(input: VertexInput) -> @builtin(position) vec4<f32> {
-      // Standard Column-Major perspective matrix multiplication order
-      let worldPosition = uniforms.modelMatrix * vec4<f32>(input.position, 1.0);
-      let viewPosition = uniforms.viewMatrix * worldPosition;
-      return uniforms.projectionMatrix * viewPosition;
+    fn vs_main(input: VertexInput, @builtin(vertex_index) vertexIndex: u32) -> PbrVertexOutput {
+        var output: PbrVertexOutput;
+
+        // HARDCODED GEOMETRY TABLE: Bypasses corrupted geometry vertex buffers!
+        var pos = array<vec2<f32>, 3>(
+            vec2<f32>(0.0, 0.5),   // Top vertex
+            vec2<f32>(-0.5, -0.5), // Bottom Left vertex
+            vec2<f32>(0.5, -0.5)   // Bottom Right vertex
+        );
+
+        // Project directly to the screen in un-clipped flat 2D space
+        output.position = vec4<f32>(pos[vertexIndex], 0.0, 1.0);
+        
+        output.worldNormal = vec3<f32>(0.0, 0.0, 1.0);
+        output.viewDir = vec3<f32>(0.0, 0.0, 1.0);
+        
+        // Hardcode a bright, solid crimson color to isolate data streams
+        output.albedo = vec3<f32>(1.0, 0.0, 0.2); 
+        return output;
     }
   ''';
 
   const String fragmentWgsl = '''
+    $sharedUniformHeader
+
+    struct PbrFragmentInput {
+        @location(0) worldNormal: vec3<f32>,
+        @location(1) viewDir: vec3<f32>,
+        @location(2) albedo: vec3<f32>,
+    }
+
     @fragment
-    fn fs_main() -> @location(0) vec4<f32> {
-      return vec4<f32>(1.0, 1.0, 1.0, 1.0); // Solid White 3D Sphere
+    fn fs_main(input: PbrFragmentInput) -> @location(0) vec4<f32> {
+        // Output the hardcoded crimson albedo directly
+        return vec4<f32>(input.albedo, 1.0);
     }
   ''';
 
-  // FIXED: Explicitly build a native framework layout blueprint matching our 192-byte block
   final uniformEntry = GpuBindGroupLayoutEntry.buffer(
     binding: 0,
-    visibility: GpuShaderStage.vertex,
+    visibility: GpuShaderStage.vertex | GpuShaderStage.fragment,
     type: GpuBufferBindingType.uniform,
-    hasDynamicOffset: true, // Keep false to ensure absolute static stability
-    minBindingSize: 352,    // 3 matrices * 64 bytes
+    hasDynamicOffset: true,
+    minBindingSize: 352,
   );
 
-  final GpuBindGroupLayout group0Layout = device.createBindGroupLayout(
+  final group0Layout = device.createBindGroupLayout(
     [uniformEntry],
     label: 'Inline Sphere Group Layout',
   );
 
-  final GpuPipelineLayout explicitLayout = device.createPipelineLayout(
+  final explicitLayout = device.createPipelineLayout(
     [group0Layout],
     label: 'Inline Sphere Master Layout',
   );
 
+  GpuDepthStencilState? depthStencilState;
+  if (hasDepthStencil) {
+    depthStencilState = const GpuDepthStencilState(
+      format: GpuTextureFormat.depth24Plus,
+      depthWriteEnabled: true,
+      depthCompare: GpuCompareFunction.lessEqual,
+    );
+  }
+// Inside your real _getOrCreatePipeline method, locate where you process vertexLayouts:
+// We need to ensure that the pipeline descriptor vertex layout matches your PBR chunks exactly!
+
+final List<GpuVertexBufferLayout> compliantLayouts = [];
+
+// If your engine maps everything into a single interleaved vertex stream (typical for optimised WebGPU engines):
+compliantLayouts.add(
+  GpuVertexBufferLayout(
+    arrayStride: 36, // 9 floats * 4 bytes = 36 bytes stride (pos:3, normal:3, color:3)
+    stepMode: GpuVertexStepMode.vertex,
+    attributes: [
+      const GpuVertexAttribute(
+        format: GpuVertexFormat.float32x3, 
+        offset: 0, 
+        shaderLocation: 0, // Maps to @location(0) position
+      ),
+      const GpuVertexAttribute(
+        format: GpuVertexFormat.float32x3, 
+        offset: 12, 
+        shaderLocation: 1, // Maps to @location(1) normal
+      ),
+      const GpuVertexAttribute(
+        format: GpuVertexFormat.float32x3, 
+        offset: 24, 
+        shaderLocation: 2, // Maps to @location(2) color
+      ),
+    ],
+  ),
+);
+
   _zeroUniform3dPipeline = device.createRenderPipeline(GpuRenderPipelineDescriptor(
     label: 'Responsive 3D Camera Sphere Pipeline',
-    layout: explicitLayout, // FIXED: Using an explicit layout prevents reflection bugs!
-    vertexModule: device.createShaderModule( vertexWgsl),
+    layout: explicitLayout,
+    vertexModule: device.createShaderModule(vertexWgsl),
     vertexEntryPoint: 'vs_main',
-    vertexBuffers: vertexLayouts,
-    fragmentModule: device.createShaderModule( fragmentWgsl),
+    vertexBuffers: compliantLayouts,
+    fragmentModule: device.createShaderModule(fragmentWgsl),
     fragmentEntryPoint: 'fs_main',
     colorTargets: [
-      GpuColorTargetState(
+      const GpuColorTargetState(
         format: GpuTextureFormat.bgra8Unorm,
         writeMask: GpuColorWrite.all,
       ),
@@ -1597,87 +1275,221 @@ GpuRenderPipeline _getOrCreateZeroUniform3dPipeline(GpuDevice device, List<GpuVe
     primitiveTopology: GpuPrimitiveTopology.triangleList,
     frontFace: GpuFrontFace.ccw,
     cullMode: GpuCullMode.none,
-    depthStencil: null,
+    depthStencil: depthStencilState,
   ));
 
   return _zeroUniform3dPipeline!;
 }
 
-GpuBuffer? _manualUniformBuffer;
-GpuBindGroup? _manualBindGroup;
-GpuRenderPipeline? _zeroUniform3dPipeline;
-GpuRenderPipeline? _constant3dPipeline;
+  GpuRenderPipeline _getOrCreateZeroUniform3dPipeline1(
+    GpuDevice device, 
+    List<GpuVertexBufferLayout?> vertexLayouts,
+    [bool hasDepthStencil = true] // Pass true if your render pass uses a depthView attachment!
+  ) {
+    if (_zeroUniform3dPipeline != null) return _zeroUniform3dPipeline!;
 
-GpuRenderPipeline _getOrCreateConstant3dPipeline(GpuDevice device, List<GpuVertexBufferLayout?> vertexLayouts, Map<String, double> matrixConstants) {
-  // We recreate the pipeline descriptor dynamically to ingest the fresh frame constants
-  const String vertexWgsl = '''
-    // Declare 32 explicit pipeline constants to construct our 3D transformation matrices
-    @id(0) const r0c0: f32 = 1.0; @id(1) const r0c1: f32 = 0.0; @id(2) const r0c2: f32 = 0.0; @id(3) const r0c3: f32 = 0.0;
-    @id(4) const r1c0: f32 = 0.0; @id(5) const r1c1: f32 = 1.0; @id(6) const r1c2: f32 = 0.0; @id(7) const r1c3: f32 = 0.0;
-    @id(8) const r2c0: f32 = 0.0; @id(9) const r2c1: f32 = 0.0; @id(10) const r2c2: f32 = 1.0; @id(11) const r2c3: f32 = 0.0;
-    @id(12) const r3c0: f32 = 0.0; @id(13) const r3c1: f32 = 0.0; @id(14) const r3c2: f32 = 0.0; @id(15) const r3c3: f32 = 1.0;
+    // 1. Shared WGSL header containing your 352-byte struct layout matrix
+    const String sharedUniformHeader = '''
+      struct Uniforms {
+          projectionMatrix: mat4x4<f32>,     // 64 bytes
+          viewMatrix: mat4x4<f32>,           // 64 bytes
+          modelMatrix: mat4x4<f32>,          // 64 bytes
+          padding0: vec4<f32>,               // baseColor (16 bytes)
+          padding1: vec4<f32>,               // pbrParams (16 bytes)
+          padding2: vec4<f32>,               // cameraPosition (16 bytes)
+          padding3: vec4<f32>,               // ambientColor (16 bytes)
+          padding4: vec4<f32>,               // fogColor (16 bytes)
+          padding5: vec4<f32>,               // fogParams (16 bytes)
+          padding6: vec4<f32>,               // mainLightDirection (16 bytes)
+          padding7: vec4<f32>,               // mainLightColor (16 bytes)
+          padding8: vec4<f32>,               // morphInfluences0 (16 bytes)
+          padding9: vec4<f32>,               // morphInfluences1 (16 bytes)
+      }
+      @group(0) @binding(0) var<uniform> uniforms: Uniforms;
+    ''';
 
-    @id(16) const p0c0: f32 = 1.0; @id(17) const p0c1: f32 = 0.0; @id(18) const p0c2: f32 = 0.0; @id(19) const p0c3: f32 = 0.0;
-    @id(20) const p1c0: f32 = 0.0; @id(21) const p1c1: f32 = 1.0; @id(22) const p1c2: f32 = 0.0; @id(23) const p1c3: f32 = 0.0;
-    @id(24) const p2c0: f32 = 0.0; @id(25) const p2c1: f32 = 0.0; @id(26) const p2c2: f32 = 1.0; @id(27) const p2c3: f32 = 0.0;
-    @id(28) const p3c0: f32 = 0.0; @id(29) const p3c1: f32 = 0.0; @id(30) const p3c2: f32 = 0.0; @id(31) const p3c3: f32 = 1.0;
+    const String vertexWgsl = '''
+      $sharedUniformHeader
 
-    struct VertexInput {
-      @location(0) position: vec3<f32>,
-    }
+      struct VertexInput {
+          @location(0) position: vec3<f32>,
+      }
 
-    @vertex
-    fn vs_main(input: VertexInput) -> @builtin(position) vec4<f32> {
-      let modelViewMatrix = mat4x4<f32>(
-        vec4<f32>(r0c0, r0c1, r0c2, r0c3),
-        vec4<f32>(r1c0, r1c1, r1c2, r1c3),
-        vec4<f32>(r2c0, r2c1, r2c2, r2c3),
-        vec4<f32>(r3c0, r3c1, r3c2, r3c3)
+      @vertex
+      fn vs_main(input: VertexInput) -> @builtin(position) vec4<f32> {
+          let worldPosition = uniforms.modelMatrix * vec4<f32>(input.position, 1.0);
+          let viewPosition = uniforms.viewMatrix * worldPosition;
+          return uniforms.projectionMatrix * viewPosition;
+      }
+    ''';
+
+    const String fragmentWgsl = '''
+      $sharedUniformHeader
+
+      @fragment
+      fn fs_main() -> @location(0) vec4<f32> {
+          // Safe to expose fragment visibility now because structural bindings match exactly!
+          return vec4<f32>(1.0, 1.0, 1.0, 1.0); // Solid White
+      }
+    ''';
+
+    final uniformEntry = GpuBindGroupLayoutEntry.buffer(
+      binding: 0,
+      visibility: GpuShaderStage.vertex | GpuShaderStage.fragment,
+      type: GpuBufferBindingType.uniform,
+      hasDynamicOffset: true, 
+      minBindingSize: 352,   
+    );
+    final GpuBindGroupLayout group0Layout = device.createBindGroupLayout(
+      [uniformEntry],
+      label: 'Inline Sphere Group Layout',
+    );
+
+    final GpuPipelineLayout explicitLayout = device.createPipelineLayout(
+      [group0Layout],
+      label: 'Inline Sphere Master Layout',
+    );
+
+    // 3. Setup deep target checking structures
+    GpuDepthStencilState? depthStencilState;
+    if (hasDepthStencil) {
+      depthStencilState = const GpuDepthStencilState(
+        format: GpuTextureFormat.depth24Plus, // Must match your active swapchain depth view format
+        depthWriteEnabled: true,
+        depthCompare: GpuCompareFunction.lessEqual,
       );
-
-      let projectionMatrix = mat4x4<f32>(
-        vec4<f32>(p0c0, p0c1, p0c2, p0c3),
-        vec4<f32>(p1c0, p1c1, p1c2, p1c3),
-        vec4<f32>(p2c0, p2c1, p2c2, p2c3),
-        vec4<f32>(p3c0, p3c1, p3c2, p3c3)
-      );
-
-      // standard column-major transform
-      let worldSpacePos = modelViewMatrix * vec4<f32>(input.position, 1.0);
-      return projectionMatrix * worldSpacePos;
     }
-  ''';
 
-  const String fragmentWgsl = '''
-    @fragment
-    fn fs_main() -> @location(0) vec4<f32> {
-      return vec4<f32>(1.0, 1.0, 1.0, 1.0); 
+    // 4. Assemble standard production descriptors via gpux creation channels
+    _zeroUniform3dPipeline = device.createRenderPipeline(GpuRenderPipelineDescriptor(
+      label: 'Responsive 3D Camera Sphere Pipeline',
+      layout: explicitLayout,
+      vertexModule: device.createShaderModule(vertexWgsl),
+      vertexEntryPoint: 'vs_main',
+      vertexBuffers: vertexLayouts,
+      fragmentModule: device.createShaderModule(fragmentWgsl),
+      fragmentEntryPoint: 'fs_main',
+      colorTargets: [
+        const GpuColorTargetState(
+          format: GpuTextureFormat.bgra8Unorm,
+          writeMask: GpuColorWrite.all,
+        ),
+      ],
+      primitiveTopology: GpuPrimitiveTopology.triangleList,
+      frontFace: GpuFrontFace.ccw,
+      cullMode: GpuCullMode.none,
+      depthStencil: depthStencilState,
+    ));
+
+    return _zeroUniform3dPipeline!;
+  }
+
+  GpuBindGroup? _manualBindGroup;
+  GpuRenderPipeline? _zeroUniform3dPipeline;
+  
+GpuRenderPipeline? _getOrCreatePipeline(
+  ResolvedMaterialDescriptor resolved,
+  MaterialShaderDescriptor shaderDescriptor,
+  EnvironmentBinding? environmentBinding,
+  MaterialTextureBinding? materialBinding,
+  List<GpuVertexBufferLayout> vertexLayouts,
+) {
+  final gpuDevice = _device;
+  final shaderSource = MaterialShaderGenerator.compile(shaderDescriptor);
+  final renderState = resolved.renderState;
+
+  DepthStencilStateDescriptor? depthState;
+  if (renderState.depthTest) {
+    depthState = DepthStencilStateDescriptor(
+      format: renderState.depthFormat,
+      depthWriteEnabled: renderState.depthWrite,
+      depthCompare: renderState.depthCompare,
+    );
+  }
+
+  final pipelineDescriptor = RenderPipelineDescriptor(
+    label: resolved.descriptor.key,
+    vertexShader: shaderSource.vertexSource,
+    fragmentShader: shaderSource.fragmentSource,
+    vertexLayouts: vertexLayouts,
+    primitiveTopology: renderState.topology,
+    cullMode: renderState.cullMode,
+    frontFace: renderState.frontFace,
+    depthStencilState: depthState,
+    colorTarget: renderState.colorTarget.copyWith(format: frame.format),
+  );
+
+  final cacheKey = PipelineKey.fromDescriptor(pipelineDescriptor);
+
+  if (_pipelineCacheMap.containsKey(cacheKey)) {
+    final cached = _pipelineCacheMap[cacheKey]!;
+    if (cached.isReady) {
+      return cached.getPipeline();
     }
-  ''';
+  }
 
-  return device.createRenderPipeline(GpuRenderPipelineDescriptor(
-    label: 'Constant 3D Pipeline',
-    layout: null, 
-    vertexModule: device.createShaderModule(vertexWgsl),
-    vertexEntryPoint: 'vs_main',
-    vertexConstants: matrixConstants, // Inject properties here
-    vertexBuffers: vertexLayouts,
-    fragmentModule: device.createShaderModule(fragmentWgsl),
-    fragmentEntryPoint: 'fs_main',
-    colorTargets: [
-      GpuColorTargetState(
-        format: GpuTextureFormat.bgra8Unorm,
-        writeMask: GpuColorWrite.all,
-      ),
-    ],
-    primitiveTopology: GpuPrimitiveTopology.triangleList,
-    frontFace: GpuFrontFace.ccw,
-    cullMode: GpuCullMode.none,
-    depthStencil: null,
-  ));
+  if (!_pipelineCacheMap.containsKey(cacheKey)) {
+    print("Creating new pipeline for ${resolved.descriptor.key}");
+    final pipeline = WebGPUPipeline(gpuDevice, pipelineDescriptor);
+    _pipelineCacheMap[cacheKey] = pipeline;
+
+    try {
+      final layoutByGroup = <int, GpuBindGroupLayout>{};
+
+      if (materialBinding != null) {
+        final textureGroups = <int>{};
+        textureGroups.addAll(resolved.descriptor.bindingGroups(MaterialBindingSource.albedoMap));
+        textureGroups.addAll(resolved.descriptor.bindingGroups(MaterialBindingSource.normalMap));
+        textureGroups.addAll(resolved.descriptor.bindingGroups(MaterialBindingSource.volumeTexture));
+        
+        // Match Kotlin's .filter { it > 0 } rule
+        for (final group in textureGroups) {
+          if (group > 0) {
+            layoutByGroup[group] = materialBinding.layout;
+          }
+        }
+      }
+
+      if (resolved.descriptor.requiresBinding(MaterialBindingSource.environmentPrefilter)) {
+        final environmentLayout = environmentBinding?.layout;
+        if (environmentLayout == null) return null;
+
+        final envGroups = resolved.descriptor.bindingGroups(MaterialBindingSource.environmentPrefilter);
+        for (final group in envGroups) {
+          if (group > 0) {
+            layoutByGroup[group] = environmentLayout;
+          }
+        }
+      }
+
+      // Sort keys numerically to perfectly match Kotlin's sortedBy { it.key }.map { it.value }
+      final sortedKeys = layoutByGroup.keys.toList()..sort();
+      final extraLayouts = sortedKeys.map((key) => layoutByGroup[key]!).toList();
+
+      // Delegate layout structure layout to the UniformBufferManager just like Kotlin
+      final pipelineLayoutWrapper = _uniformManager.pipelineLayout();//extraLayouts);
+      if (pipelineLayoutWrapper == null) {
+        print('Pipeline aborted: uniform layout not ready');
+        return null;
+      }
+
+      // Trigger pipeline compilation
+      int result = pipeline.create(pipelineLayoutWrapper);
+      if(result == -1){
+        _pipelineCacheMap.remove(cacheKey);
+      }
+    } catch (e) {
+      print("Pipeline creation exception: ${e.toString()}");
+      _pipelineCacheMap.remove(cacheKey);
+      return null;
+    }
+  }
+
+  return _pipelineCacheMap[cacheKey]?.getPipeline();
 }
 
-  GpuRenderPipeline? _getOrCreatePipeline(
+
+  GpuRenderPipeline? _getOrCreatePipeline1(
     ResolvedMaterialDescriptor resolved,
     MaterialShaderDescriptor shaderDescriptor,
     EnvironmentBinding? environmentBinding,
@@ -1826,9 +1638,7 @@ GpuRenderPipeline _getOrCreateConstant3dPipeline(GpuDevice device, List<GpuVerte
       _depthTextureBytes = 0;
     }
   }
-
 }
-
 
 // Simple immutable target structure mapping Kotlin data class output values
 class _MaterialOverrideResult {

@@ -1,4 +1,5 @@
-import 'package:gpux/gpux.dart'; // Adjust based on your exact gpux library paths
+import 'package:gpux/gpux.dart';
+import 'package:three_js_core/three_js_core.dart'; // Adjust based on your exact gpux library paths
 
 /// WebGPU shader module implementation.
 /// T029: Shader compilation and validation.
@@ -19,9 +20,9 @@ class WebGPUShaderModule {
   void compile() {
     try {
       final labelString = descriptor.label ?? "unnamed";
-      print("INFO: Compiling shader: $labelString (${descriptor.stage.name})");
-      print("INFO: WGSL source ($labelString):\n${descriptor.code}");
-      print("INFO: Creating shader module...");
+      console.info("INFO: Compiling shader: $labelString (${descriptor.stage.name})");
+      console.info("INFO: WGSL source ($labelString):\n${descriptor.code}");
+      console.info("INFO: Creating shader module...");
 
       // Replaces unsafe dynamic JS literals with a safe, strongly-typed gpux instantiation
       _module = device.createShaderModule(
@@ -29,10 +30,10 @@ class WebGPUShaderModule {
         label: descriptor.label ?? '',
       );
 
-      print("INFO: Shader module created successfully");
-      print("INFO: Shader compiled successfully: $labelString");
+      console.info("INFO: Shader module created successfully");
+      console.info("INFO: Shader compiled successfully: $labelString");
     } catch (e) {
-      print("ERROR: Shader module creation exception: ${e.toString()}");
+      console.error("ERROR: Shader module creation exception: ${e.toString()}");
       rethrow; // Bounces the error upward safely without breaking state tracking
     }
   }

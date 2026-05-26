@@ -1,4 +1,5 @@
 import 'package:gpux/gpux.dart';
+import 'package:three_js_core/others/console/console_platform.dart';
 import '../material/MaterialDescriptionRegistry.dart';
 import 'WebGPUShaderModule.dart';
 
@@ -20,10 +21,10 @@ class WebGPUPipeline {
   /// T021: Used for dynamic offset support in uniform buffers.
   int create([GpuPipelineLayout? customLayout]) {
     try {
-      print("🔨 Pipeline.create() START");
+      console.info("🔨 Pipeline.create() START");
 
       // 1. Compile vertex shader module
-      print("🔨 Creating vertex shader module...");
+      console.info("🔨 Creating vertex shader module...");
       _vertexShaderModule = WebGPUShaderModule(
         device: device,
         descriptor: ShaderModuleDescriptor(
@@ -32,11 +33,11 @@ class WebGPUPipeline {
           stage: ShaderStage.vertex,
         ),
       );
-      print("🔨 Compiling vertex shader...");
+      console.info("🔨 Compiling vertex shader...");
       _vertexShaderModule!.compile();
 
       // 2. Compile fragment shader module
-      print("🔨 Creating fragment shader module...");
+      console.info("🔨 Creating fragment shader module...");
       _fragmentShaderModule = WebGPUShaderModule(
         device: device,
         descriptor: ShaderModuleDescriptor(
@@ -45,7 +46,7 @@ class WebGPUPipeline {
           stage: ShaderStage.fragment,
         ),
       );
-      print("🔨 Compiling fragment shader...");
+      console.info("🔨 Compiling fragment shader...");
       _fragmentShaderModule!.compile();
 
       // 3. Map Vertex Buffers Layouts
@@ -58,7 +59,7 @@ class WebGPUPipeline {
         final List<GpuVertexAttribute> attributes = [];
         for (final attr in layout.attributes) {
           attributes.add(GpuVertexAttribute(
-            format: _toWebGpuVertexFormat(attr.format),
+            format: attr.format,
             offset: attr.offset,
             shaderLocation: attr.shaderLocation,
           ));
@@ -101,7 +102,7 @@ class WebGPUPipeline {
         final GpuCompareFunction depthCompare = ds.depthCompare;
 
         depthStencilState = GpuDepthStencilState(
-          format: _toWebGpuTextureFormat(ds.format),
+          format: ds.format,
           depthWriteEnabled: ds.depthWriteEnabled,
           depthCompare: depthCompare,
         );
@@ -117,11 +118,50 @@ class WebGPUPipeline {
         );
       }
 
-      final colorTarget = GpuColorTargetState(
-        format: _toWebGpuTextureFormat(descriptor.colorTarget.format),
-        blend: blendState,
-        writeMask: descriptor.colorTarget.writeMask.bits,
-      );
+    const String sharedUniformHeader = '''
+      struct Uniforms {
+          projectionMatrix: mat4x4<f32>,     // 64 bytes
+          viewMatrix: mat4x4<f32>,           // 64 bytes
+          modelMatrix: mat4x4<f32>,          // 64 bytes
+          padding0: vec4<f32>,               // baseColor (16 bytes)
+          padding1: vec4<f32>,               // pbrParams (16 bytes)
+          padding2: vec4<f32>,               // cameraPosition (16 bytes)
+          padding3: vec4<f32>,               // ambientColor (16 bytes)
+          padding4: vec4<f32>,               // fogColor (16 bytes)
+          padding5: vec4<f32>,               // fogParams (16 bytes)
+          padding6: vec4<f32>,               // mainLightDirection (16 bytes)
+          padding7: vec4<f32>,               // mainLightColor (16 bytes)
+          padding8: vec4<f32>,               // morphInfluences0 (16 bytes)
+          padding9: vec4<f32>,               // morphInfluences1 (16 bytes)
+      }
+      @group(0) @binding(0) var<uniform> uniforms: Uniforms;
+    ''';
+
+    const String vertexWgsl = '''
+      $sharedUniformHeader
+
+      struct VertexInput {
+          @location(0) position: vec3<f32>,
+      }
+
+      @vertex
+      fn vs_main(input: VertexInput) -> @builtin(position) vec4<f32> {
+          let worldPosition = uniforms.modelMatrix * vec4<f32>(input.position, 1.0);
+          let viewPosition = uniforms.viewMatrix * worldPosition;
+          return uniforms.projectionMatrix * viewPosition;
+      }
+    ''';
+
+    const String fragmentWgsl = '''
+      $sharedUniformHeader
+
+      @fragment
+      fn fs_main() -> @location(0) vec4<f32> {
+          // Safe to expose fragment visibility now because structural bindings match exactly!
+          return vec4<f32>(1.0, 1.0, 1.0, 1.0); // Solid White
+      }
+    ''';
+
 
       // 7. Map Multisample Settings
       final ms = descriptor.multisampleState;
@@ -130,12 +170,18 @@ class WebGPUPipeline {
       final pipelineDescriptor = GpuRenderPipelineDescriptor(
         label: descriptor.label ?? '',
         layout: customLayout, // If null, gpux automatically infers layout bindings ("auto")
-        vertexModule: _vertexShaderModule!.getModule()!,
+        vertexModule: device.createShaderModule(vertexWgsl),//_vertexShaderModule!.getModule()!,
         vertexEntryPoint: 'vs_main',
         vertexBuffers: bufferLayouts,
-        fragmentModule: _fragmentShaderModule!.getModule()!,
+        fragmentModule: device.createShaderModule(fragmentWgsl),//_fragmentShaderModule!.getModule()!,
         fragmentEntryPoint: 'fs_main',
-        colorTargets: [colorTarget],
+        colorTargets: [
+          GpuColorTargetState(
+            format: descriptor.colorTarget.format,
+            blend: blendState,
+            writeMask: descriptor.colorTarget.writeMask.bits,
+          )
+        ],
         primitiveTopology: topology,
         cullMode: cullMode,
         frontFace: frontFace,
@@ -145,14 +191,14 @@ class WebGPUPipeline {
         alphaToCoverageEnabled: ms?.alphaToCoverageEnabled ?? false,
       );
 
-      print("🔨 Creating GPU render pipeline...");
+      console.info("🔨 Creating GPU render pipeline...");
       _pipeline = device.createRenderPipeline(pipelineDescriptor);
-      print("🔨 GPU render pipeline created: $_pipeline");
-      print("🔨 Pipeline.create() SUCCESS");
+      console.info("🔨 GPU render pipeline created: $_pipeline");
+      console.info("🔨 Pipeline.create() SUCCESS");
 
       return 0; // Success code
     } catch (e) {
-      print("🔨 Pipeline.create() EXCEPTION: ${e.toString()}");
+      console.error("🔨 Pipeline.create() EXCEPTION: ${e.toString()}");
       return -1; // Error code
     }
   }
@@ -170,14 +216,6 @@ class WebGPUPipeline {
     if (pipelineInstance != null) {
       renderPass.setPipeline(pipelineInstance);
     }
-  }
-
-  GpuVertexFormat _toWebGpuVertexFormat(GpuVertexFormat format) {
-    return format;
-  }
-
-  GpuTextureFormat _toWebGpuTextureFormat(GpuTextureFormat format) {
-    return format;
   }
 
   GpuBlendComponent _createGpuBlendComponent(GpuBlendComponent component) {

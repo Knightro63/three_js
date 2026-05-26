@@ -54,7 +54,7 @@ class UniformBufferManager {
     _ensureUniformBuffer(device);
   }
 
-  bool updateUniforms1({
+  bool updateUniforms({
     required Mesh mesh,
     required Camera camera,
     required int drawIndex,
@@ -157,103 +157,6 @@ class UniformBufferManager {
     return true;
   }
 
-bool updateUniforms({
-  required Mesh mesh,
-  required Camera camera,
-  required int drawIndex,
-  required FrameDebugInfo frameInfo,
-  required bool enableDiagnostics,
-  MaterialUniformData? materialUniforms,
-}) {
-  final gpuDevice = _deviceProvider();
-  if (gpuDevice == null) return false;
-  _ensureUniformBuffer(gpuDevice);
-  
-  final bufferInstance = _uniformBuffer;
-  if (bufferInstance == null) return false;
-
-  final projStorage = camera.projectionMatrix.storage;
-  final viewStorage = camera.matrixWorldInverse.storage;
-  final modelStorage = mesh.matrixWorld.storage;
-
-  // 1. MUST allocate exactly 128 floats (512 bytes) to match your stride per mesh!
-  final uniformData = Float32List(128);
-
-  // 2. Direct sequential copy matching our working sphere baseline exactly
-  for (int i = 0; i < 16; i++) {
-    uniformData[i] = projStorage[i];
-    uniformData[16 + i] = viewStorage[i];
-    uniformData[32 + i] = modelStorage[i];
-  }
-
-  // 3. BULLETPROOF MATERIAL EXTRACTION LAYOUT
-  // Bypasses complex .length checks to prevent fatal runtime runtime type crashes
-  if (materialUniforms != null) {
-    // Pack base color parameters safely
-    uniformData[48] = materialUniforms.baseColor.length > 0 ? materialUniforms.baseColor[0] : 1.0;
-    uniformData[49] = materialUniforms.baseColor.length > 1 ? materialUniforms.baseColor[1] : 1.0;
-    uniformData[50] = materialUniforms.baseColor.length > 2 ? materialUniforms.baseColor[2] : 1.0;
-    uniformData[51] = materialUniforms.baseColor.length > 3 ? materialUniforms.baseColor[3] : 1.0;
-
-    uniformData[52] = materialUniforms.roughness;
-    uniformData[53] = materialUniforms.metalness;
-    uniformData[54] = materialUniforms.envIntensity;
-    uniformData[55] = materialUniforms.prefilterMipCount.toDouble();
-
-    // Pack camera coordinates securely
-    uniformData[56] = camera.position.x;
-    uniformData[57] = camera.position.y;
-    uniformData[58] = camera.position.z;
-    uniformData[59] = 1.0;
-
-    // Pack ambient lighting attributes safely with robust fallbacks
-    final amb = materialUniforms.ambientColor;
-    uniformData[60] = amb.length > 0 ? amb[0] : 0.2;
-    uniformData[61] = amb.length > 1 ? amb[1] : 0.2;
-    uniformData[62] = amb.length > 2 ? amb[2] : 0.2;
-    uniformData[63] = amb.length > 3 ? amb[3] : 1.0;
-
-    final mainLDir = materialUniforms.mainLightDirection;
-    uniformData[72] = mainLDir.length > 0 ? mainLDir[0] : 0.0;
-    uniformData[73] = mainLDir.length > 1 ? mainLDir[1] : -1.0;
-    uniformData[74] = mainLDir.length > 2 ? mainLDir[2] : 0.0;
-    uniformData[75] = mainLDir.length > 3 ? mainLDir[3] : 0.0;
-
-    final mainLCol = materialUniforms.mainLightColor;
-    uniformData[76] = mainLCol.length > 0 ? mainLCol[0] : 1.0;
-    uniformData[77] = mainLCol.length > 1 ? mainLCol[1] : 1.0;
-    uniformData[78] = mainLCol.length > 2 ? mainLCol[2] : 1.0;
-    uniformData[79] = mainLCol.length > 3 ? mainLCol[3] : 1.0;
-  } else {
-    // Fill with clean unlit defaults if material context properties are null
-    uniformData[48] = 1.0; uniformData[49] = 1.0; uniformData[50] = 1.0; uniformData[51] = 1.0; // White
-    uniformData[52] = 1.0; uniformData[53] = 0.0; uniformData[54] = 0.0; uniformData[55] = 1.0;
-    uniformData[56] = camera.position.x; uniformData[57] = camera.position.y; uniformData[58] = camera.position.z; uniformData[59] = 1.0;
-    uniformData[60] = 0.2; uniformData[61] = 0.2; uniformData[62] = 0.2; uniformData[63] = 1.0; // Default Ambient
-    uniformData[72] = 0.0; uniformData[73] = -1.0; uniformData[74] = 0.0; uniformData[75] = 0.0; // Default Light Dir
-    uniformData[76] = 1.0; uniformData[77] = 1.0; uniformData[78] = 1.0; uniformData[79] = 1.0; // Default Light Color
-  }
-
-  final List<double> morphInfluenceSource = mesh.morphTargetInfluences;
-  for (int i = 0; i < _maxMorphTargets; i++) {
-    uniformData[80 + i] = i < morphInfluenceSource.length ? morphInfluenceSource[i] : 0.0;
-  }
-
-  // Indices 88 to 127 act as trailing zero padding to fill the 512-byte stride window
-
-  // Calculate dynamic offset stride securely
-  final offset = dynamicOffset(drawIndex);
-  if (offset + 512 > uniformBufferSize) {
-    print("ERROR: Dynamic Stride Uniform Overflow prevented on index $drawIndex!");
-    return false;
-  }
-
-  // Convert floats data list directly into your framework upload pipeline
-  bufferInstance.upload(uniformData, offset: offset);
-  return true;
-}
-
-
   GpuBindGroup? bindGroup() {
     final cached = _cachedBindGroup;
     if (cached != null) return cached;
@@ -275,7 +178,7 @@ bool updateUniforms({
           binding: 0,
           buffer: internalBuffer,
           offset: 0,
-          size: objectBytes,
+          size: UniformBufferManager.uniformSizePerMesh,   // 512 bytes objectBytes,
         ),
       ],
       label: "Uniform Bind Group (Dynamic Offsets)",
@@ -326,9 +229,7 @@ bool updateUniforms({
   }
 
   void _ensureLayouts(GpuDevice device) {
-    if (_bindGroupLayout == null) {
-      _bindGroupLayout = _createUniformBindGroupLayout(device);
-    }
+    _bindGroupLayout ??= _createUniformBindGroupLayout(device);
   }
 
   void _ensureUniformBuffer(GpuDevice device) {
@@ -362,7 +263,7 @@ bool updateUniforms({
           binding: 0,
           visibility: GpuShaderStage.vertex | GpuShaderStage.fragment,
           type: GpuBufferBindingType.uniform,
-          hasDynamicOffset: false,
+          hasDynamicOffset: true,
           minBindingSize: objectBytes,
         ),
       ],
