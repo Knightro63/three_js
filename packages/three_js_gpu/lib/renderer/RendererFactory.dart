@@ -47,10 +47,10 @@ class RendererFactory {
         // Initialize renderer context 
         await renderer.initialize(config);
         
-        print("[Materia] Selected backend: WebGPU");
+        console.info("[Materia] Selected backend: WebGPU");
         return renderer;
       } catch (e) {
-        print("[Materia] WebGPU creation/initialization failed: ${e.toString()}, falling back to WebGL");
+        console.error("[Materia] WebGPU creation/initialization failed: ${e.toString()}, falling back to WebGL");
       }
     }
 
@@ -105,6 +105,6 @@ class RendererFactory {
   }
 
   static Renderer _createWebGPURenderer(GpuFrame frame) {
-    return WebGPURenderer(frame);
+    return WebGPURenderer();
   }
 }

@@ -68,7 +68,7 @@ class UniformBufferManager {
     _ensureUniformBuffer(gpuDevice);
     final bufferInstance = _uniformBuffer;
     if (bufferInstance == null) {
-      print("WARNING: Uniform buffer unavailable; skipping mesh");
+      console.warning("WARNING: Uniform buffer unavailable; skipping mesh");
       return false;
     }
 
@@ -80,9 +80,9 @@ class UniformBufferManager {
     final viewMatrix = camera.matrixWorldInverse.storage;
     final modelMatrix = mesh.matrixWorld.storage;
 
-    // if (enableDiagnostics && frameInfo.frameCount < 3 && frameInfo.drawCallCount < 2) {
-    //   _logMatrices(frameInfo, camera, projMatrix, viewMatrix, modelMatrix);
-    // }
+    if (enableDiagnostics && frameInfo.frameCount < 3 && frameInfo.drawCallCount < 2) {
+      _logMatrices(frameInfo, camera, projMatrix, viewMatrix, modelMatrix);
+    }
 
     // Allocate 88 sequential floats mirroring std140 layout bounds block memory packing
     final uniformData = Float32List(88);
@@ -251,7 +251,7 @@ class UniformBufferManager {
       _uniformBufferSizeBytes = uniformBufferSize;
       _statsTracker?.recordBufferAllocated(_uniformBufferSizeBytes);
     } catch (e) {
-      print("ERROR: Failed to create uniform buffer: ${e.toString()}");
+      console.error("ERROR: Failed to create uniform buffer: ${e.toString()}");
       _uniformBuffer = null;
     }
   }
@@ -286,24 +286,24 @@ class UniformBufferManager {
     Float32List viewMatrix,
     Float32List modelMatrix,
   ) {
-    print("T021 Frame ${frameInfo.frameCount}, Draw ${frameInfo.drawCallCount}:");
-    print(" Projection matrix:");
-    print("  [${projMatrix[0]}, ${projMatrix[4]}, ${projMatrix[8]}, ${projMatrix[12]}]");
-    print("  [${projMatrix[1]}, ${projMatrix[5]}, ${projMatrix[9]}, ${projMatrix[13]}]");
-    print("  [${projMatrix[2]}, ${projMatrix[6]}, ${projMatrix[10]}, ${projMatrix[14]}]");
-    print("  [${projMatrix[3]}, ${projMatrix[7]}, ${projMatrix[11]}, ${projMatrix[15]}]");
-    print(" View matrix:");
-    print("  [${viewMatrix[0]}, ${viewMatrix[4]}, ${viewMatrix[8]}, ${viewMatrix[12]}]");
-    print("  [${viewMatrix[1]}, ${viewMatrix[5]}, ${viewMatrix[9]}, ${viewMatrix[13]}]");
-    print("  [${viewMatrix[2]}, ${viewMatrix[6]}, ${viewMatrix[10]}, ${viewMatrix[14]}]");
-    print("  [${viewMatrix[3]}, ${viewMatrix[7]}, ${viewMatrix[11]}, ${viewMatrix[15]}]");
-    print(" Model matrix:");
-    print("  [${modelMatrix[0]}, ${modelMatrix[4]}, ${modelMatrix[8]}, ${modelMatrix[12]}]");
-    print("  [${modelMatrix[1]}, ${modelMatrix[5]}, ${modelMatrix[9]}, ${modelMatrix[13]}]");
-    print("  [${modelMatrix[2]}, ${modelMatrix[6]}, ${modelMatrix[10]}, ${modelMatrix[14]}]");
-    print("  [${modelMatrix[3]}, ${modelMatrix[7]}, ${modelMatrix[11]}, ${modelMatrix[15]}]");
-    print(" Camera pos: (${camera.position.x}, ${camera.position.y}, ${camera.position.z})");
-    print(" Camera rot: (${camera.rotation.x}, ${camera.rotation.y}, ${camera.rotation.z})");
+    console.info("T021 Frame ${frameInfo.frameCount}, Draw ${frameInfo.drawCallCount}:");
+    console.info(" Projection matrix:");
+    console.info("  [${projMatrix[0]}, ${projMatrix[4]}, ${projMatrix[8]}, ${projMatrix[12]}]");
+    console.info("  [${projMatrix[1]}, ${projMatrix[5]}, ${projMatrix[9]}, ${projMatrix[13]}]");
+    console.info("  [${projMatrix[2]}, ${projMatrix[6]}, ${projMatrix[10]}, ${projMatrix[14]}]");
+    console.info("  [${projMatrix[3]}, ${projMatrix[7]}, ${projMatrix[11]}, ${projMatrix[15]}]");
+    console.info(" View matrix:");
+    console.info("  [${viewMatrix[0]}, ${viewMatrix[4]}, ${viewMatrix[8]}, ${viewMatrix[12]}]");
+    console.info("  [${viewMatrix[1]}, ${viewMatrix[5]}, ${viewMatrix[9]}, ${viewMatrix[13]}]");
+    console.info("  [${viewMatrix[2]}, ${viewMatrix[6]}, ${viewMatrix[10]}, ${viewMatrix[14]}]");
+    console.info("  [${viewMatrix[3]}, ${viewMatrix[7]}, ${viewMatrix[11]}, ${viewMatrix[15]}]");
+    console.info(" Model matrix:");
+    console.info("  [${modelMatrix[0]}, ${modelMatrix[4]}, ${modelMatrix[8]}, ${modelMatrix[12]}]");
+    console.info("  [${modelMatrix[1]}, ${modelMatrix[5]}, ${modelMatrix[9]}, ${modelMatrix[13]}]");
+    console.info("  [${modelMatrix[2]}, ${modelMatrix[6]}, ${modelMatrix[10]}, ${modelMatrix[14]}]");
+    console.info("  [${modelMatrix[3]}, ${modelMatrix[7]}, ${modelMatrix[11]}, ${modelMatrix[15]}]");
+    console.info(" Camera pos: (${camera.position.x}, ${camera.position.y}, ${camera.position.z})");
+    console.info(" Camera rot: (${camera.rotation.x}, ${camera.rotation.y}, ${camera.rotation.z})");
   }
 }
 

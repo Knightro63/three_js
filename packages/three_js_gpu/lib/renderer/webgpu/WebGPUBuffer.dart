@@ -1,5 +1,6 @@
 import 'dart:typed_data';
-import 'package:gpux/gpux.dart'; // Adjust based on your exact gpux library path
+import 'package:gpux/gpux.dart';
+import 'package:three_js_core/three_js_core.dart'; // Adjust based on your exact gpux library path
 
 /// WebGPU buffer implementation.
 /// T030: GPU buffer management for vertices, indices, and uniforms.
@@ -26,7 +27,7 @@ class WebGPUBuffer {
         throw StateError("Buffer creation failed: GPU buffer handle returned null");
       }
     } catch (e) {
-      print("ERROR: Buffer creation failed: ${e.toString()}");
+      console.error("ERROR: Buffer creation failed: ${e.toString()}");
       rethrow;
     }
   }
@@ -50,7 +51,7 @@ class WebGPUBuffer {
         bufferOffset: offset,
       );
     } catch (e) {
-      print("ERROR: Buffer data upload failed: ${e.toString()}");
+      console.error("ERROR: Buffer data upload failed: ${e.toString()}");
       rethrow;
     }
   }
@@ -71,7 +72,7 @@ class WebGPUBuffer {
         bufferOffset: offset,
       );
     } catch (e) {
-      print("ERROR: 32-bit index upload failed: ${e.toString()}");
+      console.error("ERROR: 32-bit index upload failed: ${e.toString()}");
       rethrow;
     }
   }
@@ -92,7 +93,7 @@ class WebGPUBuffer {
         bufferOffset: offset, 
       );
     } catch (e) {
-      print("ERROR: 16-bit index upload failed: ${e.toString()}");
+      console.error("ERROR: 16-bit index upload failed: ${e.toString()}");
       rethrow;
     }
   }

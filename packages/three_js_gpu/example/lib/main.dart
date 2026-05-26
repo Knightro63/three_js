@@ -6,6 +6,7 @@ import 'package:three_js_gpu/three_js_gpu.dart';
 import 'dart:math' as math;
 
 void main() {
+  //Console.isVerbose = true;
   runApp(const MyApp());
 }
 
@@ -75,7 +76,7 @@ class _State extends State<WebglGeometries> {
     final material = three.MeshStandardMaterial.fromMap({
       "color": 0xffffff,
       "side": tmath.DoubleSide,
-      //"clipShadows": true
+      "wireframe": false,
     });
     object = three.Mesh(three.SphereGeometry(75, 20, 10), material);
     object.position.setValues(-300, 0, 200);

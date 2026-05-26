@@ -1,7 +1,6 @@
 import 'dart:typed_data';
 import 'package:gpux/gpux.dart'; // Adjust based on your exact gpux library paths
 import 'package:three_js_core/three_js_core.dart';
-import '../../material/StandardMaterial.dart';
 import '../TextureTypes.dart';
 import '../material/MaterialDescriptionRegistry.dart';
 import 'RenderStatsTracker.dart'; // To interface with Material classes
@@ -301,14 +300,14 @@ class WebGPUMaterialTextureManager {
     _currentDevice = null;
   }
 
-  Texture2D? _albedoSource(Material? material) {
-    if (material is MeshBasicMaterial) return material.map as Texture2D?;
-    if (material is MeshStandardMaterial) return material.map as Texture2D?;
+  Texture? _albedoSource(Material? material) {
+    if (material is MeshBasicMaterial) return material.map;
+    if (material is MeshStandardMaterial) return material.map;
     return null;
   }
 
-  Texture2D? _normalSource(Material? material) {
-    if (material is MeshStandardMaterial) return material.normalMap as Texture2D?;
+  Texture? _normalSource(Material? material) {
+    if (material is MeshStandardMaterial) return material.normalMap;
     return null;
   }
 
@@ -437,18 +436,6 @@ class WebGPUMaterialTextureManager {
   }
 
   _TextureUpload? _buildTextureUpload(Texture texture) {
-    if (texture is Texture2D) {
-      final upload = _textureDataFor(
-        GpuTextureFormat.values[texture.format],
-        texture.getData(), 
-        texture.getFloatData(), 
-        null, 
-        texture.width, 
-        texture.height, 
-        1
-      );
-      return upload?.copyWith(dimension: GpuTextureDimension.d2, viewDimension: GpuTextureViewDimension.d2);
-    }
     if (texture is Data3DTexture) {
       final upload = _textureDataFor(
         GpuTextureFormat.values[texture.format], 
@@ -461,7 +448,18 @@ class WebGPUMaterialTextureManager {
       );
       return upload?.copyWith(dimension: GpuTextureDimension.d3, viewDimension: GpuTextureViewDimension.d3);
     }
-    return null;
+    else{
+      final upload = _textureDataFor(
+        GpuTextureFormat.values[texture.format],
+        (texture.image.data as TypedDataList).isNotEmpty ? (texture.image.data as TypedDataList).buffer.asUint8List() : null,
+        (texture.image.data as TypedDataList).buffer.asFloat32List(),  
+        null, 
+        texture.image.width, 
+        texture.image.height, 
+        1
+      );
+      return upload?.copyWith(dimension: GpuTextureDimension.d2, viewDimension: GpuTextureViewDimension.d2);
+    }
   }
 
   _TextureUpload? _textureDataFor(

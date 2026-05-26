@@ -43,7 +43,7 @@ class WebGPUSurface implements RenderSurface {
   //     // Replaces canvas.getContext("webgpu") with cross-platform native context initialization
   //     return Gpu.createContextFromNativeHandle(_platformHandle);
   //   } catch (e) {
-  //     print("ERROR: Failed to create WebGPU canvas context: ${e.toString()}");
+  //     console.error("ERROR: Failed to create WebGPU canvas context: ${e.toString()}");
   //     return null;
   //   }
   // }

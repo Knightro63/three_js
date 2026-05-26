@@ -20,6 +20,8 @@ class WebGPUEffectComposer {
   GpuTextureView? _viewA;
   GpuTextureView? _viewB;
 
+  GpuTextureView? get sceneTargetView => _viewA;
+
   // Cached pipelines and resources per pass
   final Map<FullScreenEffectPass, GpuRenderPipeline> _pipelineCache = {};
   final Map<FullScreenEffectPass, GpuBindGroup> _bindGroupCache = {};
@@ -103,7 +105,9 @@ class WebGPUEffectComposer {
   GpuTexture _createRenderTexture(String label) {
     return device.createTexture(
       label: label,
-      width: _width, height: _height, depthOrArrayLayers: 1,
+      width: _width, 
+      height: _height, 
+      depthOrArrayLayers: 1,
       format: formatEnum,
       usage: GpuTextureUsage.textureBinding | GpuTextureUsage.renderAttachment | GpuTextureUsage.copySrc | GpuTextureUsage.copyDst,
     );

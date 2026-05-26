@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:gpux/gpux.dart';
+import 'package:three_js_core/three_js_core.dart';
 import 'WebGPUPipeline.dart';
 import 'WebGPUTexture.dart';
 import 'WebGPUBuffer.dart'; // Adjust based on your exact gpux library location
@@ -54,7 +55,7 @@ class ContextLossRecovery {
     _lossCount++;
     _isRecovering = true;
     
-    print("WARNING: GPU context lost (event #$_lossCount)");
+    console.warning("WARNING: GPU context lost (event #$_lossCount)");
     onContextLost?.call();
   }
 
@@ -69,7 +70,7 @@ class ContextLossRecovery {
       );
     }
 
-    print("INFO: Starting context recovery: ${_trackedResources.size} resources...");
+    console.info("INFO: Starting context recovery: ${_trackedResources.size} resources...");
     int buffersRecreated = 0;
     int texturesRecreated = 0;
     int pipelinesRecreated = 0;
@@ -98,7 +99,7 @@ class ContextLossRecovery {
             break;
         }
       } catch (e) {
-        print("ERROR: Failed to recreate resource: ${e.toString()}");
+        console.error("ERROR: Failed to recreate resource: ${e.toString()}");
         failures++;
       }
     }
@@ -113,10 +114,10 @@ class ContextLossRecovery {
     _isRecovering = false;
 
     if (failures > 0) {
-      print("WARNING: Context recovery completed with $failures failures");
+      console.warning("WARNING: Context recovery completed with $failures failures");
       throw StateError("Recovery completed with $failures failures");
     } else {
-      print("INFO: Context recovery successful: $stats");
+      console.info("INFO: Context recovery successful: $stats");
       onContextRestored?.call();
       return stats;
     }
@@ -146,7 +147,7 @@ class ContextLossRecovery {
       await device.lost; 
       handleContextLoss();
     } catch (e) {
-      print("ERROR: Error monitoring device loss: ${e.toString()}");
+      console.error("ERROR: Error monitoring device loss: ${e.toString()}");
     }
   }
 }

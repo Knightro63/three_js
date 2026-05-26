@@ -80,7 +80,7 @@ class BatchKey {
 
     // Render state: combine depth test, culling, blending properties
     final material = mesh.material;
-    final renderState = material is Material ? _computeRenderState(material) : 0;
+    final renderState = material != null? _computeRenderState(material) : 0;
 
     return BatchKey(
       materialId: materialId,

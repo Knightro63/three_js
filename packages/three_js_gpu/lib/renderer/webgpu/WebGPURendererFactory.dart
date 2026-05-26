@@ -22,13 +22,13 @@ class WebGPURendererFactory {
     final gpuAvailable = WebGPUDetector.isAvailable();
 
     if (gpuAvailable) {
-      print("INFO: WebGPU available - creating WebGPURenderer");
+      console.info("INFO: WebGPU available - creating WebGPURenderer");
       try {
-        final renderer = WebGPURenderer(frame);
+        final renderer = WebGPURenderer();
         final config = RendererConfig();
         
-        await renderer.initialize(config);
-        print("INFO: WebGPURenderer initialized successfully");
+        await renderer.init(frame,config);
+        console.info("INFO: WebGPURenderer initialized successfully");
         return renderer;
       } catch (e) {
         throw("WARNING: WebGPU initialization failed: ${e.toString()}");

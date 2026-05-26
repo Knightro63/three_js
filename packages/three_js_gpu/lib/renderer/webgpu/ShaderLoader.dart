@@ -1,4 +1,5 @@
-import 'package:gpux/gpux.dart'; // Adjust based on your exact gpux library path
+import 'package:gpux/gpux.dart';
+import 'package:three_js_core/three_js_core.dart'; // Adjust based on your exact gpux library path
 
 /// T033: Shader Loader for WebGPU
 /// Feature: 019-we-should-not
@@ -81,7 +82,7 @@ GpuRenderPipeline? createBasicPipeline(GpuDevice device) {
     // 3. Request the backend engine to build the pipeline
     return device.createRenderPipeline(pipelineDescriptor);
   } catch (e) {
-    print("ERROR: Failed to create basic pipeline: ${e.toString()}");
+    console.error("ERROR: Failed to create basic pipeline: ${e.toString()}");
     return null;
   }
 }

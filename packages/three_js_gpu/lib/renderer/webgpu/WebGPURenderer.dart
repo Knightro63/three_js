@@ -2,6 +2,8 @@ import 'dart:typed_data';
 import 'dart:math' as math;
 import 'package:flutter_gpux/flutter_gpux.dart';
 import 'package:three_js_core/three_js_core.dart';
+import 'package:three_js_gpu/renderer/webgpu/WebGPUFrameAttachments.dart';
+import 'package:three_js_gpu/renderer/webgpu/WebGPURenderPassManager.dart';
 import 'package:three_js_math/three_js_math.dart';
 import '../../lighting/ibl/IBLConvolutionProfiler.dart';
 import '../../lighting/ibl/PrefilterMipSelector.dart';
@@ -18,18 +20,16 @@ import 'GeometryBufferCache.dart';
 import 'PipelineCache.dart';
 import 'RenderStatsTracker.dart';
 import 'UniformBufferManager.dart';
-import 'WebGPUBufferManager.dart';
 import 'WebGPUEnvironmentManager.dart';
 import 'WebGPUMaterialTextureManager.dart';
 import 'WebGPUPipeline.dart';
-import 'WebGPURenderPassManager.dart';
 import '../../lighting/SceneLightingUniforms.dart';
 import '../material/MaterialDescriptionRegistry.dart';
 
 class WebGPURenderer extends Renderer {
-  WebGPURenderer(this.frame);
+  WebGPURenderer();
 
-  GpuFrame frame;
+  late GpuFrame frame;
 
   // Linux presentation workaround tracks
   dynamic _presentationCanvas;
@@ -49,15 +49,9 @@ class WebGPURenderer extends Renderer {
   
   final _contextLossRecovery = ContextLossRecovery();
   late final WebGPUEnvironmentManager _environmentManager = WebGPUEnvironmentManager(deviceProvider: () => _device, statsTracker: _statsTracker);
-  
   late final WebGPUMaterialTextureManager _materialTextureManager = WebGPUMaterialTextureManager(deviceProvider: () => _device, statsTracker: _statsTracker);
 
-  // Feature 020 Managers (T020)
-  WebGPUBufferManager? _bufferManager;
-  WebGPURenderPassManager? _renderPassManager;
-
   // Rendering lifecycle state variables
-  WebGPUPipeline? _currentPipeline;
   int _frameCount = 0;
   int _triangleCount = 0;
   int _drawCallCount = 0;
@@ -70,15 +64,17 @@ class WebGPURenderer extends Renderer {
   // Cache lookups
   final Map<PipelineKey, WebGPUPipeline> _pipelineCacheMap = {};
 
-  // Canvas context configurations defaults
-  GpuTextureFormat _canvasFormat = GpuTextureFormat.bgra8Unorm;
-
   // Depth-stencil target GPU attachments resources references
   GpuTexture? _depthTexture;
   GpuTextureView? _depthTextureView;
   int _depthTextureWidth = 0;
   int _depthTextureHeight = 0;
   int _depthTextureBytes = 0;
+
+  GpuTexture? _msaaColorTexture;
+  GpuTextureView? _msaaColorTextureView;
+  int _msaaColorWidth = 0;
+  int _msaaColorHeight = 0;
 
   Color actualClearColor = Color(0.0, 0.0, 0.0, 1.0);
 
@@ -93,8 +89,10 @@ class WebGPURenderer extends Renderer {
   // Renderer interface property overrides
   final BackendType backend = BackendType.webgpu;
 
-  @override
-  RendererCapabilities get capabilities => _rendererCapabilities ?? _createDefaultCapabilities();
+  // @override
+  // RendererCapabilities get capabilities => _rendererCapabilities ?? _createDefaultCapabilities();
+  late RendererConfig config;
+  WebGPURenderPassManager? _renderPassManager;
 
   RenderStats get stats => _statsTracker.getStats();
   double clearAlpha = 1.0;
@@ -150,7 +148,9 @@ class WebGPURenderer extends Renderer {
   }
 
   /// Entry point matching the unified asynchronous initialization interface contract.
-  Future<Result<void>> initialize(RendererConfig config) async {
+  Future<Result<void>> init(GpuFrame frame, RendererConfig config) async {
+    this.frame = frame;
+    this.config = config;
     // For WebGPU, surface rendering canvas binding constraints are pre-configured
     return _initializeInternal();
   }
@@ -158,7 +158,7 @@ class WebGPURenderer extends Renderer {
   /// Internal hardware driver setup loop using cross-platform async sequences.
   Future<Result<void>> _initializeInternal() async {
     try {
-      print('T033: Starting WebGPU renderer initialization...');
+      console.info('T033: Starting WebGPU renderer initialization...');
       final stopwatch = Stopwatch()..start();
 
       // 1. Instantiate the cross-platform hardware facade
@@ -174,49 +174,49 @@ class WebGPURenderer extends Renderer {
       // Device loss recovery callback hooks integration
       _device.lost.then((info) {
         try {
-          print('T033: ⚠️ WebGPU device lost: $info');
+          console.warning('T033: ⚠️ WebGPU device lost: $info');
           _contextLossRecovery.handleContextLoss();
         } catch (e) {
-          print('T033: Error handling device loss routine: $e');
+          console.error('T033: Error handling device loss routine: $e');
         }
       });
 
       // Browser bug presentation layer fallback workarounds are handled implicitly 
       // by the multi-platform canvas context abstraction wrapper layer.
-      print('T033: Configuring canvas context surface presentation pipeline...');
+      console.info('T033: Configuring canvas context surface presentation pipeline...');
       
-      // Fixed: context configuration is managed per frame target view inside flutter_gpux/gpuweb_js
-      _canvasFormat = GpuTextureFormat.bgra8Unorm;
+      console.info('T033: Rebuilding depth attachments buffers targets...');
+      _ensureDepthTexture(
+        frame.width, 
+        frame.height, 
+        sampleCount: 1
+      );
 
-      print('T033: Rebuilding depth attachments buffers targets...');
-      _ensureDepthTexture(frame.width, frame.height);
-
-      print('T033: Allocating sub-system tracking memory buffer pools...');
+      console.info('T033: Allocating sub-system tracking memory buffer pools...');
       _bufferPool = BufferPool(_device);
-      _bufferManager = WebGPUBufferManager(_device);
       
       _uniformManager.onDeviceReady(_device);
       _materialTextureManager.onDeviceReady(_device);
 
-      print('T033: Resolving adapter limits capabilities profiles...');
+      console.info('T033: Resolving adapter limits capabilities profiles...');
       _rendererCapabilities = _createCapabilities(_adapter!);
-      print('T033: Capabilities detected: maxTextureSize=${_rendererCapabilities!.maxTextureSize}');
+      console.info('T033: Capabilities detected: maxTextureSize=${_rendererCapabilities!.maxTextureSize}');
 
       // Execute internal backend architecture text module checks
-      print('T033: Validating WGSL shader compilation pipelines components...');
+      console.info('T033: Validating WGSL shader compilation pipelines components...');
       final probeResult = await _validateWgslSupport(_device);
       if (probeResult is ErrorResult) {
-        print('T033: WGSL validation failed, aborting sequence: ${probeResult.message}');
+        console.info('T033: WGSL validation failed, aborting sequence: ${probeResult.message}');
         _cleanupPartialInit();
         return Result.error(probeResult.message);
       }
 
       _isInitialized = true;
-      print('T033: WebGPU renderer completed setup in ${stopwatch.elapsedMilliseconds}ms');
+      console.info('T033: WebGPU renderer completed setup in ${stopwatch.elapsedMilliseconds}ms');
       return const Result.success(null);
     } catch (e, stack) {
-      print('T033: ❌ FATAL CRASH during renderer initialization: $e');
-      print('T033: Trace: $stack');
+      console.error('T033: ❌ FATAL CRASH during renderer initialization: $e');
+      console.error('T033: Trace: $stack');
       return Result.error('Renderer initialization failed: ${e.toString()}', e);
     }
   }
@@ -243,9 +243,9 @@ class WebGPURenderer extends Renderer {
       
       // Submit array tracking directly to the hardware device processing timeline queue
       _device.queue.submit([cmdBuf]);
-      print('RAW-CLEAR-TEST: Submitted red clear commands buffer. Presentation works if viewport is red.');
+      console.info('RAW-CLEAR-TEST: Submitted red clear commands buffer. Presentation works if viewport is red.');
     } catch (e) {
-      print('RAW-CLEAR-TEST: FAILED: $e');
+      console.error('RAW-CLEAR-TEST: FAILED: $e');
     }
   }
 
@@ -374,7 +374,7 @@ class WebGPURenderer extends Renderer {
 
       return const Result.success(null);
     } catch (e) {
-      print('T033: Exception tracking during internal WGSL validation: $e');
+      console.error('T033: Exception tracking during internal WGSL validation: $e');
       return Result.error('WGSL shader validation threw unexpected exception: ${e.toString()}', e);
     }
   }
@@ -382,9 +382,6 @@ class WebGPURenderer extends Renderer {
   /// Clean up intermediate resources allocated during an initialization failure cycle.
   void _cleanupPartialInit() {
     try {
-      _bufferManager = null;
-      _renderPassManager = null;
-      
       _uniformManager.dispose();
       _materialTextureManager.dispose();
 
@@ -404,12 +401,11 @@ class WebGPURenderer extends Renderer {
       
       _statsTracker.reset();
     } catch (e) {
-      print('T033: Error executing validation failure cleanup routine sequence: $e');
+      console.error('T033: Error executing validation failure cleanup routine sequence: $e');
     }
   }
 
   void dispose() {
-    _renderPassManager = null;
     _environmentManager.dispose();
     
     for (final pipeline in _pipelineCacheMap.values) {
@@ -422,7 +418,6 @@ class WebGPURenderer extends Renderer {
     _bufferPool.dispose();
     _uniformManager.dispose();
     _geometryCache.clear();
-    _bufferManager = null;
     
     if (_depthTexture != null && _depthTextureBytes > 0) {
       _statsTracker.recordTextureDisposed(_depthTextureBytes);
@@ -430,6 +425,8 @@ class WebGPURenderer extends Renderer {
     }
     
     _depthTexture?.destroy();
+    _msaaColorTexture?.destroy();
+
     _depthTexture = null;
     _depthTextureView = null;
     _depthTextureWidth = 0;
@@ -440,7 +437,6 @@ class WebGPURenderer extends Renderer {
     
     _presentationCanvas = null;
     _rendererCapabilities = null;
-    _currentPipeline = null;
     
     _drawIndexInFrame = 0;
     _drawCallCount = 0;
@@ -454,8 +450,8 @@ class WebGPURenderer extends Renderer {
   void render1(Object3D scene, Camera camera, GpuFrame frame) {
     // Validate that the system hardware and frame target state are healthy before evaluating instructions
     if (!_isInitialized) {
-      print('T033: Renderer not initialized, cannot render');
-      //return;
+      console.info('T033: Renderer not initialized, cannot render');
+      return;
     }
 
     _statsTracker.frameStart();
@@ -465,7 +461,7 @@ class WebGPURenderer extends Renderer {
     final bool diag = _frameCount < _diagFrames;
 
     if (enableFrameLogging) {
-      print('T033: [Frame $_frameCount] Starting render...');
+      console.info('T033: [Frame $_frameCount] Starting render...');
     }
 
     try {
@@ -477,86 +473,96 @@ class WebGPURenderer extends Renderer {
       scene.updateMatrixWorld(true);
       
       if (enableFrameLogging) {
-        print('T033: [Frame $_frameCount] - Updating camera matrices...');
+        console.info('T033: [Frame $_frameCount] - Updating camera matrices...');
       }
       camera.updateMatrixWorld();
       camera.updateProjectionMatrix();
 
       // Multiply camera matrices using the engine matrix models math package
-      final projectionViewMatrix = Matrix4()
-        ..setFrom(camera.projectionMatrix)
-        ..multiply(camera.matrixWorldInverse);
+      // final projectionViewMatrix = Matrix4()
+      //   ..setFrom(camera.projectionMatrix)
+      //   ..multiply(camera.matrixWorldInverse);
 
-      if (enableFrameLogging) {
-        print('T033: [Frame $_frameCount] - Creating frustum for culling...');
-      }
-      final frustum = Frustum()..setFromMatrix(projectionViewMatrix);
+      // if (enableFrameLogging) {
+      //   console.info('T033: [Frame $_frameCount] - Creating frustum for culling...');
+      // }
+      // final frustum = Frustum()..setFromMatrix(projectionViewMatrix);
 
       // Fetch the active frame target view attachment out from the canvas context layer
       if (enableFrameLogging) {
-        print('T033: [Frame $_frameCount] - Getting current texture from swap chain...');
+        console.info('T033: [Frame $_frameCount] - Getting current texture from swap chain...');
       }
+      final textureView = frame.targetView;
+      //_ensureMsaaColorTexture(frame.width, frame.height, frame.format);
+      final bool msaaActive = _msaaColorTextureView != null;
+      final int dynamicSampleCount = msaaActive ? 4 : 1;
 
-      _ensureDepthTexture(frame.width, frame.height);
+      _ensureDepthTexture(frame.width, frame.height, sampleCount: dynamicSampleCount);
+
+      final msaaColorView = _msaaColorTextureView ?? textureView;
       final depthView = _depthTextureView;
       
       if (depthView == null && diag) {
-        print('⚠️ Depth texture unavailable; rendering without depth buffer');
+        console.warning('⚠️ Depth texture unavailable; rendering without depth buffer');
       }
 
       // Allocate the execution timeline command encoder directly via the device instance
       if (enableFrameLogging) {
-        print('T033: [Frame $_frameCount] - Creating command encoder...');
+        console.info('T033: [Frame $_frameCount] - Creating command encoder...');
       }
       final commandEncoder = frame.device.createCommandEncoder(label: 'Main Command Encoder');
-
-      // Feature 020 Render Pass instantiation wrapper pipeline
-      if (enableFrameLogging) {
-        print('T033: [Frame $_frameCount] - Initializing RenderPassManager...');
-      }
-      _renderPassManager = WebGPURenderPassManager(commandEncoder)..enableDiagnostics = diag;
-
-      if (enableFrameLogging) {
-        print('T033: [Frame $_frameCount] - Beginning render pass (clearColor=[${actualClearColor.red}, ${actualClearColor.green}, ${actualClearColor.blue}])...');
+      if (enableFrameLogging){
+        console.info("T033: [Frame $_frameCount] - Creating command encoder...");
       }
 
-      // Build specification attachment maps using gpux model descriptors arrays blocks
-      final GpuRenderPassEncoder renderPass = commandEncoder.beginRenderPass(
-        label: 'Primary Render Pass',
-        colorAttachments: [
-          GpuColorAttachment(
-            view: frame.targetView,
-            loadOp: GpuLoadOp.clear,
-            clearValue: GpuColor(
-              scene.background is Color? scene.background.red: actualClearColor.red, 
-              scene.background is Color? scene.background.green: actualClearColor.green,  
-              scene.background is Color? scene.background.blue: actualClearColor.blue, 
-              clearAlpha
-            ),      
-            storeOp: GpuStoreOp.store,
-          ),
-        ],
-        depthStencilAttachment: depthView != null
-            ? GpuDepthStencilAttachment(
-                view: depthView,
-                depthLoadOp: GpuLoadOp.clear,
-                depthClearValue: 1.0,
-                depthStoreOp: GpuStoreOp.store,
-              )
-            : null,
+      // T020: Initialize RenderPassManager for this frame
+      if (enableFrameLogging){
+        console.info("T033: [Frame $_frameCount] - Initializing RenderPassManager...");
+      }
+      _renderPassManager = WebGPURenderPassManager(commandEncoder);
+
+      // T020: Begin render pass using manager
+      if (enableFrameLogging){
+        console.info("T033: [Frame $_frameCount] - Beginning render pass (clearColor=[${actualClearColor.red}, ${actualClearColor.green}, ${actualClearColor.blue}])...");
+      }
+      late final FramebufferHandle framebufferHandle;
+      if (depthView != null) {
+        framebufferHandle = FramebufferHandle(
+          WebGPUFramebufferAttachments(
+            colorView: msaaColorView, 
+            depthView: depthView,
+            resolveView: msaaActive ? textureView : null, 
+          )
+        );
+      } 
+      else {
+        framebufferHandle = FramebufferHandle(msaaColorView);
+      }
+
+      final Color clearColorFeature020 = Color(
+        scene.background is Color? scene.background.red: actualClearColor.red, 
+        scene.background is Color? scene.background.green: actualClearColor.green,  
+        scene.background is Color? scene.background.blue: actualClearColor.blue, 
+        clearAlpha
       );
+      _renderPassManager!.beginRenderPass(clearColor: clearColorFeature020, framebuffer: framebufferHandle);
+      if (diag){
+        console.info("RENDER[$_frameCount]: beginRenderPass OK, framebuffer=${framebufferHandle.handle.runtimeType}");
+      }
 
-      if (diag) {
-        print('RENDER[$_frameCount]: beginRenderPass OK');
+      // Get the internal render pass encoder for legacy rendering code
+      final renderPass = _renderPassManager!.getPassEncoder()!;
+      if (diag){
+        console.info("RENDER[$_frameCount]: passEncoder type=${renderPass.runtimeType}");
       }
 
       // Extract light descriptors transformations data properties out from scene graph
-      final sceneBrdf = scene.userData['environmentBrdfLut'] as Texture2D?;
+      final sceneBrdf = scene.userData['environmentBrdfLut'];
       final lightingUniforms = collectSceneLightingUniforms(scene);
       final environmentBinding = _environmentManager.prepare(scene.environment as CubeTexture?, sceneBrdf);
 
       if (enableFrameLogging) {
-        print('T033: [Frame $_frameCount] - Traversing scene graph and rendering meshes...');
+        console.info('T033: [Frame $_frameCount] - Traversing scene graph and rendering meshes...');
       }
       
       String? firstMeshName;
@@ -573,36 +579,36 @@ class WebGPURenderer extends Renderer {
       });
 
       if (diag) {
-        print('RENDER[$_frameCount]: meshes rendered=$_drawCallCount, triangles=$_triangleCount, first=$firstMeshName, last=$lastMeshName');
+        console.info('RENDER[$_frameCount]: meshes rendered=$_drawCallCount, triangles=$_triangleCount, first=$firstMeshName, last=$lastMeshName');
       }
 
       // Close and seal execution descriptors arrays loops steps blocks
       if (enableFrameLogging) {
-        print('T033: [Frame $_frameCount] - Ending render pass...');
+        console.info('T033: [Frame $_frameCount] - Ending render pass...');
       }
       renderPass.end();
 
       if (enableFrameLogging) {
-        print('T033: [Frame $_frameCount] - Finishing command encoder...');
+        console.info('T033: [Frame $_frameCount] - Finishing command encoder...');
       }
       final commandBuffer = commandEncoder.finish();
 
       if (enableFrameLogging) {
-        print('T033: [Frame $_frameCount] - Submitting command buffer to GPU...');
+        console.info('T033: [Frame $_frameCount] - Submitting command buffer to GPU...');
       }
       
       // Submit arrays parameters to native execution stream queue directly off the logical device channel reference
       frame.device.queue.submit([commandBuffer]);
       
       if (diag) {
-        print('RENDER[$_frameCount]: submitted successfully via device queue timeline channel');
+        console.info('RENDER[$_frameCount]: submitted successfully via device queue timeline channel');
       }
 
       // Blit presentation layers workaround blocks logic goes here if active...
       _frameCount++;
     } catch (e, stack) {
-      print('T033: ❌ ERROR during execution frame loop lifecycle trace cycle: $e');
-      print(stack);
+      console.error('T033: ❌ ERROR during execution frame loop lifecycle trace cycle: $e');
+      console.error(stack);
     }
   }
 
@@ -724,7 +730,7 @@ class WebGPURenderer extends Renderer {
       );
 
       if (materialTextureBinding == null) {
-        print('Warning: Material ${descriptor.key} requires texture bindings but none were prepared; skipping mesh');
+        console.warning('Warning: Material ${descriptor.key} requires texture bindings but none were prepared; skipping mesh');
         return;
       }
     }
@@ -740,9 +746,6 @@ class WebGPURenderer extends Renderer {
       bufferLayouts,
     );
     if (pipeline == null) return;
-    
-    // final pipeline = _getOrCreateZeroUniform3dPipeline1(_device, bufferLayouts);
-    // if (pipeline == null) return;
 
     // 3. RECORD COMMAND CHANNELS
     renderPass.setPipeline(pipeline);
@@ -762,14 +765,11 @@ class WebGPURenderer extends Renderer {
       materialUniforms: materialUniforms,
     )) return;
     
-    _manualBindGroup = _uniformManager.bindGroup();
-    if (_manualBindGroup == null) return;
+    final bindGroup = _uniformManager.bindGroup();
+    if (bindGroup == null) return;
 
-    // Bind our local safe bind group with no dynamic offsets array
-    if (_manualBindGroup != null) {
-      final int dynamicOffset = _uniformManager.dynamicOffset(_drawIndexInFrame);
-      renderPass.setBindGroup(0, _manualBindGroup!, dynamicOffsets: [dynamicOffset]);
-    }
+    final int dynamicOffset = _uniformManager.dynamicOffset(_drawIndexInFrame);
+    renderPass.setBindGroup(0, bindGroup, dynamicOffsets: [dynamicOffset]);
 
     // Bind additional custom shader pipeline groups
     _bindAdditionalGroups(descriptor, materialTextureBinding, environmentBinding, renderPass);
@@ -779,8 +779,13 @@ class WebGPURenderer extends Renderer {
     if (buffers.indexBuffer != null && buffers.indexCount > 0) {
       renderPass.setIndexBuffer(buffers.indexBuffer!, buffers.indexFormat);
       renderPass.drawIndexed(indexCount: buffers.indexCount, instanceCount: instanceCount);
-    } else {
+      final trianglesDrawn = (buffers.indexCount ~/ 3) * instanceCount;
+      _triangleCount += trianglesDrawn;
+    } 
+    else {
       renderPass.draw(vertexCount: buffers.vertexCount, instanceCount: instanceCount);
+      final trianglesDrawn = (buffers.indexCount ~/ 3) * instanceCount;
+      _triangleCount += trianglesDrawn;
     }
 
     _drawCallCount++;
@@ -1044,7 +1049,7 @@ class WebGPURenderer extends Renderer {
             usesNormalMap = true;
           }
         } else {
-          print('Warning: Normal map assigned to ${material.name} but geometry lacks tangents; falling back to vertex normals.');
+          console.warning('Warning: Normal map assigned to ${material.name} but geometry lacks tangents; falling back to vertex normals.');
         }
       }
     }
@@ -1121,375 +1126,10 @@ class WebGPURenderer extends Renderer {
     }
 
     _viewport = Vector4(0, 0, width.toDouble(), height.toDouble());
-    _ensureDepthTexture(width, height);
+    //_ensureDepthTexture(width, height, );
   }
-GpuRenderPipeline _getOrCreateZeroUniform3dPipeline(
-  GpuDevice device, 
-  List<GpuVertexBufferLayout?> vertexLayouts,
-  [bool hasDepthStencil = true]
-) {
-  if (_zeroUniform3dPipeline != null) return _zeroUniform3dPipeline!;
-
-  // 1. Shared header matching your exact memory signature footprint
-  const String sharedUniformHeader = '''
-    struct Uniforms {
-        projectionMatrix: mat4x4<f32>,
-        viewMatrix: mat4x4<f32>,
-        modelMatrix: mat4x4<f32>,
-        baseColor: vec4<f32>,
-        pbrParams: vec4<f32>,
-        cameraPosition: vec4<f32>,
-        ambientColor: vec4<f32>,
-        fogColor: vec4<f32>,
-        fogParams: vec4<f32>,
-        mainLightDirection: vec4<f32>,
-        mainLightColor: vec4<f32>,
-        morphInfluences0: vec4<f32>,
-        morphInfluences1: vec4<f32>,
-    }
-    @group(0) @binding(0) var<uniform> uniforms: Uniforms;
-  ''';
-
-  const String vertexWgsl = '''
-    $sharedUniformHeader
-
-    struct VertexInput {
-        @location(0) position: vec3<f32>,
-    }
-    struct PbrVertexOutput {
-        @builtin(position) position: vec4<f32>,
-        @location(0) worldNormal: vec3<f32>,
-        @location(1) viewDir: vec3<f32>,
-        @location(2) albedo: vec3<f32>,
-    }
-
-    @vertex
-    fn vs_main(input: VertexInput, @builtin(vertex_index) vertexIndex: u32) -> PbrVertexOutput {
-        var output: PbrVertexOutput;
-
-        // HARDCODED GEOMETRY TABLE: Bypasses corrupted geometry vertex buffers!
-        var pos = array<vec2<f32>, 3>(
-            vec2<f32>(0.0, 0.5),   // Top vertex
-            vec2<f32>(-0.5, -0.5), // Bottom Left vertex
-            vec2<f32>(0.5, -0.5)   // Bottom Right vertex
-        );
-
-        // Project directly to the screen in un-clipped flat 2D space
-        output.position = vec4<f32>(pos[vertexIndex], 0.0, 1.0);
-        
-        output.worldNormal = vec3<f32>(0.0, 0.0, 1.0);
-        output.viewDir = vec3<f32>(0.0, 0.0, 1.0);
-        
-        // Hardcode a bright, solid crimson color to isolate data streams
-        output.albedo = vec3<f32>(1.0, 0.0, 0.2); 
-        return output;
-    }
-  ''';
-
-  const String fragmentWgsl = '''
-    $sharedUniformHeader
-
-    struct PbrFragmentInput {
-        @location(0) worldNormal: vec3<f32>,
-        @location(1) viewDir: vec3<f32>,
-        @location(2) albedo: vec3<f32>,
-    }
-
-    @fragment
-    fn fs_main(input: PbrFragmentInput) -> @location(0) vec4<f32> {
-        // Output the hardcoded crimson albedo directly
-        return vec4<f32>(input.albedo, 1.0);
-    }
-  ''';
-
-  final uniformEntry = GpuBindGroupLayoutEntry.buffer(
-    binding: 0,
-    visibility: GpuShaderStage.vertex | GpuShaderStage.fragment,
-    type: GpuBufferBindingType.uniform,
-    hasDynamicOffset: true,
-    minBindingSize: 352,
-  );
-
-  final group0Layout = device.createBindGroupLayout(
-    [uniformEntry],
-    label: 'Inline Sphere Group Layout',
-  );
-
-  final explicitLayout = device.createPipelineLayout(
-    [group0Layout],
-    label: 'Inline Sphere Master Layout',
-  );
-
-  GpuDepthStencilState? depthStencilState;
-  if (hasDepthStencil) {
-    depthStencilState = const GpuDepthStencilState(
-      format: GpuTextureFormat.depth24Plus,
-      depthWriteEnabled: true,
-      depthCompare: GpuCompareFunction.lessEqual,
-    );
-  }
-// Inside your real _getOrCreatePipeline method, locate where you process vertexLayouts:
-// We need to ensure that the pipeline descriptor vertex layout matches your PBR chunks exactly!
-
-final List<GpuVertexBufferLayout> compliantLayouts = [];
-
-// If your engine maps everything into a single interleaved vertex stream (typical for optimised WebGPU engines):
-compliantLayouts.add(
-  GpuVertexBufferLayout(
-    arrayStride: 36, // 9 floats * 4 bytes = 36 bytes stride (pos:3, normal:3, color:3)
-    stepMode: GpuVertexStepMode.vertex,
-    attributes: [
-      const GpuVertexAttribute(
-        format: GpuVertexFormat.float32x3, 
-        offset: 0, 
-        shaderLocation: 0, // Maps to @location(0) position
-      ),
-      const GpuVertexAttribute(
-        format: GpuVertexFormat.float32x3, 
-        offset: 12, 
-        shaderLocation: 1, // Maps to @location(1) normal
-      ),
-      const GpuVertexAttribute(
-        format: GpuVertexFormat.float32x3, 
-        offset: 24, 
-        shaderLocation: 2, // Maps to @location(2) color
-      ),
-    ],
-  ),
-);
-
-  _zeroUniform3dPipeline = device.createRenderPipeline(GpuRenderPipelineDescriptor(
-    label: 'Responsive 3D Camera Sphere Pipeline',
-    layout: explicitLayout,
-    vertexModule: device.createShaderModule(vertexWgsl),
-    vertexEntryPoint: 'vs_main',
-    vertexBuffers: compliantLayouts,
-    fragmentModule: device.createShaderModule(fragmentWgsl),
-    fragmentEntryPoint: 'fs_main',
-    colorTargets: [
-      const GpuColorTargetState(
-        format: GpuTextureFormat.bgra8Unorm,
-        writeMask: GpuColorWrite.all,
-      ),
-    ],
-    primitiveTopology: GpuPrimitiveTopology.triangleList,
-    frontFace: GpuFrontFace.ccw,
-    cullMode: GpuCullMode.none,
-    depthStencil: depthStencilState,
-  ));
-
-  return _zeroUniform3dPipeline!;
-}
-
-  GpuRenderPipeline _getOrCreateZeroUniform3dPipeline1(
-    GpuDevice device, 
-    List<GpuVertexBufferLayout?> vertexLayouts,
-    [bool hasDepthStencil = true] // Pass true if your render pass uses a depthView attachment!
-  ) {
-    if (_zeroUniform3dPipeline != null) return _zeroUniform3dPipeline!;
-
-    // 1. Shared WGSL header containing your 352-byte struct layout matrix
-    const String sharedUniformHeader = '''
-      struct Uniforms {
-          projectionMatrix: mat4x4<f32>,     // 64 bytes
-          viewMatrix: mat4x4<f32>,           // 64 bytes
-          modelMatrix: mat4x4<f32>,          // 64 bytes
-          padding0: vec4<f32>,               // baseColor (16 bytes)
-          padding1: vec4<f32>,               // pbrParams (16 bytes)
-          padding2: vec4<f32>,               // cameraPosition (16 bytes)
-          padding3: vec4<f32>,               // ambientColor (16 bytes)
-          padding4: vec4<f32>,               // fogColor (16 bytes)
-          padding5: vec4<f32>,               // fogParams (16 bytes)
-          padding6: vec4<f32>,               // mainLightDirection (16 bytes)
-          padding7: vec4<f32>,               // mainLightColor (16 bytes)
-          padding8: vec4<f32>,               // morphInfluences0 (16 bytes)
-          padding9: vec4<f32>,               // morphInfluences1 (16 bytes)
-      }
-      @group(0) @binding(0) var<uniform> uniforms: Uniforms;
-    ''';
-
-    const String vertexWgsl = '''
-      $sharedUniformHeader
-
-      struct VertexInput {
-          @location(0) position: vec3<f32>,
-      }
-
-      @vertex
-      fn vs_main(input: VertexInput) -> @builtin(position) vec4<f32> {
-          let worldPosition = uniforms.modelMatrix * vec4<f32>(input.position, 1.0);
-          let viewPosition = uniforms.viewMatrix * worldPosition;
-          return uniforms.projectionMatrix * viewPosition;
-      }
-    ''';
-
-    const String fragmentWgsl = '''
-      $sharedUniformHeader
-
-      @fragment
-      fn fs_main() -> @location(0) vec4<f32> {
-          // Safe to expose fragment visibility now because structural bindings match exactly!
-          return vec4<f32>(1.0, 1.0, 1.0, 1.0); // Solid White
-      }
-    ''';
-
-    final uniformEntry = GpuBindGroupLayoutEntry.buffer(
-      binding: 0,
-      visibility: GpuShaderStage.vertex | GpuShaderStage.fragment,
-      type: GpuBufferBindingType.uniform,
-      hasDynamicOffset: true, 
-      minBindingSize: 352,   
-    );
-    final GpuBindGroupLayout group0Layout = device.createBindGroupLayout(
-      [uniformEntry],
-      label: 'Inline Sphere Group Layout',
-    );
-
-    final GpuPipelineLayout explicitLayout = device.createPipelineLayout(
-      [group0Layout],
-      label: 'Inline Sphere Master Layout',
-    );
-
-    // 3. Setup deep target checking structures
-    GpuDepthStencilState? depthStencilState;
-    if (hasDepthStencil) {
-      depthStencilState = const GpuDepthStencilState(
-        format: GpuTextureFormat.depth24Plus, // Must match your active swapchain depth view format
-        depthWriteEnabled: true,
-        depthCompare: GpuCompareFunction.lessEqual,
-      );
-    }
-
-    // 4. Assemble standard production descriptors via gpux creation channels
-    _zeroUniform3dPipeline = device.createRenderPipeline(GpuRenderPipelineDescriptor(
-      label: 'Responsive 3D Camera Sphere Pipeline',
-      layout: explicitLayout,
-      vertexModule: device.createShaderModule(vertexWgsl),
-      vertexEntryPoint: 'vs_main',
-      vertexBuffers: vertexLayouts,
-      fragmentModule: device.createShaderModule(fragmentWgsl),
-      fragmentEntryPoint: 'fs_main',
-      colorTargets: [
-        const GpuColorTargetState(
-          format: GpuTextureFormat.bgra8Unorm,
-          writeMask: GpuColorWrite.all,
-        ),
-      ],
-      primitiveTopology: GpuPrimitiveTopology.triangleList,
-      frontFace: GpuFrontFace.ccw,
-      cullMode: GpuCullMode.none,
-      depthStencil: depthStencilState,
-    ));
-
-    return _zeroUniform3dPipeline!;
-  }
-
-  GpuBindGroup? _manualBindGroup;
-  GpuRenderPipeline? _zeroUniform3dPipeline;
   
-GpuRenderPipeline? _getOrCreatePipeline(
-  ResolvedMaterialDescriptor resolved,
-  MaterialShaderDescriptor shaderDescriptor,
-  EnvironmentBinding? environmentBinding,
-  MaterialTextureBinding? materialBinding,
-  List<GpuVertexBufferLayout> vertexLayouts,
-) {
-  final gpuDevice = _device;
-  final shaderSource = MaterialShaderGenerator.compile(shaderDescriptor);
-  final renderState = resolved.renderState;
-
-  DepthStencilStateDescriptor? depthState;
-  if (renderState.depthTest) {
-    depthState = DepthStencilStateDescriptor(
-      format: renderState.depthFormat,
-      depthWriteEnabled: renderState.depthWrite,
-      depthCompare: renderState.depthCompare,
-    );
-  }
-
-  final pipelineDescriptor = RenderPipelineDescriptor(
-    label: resolved.descriptor.key,
-    vertexShader: shaderSource.vertexSource,
-    fragmentShader: shaderSource.fragmentSource,
-    vertexLayouts: vertexLayouts,
-    primitiveTopology: renderState.topology,
-    cullMode: renderState.cullMode,
-    frontFace: renderState.frontFace,
-    depthStencilState: depthState,
-    colorTarget: renderState.colorTarget.copyWith(format: frame.format),
-  );
-
-  final cacheKey = PipelineKey.fromDescriptor(pipelineDescriptor);
-
-  if (_pipelineCacheMap.containsKey(cacheKey)) {
-    final cached = _pipelineCacheMap[cacheKey]!;
-    if (cached.isReady) {
-      return cached.getPipeline();
-    }
-  }
-
-  if (!_pipelineCacheMap.containsKey(cacheKey)) {
-    print("Creating new pipeline for ${resolved.descriptor.key}");
-    final pipeline = WebGPUPipeline(gpuDevice, pipelineDescriptor);
-    _pipelineCacheMap[cacheKey] = pipeline;
-
-    try {
-      final layoutByGroup = <int, GpuBindGroupLayout>{};
-
-      if (materialBinding != null) {
-        final textureGroups = <int>{};
-        textureGroups.addAll(resolved.descriptor.bindingGroups(MaterialBindingSource.albedoMap));
-        textureGroups.addAll(resolved.descriptor.bindingGroups(MaterialBindingSource.normalMap));
-        textureGroups.addAll(resolved.descriptor.bindingGroups(MaterialBindingSource.volumeTexture));
-        
-        // Match Kotlin's .filter { it > 0 } rule
-        for (final group in textureGroups) {
-          if (group > 0) {
-            layoutByGroup[group] = materialBinding.layout;
-          }
-        }
-      }
-
-      if (resolved.descriptor.requiresBinding(MaterialBindingSource.environmentPrefilter)) {
-        final environmentLayout = environmentBinding?.layout;
-        if (environmentLayout == null) return null;
-
-        final envGroups = resolved.descriptor.bindingGroups(MaterialBindingSource.environmentPrefilter);
-        for (final group in envGroups) {
-          if (group > 0) {
-            layoutByGroup[group] = environmentLayout;
-          }
-        }
-      }
-
-      // Sort keys numerically to perfectly match Kotlin's sortedBy { it.key }.map { it.value }
-      final sortedKeys = layoutByGroup.keys.toList()..sort();
-      final extraLayouts = sortedKeys.map((key) => layoutByGroup[key]!).toList();
-
-      // Delegate layout structure layout to the UniformBufferManager just like Kotlin
-      final pipelineLayoutWrapper = _uniformManager.pipelineLayout();//extraLayouts);
-      if (pipelineLayoutWrapper == null) {
-        print('Pipeline aborted: uniform layout not ready');
-        return null;
-      }
-
-      // Trigger pipeline compilation
-      int result = pipeline.create(pipelineLayoutWrapper);
-      if(result == -1){
-        _pipelineCacheMap.remove(cacheKey);
-      }
-    } catch (e) {
-      print("Pipeline creation exception: ${e.toString()}");
-      _pipelineCacheMap.remove(cacheKey);
-      return null;
-    }
-  }
-
-  return _pipelineCacheMap[cacheKey]?.getPipeline();
-}
-
-
-  GpuRenderPipeline? _getOrCreatePipeline1(
+  GpuRenderPipeline? _getOrCreatePipeline(
     ResolvedMaterialDescriptor resolved,
     MaterialShaderDescriptor shaderDescriptor,
     EnvironmentBinding? environmentBinding,
@@ -1506,7 +1146,8 @@ GpuRenderPipeline? _getOrCreatePipeline(
       depthCompare: renderState.depthCompare,
     ) : null;
 
-    final rpd = RenderPipelineDescriptor(
+    final pipelineDescriptor = RenderPipelineDescriptor(
+      label: resolved.descriptor.key,
       vertexShader: shaderSource.vertexSource,
       fragmentShader: shaderSource.fragmentSource,
       vertexLayouts: vertexLayouts,
@@ -1514,12 +1155,16 @@ GpuRenderPipeline? _getOrCreatePipeline(
       cullMode: renderState.cullMode,
       frontFace: renderState.frontFace,
       depthStencilState: depthState,
-      colorTarget: ColorTargetDescriptor(format: GpuTextureFormat.bgra8Unorm, writeMask: ColorWriteMask.all),
+      colorTarget: renderState.colorTarget.copyWith(format: frame.format),
+      multisampleState: MultisampleStateDescriptor(
+        count: 1, 
+        mask: GpuColorWrite.all, 
+        alphaToCoverageEnabled: false
+      )
     );
 
-    final cacheKey = PipelineKey.fromDescriptor(rpd);
+    final cacheKey = PipelineKey.fromDescriptor(pipelineDescriptor);
 
-    // Cache lookup check
     if (_pipelineCacheMap.containsKey(cacheKey)) {
       final cached = _pipelineCacheMap[cacheKey]!;
       if (cached.isReady) {
@@ -1527,81 +1172,96 @@ GpuRenderPipeline? _getOrCreatePipeline(
       }
     }
 
-    print('Creating new pipeline for ${resolved.descriptor.key}');
-    final pipeline = WebGPUPipeline(gpuDevice, rpd);
+    if (!_pipelineCacheMap.containsKey(cacheKey)) {
+      console.info("Creating new pipeline for ${resolved.descriptor.key}");
+      final pipeline = WebGPUPipeline(gpuDevice, pipelineDescriptor);
+      _pipelineCacheMap[cacheKey] = pipeline;
 
-    try {
-      final layoutByGroup = <int, GpuBindGroupLayout>{};
-      
-      // 1. BUILD EXPLICIT UNIFORM BIND GROUP LAYOUT FOR GROUP 0
-      final uniformEntry = GpuBindGroupLayoutEntry.buffer(
-        binding: 0,
-        visibility: GpuShaderStage.vertex | GpuShaderStage.fragment,
-        type: GpuBufferBindingType.uniform,
-        hasDynamicOffset: true, // MUST remain true to support multi-mesh rendering strides
-        minBindingSize: 352,    // Matches the exact WGSL Uniforms struct declaration footprint (88 floats * 4 bytes)
-      );
-      layoutByGroup[0] = gpuDevice.createBindGroupLayout([uniformEntry], label: 'Uniform Group 0 Layout');
+      try {
+        final layoutByGroup = <int, GpuBindGroupLayout>{};
 
-      // 2. MAP COMPLIANT MATERIAL TEXTURE LAYOUT GROUPS
-      if (materialBinding != null) {
-        final textureGroups = <int>{};
-        textureGroups.addAll(resolved.descriptor.bindingGroups(MaterialBindingSource.albedoMap));
-        textureGroups.addAll(resolved.descriptor.bindingGroups(MaterialBindingSource.normalMap));
-        textureGroups.addAll(resolved.descriptor.bindingGroups(MaterialBindingSource.volumeTexture));
-        for (final group in textureGroups) {
-          layoutByGroup[group] = materialBinding.layout;
-        }
-      }
-
-      if (resolved.descriptor.requiresBinding(MaterialBindingSource.environmentPrefilter)) {
-        final environmentLayout = environmentBinding?.layout;
-        if (environmentLayout != null) {
-          final envGroups = resolved.descriptor.bindingGroups(MaterialBindingSource.environmentPrefilter);
-          for (final group in envGroups) {
-            layoutByGroup[group] = environmentLayout;
+        if (materialBinding != null) {
+          final textureGroups = <int>{};
+          textureGroups.addAll(resolved.descriptor.bindingGroups(MaterialBindingSource.albedoMap));
+          textureGroups.addAll(resolved.descriptor.bindingGroups(MaterialBindingSource.normalMap));
+          textureGroups.addAll(resolved.descriptor.bindingGroups(MaterialBindingSource.volumeTexture));
+          
+          // Match Kotlin's .filter { it > 0 } rule
+          for (final group in textureGroups) {
+            if (group > 0) {
+              layoutByGroup[group] = materialBinding.layout;
+            }
           }
         }
-      }
 
-      // Sort and compile the pipeline layout list array
-      final sortedKeys = layoutByGroup.keys.toList()..sort();
-      final extraLayouts = sortedKeys.map((key) => layoutByGroup[key]!).toList();
-      
-      final GpuPipelineLayout pipelineLayout = gpuDevice.createPipelineLayout(
-        extraLayouts,
-        label: '${resolved.descriptor.key}-layout',
-      );
+        if (resolved.descriptor.requiresBinding(MaterialBindingSource.environmentPrefilter)) {
+          final environmentLayout = environmentBinding?.layout;
+          if (environmentLayout == null) return null;
 
-      final creationResult = pipeline.create(pipelineLayout);
-      if (creationResult == -1) {
-        print('Pipeline creation failed: ${creationResult}');
+          final envGroups = resolved.descriptor.bindingGroups(MaterialBindingSource.environmentPrefilter);
+          for (final group in envGroups) {
+            if (group > 0) {
+              layoutByGroup[group] = environmentLayout;
+            }
+          }
+        }
+
+        // Sort keys numerically to perfectly match Kotlin's sortedBy { it.key }.map { it.value }
+        final sortedKeys = layoutByGroup.keys.toList()..sort();
+        final extraLayouts = sortedKeys.map((key) => layoutByGroup[key]!).toList();
+
+        // Delegate layout structure layout to the UniformBufferManager just like Kotlin
+        final pipelineLayoutWrapper = _uniformManager.pipelineLayout(extraLayouts);
+        if (pipelineLayoutWrapper == null) {
+          console.info('Pipeline aborted: uniform layout not ready');
+          return null;
+        }
+
+        // Trigger pipeline compilation
+        int result = pipeline.create(pipelineLayoutWrapper);
+        if(result == -1){
+          _pipelineCacheMap.remove(cacheKey);
+        }
+      } catch (e) {
+        console.info("Pipeline creation exception: ${e.toString()}");
+        _pipelineCacheMap.remove(cacheKey);
         return null;
       }
+    }
 
-      _pipelineCacheMap[cacheKey] = pipeline;
-      return pipeline.getPipeline();
+    return _pipelineCacheMap[cacheKey]?.getPipeline();
+  }
 
+  void _ensureMsaaColorTexture(int width, int height, GpuTextureFormat format) {
+    if (width <= 0 || height <= 0) return;
+    if (_msaaColorTexture != null && _msaaColorWidth == width && _msaaColorHeight == height) return;
+
+    _msaaColorTexture?.destroy();
+
+    try {
+      final texture = _device.createTexture(
+        label: 'MSAA Color Texture',
+        width: width,
+        height: height,
+        depthOrArrayLayers: 1,
+        format: format,
+        usage: GpuTextureUsage.renderAttachment | GpuTextureUsage.textureBinding, 
+        sampleCount: 4, // Explicitly match your 4x pipeline setting
+      );
+      _msaaColorTexture = texture;
+      _msaaColorTextureView = texture.createView();
+      _msaaColorWidth = width;
+      _msaaColorHeight = height;
     } catch (e) {
-      print('Pipeline creation exception trace: $e');
-      return null;
+      console.info('Failed to create MSAA color target: $e');
+      _msaaColorTexture = null;
+      _msaaColorTextureView = null;
+      _msaaColorWidth = 0;
+      _msaaColorHeight = 0;
     }
   }
 
-
-  BufferHandle _createVertexBufferViaManager(Float32List vertices) {
-    return _bufferManager!.createVertexBuffer(vertices);
-  }
-
-  BufferHandle _createIndexBufferViaManager(Uint32List indices) {
-    return _bufferManager!.createIndexBuffer(indices);
-  }
-
-  BufferHandle _createUniformBufferViaManager(int sizeBytes) {
-    return _bufferManager!.createUniformBuffer(sizeBytes);
-  }
-
-  void _ensureDepthTexture(int width, int height) {
+  void _ensureDepthTexture(int width, int height, {int sampleCount = 1}) {
     if (width <= 0 || height <= 0) return;
     if (_depthTexture != null && _depthTextureWidth == width && _depthTextureHeight == height) return;
 
@@ -1616,9 +1276,12 @@ GpuRenderPipeline? _getOrCreatePipeline(
     try {
       final texture = _device.createTexture(
         label: 'Depth Texture',
-        width: width, height: height, depthOrArrayLayers: 1,
+        width: width, 
+        height: height, 
+        depthOrArrayLayers: 1,
         format: GpuTextureFormat.depth24Plus,
         usage: GpuTextureUsage.renderAttachment,
+        sampleCount: sampleCount,
       );
 
       _depthTexture = texture;
@@ -1630,7 +1293,7 @@ GpuRenderPipeline? _getOrCreatePipeline(
       _depthTextureBytes = width * height * bytesPerPixel;
       _statsTracker.recordTextureCreated(_depthTextureBytes);
     } catch (e) {
-      print('Failed to create depth texture target: $e');
+      console.info('Failed to create depth texture target: $e');
       _depthTexture = null;
       _depthTextureView = null;
       _depthTextureWidth = 0;

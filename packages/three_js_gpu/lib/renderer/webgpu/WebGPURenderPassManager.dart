@@ -1,5 +1,6 @@
 import 'dart:core';
 import 'package:gpux/gpux.dart';
+import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'WebGPUBufferManager.dart';
 import 'WebGPUFrameAttachments.dart'; // Adjust based on your exact gpux library paths
@@ -40,13 +41,16 @@ class WebGPURenderPassManager implements RenderPassManager {
 
       final GpuTextureView colorView;
       final GpuTextureView? depthView;
+      final GpuTextureView? resolveView;
 
       if (handle is WebGPUFramebufferAttachments) {
         colorView = handle.colorView;
         depthView = handle.depthView;
+        resolveView = handle.resolveView; 
       } else if (handle is GpuTextureView) {
         colorView = handle;
         depthView = null;
+        resolveView = null;
       } else {
         throw ArgumentError("framebuffer.handle must be GpuTextureView or WebGPUFramebufferAttachments");
       }
@@ -55,7 +59,8 @@ class WebGPURenderPassManager implements RenderPassManager {
       final colorAttachment = GpuColorAttachment(
         view: colorView,
         loadOp: GpuLoadOp.clear,
-        storeOp: GpuStoreOp.store,
+        resolveTarget: resolveView,
+        storeOp: resolveView != null ? GpuStoreOp.discard : GpuStoreOp.store, // Discard 4x view memory if resolved
         clearValue: GpuColor(
           clearColor.red,
           clearColor.green,
@@ -70,13 +75,13 @@ class WebGPURenderPassManager implements RenderPassManager {
           view: depthView,
           depthClearValue: 1.0,
           depthLoadOp: GpuLoadOp.clear,
-          depthStoreOp: GpuStoreOp.store,
+          depthStoreOp: resolveView != null ? GpuStoreOp.discard : GpuStoreOp.store,
         );
       }
 
       // Diagnostics logging window block
       if (enableDiagnostics) {
-        print(
+        console.info(
           "PASS-DESC: colorView type=${colorView.runtimeType}, "
           "clear=[${clearColor.red}, ${clearColor.green}, ${clearColor.blue}, ${clearColor.alpha}], "
           "depthView=${depthView != null}, "
@@ -85,14 +90,17 @@ class WebGPURenderPassManager implements RenderPassManager {
       }
 
       // Spun up the active render command encoder context lane
-      _passEncoder = commandEncoder.beginRenderPass(colorAttachments: [colorAttachment], depthStencilAttachment: depthStencilAttachment);
+      _passEncoder = commandEncoder.beginRenderPass(
+        colorAttachments: [colorAttachment], 
+        depthStencilAttachment: depthStencilAttachment
+      );
       
       if (_passEncoder == null) {
         throw RenderPassException("Failed to begin render pass");
       }
 
       if (enableDiagnostics) {
-        print("PASS-DESC: passEncoder=${_passEncoder.runtimeType}, active=true");
+        console.info("PASS-DESC: passEncoder=${_passEncoder.runtimeType}, active=true");
       }
 
       _renderPassActive = true;

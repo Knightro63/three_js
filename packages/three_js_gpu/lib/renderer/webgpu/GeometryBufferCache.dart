@@ -47,7 +47,7 @@ class GeometryBufferCache {
 
     final gpuDevice = _deviceProvider();
     if (gpuDevice == null) {
-      print("ERROR: WebGPU device unavailable when creating geometry buffers");
+      console.error("ERROR: WebGPU device unavailable when creating geometry buffers");
       return null;
     }
 
@@ -116,7 +116,7 @@ class GeometryBufferCache {
       _buffersByGeometry[key] = buffers;
       return buffers;
     } catch (e) {
-      print("ERROR: Failed to create geometry buffers: ${e.toString()}");
+      console.error("ERROR: Failed to create geometry buffers: ${e.toString()}");
       return null;
     }
   }

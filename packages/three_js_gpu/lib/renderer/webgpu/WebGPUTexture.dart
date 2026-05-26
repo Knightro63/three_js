@@ -1,5 +1,6 @@
 import 'dart:typed_data';
-import 'package:gpux/gpux.dart'; // Adjust based on your exact gpux package paths
+import 'package:gpux/gpux.dart';
+import 'package:three_js_core/three_js_core.dart'; // Adjust based on your exact gpux package paths
 
 /// Texture descriptor for creation.
 class TextureDescriptor {
@@ -66,7 +67,7 @@ class WebGPUTexture {
 
       _view = _texture!.createView();
     } catch (e) {
-      print("ERROR: Texture creation failed: ${e.toString()}");
+      console.error("ERROR: Texture creation failed: ${e.toString()}");
       rethrow;
     }
   }
@@ -96,7 +97,7 @@ class WebGPUTexture {
         depthOrArrayLayers: targetDepth,
       );
     } catch (e) {
-      print("ERROR: Texture upload failed: ${e.toString()}");
+      console.error("ERROR: Texture upload failed: ${e.toString()}");
       rethrow;
     }
   }

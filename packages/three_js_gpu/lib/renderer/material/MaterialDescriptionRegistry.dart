@@ -3,7 +3,6 @@ import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 import '../../shader/MaterialShaderLibrary.dart';
 import '../geometry/GeometryDescriptor.dart';
-import '../webgpu/WebGPUPipeline.dart';
 
 
 /// Enumeration of non-uniform material resource attachment types.
@@ -53,47 +52,40 @@ enum MaterialUniformType {
 const int materialTextureGroup = 1;
 const int environmentTextureGroup = 2;
 
-/// Color target configuration including blending.
-class ColorTargetDescriptor {
-  const ColorTargetDescriptor({
-    this.format = GpuTextureFormat.bgra8Unorm,
-    this.blendState,
-    this.writeMask = ColorWriteMask.all,
-  });
 
-  final GpuTextureFormat format;
-  final GpuBlendState? blendState;
-  final ColorWriteMask writeMask; // Maps to WebGPU / gpux bitwise flag integer mask representation
+
+/// Color target configuration including blending.
+extension ColorTargetDescriptor on GpuColorTargetState{
 
   /// Shorthand immutable copier mimicking Kotlin's data class copy modifier.
-  ColorTargetDescriptor copyWith({
+  GpuColorTargetState copyWith({
     GpuTextureFormat? format,
     GpuBlendState? blendState,
-    ColorWriteMask? writeMask,
+    int? writeMask,
   }) {
-    return ColorTargetDescriptor(
+    return GpuColorTargetState(
       format: format ?? this.format,
-      blendState: blendState ?? this.blendState,
+      blend: blendState ?? this.blend,
       writeMask: writeMask ?? this.writeMask,
     );
   }
 
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is ColorTargetDescriptor &&
-          runtimeType == other.runtimeType &&
-          format == other.format &&
-          blendState == other.blendState &&
-          writeMask == other.writeMask;
+  // @override
+  // bool operator ==(Object other) =>
+  //     identical(this, other) ||
+  //     other is GpuColorTargetState &&
+  //         runtimeType == other.runtimeType &&
+  //         format == other.format &&
+  //         blend == other.blend &&
+  //         writeMask == other.writeMask;
 
-  @override
-  int get hashCode => Object.hash(format, blendState, writeMask);
+  // @override
+  // int get hashCode => Object.hash(format, blend, writeMask);
 
-  @override
-  String toString() {
-    return 'ColorTargetDescriptor(format: $format, blendState: $blendState, writeMask: $writeMask)';
-  }
+  // @override
+  // String toString() {
+  //   return 'ColorTargetDescriptor(format: $format, blendState: $blend, writeMask: $writeMask)';
+  // }
 }
 
 /// Describes fixed-function pipeline state for a material.
@@ -106,9 +98,9 @@ class MaterialRenderState {
     this.depthWrite = true,
     this.depthCompare = GpuCompareFunction.less,
     this.depthFormat = GpuTextureFormat.depth24Plus,
-    ColorTargetDescriptor? colorTarget
+    GpuColorTargetState? colorTarget
   }){
-    this.colorTarget = colorTarget ?? ColorTargetDescriptor();
+    this.colorTarget = colorTarget ?? GpuColorTargetState(format: GpuTextureFormat.bgra8Unorm);
   }
 
   final GpuPrimitiveTopology topology;
@@ -118,7 +110,7 @@ class MaterialRenderState {
   final bool depthWrite;
   final GpuCompareFunction depthCompare;
   final GpuTextureFormat depthFormat;
-  late final ColorTargetDescriptor colorTarget;
+  late final GpuColorTargetState colorTarget;
 
   MaterialRenderState applyCommonOverrides({
     required bool depthTest,
@@ -132,7 +124,7 @@ class MaterialRenderState {
       side == BackSide? GpuCullMode.front:
       GpuCullMode.none;
 
-    final writeMask = colorWrite ? ColorWriteMask.all : ColorWriteMask.none;
+    final writeMask = colorWrite ? GpuColorWrite.all : 0;
 
     return copyWith(
       cullMode: cullModeOverride,
@@ -159,7 +151,7 @@ class MaterialRenderState {
     bool? depthWrite,
     GpuCompareFunction? depthCompare,
     GpuTextureFormat? depthFormat,
-    ColorTargetDescriptor? colorTarget,
+    GpuColorTargetState? colorTarget,
   }) {
     return MaterialRenderState(
       topology: topology ?? this.topology,
@@ -615,12 +607,12 @@ abstract class MaterialDescriptorRegistry {
     final descriptor = descriptorFor(material);
     if (descriptor == null) return null;
 
-    if (material is MeshBasicMaterial) {
-      return _resolveBasic(descriptor, material);
-    } else if (material is MeshStandardMaterial) {
-      return _resolveStandard(descriptor, material);
-    }
-    return null;
+    // if (material is MeshBasicMaterial) {
+    //   return _resolveBasic(descriptor, material);
+    // } else if (material is MeshStandardMaterial) {
+    //   return _resolveStandard(descriptor, material);
+    // }
+    return _resolveStandardOrEmulated(descriptor, material);
   }
 
   static void _registerInternal(
@@ -658,6 +650,38 @@ abstract class MaterialDescriptorRegistry {
     _defaultsRegistered = true;
     _registerDefaultsLocked();
   }
+
+  static ResolvedMaterialDescriptor _resolveStandardOrEmulated(
+    MaterialDescriptor descriptor,
+    Material material,
+  ) {
+    // 1. Calculate alpha transparent blending configurations safely
+    final blendState = _blendStateFor(
+      _standardBlendToCommon(StandardBlendMode.values[material.blending]),
+      material.transparent,
+      material.opacity,
+    );
+
+    // 2. Map standard state layout overrides
+    final state = descriptor.renderState.applyCommonOverrides(
+      depthTest: material.depthTest,
+      depthWrite: material.depthWrite,
+      colorWrite: material.colorWrite,
+      side: _standardSideToCommon(material.side),
+      hasBlend: blendState != null,
+    ).copyWith(
+      colorTarget: descriptor.renderState.colorTarget.copyWith(
+        blendState: blendState,
+      ),
+    );
+
+    // 3. Output the structural properties that protect WebGPU from crashing
+    return ResolvedMaterialDescriptor(
+      descriptor: descriptor,
+      renderState: state,
+    );
+  }
+
 
   static ResolvedMaterialDescriptor _resolveBasic(
     MaterialDescriptor descriptor,

@@ -1,6 +1,5 @@
 import 'package:gpux/gpux.dart';
 import 'package:three_js_core/others/console/console_platform.dart';
-import '../material/MaterialDescriptionRegistry.dart';
 import 'WebGPUShaderModule.dart';
 
 /// WebGPU render pipeline implementation.
@@ -72,35 +71,11 @@ class WebGPUPipeline {
         ));
       }
 
-      // 4. Map Primitive State Settings
-      final GpuPrimitiveTopology topology;
-      switch (descriptor.primitiveTopology) {
-        case GpuPrimitiveTopology.pointList: topology = GpuPrimitiveTopology.pointList; break;
-        case GpuPrimitiveTopology.lineList: topology = GpuPrimitiveTopology.lineList; break;
-        case GpuPrimitiveTopology.lineStrip: topology = GpuPrimitiveTopology.lineStrip; break;
-        case GpuPrimitiveTopology.triangleList: topology = GpuPrimitiveTopology.triangleList; break;
-        case GpuPrimitiveTopology.triangleStrip: topology = GpuPrimitiveTopology.triangleStrip; break;
-      }
-
-      final GpuCullMode cullMode;
-      switch (descriptor.cullMode) {
-        case GpuCullMode.none: cullMode = GpuCullMode.none; break;
-        case GpuCullMode.front: cullMode = GpuCullMode.front; break;
-        case GpuCullMode.back: cullMode = GpuCullMode.back; break;
-      }
-
-      final GpuFrontFace frontFace;
-      switch (descriptor.frontFace) {
-        case GpuFrontFace.ccw: frontFace = GpuFrontFace.ccw; break;
-        case GpuFrontFace.cw: frontFace = GpuFrontFace.cw; break;
-      }
-
       // 5. Map Depth Stencil Configurations
       GpuDepthStencilState? depthStencilState;
       final ds = descriptor.depthStencilState;
       if (ds != null) {
         final GpuCompareFunction depthCompare = ds.depthCompare;
-
         depthStencilState = GpuDepthStencilState(
           format: ds.format,
           depthWriteEnabled: ds.depthWriteEnabled,
@@ -110,58 +85,13 @@ class WebGPUPipeline {
 
       // 6. Map Color Targets Blending States
       GpuBlendState? blendState;
-      final blend = descriptor.colorTarget.blendState;
+      final blend = descriptor.colorTarget.blend;
       if (blend != null) {
         blendState = GpuBlendState(
           color: _createGpuBlendComponent(blend.color),
           alpha: _createGpuBlendComponent(blend.alpha),
         );
       }
-
-    const String sharedUniformHeader = '''
-      struct Uniforms {
-          projectionMatrix: mat4x4<f32>,     // 64 bytes
-          viewMatrix: mat4x4<f32>,           // 64 bytes
-          modelMatrix: mat4x4<f32>,          // 64 bytes
-          padding0: vec4<f32>,               // baseColor (16 bytes)
-          padding1: vec4<f32>,               // pbrParams (16 bytes)
-          padding2: vec4<f32>,               // cameraPosition (16 bytes)
-          padding3: vec4<f32>,               // ambientColor (16 bytes)
-          padding4: vec4<f32>,               // fogColor (16 bytes)
-          padding5: vec4<f32>,               // fogParams (16 bytes)
-          padding6: vec4<f32>,               // mainLightDirection (16 bytes)
-          padding7: vec4<f32>,               // mainLightColor (16 bytes)
-          padding8: vec4<f32>,               // morphInfluences0 (16 bytes)
-          padding9: vec4<f32>,               // morphInfluences1 (16 bytes)
-      }
-      @group(0) @binding(0) var<uniform> uniforms: Uniforms;
-    ''';
-
-    const String vertexWgsl = '''
-      $sharedUniformHeader
-
-      struct VertexInput {
-          @location(0) position: vec3<f32>,
-      }
-
-      @vertex
-      fn vs_main(input: VertexInput) -> @builtin(position) vec4<f32> {
-          let worldPosition = uniforms.modelMatrix * vec4<f32>(input.position, 1.0);
-          let viewPosition = uniforms.viewMatrix * worldPosition;
-          return uniforms.projectionMatrix * viewPosition;
-      }
-    ''';
-
-    const String fragmentWgsl = '''
-      $sharedUniformHeader
-
-      @fragment
-      fn fs_main() -> @location(0) vec4<f32> {
-          // Safe to expose fragment visibility now because structural bindings match exactly!
-          return vec4<f32>(1.0, 1.0, 1.0, 1.0); // Solid White
-      }
-    ''';
-
 
       // 7. Map Multisample Settings
       final ms = descriptor.multisampleState;
@@ -170,29 +100,30 @@ class WebGPUPipeline {
       final pipelineDescriptor = GpuRenderPipelineDescriptor(
         label: descriptor.label ?? '',
         layout: customLayout, // If null, gpux automatically infers layout bindings ("auto")
-        vertexModule: device.createShaderModule(vertexWgsl),//_vertexShaderModule!.getModule()!,
+        vertexModule: _vertexShaderModule!.getModule()!,
         vertexEntryPoint: 'vs_main',
         vertexBuffers: bufferLayouts,
-        fragmentModule: device.createShaderModule(fragmentWgsl),//_fragmentShaderModule!.getModule()!,
+        fragmentModule: _fragmentShaderModule!.getModule()!,
         fragmentEntryPoint: 'fs_main',
         colorTargets: [
           GpuColorTargetState(
             format: descriptor.colorTarget.format,
             blend: blendState,
-            writeMask: descriptor.colorTarget.writeMask.bits,
+            writeMask: descriptor.colorTarget.writeMask,
           )
         ],
-        primitiveTopology: topology,
-        cullMode: cullMode,
-        frontFace: frontFace,
+        primitiveTopology: descriptor.primitiveTopology,
+        cullMode: descriptor.cullMode,
+        frontFace: descriptor.frontFace,
         depthStencil: depthStencilState,
-        multisampleCount: ms?.count ?? 0,
+        multisampleCount: ms?.count ?? 1,
         multisampleMask: ms?.mask ?? 0xFFFFFFFF,
         alphaToCoverageEnabled: ms?.alphaToCoverageEnabled ?? false,
       );
-
+      
       console.info("🔨 Creating GPU render pipeline...");
       _pipeline = device.createRenderPipeline(pipelineDescriptor);
+
       console.info("🔨 GPU render pipeline created: $_pipeline");
       console.info("🔨 Pipeline.create() SUCCESS");
 
@@ -256,7 +187,7 @@ class RenderPipelineDescriptor {
   final GpuFrontFace frontFace;
   final DepthStencilStateDescriptor? depthStencilState;
   final MultisampleStateDescriptor? multisampleState;
-  final ColorTargetDescriptor colorTarget;
+  final GpuColorTargetState colorTarget;
 
   const RenderPipelineDescriptor({
     this.label,

@@ -1,5 +1,7 @@
 import 'dart:core';
 
+import 'package:three_js_core/three_js_core.dart';
+
 /// Error handling and logging for WebGPU renderer.
 /// T040: Clear, actionable error messages for debugging.
 class ErrorReporter {
@@ -44,7 +46,7 @@ class ErrorReporter {
     );
 
     _errorLog.add(record);
-    print("ERROR: $message");
+    console.error("ERROR: $message");
   }
 
   /// Reports a buffer allocation or upload error.
@@ -78,7 +80,7 @@ class ErrorReporter {
     );
 
     _errorLog.add(record);
-    print("ERROR: $message");
+    console.error("ERROR: $message");
   }
 
   /// Reports a texture creation or upload error.
@@ -116,7 +118,7 @@ class ErrorReporter {
     );
 
     _errorLog.add(record);
-    print("ERROR: $message");
+    console.error("ERROR: $message");
   }
 
   /// Reports a pipeline creation error.
@@ -147,7 +149,7 @@ class ErrorReporter {
     );
 
     _errorLog.add(record);
-    print("ERROR: $message");
+    console.error("ERROR: $message");
   }
 
   // ==========================================
@@ -179,7 +181,7 @@ class ErrorReporter {
     );
 
     _errorLog.add(record);
-    print("ERROR: $message");
+    console.error("ERROR: $message");
   }
 
   /// Reports a context loss event.
@@ -211,9 +213,9 @@ class ErrorReporter {
 
     _errorLog.add(record);
     if (canRecover) {
-      print("WARNING: $message");
+      console.warning("WARNING: $message");
     } else {
-      print("ERROR: $message");
+      console.error("ERROR: $message");
     }
   }
 
@@ -229,7 +231,7 @@ class ErrorReporter {
     );
 
     _errorLog.add(record);
-    print("WARNING: [${category.name}] $message");
+    console.warning("WARNING: [${category.name}] $message");
   }
 
   /// Gets error statistics.
