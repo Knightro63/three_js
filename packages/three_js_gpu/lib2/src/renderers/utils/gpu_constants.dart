@@ -1,4 +1,4 @@
-final GPUPrimitiveTopology = {
+final gpuPrimitiveTopology = {
 	'PointList': 'point-list',
 	'LineList': 'line-list',
 	'LineStrip': 'line-strip',
@@ -6,7 +6,7 @@ final GPUPrimitiveTopology = {
 	'TriangleStrip': 'triangle-strip',
 };
 
-final GPUCompareFunction = {
+final gpuCompareFunction = {
 	'Never': 'never',
 	'Less': 'less',
 	'Equal': 'equal',
@@ -17,33 +17,33 @@ final GPUCompareFunction = {
 	'Always': 'always'
 };
 
-final GPUStoreOp = {
+final gpuStoreOp = {
 	'Store': 'store',
 	'Discard': 'discard'
 };
 
-final GPULoadOp = {
+final gpuLoadOp = {
 	'Load': 'load',
 	'Clear': 'clear'
 };
 
-final GPUFrontFace = {
+final gpuFrontFace = {
 	'CCW': 'ccw',
 	'CW': 'cw'
 };
 
-final GPUCullMode = {
+final gpuCullMode = {
 	'None': 'none',
 	'Front': 'front',
 	'Back': 'back'
 };
 
-final GPUIndexFormat = {
+final gpuIndexFormat = {
 	'Uint16': 'uint16',
 	'Uint32': 'uint32'
 };
 
-final GPUVertexFormat = {
+final gpuVertexFormat = {
 	'Uint8x2': 'uint8x2',
 	'Uint8x4': 'uint8x4',
 	'Sint8x2': 'sint8x2',
@@ -76,7 +76,7 @@ final GPUVertexFormat = {
 	'Sint32x4': 'sint32x4'
 };
 
-final GPUTextureFormat = {
+final gpuTextureFormat = {
 
 	// 8-bit formats
 
@@ -207,18 +207,18 @@ final GPUTextureFormat = {
 
 };
 
-final GPUAddressMode = {
+final gpuAddressMode = {
 	'ClampToEdge': 'clamp-to-edge',
 	'Repeat': 'repeat',
 	'MirrorRepeat': 'mirror-repeat'
 };
 
-final GPUFilterMode = {
+final gpuFilterMode = {
 	'Linear': 'linear',
 	'Nearest': 'nearest'
 };
 
-final GPUBlendFactor = {
+final gpuBlendFactor = {
 	'Zero': 'zero',
 	'One': 'one',
 	'Src': 'src',
@@ -234,7 +234,7 @@ final GPUBlendFactor = {
 	'OneMinusConstant': 'one-minus-constant'
 };
 
-final GPUBlendOperation = {
+final gpuBlendOperation = {
 	'Add': 'add',
 	'Subtract': 'subtract',
 	'ReverseSubtract': 'reverse-subtract',
@@ -242,7 +242,7 @@ final GPUBlendOperation = {
 	'Max': 'max'
 };
 
-final GPUColorWriteFlags = {
+final gpuColorWriteFlags = {
 	'None': 0,
 	'Red': 0x1,
 	'Green': 0x2,
@@ -251,7 +251,7 @@ final GPUColorWriteFlags = {
 	'All': 0xF
 };
 
-final GPUStencilOperation = {
+final gpuStencilOperation = {
 	'Keep': 'keep',
 	'Zero': 'zero',
 	'Replace': 'replace',
@@ -262,25 +262,25 @@ final GPUStencilOperation = {
 	'DecrementWrap': 'decrement-wrap'
 };
 
-final GPUBufferBindingType = {
+final gpuBufferBindingType = {
 	'Uniform': 'uniform',
 	'Storage': 'storage',
 	'ReadOnlyStorage': 'read-only-storage'
 };
 
-final GPUStorageTextureAccess = {
+final gpuStorageTextureAccess = {
 	'WriteOnly': 'write-only',
 	'ReadOnly': 'read-only',
 	'ReadWrite': 'read-write',
 };
 
-final GPUSamplerBindingType = {
+final gpuSamplerBindingType = {
 	'Filtering': 'filtering',
 	'NonFiltering': 'non-filtering',
 	'Comparison': 'comparison'
 };
 
-final GPUTextureSampleType = {
+final gpuTextureSampleType = {
 	'Float': 'float',
 	'UnfilterableFloat': 'unfilterable-float',
 	'Depth': 'depth',
@@ -288,13 +288,13 @@ final GPUTextureSampleType = {
 	'UInt': 'uint'
 };
 
-final GPUTextureDimension = {
+final gpuTextureDimension = {
 	'OneD': '1d',
 	'TwoD': '2d',
 	'ThreeD': '3d'
 };
 
-final GPUTextureViewDimension = {
+final gpuTextureViewDimension = {
 	'OneD': '1d',
 	'TwoD': '2d',
 	'TwoDArray': '2d-array',
@@ -303,18 +303,18 @@ final GPUTextureViewDimension = {
 	'ThreeD': '3d'
 };
 
-final GPUTextureAspect = {
+final gpuTextureAspect = {
 	'All': 'all',
 	'StencilOnly': 'stencil-only',
 	'DepthOnly': 'depth-only'
 };
 
-final GPUInputStepMode = {
+final gpuInputStepMode = {
 	'Vertex': 'vertex',
 	'Instance': 'instance'
 };
 
-final GPUFeatureName = {
+final gpuFeatureName = {
 	'CoreFeaturesAndLimits': 'core-features-and-limits',
 	'DepthClipControl': 'depth-clip-control',
 	'Depth32FloatStencil8': 'depth32float-stencil8',

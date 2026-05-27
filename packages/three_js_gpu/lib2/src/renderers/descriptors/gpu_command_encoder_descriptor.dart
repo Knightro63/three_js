@@ -1,15 +1,15 @@
-/**
- * Reusable descriptor for `GPUDevice.createCommandEncoder()`.
- *
- * @private
- */
+/// Reusable descriptor for `GPUDevice.createCommandEncoder()`.
 class GPUCommandEncoderDescriptor {
-	String label = '';
+  /// The label of the command encoder.
+  String label = '';
 
-	/**
-	 * Resets the descriptor to its default state.
-	 */
-	void reset() {
-		this.label = '';
-	}
+  /// Constructs a new GPU command encoder descriptor with explicit defaults.
+  GPUCommandEncoderDescriptor() {
+    this.reset();
+  }
+
+  /// Resets the descriptor to its default state.
+  void reset() {
+    this.label = '';
+  }
 }

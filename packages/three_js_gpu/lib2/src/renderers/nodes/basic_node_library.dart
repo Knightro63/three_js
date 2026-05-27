@@ -1,19 +1,12 @@
 import 'package:three_js_core/three_js_core.dart';
-import 'package:three_js_gpu/common/nodes/node_library.dart';
+import '../common/nodes/node_library.dart';
 import 'package:three_js_math/three_js_math.dart';
 
-/**
- * This version of a node library represents a basic version
- * just focusing on lights and tone mapping techniques.
- *
- * @private
- * @augments NodeLibrary
- */
+/// This version of a node library represents a basic version
+/// just focusing on lights and tone mapping techniques.
 class BasicNodeLibrary extends NodeLibrary {
 
-	/**
-	 * Constructs a new basic node library.
-	 */
+	/// Constructs a new basic node library.
 	BasicNodeLibrary():super() {
 		this.addLight( PointLightNode, PointLight );
 		this.addLight( DirectionalLightNode, DirectionalLight );

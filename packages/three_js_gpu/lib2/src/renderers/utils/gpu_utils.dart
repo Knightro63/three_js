@@ -1,133 +1,162 @@
-import 'package:three_js_core/three_js_core.dart';
-import 'package:three_js_gpu/common/render_context.dart';
-import '../gpu_backend.dart';
-import 'package:three_js_math/three_js_math.dart';
+import 'package:web/web.dart';
+import 'package:gpux/gpux.dart'; 
+import 'package:three_js_core/three_js_core.dart' as core;
+import 'package:three_js_math/three_js_math.dart' as math;
 
+// Module-scoped list to mimic JavaScript static performance optimizations
+final List<dynamic> _commandList = [null];
+
+/// A WebGPU backend utility module with common helpers.
 class WebGPUUtils {
-  WebGPUBackend backend;
+  /// A reference to the WebGPU backend instance context.
+  final dynamic backend;
 
-	WebGPUUtils(this.backend );
+  /// Constructs a new utility object.
+  WebGPUUtils(this.backend);
 
-	/// Returns the depth/stencil GPU format for the given render context.
-	String getCurrentDepthStencilFormat(RenderContext renderContext ) {
-		String? format;
+  /// Returns the depth/stencil GPU format for the given render context.
+  GpuTextureFormat? getCurrentDepthStencilFormat(dynamic renderContext) {
+    GpuTextureFormat? format;
+    
+    if (renderContext.depth == true) {
+      if (renderContext.depthTexture != null) {
+        format = this.getTextureFormatGPU(renderContext.depthTexture);
+      } else if (renderContext.stencil == true) {
+        if (this.backend.renderer.reversedDepthBuffer == true) {
+          format = GpuTextureFormat.depth32FloatStencil8;
+        } else {
+          format = GpuTextureFormat.depth24PlusStencil8;
+        }
+      } else {
+        if (this.backend.renderer.reversedDepthBuffer == true) {
+          format = GpuTextureFormat.depth32Float;
+        } else {
+          format = GpuTextureFormat.depth24Plus;
+        }
+      }
+    }
+    
+    return format;
+  }
 
-		if ( renderContext.depth ) {
-			if ( renderContext.depthTexture != null ) {
-				format = this.getTextureFormatGPU( renderContext.depthTexture );
-			} 
-      else if ( renderContext.stencil ) {
-				if ( this.backend.renderer.reversedDepthBuffer == true ) {
-					format = GPUTextureFormat.Depth32FloatStencil8;
-				} 
-        else {
-					format = GPUTextureFormat.Depth24PlusStencil8;
-				}
-			} 
-      else {
-				if ( this.backend.renderer.reversedDepthBuffer == true ) {
-					format = GPUTextureFormat.Depth32Float;
-				} 
-        else {
-					format = GPUTextureFormat.Depth24Plus;
-				}
-			}
-		}
+  /// Returns the GPU format for the given texture.
+  GpuTextureFormat getTextureFormatGPU(core.Texture texture) {
+    // Enforcing map directive bracket syntax rules instead of backend.get()
+    return this.backend[texture]['format'];
+  }
 
-		return format!;
-	}
+  /// Returns an object that defines the multi-sampling state of the given texture.
+  Map<String, dynamic> getTextureSampleData(core.Texture texture) {
+    int? samples;
 
-	String getTextureFormatGPU(Texture texture ) {
-		return backend.get( texture ).format;
-	}
+    if (texture is core.FramebufferTexture) {
+      samples = 1;
+    } else if (texture.isDepthTexture == true && texture.renderTarget == null) {
+      final dynamic renderer = this.backend.renderer;
+      final dynamic renderTarget = renderer.getRenderTarget();
+      samples = renderTarget != null ? renderTarget.samples : renderer.currentSamples;
+    } else if (texture.renderTarget != null) {
+      samples = texture.renderTarget?.samples;
+    }
 
-	/// Returns an object that defines the multi-sampling state of the given texture.
-	Map<String,dynamic> getTextureSampleData(Texture texture ) {
-		int? samples;
+    // Default assignment evaluation
+    final int resolvedSamples = samples ?? 1;
+    
+    final bool isMSAA = resolvedSamples > 1 && 
+        texture.renderTarget != null && 
+        (texture.isDepthTexture != true && texture is! core.FramebufferTexture);
+        
+    final int primarySamples = isMSAA ? 1 : resolvedSamples;
 
-		if ( texture is FramebufferTexture ) {
-			samples = 1;
-		} else if ( texture.isDepthTexture && texture.renderTarget == null) {
-			final renderer = backend.renderer;
-			final renderTarget = renderer?.getRenderTarget();
+    return {
+      'samples': resolvedSamples,
+      'primarySamples': primarySamples,
+      'isMSAA': isMSAA
+    };
+  }
 
-			samples = renderTarget != null? renderTarget.samples : renderer?.samples;
-		} 
-    else if ( texture.renderTarget != null) {
-			samples = texture.renderTarget?.samples;
-		}
+  /// Returns the default color attachment's GPU format of the current render context.
+  GpuTextureFormat getCurrentColorFormat(dynamic renderContext) {
+    if (renderContext.textures != null) {
+      return this.getTextureFormatGPU(renderContext.textures[0]);
+    }
+    return this.getPreferredCanvasFormat();
+  }
 
-		samples = samples ?? 1;
+  /// Returns the GPU formats of all color attachments of the current render context.
+  List<GpuTextureFormat> getCurrentColorFormats(dynamic renderContext) {
+    if (renderContext.textures != null) {
+      final List<dynamic> texturesList = renderContext.textures;
+      // Remap JavaScript map loops over array objects cleanly to standard Dart lists
+      return texturesList.map((t) => this.getTextureFormatGPU(t as core.Texture)).toList();
+    }
+    
+    return [this.getPreferredCanvasFormat()];
+  }
 
-		final isMSAA = samples > 1 && texture.renderTarget != null && ( texture is DepthTexture != true && texture is FramebufferTexture != true );
-		final primarySamples = isMSAA ? 1 : samples;
+  /// Returns the output color space of the current render context.
+  dynamic getCurrentColorSpace(dynamic renderContext) {
+    if (renderContext.textures != null) {
+      return renderContext.textures[0].colorSpace;
+    }
+    return this.backend.renderer.outputColorSpace;
+  }
 
-		return { 'samples': samples, 'primarySamples': primarySamples, 'isMSAA': isMSAA };
-	}
-
-	/// Returns the default color attachment's GPU format of the current render context.
-	String? getCurrentColorFormat(RenderContext renderContext ) {
-		String? format;
-
-		if ( renderContext.textures != null ) {
-			format = getTextureFormatGPU( renderContext.textures[ 0 ] );
-		} else {
-			format = getPreferredCanvasFormat(); // default context format
-		}
-
-		return format;
-	}
-
-	/// Returns the output color space of the current render context.
-	String getCurrentColorSpace(RenderContext renderContext ) {
-		if ( renderContext.textures != null ) {
-			return renderContext.textures?[ 0 ].colorSpace ?? '';
-		}
-
-		return backend.renderer?.outputColorSpace ?? '';
-	}
-
-	/// Returns GPU primitive topology for the given object and material.
-	String? getPrimitiveTopology( Object3D object, Material material ) {
-		if ( object is Points ) return GPUPrimitiveTopology.PointList;
-		else if ( object is LineSegments || ( object is Mesh && material.wireframe == true ) ) return GPUPrimitiveTopology.LineList;
-		else if ( object is Line ) return GPUPrimitiveTopology.LineStrip;
-		else if ( object is Mesh ) return GPUPrimitiveTopology.TriangleList;
-
+  /// Returns GPU primitive topology for the given object and material.
+  GpuPrimitiveTopology? getPrimitiveTopology(core.Object3D object, core.Material material) {
+    if (object is core.Points) {
+      return GpuPrimitiveTopology.pointList;
+    } else if (object is core.LineSegments || (object is core.Mesh && material.wireframe == true)) {
+      return GpuPrimitiveTopology.lineList;
+    } else if (object is core.Line) {
+      return GpuPrimitiveTopology.lineStrip;
+    } else if (object is core.Mesh) {
+      return GpuPrimitiveTopology.triangleList;
+    }
     return null;
-	}
+  }
 
-	/// Returns a modified sample count from the given sample count value.
-	///
-	/// That is required since WebGPU only supports either 1 or 4.
-	int getSampleCount(int sampleCount ) {
-		return sampleCount >= 4 ? 4 : 1;
-	}
+  /// Returns a modified sample count from the given sample count value.
+  /// WebGPU only supports either 1 or 4.
+  int getSampleCount(int sampleCount) {
+    return sampleCount >= 4 ? 4 : 1;
+  }
 
-	/// Returns the sample count of the given render context.
-	int getSampleCountRenderContext(RenderContext renderContext ) {
-		if ( renderContext.textures != null ) {
-			return getSampleCount( renderContext.sampleCount );
-		}
+  /// Returns the sample count of the given render context.
+  int getSampleCountRenderContext(dynamic renderContext) {
+    if (renderContext.textures != null) {
+      return this.getSampleCount(renderContext.sampleCount ?? 1);
+    }
+    return this.getSampleCount(this.backend.renderer.currentSamples ?? 1);
+  }
 
-		return getSampleCount( backend.renderer.samples );
-	}
+  /// Returns the preferred canvas texture layout format.
+  GpuTextureFormat getPreferredCanvasFormat() {
+    final Map<String, dynamic> parameters = this.backend.parameters;
+    final dynamic bufferType = parameters['outputType'];
 
-	/// Returns the preferred canvas format.
-	///
-	/// There is a separate method for this so it's possible to
-	/// honor edge cases for specific devices.
-	String getPreferredCanvasFormat() {
-		final outputType = backend.parameters['outputType'];
+    if (bufferType == null) {
+      try {
+        // Safe runtime web extraction check path mapping
+        return window.navigator.gpu.getPreferredCanvasFormat();
+      } catch (_) {
+        // Default standard safe color format mapping fallback outside pure web targets
+        return GpuTextureFormat.bgra8Unorm;
+      }
+    } else if (bufferType == math.UnsignedByteType) {
+      return GpuTextureFormat.bgra8Unorm;
+    } else if (bufferType == math.HalfFloatType) {
+      return GpuTextureFormat.rgba16Float;
+    } else {
+      throw Exception('THREE.WebGPUUtils: Unsupported output buffer type.');
+    }
+  }
+}
 
-		if ( outputType == null ) {
-			return navigator.gpu.getPreferredCanvasFormat();
-		} else if ( outputType == UnsignedByteType ) {
-			return GPUTextureFormat.BGRA8Unorm;
-		} else if ( outputType == HalfFloatType ) {
-			return GPUTextureFormat.RGBA16Float;
-		} else {
-			throw( 'Unsupported outputType' );
-		}
-	}
+/// Submits a single GPU command to the device queue using a shared, module-scoped
+/// array to avoid per-call array allocations.
+void submit(dynamic device, dynamic command) {
+  _commandList[0] = command;
+  device.queue.submit(_commandList);
+  _commandList[0] = null;
 }

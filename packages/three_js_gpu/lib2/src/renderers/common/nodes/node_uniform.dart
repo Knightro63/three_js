@@ -1,4 +1,4 @@
-import 'package:three_js_gpu/common/uniform.dart';
+import '../uniform.dart';
 import 'package:three_js_math/three_js_math.dart';
 
 /// A special form of Number uniform binding type.

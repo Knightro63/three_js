@@ -1,16 +1,13 @@
 import 'package:three_js_core/three_js_core.dart';
-import 'package:three_js_gpu/common/nodes/node_library.dart';
+import '../../materials/mesh_normal_node_material1.dart';
+import '../../materials/mesh_phong_node_material1.dart';
+import '../common/nodes/node_library.dart';
 import 'package:three_js_math/three_js_math.dart';
 import '../../materials/node_materials.dart';
 
-/**
- * This version of a node library represents the standard version
- * used in {@link WebGPURenderer}. It maps lights, tone mapping
- * techniques and materials to node-based implementations.
- *
- * @private
- * @augments NodeLibrary
- */
+/// This version of a node library represents the standard version
+/// used in {@link WebGPURenderer}. It maps lights, tone mapping
+/// techniques and materials to node-based implementations.
 class StandardNodeLibrary extends NodeLibrary {
 
 	StandardNodeLibrary():super() {

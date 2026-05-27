@@ -1,4 +1,4 @@
-import "package:three_js_gpu/common/uniforms_group.dart";
+import "../uniforms_group.dart";
 
 int _id = 0;
 

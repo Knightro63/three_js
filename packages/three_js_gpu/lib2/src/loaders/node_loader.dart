@@ -135,7 +135,7 @@ class NodeLoader extends Loader {
 	 */
 	Node createNodeFromType(String type ) {
 		if ( this.nodes[ type ] == null ) {
-			error( 'NodeLoader: Node type not found:', type );
+			console.error( 'NodeLoader: Node type not found: $type' );
 			return float();
 		}
 

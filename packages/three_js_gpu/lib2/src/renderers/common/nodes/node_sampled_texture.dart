@@ -1,4 +1,4 @@
-import "package:three_js_gpu/common/sampled_texture.dart";
+import "../common/sampled_texture.dart";
 
 /// A special form of sampled texture binding type.
 /// It's texture value is managed by a node object.

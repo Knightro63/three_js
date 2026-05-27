@@ -1,65 +1,85 @@
-import "package:three_js_gpu/common/bind_group.dart";
-import "package:three_js_gpu/src/core/node.dart";
+import 'package:three_js_core/three_js_core.dart' as core;
+import '../bind_group.dart';
 
-/**
- * This module represents the state of a node builder after it was
- * used to build the nodes for a render object. The state holds the
- * results of the build for further processing in the renderer.
- *
- * Render objects with identical cache keys share the same node builder state.
- *
- * @private
- */
+/// This module represents the state of a node builder after it was
+/// used to build the nodes for a render object. The state holds the
+/// results of the build for further processing in the renderer.
+/// 
+/// Render objects with identical cache keys share the same node builder state.
 class NodeBuilderState {
+  /// The native vertex shader code.
   String vertexShader;
-  String fragmentShader; 
+
+  /// The native fragment shader code.
+  String fragmentShader;
+
+  /// The native compute shader code.
   String computeShader;
-  List<NodeAttribute> nodeAttributes;
+
+  /// An array with transform attribute objects. Only relevant when using compute shaders with WebGL 2.
+  List<Map<String, dynamic>> transforms;
+
+  /// An array of node attributes representing the attributes of the shaders.
+  List<dynamic> nodeAttributes; // Maps to NodeAttribute collections
+
+  /// An array of bind groups representing the uniform or storage buffers, textures or samplers of the shader.
   List<BindGroup> bindings;
-  List<Node> updateNodes;
-  List<Node> updateBeforeNodes; 
-  List<Node> updateAfterNodes;
-  NodeMaterialObserver observer; 
-  late List transforms;
+
+  /// An array of nodes that implement their `update()` method.
+  List<dynamic> updateNodes; // Maps to Node collections
+
+  /// An array of nodes that implement their `updateBefore()` method.
+  List<dynamic> updateBeforeNodes; // Maps to Node collections
+
+  /// An array of nodes that implement their `updateAfter()` method.
+  List<dynamic> updateAfterNodes; // Maps to Node collections
+
+  /// A node material observer.
+  dynamic observer; // Maps to NodeMaterialObserver instance
+
+  /// How often this state is used by render objects.
   int usedTimes = 0;
 
-	NodeBuilderState(
-    this.vertexShader, 
-    this.fragmentShader, 
-    this.computeShader, 
-    this.nodeAttributes, 
-    this.bindings, 
-    this.updateNodes, 
-    this.updateBeforeNodes, 
-    this.updateAfterNodes, 
-    this.observer, 
-    List? transforms
-  ) {
-		this.transforms = transforms ?? [];
-	}
+  /// Constructs a new node builder state context.
+  NodeBuilderState({
+    required this.vertexShader,
+    required this.fragmentShader,
+    required this.computeShader,
+    required this.nodeAttributes,
+    required this.bindings,
+    required this.updateNodes,
+    required this.updateBeforeNodes,
+    required this.updateAfterNodes,
+    required this.observer,
+    List<Map<String, dynamic>>? transforms,
+  }) : this.transforms = transforms ?? const <Map<String, dynamic>>[];
 
-	/// This method is used to create a array of bind groups based
-	/// on the existing bind groups of this state. Shared groups are
-	/// not cloned.
-	List<BindGroup> createBindings() {
-		final bindings = <BindGroup>[];
+  /// This method is used to create an array of bind groups based
+  /// on the existing bind groups of this state. Shared groups are not cloned.
+  /// 
+  /// Returns an array list of [BindGroup] collections.
+  List<BindGroup> createBindings() {
+    final List<BindGroup> clonedBindingsList = [];
 
-		for ( final instanceGroup in this.bindings ) {
-			final shared = instanceGroup.bindings[ 0 ].groupNode.shared; // All bindings in the group must have the same groupNode.
+    for (final BindGroup instanceGroup in this.bindings) {
+      // Enforcing map directive bracket syntax rules when checking inner configuration layout metrics
+      final dynamic groupNode = instanceGroup.bindings.firstOrNull?['groupNode'];
+      final bool shared = groupNode?['shared'] == true;
 
-			if ( shared != true ) {
-				final bindingsGroup = BindGroup( instanceGroup.name, [], instanceGroup.index, instanceGroup );
-				bindings.add( bindingsGroup );
+      // All bindings in the group must have the same groupNode alignment constraints
+      if (!shared) {
+        final BindGroup bindingsGroup = BindGroup(instanceGroup.name, []);
+        clonedBindingsList.add(bindingsGroup);
 
-				for ( final instanceBinding in instanceGroup.bindings ) {
-					bindingsGroup.bindings.add( instanceBinding.clone() );
-				}
+        for (final dynamic instanceBinding in instanceGroup.bindings) {
+          // Clone the instance properties block natively across compilation paths
+          bindingsGroup.bindings.add(instanceBinding.clone());
+        }
+      } else {
+        clonedBindingsList.add(instanceGroup);
+      }
+    }
 
-			} else {
-				bindings.add( instanceGroup );
-			}
-		}
-
-		return bindings;
-	}
+    return clonedBindingsList;
+  }
 }
