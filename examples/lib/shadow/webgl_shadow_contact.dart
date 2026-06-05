@@ -273,11 +273,11 @@ class _MyAppState extends State<WebglShadowContact> {
     depthMaterial.depthTest = false;
     depthMaterial.depthWrite = false;
 
-    horizontalBlurMaterial = three.ShaderMaterial.fromMap(three.horizontalBlurShader);
-    horizontalBlurMaterial.depthTest = false;
+    // horizontalBlurMaterial = three.ShaderMaterial.fromMap(three.horizontalBlurShader);
+    // horizontalBlurMaterial.depthTest = false;
 
-    verticalBlurMaterial = three.ShaderMaterial.fromMap(three.verticalBlurShader);
-    verticalBlurMaterial.depthTest = false;
+    // verticalBlurMaterial = three.ShaderMaterial.fromMap(three.verticalBlurShader);
+    // verticalBlurMaterial.depthTest = false;
 
     controls = three.OrbitControls( threeJs.camera, threeJs.globalKey );
 

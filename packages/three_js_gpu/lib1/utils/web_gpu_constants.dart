@@ -309,10 +309,10 @@ final GPUTextureAspect = {
 	'DepthOnly': 'depth-only'
 };
 
-final GPUInputStepMode = {
-	'Vertex': 'vertex',
-	'Instance': 'instance'
-};
+enum GpuInputStepMode{
+	vertex,
+	instance
+}
 
 final GPUFeatureName = {
 	'CoreFeaturesAndLimits': 'core-features-and-limits',

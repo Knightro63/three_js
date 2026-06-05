@@ -1,16 +1,10 @@
 /// Collection of layout parameters and structural geometry type flags.
-abstract class AttributeType {
-  /// Vertex buffer shader layout attribute.
-  static const int vertex = 1;
-
-  /// Index buffer shader layout attribute.
-  static const int index = 2;
-
-  /// Storage buffer shader layout attribute.
-  static const int storage = 3;
-
-  /// Indirect execution storage buffer shader layout attribute.
-  static const int indirect = 4;
+enum AttributeType {
+  none,
+  vertex,
+  indx,
+  storage,
+  indirect
 }
 
 /// Size of a memory chunk in bytes matching WebGPU STD140 layout alignment rules.

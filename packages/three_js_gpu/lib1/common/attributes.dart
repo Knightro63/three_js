@@ -1,4 +1,4 @@
-import 'package:three_js_gpu/gpu_backend.dart';
+import '../gpu_backend.dart';
 
 import './backend.dart';
 import 'package:three_js_math/three_js_math.dart';

@@ -67,9 +67,6 @@ class _MyAppState extends State<MiscControlsArcball> {
     // controls
 
     controls = ArcballControls(threeJs.camera, threeJs.globalKey, threeJs.scene, 1);
-    controls.addEventListener('change', (event) {
-      threeJs.render();
-    });
 
     // world
 

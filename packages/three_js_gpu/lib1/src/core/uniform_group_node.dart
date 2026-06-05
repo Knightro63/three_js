@@ -1,4 +1,4 @@
-import 'package:three_js_gpu/src/core/node.dart';
+import '../../src/core/node.dart';
 
 /// This node can be used to group single instances of {@link UniformNode}
 /// and manage them as a uniform buffer.

@@ -1,8 +1,6 @@
 import 'dart:typed_data';
 import 'package:gpux/gpux.dart';
-import 'package:three_js_core/three_js_core.dart';
-import 'package:three_js_math/three_js_math.dart';
-
+import '../common/data_map.dart';
 import '../descriptors/gpu_bind_group_descriptor.dart';
 import '../descriptors/gpu_buffer_descriptor.dart';
 import '../descriptors/gpu_command_encoder_descriptor.dart';
@@ -52,9 +50,9 @@ class WebGPUTexturePassUtils extends DataMap {
   late final dynamic mipmapShaderModule;
 
   /// Local state backing cache following map instructions strategy
-  final Map<String, dynamic> _passUtilsStateCache = {};
-  dynamic operator [](String key) => _passUtilsStateCache[key];
-  void operator []=(String key, dynamic value) => _passUtilsStateCache[key] = value;
+  // final Map<String, dynamic> _passUtilsStateCache = {};
+  // dynamic operator [](String key) => _passUtilsStateCache[key];
+  // void operator []=(String key, dynamic value) => _passUtilsStateCache[key] = value;
 
   /// Constructs a new texture pass utility object.
   WebGPUTexturePassUtils(this.device) : super() {

@@ -1,3 +1,5 @@
+import 'package:three_js_math/three_js_math.dart';
+
 /// Reusable descriptor configuration layout for `GPUTexelCopyTextureInfo`, the texture side of
 /// `GPUCommandEncoder.copyTextureToTexture()`, `copyTextureToBuffer()` and
 /// `GPUQueue.writeTexture()`.
@@ -9,11 +11,7 @@ class GPUTexelCopyTextureInfo {
   int mipLevel = 0;
 
   /// The origin offset within the texture.
-  final Map<String, int> origin = {
-    'x': 0,
-    'y': 0,
-    'z': 0
-  };
+  final Vector3 origin = Vector3();
 
   /// Which aspect of the texture is referenced.
   String aspect = 'all';
@@ -30,9 +28,9 @@ class GPUTexelCopyTextureInfo {
     this.mipLevel = 0;
     
     // Enforcing direct map bracket configurations based on directive instructions
-    this.origin['x'] = 0;
-    this.origin['y'] = 0;
-    this.origin['z'] = 0;
+    this.origin.x = 0;
+    this.origin.y = 0;
+    this.origin.z = 0;
     
     this.aspect = 'all';
   }

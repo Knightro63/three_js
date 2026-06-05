@@ -1,8 +1,8 @@
-import 'package:three_js_core/three_js_core.dart' as core;
-import 'package:three_js_math/three_js_math.dart' as math;
+import 'package:three_js_core/three_js_core.dart';
+import 'package:three_js_math/three_js_math.dart';
 
 // WebGPU rendering layer dependencies matching your gpux implementation
-import '../common/renderer.dart';
+import 'common/renderer.dart';
 import '../webgl-fallback/WebGLBackend.dart';
 import './gpu_backend.dart';
 import './nodes/standard_node_library.dart';
@@ -13,6 +13,9 @@ import './nodes/standard_node_library.dart';
 class WebGPURenderer extends Renderer {
   late StandardNodeLibrary library;
   final bool isWebGPURenderer = true;
+  int samples = 0;
+  bool alpha = false;
+  Map<String,dynamic> info = {};
 
   // Private internal constructor running parent initializations
   WebGPURenderer._internal(dynamic backend, Map<String, dynamic> parameters) 
@@ -22,7 +25,7 @@ class WebGPURenderer extends Renderer {
     this.library = StandardNodeLibrary();
 
     // Utilizing core console info log from three_js_core
-    core.console.info('WebGPURenderer: Production GPU context initialized.');
+    console.info('WebGPURenderer: Production GPU context initialized.');
   }
 
   /// Factory constructor providing dynamic configuration analysis 
@@ -48,13 +51,13 @@ class WebGPURenderer extends Renderer {
     dynamic selectedBackend;
 
     if (forceWebGL) {
-      core.console.info('WebGPURenderer: WebGL backend deployment forced via options flags.');
+      console.info('WebGPURenderer: WebGL backend deployment forced via options flags.');
       selectedBackend = WebGLBackend(params);
     } else {
       // Setup dynamic fallback routing function wrapper
       params['getFallback'] = () {
         // Utilizing core console warning log from three_js_core
-        core.console.warning('WebGPURenderer: WebGPU is not available, running under WebGL2 backend.');
+        console.warning('WebGPURenderer: WebGPU is not available, running under WebGL2 backend.');
         return WebGLBackend(params);
       };
       
@@ -62,11 +65,16 @@ class WebGPURenderer extends Renderer {
         selectedBackend = WebGPUBackend(params);
       } catch (exception) {
         // Utilizing core console error log from three_js_core
-        core.console.error('WebGPURenderer: WebGPU initialization hit a critical fault: $exception');
+        console.error('WebGPURenderer: WebGPU initialization hit a critical fault: $exception');
         selectedBackend = WebGLBackend(params);
       }
     }
 
     return WebGPURenderer._internal(selectedBackend, params);
   }
+
+  onDeviceLost(dynamic deviceLossInfo){}
+  onError(Map<String,dynamic> info){}
+  getCanvasTarget(){}
+  getDrawingBufferSize(Vector2 v2){}
 }

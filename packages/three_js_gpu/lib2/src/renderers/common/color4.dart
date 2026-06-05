@@ -18,9 +18,9 @@ class Color4 extends math.Color {
         ) {
     // If the input red parameter is an active core Color instance, inherit its settings
     if (r is math.Color) {
-      this.r = r.r;
-      this.g = r.g;
-      this.b = r.b;
+      this.red = r.red;
+      this.green = r.green;
+      this.blue = r.blue;
       if (r is Color4) {
         this.a = r.a;
       }
@@ -32,11 +32,12 @@ class Color4 extends math.Color {
   /// 
   /// Returns a fluid reference to this object.
   @override
-  Color4 set(dynamic r, [dynamic g, dynamic b]) {
+  Color4 setValues(double r, double g, double b, [double a]) {
     // Check if an accidental trailing 4th argument was passed dynamically
     if (b != null && g != null) {
-      super.setRGB(r.toDouble(), g.toDouble(), b.toDouble());
-    } else {
+      super.setRGB(r, g, b);
+    } 
+    else {
       super.set(r);
       if (r is Color4) {
         this.a = r.a;

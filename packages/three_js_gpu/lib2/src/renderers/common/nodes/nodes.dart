@@ -1,9 +1,9 @@
 import 'package:three_js_core/three_js_core.dart';
-import 'package:three_js_gpu/common/backend.dart';
-import 'package:three_js_gpu/common/chain_map.dart';
-import 'package:three_js_gpu/common/data_map.dart';
-import 'package:three_js_gpu/common/nodes/node_builder_state.dart';
-import 'package:three_js_gpu/common/nodes/node_uniforms_group.dart';
+import '../backend.dart';
+import '../chain_map.dart';
+import '../data_map.dart';
+import '../nodes/node_builder_state.dart';
+import '../nodes/node_uniforms_group.dart';
 import 'package:three_js_math/three_js_math.dart';
 
 final _outputNodeMap = new WeakMap();

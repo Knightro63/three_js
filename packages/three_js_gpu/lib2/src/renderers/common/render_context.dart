@@ -1,0 +1,69 @@
+import 'package:three_js_core/three_js_core.dart';
+import '../../nodes/core/node_utils.dart';
+import 'clipping_context.dart';
+import 'package:three_js_math/three_js_math.dart';
+
+int _id = 0;
+
+/// Any render or compute command is executed in a specific context that defines
+/// the state of the renderer and its backend. Typical examples for such context
+/// data are the current clear values or data from the active framebuffer. This
+/// module is used to represent these contexts as objects.
+class RenderContext {
+  late int id;
+  MRTNode? mrt;
+  bool color = true;
+  bool clearColor = true;
+
+	Map<String,dynamic> clearColorValue = { 'r': 0, 'g': 0, 'b': 0, 'a': 1 };
+
+	bool depth = true;
+	bool clearDepth = true;
+	double clearDepthValue = 1;
+	bool stencil = false;
+	bool clearStencil = true;
+	double clearStencilValue = 1;
+	bool viewport = false;
+	Vector4 viewportValue = Vector4();
+	bool scissor = false;
+	Vector4 scissorValue =  Vector4();
+
+	BaseRenderTarget? renderTarget;
+	List<Texture>? textures;
+	DepthTexture? depthTexture;
+	int activeCubeFace = 0;
+	int activeMipmapLevel = 0;
+	int sampleCount = 1;
+
+	int width = 0;
+	int height = 0;
+	int occlusionQueryCount = 0;
+	ClippingContext? clippingContext;
+  Camera? camera;
+	bool isRenderContext = true;
+
+	RenderContext() {
+		id = _id ++;
+	}
+
+	int getCacheKey() {
+		return _getCacheKey( this );
+	}
+}
+
+/// Computes a cache key for the given render context. This key
+/// should identify the render target state so it is possible to
+/// configure the correct attachments in the respective backend.
+int _getCacheKey(RenderContext renderContext ) {
+  final textures = renderContext.textures;
+	final activeCubeFace = renderContext.activeCubeFace;
+
+	final values = [ activeCubeFace ];
+  if(textures != null){
+    for ( final texture in textures ) {
+      values.add( texture.id );
+    }
+  }
+
+	return NodeUtils.hashArray( values );
+}

@@ -2,6 +2,10 @@ import 'dart:typed_data';
 import 'package:gpux/gpux.dart';
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
+import '../../../../lib1/utils/web_gpu_constants.dart';
+import '../common/readback_buffer.dart';
+import '../common/storage_buffer_attribute.dart';
+import '../common/storage_instanced_buffer_attribute.dart';
 import '../descriptors/gpu_buffer_descriptor.dart';
 import '../descriptors/gpu_command_encoder_descriptor.dart';
 import 'gpu_utils.dart';
@@ -254,14 +258,14 @@ class WebGPUAttributeUtils {
         int arrayStride;
         GpuInputStepMode stepMode;
 
-        if (geometryAttribute.isInterleavedBufferAttribute == true) {
+        if (geometryAttribute is InterleavedBufferAttribute == true) {
           arrayStride = geometryAttribute.data.stride * bytesPerElement;
-          stepMode = geometryAttribute.data.isInstancedInterleavedBuffer == true
+          stepMode = geometryAttribute.data is InstancedInterleavedBuffer == true
               ? GpuInputStepMode.instance
               : GpuInputStepMode.vertex;
         } else {
           arrayStride = geometryAttribute.itemSize * bytesPerElement;
-          stepMode = geometryAttribute.isInstancedBufferAttribute == true
+          stepMode = geometryAttribute is InstancedBufferAttribute == true
               ? GpuInputStepMode.instance
               : GpuInputStepMode.vertex;
         }
@@ -320,8 +324,8 @@ class WebGPUAttributeUtils {
   /// new allocation.
   /// 
   /// Returns a [Future] that resolves with the buffer data when the data are ready.
-  Future<dynamic> getArrayBufferAsync(
-    dynamic attribute, [
+  Future<ByteBuffer> getArrayBufferAsync(
+    StorageBufferAttribute attribute, [
     dynamic target = null, 
     int offset = 0, 
     int count = -1
@@ -336,7 +340,7 @@ class WebGPUAttributeUtils {
     final int byteLength = (count == -1) ? (bufferGPU.size - offset).toInt() : count;
     dynamic readBufferGPU;
 
-    if (target != null && target.isReadbackBuffer == true) {
+    if (target != null && target is ReadbackBuffer == true) {
       final dynamic readbackInfo = backend[target];
 
       if (target._mapped == true) {
@@ -417,7 +421,7 @@ class WebGPUAttributeUtils {
 
       readBufferGPU.destroy();
       return result.buffer; // Returns the underlying ByteBuffer layout
-    } else if (target.isReadbackBuffer == true) {
+    } else if (target is ReadbackBuffer == true) {
       // Assign the unmanaged hardware memory pointer to the readback handle
       target.buffer = readBufferGPU.getMappedRange(0, byteLength);
       return target;
@@ -488,7 +492,7 @@ class WebGPUAttributeUtils {
   /// Utility method for handling interleaved buffer attributes correctly.
   /// To process them, their `InterleavedBuffer` is returned.
   dynamic _getBufferAttribute(dynamic attribute) {
-    if (attribute.isInterleavedBufferAttribute == true) {
+    if (attribute is InterleavedBufferAttribute == true) {
       attribute = attribute.data;
     }
     return attribute;

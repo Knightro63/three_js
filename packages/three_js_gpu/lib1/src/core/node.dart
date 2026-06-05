@@ -1,7 +1,7 @@
 import 'package:three_js_core/three_js_core.dart';
-import 'package:three_js_gpu/common/nodes/node_builder_state.dart';
-import 'package:three_js_gpu/src/code/node_builder.dart';
-import 'package:three_js_gpu/src/core/constants.dart';
+import '../../common/nodes/node_builder_state.dart';
+import '../../src/code/node_builder.dart';
+import '../../src/core/constants.dart';
 import 'package:three_js_math/three_js_math.dart';
 
 const _parentBuildStage = {

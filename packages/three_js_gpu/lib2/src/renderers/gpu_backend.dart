@@ -1,17 +1,19 @@
-import 'dart:html' as html; // Used for navigator platform inspection
 import 'dart:typed_data';
-import 'package:three_js_core/three_js_core.dart' as core;
-import 'package:three_js_math/three_js_math.dart' as math;
+import 'package:flutter/foundation.dart';
+import 'package:three_js_core/three_js_core.dart';
+import 'package:three_js_math/three_js_math.dart';
 import 'package:gpux/gpux.dart';
 
 // gpux backend utility and descriptor imports
-import '../common/backend.dart';
-import './utils/web_gpu_constants.dart';
+import '../../core/render_target_3d.dart';
+import '../nodes/core/node.dart';
+import 'common/backend.dart';
+import './utils/gpu_constants.dart';
 import './nodes/wgsl_node_builder.dart';
 import './utils/gpu_utils.dart';
 import './utils/web_gpu_attribute_utils.dart';
 import './utils/web_gpu_binding_utils.dart';
-import './utils/web_gpu_capabilities.dart';
+import './utils/gpu_capabilities.dart';
 import './utils/web_gpu_pipeline_utils.dart';
 import './utils/web_gpu_texture_utils.dart';
 import './utils/web_gpu_timestamp_query_pool.dart';
@@ -27,6 +29,18 @@ import './descriptors/gpu_render_pass_timestamp_writes.dart';
 import './descriptors/gpu_texel_copy_texture_info.dart';
 import './descriptors/gpu_texture_view_descriptor.dart';
 import './descriptors/gpu_extent_3d.dart';
+import 'common/bind_group.dart';
+import 'common/buffer.dart';
+import 'common/compute_pipeline.dart';
+import 'common/indirect_storage_buffer_attribute.dart';
+import 'common/info.dart';
+import 'common/programmable_stage.dart';
+import 'common/render_context.dart';
+import 'common/render_object.dart';
+import 'common/storage_array_texture.dart';
+import 'common/storage_buffer_attribute.dart';
+import 'common/storage_instanced_buffer_attribute.dart';
+import 'gpu_renderer.dart';
 
 // Package constants definitions or local mapping replacements
 class Constants {
@@ -63,9 +77,10 @@ class WebGPUBackend extends Backend {
   late WebGPUBindingUtils bindingUtils;
   late WebGPUCapabilities capabilities;
   late WebGPUPipelineUtils pipelineUtils;
-  late WebGPUTextureUtils textureUtils;
+  late WebGpuTextureUtils textureUtils;
 
   final Map<int, dynamic> occludedResolveCache = {};
+  final Map<String, dynamic> _backendStateCache = {};
   late final Map<String, bool> _compatibility;
 
   /// Constructs a new WebGPU backend framework pipeline.
@@ -82,14 +97,13 @@ class WebGPUBackend extends Backend {
     this.bindingUtils = WebGPUBindingUtils(this);
     this.capabilities = WebGPUCapabilities(this);
     this.pipelineUtils = WebGPUPipelineUtils(this);
-    this.textureUtils = WebGPUTextureUtils(this);
+    this.textureUtils = WebGpuTextureUtils(this);
 
     // Cross-Platform Compatibility validation check parsing
     bool compatibilityTextureCompare = true;
     try {
       // Validates browser environments safely on web compiles
-      final userAgent = html.window.navigator.userAgent;
-      if (userAgent.contains('Android')) {
+      if (kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
         compatibilityTextureCompare = false;
       }
     } catch (_) {
@@ -101,14 +115,15 @@ class WebGPUBackend extends Backend {
       Constants.textureCompare: compatibilityTextureCompare
     };
 
-    core.console.info('WebGPUBackend: Structural layout successfully initialized.');
+    console.info('WebGPUBackend: Structural layout successfully initialized.');
   }
 
   /// Initializes the backend so it is ready for usage.
   /// 
   /// Throws an [Exception] if the WebGPU context adapter cannot be requested.
   @override
-  Future<void> init(dynamic renderer) async {
+  Future<void> init(Renderer r) async {
+    final renderer = r as WebGPURenderer;
     await super.init(renderer);
     final Map<String, dynamic> params = this.parameters;
     dynamic selectedDevice;
@@ -117,14 +132,14 @@ class WebGPUBackend extends Backend {
       final Map<String, dynamic> adapterOptions = {
         'powerPreference': params['powerPreference'],
         'featureLevel': 'compatibility',
-        'xrCompatible': renderer.xr?.enabled ?? false
+        'xrCompatible': renderer.xr.enabled
       };
 
       dynamic adapter;
       try {
         // Querying the platform web context securely via window environment channels
         // In mobile/desktop environments, this bridges directly to your native gpux bindings context
-        adapter = await html.window.navigator.gpu.requestAdapter(adapterOptions);
+        //adapter = await html.window.navigator.gpu.requestAdapter(adapterOptions);
       } catch (e) {
         adapter = null;
       }
@@ -187,10 +202,10 @@ class WebGPUBackend extends Backend {
     this.device = selectedDevice;
     
     // Evaluate if Timestamp Query metric pools are globally tracked by the device
-    this.trackTimestamp = this.trackTimestamp && this.hasFeature(GPUFeatureName.timestampQuery);
+    this.trackTimestamp = this.trackTimestamp && this.hasFeature(GpuFeatureName.timestampQuery);
     
     this.updateSize();
-    core.console.info('WebGPUBackend: Backend device context successfully attached.');
+    console.info('WebGPUBackend: Backend device context successfully attached.');
   }
 
   /// Registers external GPU textures from `XRGPUBinding` for use in rendering.
@@ -198,7 +213,7 @@ class WebGPUBackend extends Backend {
   /// [renderTarget] - The render target to register the textures for.
   /// [colorTexture] - The shared XR color GPUTexture.
   /// [viewDescriptors] - Optional view descriptors, one per XR view.
-  void setXRRenderTargetTextures(dynamic renderTarget, dynamic colorTexture, [List<dynamic>? viewDescriptors = null]) {
+  void setXRRenderTargetTextures(BaseRenderTarget renderTarget, GpuTexture colorTexture, [List<dynamic>? viewDescriptors = null]) {
     this.set(renderTarget.texture, {
       'texture': colorTexture,
       'format': colorTexture.format,
@@ -210,7 +225,7 @@ class WebGPUBackend extends Backend {
 
   /// A reference to the context.
   dynamic get context {
-    final dynamic canvasTarget = this.renderer.getCanvasTarget();
+    final dynamic canvasTarget = this.renderer?.getCanvasTarget();
     final dynamic canvasData = this.get(canvasTarget);
     dynamic selectedContext = canvasData['context'];
 
@@ -263,8 +278,8 @@ class WebGPUBackend extends Backend {
   /// new allocation.
   /// 
   /// Returns a [Future] that resolves with the buffer data when the data are ready.
-  Future<dynamic> getArrayBufferAsync(
-    dynamic attribute, [
+  Future<ByteBuffer> getArrayBufferAsync(
+    StorageBufferAttribute attribute, [
     dynamic target = null, 
     int offset = 0, 
     int count = -1
@@ -302,9 +317,9 @@ class WebGPUBackend extends Backend {
         descriptor.depthStencilAttachment = depthStencilAttachment;
       }
 
-      final dynamic colorAttachment = descriptor.colorAttachments[0];
+      final GpuColorAttachment colorAttachment = descriptor.colorAttachments[0];
       if (samples > 0) {
-        colorAttachment.view = this.textureUtils.getColorBuffer().createView();
+        colorAttachment.view = this.textureUtils.getColorBuffer()?.createView();
       } else {
         colorAttachment.resolveTarget = null; // Replaces undefined with null
       }
@@ -313,7 +328,7 @@ class WebGPUBackend extends Backend {
       canvasData['samples'] = samples;
     }
 
-    final dynamic colorAttachment = descriptor.colorAttachments[0];
+    final GpuColorAttachment colorAttachment = descriptor.colorAttachments[0];
     if (samples > 0) {
       colorAttachment.resolveTarget = this.context.getCurrentTexture().createView();
     } else {
@@ -324,18 +339,18 @@ class WebGPUBackend extends Backend {
   }
 
   /// Returns whether the render target is a render target array with depth 2D array texture.
-  bool _isRenderCameraDepthArray(dynamic renderContext) {
+  bool _isRenderCameraDepthArray(RenderContext renderContext) {
     final dynamic camera = renderContext.camera;
     return renderContext.depthTexture != null &&
-        renderContext.depthTexture.isArrayTexture == true &&
+        renderContext.depthTexture is StorageArrayTexture == true &&
         camera != null &&
-        camera.isArrayCamera == true;
+        camera is ArrayCamera == true;
   }
 
   /// Returns whether the current render context references external textures.
   /// 
   /// External textures can change every frame, so their descriptors must not be cached.
-  bool _hasExternalTexture(dynamic renderContext) {
+  bool _hasExternalTexture(RenderContext renderContext) {
     final dynamic textures = renderContext.textures;
     if (textures == null) return false;
 
@@ -351,11 +366,11 @@ class WebGPUBackend extends Backend {
   }
 
   /// Creates attachment views for an external texture render target.
-  List<Map<String, dynamic>> _createExternalTextureViews(dynamic renderContext, dynamic textureData) {
+  List<Map<String, dynamic>> _createExternalTextureViews(RenderContext renderContext, dynamic textureData) {
     final List<Map<String, dynamic>> textureViews = [];
     final dynamic camera = renderContext.camera;
 
-    if (textureData['xrViewDescriptors'] != null && camera != null && camera.isArrayCamera == true) {
+    if (textureData['xrViewDescriptors'] != null && camera != null && camera is ArrayCamera == true) {
       final List<dynamic> xrViewDescriptors = textureData['xrViewDescriptors'];
       
       for (int i = 0; i < xrViewDescriptors.length; i++) {
@@ -381,33 +396,33 @@ class WebGPUBackend extends Backend {
   }
 
   /// Returns the render pass descriptor for the given render context.
-  Map<String, dynamic> _getRenderPassDescriptor(dynamic renderContext, [Map<String, dynamic> colorAttachmentsConfig = const {}]) {
-    final dynamic renderTarget = renderContext.renderTarget;
+  Map<String, dynamic> _getRenderPassDescriptor(RenderContext renderContext, [Map<String, dynamic> colorAttachmentsConfig = const {}]) {
+    final BaseRenderTarget? renderTarget = renderContext.renderTarget;
     final dynamic renderTargetData = this.get(renderTarget);
     final bool hasExternalTexture = this._hasExternalTexture(renderContext);
     
     dynamic descriptors = renderTargetData['descriptors'];
 
     if (descriptors == null ||
-        renderTargetData['width'] != renderTarget.width ||
-        renderTargetData['height'] != renderTarget.height ||
-        renderTargetData['samples'] != renderTarget.samples ||
+        renderTargetData['width'] != renderTarget?.width ||
+        renderTargetData['height'] != renderTarget?.height ||
+        renderTargetData['samples'] != renderTarget?.samples ||
         hasExternalTexture) {
       descriptors = <String, dynamic>{};
       renderTargetData['descriptors'] = descriptors;
     }
 
-    final String cacheKey = renderContext.getCacheKey();
+    final int? cacheKey = renderContext.getCacheKey();
     dynamic descriptorBase = descriptors[cacheKey];
 
     if (descriptorBase == null || hasExternalTexture) {
-      final List<dynamic> textures = renderContext.textures;
+      final List<Texture>? textures = renderContext.textures;
       final List<Map<String, dynamic>> textureViews = [];
       dynamic sliceIndex;
       final bool isRenderCameraDepthArray = this._isRenderCameraDepthArray(renderContext);
 
-      for (int i = 0; i < textures.length; i++) {
-        final dynamic textureData = this.get(textures[i]);
+      for (int i = 0; i < (textures?.length ?? 0); i++) {
+        final dynamic textureData = this.get(textures![i]);
         
         if (textureData['externalTexture'] == true) {
           // Replaces the JavaScript ES6 array spread syntax (...) with addAll
@@ -422,13 +437,14 @@ class WebGPUBackend extends Backend {
         _viewDescriptor.arrayLayerCount = 1;
         _viewDescriptor.dimension = GpuTextureViewDimension.d2;
 
-        if (renderTarget.isRenderTarget3D == true) {
+        if (renderTarget is RenderTarget3D) {
           sliceIndex = renderContext.activeCubeFace;
           _viewDescriptor.baseArrayLayer = 0;
           _viewDescriptor.dimension = GpuTextureViewDimension.d3;
-        } else if (renderTarget.isRenderTarget == true && textures[i].image.depth > 1) {
+        } 
+        else if (renderTarget is RenderTarget == true && textures[i].image.depth > 1) {
           if (isRenderCameraDepthArray == true) {
-            final List<dynamic> cameras = renderContext.camera.cameras;
+            final List<Camera> cameras = (renderContext.camera  as ArrayCamera).cameras;
             for (int layer = 0; layer < cameras.length; layer++) {
               _viewDescriptor.baseArrayLayer = layer;
               _viewDescriptor.arrayLayerCount = 1;
@@ -489,7 +505,7 @@ class WebGPUBackend extends Backend {
       if (renderContext.depth == true) {
         final dynamic depthTextureData = this.get(renderContext.depthTexture);
         
-        if (renderContext.depthTexture is core.ArrayTexture == true || renderContext.depthTexture is core.CubeTexture == true) {
+        if (renderContext.depthTexture is StorageArrayTexture == true || renderContext.depthTexture is CubeTexture == true) {
           _viewDescriptor.dimension = GpuTextureViewDimension.d2;
           _viewDescriptor.arrayLayerCount = 1;
           _viewDescriptor.baseArrayLayer = renderContext.activeCubeFace;
@@ -503,9 +519,9 @@ class WebGPUBackend extends Backend {
       }
 
       descriptors[cacheKey] = descriptorBase;
-      renderTargetData['width'] = renderTarget.width;
-      renderTargetData['height'] = renderTarget.height;
-      renderTargetData['samples'] = renderTarget.samples;
+      renderTargetData['width'] = renderTarget?.width;
+      renderTargetData['height'] = renderTarget?.height;
+      renderTargetData['samples'] = renderTarget?.samples;
       renderTargetData['activeMipmapLevel'] = renderContext.activeMipmapLevel;
       renderTargetData['activeCubeFace'] = renderContext.activeCubeFace;
     }
@@ -515,17 +531,21 @@ class WebGPUBackend extends Backend {
 
     // Apply dynamic properties to cached attachments configurations
     for (int i = 0; i < descriptorBase['colorAttachments'].length; i++) {
-      final dynamic attachment = descriptorBase['colorAttachments'][i];
-      Map<String, double> clearValue = {'r': 0, 'g': 0, 'b': 0, 'a': 1};
+      GpuColor clearValue = GpuColor(0, 0, 0, 1);//{'r': 0, 'g': 0, 'b': 0, 'a': 1};
 
       if (i == 0 && colorAttachmentsConfig['clearValue'] != null) {
         clearValue = colorAttachmentsConfig['clearValue'];
       }
 
-      attachment.loadOp = colorAttachmentsConfig['loadOp'] ?? GpuLoadOp.load;
-      attachment.storeOp = colorAttachmentsConfig['storeOp'] ?? GpuStoreOp.store;
-      attachment.clearValue = clearValue;
-      
+      final attachment = GpuColorAttachment(
+        view: descriptorBase['colorAttachments'][i].view,
+        depthSlice: descriptorBase['colorAttachments'][i].depthSlice,
+        resolveTarget: descriptorBase['colorAttachments'][i].resolveTarget,
+        loadOp: colorAttachmentsConfig['loadOp'] ?? GpuLoadOp.load,
+        storeOp: colorAttachmentsConfig['storeOp'] ?? GpuStoreOp.store,
+        clearValue: clearValue
+      );
+      descriptorBase['colorAttachments'][i] = attachment;
       descriptor.colorAttachments.add(attachment);
     }
 
@@ -538,10 +558,10 @@ class WebGPUBackend extends Backend {
 
   /// This method is executed at the beginning of a render call and prepares
   /// the WebGPU state for upcoming render calls.
-  void beginRender(dynamic renderContext) {
+  void beginRender(RenderContext renderContext) {
     // Utilizing direct map bracket directives instead of this.get()
-    final dynamic renderContextData = this[renderContext]; 
-    final int occlusionQueryCount = renderContext.occlusionQueryCount ?? 0;
+    final Map<dynamic,dynamic> renderContextData = this.get(renderContext)!; 
+    final int occlusionQueryCount = renderContext.occlusionQueryCount;
     dynamic occlusionQuerySet;
 
     if (occlusionQueryCount > 0) {
@@ -640,7 +660,7 @@ class WebGPUBackend extends Backend {
 
     // Layered render targets: prepare bundle encoders for each camera in the array camera structure
     if (this._isRenderCameraDepthArray(renderContext) == true) {
-      final List<dynamic> cameras = renderContext.camera.cameras;
+      final List<dynamic> cameras = (renderContext.camera as ArrayCamera).cameras;
       
       if (renderContextData['layerDescriptors'] == null || renderContextData['layerDescriptors'].length != cameras.length) {
         this._createArrayCameraLayerDescriptors(renderContext, renderContextData, descriptor, cameras);
@@ -690,8 +710,8 @@ class WebGPUBackend extends Backend {
 
   /// Creates render pass descriptors for each camera in an array camera.
   void _createArrayCameraLayerDescriptors(
-    dynamic renderContext, 
-    dynamic renderContextData, 
+    RenderContext renderContext, 
+    Map<dynamic,dynamic> renderContextData, 
     dynamic descriptor, 
     List<dynamic> cameras
   ) {
@@ -699,7 +719,7 @@ class WebGPUBackend extends Backend {
     renderContextData['layerDescriptors'] = <dynamic>[];
     
     // Utilizing direct map bracket lookup directive instead of this.get()
-    final dynamic depthTextureData = this[renderContext.depthTexture]; 
+    final Map<dynamic,dynamic> depthTextureData = this.get(renderContext.depthTexture)!; 
     
     if (depthTextureData['viewCache'] == null) {
       depthTextureData['viewCache'] = <int, dynamic>{};
@@ -805,9 +825,9 @@ class WebGPUBackend extends Backend {
 
   /// This method is executed at the end of a render call and finalizes work
   /// after draw calls.
-  void finishRender(dynamic renderContext) {
+  void finishRender(RenderContext renderContext) {
     // Direct map bracket assignment following map directive strategy
-    final dynamic renderContextData = this[renderContext]; 
+    final Map<dynamic,dynamic> renderContextData = this.get(renderContext)!; 
     final int occlusionQueryCount = renderContext.occlusionQueryCount ?? 0;
 
     if (renderContextData['renderBundles'].length > 0) {
@@ -887,9 +907,9 @@ class WebGPUBackend extends Backend {
     submit(this.device, renderContextData['encoder'].finish());
 
     if (renderContext.textures != null) {
-      final List<dynamic> textures = renderContext.textures;
-      for (int i = 0; i < textures.length; i++) {
-        final dynamic texture = textures[i];
+      final List<Texture>? textures = renderContext.textures;
+      for (int i = 0; i < (textures?.length ?? 0); i++) {
+        final Texture texture = textures![i];
         if (texture.generateMipmaps == true) {
           this.textureUtils.generateMipmaps(texture);
         }
@@ -899,10 +919,10 @@ class WebGPUBackend extends Backend {
 
   /// Returns `true` if the given 3D object is fully occluded by other
   /// 3D objects in the scene.
-  bool isOccluded(dynamic renderContext, dynamic object) {
+  bool isOccluded(RenderContext renderContext, Object3D object) {
     // Utilizing direct map bracket directives instead of this.get()
-    final dynamic renderContextData = this[renderContext]; 
-    final Set<dynamic>? occluded = renderContextData?['occluded'];
+    final Map<dynamic,dynamic> renderContextData = this.get(renderContext)!; 
+    final Set<dynamic>? occluded = renderContextData['occluded'];
     
     return occluded != null && occluded.contains(object);
   }
@@ -912,7 +932,7 @@ class WebGPUBackend extends Backend {
   /// 
   /// Returns a [Future] that resolves when the occlusion query results have been processed.
   Future<void> resolveOccludedAsync(dynamic renderContext) async {
-    final dynamic renderContextData = this[renderContext]; 
+    final Map<dynamic,dynamic> renderContextData = this.get(renderContext)!; 
     
     // Destructuring unpack replacement via direct bracket properties extraction
     final dynamic currentOcclusionQueryBuffer = renderContextData?['currentOcclusionQueryBuffer'];
@@ -932,12 +952,12 @@ class WebGPUBackend extends Backend {
       final dynamic buffer = currentOcclusionQueryBuffer.getMappedRange();
       
       // Native Dart representation of a 64-bit unsigned binary integer view layer
-      final math.ByteData results = math.ByteData.view(buffer);
+      final ByteData results = ByteData.view(buffer);
 
       for (int i = 0; i < currentOcclusionQueryObjects.length; i++) {
         // Reads 8-byte (64-bit) unsigned increments sequentially from the payload stream
         final int byteOffset = i * 8;
-        final int queryValue = results.getUint64(byteOffset, math.Endian.little);
+        final int queryValue = results.getUint64(byteOffset, Endian.little);
 
         if (queryValue == 0) {
           occluded.add(currentOcclusionQueryObjects[i]);
@@ -950,9 +970,9 @@ class WebGPUBackend extends Backend {
   }
 
   /// Updates the viewport with the values from the given render context.
-  void updateViewport(dynamic renderContext) {
-    final dynamic renderContextData = this[renderContext];
-    final dynamic currentPass = renderContextData?['currentPass'];
+  void updateViewport(RenderContext renderContext) {
+    final Map<dynamic,dynamic> renderContextData = this.get(renderContext)!;
+    final dynamic currentPass = renderContextData['currentPass'];
     
     if (currentPass != null) {
       final dynamic vp = renderContext.viewportValue;
@@ -961,9 +981,9 @@ class WebGPUBackend extends Backend {
   }
 
   /// Updates the scissor with the values from the given render context.
-  void updateScissor(dynamic renderContext) {
-    final dynamic renderContextData = this[renderContext];
-    final dynamic currentPass = renderContextData?['currentPass'];
+  void updateScissor(RenderContext renderContext) {
+    final Map<dynamic,dynamic> renderContextData = this.get(renderContext)!;
+    final dynamic currentPass = renderContextData['currentPass'];
     
     if (currentPass != null) {
       final dynamic sc = renderContext.scissorValue;
@@ -973,14 +993,14 @@ class WebGPUBackend extends Backend {
 
   /// Returns the clear color and alpha into a single color object.
   @override
-  dynamic getClearColor() {
-    final dynamic clearColor = super.getClearColor();
+  Color? getClearColor() {
+    final Color? clearColor = super.getClearColor();
 
     // Only premultiply alpha when alphaMode is configured as "premultiplied"
-    if (this.renderer.alpha == true) {
-      clearColor.r *= clearColor.a;
-      clearColor.g *= clearColor.a;
-      clearColor.b *= clearColor.a;
+    if (clearColor != null && this.renderer?.alpha == true) {
+      clearColor.red *= clearColor.alpha;
+      clearColor.green *= clearColor.alpha;
+      clearColor.blue *= clearColor.alpha;
     }
     
     return clearColor;
@@ -1087,9 +1107,9 @@ class WebGPUBackend extends Backend {
   /// prepares the state for upcoming compute tasks.
   /// 
   /// [computeGroup] - The compute node(s).
-  void beginCompute(dynamic computeGroup) {
+  void beginCompute(List<Node> computeGroup) {
     // Utilizing direct map bracket directives instead of this.get()
-    final dynamic groupGPU = this[computeGroup]; 
+    final Map<dynamic,dynamic> groupGPU = this.get(computeGroup)!; 
     final String label = 'computeGroup_${computeGroup.id}';
     
     _computePassDescriptor.label = label;
@@ -1106,25 +1126,25 @@ class WebGPUBackend extends Backend {
 
   /// Executes a compute command for the given compute node.
   void compute(
-    dynamic computeGroup, 
-    dynamic computeNode, 
-    List<dynamic> bindings, 
-    dynamic pipeline, 
-    [dynamic dispatchSize = null]
+    List<Node> computeGroup, 
+    Node computeNode, 
+    List<BindGroup> bindings, 
+    ComputePipeline pipeline, 
+    [dynamic dispatchSize]
   ) {
     // Utilizing direct map bracket directives instead of this.get()
-    final dynamic computeNodeData = this[computeNode];
-    final dynamic computeGroupData = this[computeGroup];
-    final dynamic passEncoderGPU = computeGroupData?['passEncoderGPU'];
+    final Map<dynamic,dynamic> computeNodeData = this.get(computeNode)!;
+    final Map<dynamic,dynamic> computeGroupData = this.get(computeGroup)!;
+    final dynamic passEncoderGPU = computeGroupData['passEncoderGPU'];
 
     // Pipeline allocation resolution
-    final dynamic pipelineGPU = this[pipeline]?['pipeline'];
+    final dynamic pipelineGPU = this.get(pipeline)?['pipeline'];
     this.pipelineUtils.setPipeline(passEncoderGPU, pipelineGPU);
 
     // Bind groups mapping loop
     for (int i = 0, l = bindings.length; i < l; i++) {
       final dynamic bindGroup = bindings[i];
-      final dynamic bindingsData = this[bindGroup];
+      final dynamic bindingsData = this.get(bindGroup);
       passEncoderGPU.setBindGroup(i, bindingsData?['group']);
     }
 
@@ -1133,8 +1153,8 @@ class WebGPUBackend extends Backend {
     }
 
     // When the dispatchSize is loaded with a StorageBuffer directly from GPU memory context
-    if (dispatchSize != null && dispatchSize.isIndirectStorageBufferAttribute == true) {
-      final dynamic dispatchBuffer = this[dispatchSize]?['buffer'];
+    if (dispatchSize != null && dispatchSize is IndirectStorageBufferAttribute == true) {
+      final Map<dynamic,dynamic> dispatchBuffer = this.get(dispatchSize)?['buffer'];
       passEncoderGPU.dispatchWorkgroupsIndirect(dispatchBuffer, 0);
       return;
     }
@@ -1148,7 +1168,7 @@ class WebGPUBackend extends Backend {
         computeNodeData['dispatchSize'] = <int>[0, 1, 1];
         computeNodeData['count'] = count;
         
-        final List<dynamic> workgroupSize = computeNode.workgroupSize;
+        final List<num> workgroupSize = computeNode.workgroupSize;
         int size = workgroupSize[0].toInt();
         
         for (int i = 1; i < workgroupSize.length; i++) {
@@ -1182,9 +1202,9 @@ class WebGPUBackend extends Backend {
 
   /// This method is executed at the end of a compute call and
   /// finalizes work after compute tasks.
-  void finishCompute(dynamic computeGroup) {
+  void finishCompute(List<Node> computeGroup) {
     // Utilizing direct map bracket directives instead of this.get()
-    final dynamic groupData = this[computeGroup];
+    final dynamic groupData = this.get(computeGroup)!;
     
     groupData['passEncoderGPU'].end();
     submit(this.device, groupData['cmdEncoderGPU'].finish());
@@ -1219,7 +1239,7 @@ class WebGPUBackend extends Backend {
     for (int i = 0, l = bindings.length; i < l; i++) {
       final dynamic bindGroup = bindings[i];
       // Utilizing direct map bracket directive instead of this.get()
-      final dynamic bindingsData = this[bindGroup]; 
+      final dynamic bindingsData = this.get(bindGroup); 
       
       if (currentBindingGroups[i] != bindGroup.id) {
         passEncoderGPU.setBindGroup(i, bindingsData['group']);
@@ -1230,7 +1250,7 @@ class WebGPUBackend extends Backend {
     // Index buffer configurations
     if (hasIndex == true) {
       if (currentSets['index'] != index) {
-        final dynamic buffer = this[index]['buffer'];
+        final dynamic buffer = this.get(index)?['buffer'];
         
         // Check backing element type natively using Dart typed data array signatures
         final GpuIndexFormat indexFormat = (index.array is Uint16List) 
@@ -1246,7 +1266,7 @@ class WebGPUBackend extends Backend {
     for (int i = 0, l = vertexBuffers.length; i < l; i++) {
       final dynamic vertexBuffer = vertexBuffers[i];
       if (currentSets['attributes'][i] != vertexBuffer) {
-        final dynamic buffer = this[vertexBuffer]['buffer'];
+        final dynamic buffer = this.get(vertexBuffer)?['buffer'];
         passEncoderGPU.setVertexBuffer(i, buffer);
         currentSets['attributes'][i] = vertexBuffer;
       }
@@ -1291,7 +1311,7 @@ class WebGPUBackend extends Backend {
       final dynamic indirect = renderObject.getIndirect();
       
       if (indirect != null) {
-        final dynamic buffer = this[indirect]['buffer'];
+        final dynamic buffer = this.get(indirect)?['buffer'];
         final dynamic indirectOffset = renderObject.getIndirectOffset();
         final List<dynamic> indirectOffsets = (indirectOffset is List) ? indirectOffset : [indirectOffset];
         
@@ -1312,7 +1332,7 @@ class WebGPUBackend extends Backend {
       final dynamic indirect = renderObject.getIndirect();
       
       if (indirect != null) {
-        final dynamic buffer = this[indirect]['buffer'];
+        final dynamic buffer = this.get(indirect)?['buffer'];
         final dynamic indirectOffset = renderObject.getIndirectOffset();
         final List<dynamic> indirectOffsets = (indirectOffset is List) ? indirectOffset : [indirectOffset];
         
@@ -1330,15 +1350,15 @@ class WebGPUBackend extends Backend {
   /// 
   /// [renderObject] - The render object to draw.
   /// [info] - Holds a series of statistical information about the GPU memory and the rendering process.
-  void draw(dynamic renderObject, dynamic info) {
+  void draw(RenderObject renderObject, Info info) {
     // Replacing JavaScript object destructuring with standard property extraction
     final dynamic object = renderObject.object;
     final dynamic context = renderObject.context;
     final dynamic pipeline = renderObject.pipeline;
 
     // Utilizing direct map bracket directives instead of this.get()
-    final dynamic renderContextData = this[context]; 
-    final dynamic pipelineData = this[pipeline];
+    final dynamic renderContextData = this.get(context); 
+    final dynamic pipelineData = this.get(pipeline);
     final dynamic pipelineGPU = pipelineData?['pipeline'];
 
     // Skip if pipeline has compilation or device verification faults
@@ -1351,16 +1371,16 @@ class WebGPUBackend extends Backend {
     final List<dynamic> vertexBuffers = renderObject.getVertexBuffers() ?? [];
 
     // Multi-Camera array execution branch pipeline path
-    if (renderObject.camera.isArrayCamera == true && renderObject.camera.cameras.length > 0) {
-      final dynamic cameraData = this[renderObject.camera];
-      final List<dynamic> cameras = renderObject.camera.cameras;
+    if (renderObject.camera is ArrayCamera == true && (renderObject.camera as ArrayCamera).cameras.length > 0) {
+      final dynamic cameraData = this.get(renderObject.camera);
+      final List<Camera> cameras = (renderObject.camera as ArrayCamera).cameras;
       final dynamic cameraIndex = renderObject.getBindingGroup('cameraIndex');
 
       if (cameraData?['indexesGPU'] == null || cameraData['indexesGPU'].length != cameras.length) {
-        final dynamic bindingsData = this[cameraIndex];
+        final dynamic bindingsData = this.get(cameraIndex);
         final List<dynamic> indexesGPU = [];
         
-        // Map Uint32Array to native math.Uint32List structure
+        // Map Uint32Array to native Uint32List structure
         final Uint32List data = Uint32List.fromList([0, 0, 0, 0]);
 
         for (int i = 0, len = cameras.length; i < len; i++) {
@@ -1372,13 +1392,13 @@ class WebGPUBackend extends Backend {
         cameraData['indexesGPU'] = indexesGPU;
       }
 
-      final double pixelRatio = this.renderer.getPixelRatio().toDouble();
+      final double pixelRatio = this.renderer!.getPixelRatio().toDouble();
 
       for (int i = 0, len = cameras.length; i < len; i++) {
-        final dynamic subCamera = cameras[i];
+        final Camera subCamera = cameras[i];
         
         if (object.layers.test(subCamera.layers) == true) {
-          final dynamic vp = subCamera.viewport;
+          final Vector4 vp = subCamera.viewport!;
           dynamic pass = renderContextData['currentPass'];
           dynamic sets = renderContextData['currentSets'];
           
@@ -1443,11 +1463,11 @@ class WebGPUBackend extends Backend {
   }
 
   /// Returns `true` if the render pipeline requires an update.
-  bool needsRenderUpdate(dynamic renderObject) {
+  bool needsRenderUpdate(RenderObject renderObject) {
     // Utilizing direct map bracket directive instead of this.get()
-    final dynamic data = this[renderObject]; 
-    final dynamic object = renderObject.object;
-    final dynamic material = renderObject.material;
+    final Map data = this.get(renderObject)!; 
+    final Object3D object = renderObject.object;
+    final Material material = renderObject.material;
     final dynamic utils = this.utils;
 
     final int sampleCount = utils.getSampleCountRenderContext(renderObject.context);
@@ -1528,7 +1548,7 @@ class WebGPUBackend extends Backend {
   }
 
   /// Returns a cache key that is used to identify render pipelines.
-  String getRenderCacheKey(dynamic renderObject) {
+  String getRenderCacheKey(RenderObject renderObject) {
     final dynamic object = renderObject.object;
     final dynamic material = renderObject.material;
     final dynamic utils = this.utils;
@@ -1583,7 +1603,7 @@ class WebGPUBackend extends Backend {
   /// as a placeholder until the actual texture is ready for usage.
   /// 
   /// Returns `true` if the sampler has been updated successfully.
-  bool createDefaultTexture(dynamic texture) {
+  void createDefaultTexture(Texture texture) {
     return this.textureUtils.createDefaultTexture(texture);
   }
 
@@ -1591,14 +1611,14 @@ class WebGPUBackend extends Backend {
   /// 
   /// [options] - Optional configuration parameters map layer.
   void createTexture(dynamic texture, [Map<String, dynamic>? options]) {
-    this.textureUtils.createTexture(texture, options ?? const {});
+    this.textureUtils.createTexture(texture, options ?? {});
   }
 
   /// Uploads the updated texture data to the GPU.
   /// 
   /// [options] - Optional configuration parameters map layer.
   void updateTexture(dynamic texture, [Map<String, dynamic>? options]) {
-    this.textureUtils.updateTexture(texture, options ?? const {});
+    this.textureUtils.updateTexture(texture, options ?? {});
   }
 
   /// Generates mipmaps for the given texture.
@@ -1609,19 +1629,19 @@ class WebGPUBackend extends Backend {
   /// Destroys the GPU data for the given texture object.
   /// 
   /// [isDefaultTexture] - Whether the texture uses a default GPU texture or not.
-  void destroyTexture(dynamic texture, [bool isDefaultTexture = false]) {
+  void destroyTexture(Texture texture, [bool isDefaultTexture = false]) {
     this.textureUtils.destroyTexture(texture, isDefaultTexture);
   }
 
   /// Returns texture data as a typed array view.
   /// 
   /// Returns a [Future] that resolves with the backing buffer data when the copy operation has finished.
-  Future<dynamic> copyTextureToBuffer(
-    dynamic texture, 
-    int x, 
-    int y, 
-    int width, 
-    int height, 
+  Future<TypedData> copyTextureToBuffer(
+    Texture texture, 
+    double x, 
+    double y, 
+    double width, 
+    double height, 
     int faceIndex
   ) async {
     return await this.textureUtils.copyTextureToBuffer(texture, x, y, width, height, faceIndex);
@@ -1655,16 +1675,16 @@ class WebGPUBackend extends Backend {
   /// Returns a node builder for the given render object.
   /// 
   /// Returns a new [WGSLNodeBuilder] instance context.
-  WGSLNodeBuilder createNodeBuilder(dynamic object, dynamic renderer) {
+  WGSLNodeBuilder createNodeBuilder(Object3D object, Renderer renderer) {
     return WGSLNodeBuilder(object, renderer);
   }
 
   // Program
 
   /// Creates a shader program module from the given programmable stage block.
-  void createProgram(dynamic program) {
+  void createProgram(ProgrammableStage program) {
     // Utilizing direct map bracket directive instead of this.get()
-    final dynamic programGPU = this[program]; 
+    final Map programGPU = this.get(program)!; 
     
     final String labelSuffix = (program.name != '') ? '_${program.name}' : '';
     _shaderModuleDescriptor.label = '${program.stage}$labelSuffix';
@@ -1679,7 +1699,7 @@ class WebGPUBackend extends Backend {
   }
 
   /// Destroys the shader program of the given programmable stage.
-  void destroyProgram(dynamic program) {
+  void destroyProgram(ProgrammableStage program) {
     // Replaces this.delete(program) with native Dart Map element extraction removal
     this._backendStateCache.remove(program);
   }
@@ -1689,7 +1709,7 @@ class WebGPUBackend extends Backend {
   /// Creates a render pipeline for the given render object.
   /// 
   /// [promises] - An array of compilation futures which are evaluated in `compileAsync()`.
-  void createRenderPipeline(dynamic renderObject, List<Future<dynamic>> promises) {
+  void createRenderPipeline(RenderObject renderObject, [List<Future<dynamic>>? promises]) {
     this.pipelineUtils.createRenderPipeline(renderObject, promises);
   }
 
@@ -1703,7 +1723,7 @@ class WebGPUBackend extends Backend {
   /// Prepares the state for encoding render bundles.
   void beginBundle(dynamic renderContext) {
     // Utilizing direct map bracket directive instead of this.get()
-    final dynamic renderContextData = this[renderContext]; 
+    final Map renderContextData = this.get(renderContext)!; 
     
     renderContextData['_currentPass'] = renderContextData['currentPass'];
     renderContextData['_currentSets'] = renderContextData['currentSets'];
@@ -1722,13 +1742,13 @@ class WebGPUBackend extends Backend {
   /// After processing render bundles this method finalizes related work.
   /// 
   /// [bundle] - The render bundle output container.
-  void finishBundle(dynamic renderContext, dynamic bundle) {
-    final dynamic renderContextData = this[renderContext]; 
+  void finishBundle(RenderContext renderContext, dynamic bundle) {
+    final dynamic renderContextData = this.get(renderContext); 
     final dynamic bundleEncoder = renderContextData['currentPass'];
     final dynamic bundleGPU = bundleEncoder.finish();
     
     // Cache the completed hardware layout bundle via map bracket assignments
-    this[bundle]['bundleGPU'] = bundleGPU; 
+    this.get(bundle)?['bundleGPU'] = bundleGPU; 
     
     // Restore the underlying active parent render pass pipeline configurations state
     renderContextData['currentSets'] = renderContextData['_currentSets'];
@@ -1736,12 +1756,12 @@ class WebGPUBackend extends Backend {
   }
 
   /// Adds a render bundle to the render context data.
-  void addBundle(dynamic renderContext, dynamic bundle) {
+  void addBundle(RenderContext renderContext, dynamic bundle) {
     // Utilizing direct map bracket directive instead of this.get()
-    final dynamic renderContextData = this[renderContext];
+    final dynamic renderContextData = this.get(renderContext);
     
     // Extract hardware bundle reference using bracket mapping notation
-    final dynamic bundleGPU = this[bundle]?['bundleGPU'];
+    final dynamic bundleGPU = this.get(bundle)?['bundleGPU'];
     
     if (renderContextData?['renderBundles'] != null && bundleGPU != null) {
       renderContextData['renderBundles'].add(bundleGPU);
@@ -1754,7 +1774,7 @@ class WebGPUBackend extends Backend {
   /// 
   /// [uniformBuffer] - The uniform buffer payload structure.
   void createUniformBuffer(dynamic uniformBuffer) {
-    final dynamic uniformBufferData = this[uniformBuffer];
+    final dynamic uniformBufferData = this.get(uniformBuffer);
 
     if (uniformBufferData?['buffer'] == null) {
       final int byteLength = uniformBuffer.byteLength;
@@ -1790,7 +1810,7 @@ class WebGPUBackend extends Backend {
 
   /// Destroys the GPU data for the given uniform buffer.
   void destroyUniformBuffer(dynamic uniformBuffer) {
-    final dynamic uniformBufferData = this[uniformBuffer];
+    final dynamic uniformBufferData = this.get(uniformBuffer);
     
     if (uniformBufferData?['buffer'] != null) {
       uniformBufferData['buffer'].destroy();
@@ -1803,22 +1823,22 @@ class WebGPUBackend extends Backend {
   // Bindings
 
   /// Creates bindings from the given bind group definition.
-  void createBindings(dynamic bindGroup, List<dynamic> bindings, int cacheIndex, int version) {
-    this.bindingUtils.createBindings(bindGroup, bindings, cacheIndex, version);
+  void createBindings(BindGroup bindGroup, List<BindGroup> bindings, int cacheIndex,[int? version ]) {
+    this.bindingUtils.createBindings(bindGroup, bindings, cacheIndex, version ?? 0);
   }
 
   /// Updates the given bind group definition.
-  void updateBindings(dynamic bindGroup, List<dynamic> bindings, int cacheIndex, int version) {
+  void updateBindings(BindGroup bindGroup, List<BindGroup> bindings, int cacheIndex, int version) {
     this.bindingUtils.createBindings(bindGroup, bindings, cacheIndex, version);
   }
 
   /// Updates a buffer binding.
-  void updateBinding(dynamic binding) {
+  void updateBinding(Buffer binding) {
     this.bindingUtils.updateBinding(binding);
   }
 
   /// Delete data associated with the current bind group.
-  void deleteBindGroupData(dynamic bindGroup) {
+  void deleteBindGroupData(BindGroup bindGroup) {
     this.bindingUtils.deleteBindGroupData(bindGroup);
   }
 
@@ -1828,7 +1848,7 @@ class WebGPUBackend extends Backend {
   void createIndexAttribute(dynamic attribute) {
     int usage = GpuBufferUsage.index | GpuBufferUsage.copySrc | GpuBufferUsage.copyDst;
     
-    if (attribute.isStorageBufferAttribute == true || attribute.isStorageInstancedBufferAttribute == true) {
+    if (attribute is StorageBufferAttribute == true || attribute is StorageInstancedBufferAttribute == true) {
       // Standard bitwise OR operation assignment masks mapping
       usage |= GpuBufferUsage.storage;
     }
@@ -1875,7 +1895,7 @@ class WebGPUBackend extends Backend {
   /// Triggers an update of the default render pass descriptor.
   void updateSize() {
     // Replaces this.delete() with direct internal state dictionary map removal
-    this._backendStateCache.remove(this.renderer.getCanvasTarget());
+    this._backendStateCache.remove(this.renderer?.getCanvasTarget());
   }
 
   // Utils
@@ -1883,12 +1903,12 @@ class WebGPUBackend extends Backend {
   /// Checks if the given feature is supported by the backend.
   /// 
   /// Returns `true` if the hardware feature is fully supported.
-  bool hasFeature(String name) {
-    String featureName = name;
+  bool hasFeature(GpuFeatureName name) {
+    GpuFeatureName featureName = name;
     
     // Check global constant property map trackers natively using bracket access
-    if (GPUFeatureMap[name] != null) {
-      featureName = GPUFeatureMap[name]!;
+    if (GpuFeatureMap[name] != null) {
+      featureName = GpuFeatureMap[name]!;
     }
     
     return this.device.features.has(featureName);
@@ -1903,48 +1923,39 @@ class WebGPUBackend extends Backend {
   /// [srcLevel] - The mipmap level to copy.
   /// [dstLevel] - The destination mip level to copy to.
   void copyTextureToTexture(
-    dynamic srcTexture, 
-    dynamic dstTexture, [
-    dynamic srcRegion = null, 
-    dynamic dstPosition = null, 
+    Texture srcTexture, 
+    Texture dstTexture, [
+    BoundingBox? srcRegion, 
+    Vector? dstPosition, 
     int srcLevel = 0, 
-    int dstLevel = 0
+    int dstLevel = 0 
   ]) {
-    int dstX = 0;
-    int dstY = 0;
-    int dstZ = 0;
-    int srcX = 0;
-    int srcY = 0;
-    int srcZ = 0;
+    double dstX = 0;
+    double dstY = 0;
+    double dstZ = 0;
+    double srcX = 0;
+    double srcY = 0;
+    double srcZ = 0;
     
     int srcWidth = srcTexture.image.width.toInt();
     int srcHeight = srcTexture.image.height.toInt();
     int srcDepth = 1;
 
     if (srcRegion != null) {
-      if (srcRegion.isBox3 == true) {
-        srcX = srcRegion.min.x.toInt();
-        srcY = srcRegion.min.y.toInt();
-        srcZ = srcRegion.min.z.toInt();
-        srcWidth = (srcRegion.max.x - srcRegion.min.x).toInt();
-        srcHeight = (srcRegion.max.y - srcRegion.min.y).toInt();
-        srcDepth = (srcRegion.max.z - srcRegion.min.z).toInt();
-      } else {
-        // Assume it's a Box2 framework vector box bounds
-        srcX = srcRegion.min.x.toInt();
-        srcY = srcRegion.min.y.toInt();
-        srcWidth = (srcRegion.max.x - srcRegion.min.x).toInt();
-        srcHeight = (srcRegion.max.y - srcRegion.min.y).toInt();
-        srcDepth = 1;
-      }
+      srcX = srcRegion.min.x;
+      srcY = srcRegion.min.y;
+      srcZ = srcRegion.min.z;
+      srcWidth = (srcRegion.max.x - srcRegion.min.x).toInt();
+      srcHeight = (srcRegion.max.y - srcRegion.min.y).toInt();
+      srcDepth = (srcRegion.max.z - srcRegion.min.z).toInt();
     }
 
     if (dstPosition != null) {
-      dstX = dstPosition.x.toInt();
-      dstY = dstPosition.y.toInt();
+      dstX = dstPosition.x;
+      dstY = dstPosition.y;
       // Handle the fallback lookup calculation if z parameter does not exist on Vector2
       try {
-        dstZ = dstPosition.z.toInt();
+        if(Vector is Vector3) dstZ = (dstPosition as Vector3).z;
       } catch (_) {
         dstZ = 0;
       }
@@ -1955,8 +1966,8 @@ class WebGPUBackend extends Backend {
     _commandEncoderDescriptor.reset();
 
     // Utilizing direct map bracket directives instead of this.get()
-    final dynamic sourceGPU = this[srcTexture]['texture'];
-    final dynamic destinationGPU = this[dstTexture]['texture'];
+    final dynamic sourceGPU = this.get(srcTexture)?['texture'];
+    final dynamic destinationGPU = this.get(dstTexture)?['texture'];
 
     _texelCopyTextureInfoSrc.texture = sourceGPU;
     _texelCopyTextureInfoSrc.mipLevel = srcLevel;
@@ -1993,30 +2004,30 @@ class WebGPUBackend extends Backend {
   /// [texture] - The destination texture.
   /// [renderContext] - The render context.
   /// [rectangle] - A four dimensional vector defining the origin and dimension of the copy.
-  void copyFramebufferToTexture(dynamic texture, dynamic renderContext, dynamic rectangle) {
+  void copyFramebufferToTexture(Texture texture, RenderContext renderContext, dynamic rectangle) {
     // Utilizing direct map bracket directives instead of this.get()
-    final dynamic renderContextData = this[renderContext]; 
+    final Map renderContextData = this.get(renderContext)!; 
     dynamic sourceGPU;
 
     if (renderContext.renderTarget == true) {
-      if (texture.isDepthTexture == true) {
-        sourceGPU = this[renderContext.depthTexture]['texture'];
+      if (texture is DepthTexture == true) {
+        sourceGPU = this.get(renderContext.depthTexture)!['texture'];
       } else {
-        sourceGPU = this[renderContext.textures[0]]['texture'];
+        sourceGPU = this.get(renderContext.textures![0])!['texture'];
       }
     } else {
-      if (texture.isDepthTexture == true) {
+      if (texture is DepthTexture == true) {
         sourceGPU = this.textureUtils.getDepthBuffer(renderContext.depth, renderContext.stencil);
       } else {
         sourceGPU = this.context.getCurrentTexture();
       }
     }
 
-    final dynamic destinationGPU = this[texture]['texture'];
+    final dynamic destinationGPU = this.get(texture)!['texture'];
 
     if (sourceGPU.format != destinationGPU.format) {
       // Replaces JavaScript error handler with three_js_core console logger
-      core.console.error(
+      console.error(
         'WebGPUBackend: copyFramebufferToTexture: Source and destination formats do not match. '
         'Source: ${sourceGPU.format}, Destination: ${destinationGPU.format}'
       );
@@ -2137,7 +2148,7 @@ class WebGPUBackend extends Backend {
     // Reset the internal state backup cache map entirely
     this._backendStateCache.clear();
     
-    core.console.info('WebGPUBackend: Framework pipeline context successfully disposed.');
+    console.info('WebGPUBackend: Framework pipeline context successfully disposed.');
     super.dispose();
   }
 }

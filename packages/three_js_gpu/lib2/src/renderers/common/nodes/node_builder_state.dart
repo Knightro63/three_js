@@ -1,4 +1,3 @@
-import 'package:three_js_core/three_js_core.dart' as core;
 import '../bind_group.dart';
 
 /// This module represents the state of a node builder after it was

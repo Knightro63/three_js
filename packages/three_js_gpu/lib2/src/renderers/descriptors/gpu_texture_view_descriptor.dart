@@ -15,7 +15,7 @@ class GPUTextureViewDescriptor {
   int usage = 0;
 
   /// Which aspect of the texture is referenced.
-  String aspect = 'all';
+  GpuTextureAspect aspect = GpuTextureAspect.all;
 
   /// The first mip level accessible to the texture view.
   int baseMipLevel = 0;
@@ -45,7 +45,7 @@ class GPUTextureViewDescriptor {
     this.format = null;
     this.dimension = null;
     this.usage = 0;
-    this.aspect = 'all';
+    this.aspect = GpuTextureAspect.all;
     this.baseMipLevel = 0;
     this.mipLevelCount = null;
     this.baseArrayLayer = 0;

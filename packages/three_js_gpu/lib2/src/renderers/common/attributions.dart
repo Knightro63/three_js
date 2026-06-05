@@ -1,5 +1,6 @@
-import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
+import 'constants.dart';
+import 'data_map.dart';
 
 /// This renderer module manages geometry attributes.
 class Attributes extends DataMap {
@@ -17,7 +18,7 @@ class Attributes extends DataMap {
   /// [attribute] - The attribute context to remove.
   /// Returns the deleted attribute data map container layer.
   @override
-  dynamic delete(dynamic attribute) {
+  Map<String,dynamic>? delete(dynamic attribute) {
     final dynamic attributeData = super.delete(attribute);
     
     if (attributeData != null) {

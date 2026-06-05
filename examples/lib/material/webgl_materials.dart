@@ -59,10 +59,11 @@ class _MyAppState extends State<WebglMaterials> {
   final objects = [], materials = [];
 
   Future<void> setup() async {
+    threeJs.scene = three.Scene();
     threeJs.camera = three.PerspectiveCamera(45, threeJs.width / threeJs.height, 1, 2000);
     threeJs.camera.position.setValues(0, 200, 800);
     controls = three.OrbitControls(threeJs.camera, threeJs.globalKey);
-    threeJs.scene = three.Scene();
+    
 
     // Grid
 

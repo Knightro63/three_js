@@ -1,3 +1,5 @@
+import '../code/node_builder.dart';
+
 /**
  * Abstract class for implementing lighting models. The module defines
  * multiple methods that concrete lighting models can implement. These

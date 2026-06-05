@@ -1,5 +1,5 @@
 import 'package:three_js_core/three_js_core.dart';
-import 'package:three_js_gpu/src/code/node_function_input.dart';
+import '../../src/code/node_function_input.dart';
 
 /// Base class for node functions. A derived module must be implemented
 /// for each supported native shader language. Similar to other `Node*` modules,
@@ -14,7 +14,7 @@ class NodeFunction {
 	NodeFunction(this.type, this.inputs, [this.name = '', this.precision = ''] );
 
 	/// This method returns the native code of the node function.
-	getCode([String? name]) {
+	void getCode([String? name]) {
     name ??= this.name;
 		console.warning( 'Abstract function.' );
 	}

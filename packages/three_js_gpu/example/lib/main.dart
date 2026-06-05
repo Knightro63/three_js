@@ -52,7 +52,7 @@ class _State extends State<WebglGeometries> {
 
   @override
   Widget build(BuildContext context) {
-    return threeJs.build(context);
+    return threeJs.build();
   }
 
   int startTime = 0;
@@ -62,7 +62,7 @@ class _State extends State<WebglGeometries> {
     threeJs.camera.position.y = 400;
 
     threeJs.scene = three.Scene();
-    threeJs.scene.background = tmath.Color.fromHex32(0xff00ff);
+    //threeJs.scene.background = tmath.Color.fromHex32(0xff00ff);
 
     three.Mesh object;
 

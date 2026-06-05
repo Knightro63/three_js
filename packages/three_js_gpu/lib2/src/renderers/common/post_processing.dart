@@ -1,0 +1,162 @@
+
+
+import 'package:three_js_core/three_js_core.dart';
+import '../../materials/node_material.dart';
+import 'quad_mesh.dart';
+import 'renderer.dart';
+import 'package:three_js_math/three_js_math.dart';
+
+/**
+ * This module is responsible to manage the post processing setups in apps.
+ * You usually create a single instance of this class and use it to define
+ * the output of your post processing effect chain.
+ * ```js
+ * final postProcessing = new PostProcessing( renderer );
+ *
+ * final scenePass = pass( scene, camera );
+ *
+ * postProcessing.outputNode = scenePass;
+ * ```
+ *
+ * Note: This module can only be used with `WebGPURenderer`.
+ */
+class PostProcessing {
+  late final QuadMesh _quadMesh;
+  Renderer renderer;
+  bool outputColorTransform = true;
+  bool needsUpdate = true;
+  NodeMaterial material = NodeMaterial();
+  Map? _context;
+
+	/**
+	 * Constructs a new post processing management module.
+	 *
+	 * @param {Renderer} renderer - A reference to the renderer.
+	 * @param {Node<vec4>} outputNode - An optional output node.
+	 */
+	PostProcessing(this.renderer, outputNode = vec4( 0, 0, 1, 1 ) ) {
+
+		/**
+		 * A node which defines the final output of the post
+		 * processing. This is usually the last node in a chain
+		 * of effect nodes.
+		 *
+		 * @type {Node<vec4>}
+		 */
+		this.outputNode = outputNode;
+		material.name = 'PostProcessing';
+		_quadMesh = QuadMesh( material );
+	}
+
+	/**
+	 * When `PostProcessing` is used to apply post processing effects,
+	 * the application must use this version of `render()` inside
+	 * its animation loop (not the one from the renderer).
+	 */
+	void render() {
+		final renderer = this.renderer;
+		this._update();
+
+		this._context?['onBeforePostProcessing']?.call();
+
+		final toneMapping = renderer.toneMapping;
+		final outputColorSpace = renderer.outputColorSpace;
+
+		renderer.toneMapping = NoToneMapping;
+		renderer.outputColorSpace = LinearSRGBColorSpace;
+
+		//
+
+		final currentXR = renderer.xr.enabled;
+		renderer.xr.enabled = false;
+
+		_quadMesh.render( renderer );
+
+		renderer.xr.enabled = currentXR;
+
+		//
+
+		renderer.toneMapping = toneMapping;
+		renderer.outputColorSpace = outputColorSpace;
+
+		_context?['onAfterPostProcessing']?.call();
+	}
+
+	get context => _context;
+
+
+	void dispose() {
+		_quadMesh.material?.dispose();
+	}
+
+	/**
+	 * Updates the state of the module.
+	 */
+	void _update() {
+		if (needsUpdate == true ) {
+
+			final renderer = this.renderer;
+
+			final toneMapping = renderer.toneMapping;
+			final outputColorSpace = renderer.outputColorSpace;
+
+			final context = {
+				'postProcessing': this,
+				'onBeforePostProcessing': null,
+				'onAfterPostProcessing': null
+			};
+
+			let outputNode = this.outputNode;
+
+			if ( outputColorTransform == true ) {
+				outputNode = outputNode.context( context );
+				outputNode = renderOutput( outputNode, toneMapping, outputColorSpace );
+			} 
+      else {
+				context['toneMapping'] = toneMapping;
+				context['outputColorSpace'] = outputColorSpace;
+				outputNode = outputNode.context( context );
+			}
+
+			_context = context;
+
+			_quadMesh.material.fragmentNode = outputNode;
+			_quadMesh.material?.needsUpdate = true;
+
+			needsUpdate = false;
+		}
+	}
+
+	/**
+	 * When `PostProcessing` is used to apply post processing effects,
+	 * the application must use this version of `renderAsync()` inside
+	 * its animation loop (not the one from the renderer).
+	 */
+	Future<void> renderAsync() async{
+		_update();
+
+		_context?['onBeforePostProcessing']?.call();
+
+		final renderer = this.renderer;
+
+		final toneMapping = renderer.toneMapping;
+		final outputColorSpace = renderer.outputColorSpace;
+
+		renderer.toneMapping = NoToneMapping;
+		renderer.outputColorSpace = LinearSRGBColorSpace;
+
+		//
+		final currentXR = renderer.xr.enabled;
+		renderer.xr.enabled = false;
+
+		await _quadMesh.renderAsync( renderer );
+
+		renderer.xr.enabled = currentXR;
+
+		//
+		renderer.toneMapping = toneMapping;
+		renderer.outputColorSpace = outputColorSpace;
+
+		_context?['onAfterPostProcessing']?.call();
+	}
+}

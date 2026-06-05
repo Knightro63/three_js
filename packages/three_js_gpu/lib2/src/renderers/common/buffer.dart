@@ -11,7 +11,11 @@ abstract class Buffer extends Binding {
   int bytesPerElement = Float32List.bytesPerElement;
 
   /// A reference to the internal buffer memory tracking list.
-  dynamic _buffer; // Maps to TypedData views (Float32List, Uint32List, etc.)
+  Float32List? _buffer;
+  Float32List? get buffer => _buffer;
+  set buffer(Float32List? buffer){
+    _buffer = buffer;
+  }
 
   /// An array list of update ranges.
   final List<Map<String, int>> _updateRanges = [];
@@ -20,9 +24,7 @@ abstract class Buffer extends Binding {
   /// 
   /// [name] - The buffer's name.
   /// [buffer] - The internal typed array list payload.
-  Buffer(String name, [dynamic buffer = null]) : super(name) {
-    this._buffer = buffer;
-  }
+  Buffer(super.name, [this._buffer = null]);
 
   /// The array list of update ranges.
   List<Map<String, int>> get updateRanges => this._updateRanges;
@@ -55,10 +57,7 @@ abstract class Buffer extends Binding {
         
     return getFloatLength(rawByteLength);
   }
-
-  /// A reference to the internal buffer view layer.
-  dynamic get buffer => this._buffer;
-
+  
   /// Updates the binding state metrics.
   /// 
   /// Returns `true` if the buffer has been modified and must be uploaded to the GPU.

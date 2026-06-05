@@ -1,5 +1,6 @@
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_core_loaders/three_js_core_loaders.dart';
+import '../nodes/core/node.dart';
 
 /**
  * A loader for loading node objects in the three.js JSON Object/Scene format.
@@ -22,7 +23,7 @@ class NodeLoader extends Loader {
 	 */
 	load( url, onLoad, onProgress, onError ) {
 
-		const loader = new FileLoader( this.manager );
+		final loader = new FileLoader( this.manager );
 		loader.setPath( this.path );
 		loader.setRequestHeader( this.requestHeader );
 		loader.setWithCredentials( this.withCredentials );

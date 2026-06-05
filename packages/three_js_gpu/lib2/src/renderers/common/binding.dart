@@ -43,5 +43,7 @@ abstract class Binding {
 
   /// Abstract helper routine required to facilitate accurate clone copies 
   /// of concrete subclasses without using heavy reflection packages.
-  Binding createInstance();
+  Binding createInstance(){
+    throw('Not Implimented!');
+  }
 }

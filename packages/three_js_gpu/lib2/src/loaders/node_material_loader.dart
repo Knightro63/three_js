@@ -1,4 +1,6 @@
+import 'package:three_js_core/materials/material.dart';
 import 'package:three_js_core/three_js_core.dart' as core;
+import 'package:three_js_tjs_loader/three_js_tjs_loader.dart';
 
 /// A special type of material loader for loading node materials.
 class NodeMaterialLoader extends MaterialLoader {
@@ -18,9 +20,9 @@ class NodeMaterialLoader extends MaterialLoader {
   /// 
   /// Returns a resolved parsed material instance component.
   @override
-  dynamic parse(Map<String, dynamic> json) {
+  Material parseJson(Map<String, dynamic> json) {
     // Invoke parent parsing lifecycle routines
-    final dynamic material = super.parse(json);
+    final dynamic material = super.parseJson(json);
     
     final Map<String, dynamic>? inputNodes = json['inputNodes'];
 

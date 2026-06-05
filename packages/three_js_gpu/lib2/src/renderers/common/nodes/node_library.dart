@@ -29,7 +29,7 @@ class NodeLibrary {
 		final nodeMaterialClass = getMaterialNodeClass( material.type );
 		
     if ( nodeMaterialClass != null ) {
-			nodeMaterial = nodeMaterialClass();
+			nodeMaterial = nodeMaterialClass;
 
 			for ( final key in material.keys ) {
 				nodeMaterial[ key ] = material[ key ];

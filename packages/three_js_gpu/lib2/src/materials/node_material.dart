@@ -1,5 +1,7 @@
 import 'package:three_js_core/three_js_core.dart';
 
+import '../nodes/core/node.dart';
+
 /**
  * Base class for all node materials.
  *

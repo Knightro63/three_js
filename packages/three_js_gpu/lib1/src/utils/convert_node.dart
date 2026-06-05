@@ -1,4 +1,4 @@
-import 'package:three_js_gpu/src/code/node_builder.dart';
+import '../../src/code/node_builder.dart';
 import '../core/node.dart';
 
 /// This module is part of the TSL core and usually not used in app level code.

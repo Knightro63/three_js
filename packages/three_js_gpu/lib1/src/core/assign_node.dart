@@ -1,5 +1,5 @@
-import 'package:three_js_gpu/src/code/node_builder.dart';
-import 'package:three_js_gpu/src/core/node.dart';
+import '../../src/code/node_builder.dart';
+import '../../src/core/node.dart';
 import '../core/temp_node.dart';
 
 /// These node represents an assign operation. Meaning a node is assigned

@@ -1,6 +1,6 @@
 
 import 'package:three_js_core/three_js_core.dart';
-import 'package:three_js_gpu/gpu_backend.dart';
+import '../gpu_backend.dart';
 import 'package:three_js_math/three_js_math.dart';
 
 final typedArraysToVertexFormatPrefix = new Map( [

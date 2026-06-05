@@ -4,7 +4,6 @@ import 'package:example/src/statistics.dart';
 import 'package:three_js/three_js.dart' as three;
 import 'dart:math' as math;
 import 'package:three_js_postprocessing/three_js_postprocessing.dart';
-import 'package:flutter_angle/flutter_angle.dart';
 
 class WebglPostprocessingFXAA extends StatefulWidget {
   const WebglPostprocessingFXAA({super.key});
@@ -99,28 +98,28 @@ class _State extends State<WebglPostprocessingFXAA> {
       threeJs.scene.add( mesh );
     }
 
-    controls = three.OrbitControls(threeJs.camera, threeJs.globalKey );
-    controls.autoRotate = true;
+    // controls = three.OrbitControls(threeJs.camera, threeJs.globalKey );
+    // controls.autoRotate = true;
 
-    final renderPass = RenderPass( threeJs.scene, threeJs.camera );
-    renderPass.clearAlpha = 0;
+    // final renderPass = RenderPass( threeJs.scene, threeJs.camera );
+    // renderPass.clearAlpha = 0;
 
-    composer1 = EffectComposer( threeJs.renderer!,null, threeJs.texture! );
-    composer1.addPass( renderPass );
-    //composer1.addPass( outputPass );
+    // composer1 = EffectComposer( threeJs.renderer!,null, threeJs.texture! );
+    // composer1.addPass( renderPass );
+    // //composer1.addPass( outputPass );
 
-    composer2 = EffectComposer( threeJs.renderer!,null, threeJs.texture! );
-    composer2.addPass( renderPass );
-    //composer2.addPass( outputPass );
+    // composer2 = EffectComposer( threeJs.renderer!,null, threeJs.texture! );
+    // composer2.addPass( renderPass );
+    // //composer2.addPass( outputPass );
 
-    // FXAA is engineered to be applied towards the end of engine post processing after conversion to low dynamic range and conversion to the sRGB color space for display.
+    // // FXAA is engineered to be applied towards the end of engine post processing after conversion to low dynamic range and conversion to the sRGB color space for display.
 
-    composer2.addPass( fxaaPass );
+    // composer2.addPass( fxaaPass );
 
-    threeJs.customRenderer = renderer;
+    // threeJs.customRenderer = renderer;
   }
 
-  Future<void> renderer(three.Scene scene, three.Camera camera, FlutterAngleTexture texture,[dt]) async{
+  Future<void> renderer(three.Scene scene, three.Camera camera, dynamic texture,[dt]) async{
     final halfWidth = threeJs.width / 2;
 
     controls.update();

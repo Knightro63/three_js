@@ -2,11 +2,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:three_js_core/others/index.dart';
-import 'package:three_js_gpu/effects/FullScreenEffect.dart';
-import 'package:three_js_gpu/effects/FullScreenEffectPass.dart';
 import 'package:three_js_gpu/renderer/RendererConfig.dart';
-import 'package:three_js_gpu/renderer/webgpu/WebGPUEffectComposer.dart';
 import 'renderer/webgpu/WebGPURenderer.dart';
 import 'package:three_js_core/renderers/index.dart';
 import 'package:three_js_core/three_js_core.dart' as core;
@@ -40,7 +36,7 @@ class Settings{
     this.depth = true,
     this.premultipliedAlpha = true,
     this.preserveDrawingBuffer = false,
-    //this.powerPreference = core.PowerPreference.defaultp,
+    this.powerPreference = core.PowerPreference.defaultp,
     this.failIfMajorPerformanceCaveat = false,
     this.reverseDepthBuffer = false,
     this.precision = core.Precision.highp,
@@ -55,7 +51,7 @@ class Settings{
   
   bool premultipliedAlpha;
   bool preserveDrawingBuffer;
-  //PowerPreference powerPreference;
+  core.PowerPreference powerPreference;
   bool reverseDepthBuffer;
   bool failIfMajorPerformanceCaveat;
   bool depth = true;
@@ -442,9 +438,6 @@ class ThreeJS implements GpuRenderer{
 // }
 // ''';
 
-
-
-
   Future<void> init() async{
     if (_mounted) return;
     await setup?.call();
@@ -452,7 +445,7 @@ class ThreeJS implements GpuRenderer{
     onSetupComplete();
   }
 
-  Widget build(BuildContext context) {
+  Widget build() {
     return Builder(builder: (BuildContext context) {
       initSize(context);
       return core.Peripherals(
@@ -473,13 +466,13 @@ class ThreeJS implements GpuRenderer{
   }
 
   @override
-  bool render(GpuFrame frame) {
+  bool render([GpuFrame? frame]) {
     if (!mounted || _disposed) return false;
 
     // Lazy initialize renderer carefully without breaking state mappings
     if (renderer == null) {
       renderer = WebGPURenderer();
-      renderer!.init(frame, RendererConfig()).then((_) {
+      renderer!.init(frame!, RendererConfig()).then((_) {
         _isRendererReady = true;
         // Fire your custom initialization callback to notify listeners/UI
         onSetupComplete(); 
@@ -495,7 +488,7 @@ class ThreeJS implements GpuRenderer{
 
     // Only kick off a frame pass execution trace if initialization has completed
     if (mounted && _isRendererReady) {
-      executeFrameTick(frame);
+      executeFrameTick(frame!);
       return true;
     }
 

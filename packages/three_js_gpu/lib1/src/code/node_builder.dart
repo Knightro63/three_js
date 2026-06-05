@@ -1,8 +1,8 @@
 import 'package:three_js_core/others/weak_map.dart';
 import 'package:three_js_core/renderers/cube_render_target.dart';
 import 'package:three_js_core/renderers/render_target.dart';
-import 'package:three_js_gpu/common/chain_map.dart';
-import 'package:three_js_gpu/src/core/node.dart';
+import '../../common/chain_map.dart';
+import '../../src/core/node.dart';
 
 const rendererCache = new WeakMap();
 

@@ -1,4 +1,4 @@
-import 'package:three_js_core/three_js_core.dart' as core;
+import 'package:three_js_tjs_loader/three_js_tjs_loader.dart';
 import './node_loader.dart';
 import './node_material_loader.dart';
 

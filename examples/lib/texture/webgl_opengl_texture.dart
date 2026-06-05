@@ -3,7 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:example/src/statistics.dart';
 import 'package:three_js/three_js.dart' as three;
-import 'package:flutter_angle/flutter_angle.dart';
+// import 'package:flutter_angle/flutter_angle.dart';
 
 class WebglOpenglTexture extends StatefulWidget {
   const WebglOpenglTexture({super.key});
@@ -82,32 +82,32 @@ class _State extends State<WebglOpenglTexture> {
     
     final cubes = []; // just an array we can use to rotate the cubes
 
-    {
-      final RenderingContext gl = threeJs.renderer!.getContext();
-      final glTex = gl.createTexture();
-      gl.bindTexture(WebGL.TEXTURE_2D, glTex);
-      gl.texImage2D(WebGL.TEXTURE_2D, 0, WebGL.RGBA, 2, 2, 0,
-          WebGL.RGBA, WebGL.UNSIGNED_BYTE, Uint8List.fromList([
-            255, 0, 0, 255,
-            0, 255, 0, 255,
-            0, 0, 255, 255,
-            255, 255, 0, 255,
-          ]));
-      gl.generateMipmap(WebGL.TEXTURE_2D);
-      gl.texParameteri(WebGL.TEXTURE_2D, WebGL.TEXTURE_MAG_FILTER, WebGL.NEAREST);
+    // {
+    //   final RenderingContext gl = threeJs.renderer!.getContext();
+    //   final glTex = gl.createTexture();
+    //   gl.bindTexture(WebGL.TEXTURE_2D, glTex);
+    //   gl.texImage2D(WebGL.TEXTURE_2D, 0, WebGL.RGBA, 2, 2, 0,
+    //       WebGL.RGBA, WebGL.UNSIGNED_BYTE, Uint8List.fromList([
+    //         255, 0, 0, 255,
+    //         0, 255, 0, 255,
+    //         0, 0, 255, 255,
+    //         255, 255, 0, 255,
+    //       ]));
+    //   gl.generateMipmap(WebGL.TEXTURE_2D);
+    //   gl.texParameteri(WebGL.TEXTURE_2D, WebGL.TEXTURE_MAG_FILTER, WebGL.NEAREST);
     
-      final texture = three.Texture();
-      forceTextureInitialization(texture);
-      final texProps = threeJs.renderer!.properties.get(texture);
-      texProps['__webglTexture'] = glTex;
+    //   final texture = three.Texture();
+    //   forceTextureInitialization(texture);
+    //   final texProps = threeJs.renderer!.properties.get(texture);
+    //   texProps['__webglTexture'] = glTex;
       
-      final material = three.MeshBasicMaterial.fromMap({
-        'map': texture,
-      });
-      final cube = three.Mesh(geometry, material);
-      threeJs.scene.add(cube);
-      cubes.add(cube); // add to our list of cubes to rotate
-    }
+    //   final material = three.MeshBasicMaterial.fromMap({
+    //     'map': texture,
+    //   });
+    //   final cube = three.Mesh(geometry, material);
+    //   threeJs.scene.add(cube);
+    //   cubes.add(cube); // add to our list of cubes to rotate
+    // }
 
     controls = three.OrbitControls( threeJs.camera, threeJs.globalKey );
 

@@ -1,4 +1,4 @@
-import 'package:three_js_gpu/src/code/node_builder.dart';
+import '../../src/code/node_builder.dart';
 
 import '../core/node.dart';
 

@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:three_js_core/three_js_core.dart';
-import '../common/renderer.dart';
+import '../renderer.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'dart:math' as math;
 

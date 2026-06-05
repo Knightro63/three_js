@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-import 'package:three_js_core/three_js_core.dart' as core;
 import './storage_buffer_attribute.dart'; // Holds your StorageBufferAttribute class definition
 
 /// This special type of buffer attribute is intended for compute shaders.
@@ -15,6 +14,5 @@ class IndirectStorageBufferAttribute extends StorageBufferAttribute {
   /// 
   /// [count] - The item count or an explicit backing [Uint32List] buffer.
   /// [itemSize] - The dimensional structural size per element item.
-  IndirectStorageBufferAttribute(dynamic count, int itemSize) 
-      : super(count, itemSize, Uint32List);
+  IndirectStorageBufferAttribute(super.count, super.itemSize, typeClass = Uint32List);
 }

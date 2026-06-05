@@ -1,6 +1,8 @@
 import 'dart:typed_data';
 import 'package:three_js_gpu/gpu_backend.dart';
 
+import '../gpu_backend.dart';
+
 const _compareToWebGPU = {
 	[ NeverCompare ]: 'never',
 	[ LessCompare ]: 'less',
@@ -346,10 +348,11 @@ class WebGPUTextureUtils {
 	 * @param {boolean} [stencil=false] -  Whether stencil is enabled or not.
 	 * @return {GPUTexture} The depth buffer.
 	 */
-	getDepthBuffer( depth = true, stencil = false ) {
-
-		const backend = this.backend;
-		const { width, height } = backend.getDrawingBufferSize();
+	GPUTexture getDepthBuffer([bool depth = true, bool stencil = false ]) {
+		final backend = this.backend;
+		final size = backend.getDrawingBufferSize();
+    final width = size.width;
+    final width = size.height;
 
 		const depthTexture = this.depthTexture;
 		const depthTextureGPU = backend.get( depthTexture ).texture;

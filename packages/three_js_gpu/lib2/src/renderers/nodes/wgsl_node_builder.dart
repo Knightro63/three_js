@@ -1,6 +1,8 @@
 
 
 // GPUShaderStage is not defined in browsers not supporting WebGPU
+import '../../nodes/code/node_builder.dart';
+
 const GPUShaderStage = ( typeof self != 'undefined' ) ? self.GPUShaderStage : { VERTEX: 1, FRAGMENT: 2, COMPUTE: 4 };
 
 const accessNames = {

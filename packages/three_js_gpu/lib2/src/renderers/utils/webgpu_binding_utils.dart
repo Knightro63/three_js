@@ -1,7 +1,18 @@
+import 'dart:convert';
 import 'dart:typed_data';
 import 'package:gpux/gpux.dart';
 import 'package:three_js_core/three_js_core.dart';
-import 'package:three_js_math/three_js_math.dart' as math;
+import 'package:three_js_math/three_js_math.dart';
+
+import '../../nodes/core/constants.dart';
+import '../../nodes/core/node_utils.dart';
+import '../common/nodes/node_sampled_texture.dart';
+import '../common/sampled_texture.dart';
+import '../common/storage_buffer.dart';
+import '../common/uniform_buffer.dart';
+import '../descriptors/gpu_bind_group_descriptor.dart';
+import '../descriptors/gpu_buffer_descriptor.dart';
+import '../descriptors/gpu_texture_view_descriptor.dart';
 
 // Shared file descriptors initialized from your recently converted files
 final GPUBindGroupDescriptor _bindGroupDescriptor = GPUBindGroupDescriptor();
@@ -26,7 +37,7 @@ class WebGPUBindingUtils {
   final dynamic backend;
 
   /// A cache that maps unique hash combinations of layout entries to existing layouts.
-  final Map<String, BindGroupLayout> _bindGroupLayoutCache = {};
+  final Map<int, BindGroupLayout> _bindGroupLayoutCache = {};
 
   /// Constructs a new utility object context.
   WebGPUBindingUtils(this.backend);
@@ -52,8 +63,8 @@ class WebGPUBindingUtils {
     final List<Map<String, dynamic>> entries = this._createLayoutEntries(bindGroup);
     
     // Serialization string hash generator replacing javascript's JSON.stringify(entries)
-    final String layoutStringSignature = NodeUtils.hashJSON(entries);
-    final String bindGroupLayoutKey = NodeUtils.hashString(layoutStringSignature);
+    final String layoutStringSignature = jsonEncode(entries);
+    final int bindGroupLayoutKey = NodeUtils.hashString(layoutStringSignature);
 
     // Try to locate an existing, identical layout inside the internal reuse cache
     BindGroupLayout? bindGroupLayout = this._bindGroupLayoutCache[bindGroupLayoutKey];
@@ -365,7 +376,7 @@ class WebGPUBindingUtils {
           storageTexture['access'] = GpuStorageTextureAccess.readOnly;
         }
 
-        if (binding.texture is ArrayTexture == true) {
+        if (binding.texture.isArrayTexture == true) {
           storageTexture['viewDimension'] = GpuTextureViewDimension.d2Array;
         } else if (binding.texture.is3DTexture == true) {
           storageTexture['viewDimension'] = GpuTextureViewDimension.d3;
@@ -393,11 +404,11 @@ class WebGPUBindingUtils {
           }
         } else {
           final dynamic type = binding.texture.type;
-          if (type == Constants.intType) {
+          if (type == IntType) {
             texture['sampleType'] = GpuTextureSampleType.sint;
-          } else if (type == Constants.unsignedIntType) {
+          } else if (type == UnsignedIntType) {
             texture['sampleType'] = GpuTextureSampleType.uint;
-          } else if (type == Constants.floatType) {
+          } else if (type == FloatType) {
             if (this.backend.hasFeature('float32-filterable') == true) {
               texture['sampleType'] = GpuTextureSampleType.float;
             } else {
@@ -408,11 +419,11 @@ class WebGPUBindingUtils {
 
         if (binding is SampledCubeTexture == true) {
           texture['viewDimension'] = GpuTextureViewDimension.cube;
-        } else if (binding.texture is ArrayTexture == true || 
+        } else if (binding.texture.isArrayTexture == true || 
                  binding.texture is DataArrayTexture == true || 
                  binding.texture is CompressedArrayTexture == true) {
           texture['viewDimension'] = GpuTextureViewDimension.d2Array;
-        } else if (binding.isSampledTexture3D == true) {
+        } else if (binding is NodeSampledTexture3D == true) {
           texture['viewDimension'] = GpuTextureViewDimension.d3;
         }
         

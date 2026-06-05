@@ -1,7 +1,7 @@
-import 'package:three_js_gpu/src/code/node_builder.dart';
-import 'package:three_js_gpu/src/code/node_function.dart';
-import 'package:three_js_gpu/src/code/node_function_input.dart';
-import 'package:three_js_gpu/src/core/node.dart';
+import '../../src/code/node_builder.dart';
+import '../../src/code/node_function.dart';
+import '../../src/code/node_function_input.dart';
+import '../../src/core/node.dart';
 
 import './code_node.dart';
 import '../tsl/tsl_base.dart';

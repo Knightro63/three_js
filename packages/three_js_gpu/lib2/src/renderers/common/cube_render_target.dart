@@ -1,5 +1,7 @@
 import 'package:three_js_core/three_js_core.dart';
-import 'package:three_js_math/three_js_math.dart' as math;
+import 'package:three_js_math/three_js_math.dart';
+
+import '../../materials/node_materials.dart';
 
 /// This class represents a cube render target. It is a special version
 /// of WebGLCubeRenderTarget which is compatible with WebGPURenderer.
@@ -11,10 +13,8 @@ class CubeRenderTarget extends RenderTarget {
   /// 
   /// [size] - The uniform side length dimensions of the render target.
   /// [options] - Optional Map layer configuration properties flags.
-  CubeRenderTarget([int size = 1, Map<String, dynamic>? options]) 
+  CubeRenderTarget([int size = 1, RenderTargetOptions? options]) 
       : super(size, size, options) {
-    
-    this.type = 'CubeRenderTarget';
 
     final Map<String, int> image = {
       'width': size,
@@ -42,7 +42,7 @@ class CubeRenderTarget extends RenderTarget {
   /// [renderer] - The execution renderer instance context.
   /// [texture] - The input equirectangular source texture wrapper.
   /// Returns a fluent reference to this cube render target layout.
-  CubeRenderTarget fromEquirectangularTexture(dynamic renderer, dynamic texture) {
+  CubeRenderTarget fromEquirectangularTexture(Renderer renderer, Texture texture) {
     final int currentMinFilter = texture.minFilter;
     final bool currentGenerateMipmaps = texture.generateMipmaps == true;
 
@@ -59,16 +59,16 @@ class CubeRenderTarget extends RenderTarget {
 
     // Invoke texture node math references via standard TSL mapping closures
     material.colorNode = texture(texture, uvNode, float(0));
-    material.side = Constants.backSide;
-    material.blending = Constants.noBlending;
+    material.side = BackSide;
+    material.blending = NoBlending;
 
     final Mesh mesh = Mesh(geometry, material);
     final Scene scene = Scene();
     scene.add(mesh);
 
     // Avoid blurred poles alignment artifacts across raw floating coordinates lines
-    if (texture.minFilter == Constants.linearMipmapLinearFilter) {
-      texture.minFilter = Constants.linearFilter;
+    if (texture.minFilter == LinearMipmapLinearFilter) {
+      texture.minFilter = LinearFilter;
     }
 
     final CubeCamera camera = CubeCamera(1, 10, this);

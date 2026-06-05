@@ -127,7 +127,7 @@ class _State extends State<WebglBuffergeometryCustomAttributesParticles> {
     final particleSystem = three.Points( geometry, shaderMaterial );
     threeJs.scene.add( particleSystem );
 
-    threeJs.renderer?.gl.enable(0x8642);
+    //threeJs.renderer?.gl.enable(0x8642);
 
     threeJs.addAnimationEvent((dt){
       final time = DateTime.now().millisecondsSinceEpoch * 0.005;
