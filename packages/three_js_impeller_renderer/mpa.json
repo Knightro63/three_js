@@ -1,0 +1,156 @@
+[
+  {
+    "material": "Material",
+    "description": "The abstract base class for all materials.",
+    "maps": [
+      { "property": "map", "purpose": "Sets the base color texture of the surface." },
+      { "property": "alphaMap", "purpose": "Controls surface transparency via grayscale values." }
+    ]
+  },
+  {
+    "material": "MeshBasicMaterial",
+    "description": "A simple material for drawing geometries in a flat or wireframe way.",
+    "maps": [
+      { "property": "map", "purpose": "Sets the base color texture of the surface." },
+      { "property": "alphaMap", "purpose": "Controls surface transparency via grayscale values." },
+      { "property": "aoMap", "purpose": "Specifies ambient occlusion to fake soft shadowing." },
+      { "property": "specularMap", "purpose": "Defines surface reflectivity and shininess placement." }
+    ]
+  },
+  {
+    "material": "MeshLambertMaterial",
+    "description": "A material for non-shiny surfaces, calculated using a Gouraud shading model.",
+    "maps": [
+      { "property": "map", "purpose": "Sets the base color texture of the surface." },
+      { "property": "alphaMap", "purpose": "Controls surface transparency via grayscale values." },
+      { "property": "aoMap", "purpose": "Grayscale shadow map for non-shiny, diffuse surfaces." },
+      { "property": "specularMap", "purpose": "Controls where specular highlights appear under light." },
+      { "property": "lightMap", "purpose": "Bakes pre-rendered lighting data directly onto the mesh." }
+    ]
+  },
+  {
+    "material": "MeshPhongMaterial",
+    "description": "A material for shiny surfaces with specular highlights, calculated using a Blinn-Phong model.",
+    "maps": [
+      { "property": "map", "purpose": "Sets the base color texture of the surface." },
+      { "property": "alphaMap", "purpose": "Controls surface transparency via grayscale values." },
+      { "property": "bumpMap", "purpose": "Uses grayscale displacement to fake surface depth." },
+      { "property": "normalMap", "purpose": "Modifies vertex normals using RGB data for detailed relief." },
+      { "property": "displacementMap", "purpose": "Physically deforms vertex positions using height values." },
+      { "property": "specularMap", "purpose": "Pinpoints where shiny highlights react to light sources." },
+      { "property": "aoMap", "purpose": "Adds local shadows to deep crevices." },
+      { "property": "lightMap", "purpose": "Incorporates static environment lighting maps." }
+    ]
+  },
+  {
+    "material": "MeshStandardMaterial",
+    "description": "A standard physically-based rendering (PBR) material.",
+    "maps": [
+      { "property": "map", "purpose": "Sets the base color texture of the surface." },
+      { "property": "alphaMap", "purpose": "Controls surface transparency via grayscale values." },
+      { "property": "bumpMap", "purpose": "Simulates superficial surface roughness details." },
+      { "property": "normalMap", "purpose": "Enhances lighting response across micro-details." },
+      { "property": "displacementMap", "purpose": "Modifies the actual 3D silhouette geometry." },
+      { "property": "roughnessMap", "purpose": "Grayscale layout where black is smooth and white is rough." },
+      { "property": "metalnessMap", "purpose": "Grayscale layout separating metal from dielectric surfaces." },
+      { "property": "aoMap", "purpose": "Darkens cracks and occlusion points under ambient light." },
+      { "property": "lightMap", "purpose": "Blends baked light maps into the PBR shader calculation." },
+      { "property": "emissiveMap", "purpose": "Defines parts of the mesh that emit light independently." }
+    ]
+  },
+  {
+    "material": "MeshPhysicalMaterial",
+    "description": "An extension of MeshStandardMaterial, providing advanced physically-based rendering properties.",
+    "maps": [
+      { "property": "map", "purpose": "Sets the base color texture of the surface." },
+      { "property": "alphaMap", "purpose": "Controls surface transparency via grayscale values." },
+      { "property": "bumpMap", "purpose": "Simulates superficial surface roughness details." },
+      { "property": "normalMap", "purpose": "Enhances lighting response across micro-details." },
+      { "property": "displacementMap", "purpose": "Modifies the actual 3D silhouette geometry." },
+      { "property": "roughnessMap", "purpose": "Grayscale layout where black is smooth and white is rough." },
+      { "property": "metalnessMap", "purpose": "Grayscale layout separating metal from dielectric surfaces." },
+      { "property": "aoMap", "purpose": "Darkens cracks and occlusion points under ambient light." },
+      { "property": "lightMap", "purpose": "Blends baked light maps into the PBR shader calculation." },
+      { "property": "emissiveMap", "purpose": "Defines parts of the mesh that emit light independently." },
+      { "property": "clearcoatMap", "purpose": "Adds a shiny outer varnish layer map." },
+      { "property": "clearcoatNormalMap", "purpose": "Defines detailed micro-scratches on the outer varnish layer." },
+      { "property": "clearcoatRoughnessMap", "purpose": "Dictates local fuzziness of the clearcoat layer reflection." },
+      { "property": "sheenColorMap", "purpose": "Maps cloth-like velvet reflection highlights." },
+      { "property": "sheenRoughnessMap", "purpose": "Controls edge fuzziness on cloth and fabric structures." },
+      { "property": "transmissionMap", "purpose": "Manages thin-surface transparency and light refraction." },
+      { "property": "thicknessMap", "purpose": "Dictates surface thickness for subsurface refraction volume." },
+      { "property": "iridescenceMap", "purpose": "Maps anti-reflective or thin-film soap-bubble color shifts." },
+      { "property": "iridescenceThicknessMap", "purpose": "Fine-tunes the physical layer thickness of iridescence." }
+    ]
+  },
+  {
+    "material": "MeshMatcapMaterial",
+    "description": "An efficient material defined by an encoded Material Capture (MatCap) image.",
+    "maps": [
+      { "property": "matcap", "purpose": "Encodes entire lighting, shading, and color spaces into a sphere map." }
+    ]
+  },
+  {
+    "material": "MeshToonMaterial",
+    "description": "A material implementing a toon/cell shading look.",
+    "maps": [
+      { "property": "map", "purpose": "Sets the base color texture of the surface." },
+      { "property": "alphaMap", "purpose": "Controls surface transparency via grayscale values." },
+      { "property": "gradientMap", "purpose": "Dictates a stepping layout for cell-shaded/anime visuals." },
+      { "property": "normalMap", "purpose": "Handles line shading distortions across surface details." },
+      { "property": "bumpMap", "purpose": "Handles micro-surface variations for step-shading distortion." }
+    ]
+  },
+  {
+    "material": "PointsMaterial",
+    "description": "The default material used by Points objects to render particle-like vertex dots.",
+    "maps": [
+      { "property": "map", "purpose": "Sets the texture applied to each individual point element." }
+    ]
+  },
+  {
+    "material": "SpriteMaterial",
+    "description": "A specialized material designed specifically for 2D sprites that always face the camera.",
+    "maps": [
+      { "property": "map", "purpose": "Sets the color texture displayed on the sprite face." },
+      { "property": "alphaMap", "purpose": "Controls sprite transparency boundaries." }
+    ]
+  },
+  {
+    "material": "ShaderMaterial",
+    "description": "A highly customizable material rendered with custom GLSL vertex and fragment shaders.",
+    "maps": [
+      { "property": "uniforms", "purpose": "Accepts custom textures mapped manually inside shader variables." }
+    ]
+  },
+  {
+    "material": "MeshNormalMaterial",
+    "description": "Maps the vertex normal vectors directly to RGB colors for technical diagnostic views.",
+    "maps": []
+  },
+  {
+    "material": "MeshDepthMaterial",
+    "description": "Renders a mesh by translating depth values into grayscale, where closer geometry is white and farther is black.",
+    "maps": []
+  },
+  {
+    "material": "LineBasicMaterial",
+    "description": "A material used for drawing simple non-shaded wireframe lines.",
+    "maps": []
+  },
+  {
+    "material": "LineDashedMaterial",
+    "description": "A material used for drawing dashed wireframe lines by defining dash and gap sizes.",
+    "maps": []
+  },
+  {
+    "material": "ShadowMaterial",
+    "description": "A special invisible material that can receive shadows, turning shadow zones into dark alpha values over real-world or background layers.",
+    "maps": []
+  },
+  {
+    "material": "RawShaderMaterial",
+    "description": "An unmanaged variant of ShaderMaterial that bypasses built-in uniform and attribute inclusions.",
+    "maps": []
+  }
+]

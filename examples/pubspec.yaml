@@ -30,7 +30,7 @@ dependencies:
   three_js_exporters: ^0.3.0
   three_js_line: ^0.3.0
   three_js_bvh_csg: ^0.3.0
-  three_js_video_texture: ^0.1.0
+  #three_js_video_texture: ^0.1.0
   three_js_audio: ^0.3.0
   three_js_audio_latency: ^0.1.0
   three_js_advanced_exporters: ^0.1.0
@@ -52,6 +52,8 @@ dependency_overrides:
       url: https://github.com/alex-melnyk/flutter-permission-handler.git 
       path: permission_handler_apple
   file_picker: ^10.1.9
+  # flutter_angle: 
+  #   path: ../../flutter_angle/flutter_angle
 
 flutter:
   uses-material-design: true

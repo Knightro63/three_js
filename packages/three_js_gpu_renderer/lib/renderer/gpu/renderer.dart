@@ -211,9 +211,8 @@ class GpuRenderer extends Renderer {
 
       // 2. Request physical hardware adapter reference
       final requestedAdapter = await gpu.requestAdapter(
-        gpux.GpuRequestAdapterOptions(
-        powerPreference: gpux.GpuPowerPreference.highPerformance,
-      ));
+        gpux.GpuRequestAdapterOptions()
+      );
       _adapter = requestedAdapter;
 
       // Device loss recovery callback hooks integration
@@ -642,13 +641,6 @@ class GpuRenderer extends Renderer {
 
         // Update matrices specifically for this sub-view camera perspective position
         subCamera.updateMatrixWorld();
-        
-        // Compute specialized scene uniform blocks for THIS perspective frame view path
-        final sceneData = SceneUniformData.updateUniforms(
-          camera: subCamera,
-          scene: scene,
-          activeLights: lights
-        );
 
         // Back-to-Front depth sorting calculation relative to THIS sub-camera position
         // final cameraWorldPos = subCamera.position;
@@ -734,6 +726,7 @@ class GpuRenderer extends Renderer {
         // print("object: ${object.type} ${!object.frustumCulled} ${_frustum.intersectsObject(object)} ");
 
         if ( !object.frustumCulled || _frustum.intersectsObject(object)) {
+          object.updateMatrix();
           final geometry = object.geometry;//objects.update(object);
           final material = object.material;
 

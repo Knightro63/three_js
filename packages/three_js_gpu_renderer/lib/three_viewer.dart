@@ -498,7 +498,7 @@ class ThreeJS implements gpux.GpuRenderer{
 
     // Return true to tell the hardware wrapper engine to keep checking for frames, 
     // but don't draw yet because async setup is still processing.
-    return true; 
+    return false; 
   }
 
   @override
@@ -508,12 +508,8 @@ class ThreeJS implements gpux.GpuRenderer{
   void removeListener(VoidCallback listener) => _listeners.remove(listener);
 
   @override
-  bool shouldUpdate(gpux.GpuRenderer oldRenderer) => true;
+  bool shouldUpdate(gpux.GpuRenderer oldRenderer) => false;
 
   @override
   bool get shouldSkipNextFrame => false;
 }
-
-
-
-

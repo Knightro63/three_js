@@ -1,10 +1,9 @@
 import 'dart:typed_data';
-import 'package:gpux/gpux.dart' as gpux; // Adjust based on your exact gpux library paths
+import 'package:flutter_gpu/gpu.dart' as gpux; // Adjust based on your exact gpux library paths
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
-import '../material/material_description_registry.dart';
-import 'render_stats_tracker.dart';
-import 'buffer.dart'; // To interface with Mesh, Camera, Vector3, etc.
+// import '../material/material_description_registry.dart';
+// import 'buffer.dart'; // To interface with Mesh, Camera, Vector3, etc.
 
 class FrameDebugInfo {
   final int frameCount;
@@ -14,196 +13,6 @@ class FrameDebugInfo {
     required this.frameCount,
     required this.drawCallCount,
   });
-}
-
-class UniformBufferManager {
-  // Static Constants replacing Kotlin's companion object block
-  static const int maxMeshesPerFrame = 200;
-  static const int _uniformAlignment = 256;
-  
-  // Maps dynamically to the underlying MaterialDescriptorRegistry specifications
-  static final int objectBytes = MaterialDescriptorRegistry.uniformBlockSizeBytes();
-  static final int uniformSizePerMesh = ((objectBytes + _uniformAlignment - 1) ~/ _uniformAlignment) * _uniformAlignment;
-  static final int uniformBufferSize = maxMeshesPerFrame * uniformSizePerMesh;
-
-  final gpux.GpuDevice? Function() _deviceProvider;
-  final RenderStatsTracker? _statsTracker;
-
-  GpuBuffer? _uniformBuffer;
-
-  gpux.GpuBindGroupLayout? _bindGroupLayout;
-  gpux.GpuPipelineLayout? _pipelineLayout;
-  gpux.GpuBindGroup? _cachedBindGroup;
-  int _uniformBufferSizeBytes = 0;
-  List<gpux.GpuBindGroupLayout> _extraLayoutsCache = const [];
-
-  UniformBufferManager({
-    required gpux.GpuDevice? Function() deviceProvider,
-    RenderStatsTracker? statsTracker,
-  })  : _deviceProvider = deviceProvider,
-        _statsTracker = statsTracker;
-
-  void onDeviceReady(gpux.GpuDevice device) {
-    _ensureLayouts(device);
-    _ensureUniformBuffer(device);
-  }
-
-  bool updateUniforms({
-    required Float32List materialData,
-    required Float32List sceneData,
-    required int drawIndex,
-  }) {
-    final gpuDevice = _deviceProvider();
-    if (gpuDevice == null) return false;
-
-    _ensureUniformBuffer(gpuDevice);
-    final bufferInstance = _uniformBuffer;
-    if (bufferInstance == null) {
-      console.warning("WARNING: Uniform buffer unavailable; skipping mesh");
-      return false;
-    }
-
-    // 1. Calculate combined float storage sizing
-    final int totalRawFloats = sceneData.length + materialData.length;
-    
-    // Pad the storage size up to your framework's expected 512-byte dynamic block stride boundary
-    final int alignedFloatCount = ((totalRawFloats / 128).ceil() * 128);
-    final Float32List uniformData = Float32List(alignedFloatCount);
-    uniformData.setAll(0, sceneData);
-    uniformData.setAll(sceneData.length, materialData);// Material data starts at offset 32
-
-    // Indices 64 to 127 remain empty padding floats to complete your required 512-byte block stride
-    final offset = dynamicOffset(drawIndex);
-    final byteLength = alignedFloatCount * 4;
-    
-    if (offset + byteLength > uniformBufferSize) return false;
-
-    // Upload the complete float stream into the WebGPU queue structure
-    bufferInstance.upload(uniformData, offset: offset);
-    return true;
-  }
-
-  gpux.GpuBindGroup? bindGroup() {
-    final cached = _cachedBindGroup;
-    if (cached != null) return cached;
-
-    final gpuDevice = _deviceProvider();
-    if (gpuDevice == null) return null;
-
-    _ensureLayouts(gpuDevice);
-    _ensureUniformBuffer(gpuDevice);
-
-    final layout = _bindGroupLayout;
-    final internalBuffer = _uniformBuffer?.getBuffer();
-    if (layout == null || internalBuffer == null) return null;
-
-    final bindGroup = gpuDevice.createBindGroup(
-      layout: layout,
-      entries: [
-        gpux.GpuBindGroupEntry.buffer(
-          binding: 0,
-          buffer: internalBuffer,
-          offset: 0,
-          size: UniformBufferManager.uniformSizePerMesh,   // 512 bytes objectBytes,
-        ),
-      ],
-      label: "Uniform Bind Group (Dynamic Offsets)",
-    );
-    _cachedBindGroup = bindGroup;
-    return bindGroup;
-  }
-
-  gpux.GpuPipelineLayout? pipelineLayout([List<gpux.GpuBindGroupLayout> extraLayouts = const []]) {
-    final gpuDevice = _deviceProvider();
-    if (gpuDevice == null) return null;
-
-    _ensureLayouts(gpuDevice);
-
-    // List deep comparison checking
-    if (_pipelineLayout != null && _areLayoutListsEqual(_extraLayoutsCache, extraLayouts)) {
-      return _pipelineLayout;
-    }
-
-    final coreLayout = _bindGroupLayout;
-    if (coreLayout == null) return null;
-
-    final layouts = [coreLayout, ...extraLayouts];
-
-    _pipelineLayout = gpuDevice.createPipelineLayout(
-      layouts,
-      label: "Uniform Pipeline Layout (Dynamic Offsets)",
-    );
-    _extraLayoutsCache = extraLayouts;
-    return _pipelineLayout;
-  }
-
-  int dynamicOffset(int drawIndex) => drawIndex * uniformSizePerMesh;
-
-  void dispose() {
-    _cachedBindGroup = null;
-    _bindGroupLayout = null;
-    _pipelineLayout = null;
-    _extraLayoutsCache = const [];
-    
-    if (_uniformBuffer != null && _uniformBufferSizeBytes > 0) {
-      _statsTracker?.recordBufferDeallocated(_uniformBufferSizeBytes);
-      _uniformBufferSizeBytes = 0;
-    }
-    
-    _uniformBuffer?.dispose();
-    _uniformBuffer = null;
-  }
-
-  void _ensureLayouts(gpux.GpuDevice device) {
-    _bindGroupLayout ??= _createUniformBindGroupLayout(device);
-  }
-
-  void _ensureUniformBuffer(gpux.GpuDevice device) {
-    if (_uniformBuffer != null) return;
-
-    final buffer = GpuBuffer(
-      device,
-      BufferDescriptor(
-        size: uniformBufferSize,
-        usage: gpux.GpuBufferUsage.uniform | gpux.GpuBufferUsage.copyDst,
-        label: "Uniform Buffer (Multi-Mesh, $maxMeshesPerFrame max)",
-      ),
-    );
-
-    try {
-      buffer.create();
-      _uniformBuffer = buffer;
-      _cachedBindGroup = null;
-      _uniformBufferSizeBytes = uniformBufferSize;
-      _statsTracker?.recordBufferAllocated(_uniformBufferSizeBytes);
-    } catch (e) {
-      console.error("ERROR: Failed to create uniform buffer: ${e.toString()}");
-      _uniformBuffer = null;
-    }
-  }
-
-  gpux.GpuBindGroupLayout _createUniformBindGroupLayout(gpux.GpuDevice device) {
-    return device.createBindGroupLayout(
-      [
-        gpux.GpuBufferBindingLayout(
-          binding: 0,
-          visibility: gpux.GpuShaderStage.vertex | gpux.GpuShaderStage.fragment,
-          type: gpux.GpuBufferBindingType.uniform,
-          hasDynamicOffset: true,
-          minBindingSize: objectBytes,
-        ),
-      ],
-      label: "Uniform Bind Group Layout (Dynamic Offsets)",
-    );
-  }
-
-  bool _areLayoutListsEqual(List<gpux.GpuBindGroupLayout> a, List<gpux.GpuBindGroupLayout> b) {
-    if (a.length != b.length) return false;
-    for (int i = 0; i < a.length; i++) {
-      if (a[i] != b[i]) return false;
-    }
-    return true;
-  }
 }
 
 class SceneUniformData {
@@ -228,100 +37,103 @@ class SceneUniformData {
   static Float32List updateUniforms({
     required Camera camera,
     required Scene scene,
-    List<Light>? activeLights, 
+    List<Light>? activeLights,
   }) {
     final lightsList = activeLights ?? const [];
     final int totalCount = lightsList.length;
 
-    // Calculate and synchronize absolute viewing camera transformation states
     camera.updateMatrixWorld();
-    //camera.matrixWorldInverse.setFrom(camera.matrixWorld).invert();
-    
     final projMatrix = camera.projectionMatrix.storage;
     final viewMatrix = camera.matrixWorldInverse.storage;
 
-    // Allocate 128 elements to preserve your 512-byte dynamic storage buffer layout bounds
-    final uniformData = Float32List(48+(16*16));
+    // Total size layout footprint matching GLSL:
+    // Header: 48 floats
+    // Arrays: 4 arrays * 16 elements * 4 floats = 256 floats
+    // Total allocation size = 304 floats
+    final uniformData = Float32List(48 + (4 * 16 * 4));
 
-    // [Offsets 0-15]: Copy 4x4 Camera Projection Matrix (64 bytes)
+    // [Offsets 0-31]: Matrices
     for (int i = 0; i < 16; i++) {
       uniformData[i] = projMatrix[i];
       uniformData[16 + i] = viewMatrix[i];
     }
 
-    // [Offsets 32-35]: Camera World Position Vector (Moved completely out of material scope)
+    // [Offsets 32-35]: Camera World Position & Count
     uniformData[32] = camera.position.x;
     uniformData[33] = camera.position.y;
     uniformData[34] = camera.position.z;
-    uniformData[35] = totalCount.toDouble(); // Alignment padding flag
+    uniformData[35] = totalCount.toDouble();
 
-    // [Offsets 36-39]: Global Ambient Color Vector
-    //final Color ambient = scene.background == Color()?scene.background:Color();
-    uniformData[36] = 0;
-    uniformData[37] = 0;
-    uniformData[38] = 0;
-    uniformData[39] = 0;
+    // [Offsets 36-39]: Ambient Color
+    uniformData[36] = 0.0;
+    uniformData[37] = 0.0;
+    uniformData[38] = 0.0;
+    uniformData[39] = 0.0;
 
-    // [Offsets 40-43]: Environmental Fog Color Vector
+    // [Offsets 40-43]: Fog Color
     final fogColor = scene.fog?.color ?? Color();
     uniformData[40] = fogColor.red;
     uniformData[41] = fogColor.green;
     uniformData[42] = fogColor.blue;
     uniformData[43] = fogColor.alpha;
 
-    // [Offsets 44-47]: Environmental Fog Range Density Parameters
-    uniformData[44] = scene.fog?.isFogExp2 == false?scene.fog?.near ?? 0.0 : 0.0;
-    uniformData[45] = scene.fog?.isFogExp2 == false?scene.fog?.far ?? 0.0 : 0.0;
-    uniformData[46] = (scene.fog?.isFogExp2 == true? scene.fog?.density: 0.0) ?? 0.0;
-    uniformData[47] = scene.fog?.isFogExp2 == true?1.0:0.0;
+    // [Offsets 44-47]: Fog Params
+    uniformData[44] = scene.fog?.isFogExp2 == false ? scene.fog?.near ?? 0.0 : 0.0;
+    uniformData[45] = scene.fog?.isFogExp2 == false ? scene.fog?.far ?? 0.0 : 0.0;
+    uniformData[46] = (scene.fog?.isFogExp2 == true ? scene.fog?.density : 0.0) ?? 0.0;
+    uniformData[47] = scene.fog?.isFogExp2 == true ? 1.0 : 0.0;
 
-    // 2. Loop explicitly over the exact user-defined array length
+    // Base pointer coordinates for sequential parallel blocks
+    final int positionsBase     = 48;
+    final int colorsBase        = 48 + (16 * 4);       // Offset 112
+    final int attenuationBase   = 48 + (16 * 4 * 2);   // Offset 176
+    final int extendedBase      = 48 + (16 * 4 * 3);   // Offset 240
+
+    // Serialize each block sequentially to align perfectly with GLSL std140
     for (int i = 0; i < totalCount; i++) {
-      final int baseOffset = 48 + (i * 16); 
       final Light light = lightsList[i];
-      double typeToken = 1.0; // Default directional
+      final int stride = i * 4;
 
+      double typeToken = 1.0; 
       if (light is AmbientLight) typeToken = 6.0;
       else if (light is PointLight) typeToken = 2.0;
       else if (light is SpotLight) typeToken = 3.0;
       else if (light is HemisphereLight) typeToken = 4.0;
       else if (light is RectAreaLight) typeToken = 5.0;
 
-      // Vector 1: Position and Type Token
-      uniformData[baseOffset]     = light.position.x;
-      uniformData[baseOffset + 1] = light.position.y;
-      uniformData[baseOffset + 2] = light.position.z;
-      uniformData[baseOffset + 3] = typeToken;
+      // 1. Pack lightPositions[16]
+      uniformData[positionsBase + stride]     = light.position.x;
+      uniformData[positionsBase + stride + 1] = light.position.y;
+      uniformData[positionsBase + stride + 2] = light.position.z;
+      uniformData[positionsBase + stride + 3] = typeToken;
 
-      // Vector 2: Primary Color and Intensity
-      uniformData[baseOffset + 4] = light.color?.red ?? 1.0;
-      uniformData[baseOffset + 5] = light.color?.green ?? 1.0;
-      uniformData[baseOffset + 6] = light.color?.blue ?? 1.0;
-      uniformData[baseOffset + 7] = light.intensity;
+      // 2. Pack lightColors[16]
+      uniformData[colorsBase + stride]     = light.color?.red ?? 1.0;
+      uniformData[colorsBase + stride + 1] = light.color?.green ?? 1.0;
+      uniformData[colorsBase + stride + 2] = light.color?.blue ?? 1.0;
+      uniformData[colorsBase + stride + 3] = light.intensity;
 
-      // Vector 3: Attenuation Parameters
-      uniformData[baseOffset + 8]  = light.distance ?? 0.0;
-      uniformData[baseOffset + 9]  = light.decay ?? 2.0;
-      uniformData[baseOffset + 10] = light.angle ?? 0.0;
-      uniformData[baseOffset + 11] = light.penumbra ?? 0.0;
+      // 3. Pack lightAttenuationParams[16]
+      uniformData[attenuationBase + stride]     = light.distance ?? 0.0;
+      uniformData[attenuationBase + stride + 1] = light.decay ?? 2.0;
+      uniformData[attenuationBase + stride + 2] = light.angle ?? 0.0;
+      uniformData[attenuationBase + stride + 3] = light.penumbra ?? 0.0;
 
-      // Vector 4: Extended Dimensions / Ground Colors
+      // 4. Pack lightExtendedParams[16]
       if (typeToken == 4.0 && light.groundColor != null) {
-        uniformData[baseOffset + 12] = light.groundColor!.red;
-        uniformData[baseOffset + 13] = light.groundColor!.green;
-        uniformData[baseOffset + 14] = light.groundColor!.blue;
-      } 
-      else if (typeToken == 5.0) {
-        uniformData[baseOffset + 12] = light.width ?? 1.0;
-        uniformData[baseOffset + 13] = light.height ?? 1.0;
-        uniformData[baseOffset + 14] = 0.0;
-      } 
-      else {
-        uniformData[baseOffset + 12] = 0.0;
-        uniformData[baseOffset + 13] = 0.0;
-        uniformData[baseOffset + 14] = 0.0;
+        uniformData[extendedBase + stride]     = light.groundColor!.red;
+        uniformData[extendedBase + stride + 1] = light.groundColor!.green;
+        uniformData[extendedBase + stride + 2] = light.groundColor!.blue;
+      } else if (typeToken == 5.0) {
+        uniformData[extendedBase + stride]     = light.width ?? 1.0;
+        uniformData[extendedBase + stride + 1] = light.height ?? 1.0;
+        uniformData[extendedBase + stride + 2] = 0.0;
+      } else {
+        uniformData[extendedBase + stride]     = 0.0;
+        uniformData[extendedBase + stride + 1] = 0.0;
+        uniformData[extendedBase + stride + 2] = 0.0;
       }
-      uniformData[baseOffset + 15] = 0.0; 
+      uniformData[extendedBase + stride + 3] = 0.0;
     }
 
     return uniformData;

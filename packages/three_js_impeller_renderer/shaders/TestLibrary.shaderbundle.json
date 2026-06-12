@@ -1,0 +1,18 @@
+{
+  "NormalVertex": {
+    "type": "vertex",
+    "file": "shaders/normal.vert"
+  },
+  "NormalFragment": {
+    "type": "fragment",
+    "file": "shaders/normal.frag"
+  },
+  "BasicVertex": {
+    "type": "vertex",
+    "file": "shaders/basic.vert"
+  },
+  "BasicFragment": {
+    "type": "fragment",
+    "file": "shaders/basic.frag"
+  }
+}

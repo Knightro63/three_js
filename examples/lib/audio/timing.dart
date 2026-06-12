@@ -5,7 +5,7 @@ import 'package:example/src/statistics.dart';
 import 'package:three_js/three_js.dart' as three;
 import 'package:three_js_audio/three_js_audio.dart';
 import 'package:three_js_audio_latency/audio_latency.dart';
-import 'package:three_js_video_texture/video_audio.dart';
+//import 'package:three_js_video_texture/video_audio.dart';
 
 class AudioTiming extends StatefulWidget {
   
@@ -119,8 +119,8 @@ class _State extends State<AudioTiming> {
       ball.position.x = radius * math.cos( s );
       ball.position.z = radius * math.sin( s );
 
-      //final audio = FlutterAudio(path: 'assets/sounds/ping_pong.mp3');
-      final audio = VideoAudio(path: 'assets/sounds/ping_pong.mp3');
+      final audio = FlutterAudio(path: 'assets/sounds/ping_pong.mp3');
+      //final audio = VideoAudio(path: 'assets/sounds/ping_pong.mp3');
       //await AudioLatency.initSource();
       //final audio = AudioLatency(path: 'assets/sounds/ping_pong.mp3');
       ball.add( audio );

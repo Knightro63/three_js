@@ -12,8 +12,10 @@ dependencies:
   cupertino_icons: ^1.0.6
   three_js_impeller_renderer:
     path: ../
-  three_js_math: ^0.3.0
   three_js_core: ^0.3.0
+  three_js_math: ^0.3.0
+  three_js_curves: ^0.3.0
+  three_js_helpers: ^0.3.0
 
 dev_dependencies:
   flutter_test:

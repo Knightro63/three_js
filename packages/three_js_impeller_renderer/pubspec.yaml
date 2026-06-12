@@ -24,8 +24,11 @@ dev_dependencies:
   flutter_lints: ^5.0.0
 
 flutter:
-  shaders:
-   - shaders/shader_lib/meshtoon.vert
+  assets:
+    - build/shaderbundles/TestLibrary.shaderbundle
+  # shaders:
+  #   - path: shaders/simple.vert
+  #   - path: shaders/simple.frag
   #  - shaders/shader_lib/vertical_blur.frag
   #  - shaders/shader_lib/equirect.vert
   #  - shaders/shader_lib/points.vert

@@ -1,424 +1,286 @@
-// import 'dart:async';
-// import 'dart:io';
-// import 'package:flutter/foundation.dart';
-// import 'package:flutter/material.dart';
-// import 'package:flutter/scheduler.dart';
-// import '../renderers/index.dart';
-// import 'package:three_js_core/others/index.dart';
-// import 'package:three_js_core/renderers/index.dart';
-// import 'package:three_js_core/three_js_core.dart' as core;
-// import 'package:three_js_math/three_js_math.dart';
+import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:three_js_impeller_renderer/renderer/renderer.dart';
+import 'package:three_js_core/renderers/index.dart';
+import 'package:three_js_core/three_js_core.dart' as core;
+import 'package:three_js_math/three_js_math.dart';
 
-// class Settings{
-//   Settings({
-//     this.useSourceTexture = false,
-//     this.enableShadowMap = true,
-//     this.autoClear = true,
-//     Map<String,dynamic>? renderOptions,
-//     this.animate = true,
-//     this.alpha = false,
-//     this.autoClearDepth = true,
-//     this.autoClearStencil = true,
-//     this.clearAlpha = 1.0,
-//     this.clearColor = 0x000000,
-//     this.localClippingEnabled = false,
-//     this.clippingPlanes = const [],
-//     this.colorSpace = ColorSpace.srgb,
-//     this.outputEncoding = sRGBEncoding,
-//     this.toneMapping = NoToneMapping,
-//     this.shadowMapType = PCFShadowMap,
-//     this.toneMappingExposure = 1.0,
-//     this.logarithmicDepthBuffer = false,
-//     this.stencil = true,
-//     this.xr,
-//     this.antialias = false,
+class Settings{
+  Settings({
+    this.useSourceTexture = false,
+    this.enableShadowMap = true,
+    this.autoClear = true,
+    Map<String,dynamic>? renderOptions,
+    this.animate = true,
+    this.alpha = false,
+    this.autoClearDepth = true,
+    this.autoClearStencil = true,
+    this.clearAlpha = 1.0,
+    this.clearColor = 0x000000,
+    this.localClippingEnabled = false,
+    this.clippingPlanes = const [],
+    this.colorSpace = ColorSpace.srgb,
+    this.outputEncoding = sRGBEncoding,
+    this.toneMapping = NoToneMapping,
+    this.shadowMapType = PCFShadowMap,
+    this.toneMappingExposure = 1.0,
+    this.logarithmicDepthBuffer = false,
+    this.stencil = true,
+    this.xr,
+    this.antialias = false,
 
-//     this.depth = true,
-//     this.premultipliedAlpha = true,
-//     this.preserveDrawingBuffer = false,
-//     this.powerPreference = core.PowerPreference.defaultp,
-//     this.failIfMajorPerformanceCaveat = false,
-//     this.reverseDepthBuffer = false,
-//     this.precision = core.Precision.highp,
-//     this.screenResolution
-//   }){
-//     this.renderOptions = renderOptions ?? {
-//       "format": RGBAFormat,
-//       "samples": 4
-//     };
-//   }
+    this.depth = true,
+    this.premultipliedAlpha = true,
+    this.preserveDrawingBuffer = false,
+    this.powerPreference = core.PowerPreference.defaultp,
+    this.failIfMajorPerformanceCaveat = false,
+    this.reverseDepthBuffer = false,
+    this.precision = core.Precision.highp,
+    this.screenResolution,
+    this.useSurfaceProducer = true
+  }){
+    this.renderOptions = renderOptions ?? {
+      "format": RGBAFormat,
+      "samples": 4
+    };
+  }
   
-//   bool premultipliedAlpha;
-//   bool preserveDrawingBuffer;
-//   PowerPreference powerPreference;
-//   bool reverseDepthBuffer;
-//   bool failIfMajorPerformanceCaveat;
-//   bool depth = true;
-//   Precision precision;
-//   bool alpha;
-//   bool stencil;
-//   bool logarithmicDepthBuffer;
-//   int clearColor;
-//   double clearAlpha;
-//   bool antialias;
-//   XRManager Function(ImpellerRenderer renderer, dynamic gl)? xr;
-//   double? screenResolution;
+  bool premultipliedAlpha;
+  bool preserveDrawingBuffer;
+  core.PowerPreference powerPreference;
+  bool reverseDepthBuffer;
+  bool failIfMajorPerformanceCaveat;
+  bool depth = true;
+  bool useSurfaceProducer;
+  Precision precision;
+  bool alpha;
+  bool stencil;
+  bool logarithmicDepthBuffer;
+  int clearColor;
+  double clearAlpha;
+  bool antialias;
+  XRManager Function(ImpellerRenderer renderer, dynamic gl)? xr;
+  double? screenResolution;
   
-//   bool animate;
-//   bool useSourceTexture;
-//   bool enableShadowMap;
-//   bool autoClear;
-//   bool autoClearDepth;
-//   bool autoClearStencil;
-//   bool localClippingEnabled;
-//   late Map<String,dynamic> renderOptions;
-//   List<Plane> clippingPlanes;
-//   int outputEncoding;
-//   ColorSpace colorSpace;
-//   int toneMapping;
-//   int shadowMapType;
-//   double toneMappingExposure;
-// }
+  bool animate;
+  bool useSourceTexture;
+  bool enableShadowMap;
+  bool autoClear;
+  bool autoClearDepth;
+  bool autoClearStencil;
+  bool localClippingEnabled;
+  late Map<String,dynamic> renderOptions;
+  List<Plane> clippingPlanes;
+  int outputEncoding;
+  ColorSpace colorSpace;
+  int toneMapping;
+  int shadowMapType;
+  double toneMappingExposure;
+}
 
-// /// threeJs utility class. If you want to learn how to connect cannon.js with js, please look at the examples/threejs_* instead.
-// class ThreeJS with WidgetsBindingObserver{
-//   void Function() onSetupComplete;
-//   ThreeJS({
-//     Settings? settings,
-//     required this.onSetupComplete, 
-//     required this.setup,
-//     this.rendererUpdate,
-//     this.postProcessor,
-//     this.windowResizeUpdate,
-//     Size? size,
-//     ImpellerRenderer? renderer,
-//     this.renderNumber = 0,
-//     this.loadingWidget
-//   }){
-//     this.settings = settings ?? Settings();
-//     _resolution = this.settings.screenResolution;
-//     _fixedSize = size;
-//   }
+class ThreeJSPainter extends CustomPainter {
+  ThreeJSPainter(this.renderer, {required Listenable repaint}) : super(repaint: repaint);
 
-//   int renderNumber;
+  ImpellerRenderer renderer;
 
-//   BuildContext? _context;
-//   Timer? _debounceTimer;
+  @override
+  void paint(Canvas canvas, Size size) {
+    /// Wrap the Flutter GPU texture as a ui.Image and draw it like normal!
+    final image = renderer.image;
+    if(image != null) canvas.drawImage(image, Offset(0, 0), Paint());
+  }
 
-//   Widget? loadingWidget;
-//   Size? _fixedSize;
-//   late final Settings settings;
-//   final GlobalKey<core.PeripheralsState> globalKey = GlobalKey<core.PeripheralsState>();
-//   core.PeripheralsState get domElement => globalKey.currentState!;
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return true;
+  }
+}
 
-//   bool visible = true;
+class ThreeJS{
+  void Function() onSetupComplete;
+  ThreeJS({
+    Settings? settings,
+    required this.onSetupComplete, 
+    required this.setup,
+    this.rendererUpdate,
+    this.postProcessor,
+    this.windowResizeUpdate,
+    Size? size,
+    ImpellerRenderer? renderer,
+    this.renderNumber = 0,
+    this.loadingWidget
+  }){
+    this.settings = settings ?? Settings();
+    _resolution = this.settings.screenResolution;
+    _fixedSize = size;
+  }
 
-//   FlutterAngleTexture? texture;
-//   RenderingContext? gl;
+  int renderNumber;
+  final ChangeNotifier repaintNotifier = ChangeNotifier();
 
-//   ImpellerRenderTarget? renderTarget;
-//   ImpellerRenderer? renderer;
-//   final core.Clock clock = core.Clock();
+  BuildContext? _context;
+  Timer? _debounceTimer;
 
-//   late final core.Scene scene;
-//   late final core.Camera camera;
-//   Ticker? ticker;
+  Widget? loadingWidget;
+  Size? _fixedSize;
+  late final Settings settings;
+  final GlobalKey<core.PeripheralsState> globalKey = GlobalKey<core.PeripheralsState>();
+  core.PeripheralsState get domElement => globalKey.currentState!;
 
-//   double get width => screenSize!.width;
-//   double get height => screenSize!.height;
+  bool visible = true;
 
-//   Size? screenSize;
-//   double? _resolution;
-//   double get dpr => _resolution ?? 1.0;
-//   void setResolution(double newResolution){
-//     _resolution = newResolution;
-//   }
+  RenderTarget? renderTarget;
+  ImpellerRenderer? renderer;
+  final core.Clock clock = core.Clock();
 
-//   WebGLTexture? sourceTexture;
+  late final core.Scene scene;
+  late final core.Camera camera;
+  Ticker? ticker;
 
-//   bool pause = false;
-//   bool _disposed = false;
-//   bool isVisibleOnScreen = true;
-//   bool _mounted = false;
-//   bool get mounted => _mounted;
-//   bool _updating = false;
-//   bool get updating => _updating;
+  double get width => screenSize!.width;
+  double get height => screenSize!.height;
 
-//   void Function()? rendererUpdate;
-//   void Function(Size newSize)? windowResizeUpdate;
-//   void Function([double? dt])? postProcessor;
-//   Future<void> Function(core.Scene,core.Camera,FlutterAngleTexture,[double? dt])? customRenderer;
-//   Future<void> Function(BuildContext) onWindowResize = (context) async{};
-//   FutureOr<void> Function()? setup;
-//   List<Function(double dt)> events = [];
-//   List<Function()> disposeEvents = [];
+  Size? screenSize;
+  double? _resolution;
+  double get dpr => _resolution ?? 1.0;
+  void setResolution(double newResolution){
+    _resolution = newResolution;
+  }
 
-//   FlutterAngle? angle = FlutterAngle();
+  bool pause = false;
+  bool _disposed = false;
+  bool _isRendererReady = false;
+  bool isVisibleOnScreen = true;
+  bool _mounted = false;
+  bool get mounted => _mounted;
+  bool _updating = false;
+  bool get updating => _updating;
 
-//   void addAnimationEvent(Function(double dt) event){
-//     events.add(event);
-//   }
-//   void toDispose(Function() event){
-//     disposeEvents.add(event);
-//   }
+  void Function()? rendererUpdate;
+  void Function(Size newSize)? windowResizeUpdate;
+  void Function([double? dt])? postProcessor;
+  Future<void> Function(core.Scene,core.Camera,[double? dt])? customRenderer;
+  Future<void> Function(BuildContext) onWindowResize = (context) async{};
+  FutureOr<void> Function()? setup;
+  List<Function(double dt)> events = [];
+  List<Function()> disposeEvents = [];
 
-//   @override
-//   void didChangeMetrics() {
-//     if (_disposed) return;
-//     _debounceTimer?.cancel(); // Clear existing timer
-//     _debounceTimer = Timer(Duration(milliseconds: 300+renderNumber*100), () { // Set a new timer
-//       if (_context != null && _context!.mounted) {
-//         _onWindowResize(_context!);
-//       }
-//     });
-//   }
+  bool didRender = false;
 
-//   void dispose(){
-//     if(_disposed) return;
-//     _disposed = true;
-//     _debounceTimer?.cancel(); // Cancel timer if active
-//     _debounceTimer = null;
-//     WidgetsBinding.instance.removeObserver(this);
-//     ticker?.dispose();
-//     ticker = null;
-//     renderer?.dispose();
-//     renderer = null;
-//     renderTarget?.dispose();
-//     renderTarget = null;
-//     scene.dispose();
-//     for(final event in disposeEvents){
-//       event.call();
-//     }
+  void addAnimationEvent(Function(double dt) event){
+    events.add(event);
+  }
+  void toDispose(Function() event){
+    disposeEvents.add(event);
+  }
+
+  void dispose(){
+    if(_disposed) return;
+    _disposed = true;
+    ticker?.dispose();
+    ticker = null;
+    renderer?.dispose();
+    renderer = null;
+    renderTarget?.dispose();
+    renderTarget = null;
+    scene.dispose();
+    for(final event in disposeEvents){
+      event.call();
+    }
     
-//     camera.dispose();
-//     events.clear();
-//     disposeEvents.clear();
+    camera.dispose();
+    events.clear();
+    disposeEvents.clear();
 
-//     //allNativeData.dispose();
+    loadingWidget = null;
+    _fixedSize = null;
+    screenSize = null;
 
-//     angle?.dispose([texture]);
-//     loadingWidget = null;
-//     _fixedSize = null;
-//     screenSize = null;
+    rendererUpdate = null;
+    windowResizeUpdate = null;
+    postProcessor = null;
+    setup = null;
+    repaintNotifier.dispose();
+  }
 
-//     rendererUpdate = null;
-//     windowResizeUpdate = null;
-//     postProcessor = null;
-//     setup = null;
-//   }
-
-//   void initSize(BuildContext context){
-//     if (screenSize != null) {
-//       return;
-//     }
-//     _context = context;
-//     WidgetsBinding.instance.addObserver(this);
-//     final mqd = MediaQuery.of(context);
-
-//     screenSize = _fixedSize ?? mqd.size;
-//     _resolution ??= mqd.devicePixelRatio;
-
-//     Future.delayed(Duration(milliseconds: renderNumber*100), () async{
-//       await initPlatformState();
-//     });
-//   }
-  
-//   Future<void> animate(Duration duration) async {
-//     if (!mounted || _disposed || updating || !isVisibleOnScreen || !visible) {
-//       return;
-//     }
-//     _updating = true;
-//     double dt = clock.getDelta();
+  void initSize(BuildContext context){
+    if (screenSize != null) {
+      return;
+    }
     
-//     if(settings.animate){
-//       await (customRenderer?.call(scene,camera,texture!,dt) ?? render(scene,camera,texture!,dt));
-//       if(!pause){
-//         for(int i = 0; i < events.length;i++){
-//           events[i].call(dt);
-//         }
-//       }
-//     }
-//     _updating = false;
-//   }
+    _context = context;
 
-//   Future<void> render([core.Scene? scene, core.Camera? camera, FlutterAngleTexture? texture, double? dt]) async{
-//     scene ??= this.scene;
-//     camera ??= this.camera;
-//     texture ??= this.texture!;
+    final mqd = MediaQuery.of(context);
+
+    screenSize = _fixedSize ?? mqd.size;
+    _resolution ??= mqd.devicePixelRatio;
     
-//     if(sourceTexture == null){
-//       angle?.activateTexture(texture);
-//     }
-//     rendererUpdate?.call(); 
-//     if(postProcessor == null){
-//       renderer!.clear();
-//       renderer!.setViewport(0,0,width,height);
-//       renderer!.render(scene, camera);
-//     }
-//     else{
-//       postProcessor?.call(dt);
-//     }
+    init();
+  }
+
+  Future<void> animate(Duration duration) async {
+    if (!_mounted || _disposed || _updating || !visible) return;
+    _updating = true;
+    double dt = clock.getDelta();
+
+    if (settings.animate) {
+      // 1. Process custom game scene update event callbacks
+      if (!pause) {
+        for (int i = 0; i < events.length; i++) {
+          events[i].call(dt);
+        }
+      }
+
+      // 2. Direct your GpuRenderer to compile down onto the active frame target texture channel
+      await (customRenderer?.call(scene,camera,dt) ?? render(scene,camera,dt));
+      repaintNotifier.notifyListeners(); 
+    }
+
+    _updating = false;
+  }
+
+  Future<void> render([core.Scene? scene, core.Camera? camera, double? dt]) async{
+    scene ??= this.scene;
+    camera ??= this.camera;
     
-//     if(sourceTexture != null){
-//       angle?.activateTexture(texture);
-//     }
-//     await angle?.updateTexture(texture,sourceTexture);
-//   }
-  
-//   void initRenderer() {
-//     ImpellerRendererParameters options = ImpellerRendererParameters(
-//       width: width,
-//       height: height,
-//       stencil: settings.stencil,
-//       antialias: settings.antialias,
-//       alpha: settings.alpha,
-//       clearColor: settings.clearColor,
-//       clearAlpha: settings.clearAlpha,
-//       logarithmicDepthBuffer: settings.logarithmicDepthBuffer,
-//       xr: settings.xr,
-//       depth: settings.depth,
-//       premultipliedAlpha: settings.premultipliedAlpha,
-//       preserveDrawingBuffer: settings.preserveDrawingBuffer,
-//       powerPreference: settings.powerPreference,
-//       failIfMajorPerformanceCaveat: settings.failIfMajorPerformanceCaveat,
-//       reverseDepthBuffer: settings.reverseDepthBuffer,
-//       precision: settings.precision,
-//     );
-    
-//     renderer = ImpellerRenderer(options);
-//     renderer!.setPixelRatio(_resolution!);
-//     renderer!.setSize(width, height, false);
-//     renderer!.alpha = settings.alpha;
-//     renderer!.shadowMap.enabled = settings.enableShadowMap;
-//     renderer!.shadowMap.type = settings.shadowMapType;
-//     renderer!.autoClear = settings.autoClear;
-//     renderer!.setClearColor(
-//       Color.fromHex32(settings.clearColor), 
-//       settings.clearAlpha
-//     );
-//     renderer!.autoClearDepth = settings.autoClearDepth;
-//     renderer!.autoClearStencil = settings.autoClearStencil;
-//     renderer!.outputEncoding = settings.outputEncoding;
-//     renderer!.outputColorSpace = settings.colorSpace.toString();
-//     renderer!.localClippingEnabled = settings.localClippingEnabled;
-//     renderer!.clippingPlanes = settings.clippingPlanes;
-//     renderer!.toneMapping = settings.toneMapping;
-//     renderer!.toneMappingExposure = settings.toneMappingExposure;
+    rendererUpdate?.call(); 
+    if(postProcessor == null){
+      renderer!.setViewport(0,0,width,height);
+      renderer!.render(scene, camera);
+    }
+    else{
+      postProcessor?.call(dt);
+    }
+  }
 
-//     if(settings.useSourceTexture){
-//       final RenderTargetOptions pars = RenderTargetOptions(settings.renderOptions);
-//       renderTarget = ImpellerRenderTarget((width * _resolution!).toInt(), (height * _resolution!).toInt(), pars);
-//       renderer!.setRenderTarget(renderTarget);
-//       sourceTexture = renderer!.getRenderTargetGLTexture(renderTarget!);
-//     }
-//   }
-  
-//   Future<void> _onWindowResize(BuildContext context) async{
-//     if (_disposed) return;
-//     double dt = clock.getDelta();
-//     final mqd = MediaQuery.maybeOf(context);
-//     if (mqd == null) return;
-//     if(_fixedSize == null && screenSize != mqd.size && texture != null){
-//       screenSize = mqd.size;
+  Future<void> init() async{
+    if (_mounted) return;
+    if (renderer == null) {
+      renderer = ImpellerRenderer(ImpellerRendererParameters(width: width, height: height));
+    }
+    await setup?.call();
+    _mounted = true;
+    ticker = Ticker(animate);
+    ticker?.start();
+    onSetupComplete();
+  }
 
-//       if(settings.screenResolution == null){
-//         _resolution = mqd.devicePixelRatio;
-//       }
-
-//       final options = AngleOptions(
-//         width: width.toInt(),
-//         height: height.toInt(),
-//         dpr: _resolution!,
-//       );
-
-//       await angle?.resize(texture!, options);
-
-//       camera.aspect = width/height;
-//       camera.updateProjectionMatrix();
-
-//       windowResizeUpdate?.call(screenSize!);
-//       renderer!.setSize(width, height);
-
-//       if(postProcessor != null){
-//         postProcessor?.call(dt);
-//       }
-//       render(scene,camera,texture!,dt);
-//     }
-//   }
-
-//   Future<void> initScene() async{
-//     if (renderer == null) {
-//       initRenderer();
-//     }
-//     await setup?.call();
-//     _mounted = true;
-//     ticker = Ticker(animate);
-//     ticker?.start();
-//     onSetupComplete();
-//   }
-
-//   Future<void> initPlatformState() async {
-//     if(texture == null){
-//       await angle?.init();
-      
-//       texture = await angle?.createTexture(      
-//         AngleOptions(
-//           width: width.toInt(), 
-//           height: height.toInt(), 
-//           dpr: _resolution!,
-//           alpha: settings.alpha,
-//           antialias: settings.antialias,
-//           customRenderer: !settings.useSourceTexture,
-//           useSurfaceProducer: true
-//         )
-//       );
-//     }
-
-//     console.info(texture?.toMap());
-//     if (gl == null) {
-//       gl = texture!.getContext();
-//     }
-//     await initScene();
-//   }
-
-//   Widget build() {
-//     return  Builder(builder: (BuildContext context) {
-//       initSize(context);
-//       return core.Peripherals(
-//         key: globalKey,
-//         builder: (BuildContext context) {
-//           return Container(
-//             width: !visible?0:width,
-//             height: !visible?0:height,
-//             child: SizeChangedLayoutNotifier(
-//               child: Builder(builder: (BuildContext context) {
-//                 if (kIsWeb) {
-//                   return texture != null && mounted? HtmlElementView(viewType:texture!.textureId.toString()):loadingWidget ?? Container(
-//                     width: MediaQuery.of(context).size.width,
-//                     height: MediaQuery.of(context).size.height,
-//                     color: Theme.of(context).canvasColor,
-//                     alignment: Alignment.center,
-//                     child: const CircularProgressIndicator()
-//                   );
-//                 } 
-//                 else {
-//                   return texture != null && mounted?
-//                     Transform.scale(
-//                       scaleY: sourceTexture != null || Platform.isAndroid?1:-1,
-//                       child:Texture(textureId: texture!.textureId)
-//                     ):loadingWidget ?? Container(
-//                       width: MediaQuery.of(context).size.width,
-//                       height: MediaQuery.of(context).size.height,
-//                       color: Theme.of(context).canvasColor,
-//                       alignment: Alignment.center,
-//                       child: const CircularProgressIndicator()
-//                     );
-//                 }
-//               })
-//             )
-//           );
-//         }
-//       );
-//     });
-//   }
-// }
+  Widget build() {
+    return Builder(builder: (BuildContext context) {
+      initSize(context);
+      return core.Peripherals(
+        key: globalKey,
+        builder: (BuildContext context) {
+          return Container(
+            color: Colors.transparent,
+            width: !visible?0:width,
+            height: !visible?0:height,
+            child: renderer == null?SizedBox():CustomPaint(
+              painter: ThreeJSPainter(renderer!,repaint: repaintNotifier),
+            ),
+          );
+        });
+    });
+  }
+}
