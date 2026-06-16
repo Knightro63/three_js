@@ -39,8 +39,9 @@ class GpuPipeline {
         ),
         targetFace: renderState.frontFace
       );
+
       pass.setColorBlendEnable(true, colorAttachmentIndex: descriptor.colorAttachmentIndex);
-      pass.setColorBlendEquation(renderState.blendState ?? gpux.ColorBlendEquation(
+      pass.setColorBlendEquation(renderState.blendState ?? gpux.ColorBlendEquation(// 
         colorBlendOperation: gpux.BlendOperation.add,
         sourceColorBlendFactor: gpux.BlendFactor.one,
         destinationColorBlendFactor: gpux.BlendFactor.oneMinusSourceAlpha,

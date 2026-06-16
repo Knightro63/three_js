@@ -86,6 +86,7 @@ class MaterialRenderState {
       cullMode: cullModeOverride,
       depthTest: depthTest,
       topology: topology,
+      blendState: blendState ?? blendState,
       // Transparent alpha blending layers bypass depth-buffer writes to avoid alpha sorting artifacts
       depthWrite: blendState != null ? false : depthWrite,
     );
@@ -430,7 +431,7 @@ abstract class MaterialDescriptorRegistry {
   static void _registerDefaultsLocked() {
     final basicDescriptor = MaterialDescriptor(
       key: 'Basic',
-      bindings: [],
+      bindings: [TextureType.map,TextureType.alphaMap,TextureType.aoMap],
       renderState: MaterialRenderState(),
       requiredAttributes: [
         GeometryAttribute.position,
@@ -448,11 +449,10 @@ abstract class MaterialDescriptorRegistry {
 
     final depthDescriptor = MaterialDescriptor(
       key: 'Depth',
-      bindings: [TextureType.map,TextureType.alphaMap,TextureType.aoMap,TextureType.specularMap],
+      //bindings: [TextureType.map,TextureType.alphaMap,TextureType.aoMap,TextureType.specularMap],
       renderState: MaterialRenderState(),
       requiredAttributes: [
         GeometryAttribute.position,
-        GeometryAttribute.uv0,
         GeometryAttribute.color,
       ],
     );
@@ -476,6 +476,7 @@ abstract class MaterialDescriptorRegistry {
       renderState: MaterialRenderState(),
       requiredAttributes: [
         GeometryAttribute.position,
+        GeometryAttribute.normal,
         GeometryAttribute.uv0,
         GeometryAttribute.color,
       ],
@@ -529,7 +530,6 @@ abstract class MaterialDescriptorRegistry {
       requiredAttributes: [
         GeometryAttribute.position,
         GeometryAttribute.normal, 
-        GeometryAttribute.uv0,
         GeometryAttribute.color, // REQUIRED to protect your sequential offset registers
       ],
     );
@@ -543,6 +543,7 @@ abstract class MaterialDescriptorRegistry {
       ),
       requiredAttributes: [
         GeometryAttribute.position,
+        GeometryAttribute.uv0,
         GeometryAttribute.color, // REQUIRED to protect your sequential offset registers
       ],
     );
@@ -554,7 +555,6 @@ abstract class MaterialDescriptorRegistry {
       renderState: MaterialRenderState(),
       requiredAttributes: [
         GeometryAttribute.position,
-        GeometryAttribute.uv0,
         GeometryAttribute.color, // Always required to preserve layout index offsets
       ],
     );
@@ -593,7 +593,6 @@ abstract class MaterialDescriptorRegistry {
       renderState: MaterialRenderState(),
       requiredAttributes: [
         GeometryAttribute.position,
-        GeometryAttribute.normal,
         GeometryAttribute.color,
       ],
     );
@@ -617,10 +616,10 @@ abstract class MaterialDescriptorRegistry {
       requiredAttributes: [
         GeometryAttribute.position,
         GeometryAttribute.normal,
-        GeometryAttribute.color,
         GeometryAttribute.uv0,
-        GeometryAttribute.uv1,
-        GeometryAttribute.tangent,
+        //GeometryAttribute.uv1,
+        GeometryAttribute.color,
+        //GeometryAttribute.tangent,
       ],
     );
 

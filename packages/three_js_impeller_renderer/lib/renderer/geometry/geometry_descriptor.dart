@@ -35,24 +35,198 @@ class GeometryBindings{
   void bind(
     gpux.RenderPass pass,
     gpux.Shader vertex,
+    gpux.Shader fragment,
     Float32List sceneData,
     Float32List materialData,
   ){
     final gpux.HostBuffer host = context.createHostBuffer();
-    final GpuGeometryBuffers? hardwareBuffers = _createHardwareBuffers();//_geometryCache.getOrCreate(geometry);
+    final GpuGeometryBuffers? hardwareBuffers = _createHardwareBuffers(material);//_geometryCache.getOrCreate(geometry);
     if (hardwareBuffers == null) return;
 
     // Bind and draw using the correct calculated indices count
     pass.bindVertexBuffer( host.emplace(hardwareBuffers.vertexBuffer), hardwareBuffers.vertexCount);
     pass.bindIndexBuffer( host.emplace(hardwareBuffers.indexBuffer), gpux.IndexType.int16, hardwareBuffers.indexCount);
   
-    _bindUniforms(host, pass, vertex, sceneData, materialData);
+    _bindUniforms(host, pass, vertex, fragment, sceneData, materialData);
+    _bindTextures(pass,vertex,fragment,material);
   }
+
+  void _bindTextures(
+    gpux.RenderPass pass,
+    gpux.Shader vertex,
+    gpux.Shader fragment,
+    Material material,
+  ){
+
+    final List<TextureType> activeBindings = descriptor.bindings;
+
+    // ========================================================
+    // 1. VERTEX SHADER PIPELINE BINDINGS
+    // ========================================================
+    if (material.displacementMap != null && activeBindings.contains(TextureType.displacementMap)) {
+      final texture = _createTexture(material.displacementMap!.image);
+      final texSlot = vertex.getUniformSlot('displacementMap');
+      pass.bindTexture(texSlot, texture);
+    }
+
+    // ========================================================
+    // 2. FRAGMENT SHADER PIPELINE BINDINGS
+    // ========================================================
+    if(material.map != null && descriptor.bindings.contains(TextureType.map)){
+      final texture = _createTexture(material.map!.image);
+      final texSlot = fragment.getUniformSlot('map');
+      pass.bindTexture(texSlot, texture);
+    }
+
+    if(material.alphaMap != null && descriptor.bindings.contains(TextureType.alphaMap)){
+      final texture = _createTexture(material.alphaMap!.image);
+      final texSlot = fragment.getUniformSlot('alphaMap');
+      pass.bindTexture(texSlot, texture);
+    }
+
+    if(material.normalMap != null && descriptor.bindings.contains(TextureType.normalMap)){
+      final texture = _createTexture(material.normalMap!.image);
+      final texSlot = fragment.getUniformSlot('normalMap');
+      pass.bindTexture(texSlot, texture);
+    }
+
+    if(material.bumpMap != null && descriptor.bindings.contains(TextureType.bumpMap)){
+      final texture = _createTexture(material.bumpMap!.image);
+      final texSlot = fragment.getUniformSlot('bumpMap');
+      pass.bindTexture(texSlot, texture);
+    }
+
+    if(material.roughnessMap != null && descriptor.bindings.contains(TextureType.roughnessMap)){
+      final texture = _createTexture(material.roughnessMap!.image);
+      final texSlot = fragment.getUniformSlot('roughnessMap');
+      pass.bindTexture(texSlot, texture);
+    }
+
+    if(material.metalnessMap != null && descriptor.bindings.contains(TextureType.metalnessMap)){
+      final texture = _createTexture(material.metalnessMap!.image);
+      final texSlot = fragment.getUniformSlot('metalnessMap');
+      pass.bindTexture(texSlot, texture);
+    }
+
+    if(material.aoMap != null && descriptor.bindings.contains(TextureType.aoMap)){
+      final texture = _createTexture(material.aoMap!.image);
+      final texSlot = fragment.getUniformSlot('aoMap');
+      pass.bindTexture(texSlot, texture);
+    }
+
+    if(material.specularMap != null && descriptor.bindings.contains(TextureType.specularMap)){
+      final texture = _createTexture(material.specularMap!.image);
+      final texSlot = fragment.getUniformSlot('specularMap');
+      pass.bindTexture(texSlot, texture);
+    }
+
+    if(material.lightMap != null && descriptor.bindings.contains(TextureType.lightMap)){
+      final texture = _createTexture(material.lightMap!.image);
+      final texSlot = fragment.getUniformSlot('lightMap');
+      pass.bindTexture(texSlot, texture);
+    }
+
+    if(material.emissiveMap != null && descriptor.bindings.contains(TextureType.emissiveMap)){
+      final texture = _createTexture(material.emissiveMap!.image);
+      final texSlot = fragment.getUniformSlot('emissiveMap');
+      pass.bindTexture(texSlot, texture);
+    }
+
+    if(material.clearcoatMap != null && descriptor.bindings.contains(TextureType.clearcoatMap)){
+      final texture = _createTexture(material.clearcoatMap!.image);
+      final texSlot = fragment.getUniformSlot('clearcoatMap');
+      pass.bindTexture(texSlot, texture);
+    }
+
+    if(material.clearcoatNormalMap != null && descriptor.bindings.contains(TextureType.clearcoatNormalMap)){
+      final texture = _createTexture(material.clearcoatNormalMap!.image);
+      final texSlot = fragment.getUniformSlot('clearcoatNormalMap');
+      pass.bindTexture(texSlot, texture);
+    }
+
+    if(material.clearcoatRoughnessMap != null && descriptor.bindings.contains(TextureType.clearcoatRoughnessMap)){
+      final texture = _createTexture(material.clearcoatRoughnessMap!.image);
+      final texSlot = fragment.getUniformSlot('clearcoatRoughnessMap');
+      pass.bindTexture(texSlot, texture);
+    }
+
+    if(material.sheenColorMap != null && descriptor.bindings.contains(TextureType.sheenColorMap)){
+      final texture = _createTexture(material.sheenColorMap!.image);
+      final texSlot = fragment.getUniformSlot('sheenColorMap');
+      pass.bindTexture(texSlot, texture);
+    }
+
+    if(material.sheenRoughnessMap != null && descriptor.bindings.contains(TextureType.sheenRoughnessMap)){
+      final texture = _createTexture(material.sheenRoughnessMap!.image);
+      final texSlot = fragment.getUniformSlot('sheenRoughnessMap');
+      pass.bindTexture(texSlot, texture);
+    }
+
+    if(material.transmissionMap != null && descriptor.bindings.contains(TextureType.transmissionMap)){
+      final texture = _createTexture(material.transmissionMap!.image);
+      final texSlot = fragment.getUniformSlot('transmissionMap');
+      pass.bindTexture(texSlot, texture);
+    }
+
+    if(material.thicknessMap != null && descriptor.bindings.contains(TextureType.thicknessMap)){
+      final texture = _createTexture(material.thicknessMap!.image);
+      final texSlot = fragment.getUniformSlot('thicknessMap');
+      pass.bindTexture(texSlot, texture);
+    }
+
+    if(material.iridescenceMap != null && descriptor.bindings.contains(TextureType.iridescenceMap)){
+      final texture = _createTexture(material.iridescenceMap!.image);
+      final texSlot = fragment.getUniformSlot('iridescenceMap');
+      pass.bindTexture(texSlot, texture);
+    }
+
+    if(material.iridescenceThicknessMap != null && descriptor.bindings.contains(TextureType.iridescenceThicknessMap)){
+      final texture = _createTexture(material.iridescenceThicknessMap!.image);
+      final texSlot = fragment.getUniformSlot('iridescenceThicknessMap');
+      pass.bindTexture(texSlot, texture);
+    }
+
+    if(material.gradientMap != null && descriptor.bindings.contains(TextureType.gradientMap)){
+      final texture = _createTexture(material.gradientMap!.image);
+      final texSlot = fragment.getUniformSlot('gradientMap');
+      pass.bindTexture(texSlot, texture);
+    }
+
+    if(material.matcap != null && descriptor.bindings.contains(TextureType.matcap)){
+      final texture = _createTexture(material.matcap!.image);
+      final texSlot = fragment.getUniformSlot('matcap');
+      pass.bindTexture(texSlot, texture);
+    }
+  }
+
+  gpux.Texture _createTexture(ImageElement element){
+    if(_cachedTextures.containsKey(element.uuid)){
+      return _cachedTextures[element.uuid]!;
+    }
+    final sampledTexture = context.createTexture(
+      gpux.StorageMode.hostVisible, 
+      element.width.toInt(), 
+      element.height.toInt(),
+      //textureType: gpux.TextureType.texture2D,
+      format: gpux.PixelFormat.r8g8b8a8UNormInt,
+      enableShaderReadUsage: true
+    );
+    element.uuid = (element.data as Uint8List).sublist(0,32).toString();
+    _cachedTextures[element.uuid!] = sampledTexture;
+
+    sampledTexture.overwrite(element.data.buffer.asByteData());
+
+    return sampledTexture;
+  }
+
+  Map<String,gpux.Texture> _cachedTextures = {};
+
 
   void _bindUniforms(
     gpux.HostBuffer host,
     gpux.RenderPass pass,
     gpux.Shader vertex,
+    gpux.Shader fragment,
     Float32List sceneData,
     Float32List materialData,
   ){
@@ -62,13 +236,18 @@ class GeometryBindings{
 
     //Map uniform buffer blocks to specific shader string properties
     final sceneSlotVertex = vertex.getUniformSlot('SceneBlock');
-    final materialSlotVertex = vertex.getUniformSlot('MaterialBlock'); // Add this for the Vertex transform!
+    final materialSlotVertex = vertex.getUniformSlot('MaterialBlock');
+
+    final sceneSlotFragment = fragment.getUniformSlot('SceneBlock');
+    final materialSlotFragment = fragment.getUniformSlot('MaterialBlock');
 
     pass.bindUniform(sceneSlotVertex, sceneBufferView);
-    pass.bindUniform(materialSlotVertex, materialBufferView); // Feeds modelMatrix to vertex shader
+    pass.bindUniform(materialSlotVertex, materialBufferView);
+    pass.bindUniform(sceneSlotFragment, sceneBufferView);
+    pass.bindUniform(materialSlotFragment, materialBufferView);
   }
 
-  GpuGeometryBuffers? _createHardwareBuffers() {
+  GpuGeometryBuffers? _createHardwareBuffers(Material material) {
     final positionAttr = geometry.attributes['position'] as BufferAttribute?;
     final normalAttr = geometry.attributes['normal'] as BufferAttribute?;
     final uv0Attr = geometry.attributes['uv'] as BufferAttribute?;
@@ -145,9 +324,9 @@ class GeometryBindings{
     }
 
     void _colors(int i, int offset) {
-      interleavedData[vertexStride + offset + 0] = colors?[i * 3 + 0] ?? 1.0; // Fixed: 4 components (RGBA)
-      interleavedData[vertexStride + offset + 1] = colors?[i * 3 + 1] ?? 1.0;
-      interleavedData[vertexStride + offset + 2] = colors?[i * 3 + 2] ?? 1.0;
+      interleavedData[vertexStride + offset + 0] = colors?[i * 3 + 0] ?? material.color.red; // Fixed: 4 components (RGBA)
+      interleavedData[vertexStride + offset + 1] = colors?[i * 3 + 1] ?? material.color.green;
+      interleavedData[vertexStride + offset + 2] = colors?[i * 3 + 2] ?? material.color.blue;
       //interleavedData[vertexStride + offset + 3] = colors?[i * 4 + 3] ?? 1.0;
     }
 

@@ -14,5 +14,93 @@
   "BasicFragment": {
     "type": "fragment",
     "file": "shaders/basic.frag"
+  },
+  "DepthVertex": {
+    "type": "vertex",
+    "file": "shaders/depth.vert"
+  },
+  "DepthFragment": {
+    "type": "fragment",
+    "file": "shaders/depth.frag"
+  },
+  "DistanceVertex": {
+    "type": "vertex",
+    "file": "shaders/distance.vert"
+  },
+  "DistanceFragment": {
+    "type": "fragment",
+    "file": "shaders/distance.frag"
+  },
+  "LambertVertex": {
+    "type": "vertex",
+    "file": "shaders/lambert.vert"
+  },
+  "LambertFragment": {
+    "type": "fragment",
+    "file": "shaders/lambert.frag"
+  },
+  "MatcapVertex": {
+    "type": "vertex",
+    "file": "shaders/matcap.vert"
+  },
+  "MatcapFragment": {
+    "type": "fragment",
+    "file": "shaders/matcap.frag"
+  },
+  "PhongVertex": {
+    "type": "vertex",
+    "file": "shaders/phong.vert"
+  },
+  "PhongFragment": {
+    "type": "fragment",
+    "file": "shaders/phong.frag"
+  },
+  "ToonVertex": {
+    "type": "vertex",
+    "file": "shaders/toon.vert"
+  },
+  "ToonFragment": {
+    "type": "fragment",
+    "file": "shaders/toon.frag"
+  },
+  "SpriteVertex": {
+    "type": "vertex",
+    "file": "shaders/sprite.vert"
+  },
+  "SpriteFragment": {
+    "type": "fragment",
+    "file": "shaders/sprite.frag"
+  },
+  "ShadowVertex": {
+    "type": "vertex",
+    "file": "shaders/shadow.vert"
+  },
+  "ShadowFragment": {
+    "type": "fragment",
+    "file": "shaders/shadow.frag"
+  },
+  "LineBasicVertex": {
+    "type": "vertex",
+    "file": "shaders/line_basic.vert"
+  },
+  "LineBasicFragment": {
+    "type": "fragment",
+    "file": "shaders/line_basic.frag"
+  },
+  "LineDashedVertex": {
+    "type": "vertex",
+    "file": "shaders/line_dashed.vert"
+  },
+  "LineDashedFragment": {
+    "type": "fragment",
+    "file": "shaders/line_dashed.frag"
+  },
+  "StandardVertex": {
+    "type": "vertex",
+    "file": "shaders/standard.vert"
+  },
+  "StandardFragment": {
+    "type": "fragment",
+    "file": "shaders/standard.frag"
   }
 }

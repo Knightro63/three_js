@@ -42,7 +42,7 @@ class _State extends State<WebglGeometries> {
   void initState() {
     threeJs = ThreeJS(
       onSetupComplete: (){setState(() {});},
-      setup: setup,
+      setup: setup2,
     );
     super.initState();
   }
@@ -95,12 +95,20 @@ class _State extends State<WebglGeometries> {
     // lineSegments.computeLineDistances();
     // threeJs.scene.add( lineSegments );
 
-    final material = three.MeshNormalMaterial.fromMap({
-      "color": 0xff00ff,
+    final three.DataTexture texture = three.DataTexture(generateTexture().data, 256, 256);
+    texture.needsUpdate = true;
+
+    final material = three.MeshBasicMaterial.fromMap({
+      "color": 0x00ffff,
       "side": tmath.DoubleSide,
-      // "transparent": true,
-      // "opacity": 0.5,
-      // 'wireframe': true
+      "flatShading": true,
+      "transparent": true,
+      //"opacity": 0.1,
+      "map": texture,
+      //'wireframe': true
+      "specular": 0x009900,
+      "shininess": 30,
+      "blending": tmath.AdditiveBlending
     });
 
     object = three.Mesh(three.SphereGeometry(75, 20, 10), material);
@@ -186,22 +194,23 @@ class _State extends State<WebglGeometries> {
   }
 
   late three.PointLight pointLight;
-  final objects = [], materials = [];
+  final objects = [], materials = <three.Material>[];
 
   Future<void> setup2() async {
     threeJs.camera = three.PerspectiveCamera(45, threeJs.width / threeJs.height, 1, 2000);
     threeJs.camera.position.setValues(0, 200, 800);
+    
     threeJs.scene = three.Scene();
+    //threeJs.scene.background = tmath.Color.fromHex32( 0x111111 );
     threeJs.scene.background = threeJs.scene.environment = three.DataTexture(generateTexture().data, 256~/4, 256~/4);
 
     // Grid
-
-    final helper = GridHelper(1000, 40, 0x303030, 0x303030);
-    helper.position.y = -75;
-    threeJs.scene.add(helper);
+    // final helper = GridHelper(1000, 40, 0x303030, 0x303030);
+    // helper.position.y = -75;
+    // threeJs.scene.add(helper);
 
     // Materials
-    final three.DataTexture texture = three.DataTexture(generateTexture().data, 256~/4, 256~/4);
+    final three.DataTexture texture = three.DataTexture(generateTexture().data, 256, 256);
     texture.needsUpdate = true;
 
     materials.add(three.MeshLambertMaterial.fromMap({
@@ -233,7 +242,7 @@ class _State extends State<WebglGeometries> {
     }));
     materials.add(three.MeshNormalMaterial.fromMap({"flatShading": true}));
     materials.add(three.MeshBasicMaterial.fromMap({"color": 0xffaa00, "wireframe": true}));
-    materials.add(three.MeshDepthMaterial());
+    materials.add(three.MeshDistanceMaterial());
     materials.add(three.MeshLambertMaterial.fromMap({"color": 0x666666, "emissive": 0xff0000}));
     materials.add(three.MeshPhongMaterial.fromMap({
       "color": 0x000000,
@@ -243,7 +252,10 @@ class _State extends State<WebglGeometries> {
       "opacity": 0.9,
       "transparent": true,
     }));
-    materials.add(three.MeshStandardMaterial.fromMap({"map": texture, "transparent": true}));
+    materials.add(three.MeshStandardMaterial.fromMap({
+      "map": texture, 
+      "transparent": true
+    }));
 
     // Spheres geometry
 
@@ -326,10 +338,10 @@ class _State extends State<WebglGeometries> {
 
     materials[materials.length - 2]
         .emissive
-        .setHSL(0.54, 1.0, 0.35 * (0.5 + 0.5 * math.sin(35 * timer)));
+        ?.setHSL(0.54, 1.0, 0.35 * (0.5 + 0.5 * math.sin(35 * timer)));
     materials[materials.length - 3]
         .emissive
-        .setHSL(0.04, 1.0, 0.35 * (0.5 + 0.5 * math.cos(35 * timer)));
+        ?.setHSL(0.04, 1.0, 0.35 * (0.5 + 0.5 * math.cos(35 * timer)));
 
     pointLight.position.x = math.sin(timer * 7) * 300;
     pointLight.position.y = math.cos(timer * 5) * 400;

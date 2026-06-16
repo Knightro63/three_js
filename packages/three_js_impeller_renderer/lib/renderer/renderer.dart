@@ -548,7 +548,7 @@ class ImpellerRenderer extends Renderer{
     if (_drawIndexInFrame >= maxMeshesPerFrame) return;
 
     // Force absolute parent-child matrix updates
-    mesh.updateMatrixWorld();
+    //mesh.updateMatrixWorld();
     if (camera.matrixWorldInverse.storage[0] == 0.0 && camera.matrixWorldInverse.storage[5] == 0.0) {
       camera.matrixWorldInverse.setFrom(camera.matrixWorld).invert();
     }
@@ -575,17 +575,24 @@ class ImpellerRenderer extends Renderer{
     _cachedPipeline[hash]!.bind(pass);
 
     MaterialDescriptor mdescriptor = resolved.descriptor;
-    final Float32List materialData = MaterialConverter.convert(material, camera).updateUniforms(mesh: mesh);
+    final Float32List materialData = MaterialConverter.convert(material, camera).updateUniforms(mesh: mesh, material: material);
     
     if(_cachedGeometry[hash] == null || mdescriptor != _cachedPipeline[hash]?.descriptor){
       _cachedGeometry[hash] = GeometryBindings(
         gpu.gpuContext, 
         geometry,
         material,
-        mdescriptor
+        mdescriptor,
       );
     }
-    _cachedGeometry[hash]!.bind(pass,resolved.vertex,sceneData,materialData);
+
+    _cachedGeometry[hash]!.bind(
+      pass,
+      resolved.vertex,
+      resolved.fragment,
+      sceneData,
+      materialData,
+    );
 
     pass.draw();
 

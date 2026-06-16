@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-import 'package:flutter_gpu/gpu.dart' as gpux; // Adjust based on your exact gpux library paths
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 // import '../material/material_description_registry.dart';
@@ -257,14 +256,14 @@ class MaterialUniformData {
     return lineJoinRound; // Default WebGL fallback
   }
 
-  Float32List updateUniforms({required Object3D mesh}) {
+  Float32List updateUniforms({required Object3D mesh, required Material material}) {
     mesh.updateMatrixWorld();
     final modelMatrix = mesh.matrixWorld.storage;
 
     // Exact Footprint:
     // modelMatrix (16) + 13 vec4 vectors (13 * 4 = 52) + 6 clipping planes (6 * 4 = 24) 
     // + 1 clippingPlaneParams vector (4) = 96 floats total (384 bytes).
-    final uniformData = Float32List(96);
+    final uniformData = Float32List(116);
 
     // ========================================================
     // 1. MODEL MATRIX (Offsets 0 - 15) -> 64 Bytes
@@ -393,6 +392,37 @@ class MaterialUniformData {
     // 4. TAILING SCALAR + PADDING (Offsets 92 - 95) -> vec4
     // ========================================================
     uniformData[92] = clippingPlanes.length.toDouble(); // material.clippingPlaneParams.x
+
+    double checkMap(Texture? prop) => prop != null ? 1 : 0;
+    uniformData[93]  = checkMap(material.map);                        // 0: hasMap
+    uniformData[94]  = checkMap(material.alphaMap);                   // 1: hasAlphaMap
+    uniformData[95]  = checkMap(material.aoMap);                      // 2: hasAoMap
+    
+    uniformData[96]  = checkMap(material.specularMap);                // 3: hasSpecularMap
+    uniformData[97]  = checkMap(material.lightMap);                   // 4: hasLightMap
+    uniformData[98]  = checkMap(material.bumpMap);                    // 5: hasBumpMap
+    uniformData[99]  = checkMap(material.normalMap);                  // 6: hasNormalMap
+    
+    uniformData[100] = checkMap(material.displacementMap);            // 7: hasDisplacementMap
+    uniformData[101] = checkMap(material.roughnessMap);               // 8: hasRoughnessMap
+    uniformData[102] = checkMap(material.metalnessMap);               // 9: hasMetalnessMap
+    uniformData[103] = checkMap(material.emissiveMap);                // 10: hasEmissiveMap
+    
+    uniformData[104] = checkMap(material.clearcoatMap);               // 11: hasClearcoatMap
+    uniformData[105] = checkMap(material.clearcoatNormalMap);         // 12: hasClearcoatNormalMap
+    uniformData[106] = checkMap(material.clearcoatRoughnessMap);      // 13: hasClearcoatRoughnessMap
+    uniformData[107] = checkMap(material.sheenColorMap);              // 14: hasSheenColorMap
+    
+    uniformData[108] = checkMap(material.sheenRoughnessMap);          // 15: hasSheenRoughnessMap
+    uniformData[109] = checkMap(material.transmissionMap);            // 16: hasTransmissionMap
+    uniformData[110] = checkMap(material.thicknessMap);               // 17: hasThicknessMap
+    uniformData[111] = checkMap(material.iridescenceMap);             // 18: hasIridescenceMap
+    
+    uniformData[112] = checkMap(material.iridescenceThicknessMap);    // 19: hasIridescenceThicknessMap
+    uniformData[113] = checkMap(material.gradientMap);                // 20: hasGradientMap
+    uniformData[114] = checkMap(material.matcap);                     // 21: hasMatcap
+
+    uniformData[115] = 0.0;
 
     return uniformData;
   }

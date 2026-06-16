@@ -48,9 +48,8 @@ vec3 calculateDynamicLighting(
 
     for (int i = 0; i < totalLights; i++) {
         // Accessing structural uniform buffer array blocks natively
-        var light = scene.lights[i]; 
-        float typeToken = light.position.w;
-        float intensity = light.color.a;
+        float typeToken = scene.lightPositions[i].w;
+        float intensity = scene.lightColors[i].a;
 
         if (typeToken == 0.0) {
             // 0.0 = No Light / Unassigned Padding. Skip safely!
@@ -58,13 +57,13 @@ vec3 calculateDynamicLighting(
         } 
         else if (typeToken == 6.0) {
             // AMBIENT LIGHT SOURCE TRACKING
-            ambientAccum += light.color.rgb * intensity;
+            ambientAccum += scene.lightColors[i].rgb * intensity;
         } 
         else if (typeToken == 1.0) {
             // DIRECTIONAL LIGHT
             IncidentLight directLight = IncidentLight(vec3(0.0), vec3(0.0), false);
-            directLight.direction = normalize(-light.position.xyz);
-            directLight.color = light.color.rgb * intensity;
+            directLight.direction = normalize(-scene.lightPositions[i].xyz);
+            directLight.color = scene.lightColors[i].rgb * intensity;
             directLight.visible = true;
             
             RE_Direct_BlinnPhong(directLight, N, V, albedo, shininess, specularColor, reflected);
@@ -72,7 +71,7 @@ vec3 calculateDynamicLighting(
         else if (typeToken == 2.0) {
             // POINT LIGHT
             IncidentLight directLight = IncidentLight(vec3(0.0), vec3(0.0), false);
-            vec3 lightWorldPos = light.position.xyz;
+            vec3 lightWorldPos = scene.lightPositions[i].xyz;
             
             if (dot(lightWorldPos, lightWorldPos) == 0.0) {
                 lightWorldPos = scene.cameraPosition.xyz;
@@ -80,8 +79,8 @@ vec3 calculateDynamicLighting(
             
             vec3 lightToVertex = lightWorldPos - worldPos;
             float distanceToLight = length(lightToVertex);
-            float lightDistance = light.attenuationParams.x;
-            float lightDecay = light.attenuationParams.y;
+            float lightDistance = scene.lightAttenuationParams[i].x;
+            float lightDecay = scene.lightAttenuationParams[i].y;
 
             if (lightDistance == 0.0 || distanceToLight <= lightDistance) {
                 directLight.direction = normalize(lightToVertex);
@@ -93,7 +92,7 @@ vec3 calculateDynamicLighting(
                     attenuation = 1.0 / (1.0 + (distanceToLight * 0.002) * (distanceToLight * 0.002));
                 }
                 
-                directLight.color = light.color.rgb * intensity * attenuation;
+                directLight.color = scene.lightColors[i].rgb * intensity * attenuation;
                 directLight.visible = true;
                 
                 RE_Direct_BlinnPhong(directLight, N, V, albedo, shininess, specularColor, reflected);
@@ -102,16 +101,16 @@ vec3 calculateDynamicLighting(
         else if (typeToken == 3.0) {
             // SPOT LIGHT
             IncidentLight directLight = IncidentLight(vec3(0.0), vec3(0.0), false);
-            vec3 lightToVertex = light.position.xyz - worldPos;
+            vec3 lightToVertex = scene.lightPositions[i].xyz - worldPos;
             float distanceToLight = length(lightToVertex);
-            float lightDistance = light.attenuationParams.x;
-            float lightDecay = light.attenuationParams.y;
-            float coneAngle = light.attenuationParams.z;
-            float conePenumbra = light.attenuationParams.w;
+            float lightDistance = scene.lightAttenuationParams[i].x;
+            float lightDecay = scene.lightAttenuationParams[i].y;
+            float coneAngle = scene.lightAttenuationParams[i].z;
+            float conePenumbra = scene.lightAttenuationParams[i].w;
 
             if (lightDistance == 0.0 || distanceToLight <= lightDistance) {
                 vec3 L = normalize(lightToVertex);
-                vec3 spotDirection = normalize(light.extendedParams.xyz);
+                vec3 spotDirection = normalize(scene.lightExtendedParams[i].xyz);
                 float angleCos = dot(L, -spotDirection);
                 float coneCos = cos(coneAngle);
                 float penumbraCos = cos(coneAngle * (1.0 - conePenumbra));
@@ -126,7 +125,7 @@ vec3 calculateDynamicLighting(
                     
                     float spotEffect = smoothstep(coneCos, penumbraCos, angleCos);
                     directLight.direction = L;
-                    directLight.color = light.color.rgb * intensity * attenuation * spotEffect;
+                    directLight.color = scene.lightColors[i].rgb * intensity * attenuation * spotEffect;
                     directLight.visible = true;
                     
                     RE_Direct_BlinnPhong(directLight, N, V, albedo, shininess, specularColor, reflected);
@@ -135,10 +134,10 @@ vec3 calculateDynamicLighting(
         } 
         else if (typeToken == 4.0) {
             // HEMISPHERE LIGHT
-            float dotNL = dot(N, normalize(light.position.xyz));
+            float dotNL = dot(N, normalize(scene.lightPositions[i].xyz));
             float hemiMix = dotNL * 0.5 + 0.5;
-            vec3 skyColor = light.color.rgb * intensity;
-            vec3 groundColor = light.extendedParams.xyz;
+            vec3 skyColor = scene.lightColors[i].rgb * intensity;
+            vec3 groundColor = scene.lightExtendedParams[i].xyz;
             ambientAccum += mix(groundColor, skyColor, hemiMix);
         }
     }

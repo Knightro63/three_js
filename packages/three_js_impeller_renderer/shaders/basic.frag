@@ -3,23 +3,68 @@
 #include <color.glsl>
 #include <clipping.glsl>
 
-uniform sampler2D map;
-uniform sampler2D alphaMap;
-uniform sampler2D aoMap;
-uniform sampler2D specularMap;
+uniform sampler2D map;          
+uniform sampler2D alphaMap;     
+uniform sampler2D aoMap;        
+uniform sampler2D specularMap;  
 
 in vec3 v_color;
 in vec3 v_normal;
 in vec2 v_uv;
 in vec3 v_worldPosition;
+
 out vec4 frag_color;
 
 void main() {
-  evaluateClippingPlanes(v_worldPosition);
-  vec3 color = v_color;
-  float alphaOverride = material.baseColor.a;
-  vec3 finalColor = applyFog(color, v_worldPosition);
-  vec4 finalRGBA = vec4(finalColor, alphaOverride);
-  finalRGBA = applyColor(finalRGBA);
-  frag_color = vec4(clamp(finalRGBA.rgb, vec3(0.0), vec3(1.0)), finalRGBA.a);
+  if(evaluateClippingPlanes(v_worldPosition)){
+    frag_color = vec4(0.0);
+    return;
+  }
+    vec3 color = v_color;
+    float alphaOverride = material.baseColor.a;
+
+    // 1. Albedo Processing
+    vec4 texelColor = vec4(1.0); // Default fallback: neutral white
+    if (material.flags0.y > 0.5) {
+        texelColor = texture(map, v_uv);
+        alphaOverride = material.baseColor.a * texelColor.a;
+    }
+    else{
+        alphaOverride = material.baseColor.a;
+    }
+    vec3 baseColor = color * texelColor.rgb;
+
+    // 2. Ambient Occlusion Processing
+    if (material.flags0.z > 0.5) {
+        float ao = texture(aoMap, v_uv).r;
+        baseColor *= ao; 
+    }
+
+    // 3. Specular Processing
+    vec3 specularIntensity = vec3(0.0); // Default fallback: no extra shine
+    if (material.flags0.w > 0.5) {
+        specularIntensity = texture(specularMap, v_uv).rgb;
+    }
+
+    // 4. Alpha Processing
+    float alpha = alphaOverride;
+    if (material.flags1.x > 0.5) {
+        float extraAlpha = texture(alphaMap, v_uv).g;
+        alpha *= extraAlpha;
+    }
+
+    if (alpha < 0.001) {
+        frag_color = vec4(0.0);
+        return;
+    }
+
+    // 5. Final Output Compilation
+    vec3 finalColor = applyFog(
+        baseColor, 
+        v_worldPosition
+    );
+    vec4 finalRGBA = vec4(finalColor, alpha);
+    finalRGBA = applyColor(finalRGBA);
+
+    frag_color = vec4(finalRGBA.rgb, finalRGBA.a);
 }
