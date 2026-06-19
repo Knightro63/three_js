@@ -253,22 +253,4 @@ class MaterialConverter {
       throw ("Material ${material.runtimeType} has not been converted yet. Please use another Material.");
     }
   }
-
-  static MeshBasicMaterial toGpuBasicFallback(MeshStandardMaterial material) {
-    return MeshBasicMaterial()
-      ..name = material.name
-      ..color = material.color.clone()
-      ..map = material.map
-      ..transparent = material.transparent
-      ..opacity = material.opacity
-      ..vertexColors = material.vertexColors
-      ..depthTest = material.depthTest
-      ..depthWrite = material.depthWrite
-      ..colorWrite = material.colorWrite
-      ..side = material.side
-      ..blending = material.blending
-      ..wireframe = material.wireframe
-      ..wireframeLinewidth = material.wireframeLinewidth
-      ..needsUpdate = true;
-  }
 }

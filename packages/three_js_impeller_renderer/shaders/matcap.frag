@@ -65,7 +65,7 @@ void main() {
   vec4 finalRGBA = vec4(finalColor, alpha);
 
   // Run central color space grading rules
-  finalRGBA = applyColor(finalRGBA);
+  finalRGBA = applyColor(finalRGBA,material.lineExtendedParams.z);
 
   // float antiPrune = texture(normalMap, vec2(0.0)).r * 0.000001 + 
   //                   texture(bumpMap, vec2(0.0)).r * 0.000001;

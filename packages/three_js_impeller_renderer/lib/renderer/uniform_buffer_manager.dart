@@ -256,7 +256,8 @@ class MaterialUniformData {
     return lineJoinRound; // Default WebGL fallback
   }
 
-  Float32List updateUniforms({required Object3D mesh, required Material material}) {
+  Float32List updateUniforms(Object3D mesh) {
+    final material = mesh.material!;
     mesh.updateMatrixWorld();
     final modelMatrix = mesh.matrixWorld.storage;
 
@@ -349,15 +350,23 @@ class MaterialUniformData {
     uniformData[51] = (this.prefilterMipCount).toDouble();
 
     // [Offsets 52-55]: lineParams (vec4)
-    uniformData[52] = this.linewidth;
-    uniformData[53] = this.dashSize;
-    uniformData[54] = this.mapLineCap(linecap).toDouble();
-    uniformData[55] = this.mapLineJoin(linejoin).toDouble();
+    if(material is PointsMaterial){
+      uniformData[52] = (material.size ?? 1)*25;
+      uniformData[53] = material.sizeAttenuation==true?1:0;
+      uniformData[54] = (material.scale ?? 1)*10;
+      uniformData[55] = 0;
+    }
+    else{
+      uniformData[52] = this.linewidth;
+      uniformData[53] = this.dashSize;
+      uniformData[54] = this.mapLineCap(linecap).toDouble();
+      uniformData[55] = this.mapLineJoin(linejoin).toDouble();
+    }
 
     // [Offsets 56-59]: lineExtendedParams (vec4)
     uniformData[56] = this.gapSize;
     uniformData[57] = this.scale;
-    uniformData[58] = 0.0; // ColorSpace field template fallback
+    uniformData[58] = 2; // ColorSpace field template fallback
     uniformData[59] = this.rotation;
 
     // [Offsets 60-67]: morphInfluences0 & morphInfluences1 (2 x vec4)

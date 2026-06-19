@@ -49,7 +49,7 @@ class GeometryBindings{
 
     // Bind and draw using the correct calculated indices count
     pass.bindVertexBuffer( host.emplace(hardwareBuffers.vertexBuffer), hardwareBuffers.vertexCount);
-    if(hardwareBuffers.indexCount != 0) pass.bindIndexBuffer( host.emplace(hardwareBuffers.indexBuffer), hardwareBuffers.indexType, hardwareBuffers.indexCount);
+    if(hardwareBuffers.indexCount != 0) pass.bindIndexBuffer( host.emplace(hardwareBuffers.indexBuffer), gpux.IndexType.int16, hardwareBuffers.indexCount);
   }
 
   void _bindTextures(
@@ -64,48 +64,43 @@ class GeometryBindings{
     // ========================================================
     // 1. VERTEX SHADER PIPELINE BINDINGS
     // ========================================================
-    if (material.displacementMap != null && activeBindings.contains(TextureType.displacementMap)) {
-      final texture = _createTexture(material.displacementMap!.image);
+    if (activeBindings.contains(TextureType.displacementMap)) {
+      final texture = _createTexture(material.displacementMap?.image);
       final texSlot = vertex.getUniformSlot('displacementMap');
-      pass.bindTexture(texSlot, texture, sampler: GpuSamplerConverter.getSampler(material.displacementMap!));
+      pass.bindTexture(texSlot, texture, sampler: GpuSamplerConverter.getSampler(material.displacementMap));
     }
 
     // ========================================================
     // 2. FRAGMENT SHADER PIPELINE BINDINGS
     // ========================================================
-    if(material.map != null && descriptor.bindings.contains(TextureType.map)){
-      final texture = _createTexture(material.map!.image);
+    if(descriptor.bindings.contains(TextureType.map)){
+      final texture = _createTexture(material.map?.image);
       final texSlot = fragment.getUniformSlot('map');
-      pass.bindTexture(texSlot, texture, sampler: GpuSamplerConverter.getSampler(material.map!));
+      pass.bindTexture(texSlot, texture, sampler: GpuSamplerConverter.getSampler(material.map));
     }
 
-    if(material.alphaMap != null && descriptor.bindings.contains(TextureType.alphaMap)){
-      final texture = _createTexture(material.alphaMap!.image);
+    if(descriptor.bindings.contains(TextureType.alphaMap)){
+      final texture = _createTexture(material.alphaMap?.image);
       final texSlot = fragment.getUniformSlot('alphaMap');
-      pass.bindTexture(texSlot, texture, sampler: GpuSamplerConverter.getSampler(material.alphaMap!));
+      pass.bindTexture(texSlot, texture, sampler: GpuSamplerConverter.getSampler(material.alphaMap));
     }
 
-    if(material.normalMap != null && descriptor.bindings.contains(TextureType.normalMap)){
-      final texture = _createTexture(material.normalMap!.image);
+    if(descriptor.bindings.contains(TextureType.normalMap)){
+      final texture = _createTexture(material.normalMap?.image);
       final texSlot = fragment.getUniformSlot('normalMap');
-      pass.bindTexture(texSlot, texture, sampler: GpuSamplerConverter.getSampler(material.normalMap!));
+      pass.bindTexture(texSlot, texture, sampler: GpuSamplerConverter.getSampler(material.normalMap));
     }
 
-    if(material.bumpMap != null && descriptor.bindings.contains(TextureType.bumpMap)){
-      final texture = _createTexture(material.bumpMap!.image);
+    if(descriptor.bindings.contains(TextureType.bumpMap)){
+      final texture = _createTexture(material.bumpMap?.image);
       final texSlot = fragment.getUniformSlot('bumpMap');
-      pass.bindTexture(texSlot, texture, sampler: GpuSamplerConverter.getSampler(material.bumpMap!));
+      pass.bindTexture(texSlot, texture, sampler: GpuSamplerConverter.getSampler(material.bumpMap));
     }
 
     if(
-      (material.roughnessMap != null || 
-      material.metalnessMap != null || 
-      material.aoMap != null) &&
-      (
-        descriptor.bindings.contains(TextureType.roughnessMap) ||
-        descriptor.bindings.contains(TextureType.metalnessMap) ||
-        descriptor.bindings.contains(TextureType.aoMap)
-      )
+      descriptor.bindings.contains(TextureType.roughnessMap) ||
+      descriptor.bindings.contains(TextureType.metalnessMap) ||
+      descriptor.bindings.contains(TextureType.aoMap)
     ){
       final ImageElement? ieo = material.aoMap?.image;
       final ImageElement? ier = material.roughnessMap?.image;
@@ -114,34 +109,23 @@ class GeometryBindings{
       final o = ieo?.data as Uint8List?;
       final r = ier?.data as Uint8List?;
       final m = iem?.data as Uint8List?;
-      final int l = o?.length ?? r?.length ?? m?.length ?? 0;
+      //final int l = o?.length ?? r?.length ?? m?.length ?? 0;
 
-      final int w = (ieo?.width ?? ier?.width ?? iem?.width ?? 0).toInt();
-      final int h = (ieo?.height ?? ier?.height ?? iem?.height ?? 0).toInt();
+      final int w = (ieo?.width ?? ier?.width ?? iem?.width ?? 1).toInt();
+      final int h = (ieo?.height ?? ier?.height ?? iem?.height ?? 1).toInt();
 
       final int totalPixels = w * h;
       final Uint8List packedData = Uint8List(totalPixels * 4);
 
-      // 3. FIXED: Robust multi-stride unpacking.
-      // This automatically adjusts if three.js textures use 3 or 4 components natively.
       final int oStride = (o != null && o.length >= totalPixels * 4) ? 4 : 3;
       final int rStride = (r != null && r.length >= totalPixels * 4) ? 4 : 3;
       final int mStride = (m != null && m.length >= totalPixels * 4) ? 4 : 3;
 
       for (int i = 0; i < totalPixels; i++) {
         int outIdx = i * 4;
-
-        // Red Channel = Ambient Occlusion (Defaults to full white if missing)
         packedData[outIdx + 0] = o != null ? o[i * oStride + 0] : 255;
-        
-        // Green Channel = Roughness (Three.js standard reads green)
-        // If your roughness maps are purely grayscale single-channel, reading component +0 is completely safe
         packedData[outIdx + 1] = r != null ? r[i * rStride + 0] : 255;
-        
-        // Blue Channel = Metalness (Three.js standard reads blue)
         packedData[outIdx + 2] = m != null ? m[i * mStride + 0] : 0;
-        
-        // Alpha Channel = Padding required by Vulkan/Metal formats
         packedData[outIdx + 3] = 255; 
       }
 
@@ -153,37 +137,34 @@ class GeometryBindings{
         )
       );
       final texSlot = fragment.getUniformSlot('ormMap');
-      pass.bindTexture(texSlot, texture, sampler: GpuSamplerConverter.getSampler(material.aoMap ?? material.roughnessMap ?? material.metalnessMap!));
+      pass.bindTexture(texSlot, texture, sampler: GpuSamplerConverter.getSampler(material.aoMap?? material.roughnessMap ?? material.metalnessMap));
     }
 
-    if(material.specularMap != null && descriptor.bindings.contains(TextureType.specularMap)){
-      final texture = _createTexture(material.specularMap!.image);
+    if(descriptor.bindings.contains(TextureType.specularMap)){
+      final texture = _createTexture(material.specularMap?.image);
       final texSlot = fragment.getUniformSlot('specularMap');
-      pass.bindTexture(texSlot, texture, sampler: GpuSamplerConverter.getSampler(material.specularMap!));
+      pass.bindTexture(texSlot, texture, sampler: GpuSamplerConverter.getSampler(material.specularMap));
     }
 
-    if(material.lightMap != null && descriptor.bindings.contains(TextureType.lightMap)){
-      final texture = _createTexture(material.lightMap!.image);
+    if(descriptor.bindings.contains(TextureType.lightMap)){
+      final texture = _createTexture(material.lightMap?.image);
       final texSlot = fragment.getUniformSlot('lightMap');
-      pass.bindTexture(texSlot, texture, sampler: GpuSamplerConverter.getSampler(material.lightMap!));
+      pass.bindTexture(texSlot, texture, sampler: GpuSamplerConverter.getSampler(material.lightMap));
     }
 
-    if(material.emissiveMap != null && descriptor.bindings.contains(TextureType.emissiveMap)){
-      final texture = _createTexture(material.emissiveMap!.image);
+    if(descriptor.bindings.contains(TextureType.emissiveMap)){
+      final texture = _createTexture(material.emissiveMap?.image);
       final texSlot = fragment.getUniformSlot('emissiveMap');
-      pass.bindTexture(texSlot, texture, sampler: GpuSamplerConverter.getSampler(material.emissiveMap!));
+      pass.bindTexture(texSlot, texture, sampler: GpuSamplerConverter.getSampler(material.emissiveMap));
     }
 
-
-    if(material.clearcoatNormalMap != null && descriptor.bindings.contains(TextureType.clearcoatNormalMap)){
-      final texture = _createTexture(material.clearcoatNormalMap!.image);
+    if(descriptor.bindings.contains(TextureType.clearcoatNormalMap)){
+      final texture = _createTexture(material.clearcoatNormalMap?.image);
       final texSlot = fragment.getUniformSlot('clearcoatNormalMap');
-      pass.bindTexture(texSlot, texture, sampler: GpuSamplerConverter.getSampler(material.clearcoatNormalMap!));
+      pass.bindTexture(texSlot, texture, sampler: GpuSamplerConverter.getSampler(material.clearcoatNormalMap));
     }
 
-    if ((material.clearcoatMap != null || material.clearcoatRoughnessMap != null) &&
-        (descriptor.bindings.contains(TextureType.clearcoatMap) ||
-        descriptor.bindings.contains(TextureType.clearcoatRoughnessMap))) {
+    if (descriptor.bindings.contains(TextureType.clearcoatMap) || descriptor.bindings.contains(TextureType.clearcoatRoughnessMap)) {
       
       final ImageElement? iec = material.clearcoatMap?.image;
       final ImageElement? ier = material.clearcoatRoughnessMap?.image;
@@ -191,8 +172,8 @@ class GeometryBindings{
       final c = iec?.data as Uint8List?;
       final r = ier?.data as Uint8List?;
 
-      final int w = (iec?.width ?? ier?.width ?? 0).toInt();
-      final int h = (iec?.height ?? ier?.height ?? 0).toInt();
+      final int w = (iec?.width ?? ier?.width ?? 1).toInt();
+      final int h = (iec?.height ?? ier?.height ?? 1).toInt();
       
       final int totalPixels = w * h;
       final Uint8List packedData = Uint8List(totalPixels * 4);
@@ -218,29 +199,29 @@ class GeometryBindings{
       
       final texSlot = fragment.getUniformSlot('clearcoatParamsMap');
       
-      final targetMap = material.clearcoatMap ?? material.clearcoatRoughnessMap!;
+      final targetMap = material.clearcoatMap ?? material.clearcoatRoughnessMap;
       final sampler = GpuSamplerConverter.getSampler(targetMap);
 
       pass.bindTexture(texSlot, texture, sampler: sampler);
     }
 
-    if(material.sheenColorMap != null && descriptor.bindings.contains(TextureType.sheenColorMap)){
-      final texture = _createTexture(material.sheenColorMap!.image);
+    if(descriptor.bindings.contains(TextureType.sheenColorMap)){
+      final texture = _createTexture(material.sheenColorMap?.image);
       final texSlot = fragment.getUniformSlot('sheenColorMap');
-      pass.bindTexture(texSlot, texture, sampler: GpuSamplerConverter.getSampler(material.sheenColorMap!));
+      pass.bindTexture(texSlot, texture, sampler: GpuSamplerConverter.getSampler(material.sheenColorMap));
     }
 
-    if(material.sheenRoughnessMap != null && descriptor.bindings.contains(TextureType.sheenRoughnessMap)){
-      final texture = _createTexture(material.sheenRoughnessMap!.image);
+    if(descriptor.bindings.contains(TextureType.sheenRoughnessMap)){
+      final texture = _createTexture(material.sheenRoughnessMap?.image);
       final texSlot = fragment.getUniformSlot('sheenRoughnessMap');
-      pass.bindTexture(texSlot, texture, sampler: GpuSamplerConverter.getSampler(material.sheenRoughnessMap!));
+      pass.bindTexture(texSlot, texture, sampler: GpuSamplerConverter.getSampler(material.sheenRoughnessMap));
     }
 
-    if ((material.transmissionMap != null || material.thicknessMap != null || material.iridescenceMap != null) &&
-        (descriptor.bindings.contains(TextureType.transmissionMap) ||
+    if (
+        descriptor.bindings.contains(TextureType.transmissionMap) ||
         descriptor.bindings.contains(TextureType.thicknessMap) ||
-        descriptor.bindings.contains(TextureType.iridescenceMap))) {
-      
+        descriptor.bindings.contains(TextureType.iridescenceMap)
+    ) {
       final ImageElement? iet = material.transmissionMap?.image;
       final ImageElement? ieh = material.thicknessMap?.image;
       final ImageElement? iei = material.iridescenceMap?.image;
@@ -249,8 +230,8 @@ class GeometryBindings{
       final h = ieh?.data as Uint8List?;
       final r = iei?.data as Uint8List?;
 
-      final int w = (iet?.width ?? ieh?.width ?? iei?.width ?? 0).toInt();
-      final int hDim = (iet?.height ?? ieh?.height ?? iei?.height ?? 0).toInt();
+      final int w = (iet?.width ?? ieh?.width ?? iei?.width ?? 1).toInt();
+      final int hDim = (iet?.height ?? ieh?.height ?? iei?.height ?? 1).toInt();
       
       final int totalPixels = w * hDim;
       final Uint8List packedData = Uint8List(totalPixels * 4);
@@ -280,54 +261,75 @@ class GeometryBindings{
       // Connects directly to uniform sampler2D advancedPhysicalMap inside physical.frag
       final texSlot = fragment.getUniformSlot('advancedPhysicalMap');
       
-      final targetMap = material.transmissionMap ?? material.thicknessMap ?? material.iridescenceMap!;
+      final targetMap = material.transmissionMap ?? material.thicknessMap ?? material.iridescenceMap;
       final sampler = GpuSamplerConverter.getSampler(targetMap);
 
       pass.bindTexture(texSlot, texture, sampler: sampler);
     }
 
-    if(material.iridescenceThicknessMap != null && descriptor.bindings.contains(TextureType.iridescenceThicknessMap)){
-      final texture = _createTexture(material.iridescenceThicknessMap!.image);
+    if(descriptor.bindings.contains(TextureType.iridescenceThicknessMap)){
+      final texture = _createTexture(material.iridescenceThicknessMap?.image);
       final texSlot = fragment.getUniformSlot('iridescenceThicknessMap');
-      pass.bindTexture(texSlot, texture, sampler: GpuSamplerConverter.getSampler(material.iridescenceThicknessMap!));
+      pass.bindTexture(texSlot, texture, sampler: GpuSamplerConverter.getSampler(material.iridescenceThicknessMap));
     }
 
-    if(material.gradientMap != null && descriptor.bindings.contains(TextureType.gradientMap)){
-      final texture = _createTexture(material.gradientMap!.image);
+    if(descriptor.bindings.contains(TextureType.gradientMap)){
+      final texture = _createTexture(material.gradientMap?.image);
       final texSlot = fragment.getUniformSlot('gradientMap');
-      pass.bindTexture(texSlot, texture, sampler: GpuSamplerConverter.getSampler(material.gradientMap!));
+      pass.bindTexture(texSlot, texture, sampler: GpuSamplerConverter.getSampler(material.gradientMap));
     }
 
-    if(material.matcap != null && descriptor.bindings.contains(TextureType.matcap)){
-      final texture = _createTexture(material.matcap!.image);
+    if(descriptor.bindings.contains(TextureType.matcap)){
+      final texture = _createTexture(material.matcap?.image);
       final texSlot = fragment.getUniformSlot('matcap');
-      pass.bindTexture(texSlot, texture, sampler: GpuSamplerConverter.getSampler(material.matcap!));
+      pass.bindTexture(texSlot, texture, sampler: GpuSamplerConverter.getSampler(material.matcap));
     }
   }
 
-  gpux.Texture _createTexture(ImageElement element){
-    if(_cachedTextures.containsKey(element.uuid)){
-      return _cachedTextures[element.uuid]!;
+  gpux.Texture _createTexture(ImageElement? element){
+    if(_cachedTextures.containsKey(element?.uuid)){
+      return _cachedTextures[element!.uuid]!;
     }
-    final sampledTexture = context.createTexture(
-      gpux.StorageMode.hostVisible,
-      element.width.toInt(), 
-      element.height.toInt(),
-      sampleCount: 1,
-      //textureType: gpux.TextureType.texture2D,
-      format: gpux.PixelFormat.r8g8b8a8UNormInt,
-      enableShaderReadUsage: true
-    );
-    element.uuid = MathUtils.generateUUID();
-    _cachedTextures[element.uuid!] = sampledTexture;
+    late final gpux.Texture sampledTexture;
 
-    if(element.data != null) sampledTexture.overwrite(element.data.buffer.asByteData());
+    if(element != null){
+      sampledTexture = context.createTexture(
+        gpux.StorageMode.hostVisible,
+        element.width.toInt(), 
+        element.height.toInt(),
+        sampleCount: 1,
+        //textureType: gpux.TextureType.texture2D,
+        format: gpux.PixelFormat.r8g8b8a8UNormIntSRGB,
+        enableShaderReadUsage: true
+      );
+      element.uuid = MathUtils.generateUUID();
+      _cachedTextures[element.uuid!] = sampledTexture;
+
+      if(element.data != null) sampledTexture.overwrite(element.data.buffer.asByteData());
+    }
+    else{
+      sampledTexture = context.createTexture(
+        gpux.StorageMode.hostVisible,
+        2, 
+        2,
+        sampleCount: 1,
+        //textureType: gpux.TextureType.texture2D,
+        format: gpux.PixelFormat.r8g8b8a8UNormInt,
+        enableShaderReadUsage: true
+      );
+
+      sampledTexture.overwrite(Uint8List.fromList([
+        0,0,0,0,
+        0,0,0,0,
+        0,0,0,0,
+        0,0,0,0
+      ]).buffer.asByteData());
+    }
 
     return sampledTexture;
   }
 
   Map<String,gpux.Texture> _cachedTextures = {};
-
 
   void _bindUniforms(
     gpux.HostBuffer host,
@@ -375,25 +377,11 @@ class GeometryBindings{
     final colorAttr = geometry.attributes['color'] as BufferAttribute?;
     final indexAttr = geometry.index;
     
-    if (
-      positionAttr == null
-    ){
+    if (positionAttr == null){
       return null;
     }
 
     final int totalVertices = positionAttr.count;
-    int totalIndex = 0;
-    bool overwrite = false;
-
-    if(
-      indexAttr == null &&
-      material is! LineDashedMaterial &&
-      geometry is! LineSegments &&
-      material is! LineBasicMaterial
-    ){
-      overwrite = true;
-      totalIndex = totalVertices;
-    }
 
     // ========================================================
     // 1. COMPILE-SAFE INDEX EXTRACTION
@@ -401,7 +389,7 @@ class GeometryBindings{
     // Direct cast to Uint16List represents only this mesh slice's data bounds
     final TypedDataList indices = (indexAttr != null) 
         ? indexAttr.array// Safely converts Uint32List or standard List<int>
-        : Uint16List(totalVertices);
+        : Uint32List(0);
 
     // ========================================================
     // 2. INTERLEAVE ATTRIBUTES USING COUNT (Fixes Overlapping Triangles)
@@ -490,10 +478,6 @@ class GeometryBindings{
       }
 
       vertexStride += stride; // Advance by the correct total float stride
-
-      if(overwrite){
-        indices[i] = i;
-      }
     }
 
     final ByteData rawVertices = interleavedData.buffer.asByteData();
@@ -501,10 +485,9 @@ class GeometryBindings{
     _cachedBuffer[uuid] = GpuGeometryBuffers(
       vertexBuffer: rawVertices,
       indexBuffer: indices.buffer.asByteData(),
-      indexCount: indexAttr?.count ?? totalIndex, // Total active item connections
+      indexCount: indexAttr?.count ?? 0, // Total active item connections
       vertexCount: totalVertices,  // Use total unique physical vertices
-      version: material.version,
-      indexType: indices is Uint32List || indices is Int32List?gpux.IndexType.int32:gpux.IndexType.int16
+      version: material.version
     );
 
     return _cachedBuffer[uuid];
@@ -517,8 +500,7 @@ class GpuGeometryBuffers {
     required this.indexBuffer,
     required this.indexCount,
     required this.vertexCount,
-    required this.version,
-    required this.indexType
+    required this.version
   });
 
   final ByteData vertexBuffer;
@@ -526,7 +508,6 @@ class GpuGeometryBuffers {
   final int indexCount;
   final int vertexCount;
   final int version;
-  final gpux.IndexType indexType;
 }
 
 class GpuFilterPair {
@@ -548,7 +529,8 @@ class GpuSamplerConverter {
   static const int GL_MIRRORED_REPEAT = 33648;
   static const int GL_TEXTURE_MIN_FILTER = 10241;
 
-  static gpux.SamplerOptions getSampler(Texture text){
+  static gpux.SamplerOptions getSampler(Texture? text){
+    if(text == null) return gpux.SamplerOptions();
     final GpuFilterPair minf = fromGlMinFilter(text.minFilter);
 
     return gpux.SamplerOptions(

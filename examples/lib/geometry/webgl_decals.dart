@@ -225,7 +225,7 @@ class _State extends State<WebglDecals> {
       mesh.material = three.MeshPhongMaterial.fromMap( {
         'specular': 0x111111,
         'map': map,
-        'specularMap': specularMap,
+        //'specularMap': specularMap,
         'normalMap': normalMap,
         'shininess': 25
       });

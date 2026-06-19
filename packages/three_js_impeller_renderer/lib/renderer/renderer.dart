@@ -18,16 +18,16 @@ import 'package:three_js_impeller_renderer/renderer/three_js_rendering/gpu_rende
 import 'package:three_js_impeller_renderer/renderer/three_js_rendering/gpu_render_states.dart';
 import 'package:three_js_impeller_renderer/renderer/uniform_buffer_manager.dart';
 import 'package:three_js_math/three_js_math.dart';
-import 'package:vector_math/vector_math_64.dart' as vmath;
 import 'package:flutter_gpu/gpu.dart' as gpu;
 
 class ImpellerRendererParameters{
   double width;
   double height;
   bool stencil;
-  bool antialias;
+  //bool antialias;
   bool alpha;
   int clearColor;
+  int sampleCount;
   double clearAlpha;
   bool logarithmicDepthBuffer;
   bool premultipliedAlpha;
@@ -42,8 +42,9 @@ class ImpellerRendererParameters{
   ImpellerRendererParameters({
     required this.width,
     required this.height,
+    required this.sampleCount,
     this.stencil = true,
-    this.antialias = false,
+    //this.antialias = false,
     this.alpha = false,
     this.clearAlpha = 1.0,
     this.clearColor = 0x000000,
@@ -64,7 +65,8 @@ class ImpellerRendererParameters{
       height: map["height"].toDouble(),
       depth: map["depth"] ?? true,
       stencil: map["stencil"] ?? true,
-      antialias: map["antialias"] ?? false,
+      sampleCount: map["sampleCount"] ?? 1,
+      //antialias: map["antialias"] ?? false,
       premultipliedAlpha: map["premultipliedAlpha"] ?? true,
       preserveDrawingBuffer: map["preserveDrawingBuffer"] ?? false,
       powerPreference: map["powerPreference"] ?? "default",
@@ -87,6 +89,7 @@ class ImpellerRenderer extends Renderer{
 
   late double _width;
   late double _height;
+  int _sampleCount = 1;
 
   double get width => _width;
   double get height => _height;
@@ -129,13 +132,21 @@ class ImpellerRenderer extends Renderer{
   ImpellerRenderTarget? _currentRenderTarget;
 
   late gpu.Texture depthTexture = gpu.gpuContext.createTexture(
-      gpu.StorageMode.deviceTransient, width.toInt(), height.toInt(),
-      format: gpu.gpuContext.defaultDepthStencilFormat,
-      enableRenderTargetUsage: true,
-      coordinateSystem: gpu.TextureCoordinateSystem.renderToTexture);
+    gpu.StorageMode.deviceTransient, width.toInt(), height.toInt(),
+    sampleCount: _sampleCount,
+    format: gpu.gpuContext.defaultDepthStencilFormat,
+    enableRenderTargetUsage: true,
+    coordinateSystem: gpu.TextureCoordinateSystem.renderToTexture
+  );
 
-  late gpu.Texture renderTexture= gpu.gpuContext.createTexture(
+  late gpu.Texture msaaColorTexture = gpu.gpuContext.createTexture(
+    gpu.StorageMode.deviceTransient, width.toInt(), height.toInt(),
+    sampleCount: _sampleCount, // MUST match your pipeline sample count!
+  );
+
+  late gpu.Texture renderTexture = gpu.gpuContext.createTexture(
     gpu.StorageMode.devicePrivate, width.toInt(), height.toInt(),
+    sampleCount: 1,
     enableRenderTargetUsage: true,
     enableShaderReadUsage: true,
     coordinateSystem: gpu.TextureCoordinateSystem.renderToTexture
@@ -172,6 +183,7 @@ class ImpellerRenderer extends Renderer{
   ImpellerRenderer(this.parameters){
     _width = this.parameters.width;
     _height = this.parameters.height;
+    _sampleCount = this.parameters.sampleCount;
 
     renderLists = GpuRenderLists();
 
@@ -186,9 +198,15 @@ class ImpellerRenderer extends Renderer{
   void _setTextures(int width, int height){
     depthTexture = gpu.gpuContext.createTexture(
       gpu.StorageMode.deviceTransient, width, height,
+      sampleCount: _sampleCount,
       format: gpu.gpuContext.defaultDepthStencilFormat,
       enableRenderTargetUsage: true,
       coordinateSystem: gpu.TextureCoordinateSystem.renderToTexture
+    );
+
+    msaaColorTexture = gpu.gpuContext.createTexture(
+      gpu.StorageMode.deviceTransient, width.toInt(), height.toInt(),
+      sampleCount: _sampleCount, // MUST match your pipeline sample count!
     );
 
     renderTexture= gpu.gpuContext.createTexture(
@@ -237,6 +255,15 @@ class ImpellerRenderer extends Renderer{
   }
   @override
   void setClearAlpha(double alpha){
+
+  }
+  void setScissor(double x, double y, double width, double height){
+    _scissor.setValues(x, y, width, height);
+    _currentScissor.setFrom(_scissor);
+    _currentScissor.scale(_pixelRatio);
+    _currentScissor.floor();
+  }
+  void setScissorTest(bool test){
 
   }
   @override
@@ -327,8 +354,9 @@ class ImpellerRenderer extends Renderer{
       commandBuffer,
       clearColorFeature020,
       GpuFramebufferAttachments(
-        colorView: renderTexture,
+        colorView: _sampleCount>1?msaaColorTexture:renderTexture,
         depthView: depthTexture,
+        resolveView: _sampleCount>1?renderTexture:null
       )
     );
     final renderPass = _renderPassManager!.getPassEncoder;
@@ -403,7 +431,7 @@ class ImpellerRenderer extends Renderer{
       // =====
 
       // Update matrices specifically for this sub-view camera perspective position
-      //subCamera.updateMatrixWorld();
+      subCamera.updateMatrixWorld();
 
       // Back-to-Front depth sorting calculation relative to THIS sub-camera position
       // final cameraWorldPos = subCamera.position;
@@ -414,18 +442,15 @@ class ImpellerRenderer extends Renderer{
       // });
 
       for (final o in opaqueObjects) {
-        _renderMesh(o.object, subCamera, sceneData, renderPass, environmentBinding);
+        _renderMesh(o, subCamera, sceneData, renderPass, environmentBinding);
       }
       for (final o in transmissiveObjects) {
-        _renderMesh(o.object, subCamera, sceneData, renderPass, environmentBinding);
+        _renderMesh(o, subCamera, sceneData, renderPass, environmentBinding);
       }
       for (final o in transparentObjects) {
-        _renderMesh(o.object, subCamera, sceneData, renderPass, environmentBinding);
+        _renderMesh(o, subCamera, sceneData, renderPass, environmentBinding);
       }
     }
-    // =========================================================================
-    
-    //renderPass.draw();
     commandBuffer.submit();
     
     renderListStack.removeLast();
@@ -535,34 +560,34 @@ class ImpellerRenderer extends Renderer{
   }
 
   void _renderMesh(
-    Object3D? mesh,
+    RenderItem? item,
     Camera camera,
     Float32List sceneData,
     gpu.RenderPass pass,
     dynamic environmentBinding,
   ) {
-    if (mesh == null) return;
+    if (item == null) return;
 
     // 1. Frame-bound layout and allocation guards
     final int maxMeshesPerFrame = 200;
     if (_drawIndexInFrame >= maxMeshesPerFrame) return;
 
     // Force absolute parent-child matrix updates
-    //mesh.updateMatrixWorld();
     if (camera.matrixWorldInverse.storage[0] == 0.0 && camera.matrixWorldInverse.storage[5] == 0.0) {
       camera.matrixWorldInverse.setFrom(camera.matrixWorld).invert();
     }
-
-    final geometry = mesh.geometry;
+    
+    final mesh = item.object!;
+    final geometry = item.geometry;
     if (geometry == null) return;
-    final material = mesh.material;
+    final material = item.material;
     if (material == null) return;
     
     final resolved = MaterialDescriptorRegistry.resolve(material, mesh)!;
     final renderState = resolved.renderState;
-    final int hash = mesh.hashCode+material.hashCode;
-    if(_cachedPipeline[hash] == null || resolved.renderState != _cachedPipeline[hash]?.descriptor.renderState){
-      _cachedPipeline[hash] = GpuPipeline(
+    final String pipelineHash = '${resolved.vertex.hashCode}_${resolved.fragment.hashCode}_${renderState.uuid}';
+    if(_cachedPipeline[pipelineHash] == null || resolved.renderState != _cachedPipeline[pipelineHash]?.descriptor.renderState){
+      _cachedPipeline[pipelineHash] = GpuPipeline(
         gpu.gpuContext, 
         RenderPipelineDescriptor(
           vertexShader: resolved.vertex, 
@@ -572,21 +597,23 @@ class ImpellerRenderer extends Renderer{
         )
       );
     }
-    _cachedPipeline[hash]!.bind(pass);
+
+    pass.clearBindings(); 
+    _cachedPipeline[pipelineHash]!.bind(pass);
 
     MaterialDescriptor mdescriptor = resolved.descriptor;
-    final Float32List materialData = MaterialConverter.convert(material, camera).updateUniforms(mesh: mesh, material: material);
-    
-    if(_cachedGeometry[hash] == null || mdescriptor != _cachedPipeline[hash]?.descriptor){
-      _cachedGeometry[hash] = GeometryBindings(
+    final Float32List materialData = MaterialConverter.convert(material, camera).updateUniforms(mesh);
+    final String geomHash = '${geometry.uuid}_${material.uuid}';
+    if(_cachedGeometry[geomHash] == null || mdescriptor != _cachedPipeline[geomHash]?.descriptor){
+      _cachedGeometry[geomHash] = GeometryBindings(
         gpu.gpuContext, 
         geometry,
         material,
-        mdescriptor,
+        mdescriptor
       );
     }
 
-    _cachedGeometry[hash]!.bind(
+    _cachedGeometry[geomHash]!.bind(
       pass,
       resolved.vertex,
       resolved.fragment,
@@ -600,8 +627,8 @@ class ImpellerRenderer extends Renderer{
     _drawIndexInFrame++;
   }
 
-  Map<int,GpuPipeline> _cachedPipeline = {};
-  Map<int,GeometryBindings> _cachedGeometry = {};
+  Map<String,GpuPipeline> _cachedPipeline = {};
+  Map<String,GeometryBindings> _cachedGeometry = {};
 
   @override
   void setRenderTarget(RenderTarget? renderTarget, [int activeCubeFace = 0, int activeMipmapLevel = 0]){

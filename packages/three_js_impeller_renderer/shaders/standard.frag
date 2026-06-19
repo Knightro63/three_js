@@ -9,9 +9,7 @@ uniform sampler2D map;
 uniform sampler2D alphaMap; 
 uniform sampler2D normalMap; 
 uniform sampler2D bumpMap; 
-uniform sampler2D roughnessMap; 
-uniform sampler2D metalnessMap; 
-uniform sampler2D aoMap; 
+uniform sampler2D ormMap; 
 uniform sampler2D lightMap; 
 uniform sampler2D emissiveMap; 
 
@@ -37,8 +35,7 @@ vec3 perturbNormalArb(vec3 surf_pos, vec3 surf_norm, vec2 dHdxy, float faceDirec
 
 void main() { 
   if(evaluateClippingPlanes(v_worldPosition)){
-    frag_color = vec4(0.0);
-    return;
+    discard;
   }  
 
   // Resolve precise uniform configuration maps boolean flag states from MaterialBlock 
@@ -75,7 +72,7 @@ void main() {
 
   // 3. Process Material Grayscale Ambient Occlusion 
   if (hasAoMap) { 
-    blendedAlbedo *= texture(aoMap, v_uv).r * material.mapIntensities.w; // material.aoMapIntensity 
+    blendedAlbedo *= texture(ormMap, v_uv).r * material.mapIntensities.w; // material.aoMapIntensity 
   } 
 
   // 4. Process Baked Environment Light Maps 
@@ -89,12 +86,12 @@ void main() {
   // 6. Gather and Parse PBR Specific parameters properties 
   float roughnessFactor = material.pbrParams.x; // default raw uniform roughness 
   if (hasRoughnessMap) { 
-    roughnessFactor *= texture(roughnessMap, v_uv).g; // Three.js reads green for roughness 
+    roughnessFactor *= texture(ormMap, v_uv).g; // Three.js reads green for roughness 
   } 
 
   float metalnessFactor = material.pbrParams.y; // default raw uniform metalness 
   if (hasMetalnessMap) { 
-    metalnessFactor *= texture(metalnessMap, v_uv).b; // Three.js reads blue for metalness 
+    metalnessFactor *= texture(ormMap, v_uv).b; // Three.js reads blue for metalness 
   } 
 
   // 7. Surface Normal Evaluation (Smooth vs Facetted) 
@@ -132,6 +129,6 @@ void main() {
   vec4 finalRGBA = vec4(finalColor, alpha); 
 
   // Isolate color grading space conversions to protect transparency channel lines 
-  finalRGBA= applyColor(finalRGBA); 
+  finalRGBA= applyColor(finalRGBA,material.lineExtendedParams.z); 
   frag_color = vec4(clamp(finalRGBA.rgb, vec3(0.0), vec3(1.0)), finalRGBA.a); 
 }

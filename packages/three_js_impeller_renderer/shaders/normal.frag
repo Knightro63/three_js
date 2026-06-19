@@ -4,7 +4,6 @@
 #include <flat_shading.glsl>
 
 // Clean, reflected interpolation streams
-in vec3 v_color;
 in vec3 v_worldNormal;   
 in vec3 v_worldPosition; 
 
@@ -23,7 +22,7 @@ void main() {
   vec3 packedColor = viewNormal * 0.5 + vec3(0.5);
 
   vec4 finalRGBA = vec4(packedColor, 1.0);
-  finalRGBA = applyColor(finalRGBA);
+  finalRGBA = applyColor(finalRGBA,material.lineExtendedParams.z);
 
   frag_color = vec4(clamp(finalRGBA.rgb, vec3(0.0), vec3(1.0)), finalRGBA.a);
 }

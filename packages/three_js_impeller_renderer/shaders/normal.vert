@@ -2,9 +2,7 @@
 
 in vec3 position;
 in vec3 normal;
-in vec3 color;
 
-out vec3 v_color;
 out vec3 v_worldNormal;
 out vec3 v_worldPosition;
 
@@ -16,6 +14,4 @@ void main() {
   
   v_worldNormal = normalize(material.modelMatrix * vec4(normal,0.0)).xyz;
   //v_worldNormal = normalize(mat3(material.modelMatrix) * normal);
-  
-  v_color = color;
 }

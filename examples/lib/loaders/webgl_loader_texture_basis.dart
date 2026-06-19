@@ -60,12 +60,12 @@ class _MyAppState extends State<WebglLoaderTextureBasis> {
 
     threeJs.scene = three.Scene();
 
-    final ambientLight = three.AmbientLight(0xcccccc, 0.4);
+    final ambientLight = three.AmbientLight(0xcccccc, 1.0);
     threeJs.scene.add(ambientLight);
     threeJs.camera.lookAt(threeJs.scene.position);
 
     final geometry = three.PlaneGeometry(10, 10);
-    final material = three.MeshBasicMaterial.fromMap({"side": three.DoubleSide});
+    final material = three.MeshBasicMaterial.fromMap({"side": three.BackSide});
 
     final mesh = three.Mesh(geometry, material);
 

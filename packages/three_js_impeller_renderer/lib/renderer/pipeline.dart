@@ -22,7 +22,6 @@ class GpuPipeline {
       final renderState = descriptor.renderState;
 
       final pipeline = context.createRenderPipeline(vertex,fragment);
-
       pass.bindPipeline(pipeline);
       pass.setCullMode(renderState.cullMode);
       pass.setDepthWriteEnable(renderState.depthWrite);
@@ -41,14 +40,7 @@ class GpuPipeline {
       );
 
       pass.setColorBlendEnable(true, colorAttachmentIndex: descriptor.colorAttachmentIndex);
-      pass.setColorBlendEquation(renderState.blendState ?? gpux.ColorBlendEquation(// 
-        colorBlendOperation: gpux.BlendOperation.add,
-        sourceColorBlendFactor: gpux.BlendFactor.one,
-        destinationColorBlendFactor: gpux.BlendFactor.oneMinusSourceAlpha,
-        alphaBlendOperation: gpux.BlendOperation.add,
-        sourceAlphaBlendFactor: gpux.BlendFactor.one,
-        destinationAlphaBlendFactor: gpux.BlendFactor.oneMinusSourceAlpha,
-      ),colorAttachmentIndex: descriptor.colorAttachmentIndex);
+      pass.setColorBlendEquation(renderState.blendState,colorAttachmentIndex: descriptor.colorAttachmentIndex);
 
 
       console.info("🔨 GPU render pipeline created: $pipeline");
@@ -136,12 +128,3 @@ class ColorWriteMask {
   static const ColorWriteMask all = ColorWriteMask(0xF);
   static const ColorWriteMask none = ColorWriteMask(0x0);
 }
-
-// enum VertexStepMode { vertex, instance }
-// enum VertexFormat { float32, float32x2, float32x3, float32x4, uint32, uint32x2, uint32x3, uint32x4 }
-// enum PrimitiveTopology { pointList, lineList, lineStrip, triangleList, triangleStrip }
-// enum CullMode { none, front, back }
-// enum FrontFace { ccw, cw }
-// enum CompareFunction { never, less, equal, lessEqual, greater, notEqual, greaterEqual, always }
-// enum BlendFactor { zero, one, src, oneMinusSrc, srcAlpha, oneMinusSrcAlpha, dst, oneMinusDst, dstAlpha, oneMinusDstAlpha }
-// enum BlendOperation { add, subtract, reverseSubtract, min, max }

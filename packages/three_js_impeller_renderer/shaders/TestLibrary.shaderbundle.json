@@ -95,6 +95,14 @@
     "type": "fragment",
     "file": "shaders/line_dashed.frag"
   },
+  "PointsVertex": {
+    "type": "vertex",
+    "file": "shaders/points.vert"
+  },
+  "PointsFragment": {
+    "type": "fragment",
+    "file": "shaders/points.frag"
+  },
   "StandardVertex": {
     "type": "vertex",
     "file": "shaders/standard.vert"
@@ -102,5 +110,13 @@
   "StandardFragment": {
     "type": "fragment",
     "file": "shaders/standard.frag"
+  },
+  "PhysicalVertex": {
+    "type": "vertex",
+    "file": "shaders/physical.vert"
+  },
+  "PhysicalFragment": {
+    "type": "fragment",
+    "file": "shaders/physical.frag"
   }
 }

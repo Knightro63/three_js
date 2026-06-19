@@ -54,18 +54,21 @@ class MaterialRenderState {
     this.winding = gpux.WindingOrder.counterClockwise,
     this.depthTest = true,
     this.depthWrite = true,
-    this.blendState,
+    gpux.ColorBlendEquation? blendState,
     this.depthCompare = gpux.CompareFunction.less,
     this.depthFormat = gpux.PixelFormat.d24UnormS8Uint,
-  });
-
+  }){
+    this.blendState = blendState ?? MaterialDescriptorRegistry._noBlending;
+  }
+  
+  final String uuid = MathUtils.generateUUID(); 
   final gpux.PrimitiveType topology;
   final gpux.CullMode cullMode;
   final gpux.StencilFace frontFace;
   final gpux.WindingOrder winding;
   final bool depthTest;
   final bool depthWrite;
-  gpux.ColorBlendEquation? blendState;
+  late final gpux.ColorBlendEquation blendState;
   final gpux.CompareFunction depthCompare;
   final gpux.PixelFormat depthFormat;
 
@@ -76,6 +79,7 @@ class MaterialRenderState {
     required int side,
     required gpux.ColorBlendEquation? blendState,
     gpux.PrimitiveType topology = gpux.PrimitiveType.triangle,
+    gpux.WindingOrder winding = gpux.WindingOrder.counterClockwise
   }) {
     final cullModeOverride = 
       side == FrontSide? gpux.CullMode.backFace:
@@ -87,6 +91,7 @@ class MaterialRenderState {
       depthTest: depthTest,
       topology: topology,
       blendState: blendState ?? blendState,
+      winding: winding,
       // Transparent alpha blending layers bypass depth-buffer writes to avoid alpha sorting artifacts
       depthWrite: blendState != null ? false : depthWrite,
     );
@@ -362,15 +367,18 @@ abstract class MaterialDescriptorRegistry {
     );
 
     var activeTopology = gpux.PrimitiveType.triangle;
-    
+
     if (
-      mesh is Line || 
-      mesh is LineSegments || 
-      material.wireframe == true ||
-      material is LineBasicMaterial ||
-      material is LineDashedMaterial
+      material is LineDashedMaterial ||
+      mesh is LineSegments ||
+      material.wireframe == true
     ) {
       activeTopology = gpux.PrimitiveType.line;
+    } 
+    else if (
+      material is LineBasicMaterial
+    ) {
+      activeTopology = gpux.PrimitiveType.lineStrip;
     } 
     else if (
       mesh is Points ||
@@ -385,7 +393,8 @@ abstract class MaterialDescriptorRegistry {
       colorWrite: material.colorWrite,
       side: material.side, // Assuming material.side already handles internal common Side conversions
       blendState: blendState,
-      topology: activeTopology
+      topology: activeTopology,
+      winding: gpux.WindingOrder.counterClockwise
     );
 
     return ResolvedMaterialDescriptor(
@@ -447,25 +456,12 @@ abstract class MaterialDescriptorRegistry {
       true,
     );
 
-    final depthDescriptor = MaterialDescriptor(
-      key: 'Depth',
-      //bindings: [TextureType.map,TextureType.alphaMap,TextureType.aoMap,TextureType.specularMap],
-      renderState: MaterialRenderState(),
-      requiredAttributes: [
-        GeometryAttribute.position,
-        GeometryAttribute.color,
-      ],
-    );
-
-    _registerInternal(depthDescriptor,[MeshDepthMaterial],true);
-
     final normalDescriptor = MaterialDescriptor(
       key: 'Normal',
       renderState: MaterialRenderState(),
       requiredAttributes: [
         GeometryAttribute.position,
         GeometryAttribute.normal,
-        GeometryAttribute.color,
       ],
     );
     _registerInternal(normalDescriptor,[MeshNormalMaterial],true);
@@ -535,20 +531,6 @@ abstract class MaterialDescriptorRegistry {
     );
     _registerInternal(shadowDescriptor, [ShadowMaterial], true);
 
-    final lineBasicDescriptor = MaterialDescriptor(
-      key: 'LineBasic',
-      renderState: MaterialRenderState(
-        // CRITICAL OVERRIDE: Switches your hardware pipeline from rendering triangles to drawing lines
-        topology: gpux.PrimitiveType.line, 
-      ),
-      requiredAttributes: [
-        GeometryAttribute.position,
-        GeometryAttribute.uv0,
-        GeometryAttribute.color, // REQUIRED to protect your sequential offset registers
-      ],
-    );
-    _registerInternal(lineBasicDescriptor, [LineBasicMaterial], true);
-
     final spriteDescriptor = MaterialDescriptor(
       key: 'Sprite',
       bindings: [TextureType.map,TextureType.alphaMap], // Allocates albedo texture binding slots for the sprite asset maps
@@ -559,6 +541,18 @@ abstract class MaterialDescriptorRegistry {
       ],
     );
     _registerInternal(spriteDescriptor, [SpriteMaterial], true);
+
+    final lineBasicDescriptor = MaterialDescriptor(
+      key: 'LineBasic',
+      renderState: MaterialRenderState(
+        //topology: gpux.PrimitiveType.line, 
+      ),
+      requiredAttributes: [
+        GeometryAttribute.position,
+        GeometryAttribute.color, // REQUIRED to protect your sequential offset registers
+      ],
+    );
+    _registerInternal(lineBasicDescriptor, [LineBasicMaterial], true);
 
     final lineDashedDescriptor = MaterialDescriptor(
       key: 'LineDashed',
@@ -598,6 +592,14 @@ abstract class MaterialDescriptorRegistry {
     );
     _registerInternal(distanceDescriptor, [MeshDistanceMaterial], true);
 
+    final depthDescriptor = MaterialDescriptor(
+      key: 'Depth',
+      renderState: MaterialRenderState(),
+      requiredAttributes: [GeometryAttribute.position],
+    );
+
+    _registerInternal(depthDescriptor,[MeshDepthMaterial],true);
+
     final shaderDescriptor = MaterialDescriptor(
       key: 'Shader',
       bindings: [TextureType.uniforms], 
@@ -617,30 +619,65 @@ abstract class MaterialDescriptorRegistry {
         GeometryAttribute.position,
         GeometryAttribute.normal,
         GeometryAttribute.uv0,
-        //GeometryAttribute.uv1,
         GeometryAttribute.color,
-        //GeometryAttribute.tangent,
       ],
     );
 
     _registerInternal(standardDescriptor,[MeshStandardMaterial],true,);
+
+    final physicalDescriptor = MaterialDescriptor(
+      key: 'Physical',
+      bindings: [
+        TextureType.map,
+        TextureType.alphaMap,
+        TextureType.displacementMap,
+        TextureType.normalMap,
+        TextureType.bumpMap,
+        TextureType.specularMap,
+        TextureType.aoMap,
+        TextureType.lightMap,
+        TextureType.roughnessMap,
+        TextureType.metalnessMap,
+        TextureType.emissiveMap,
+
+        // --- MESHPHTSICALMATERIAL SAMPLER EXTENSIONS ---
+        TextureType.clearcoatMap,
+        TextureType.clearcoatNormalMap,
+        TextureType.clearcoatRoughnessMap,
+        TextureType.sheenColorMap,
+        TextureType.sheenRoughnessMap,
+        TextureType.transmissionMap,
+        TextureType.thicknessMap,
+        TextureType.iridescenceMap,
+        TextureType.iridescenceThicknessMap,
+      ],      
+      renderState: MaterialRenderState(),
+      requiredAttributes: [
+        GeometryAttribute.position,
+        GeometryAttribute.normal,
+        GeometryAttribute.uv0,
+        GeometryAttribute.color,
+      ],
+    );
+
+    _registerInternal(physicalDescriptor,[MeshPhysicalMaterial],true,);
   }
 
   /// Evaluates material parameters and selects the optimal alpha blending equation.
-  static gpux.ColorBlendEquation? _blendStateFor(Blending mode, bool transparent, double opacity) {
+  static gpux.ColorBlendEquation _blendStateFor(Blending mode, bool transparent, double opacity) {
     if (mode == Blending.noBlending) {
-      return null;
+      return _noBlending;
     }
 
     final bool needsBlend = transparent || opacity < 1.0 || mode != Blending.normalBlending;
-    if (!needsBlend) return null;
+    if (!needsBlend) return _noBlending;
 
     return switch (mode) {
       Blending.normalBlending || Blending.customBlending => _alphaBlend,
       Blending.additiveBlending => _additiveBlend,
       Blending.subtractiveBlending => _subtractiveBlend,
       Blending.multiplyBlending => _multiplyBlend,
-      Blending.noBlending => null,
+      Blending.noBlending => _noBlending,
     };
   }
 
@@ -679,6 +716,15 @@ abstract class MaterialDescriptorRegistry {
     sourceAlphaBlendFactor: gpux.BlendFactor.one,
     destinationAlphaBlendFactor: gpux.BlendFactor.oneMinusSourceAlpha,
     alphaBlendOperation: gpux.BlendOperation.add,
+  );
+
+  static gpux.ColorBlendEquation _noBlending = gpux.ColorBlendEquation(
+    colorBlendOperation: gpux.BlendOperation.add,
+    sourceColorBlendFactor: gpux.BlendFactor.one,
+    destinationColorBlendFactor: gpux.BlendFactor.oneMinusSourceAlpha,
+    alphaBlendOperation: gpux.BlendOperation.add,
+    sourceAlphaBlendFactor: gpux.BlendFactor.one,
+    destinationAlphaBlendFactor: gpux.BlendFactor.oneMinusSourceAlpha,
   );
 }
 

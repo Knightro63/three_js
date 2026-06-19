@@ -11,26 +11,26 @@ struct ReflectedLight {
 
 // WGSL pointers (ptr<function, T>) map directly to GLSL's performant 'inout' references
 void RE_Direct_BlinnPhong(
-    IncidentLight directLight, 
-    vec3 N, 
-    vec3 V, 
-    vec3 albedo, 
-    float shininess, 
-    vec3 specularColor, 
-    inout ReflectedLight reflectedLight
+  IncidentLight directLight, 
+  vec3 N, 
+  vec3 V, 
+  vec3 albedo, 
+  float shininess, 
+  vec3 specularColor, 
+  inout ReflectedLight reflectedLight
 ) {
-    float dotNL = max(dot(N, directLight.direction), 0.0);
-    
-    if (dotNL > 0.0 && directLight.visible) {
-        reflectedLight.diffuse += directLight.color * albedo * dotNL;
-        
-        if (shininess > 0.0) {
-            vec3 H = normalize(directLight.direction + V);
-            float dotNH = max(dot(N, H), 0.0);
-            float specPower = pow(dotNH, max(shininess, 1.0));
-            reflectedLight.specular += directLight.color * specularColor * specPower;
-        }
+  float dotNL = max(dot(N, directLight.direction), 0.0);
+
+  reflectedLight.diffuse += directLight.color * albedo * dotNL;
+  
+  if (dotNL > 0.0 && directLight.visible) {
+    if (shininess > 0.0) {
+      vec3 H = normalize(directLight.direction + V);
+      float dotNH = max(dot(N, H), 0.0);
+      float specPower = pow(dotNH, max(shininess, 1.0));
+      reflectedLight.specular += directLight.color * specularColor * specPower;
     }
+  }
 }
 
 vec3 calculateDynamicLighting(

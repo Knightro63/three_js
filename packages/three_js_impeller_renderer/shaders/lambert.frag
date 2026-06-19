@@ -8,7 +8,7 @@
 uniform sampler2D map;
 uniform sampler2D alphaMap;
 uniform sampler2D specularMap;
-uniform sampler2D aoMap;
+uniform sampler2D ormMap;
 uniform sampler2D lightMap;
 
 in vec3 v_color;
@@ -54,7 +54,7 @@ void main() {
 
   // 5. Ambient Occlusion (AO) Processing
   if (hasAoMap) {
-    float ao = texture(aoMap, v_uv).r; // Grayscale shadow stored in red channel
+    float ao = texture(ormMap, v_uv).r; // Grayscale shadow stored in red channel
     blendedAlbedo *= ao;
   }
 
@@ -88,7 +88,7 @@ void main() {
   vec4 finalRGBA = vec4(finalColor, alpha);
   
   // Transform from working Linear space back to destination Output Space
-  finalRGBA = applyColor(finalRGBA);
+  finalRGBA = applyColor(finalRGBA,material.lineExtendedParams.z);
 
   // 12. Output final safe frame register metrics
   frag_color = vec4(clamp(finalRGBA.rgb, vec3(0.0), vec3(1.0)), finalRGBA.a);

@@ -10,7 +10,7 @@ uniform sampler2D alphaMap;
 uniform sampler2D normalMap;
 uniform sampler2D bumpMap;
 uniform sampler2D specularMap;
-uniform sampler2D aoMap;
+uniform sampler2D ormMap;
 uniform sampler2D lightMap;
 
 in vec3 v_color;
@@ -75,7 +75,7 @@ void main() {
   }
 
   if (hasAoMap) {
-    blendedAlbedo *= texture(aoMap, v_uv).r;
+    blendedAlbedo *= texture(ormMap, v_uv).r;
   }
 
   if (hasLightMap) {
@@ -114,7 +114,7 @@ void main() {
   finalColor = applyFog(finalColor, v_worldPosition);
   vec4 finalRGBA = vec4(finalColor, alpha);
 
-  finalRGBA = applyColor(finalRGBA);
+  finalRGBA = applyColor(finalRGBA,material.lineExtendedParams.z);
 
   frag_color = vec4(clamp(finalRGBA.rgb, vec3(0.0), vec3(1.0)), finalRGBA.a);
 }

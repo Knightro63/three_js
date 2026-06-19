@@ -103,25 +103,20 @@ class _State extends State<WebglGeometries> {
       "side": tmath.DoubleSide,
       "flatShading": true,
       "transparent": true,
-      //"opacity": 0.1,
       "map": texture,
-      //'wireframe': true
-      "specular": 0x009900,
-      "shininess": 30,
-      "blending": tmath.AdditiveBlending
     });
 
     object = three.Mesh(three.SphereGeometry(75, 20, 10), material);
     object.position.setValues(-300, 0, 200);
     threeJs.scene.add(object);
 
-    object = three.Mesh(three.PlaneGeometry(120, 100, 4, 4), material);
-    object.position.setValues(-300, 0, 0);
-    threeJs.scene.add(object);
+    // object = three.Mesh(three.PlaneGeometry(120, 100, 4, 4), material);
+    // object.position.setValues(-300, 0, 0);
+    // threeJs.scene.add(object);
 
-    object = three.Mesh(three.BoxGeometry(100, 100, 100, 4, 4, 4), material);
-    object.position.setValues(-100, 0, 0);
-    threeJs.scene.add(object);
+    // object = three.Mesh(three.BoxGeometry(100, 100, 100, 4, 4, 4), material);
+    // object.position.setValues(-100, 0, 0);
+    // threeJs.scene.add(object);
 
     startTime = DateTime.now().millisecondsSinceEpoch;
 
@@ -205,20 +200,16 @@ class _State extends State<WebglGeometries> {
     threeJs.scene.background = threeJs.scene.environment = three.DataTexture(generateTexture().data, 256~/4, 256~/4);
 
     // Grid
-    // final helper = GridHelper(1000, 40, 0x303030, 0x303030);
-    // helper.position.y = -75;
-    // threeJs.scene.add(helper);
+    final helper = GridHelper(1000, 40, 0x303030, 0x303030);
+    helper.position.y = -75;
+    threeJs.scene.add(helper);
 
     // Materials
     final three.DataTexture texture = three.DataTexture(generateTexture().data, 256, 256);
     texture.needsUpdate = true;
 
-    materials.add(three.MeshLambertMaterial.fromMap({
-      "map": texture,
-      "color": 0xff0000,
-      "transparent": true,
-    }));
-    materials.add(three.MeshLambertMaterial.fromMap({"color": 0xdddddd,}));
+    materials.add(three.MeshLambertMaterial.fromMap({"map": texture,"transparent": true,}));
+    materials.add(three.MeshLambertMaterial.fromMap({"color": 0xdddddd}));
     materials.add(three.MeshPhongMaterial.fromMap({
       "color": 0xdddddd,
       "specular": 0x009900,
@@ -232,17 +223,16 @@ class _State extends State<WebglGeometries> {
       "blending": tmath.AdditiveBlending
     }));
     materials.add(three.MeshLambertMaterial.fromMap({"color": 0xdddddd}));
-    materials.add(three.MeshStandardMaterial.fromMap({
+    materials.add(three.MeshPhongMaterial.fromMap({
       "color": 0xffffff,
       "specular": 0x009900,
       "shininess": 30,
       "map": texture,
       "transparent": true,
-      "blending": tmath.AdditiveBlending
     }));
     materials.add(three.MeshNormalMaterial.fromMap({"flatShading": true}));
     materials.add(three.MeshBasicMaterial.fromMap({"color": 0xffaa00, "wireframe": true}));
-    materials.add(three.MeshDistanceMaterial());
+    materials.add(three.MeshDepthMaterial());
     materials.add(three.MeshLambertMaterial.fromMap({"color": 0x666666, "emissive": 0xff0000}));
     materials.add(three.MeshPhongMaterial.fromMap({
       "color": 0x000000,
@@ -252,7 +242,7 @@ class _State extends State<WebglGeometries> {
       "opacity": 0.9,
       "transparent": true,
     }));
-    materials.add(three.MeshStandardMaterial.fromMap({
+    materials.add(three.MeshBasicMaterial.fromMap({
       "map": texture, 
       "transparent": true
     }));

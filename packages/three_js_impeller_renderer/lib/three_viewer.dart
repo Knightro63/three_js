@@ -216,7 +216,9 @@ class ThreeJS{
     screenSize = _fixedSize ?? mqd.size;
     _resolution ??= mqd.devicePixelRatio;
     
-    init();
+    Future.delayed(Duration(milliseconds: renderNumber*100), () async{
+      await init();
+    });
   }
 
   Future<void> animate(Duration duration) async {
@@ -257,7 +259,13 @@ class ThreeJS{
   Future<void> init() async{
     if (_mounted) return;
     if (renderer == null) {
-      renderer = ImpellerRenderer(ImpellerRendererParameters(width: width, height: height));
+      renderer = ImpellerRenderer(
+        ImpellerRendererParameters(
+          width: width*dpr, 
+          height: height*dpr,
+          sampleCount: settings.antialias?4:1
+        )
+      );
     }
     await setup?.call();
     _mounted = true;

@@ -13,19 +13,19 @@ void main() {
   }
   vec3 color = v_color;
 
-    mat4 invView = inverse(scene.viewMatrix);
-    vec3 cameraWorldPos = invView[3].xyz;
+  mat4 invView = inverse(scene.viewMatrix);
+  vec3 cameraWorldPos = invView[3].xyz;
 
-    float distanceToCamera = length(v_worldPosition - cameraWorldPos);
+  float distanceToCamera = length(v_worldPosition - cameraWorldPos);
 
-    float near = scene.fogParams.x;
-    float far = scene.fogParams.y;
+  float near = scene.fogParams.x;
+  float far = scene.fogParams.y;
 
-    if (far <= near) {
-        far = 2000.0;
-    }
+  if (far <= near) {
+    far = 2000.0;
+  }
 
-    float normalizedDistance = clamp((distanceToCamera - near) / (far - near), 0.0, 1.0);
-    float antiPrune = material.baseColor.a * 0.000001;
-    frag_color = vec4(vec3(normalizedDistance) + vec3(antiPrune), material.baseColor.a);
+  float normalizedDistance = clamp((distanceToCamera - near) / (far - near), 0.0, 1.0);
+  float antiPrune = material.baseColor.a * 0.000001;
+  frag_color = vec4(vec3(normalizedDistance) + vec3(antiPrune), material.baseColor.a);
 }

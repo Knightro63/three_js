@@ -1,12 +1,10 @@
 #include <common.glsl>
 
 in vec3 position;
-in vec2 uv;
 in vec3 color;
 
 out vec3 v_color;
 out vec3 v_worldPosition;
-out vec2 v_uv;
 
 void main() {
   vec3 vertexColor = color;
@@ -18,17 +16,16 @@ void main() {
   v_worldPosition = worldPosition.xyz;
   gl_Position = scene.projectionMatrix * scene.viewMatrix * worldPosition;
 
-  float pointSize = material.materialParams.x; 
-  // bool sizeAttenuation = material.flags1.x > 0.5;
+  float pointSize = material.lineParams.x; 
+  bool sizeAttenuation = material.lineParams.y > 0.5;
 
-  // if (sizeAttenuation) {
-  //   vec4 viewPosition = scene.viewMatrix * worldPosition;
-  //   gl_PointSize = pointSize * (300.0 / -viewPosition.z);
-  // } 
-  // else {
+  if (sizeAttenuation) {
+    vec4 viewPosition = scene.viewMatrix * worldPosition;
+    gl_PointSize = pointSize * (material.lineParams.z / -viewPosition.z);
+  } 
+  else {
     gl_PointSize = pointSize;
-  // }
+  }
 
   v_color = material.baseColor.rgb * vertexColor;
-  v_uv = uv;
 }

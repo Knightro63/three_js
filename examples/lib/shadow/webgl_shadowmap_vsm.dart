@@ -145,7 +145,7 @@ class _State extends State<WebglShadowmapVsm> {
     ground.receiveShadow = true;
     threeJs.scene.add( ground );
 
-    threeJs.renderer?.shadowMap.type = three.VSMShadowMap;
+    //threeJs.renderer?.shadowMap.type = three.VSMShadowMap;
 
     // Mouse control
     controls = three.OrbitControls( threeJs.camera, threeJs.globalKey );

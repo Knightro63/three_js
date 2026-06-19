@@ -103,7 +103,7 @@ void main() {
     vec4 finalRGBA = vec4(finalColor, alpha);
 
     // Isolate alpha from color grading profile checks to prevent precision shelves artifacts
-    finalRGBA = applyColor(finalRGBA);
+    finalRGBA = applyColor(finalRGBA,material.lineExtendedParams.z);
 
     frag_color = vec4(clamp(finalRGBA.rgb, vec3(0.0), vec3(1.0)), finalRGBA.a);
 }

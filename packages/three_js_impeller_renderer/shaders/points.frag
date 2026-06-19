@@ -7,7 +7,6 @@ uniform sampler2D alphaMap;
 
 in vec3 v_color;
 in vec3 v_worldPosition;
-in vec2 v_uv;
 
 out vec4 frag_color;
 
@@ -32,15 +31,9 @@ void main() {
     alpha *= texture(alphaMap, coord).g;
   }
 
-  if (alpha < material.pbrParams.w) {
-    frag_color = vec4(0.0);
-    return;
-  }
-
   vec3 finalColor = applyFog(blendedAlbedo, v_worldPosition);
   vec4 finalRGBA = vec4(finalColor, alpha);
+  finalRGBA = applyColor(finalRGBA,material.lineExtendedParams.z);
 
-  vec3 outputRGB = applyColor(vec4(finalRGBA.rgb, 1.0)).rgb;
-
-  frag_color = vec4(clamp(outputRGB, vec3(0.0), vec3(1.0)), finalRGBA.a);
+  frag_color = vec4(clamp(finalRGBA.rgb, vec3(0.0), vec3(1.0)),alpha);
 }

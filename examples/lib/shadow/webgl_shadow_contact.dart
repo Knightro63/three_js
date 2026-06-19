@@ -129,11 +129,11 @@ class _MyAppState extends State<WebglShadowContact> {
     threeJs.scene.overrideMaterial = null;
     cameraHelper.visible = true;
 
-    blurShadow(state["shadow"]["blur"]);
+    //blurShadow(state["shadow"]["blur"]);
 
     // a second pass to reduce the artifacts
     // (0.4 is the minimum blur amout so that the artifacts are gone)
-    blurShadow(state["shadow"]["blur"] * 0.4);
+    //blurShadow(state["shadow"]["blur"] * 0.4);
 
     // reset and render the normal scene
     threeJs.renderer!.setRenderTarget( threeJs.renderTarget );
@@ -188,7 +188,7 @@ class _MyAppState extends State<WebglShadowContact> {
     final geometries = [
       three.BoxGeometry(0.4, 0.4, 0.4),
       IcosahedronGeometry(0.3),
-      TorusKnotGeometry(0.4, 0.05, 256, 24, 1, 3)
+      TorusKnotGeometry(0.4, 0.05, 256, 24, 1, 3),
     ];
 
     final material = three.MeshNormalMaterial();

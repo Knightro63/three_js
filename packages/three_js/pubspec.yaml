@@ -17,8 +17,10 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  three_js_gpu_renderer:
-    path: ../three_js_gpu_renderer
+  three_js_impeller_renderer:
+    path: ../three_js_impeller_renderer
+  # three_js_gpu_renderer:
+  #   path: ../three_js_gpu_renderer
   #three_js_angle_renderer: ^0.0.1
   #three_js_webgl_renderer: ^0.0.1
   three_js_math: ^0.3.0

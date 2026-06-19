@@ -52,7 +52,7 @@ class GpuRenderPassManager implements RenderPassManager {
         texture: textureView,
         loadAction: gpux.LoadAction.clear,
         resolveTexture: resolveView,
-        storeAction: resolveView != null ? gpux.StoreAction.dontCare : gpux.StoreAction.store, // Discard 4x view memory if resolved
+        storeAction: resolveView != null ? gpux.StoreAction.multisampleResolve : gpux.StoreAction.store, // Discard 4x view memory if resolved
         clearValue: vmath.Vector4(
           clearColor.red,
           clearColor.green,
@@ -67,7 +67,7 @@ class GpuRenderPassManager implements RenderPassManager {
           texture: depthView,
           depthClearValue: 1.0,
           depthLoadAction: gpux.LoadAction.clear,
-          depthStoreAction: resolveView == null ? gpux.StoreAction.dontCare : gpux.StoreAction.store,
+          depthStoreAction: resolveView == null ? gpux.StoreAction.dontCare : gpux.StoreAction.dontCare,
         );
       }
 

@@ -92,7 +92,7 @@ class _MyAppState extends State<MiscControlsTransform> {
 
     final texture = await three.TextureLoader().fromAsset( 'assets/textures/crate.gif');
     //texture.colorSpace = three.SRGBColorSpace;
-    texture!.anisotropy = threeJs.renderer!.capabilities.getMaxAnisotropy().toInt();
+    //texture!.anisotropy = threeJs.renderer!.capabilities.getMaxAnisotropy().toInt();
 
     final geometry = three.BoxGeometry();
     final material = three.MeshLambertMaterial.fromMap({ 'map': texture } );

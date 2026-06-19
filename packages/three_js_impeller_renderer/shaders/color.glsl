@@ -36,9 +36,9 @@ vec4 sRGBTransferOETF(vec4 value) {
     return vec4(srgbColor, value.a);
 }
 
-vec4 applyColor(vec4 value) {
+vec4 applyColor(vec4 value, float findex) {
     // Note: Ensure your uniform interface block definition defines "uniforms" matching your Dart emplace data
-    int spaceIndex = int(material.lineExtendedParams.z + 0.1);
+    int spaceIndex = int(findex + 0.1);
     
     if (spaceIndex == 1) {
         // 1: Linear pass-through
