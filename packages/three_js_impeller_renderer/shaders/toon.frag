@@ -27,15 +27,15 @@ vec2 dYgrad(vec2 texUV) {
 }
 
 vec3 perturbNormalArb(vec3 surf_pos, vec3 surf_norm, vec2 dHdxy, float faceDirection) {
-    vec3 vSigmaX = dFdx(surf_pos);
-    vec3 vSigmaY = dFdy(surf_pos);
-    vec3 vN = surf_norm;
-    vec3 R1 = cross(vSigmaY, vN);
-    vec3 R2 = cross(vN, vSigmaX);
-    float fDet = dot(vSigmaX, R1);
-    fDet *= faceDirection;
-    vec3 vGrad = sign(fDet) * (dHdxy.x * R1 + dHdxy.y * R2);
-    return normalize(abs(fDet) * vN - vGrad);
+  vec3 vSigmaX = dFdx(surf_pos);
+  vec3 vSigmaY = dFdy(surf_pos);
+  vec3 vN = surf_norm;
+  vec3 R1 = cross(vSigmaY, vN);
+  vec3 R2 = cross(vN, vSigmaX);
+  float fDet = dot(vSigmaX, R1);
+  fDet *= faceDirection;
+  vec3 vGrad = sign(fDet) * (dHdxy.x * R1 + dHdxy.y * R2);
+  return normalize(abs(fDet) * vN - vGrad);
 }
 
 void main() {
@@ -51,30 +51,30 @@ void main() {
     float alphaOverride = material.baseColor.a;
 
     if (hasMap) {
-        texelColor = texture(map, v_uv);
-        alphaOverride = material.baseColor.a * texelColor.a;
+      texelColor = texture(map, v_uv);
+      alphaOverride = material.baseColor.a * texelColor.a;
     }
 
     vec3 blendedAlbedo = v_color * texelColor.rgb;
 
     float alpha = alphaOverride;
     if (hasAlphaMap) {
-        alpha *= texture(alphaMap, v_uv).g;
+      alpha *= texture(alphaMap, v_uv).g;
     }
 
     vec3 N = evaluateNormal(v_worldNormal, v_worldPosition);
 
     if (hasNormalMap) {
-        vec3 normalMapSample = texture(normalMap, v_uv).xyz * 2.0 - 1.0;
-        normalMapSample.xy *= material.mapIntensities.w;
-        vec2 dHdxy = normalMapSample.xy;
-        float faceDirection = gl_FrontFacing ? 1.0 : -1.0;
-        N = perturbNormalArb(v_worldPosition, N, dHdxy, faceDirection);
+      vec3 normalMapSample = texture(normalMap, v_uv).xyz * 2.0 - 1.0;
+      normalMapSample.xy *= material.mapIntensities.w;
+      vec2 dHdxy = normalMapSample.xy;
+      float faceDirection = gl_FrontFacing ? 1.0 : -1.0;
+      N = perturbNormalArb(v_worldPosition, N, dHdxy, faceDirection);
     } else if (hasBumpMap) {
-        float bumpSample = texture(bumpMap, v_uv).r;
-        vec2 dHdxy = vec2(dFdx(bumpSample), dFdy(bumpSample)) * material.mapIntensities.x;
-        float faceDirection = gl_FrontFacing ? 1.0 : -1.0;
-        N = perturbNormalArb(v_worldPosition, N, dHdxy, faceDirection);
+      float bumpSample = texture(bumpMap, v_uv).r;
+      vec2 dHdxy = vec2(dFdx(bumpSample), dFdy(bumpSample)) * material.mapIntensities.x;
+      float faceDirection = gl_FrontFacing ? 1.0 : -1.0;
+      N = perturbNormalArb(v_worldPosition, N, dHdxy, faceDirection);
     }
 
     vec3 V = normalize(scene.cameraPosition.xyz - v_worldPosition);
@@ -86,17 +86,18 @@ void main() {
 
     // Cell Shading step quantization block
     if (hasGradientMap) {
-        // Fallback or custom curve mapping via the step ramp texture asset
-        float NdotL = clamp(dot(N, V), 0.0, 1.0); // Simple light wrap factor estimation
-        vec3 gradientFactor = texture(gradientMap, vec2(NdotL, 0.5)).rgb;
-        litLighting *= gradientFactor;
-    } else {
-        // Procedural step fallback logic matching your source parameters block
-        float steps = material.pbrParams.y; // Track cartoon levels slider from Dart
-        if (steps < 2.0) {
-            steps = 3.0;
-        }
-        litLighting = floor(litLighting * steps) / (steps - 1.0);
+      // Fallback or custom curve mapping via the step ramp texture asset
+      float NdotL = clamp(dot(N, V), 0.0, 1.0); // Simple light wrap factor estimation
+      vec3 gradientFactor = texture(gradientMap, vec2(NdotL, 0.5)).rgb;
+      litLighting *= gradientFactor;
+    } 
+    else {
+      // Procedural step fallback logic matching your source parameters block
+      float steps = material.pbrParams.y; // Track cartoon levels slider from Dart
+      if (steps < 2.0) {
+        steps = 3.0;
+      }
+      litLighting = floor(litLighting * steps) / (steps - 1.0);
     }
 
     vec3 finalColor = applyFog(litLighting, v_worldPosition);

@@ -155,7 +155,7 @@ class _State extends State<WebglClippingStencil> {
       final stencilGroup = createPlaneStencilGroup(geometry, plane, i + 1);
 
       // plane is clipped by the other clipping planes
-      final planeMat = three.MeshStandardMaterial.fromMap({
+      final planeMat = three.MeshBasicMaterial.fromMap({
         "color": 0xE91E63,
         "metalness": 0.1,
         "roughness": 0.75,

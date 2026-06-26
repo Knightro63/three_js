@@ -11,16 +11,13 @@ enum GeometryAttribute {
   color,
   uv0,
   uv1,
-  tangent,
-  morphPosition,
-  morphNormal,
-  instanceMatrix,
-  lineDistance,
-  pointSize
+  skinIndex,
+  skinWeight,
 }
 
 class GeometryBindings{
   final gpux.GpuContext context;
+  final Object3D object;
   final BufferGeometry geometry;
   final MaterialDescriptor descriptor;
   final Material material;
@@ -28,6 +25,7 @@ class GeometryBindings{
 
   GeometryBindings(
     this.context, 
+    this.object,
     this.geometry,
     this.material,
     this.descriptor,
@@ -45,7 +43,7 @@ class GeometryBindings{
 
     final gpux.HostBuffer host = context.createHostBuffer();
     _bindUniforms(host, pass, vertex, fragment, sceneData, materialData);
-    _bindTextures(pass,vertex,fragment,material);
+    _bindTextures(pass,vertex,fragment);
 
     // Bind and draw using the correct calculated indices count
     pass.bindVertexBuffer( host.emplace(hardwareBuffers.vertexBuffer), hardwareBuffers.vertexCount);
@@ -55,10 +53,8 @@ class GeometryBindings{
   void _bindTextures(
     gpux.RenderPass pass,
     gpux.Shader vertex,
-    gpux.Shader fragment,
-    Material material,
+    gpux.Shader fragment
   ){
-
     final List<TextureType> activeBindings = descriptor.bindings;
 
     // ========================================================
@@ -69,7 +65,16 @@ class GeometryBindings{
       final texSlot = vertex.getUniformSlot('displacementMap');
       pass.bindTexture(texSlot, texture, sampler: GpuSamplerConverter.getSampler(material.displacementMap!));
     }
+    
+    if (object is SkinnedMesh && object.skeleton != null && activeBindings.contains(TextureType.boneTexture)) {
+      final skeleton = object.skeleton!;
+      if (skeleton.boneTexture == null ) skeleton.computeBoneTexture();
 
+      final texture = _createTexture(skeleton.boneTexture!.image);
+      final texSlot = vertex.getUniformSlot('boneTexture');
+      pass.bindTexture(texSlot, texture, sampler: GpuSamplerConverter.getSampler(skeleton.boneTexture!));
+    }
+    
     // ========================================================
     // 2. FRAGMENT SHADER PIPELINE BINDINGS
     // ========================================================
@@ -309,13 +314,14 @@ class GeometryBindings{
     if(_cachedTextures.containsKey(element.uuid)){
       return _cachedTextures[element.uuid]!;
     }
+    
     final sampledTexture = context.createTexture(
       gpux.StorageMode.hostVisible,
       element.width.toInt(), 
       element.height.toInt(),
       sampleCount: 1,
       //textureType: gpux.TextureType.texture2D,
-      format: gpux.PixelFormat.r8g8b8a8UNormInt,
+      format: element.data is Uint8List?gpux.PixelFormat.r8g8b8a8UNormInt:gpux.PixelFormat.r32g32b32a32Float,
       enableShaderReadUsage: true
     );
     element.uuid = MathUtils.generateUUID();
@@ -369,10 +375,13 @@ class GeometryBindings{
     }
 
     final positionAttr = geometry.attributes['position'] as BufferAttribute?;
+    final tangetAttr = geometry.attributes['tanget'] as BufferAttribute?;
     final normalAttr = geometry.attributes['normal'] as BufferAttribute?;
     final uv0Attr = geometry.attributes['uv'] as BufferAttribute?;
     final uv1Attr = geometry.attributes['uv1'] as BufferAttribute?;
     final colorAttr = geometry.attributes['color'] as BufferAttribute?;
+    final skinIndexAttr = geometry.attributes['skinIndex'] as BufferAttribute?;
+    final skinWeightAttr = geometry.attributes['skinWeight'] as BufferAttribute?;
     final indexAttr = geometry.index;
     
     if (
@@ -386,10 +395,10 @@ class GeometryBindings{
     bool overwrite = false;
 
     if(
-      indexAttr == null &&
-      material is! LineDashedMaterial &&
-      geometry is! LineSegments &&
-      material is! LineBasicMaterial
+      indexAttr == null //&&
+      // material is! LineDashedMaterial &&
+      // geometry is! LineSegments &&
+      // material is! LineBasicMaterial
     ){
       overwrite = true;
       totalIndex = totalVertices;
@@ -411,6 +420,8 @@ class GeometryBindings{
     final Float32List? colors = colorAttr?.array.buffer.asFloat32List();
     final Float32List? uvs0 = uv0Attr?.array.buffer.asFloat32List();
     final Float32List? uvs1 = uv1Attr?.array.buffer.asFloat32List();
+    final Float32List? skinIndices = skinIndexAttr?.array.buffer.asFloat32List();
+    final Float32List? skinWeights = skinWeightAttr?.array.buffer.asFloat32List();
 
     final attri = descriptor.requiredAttributes; 
 
@@ -421,19 +432,27 @@ class GeometryBindings{
 
     if (attri.contains(GeometryAttribute.normal)) {
       attributeOffsets[GeometryAttribute.normal] = stride;
-      stride += 3; // vec3 normal
+      stride += 3;
     }
     if (attri.contains(GeometryAttribute.uv0)) {
       attributeOffsets[GeometryAttribute.uv0] = stride;
-      stride += 2; // vec2 uv0
+      stride += 2;
     }
     if (attri.contains(GeometryAttribute.uv1)) {
       attributeOffsets[GeometryAttribute.uv1] = stride;
-      stride += 2; // vec2 uv1
+      stride += 2;
     }
     if (attri.contains(GeometryAttribute.color)) {
       attributeOffsets[GeometryAttribute.color] = stride;
       stride += 3;
+    }
+    if (attri.contains(GeometryAttribute.skinIndex)) {
+      attributeOffsets[GeometryAttribute.skinIndex] = stride;
+      stride += 4;
+    }
+    if (attri.contains(GeometryAttribute.skinWeight)) {
+      attributeOffsets[GeometryAttribute.skinWeight] = stride;
+      stride += 4;
     }
 
     final Float32List interleavedData = Float32List(totalVertices * stride);
@@ -453,7 +472,8 @@ class GeometryBindings{
     }
 
     void _uv0(int i, int offset) {
-      interleavedData[vertexStride + offset + 0] = uvs0?[i * 2 + 0] ?? 0.0; // Fixed: Reads from uvs0
+      // If explicit UVs exist, map them normally
+      interleavedData[vertexStride + offset + 0] = uvs0?[i * 2 + 0] ?? 0.0;
       interleavedData[vertexStride + offset + 1] = uvs0?[i * 2 + 1] ?? 0.0;
     }
 
@@ -466,10 +486,23 @@ class GeometryBindings{
       interleavedData[vertexStride + offset + 0] = ((colors?.length ?? 0) > i*colorItemSize?(colors?[i * colorItemSize + 0]):null) ?? material.color.red;
       interleavedData[vertexStride + offset + 1] = ((colors?.length ?? 0) > i*colorItemSize+1?(colors?[i * colorItemSize + 1]):null) ?? material.color.green;
       interleavedData[vertexStride + offset + 2] = ((colors?.length ?? 0) > i*colorItemSize+2?(colors?[i * colorItemSize + 2]):null) ?? material.color.blue;
+    }
 
-      // interleavedData[vertexStride + offset + 0] = colors?[i * colorItemSize + 0] ?? material.color.red;
-      // interleavedData[vertexStride + offset + 1] = colors?[i * colorItemSize + 1] ?? material.color.green;
-      // interleavedData[vertexStride + offset + 2] = colors?[i * colorItemSize + 2] ?? material.color.blue;
+    void _skinIndex(int i, int offset) {
+      // itemSize for skin indices is always 4
+      interleavedData[vertexStride + offset + 0] = ((skinIndices?.length ?? 0) > i * 4 + 0 ? (skinIndices?[i * 4 + 0]) : null) ?? 0.0;
+      interleavedData[vertexStride + offset + 1] = ((skinIndices?.length ?? 0) > i * 4 + 1 ? (skinIndices?[i * 4 + 1]) : null) ?? 0.0;
+      interleavedData[vertexStride + offset + 2] = ((skinIndices?.length ?? 0) > i * 4 + 2 ? (skinIndices?[i * 4 + 2]) : null) ?? 0.0;
+      interleavedData[vertexStride + offset + 3] = ((skinIndices?.length ?? 0) > i * 4 + 3 ? (skinIndices?[i * 4 + 3]) : null) ?? 0.0;
+    }
+
+    void _skinWeight(int i, int offset) {
+      // itemSize for skin weights is always 4
+      // Note: Channel 0 defaults to 1.0 so unskinned vertices bind to the first root bone instead of collapsing to scale 0
+      interleavedData[vertexStride + offset + 0] = ((skinWeights?.length ?? 0) > i * 4 + 0 ? (skinWeights?[i * 4 + 0]) : null) ?? 1.0;
+      interleavedData[vertexStride + offset + 1] = ((skinWeights?.length ?? 0) > i * 4 + 1 ? (skinWeights?[i * 4 + 1]) : null) ?? 0.0;
+      interleavedData[vertexStride + offset + 2] = ((skinWeights?.length ?? 0) > i * 4 + 2 ? (skinWeights?[i * 4 + 2]) : null) ?? 0.0;
+      interleavedData[vertexStride + offset + 3] = ((skinWeights?.length ?? 0) > i * 4 + 3 ? (skinWeights?[i * 4 + 3]) : null) ?? 0.0;
     }
 
     // 3. Execution Loop
@@ -479,15 +512,27 @@ class GeometryBindings{
       if (attri.contains(GeometryAttribute.normal)) {
         _normal(i, attributeOffsets[GeometryAttribute.normal]!);
       }
-      if (attri.contains(GeometryAttribute.uv0)) {
+      
+      if (uvs0 != null && attri.contains(GeometryAttribute.uv0)) {
         _uv0(i, attributeOffsets[GeometryAttribute.uv0]!);
       }
+
       if (attri.contains(GeometryAttribute.uv1)) {
         _uv1(i, attributeOffsets[GeometryAttribute.uv1]!);
       }
+
       if (attri.contains(GeometryAttribute.color)) {
         _colors(i, attributeOffsets[GeometryAttribute.color]!);
       }
+
+      if (attri.contains(GeometryAttribute.skinIndex)) {
+        _skinIndex(i, attributeOffsets[GeometryAttribute.skinIndex]!);
+      }
+      
+      if (attri.contains(GeometryAttribute.skinWeight)) {
+        _skinWeight(i, attributeOffsets[GeometryAttribute.skinWeight]!);
+      }
+
 
       vertexStride += stride; // Advance by the correct total float stride
 
@@ -552,11 +597,11 @@ class GpuSamplerConverter {
     final GpuFilterPair minf = fromGlMinFilter(text.minFilter);
 
     return gpux.SamplerOptions(
-      minFilter: minf.minFilter,
-      magFilter: fromGlMagFilter(text.magFilter),
-      mipFilter: minf.mipFilter, 
-      widthAddressMode: fromGlWrapMode(text.wrapS),
-      heightAddressMode: fromGlWrapMode(text.wrapT),
+      // minFilter: minf.minFilter,
+      // magFilter: fromGlMagFilter(text.magFilter),
+      // mipFilter: minf.mipFilter, 
+      // widthAddressMode: fromGlWrapMode(text.wrapS),
+      // heightAddressMode: fromGlWrapMode(text.wrapT),
     );
   }
 

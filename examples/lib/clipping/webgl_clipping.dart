@@ -102,7 +102,7 @@ class _State extends State<WebglClipping> {
 
     // Geometry
 
-    final material = three.MeshPhongMaterial.fromMap({
+    final material = three.MeshBasicMaterial.fromMap({
       "color": 0x80ee10,
       "shininess": 100,
       "side": three.DoubleSide,

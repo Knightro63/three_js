@@ -10,6 +10,7 @@ void main() {
   vec4 worldPosition = material.modelMatrix * vec4(position, 1.0);
   v_worldPosition = worldPosition.xyz;
   gl_Position = scene.projectionMatrix * scene.viewMatrix * worldPosition;
+  gl_Position.z = gl_Position.z * 0.995;
 
   v_color = color;//material.baseColor.rgb * vertexColor;
 }

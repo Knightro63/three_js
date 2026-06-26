@@ -58,7 +58,7 @@ class _State extends State<WebglClippingAdvanced> {
 
   late three.OrbitControls controls;
   late three.Object3D object;
-  late three.MeshPhongMaterial clipMaterial;
+  late three.Material clipMaterial;
 
   int startTime = 0;
 
@@ -191,7 +191,7 @@ class _State extends State<WebglClippingAdvanced> {
 
     // Geometry
 
-    clipMaterial = three.MeshPhongMaterial.fromMap({
+    clipMaterial = three.MeshBasicMaterial.fromMap({
       "color": 0xee0a10,
       "shininess": 100,
       "side": three.DoubleSide,
@@ -248,7 +248,7 @@ class _State extends State<WebglClippingAdvanced> {
 
     threeJs.scene.add(volumeVisualization);
 
-    final ground = three.Mesh(planeGeometry, three.MeshPhongMaterial.fromMap({"color": 0xa0adaf, "shininess": 10}));
+    final ground = three.Mesh(planeGeometry, three.MeshBasicMaterial.fromMap({"color": 0xa0adaf, "shininess": 10}));
     ground.rotation.x = -math.pi / 2;
     ground.scale.scale(3);
     ground.receiveShadow = true;

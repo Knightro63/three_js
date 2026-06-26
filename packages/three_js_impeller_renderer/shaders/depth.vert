@@ -11,6 +11,7 @@ void main() {
   
   vec4 viewPosition = scene.viewMatrix * worldPosition4;
   gl_Position = scene.projectionMatrix * viewPosition;
+  gl_Position.z = gl_Position.z * 0.995;
 
   v_viewDepth = -viewPosition.z;
 }

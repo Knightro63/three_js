@@ -1,7 +1,6 @@
 import 'dart:typed_data';
 import 'dart:math' as math;
 import 'dart:convert'; 
-import 'package:three_js_math/three_js_math.dart'; 
 
 // aliases for shorter compressed code (most minifers don't do this)
 typedef u8 = Uint8List;

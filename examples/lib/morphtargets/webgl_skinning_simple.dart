@@ -105,9 +105,12 @@ class _MyAppState extends State<WebglSkinningSimple> {
     three.console.info(" gltf load sucess result: $result  ");
 
     final object = result!.scene;
-
+    
     object.traverse((child) {
-      if (child is three.SkinnedMesh) child.castShadow = true;
+      if (child is three.SkinnedMesh){
+        print(child.material);
+        child.castShadow = true;
+      }
     });
 
     final skeleton = SkeletonHelper(object);

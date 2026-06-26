@@ -35,5 +35,5 @@ void main() {
 
   finalRGBA = applyColor(finalRGBA,material.lineExtendedParams.z);
 
-  frag_color = vec4(clamp(finalRGBA.rgb, vec3(0.0), vec3(1.0)), finalRGBA.a);
+  frag_color = vec4(clamp(finalRGBA.rgb, vec3(0.0), vec3(1.0)), alpha);
 }

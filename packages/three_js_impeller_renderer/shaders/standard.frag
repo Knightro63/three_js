@@ -18,6 +18,9 @@ in vec3 v_worldPosition;
 in vec3 v_worldNormal; 
 in vec2 v_uv; 
 
+in vec4 v_skinIndex;
+in vec4 v_skinWeight;
+
 out vec4 frag_color; 
 
 // Arbitrary surface normal perturbation calculation block 

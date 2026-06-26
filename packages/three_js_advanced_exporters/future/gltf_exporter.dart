@@ -886,19 +886,19 @@ class GLTFWriter {
 		var componentType;
 
 		// Detect the component type of the attribute array
-		if ( attribute.array is Float32Array ) {
+		if ( attribute.array is Float32List) {
 			componentType = WEBGL_finalANTS.FLOAT;
-		} else if ( attribute.array is Int32Array ) {
+		} else if ( attribute.array is Int32List ) {
 			componentType = WEBGL_finalANTS.INT;
-		} else if ( attribute.array is Uint32Array ) {
+		} else if ( attribute.array is Uint32List ) {
 			componentType = WEBGL_finalANTS.UNSIGNED_INT;
-		} else if ( attribute.array is Int16Array ) {
+		} else if ( attribute.array is Int16List ) {
 			componentType = WEBGL_finalANTS.SHORT;
-		} else if ( attribute.array is Uint16Array ) {
+		} else if ( attribute.array is Uint16List ) {
 			componentType = WEBGL_finalANTS.UNSIGNED_SHORT;
-		} else if ( attribute.array is Int8Array ) {
+		} else if ( attribute.array is Int8List ) {
 			componentType = WEBGL_finalANTS.BYTE;
-		} else if ( attribute.array is Uint8Array ) {
+		} else if ( attribute.array is Uint8List ) {
 			componentType = WEBGL_finalANTS.UNSIGNED_BYTE;
 		} else {
 			throw( 'THREE.GLTFExporter: Unsupported bufferAttribute component type: ${attribute.array}');
@@ -1332,11 +1332,11 @@ class GLTFWriter {
 			final array = attribute.array;
 
 			if ( attributeName == 'JOINTS_0' &&
-				! ( array is Uint16Array ) &&
-				! ( array is Uint8Array ) ) {
+				! ( array is Uint16List ) &&
+				! ( array is Uint8List ) ) {
 
 				console.warning( 'GLTFExporter: Attribute "skinIndex" converted to type UNSIGNED_SHORT.' );
-				modifiedAttribute = Uint16BufferAttribute( Uint16Array( array ), attribute.itemSize, attribute.normalized );
+				modifiedAttribute = Uint16BufferAttribute( Uint16List( array ), attribute.itemSize, attribute.normalized );
 
 			}
 
@@ -1504,16 +1504,16 @@ class GLTFWriter {
 		var attrType = null;
 
 		switch ( attribute.array.runtimeType) {
-			case Int8Array:
+			case Int8List:
 				attrType = 'byte';
 				break;
-			case Uint8Array:
+			case Uint8List:
 				attrType = 'unsigned byte';
 				break;
-			case Int16Array:
+			case Int16List:
 				attrType = 'short';
 				break;
-			case Uint16Array:
+			case Uint16List:
 				attrType = 'unsigned short';
 				break;
 			default:
@@ -1682,13 +1682,13 @@ class GLTFWriter {
 		if ( rootJoint == null ) return null;
 
 		final joints = [];
-		final inverseBindMatrices = Float32Array( skeleton.bones.length * 16 );
+		final inverseBindMatrices = Float32List( skeleton.bones.length * 16 );
 		final temporaryBoneInverse = Matrix4();
 
 		for (int i = 0; i < skeleton.bones.length; ++ i ) {
 			joints.add( nodeMap[skeleton.bones[ i ]]);
 			temporaryBoneInverse.setFrom( skeleton.boneInverses[ i ] );
-			temporaryBoneInverse.multiply( object.bindMatrix! ).copyIntoArray( inverseBindMatrices.toDartList(), i * 16 );
+			temporaryBoneInverse.multiply( object.bindMatrix! ).copyIntoArray( inverseBindMatrices.toList(), i * 16 );
 		}
 
 		if ( json['skins'] == null ) json['skins'] = [];
@@ -2368,9 +2368,9 @@ class GLTFMeshGpuInstancing extends GLTFExtension{
 		final writer = this.writer;
 		final mesh = object;
 
-		final translationAttr = Float32Array( mesh.count! * 3 );
-		final rotationAttr = Float32Array( mesh.count! * 4 );
-		final scaleAttr = Float32Array( mesh.count! * 3 );
+		final translationAttr = Float32List( mesh.count! * 3 );
+		final rotationAttr = Float32List( mesh.count! * 4 );
+		final scaleAttr = Float32List( mesh.count! * 3 );
 
 		final matrix = Matrix4();
 		final position = Vector3();
@@ -2381,9 +2381,9 @@ class GLTFMeshGpuInstancing extends GLTFExtension{
 			mesh.getMatrixAt( i, matrix );
 			matrix.decompose( position, quaternion, scale );
 
-			position.copyIntoArray( translationAttr.toDartList(), i * 3 );
-			quaternion.toArray( rotationAttr.toDartList(), i * 4 );
-			scale.copyIntoArray( scaleAttr.toDartList(), i * 3 );
+			position.copyIntoArray( translationAttr.toList(), i * 3 );
+			quaternion.toArray( rotationAttr.toList(), i * 4 );
+			scale.copyIntoArray( scaleAttr.toList(), i * 3 );
 		}
 
 		final attributes = {

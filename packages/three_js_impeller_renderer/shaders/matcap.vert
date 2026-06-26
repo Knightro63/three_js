@@ -22,6 +22,7 @@ void main() {
   v_worldNormal = normalize(mat3(material.modelMatrix) * normal);
 
   gl_Position = scene.projectionMatrix * scene.viewMatrix * worldPosition;
+  gl_Position.z = gl_Position.z * 0.995;
 
   v_color = material.baseColor.rgb * vertexColor;
   

@@ -2,7 +2,7 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 import 'package:three_js_advanced_exporters/usdz/zip.dart';
 
-import './usdz/image_export.dart';
+import '../image/image_export.dart';
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_exporters/saveFile/saveFile.dart';
 import 'package:three_js_math/three_js_math.dart';

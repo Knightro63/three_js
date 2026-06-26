@@ -256,21 +256,24 @@ class MaterialUniformData {
     return lineJoinRound; // Default WebGL fallback
   }
 
-  Float32List updateUniforms(Object3D mesh) {
-    final material = mesh.material!;
-    mesh.updateMatrixWorld();
-    final modelMatrix = mesh.matrixWorld.storage;
+  Float32List updateUniforms(Object3D object) {
+    final material = object.material!;
+    object.updateMatrixWorld();
+    final modelMatrix = object.matrixWorld.storage;
 
     // Exact Footprint:
     // modelMatrix (16) + 13 vec4 vectors (13 * 4 = 52) + 6 clipping planes (6 * 4 = 24) 
     // + 1 clippingPlaneParams vector (4) = 96 floats total (384 bytes).
-    final uniformData = Float32List(116);
+    final uniformData = Float32List(156);
+    int last = 119;
 
     // ========================================================
     // 1. MODEL MATRIX (Offsets 0 - 15) -> 64 Bytes
     // ========================================================
     for (int i = 0; i < 16; i++) {
       uniformData[i] = modelMatrix[i];
+      uniformData[last+i] = object.bindMatrix?[i] ?? 0.0;
+      uniformData[last+16+i] = object is SkinnedMesh?object.bindMatrixInverse[i]:0.0;
     }
 
     // ========================================================
@@ -351,9 +354,9 @@ class MaterialUniformData {
 
     // [Offsets 52-55]: lineParams (vec4)
     if(material is PointsMaterial){
-      uniformData[52] = (material.size ?? 1)*25;
+      uniformData[52] = (material.size ?? 1);
       uniformData[53] = material.sizeAttenuation==true?1:0;
-      uniformData[54] = (material.scale ?? 1)*10;
+      uniformData[54] = (material.scale ?? 1)*250;
       uniformData[55] = 0;
     }
     else{
@@ -370,7 +373,7 @@ class MaterialUniformData {
     uniformData[59] = this.rotation;
 
     // [Offsets 60-67]: morphInfluences0 & morphInfluences1 (2 x vec4)
-    final List<double>? morphInfluenceSource = mesh.morphTargetInfluences;
+    final List<double>? morphInfluenceSource = object.morphTargetInfluences;
     for (int i = 0; i < 8; i++) {
       double val = (morphInfluenceSource != null && i < morphInfluenceSource.length) 
           ? morphInfluenceSource[i] 
@@ -401,37 +404,43 @@ class MaterialUniformData {
     // 4. TAILING SCALAR + PADDING (Offsets 92 - 95) -> vec4
     // ========================================================
     uniformData[92] = clippingPlanes.length.toDouble(); // material.clippingPlaneParams.x
+    uniformData[93] = material.clipIntersection?clippingPlanes.length.toDouble():0.0; // material.clippingPlaneParams.x
+    uniformData[94] = material.alphaToCoverage?1.0:0.0; // material.clippingPlaneParams.x
+    uniformData[95] = 0.0; //padding
 
     double checkMap(Texture? prop) => prop != null ? 1 : 0;
-    uniformData[93]  = checkMap(material.map);                        // 0: hasMap
-    uniformData[94]  = checkMap(material.alphaMap);                   // 1: hasAlphaMap
-    uniformData[95]  = checkMap(material.aoMap);                      // 2: hasAoMap
     
-    uniformData[96]  = checkMap(material.specularMap);                // 3: hasSpecularMap
-    uniformData[97]  = checkMap(material.lightMap);                   // 4: hasLightMap
-    uniformData[98]  = checkMap(material.bumpMap);                    // 5: hasBumpMap
-    uniformData[99]  = checkMap(material.normalMap);                  // 6: hasNormalMap
+    uniformData[96] = checkMap(object.skeleton?.boneTexture); //padding
+    uniformData[97]  = checkMap(material.map);                        // 0: hasMap
+    uniformData[98]  = checkMap(material.alphaMap);                   // 1: hasAlphaMap
+    uniformData[99]  = checkMap(material.aoMap);                      // 2: hasAoMap
     
-    uniformData[100] = checkMap(material.displacementMap);            // 7: hasDisplacementMap
-    uniformData[101] = checkMap(material.roughnessMap);               // 8: hasRoughnessMap
-    uniformData[102] = checkMap(material.metalnessMap);               // 9: hasMetalnessMap
-    uniformData[103] = checkMap(material.emissiveMap);                // 10: hasEmissiveMap
+    uniformData[100]  = checkMap(material.specularMap);                // 3: hasSpecularMap
+    uniformData[101]  = checkMap(material.lightMap);                   // 4: hasLightMap
+    uniformData[102]  = checkMap(material.bumpMap);                    // 5: hasBumpMap
+    uniformData[103]  = checkMap(material.normalMap);                  // 6: hasNormalMap
     
-    uniformData[104] = checkMap(material.clearcoatMap);               // 11: hasClearcoatMap
-    uniformData[105] = checkMap(material.clearcoatNormalMap);         // 12: hasClearcoatNormalMap
-    uniformData[106] = checkMap(material.clearcoatRoughnessMap);      // 13: hasClearcoatRoughnessMap
-    uniformData[107] = checkMap(material.sheenColorMap);              // 14: hasSheenColorMap
+    uniformData[104] = checkMap(material.displacementMap);            // 7: hasDisplacementMap
+    uniformData[105] = checkMap(material.roughnessMap);               // 8: hasRoughnessMap
+    uniformData[106] = checkMap(material.metalnessMap);               // 9: hasMetalnessMap
+    uniformData[107] = checkMap(material.emissiveMap);                // 10: hasEmissiveMap
     
-    uniformData[108] = checkMap(material.sheenRoughnessMap);          // 15: hasSheenRoughnessMap
-    uniformData[109] = checkMap(material.transmissionMap);            // 16: hasTransmissionMap
-    uniformData[110] = checkMap(material.thicknessMap);               // 17: hasThicknessMap
-    uniformData[111] = checkMap(material.iridescenceMap);             // 18: hasIridescenceMap
+    uniformData[108] = checkMap(material.clearcoatMap);               // 11: hasClearcoatMap
+    uniformData[109] = checkMap(material.clearcoatNormalMap);         // 12: hasClearcoatNormalMap
+    uniformData[110] = checkMap(material.clearcoatRoughnessMap);      // 13: hasClearcoatRoughnessMap
+    uniformData[111] = checkMap(material.sheenColorMap);              // 14: hasSheenColorMap
     
-    uniformData[112] = checkMap(material.iridescenceThicknessMap);    // 19: hasIridescenceThicknessMap
-    uniformData[113] = checkMap(material.gradientMap);                // 20: hasGradientMap
-    uniformData[114] = checkMap(material.matcap);                     // 21: hasMatcap
-
-    uniformData[115] = 0.0;
+    uniformData[112] = checkMap(material.sheenRoughnessMap);          // 15: hasSheenRoughnessMap
+    uniformData[113] = checkMap(material.transmissionMap);            // 16: hasTransmissionMap
+    uniformData[114] = checkMap(material.thicknessMap);               // 17: hasThicknessMap
+    uniformData[115] = checkMap(material.iridescenceMap);             // 18: hasIridescenceMap
+    
+    uniformData[116] = checkMap(material.iridescenceThicknessMap);    // 19: hasIridescenceThicknessMap
+    uniformData[117] = checkMap(material.gradientMap);                // 20: hasGradientMap
+    uniformData[118] = checkMap(material.matcap);                     // 21: hasMatcap
+    
+    /// 152 - 155 boneTextureParm
+    uniformData[152] = object.skeleton?.boneTextureSize.toDouble() ?? 0.0;
 
     return uniformData;
   }

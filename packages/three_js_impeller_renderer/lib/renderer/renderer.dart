@@ -388,67 +388,64 @@ class ImpellerRenderer extends Renderer{
       activeLights: lights
     );
 
-    // =========================================================================
-    // 💡 ARRAY CAMERA CORE ROUTING DETERMINATION
-    // =========================================================================
-    // Check if the camera is an ArrayCamera containing sub-cameras
-    final List<Camera> subCameras = (camera is ArrayCamera) ? (camera as ArrayCamera).cameras : [camera];
+    if(camera is ArrayCamera){
+      final List<Camera> subCameras = camera.cameras;
+      for (final subCamera in subCameras) {
+        // Look up viewport dimensions configured on the Dart side for this sub-camera
+        // Three.js sets a camera.viewport property containing (x, y, width, height) relative bounds multipliers [0.0 to 1.0]
+        final Vector4 vp = subCamera.viewport ?? Vector4(0, 0, 1, 1);
+        double vpX = vp.x;
+        double vpY = vp.y;
+        double vpW = vp.z;
+        double vpH = vp.w;
 
-    for (final subCamera in subCameras) {
-      // Look up viewport dimensions configured on the Dart side for this sub-camera
-      // Three.js sets a camera.viewport property containing (x, y, width, height) relative bounds multipliers [0.0 to 1.0]
-      final Vector4 vp = subCamera.viewport ?? Vector4(0, 0, 1, 1);
-        
-      double vpX = vp.x;
-      double vpY = vp.y;
-      double vpW = vp.z;
-      double vpH = vp.w;
+        // 1. Detect if the values are normalized percentage scales [0.0 - 1.0]
+        if (vp.z <= 1.0) {
+          vpX = vp.x * width;
+          vpY = vp.y * height;
+          vpW = vp.z * width;
+          vpH = vp.w * height;
+        }
 
-      // 1. Detect if the values are normalized percentage scales [0.0 - 1.0]
-      if (vp.z <= 1.0) {
-        vpX = vp.x * width;
-        vpY = vp.y * height;
-        vpW = vp.z * width;
-        vpH = vp.w * height;
+        // 2. 💡 THE CRITICAL FIX: Flip the Y coordinate from Three.js Bottom-Left over to WebGPU Top-Left!
+        // Equation: WebGpuY = FrameHeight - SubCameraY - SubCameraHeight
+        double webGpuY = height - vpY - vpH;
+
+        // 3. HARDWARE BOUNDS CLAMP: Keep every single pixel safely within the render target texture boundaries
+        // Ensure the width and height don't exceed absolute limits
+        vpW = vpW.clamp(1.0, width);
+        vpH = vpH.clamp(1.0, height);
+        vpX = vpX.clamp(0.0, width - vpW);
+        webGpuY = webGpuY.clamp(0.0, height - vpH);
+
+        // 4. Submit the perfectly contained dimensions safely to the GPU
+        renderPass.setViewport(gpu.Viewport(x: vpX.toInt(), y: webGpuY.toInt(), width: vpW.toInt(), height:vpH.toInt(), depthRange: gpu.DepthRange(zNear: 0.0, zFar: 1.0)));
+        renderPass.setScissor(gpu.Scissor(x:vpX.toInt(), y:webGpuY.toInt(), width:vpW.toInt(), height:vpH.toInt()));
+        // =====
+
+        // Update matrices specifically for this sub-view camera perspective position
+        subCamera.updateMatrixWorld(true);
+
+        for (final o in opaqueObjects) {
+          _renderMesh(o, subCamera, sceneData, renderPass, environmentBinding);
+        }
+        for (final o in transmissiveObjects) {
+          _renderMesh(o, subCamera, sceneData, renderPass, environmentBinding);
+        }
+        for (final o in transparentObjects) {
+          _renderMesh(o, subCamera, sceneData, renderPass, environmentBinding);
+        }
       }
-
-      // 2. 💡 THE CRITICAL FIX: Flip the Y coordinate from Three.js Bottom-Left over to WebGPU Top-Left!
-      // Equation: WebGpuY = FrameHeight - SubCameraY - SubCameraHeight
-      double webGpuY = height - vpY - vpH;
-
-      // 3. HARDWARE BOUNDS CLAMP: Keep every single pixel safely within the render target texture boundaries
-      // Ensure the width and height don't exceed absolute limits
-      vpW = vpW.clamp(1.0, width);
-      vpH = vpH.clamp(1.0, height);
-      
-      // Ensure the origin points leave enough room so (origin + width/height) never overruns the frame bounds
-      vpX = vpX.clamp(0.0, width - vpW);
-      webGpuY = webGpuY.clamp(0.0, height - vpH);
-
-      // 4. Submit the perfectly contained dimensions safely to the GPU
-      //renderPass.setViewport(gpu.Viewport(x: vpX.toInt(), y: webGpuY.toInt(), width: vpW.toInt(), height:vpH.toInt(), depthRange: gpu.DepthRange(zFar: 0.0, zNear: 1.0)));
-      //renderPass.setScissor(gpu.Scissor(x:vpX.toInt(), y:webGpuY.toInt(), width:vpW.toInt(), height:vpH.toInt()));
-      // =====
-
-      // Update matrices specifically for this sub-view camera perspective position
-      subCamera.updateMatrixWorld();
-
-      // Back-to-Front depth sorting calculation relative to THIS sub-camera position
-      // final cameraWorldPos = subCamera.position;
-      // transparentMeshes.sort((a, b) {
-      //   final aWorldPos = Vector3().setFromMatrixPosition(a.matrixWorld);
-      //   final bWorldPos = Vector3().setFromMatrixPosition(b.matrixWorld);
-      //   return cameraWorldPos.distanceToSquared(bWorldPos).compareTo(cameraWorldPos.distanceToSquared(aWorldPos));
-      // });
-
+    }
+    else{
       for (final o in opaqueObjects) {
-        _renderMesh(o, subCamera, sceneData, renderPass, environmentBinding);
+        _renderMesh(o, camera, sceneData, renderPass, environmentBinding);
       }
       for (final o in transmissiveObjects) {
-        _renderMesh(o, subCamera, sceneData, renderPass, environmentBinding);
+        _renderMesh(o, camera, sceneData, renderPass, environmentBinding);
       }
       for (final o in transparentObjects) {
-        _renderMesh(o, subCamera, sceneData, renderPass, environmentBinding);
+        _renderMesh(o, camera, sceneData, renderPass, environmentBinding);
       }
     }
     commandBuffer.submit();
@@ -577,13 +574,13 @@ class ImpellerRenderer extends Renderer{
       camera.matrixWorldInverse.setFrom(camera.matrixWorld).invert();
     }
     
-    final mesh = item.object!;
+    final object = item.object!;
     final geometry = item.geometry;
     if (geometry == null) return;
     final material = item.material;
     if (material == null) return;
     
-    final resolved = MaterialDescriptorRegistry.resolve(material, mesh)!;
+    final resolved = MaterialDescriptorRegistry.resolve(material, object)!;
     final renderState = resolved.renderState;
     final String pipelineHash = '${resolved.vertex.hashCode}_${resolved.fragment.hashCode}_${renderState.uuid}';
     if(_cachedPipeline[pipelineHash] == null || resolved.renderState != _cachedPipeline[pipelineHash]?.descriptor.renderState){
@@ -602,11 +599,12 @@ class ImpellerRenderer extends Renderer{
     _cachedPipeline[pipelineHash]!.bind(pass);
 
     MaterialDescriptor mdescriptor = resolved.descriptor;
-    final Float32List materialData = MaterialConverter.convert(material, camera).updateUniforms(mesh);
+    final Float32List materialData = MaterialConverter.convert(material, camera).updateUniforms(object);
     final String geomHash = '${geometry.uuid}_${material.uuid}';
     if(_cachedGeometry[geomHash] == null || mdescriptor != _cachedPipeline[geomHash]?.descriptor){
       _cachedGeometry[geomHash] = GeometryBindings(
         gpu.gpuContext, 
+        object,
         geometry,
         material,
         mdescriptor

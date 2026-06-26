@@ -2,6 +2,7 @@
 #include <fog.glsl>
 #include <color.glsl>
 #include <clipping.glsl>
+#include <skinning.glsl>
 
 uniform sampler2D map;          
 uniform sampler2D alphaMap;     
@@ -13,14 +14,17 @@ in vec3 v_normal;
 in vec2 v_uv;
 in vec3 v_worldPosition;
 
+in vec4 v_skinIndex;
+in vec4 v_skinWeight;
+
 out vec4 frag_color;
 
 void main() {
-  if(evaluateClippingPlanes(v_worldPosition)){
-    discard;
-  }
-  vec3 color = v_color;
-  float alphaOverride = material.baseColor.a;
+  vec4 diffuseColor = vec4(v_color,material.baseColor.a);
+  applyClippingPlanes(diffuseColor,v_worldPosition);
+
+  vec3 color = diffuseColor.rgb;
+  float alphaOverride = diffuseColor.a;
 
   // 1. Albedo Processing
   vec4 texelColor = vec4(1.0); // Default fallback: neutral white
@@ -53,8 +57,7 @@ void main() {
   }
 
   if (alpha < 0.001) {
-    frag_color = vec4(0.0);
-    return;
+    discard;
   }
 
   // 5. Final Output Compilation

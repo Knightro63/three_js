@@ -86,7 +86,7 @@ class _State extends State<WebglClippingIntersection> {
     for (int i = 1; i <= 30; i += 2) {
       final geometry = three.SphereGeometry(i / 30, 48, 24);
 
-      final material = three.MeshLambertMaterial.fromMap({
+      final material = three.MeshBasicMaterial.fromMap({
         "color": three.Color(0, 0, 0).setHSL(math.Random().nextDouble(), 0.5, 0.5),
         "side": three.DoubleSide,
         "clippingPlanes": clipPlanes,

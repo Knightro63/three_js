@@ -23,6 +23,7 @@ void main() {
   
   vec3 alignedPosition = mvPosition.xyz + vec3(position.x * scaleX, position.y * scaleY, 0.0);
   gl_Position = scene.projectionMatrix * vec4(alignedPosition, 1.0);
+  gl_Position.z = gl_Position.z * 0.995;
 
   v_worldPosition = worldPositionCenter.xyz + vec3(position.x * scaleX, position.y * scaleY, 0.0);
   v_color = material.baseColor.rgb * vertexColor;

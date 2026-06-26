@@ -252,6 +252,7 @@ class ThreeJS{
       renderer!.render(scene, camera);
     }
     else{
+      renderer!.setViewport(0,0,width,height);
       postProcessor?.call(dt);
     }
   }
@@ -261,8 +262,8 @@ class ThreeJS{
     if (renderer == null) {
       renderer = ImpellerRenderer(
         ImpellerRendererParameters(
-          width: width*dpr, 
-          height: height*dpr,
+          width: width, 
+          height: height,
           sampleCount: settings.antialias?4:1
         )
       );

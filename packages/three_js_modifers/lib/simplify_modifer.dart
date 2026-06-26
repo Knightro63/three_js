@@ -333,6 +333,7 @@ class SimplifyModifier {
   }
 
   static Vertex? _minimumCostEdge(List<Vertex> vertices ) {
+    if(vertices.isEmpty) return null;
     Vertex least = vertices[0];
 
     for (int i = 0; i < vertices.length; i ++ ) {

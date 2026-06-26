@@ -35,3 +35,57 @@ bool evaluateClippingPlanes(vec3 worldPosition) {
 
   return false;
 }
+
+void applyClippingPlanes(inout vec4 diffuseColor, vec3 worldPosition) {
+  int numPlanes = int(material.cpp.x);
+  int unionPlanes = int(material.cpp.y);
+  bool useAlphaToCoverage = material.cpp.z > 0.5;
+
+  if (numPlanes <= 0) return;
+
+  if (useAlphaToCoverage) {
+      float clipOpacity = 1.0;
+
+    for (int i = 0; i < unionPlanes; i++) {
+      vec4 plane = material.clippingPlanes[i];
+      float distanceToPlane = -dot(worldPosition, plane.xyz) + plane.w;
+      float distanceGradient = fwidth(distanceToPlane) / 2.0;
+      clipOpacity *= smoothstep(-distanceGradient, distanceGradient, distanceToPlane);
+    }
+
+    if (unionPlanes < numPlanes) {
+      float intersectionOpacity = 1.0;
+      for (int i = unionPlanes; i < numPlanes; i++) {
+        vec4 plane = material.clippingPlanes[i];
+        float distanceToPlane = -dot(worldPosition, plane.xyz) + plane.w;
+        float distanceGradient = fwidth(distanceToPlane) / 2.0;
+        intersectionOpacity *= 1.0 - smoothstep(-distanceGradient, distanceGradient, distanceToPlane);
+      }
+      clipOpacity *= 1.0 - intersectionOpacity;
+    }
+
+    diffuseColor.a *= clipOpacity;
+    if (diffuseColor.a <= 0.001) discard;
+
+  } 
+  else {
+    for (int i = 0; i < unionPlanes; i++) {
+      vec4 plane = material.clippingPlanes[i];
+      float distanceToPlane = dot(worldPosition, plane.xyz) + plane.w;
+      if (distanceToPlane < 0.0) {
+        discard;
+      }
+    }
+
+    // 4. Standard Intersection Hard Clipping
+    if (unionPlanes < numPlanes) {
+      bool clipped = true;
+      for (int i = unionPlanes; i < numPlanes; i++) {
+        vec4 plane = material.clippingPlanes[i];
+        float distanceToPlane = dot(worldPosition, plane.xyz) + plane.w;
+        clipped = (distanceToPlane < 0.0) && clipped;
+      }
+      if (clipped) discard;
+    }
+  }
+}
