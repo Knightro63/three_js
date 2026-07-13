@@ -56,6 +56,8 @@ dependency_overrides:
     path: ../../flutter_angle/flutter_angle
   three_js_advanced_exporters: 
     path: ../packages/three_js_advanced_exporters
+  three_js_advanced_loaders: 
+    path: ../packages/three_js_advanced_loaders
 
 flutter:
   uses-material-design: true

@@ -180,8 +180,8 @@ class Rhino3dmLoader extends Loader {
 		//console.log(material)
 
 		final mat = new MeshPhysicalMaterial.fromMap( {
-			'color': new Color( material.diffuseColor.r / 255.0, material.diffuseColor.g / 255.0, material.diffuseColor.b / 255.0 ),
-			'emissive': new Color( material.emissionColor.r, material.emissionColor.g, material.emissionColor.b ),
+			'color': material.color.clone(),
+			'emissive': material.emissive?.clone(),
 			'flatShading': material.disableLighting,
 			'ior': material.indexOfRefraction,
 			'name': material.name,

@@ -1338,6 +1338,8 @@ class ColladaParser{
                   if ( sources['skinWeights'] != null && sources['skinIndices'] != null) {
                     buildGeometryData( primitive, sources['skinIndices'], input['offset'], skinIndex['array'] );
                     buildGeometryData( primitive, sources['skinWeights'], input['offset'], skinWeight['array'] );
+                    //buildSkinGeometryData(primitive, sources['skinIndices'], sources['skinWeights'], input['offset'], skinIndex['array'], skinWeight['array']);
+                    print(input['offset']);
                   }
 
                   // see #3803
