@@ -186,18 +186,6 @@ Uint8List _encodePngRgba(Uint8List rgba, int width, int height) {
   ]);
 }
 
-Uint8List decodeBase64Bytes(String base64Data) {
-  return Uint8List.fromList(base64Decode(base64Data));
-}
-
-String _encodeBase64Bytes(Uint8List data) {
-  return base64Encode(data);
-}
-
-Uint8List _ensureUint8Array(Uint8List data) {
-  return Uint8List.fromList(data);
-}
-
 // Rewritten to natively use package:archive instead of streaming fflate callbacks
 Future<Uint8List> _createZipData(Map<String, Uint8List> files) async {
   final archive = Archive();
@@ -209,7 +197,7 @@ Future<Uint8List> _createZipData(Map<String, Uint8List> files) async {
     final archiveFile = ArchiveFile(
       fileName, 
       contents.length, 
-      _ensureUint8Array(contents)
+      contents
     );
     archive.addFile(archiveFile);
   }
@@ -1488,7 +1476,7 @@ class _FBXExporter {
       final String dataUrl = texDyn.image.src as String;
       const prefix = 'data:image/png;base64,';
       if (dataUrl.startsWith(prefix)) {
-        return decodeBase64Bytes(dataUrl.substring(prefix.length));
+        return base64Decode(dataUrl.substring(prefix.length));
       }
     }
 
@@ -2399,7 +2387,7 @@ class _FBXExporter {
     if (obj['Content'] != null) {
       final contentData = obj['Content'];
       if (contentData is Uint8List) {
-        final base64Data = _encodeBase64Bytes(contentData);
+        final base64Data = base64Encode(contentData);
         str += '${indent(2)}Content: "$base64Data"\n';
       }
     }

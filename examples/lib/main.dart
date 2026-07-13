@@ -57,6 +57,7 @@ import 'package:example/loaders/webgl_loader_scn.dart';
 import 'package:example/loaders/webgl_loader_stl.dart';
 import 'package:example/loaders/webgl_loader_usdz.dart';
 import 'package:example/loaders/webgl_loader_vox.dart';
+import 'package:example/loaders/webgl_loader_vtk.dart';
 import 'package:example/loaders/webgl_loader_xyz.dart';
 import 'package:example/material/webgl_hex_tiling.dart';
 //import 'package:example/material/webgl_materials_video.dart';
@@ -414,6 +415,9 @@ class MyAppState extends State<MyApp> {
               },
               '/webgl_loader_stl':(BuildContext context) {
                 return const WebglLoaderStl();
+              },
+              '/webgl_loader_vtk':(BuildContext context) {
+                return const WebglLoaderVtk();
               },
               '/webgl_loader_vox':(BuildContext context) {
                 return const WebglLoaderVox();

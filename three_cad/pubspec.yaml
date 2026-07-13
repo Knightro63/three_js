@@ -11,12 +11,12 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.8
   flutter_svg: ^2.0.10+1
-  three_js: ^0.2.0
-  three_js_helpers: ^0.2.0
-  three_js_line: ^0.2.0
-  three_js_bvh_csg: ^0.2.0
-  three_js_exporters: ^0.2.0
-  three_js_transform_controls: ^0.2.0
+  three_js: ^0.3.0
+  three_js_helpers: ^0.3.0
+  three_js_line: ^0.3.0
+  three_js_bvh_csg: ^0.3.0
+  three_js_exporters: ^0.3.0
+  three_js_transform_controls: ^0.3.0
   css:
     git:
       url: https://github.com/Knightro63/css.git
@@ -31,6 +31,7 @@ dependency_overrides:
     git:
       url: https://github.com/alex-melnyk/flutter-permission-handler.git 
       path: permission_handler_apple
+  flutter_angle: ^0.4.1
 
 flutter:
   uses-material-design: true

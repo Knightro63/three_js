@@ -68,6 +68,7 @@ const List<String> filesJson = [
   "webgl_loader_ply",
   "webgl_loader_pcd",
   "webgl_loader_stl",
+  "webgl_loader_vtk",
   "webgl_loader_vox",
   "webgl_loader_svg",
   "webgl_loader_gltf",

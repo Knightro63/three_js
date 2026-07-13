@@ -96,8 +96,8 @@ class BoundingBoxHelper extends LineSegments {
   /// also updates the wireframe box to the extent of the [box] property.
   @override
   void updateMatrixWorld([bool force = false]) {
-    final box = this.box!;
-    if (box.isEmpty()) return;
+    final box = this.box;
+    if (box == null ||box.isEmpty()) return;
     box.getCenter(position);
     box.getSize(scale);
     scale.scale(0.5);

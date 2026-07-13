@@ -612,7 +612,7 @@ class Material with EventDispatcher {
       thicknessMap = newValue;
     }
     else if(key == 'specularIntensity'){
-      specularIntensity = newValue;
+      specularIntensity = newValue.toDouble();
     }
     else if(key == 'attenuationColor'){
       if (newValue is Color) {
