@@ -30,3 +30,4 @@ export 'selection/selection_helper.dart';
 
 export 'view_helper.dart';
 export 'view_helper2.dart';
+export './texture_helper.dart';

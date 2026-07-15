@@ -101,7 +101,6 @@ class _State extends State<MiscExporterOBJ> {
       'exportToObj': true
     };
 
-
     final folder1 = gui.addFolder('Geometry Selection')..open();
 
     folder1.addButton( params, 'addTriangle' ).onChange(( val ) {

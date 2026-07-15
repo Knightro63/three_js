@@ -140,34 +140,36 @@ class InterleavedBufferAttribute extends BufferAttribute{
 
   /// Returns the x component of the item at the given index.
   @override
-  double getX(int index) {
-		num x = this.data!.array[ index * this.data!.stride + this.offset ];
-		if ( this.normalized ) x = MathUtils.denormalize( x, this.array );
-		return x.toDouble();
+  double? getX(int index) {
+    return getAt(index * this.data!.stride + this.offset);
   }
 
   /// Returns the y component of the item at the given index.
   @override
-  double getY(int index) {
-		num y = this.data!.array[ index * this.data!.stride + this.offset + 1 ];
-		if ( this.normalized ) y = MathUtils.denormalize( y, this.array );
-		return y.toDouble();
+  double? getY(int index) {
+    return getAt(index * this.data!.stride + this.offset + 1);
   }
 
   /// Returns the z component of the item at the given index.
   @override
-  double getZ(int index) {
-		num z = this.data!.array[ index * this.data!.stride + this.offset + 2 ];
-		if ( this.normalized ) z = MathUtils.denormalize( z, this.array );
-		return z.toDouble();
+  double? getZ(int index) {
+    return getAt(index * this.data!.stride + this.offset + 2);
   }
 
   /// Returns the w component of the item at the given index.
   @override
-  double getW(int index) {
-		num w = this.data!.array[ index * this.data!.stride + this.offset + 3 ];
-		if ( this.normalized ) w = MathUtils.denormalize( w, this.array );
-		return w.toDouble();
+  double? getW(int index) {
+    return getAt(index * this.data!.stride + this.offset + 3 );
+  }
+
+  double? getAt(int index) {
+    if (index < array.length) {
+      num x = this.data!.array[ index ];
+      if ( this.normalized ) x = MathUtils.denormalize( x, this.array );
+      return x.toDouble();
+    } else {
+      return null;
+    }
   }
 
   /// Sets the x and y components of the item at the given index.

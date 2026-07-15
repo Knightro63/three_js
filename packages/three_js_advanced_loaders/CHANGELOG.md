@@ -1,3 +1,7 @@
+## 0.3.1
+
+* Fixed fbx and gltf bugs
+
 ## 0.3.0
 
 * Removed NativeArray for Zero-Allocation Updates.

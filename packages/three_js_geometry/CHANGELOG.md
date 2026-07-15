@@ -1,3 +1,8 @@
+## 0.3.1
+
+* Added Teapot Geometry.
+* Added Rounded Box Geometry.
+
 ## 0.3.0
 
 * Removed NativeArray for Zero-Allocation Updates.

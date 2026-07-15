@@ -102,7 +102,7 @@ class _State extends State<MiscExporterFBX> {
 
     final folder2 = gui.addFolder('Export')..open();
     folder2.addButton( params, 'exportFBX' ).onChange(( val ) {
-      exporter.export('TEST', threeJs.scene, options: FBXExportOptions());
+      exporter.export('TEST', gltf!.scene, options: FBXExportOptions());
     });
   }
 

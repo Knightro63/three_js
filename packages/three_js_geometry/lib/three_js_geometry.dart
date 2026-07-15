@@ -23,3 +23,5 @@ export 'capsule_geometry.dart';
 export 'decal_geometry.dart';
 export './parametric_gemoetries.dart';
 export './box_line_geometry.dart';
+export './rounded_box.dart';
+export './teapot.dart';

@@ -271,7 +271,8 @@ class PLYExporter{
         bytes: Uint8List.fromList(parse(scene,options)), 
         path: path
       );
-    }  }
+    }  
+  }
   static void exportMesh(String fileName, Mesh mesh, [PLYOptions? options, String? path]){
     options ??= PLYOptions();
     if(options.type == ExportTypes.ascii){

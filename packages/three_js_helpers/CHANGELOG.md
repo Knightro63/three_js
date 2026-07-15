@@ -1,3 +1,7 @@
+## 0.3.1
+
+* Added Texture Helper.
+
 ## 0.3.0
 
 * Removed NativeArray for Zero-Allocation Updates.

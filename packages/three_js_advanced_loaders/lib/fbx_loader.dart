@@ -364,23 +364,23 @@ class __FBXTreeParser {
     final wrapModeU = textureNode["WrapModeU"];
     final wrapModeV = textureNode["WrapModeV"];
 
-    final valueU = wrapModeU != null ? wrapModeU.value : 0;
-    final valueV = wrapModeV != null ? wrapModeV.value : 0;
+    final valueU = wrapModeU != null ? wrapModeU['value'] : 0;
+    final valueV = wrapModeV != null ? wrapModeV['value'] : 0;
 
     // http://download.autodesk.com/us/fbx/SDKdocs/FBX_SDK_Help/files/fbxsdkref/class_k_fbx_texture.html#889640e63e2e681259ea81061b85143a
     // 0: repeat(default), 1: clamp
 
-    texture?.wrapS = valueU == 0 ? RepeatWrapping : ClampToEdgeWrapping;
-    texture?.wrapT = valueV == 0 ? RepeatWrapping : ClampToEdgeWrapping;
+    texture?.wrapS = valueU < 1 ? RepeatWrapping : ClampToEdgeWrapping;
+    texture?.wrapT = valueV < 1 ? RepeatWrapping : ClampToEdgeWrapping;
 
     if (textureNode["Scaling"] != null) {
-      final values = textureNode["Scaling"].value;
+      final values = textureNode["Scaling"]['value'];
       texture?.repeat.x = values[0];
       texture?.repeat.y = values[1];
     }
 
 		if (textureNode["Translation"] != null) {
-			final values = textureNode['Translation'].value;
+			final values = textureNode['Translation']['value'];
 			texture?.offset.x = values[ 0 ];
 			texture?.offset.y = values[ 1 ];
 		}
@@ -464,7 +464,9 @@ class __FBXTreeParser {
       for (final nodeID in materialNodes.keys) {
         final material = parseMaterial(materialNodes[nodeID], textureMap);
 
-        if (material != null) materialMap[_parseInt(nodeID)] = material;
+        if (material != null){
+          materialMap[_parseInt(nodeID)] = material;
+        }
       }
     }
 
@@ -481,7 +483,7 @@ class __FBXTreeParser {
 
     // Case where FBX wraps shading model in property object.
     if (type is! String) {
-      type = type.runtimeType;
+      type = type.toString();
     }
 
     // Ignore unused materials which don't have any connections.
@@ -490,7 +492,6 @@ class __FBXTreeParser {
     Map<String,dynamic> parameters = parseParameters(materialNode, textureMap, id_);
 
     Material? material;
-
     switch (type.toLowerCase()) {
       case 'phong':
         material = MeshPhongMaterial();
@@ -534,9 +535,7 @@ class __FBXTreeParser {
     if (materialNode["Emissive"] != null) {
       parameters["emissive"] = Color.fromList(List<double>.from(materialNode["Emissive"]["value"]));
     } 
-    else if (materialNode["EmissiveColor"] != null &&
-        (materialNode["EmissiveColor"]["type"] == 'Color' ||
-            materialNode["EmissiveColor"].type == 'ColorRGB')) {
+    else if ((materialNode["EmissiveColor"]?["type"] == 'Color' || materialNode["EmissiveColor"]?['type'] == 'ColorRGB')) {
       // The blender exporter exports emissive color here instead of in materialNode.Emissive
       parameters["emissive"] = Color.fromList(List<double>.from(materialNode["EmissiveColor"]["value"]));
     }
@@ -1104,15 +1103,16 @@ class __FBXTreeParser {
 
     if (materials.length > 1) {
       material = GroupMaterial(materials as List<Material>);
-    } else if (materials.isNotEmpty) {
+    } 
+    else if (materials.isNotEmpty) {
       material = materials[0];
-    } else {
+    } 
+    else {
       material = MeshPhongMaterial.fromMap({"color": 0xcccccc});
       materials.add(material);
     }
 
     if (geometry?.attributes["color"] != null) {
-      //materials.forEach((material) {
       for(Material? material in materials){
         material?.vertexColors = true;
       }
@@ -1151,7 +1151,7 @@ class __FBXTreeParser {
       transformData["inheritType"] = _parseInt(modelNode["InheritType"]["value"]);
     }
     if (modelNode["RotationOrder"] != null){
-      transformData["eulerOrder"] = _getEulerOrder(modelNode["RotationOrder"]["value"]);
+      transformData["eulerOrder"] = _getEulerOrder(_parseInt(modelNode["RotationOrder"]["value"]));
     }
    else{
       transformData["eulerOrder"] = _getEulerOrder(0);//'ZYX';
@@ -1350,7 +1350,7 @@ class _GeometryParser {
     final Map<String,dynamic> transformData = {};
 
     if (modelNode['RotationOrder'] != null){
-      transformData["eulerOrder"] = _getEulerOrder(modelNode["RotationOrder"]["value"]);
+      transformData["eulerOrder"] = _getEulerOrder(_parseInt(modelNode["RotationOrder"]["value"]));
     }
     if (modelNode['InheritType'] != null){
       transformData["inheritType"] = _parseInt(modelNode["InheritType"]["value"]);
@@ -1469,11 +1469,8 @@ class _GeometryParser {
   Map<String,dynamic> parseGeoNode(Map<String,dynamic> geoNode, skeleton) {
     final Map<String,dynamic> geoInfo = {};
 
-    geoInfo["vertexPositions"] =
-        (geoNode["Vertices"] != null) ? geoNode["Vertices"]["a"] : [];
-    geoInfo["vertexIndices"] = (geoNode["PolygonVertexIndex"] != null)
-        ? geoNode["PolygonVertexIndex"]["a"]
-        : [];
+    geoInfo["vertexPositions"] = (geoNode["Vertices"] != null) ? geoNode["Vertices"]["a"] : [];
+    geoInfo["vertexIndices"] = (geoNode["PolygonVertexIndex"]?['a'] != null)? geoNode["PolygonVertexIndex"]["a"]: <int>[];
 
     if (geoNode["LayerElementColor"] != null) {
       geoInfo["color"] = parseVertexColors(geoNode["LayerElementColor"][0]);
@@ -1541,7 +1538,8 @@ class _GeometryParser {
     List<num> faceWeightIndices = [];
 
     final scope = this;
-    geoInfo["vertexIndices"].asMap().forEach((polygonVertexIndex, vertexIndex) {
+    geoInfo["vertexIndices"].asMap().forEach((polygonVertexIndex, vi) {
+      int vertexIndex = vi.toInt();
       int? materialIndex;
       bool endOfFace = false;
 
@@ -1620,16 +1618,13 @@ class _GeometryParser {
       }
 
       if (geoInfo['normal'] != null) {
-        final data = _getData(
-            polygonVertexIndex, polygonIndex, vertexIndex, geoInfo['normal']);
-
+        final data = _getData(polygonVertexIndex, polygonIndex, vertexIndex, geoInfo['normal']);
         faceNormals.addAll([data[0], data[1], data[2]]);
       }
 
       if (geoInfo["material"] != null &&
           geoInfo["material"]["mappingType"] != 'AllSame') {
-        materialIndex = _getData(polygonVertexIndex, polygonIndex, vertexIndex,
-            geoInfo["material"])[0];
+        materialIndex = _getData(polygonVertexIndex, polygonIndex, vertexIndex,geoInfo["material"])[0];
       }
 
       if (geoInfo["uv"] != null) {
@@ -2351,9 +2346,7 @@ class _AnimationParser {
     }
 
     final initialPosition = initialPositionVector3.copyIntoArray();
-    final initialRotation = Euler()
-        .setFromQuaternion(initialRotationQuaternion, RotationOrders.fromString(rawTracks["eulerOrder"]))
-        .toArray();
+    final initialRotation = Euler().setFromQuaternion(initialRotationQuaternion, RotationOrders.fromString(rawTracks["eulerOrder"])).toArray();
     final initialScale = initialScaleVector3.copyIntoArray();
 
     if (rawTracks["T"] != null && rawTracks["T"]["curves"].keys.length > 0) {
@@ -2612,15 +2605,15 @@ class _TextParser {
   late _FBXTree allNodes;
   late String currentPropName;
 
-  getPrevNode() {
+  Map<String, dynamic> getPrevNode() {
     return nodeStack.isEmpty?{}:nodeStack[currentIndent - 2];
   }
 
-  getCurrentNode() {
+  Map<String, dynamic> getCurrentNode() {
     return nodeStack.isEmpty?{}:nodeStack[currentIndent - 1];
   }
 
-  getCurrentProp() {
+  Map<String, dynamic> getCurrentProp() {
     return currentProp;
   }
 
@@ -2638,45 +2631,51 @@ class _TextParser {
     currentProp = val;
     currentPropName = name;
   }
-
+  
   _FBXTree parse(String text) {
-    currentIndent = 0;
-
-    allNodes = _FBXTree();
-    nodeStack = [];
-    currentProp = [];
-    currentPropName = '';
-
-    final scope = this;
-
-    final split = text.split(RegExp(r'[\r\n]+'));
-    split.asMap().forEach((i, line) {
-      final matchComment = RegExp(r"^[\s\t]*;").hasMatch(line);
-      final matchEmpty = RegExp(r"^[\s\t]*$").hasMatch(line);
-
-      if (matchComment || matchEmpty) return;
-
-      final matchBeginning = RegExp('\t{${scope.currentIndent}}(\\w+):(.*){').allMatches(line);// line.startsWith();
-      final matchProperty = RegExp('\t{${scope.currentIndent}}(\\w+):[\\s\\t\\r\\n](.*)').allMatches(line);//line.contains();
-      final matchEnd = line.contains(RegExp('^\\t{${scope.currentIndent - 1}}}'));
+    this.currentIndent = 0;
+    this.allNodes = _FBXTree();
+    this.nodeStack = [];
+    this.currentProp = [];
+    this.currentPropName = '';
+    
+    final List<String> split = text.split(RegExp(r'[\r\n]+'));
+    
+    // A standard for-loop is required so we can look ahead without breaking the sequence
+    for (int i = 0; i < split.length; i++) {
+      final String line = split[i];
       
+      // 1. Skip comments and empty lines
+      final bool matchComment = RegExp(r"^[\s\t]*;").hasMatch(line);
+      final bool matchEmpty = RegExp(r"^[\s\t]*$").hasMatch(line);
+      if (matchComment || matchEmpty) continue;
+
+      // 2. Replicate the dynamic, tab-enforced JavaScript regex checks
+      // We escape backslashes cleanly using Dart raw strings (r'') combined with string interpolation
+      final matchBeginning = RegExp('^\\t{${this.currentIndent}}(\\w+):(.*)\\{').allMatches(line);
+      final RegExp matchPropertyRegExp = RegExp('^\\t{${this.currentIndent}}(\\w+):[\\s\\t\\r\\n](.*)');
+      final matchEnd = line.contains(RegExp('^\\t{${this.currentIndent - 1}}}'));
+
+      final Match? matchProperty = matchPropertyRegExp.firstMatch(line);
+
       if (matchBeginning.isNotEmpty) {
-        scope.parseNodeBegin(line, matchBeginning.toList());
+        this.parseNodeBegin(line, matchBeginning.toList());
       } 
-      else if (matchProperty.isNotEmpty) {
-        scope.parseNodeProperty(line, matchProperty.toList(), split[++i]);
+      else if (matchProperty != null) {
+        // SAFE READ-AHEAD: Grab the next line if it exists without mutating 'i'
+        final String nextLine = (i + 1 < split.length) ? split[i + 1] : '';
+        this.parseNodeProperty(line, matchProperty, nextLine);
       } 
       else if (matchEnd) {
-        scope.popStack();
+        this.popStack();
       } 
       else if (RegExp(r"^[^\s\t}]").hasMatch(line)) {
-        // large arrays are split over multiple lines terminated with a ',' character
-        // if this is encountered the line needs to be joined to the previous line
-        scope.parseNodePropertyContinued(line);
+        // Large arrays split over multiple lines terminated with a ',' character
+        this.parseNodePropertyContinued(line);
       }
-    });
-
-    return allNodes;
+    }
+    
+    return this.allNodes;
   }
 
   void parseNodeBegin(String line, List<RegExpMatch> property) {
@@ -2756,79 +2755,72 @@ class _TextParser {
     return _NodeAttr(id: id, name: name, type: type);
   }
 
-  void parseNodeProperty(String line, List<RegExpMatch> property, String contentLine) {
-    final regExp = RegExp(r'^"');
-    final regExp2 = RegExp(r'"$');
+  void parseNodeProperty(String line, Match property, String contentLine) {
+    // Extract and clean property name and value strings
+    String propName = (property.group(1) ?? '').replaceAll(RegExp(r'^"|"$'), '').trim();
+    String propValue = (property.group(2) ?? '').replaceAll(RegExp(r'^"|"$'), '').trim();
 
-    String propName =
-        property.first.group(1)!.replaceFirst(regExp, '').replaceFirst(regExp2, '').trim();
-    String propValue =
-        property.first.group(2)!.replaceFirst(regExp, '').replaceFirst(regExp2, '').trim();
-
-    // for special case: base64 image data follows "Content: ," line
-    //	Content: ,
-    //	 "/9j/4RDaRXhpZgAATU0A..."
+    // Special case: base64 image data follows "Content: ," line
     if (propName == 'Content' && propValue == ',') {
-      propValue = contentLine
-          .replaceAll(RegExp(r'"'), '')
-          .replaceFirst(RegExp(r',$'), '')
-          .trim();
+      propValue = contentLine.replaceAll('"', '').replaceAll(RegExp(r',$'), '').trim();
     }
 
-    final currentNode = getCurrentNode();
-    final parentName = currentNode['name'];
+    final Map<String, dynamic> currentNode = this.getCurrentNode();
+    final String parentName = currentNode['name'] ?? '';
 
+    // Forward custom properties block
     if (parentName == 'Properties70') {
-      parseNodeSpecialProperty(line, propName, propValue);
+      this.parseNodeSpecialProperty(line, propName, propValue);
       return;
     }
 
-    // Connections
+    // CRITICAL: Connections Parsing Block
     if (propName == 'C') {
-      final connProps = propValue.split(',')..removeAt(0);//..removeRange(1,propValue.length);
-      final from = int.parse(connProps[0]);
-      final to = int.parse(connProps[1]);
-      List<String> rest = propValue.split(',');
-      rest = rest..removeRange(3, rest.length);
-
-      rest = rest.map((elem) {
-        return elem.trim().replaceFirst(RegExp(r'"'), '');
+      final List<String> connProps = propValue.split(',');
+      
+      // Elements: [0] = Type ("OO"/"OP"), [1] = from ID, [2] = to ID, [3] = Type string
+      final int from = int.tryParse(connProps[1].trim()) ?? 0;
+      final int to = int.tryParse(connProps[2].trim()) ?? 0;
+      
+      // Extract remaining metadata strings (e.g., "DiffuseColor")
+      List<dynamic> rest = connProps.sublist(3).map((elem) {
+        return elem.trim().replaceAll(RegExp(r'^"|"$'), '');
       }).toList();
 
       propName = 'connections';
-      propValue = '$from, $to';
-      _append(propValue, rest);
+      
+      // Combine standard IDs and extra rest properties into a single flat list
+      final List<dynamic> connectionData = [from, to];
+      connectionData.addAll(rest);
+      
+      propValue = connectionData.toString(); // Keep reference to assign to node mapping
+      
+      currentNode[propName] ??= [];
+      currentNode[propName].add(connectionData);
+    }
 
-      if (currentNode[propName] == null) {
-        currentNode[propName] = [];
+    // Handle unique Node IDs assignment
+    if (propName == 'Node') {
+      currentNode['id'] = propValue;
+    }
+
+    // Safely assign properties back to the parent target tracking block
+    if (propName != 'connections') {
+      if (currentNode.containsKey(propName) && currentNode[propName] is List) {
+        currentNode[propName].add(propValue);
+      } else {
+        if (propName != 'a') {
+          currentNode[propName] = propValue;
+        } else {
+          currentNode['a'] = propValue;
+        }
       }
     }
 
-    // Node
-    if (propName == 'Node') currentNode['id'] = propValue;
+    this.setCurrentProp(currentNode, propName);
 
-    // connections
-    if (currentNode.keys.contains(propName) && currentNode[propName] is List) {
-      List pv = propValue.split(',');
-      List<double> temp = [];
-      for(int i = 0; i < pv.length;i++){
-        temp.add(double.parse(pv[i]));
-      }
-      currentNode[propName].add(temp);
-    } 
-    else {
-      if (propName != 'a'){
-        currentNode[propName] = propValue;
-      }
-      else{
-        currentNode['a'] = propValue;
-      }
-    }
-
-    setCurrentProp(currentNode, propName);
-
-    // convert string to array, unless it ends in ',' in which case more will be added to it
-    if (propName == 'a' && propValue != ',') {
+    // Convert pure numeric string tokens to parsed native type arrays
+    if (propName == 'a' && !propValue.endsWith(',')) {
       currentNode['a'] = _parseNumberArray(propValue);
     }
   }
@@ -3483,11 +3475,11 @@ _getData(int polygonVertexIndex, int polygonIndex, int vertexIndex, infoObject) 
   }
 
   if (infoObject["referenceType"] == 'IndexToDirect'){
-    index = infoObject["indices"][index];
+    index = infoObject["indices"][index].toInt();
   }
 
   final int from = (index * infoObject["dataSize"]).toInt();
-  final to = from + infoObject["dataSize"];
+  final int to = (from + infoObject["dataSize"]).toInt();
 
   return _slice(dataArray, infoObject["buffer"], from, to);
 }
@@ -3678,12 +3670,6 @@ String _convertArrayBufferToString(Uint8List buffer, [int? from, int? to]) {
   final str = LoaderUtils.decodeText(Uint8List.view(buffer.buffer, from, to).toList());
 
   return str;
-}
-
-void _append(a, b) {
-  for (int i = 0, j = a.length, l = b.length; i < l; i++, j++) {
-    a+= ', ${b[i]}';
-  }
 }
 
 _slice(a, b, int from, num to) {

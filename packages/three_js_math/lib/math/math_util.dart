@@ -218,24 +218,23 @@ class MathUtils{
   /// @param {TypedArray} array - The typed array that defines the data type of the value.
   /// @return {number} The denormalize (float) value in the range `[0,1]`.
   ///
-  static double denormalize(num value, TypedData array ) {
-    switch (array.runtimeType) {
-      case Float32List:
-        return value*1.0;
-      case Uint32List:
-        return value / 4294967295.0;
-      case Uint16List:
-        return value / 65535.0;
-      case Uint8List:
-        return value / 255.0;
-      case Int32List:
-        return math.max( value / 2147483647.0, - 1.0 );
-      case Int16List:
-        return math.max( value / 32767.0, - 1.0 );
-      case Int8List:
-        return math.max( value / 127.0, - 1.0 );
-      default:
-        throw( 'Invalid component type.' );
+  static double denormalize(num value, TypedDataList array) {
+    if (array is Float32List) {
+      return value * 1.0;
+    } else if (array is Uint32List) {
+      return value / 4294967295.0;
+    } else if (array is Uint16List) {
+      return value / 65535.0;
+    } else if (array is Uint8List) {
+      return value / 255.0;
+    } else if (array is Int32List) {
+      return math.max(value / 2147483647.0, -1.0);
+    } else if (array is Int16List) {
+      return math.max(value / 32767.0, -1.0);
+    } else if (array is Int8List) {
+      return math.max(value / 127.0, -1.0);
+    } else {
+      throw ArgumentError('Invalid component type.');
     }
   }
 
@@ -246,24 +245,23 @@ class MathUtils{
   /// @param {TypedArray} array - The typed array that defines the data type of the value.
   /// @return {number} The normalize value.
   ///
-  static double normalize( num value, TypedData array ) {
-    switch ( array.runtimeType ) {
-      case Float32List:
-        return value.toDouble();
-      case Uint32List:
-        return ( value * 4294967295.0 ).roundToDouble();
-      case Uint16List:
-        return ( value * 65535.0 ).roundToDouble();
-      case Uint8List:
-        return ( value * 255.0 ).roundToDouble();
-      case Int32List:
-        return ( value * 2147483647.0 ).roundToDouble();
-      case Int16List:
-        return ( value * 32767.0 ).roundToDouble();
-      case Int8List:
-        return ( value * 127.0 ).roundToDouble();
-      default:
-        throw( 'Invalid component type.' );
+  static double normalize(num value, TypedDataList array) {
+    if (array is Float32List) {
+      return value.toDouble();
+    } else if (array is Uint32List) {
+      return (value * 4294967295.0).roundToDouble();
+    } else if (array is Uint16List) {
+      return (value * 65535.0).roundToDouble();
+    } else if (array is Uint8List) {
+      return (value * 255.0).roundToDouble();
+    } else if (array is Int32List) {
+      return (value * 2147483647.0).roundToDouble();
+    } else if (array is Int16List) {
+      return (value * 32767.0).roundToDouble();
+    } else if (array is Int8List) {
+      return (value * 127.0).roundToDouble();
+    } else {
+      throw ArgumentError('Invalid component type.');
     }
   }
   // static void listSetter<T>(List<T> list, int idx, dynamic value) {

@@ -7,6 +7,7 @@ import 'package:example/controls/misc_controls_fly.dart';
 import 'package:example/controls/misc_controls_pointerlock.dart';
 import 'package:example/controls/misc_controls_transform.dart';
 import 'package:example/exporters/misc_exporter_fbx.dart';
+import 'package:example/exporters/misc_exporter_gltf.dart';
 import 'package:example/exporters/misc_exporter_obj.dart';
 import 'package:example/exporters/misc_exporter_ply.dart';
 import 'package:example/exporters/misc_exporter_stl.dart';
@@ -256,6 +257,9 @@ class MyAppState extends State<MyApp> {
               },
               '/misc_exporter_fbx':(BuildContext context) {
                 return const MiscExporterFBX();
+              },
+              '/misc_exporter_gltf':(BuildContext context) {
+                return const MiscExporterGLTF();
               },
               '/webgl_camera_array':(BuildContext context) {
                 return const WebglCameraArray();

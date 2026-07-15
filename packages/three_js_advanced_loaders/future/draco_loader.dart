@@ -178,7 +178,7 @@ class DRACOLoader extends Loader {
 
 			if ( name == 'color' ) {
 				this._assignVertexColorSpace( attribute, result.vertexColorSpace );
-				attribute.normalized = ( array is Float32Array ) == false;
+				attribute.normalized = ( array is Float32List ) == false;
 			}
 
 			geometry.setAttribute( name, attribute );
@@ -293,8 +293,8 @@ class DRACOLoader extends Loader {
 			}
 
 			final worker = this.workerPool[ this.workerPool.length - 1 ];
-			worker._taskCosts[ taskID ] = taskCost;
-			worker._taskLoad += taskCost;
+			worker['_taskCosts'][ taskID ] = taskCost;
+			worker['_taskLoad'] += taskCost;
 			return worker;
 
 		} );
@@ -303,8 +303,8 @@ class DRACOLoader extends Loader {
 
 	_releaseTask(Map worker, taskID ) {
 		worker['_taskLoad'] = worker['_taskLoad']-worker['_taskCosts'][ taskID ];
-		worker._callbacks[ taskID ];
-		worker._taskCosts[ taskID ];
+		worker['_callbacks'][ taskID ];
+		worker['_taskCosts'][ taskID ];
 	}
 
 	debug() {
@@ -362,7 +362,7 @@ DRACOWorker() {
 					final decoder = draco.Decoder();
 
 					try {
-						final geometry = decodeGeometry( draco, decoder, new Int8Array( buffer ), taskConfig );
+						final geometry = decodeGeometry( draco, decoder, new Int8List( buffer ), taskConfig );
 						final buffers = geometry.attributes.map( ( attr ) => attr.array.buffer );
 
 						if ( geometry.index ) buffers.push( geometry.index.array.buffer );
@@ -386,7 +386,7 @@ DRACOWorker() {
 
 		final ptr = draco._malloc( byteLength );
 		decoder.GetTrianglesUInt32Array( dracoGeometry, byteLength, ptr );
-		final index = new Uint32Array( draco.HEAPF32.buffer, ptr, numIndices ).slice();
+		final index = new Uint32List( draco.HEAPF32.buffer, ptr, numIndices ).slice();
 		draco._free( ptr );
 
 		return { 'array': index, 'itemSize': 1 };
@@ -395,13 +395,13 @@ DRACOWorker() {
 
 	getDracoDataType( draco, attributeType ) {
 		switch ( attributeType ) {
-			case Float32Array: return draco.DT_FLOAT32;
-			case Int8Array: return draco.DT_INT8;
-			case Int16Array: return draco.DT_INT16;
-			case Int32Array: return draco.DT_INT32;
-			case Uint8Array: return draco.DT_UINT8;
-			case Uint16Array: return draco.DT_UINT16;
-			case Uint32Array: return draco.DT_UINT32;
+			case Float32List: return draco.DT_FLOAT32;
+			case Int8List: return draco.DT_INT8;
+			case Int16List: return draco.DT_INT16;
+			case Int32List: return draco.DT_INT32;
+			case Uint8List: return draco.DT_UINT8;
+			case Uint16List: return draco.DT_UINT16;
+			case Uint32List: return draco.DT_UINT32;
 		}
 	}
 

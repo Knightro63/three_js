@@ -651,7 +651,7 @@ class GLTFTextureBasisUExtension extends GLTFExtension {
     }
 
     final extension = textureDef["extensions"][name];
-    final loader = parser.options["ktx2Loader"];
+    final loader = parser.options["_ktx2Loader"];
 
     if (loader == null) {
       if (json["extensionsRequired"] != null &&
@@ -748,11 +748,10 @@ class GLTFMeshoptCompression extends GLTFExtension {
           bufferView["extensions"][name] != null) {
         final extensionDef = bufferView["extensions"][name];
 
-        final buffer =
-            await parser.getDependency('buffer', extensionDef.buffer);
+        final buffer = await parser.getDependency('buffer', extensionDef['buffer']);
         final decoder = parser.options['meshoptDecoder'];
 
-        if (!decoder || !decoder.supported) {
+        if (decoder == null || !decoder.supported) {
           if (json["extensionsRequired"] != null &&
               json["extensionsRequired"].indexOf(name) >= 0) {
             throw ('THREE.GLTFLoader: setMeshoptDecoder must be called before loading compressed files');

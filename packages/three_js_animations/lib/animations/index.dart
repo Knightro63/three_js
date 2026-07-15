@@ -9,3 +9,4 @@ export 'property_mixer.dart';
 export 'property_binding.dart';
 export 'animation_object_group.dart';
 export 'sprite_animator.dart';
+export './animation_clip_creator.dart';

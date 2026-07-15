@@ -365,26 +365,18 @@ Function createAttributesKey = (Map<String, dynamic> attributes) {
   return attributesKey;
 };
 
-double getNormalizedComponentScale(constructor) {
-  // Reference:
-  // https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_mesh_quantization#encoding-quantized-data
-
-  switch (constructor.toString()) {
-    case "Int8List":
-    case "Int8Array":
+double getNormalizedComponentScale(int constructor) {
+  switch (constructor) {
+    case 5120:
       return 1 / 127;
-    case "Uint8List":
-    case "Uint8Array":
+    case 5121:
       return 1 / 255;
-    case "Int16List":
-    case "Int16Array":
+    case 5122:
       return 1 / 32767;
-    case "Uint16List":
-    case "Uint16Array":
+    case 5123:
       return 1 / 65535;
-
     default:
-      throw ('THREE.GLTFLoader: Unsupported normalized accessor component type.');
+      throw ('GLTFLoader: Unsupported normalized accessor component type.');
   }
 }
 
@@ -414,7 +406,7 @@ void computeBounds(BufferGeometry geometry, Map<String, dynamic> primitiveDef, G
       if (accessor["normalized"] != null &&
           accessor["normalized"] != false &&
           accessor["normalized"] != 0) {
-        final boxScale = getNormalizedComponentScale( webglComponentTypes[accessor.componentType]);
+        final boxScale = getNormalizedComponentScale( accessor['componentType']);
         box.min.scale(boxScale);
         box.max.scale(boxScale);
       }
@@ -438,7 +430,7 @@ void computeBounds(BufferGeometry geometry, Map<String, dynamic> primitiveDef, G
       final target = targets[i];
 
       if (target["POSITION"] != null) {
-        final accessor = parser.json["accessors"][target["POSITION"]];
+        final Map<String,dynamic> accessor = parser.json["accessors"][target["POSITION"]];
         final min = accessor["min"];
         final max = accessor["max"];
 
@@ -451,7 +443,7 @@ void computeBounds(BufferGeometry geometry, Map<String, dynamic> primitiveDef, G
           vector.setZ(math.max<double>(min[2].abs().toDouble(), max[2].abs().toDouble()));
 
           if (accessor["normalized"] == true) {
-            final boxScale = getNormalizedComponentScale(webglComponentTypes[accessor.componentType]);
+            final boxScale = getNormalizedComponentScale(accessor['componentType']);
             vector.scale(boxScale);
           }
 

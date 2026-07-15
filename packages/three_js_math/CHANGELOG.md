@@ -1,3 +1,7 @@
+## 0.3.1
+
+* Updated Math Utils.
+
 ## 0.3.0
 
 * Removed FlutterAngle

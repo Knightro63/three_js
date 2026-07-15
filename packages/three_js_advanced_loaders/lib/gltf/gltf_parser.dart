@@ -441,7 +441,7 @@ class GLTFParser {
     // For VEC3: itemSize is 3, elementBytes is 4, itemBytes is 12.
     final elementBytes = typedArray.getBytesPerElement() ?? 0;
     final itemBytes = elementBytes * itemSize;
-    final byteOffset = accessorDef["byteOffset"] ?? 0;
+    final int byteOffset = accessorDef["byteOffset"] ?? 0;
     final int? byteStride = accessorDef["bufferView"] != null
         ? json["bufferViews"][accessorDef["bufferView"]]["byteStride"]
         : null;
@@ -453,7 +453,7 @@ class GLTFParser {
     if (byteStride != null && byteStride != itemBytes) {
       // Each "slice" of the buffer, as defined by 'count' elements of 'byteStride' bytes, gets its own InterleavedBuffer
       // This makes sure that IBA.count reflects accessor.count properly
-      final ibSlice = (byteOffset / byteStride).floor();
+      final int ibSlice = (byteOffset / byteStride).floor();
       final ibCacheKey = 'InterleavedBuffer:${accessorDef["bufferView"]}:${accessorDef["componentType"]}:$ibSlice:${accessorDef["count"]}';
       dynamic ib = parser.cache.get(ibCacheKey);
       if (ib == null) {
@@ -663,7 +663,7 @@ class GLTFParser {
 
       if (transform != null) {
         final gltfReference = parser.associations[texture];
-        texture = parser.extensions[gltfExtensions["KHR_TEXTURE_TRANSFORM"]].extendTexture(texture, transform);
+        texture = texture == null?null:parser.extensions[gltfExtensions["KHR_TEXTURE_TRANSFORM"]].extendTexture(texture, transform);
         parser.associations[texture] = gltfReference;
       }
     }
@@ -1313,7 +1313,7 @@ class GLTFParser {
       dynamic outputArray = outputAccessor.array;
 
       if (outputAccessor.normalized) {
-        final scale = getNormalizedComponentScale(outputArray.runtimeType);
+        final scale = getNormalizedComponentScale(outputArray);
 
         final scaled = Float32List(outputArray.length);
 
