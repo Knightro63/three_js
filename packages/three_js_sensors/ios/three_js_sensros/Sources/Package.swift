@@ -15,7 +15,10 @@ let package = Package(
     targets: [
         .target(
             name: "three_js_sensors",
-            dependencies: [],
+            dependencies: [
+                .product(name: "FlutterFramework", package: "FlutterFramework")
+            ],
+            path: "Sources"
         ),
     ]
 )

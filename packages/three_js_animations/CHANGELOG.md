@@ -1,3 +1,7 @@
+## 0.3.1
+
+* Added Animation creator clip.
+
 ## 0.3.0
 
 * Removed NativeArray for Zero-Allocation Updates.

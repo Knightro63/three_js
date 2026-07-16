@@ -1,6 +1,6 @@
 name: three_js_angle_renderer
 description: "This is a renderer for three_js using angle."
-version: 0.0.1
+version: 0.0.2
 homepage: https://github.com/Knightro63/three_js/tree/main/packages/three_js_angle_renderer
 
 environment:
@@ -13,8 +13,8 @@ dependencies:
   logger: ^2.5.0
   web: ^1.1.1
   three_js_core: ^0.3.0
-  three_js_math: ^0.3.0
-  flutter_angle: ^0.4.0
+  three_js_math: ^0.3.1
+  flutter_angle: ^0.4.1
 
 dev_dependencies:
   flutter_test:

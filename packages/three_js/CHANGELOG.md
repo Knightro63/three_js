@@ -1,3 +1,7 @@
+## 0.3.1
+
+* Updated to the latest version of three_js apis.
+
 ## 0.3.0
 
 * Removed NativeArray for Zero-Allocation Updates.

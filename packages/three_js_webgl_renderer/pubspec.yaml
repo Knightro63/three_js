@@ -12,9 +12,9 @@ dependencies:
     sdk: flutter
   logger: ^2.5.0
   web: ^1.1.1
-  three_js_core: ^0.3.0
-  three_js_math: ^0.3.0
-  flutter_angle: ^0.4.0
+  three_js_core: ^0.3.1
+  three_js_math: ^0.3.1
+  flutter_angle: ^0.4.1
 
 dev_dependencies:
   flutter_test:

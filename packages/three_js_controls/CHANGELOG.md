@@ -1,5 +1,9 @@
 ## 0.3.0
 
+* Updated three_js_sensors.
+
+## 0.3.0
+
 * Removed NativeArray for Zero-Allocation Updates.
 
 ## 0.2.2

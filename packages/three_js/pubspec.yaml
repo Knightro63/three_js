@@ -21,12 +21,12 @@ dependencies:
   #   path: ../three_js_impeller_renderer
   # three_js_gpu_renderer:
   #   path: ../three_js_gpu_renderer
-  three_js_angle_renderer: ^0.0.1
-  #three_js_webgl_renderer: ^0.0.1
-  three_js_math: ^0.3.0
+  three_js_angle_renderer: ^0.0.2
+  #three_js_webgl_renderer: ^0.0.2
+  three_js_math: ^0.3.1
   three_js_advanced_loaders: ^0.3.1
-  three_js_animations: ^0.3.0
-  three_js_controls: ^0.3.0
+  three_js_animations: ^0.3.1
+  three_js_controls: ^0.3.1
   three_js_core: ^0.3.0
   three_js_core_loaders: ^0.3.0
   three_js_curves: ^0.3.0
