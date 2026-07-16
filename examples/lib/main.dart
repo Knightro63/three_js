@@ -1,3 +1,4 @@
+import 'package:example/animations/webgl_animation_skinning_ik.dart';
 import 'package:example/animations/webgl_animation_walk.dart';
 import 'package:example/audio/orientation.dart';
 import 'package:example/audio/sandbox.dart';
@@ -473,6 +474,9 @@ class MyAppState extends State<MyApp> {
               },
               '/webgl_animation_walk':(BuildContext context) {
                 return const WebglAnimationWalk();
+              },
+              '/webgl_animation_skinning_ik':(BuildContext context) {
+                return const WebglAnimationSkinningIK();
               },
               '/webgl_skinning_simple':(BuildContext context) {
                 return const WebglSkinningSimple();

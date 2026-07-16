@@ -163,7 +163,7 @@ Please review the following table for all the supported Modules.
 |-----------------------------------------------------------------------------------------------|--------|------------|---------|-----|
 |  | <span style="color: #ff00ff;">**Animation**</span> |  |  |  |
 | AnimationClipCreator |  | ✅ | ✅ | ✅ |
-| CCDIKSolver |  | ❌ | ❌ | ❌ |
+| CCDIKSolver |  | ✅ | ✅ | ✅ |
 |  | <span style="color: #ff00ff;">**Controls**</span> |  |  |  |
 | [ArcballControls](https://github.com/Knightro63/three_js/blob/main/packages/three_js_transform_controls/lib/arcball_controls.dart) | [three_js_transform_controls](https://pub.dev/packages/three_js_transform_controls) | ✅ | ✅ | ✅ |
 | [DragControls](https://github.com/Knightro63/three_js/blob/main/packages/three_js_controls/lib/drag_controls.dart) | [three_js_controls](https://pub.dev/packages/three_js_controls) | ✅ | ✅ | ✅ |

@@ -87,6 +87,7 @@ const List<String> filesJson = [
   "webgl_skinning_simple",
   "webgl_animation_multiple",
   "misc_animation_keys",
+  "webgl_animation_skinning_ik",
   "webgl_clipping_advanced",
   "webgl_clipping_intersection",
   "webgl_clipping_stencil",
