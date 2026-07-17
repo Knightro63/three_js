@@ -4,6 +4,7 @@
 #include <color.glsl> 
 #include <clipping.glsl> 
 #include <flat_shading.glsl> 
+#include <standard.glsl>
 
 uniform sampler2D map; 
 uniform sampler2D alphaMap; 
@@ -18,23 +19,7 @@ in vec3 v_worldPosition;
 in vec3 v_worldNormal; 
 in vec2 v_uv; 
 
-in vec4 v_skinIndex;
-in vec4 v_skinWeight;
-
 out vec4 frag_color; 
-
-// Arbitrary surface normal perturbation calculation block 
-vec3 perturbNormalArb(vec3 surf_pos, vec3 surf_norm, vec2 dHdxy, float faceDirection) { 
-  vec3 vSigmaX = dFdx(surf_pos); 
-  vec3 vSigmaY = dFdy(surf_pos); 
-  vec3 vN = surf_norm; 
-  vec3 R1 = cross(vSigmaY, vN); 
-  vec3 R2 = cross(vN, vSigmaX); 
-  float fDet = dot(vSigmaX, R1); 
-  fDet *= faceDirection; 
-  vec3 vGrad = sign(fDet) * (dHdxy.x * R1 + dHdxy.y * R2); 
-  return normalize(abs(fDet) * vN - vGrad); 
-} 
 
 void main() { 
   if(evaluateClippingPlanes(v_worldPosition)){
@@ -68,7 +53,7 @@ void main() {
     alpha *= texture(alphaMap, v_uv).g; 
   } 
 
-  if (alpha < material.pbrParams.w) { // material.pbrParams.w = alphaTest 
+  if (alpha < material.pbrParams.w) {
     frag_color = vec4(0.0); 
     return; 
   } 
@@ -98,20 +83,18 @@ void main() {
   } 
 
   // 7. Surface Normal Evaluation (Smooth vs Facetted) 
+  float faceDirection = gl_FrontFacing ? 1.0 : -1.0; 
   vec3 N = evaluateNormal(v_worldNormal, v_worldPosition); 
 
   if (hasNormalMap) { 
     vec3 normalMapSample = texture(normalMap, v_uv).xyz * 2.0 - 1.0; 
-    // THE COORD FIX: Normal scale mapping is tracked inside material.mapIntensities.x (bumpScale)
     normalMapSample.xy *= material.mapIntensities.x; 
     vec2 dHdxy = normalMapSample.xy; 
-    float faceDirection = gl_FrontFacing ? 1.0 : -1.0; 
     N = perturbNormalArb(v_worldPosition, N, dHdxy, faceDirection); 
   } 
   else if (hasBumpMap) { 
     float bumpSample = texture(bumpMap, v_uv).r; 
     vec2 dHdxy = vec2(dFdx(bumpSample), dFdy(bumpSample)) * material.mapIntensities.x; // material.bumpScale 
-    float faceDirection = gl_FrontFacing ? 1.0 : -1.0; 
     N = perturbNormalArb(v_worldPosition, N, dHdxy, faceDirection); 
   } 
 

@@ -30,7 +30,8 @@ enum TextureType {
   matcap,
   gradientMap,
   uniforms,
-  boneTexture
+  boneTexture,
+  instanceTexture
 }
 
 /// Core blending modes supported by the material system.
@@ -441,7 +442,7 @@ abstract class MaterialDescriptorRegistry {
   static void _registerDefaultsLocked() {
     final basicDescriptor = MaterialDescriptor(
       key: 'Basic',
-      bindings: [TextureType.map,TextureType.alphaMap,TextureType.aoMap,TextureType.boneTexture],
+      bindings: [TextureType.map,TextureType.alphaMap,TextureType.aoMap,TextureType.boneTexture,TextureType.instanceTexture],
       renderState: MaterialRenderState(),
       requiredAttributes: [
         GeometryAttribute.position,
@@ -662,6 +663,8 @@ abstract class MaterialDescriptorRegistry {
         GeometryAttribute.normal,
         GeometryAttribute.uv0,
         GeometryAttribute.color,
+        GeometryAttribute.skinIndex,
+        GeometryAttribute.skinWeight
       ],
     );
 

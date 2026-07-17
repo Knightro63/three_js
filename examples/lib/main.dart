@@ -62,7 +62,7 @@ import 'package:example/loaders/webgl_loader_vox.dart';
 import 'package:example/loaders/webgl_loader_vtk.dart';
 import 'package:example/loaders/webgl_loader_xyz.dart';
 import 'package:example/material/webgl_hex_tiling.dart';
-//import 'package:example/material/webgl_materials_video.dart';
+import 'package:example/material/webgl_materials_video.dart';
 import 'package:example/material/webgl_tonemapping.dart';
 import 'package:example/terrain/webgl_planet_generator.dart';
 import 'package:example/postprocessing/webgl_postprocessing_fxaa.dart';
@@ -511,9 +511,9 @@ class MyAppState extends State<MyApp> {
               '/webgl_materials':(BuildContext context) {
                 return const WebglMaterials();
               },
-              // '/webgl_materials_video':(BuildContext context) {
-              //   return const WebglMaterialsVideo();
-              // },
+              '/webgl_materials_video':(BuildContext context) {
+                return const WebglMaterialsVideo();
+              },
               '/webgl_projected_basic':(BuildContext context) {
                 return const WebglProjectedBasic();
               },

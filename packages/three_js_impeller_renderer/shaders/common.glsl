@@ -40,7 +40,7 @@ layout(std140, binding = 1) uniform MaterialBlock {
   vec4 flags2; // 100-103 x:hasDisplacementMap, y:hasRoughnessMap,      z:hasMetalnessMap,      w:hasEmissiveMap
   vec4 flags3; // 104-107 x:hasClearcoatMap,    y:hasClearcoatNormalMap,z:hasClearcoatRoughMap, w:hasSheenColorMap
   vec4 flags4; // 108-109 x:hasSheenRoughMap,   y:hasTransmissionMap,   z:hasThicknessMap,      w:hasIridescenceMap
-  vec4 flags5; // 112-115 x:hasIridescenceThick,y:hasGradientMap,       z:hasMatcap,            w:padding
+  vec4 flags5; // 112-115 x:hasIridescenceThick,y:hasGradientMap,       z:hasMatcap,            w:hasInstancingTexture
 
   mat4 bindMatrices[2]; //matrix, inverse
   vec4 boneTextureParm;

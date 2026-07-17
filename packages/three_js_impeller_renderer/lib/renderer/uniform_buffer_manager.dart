@@ -438,10 +438,11 @@ class MaterialUniformData {
     uniformData[116] = checkMap(material.iridescenceThicknessMap);    // 19: hasIridescenceThicknessMap
     uniformData[117] = checkMap(material.gradientMap);                // 20: hasGradientMap
     uniformData[118] = checkMap(material.matcap);                     // 21: hasMatcap
+    uniformData[119] = object is InstancedMesh?1:0;                   // 22: hasInstancingTexture
     
     /// 152 - 155 boneTextureParm
     uniformData[152] = object.skeleton?.boneTextureSize.toDouble() ?? 0.0;
-
+    uniformData[153] = 0.0; //this will be size for instancing
     return uniformData;
   }
 }

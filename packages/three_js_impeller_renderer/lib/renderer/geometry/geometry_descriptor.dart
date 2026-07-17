@@ -12,7 +12,7 @@ enum GeometryAttribute {
   uv0,
   uv1,
   skinIndex,
-  skinWeight,
+  skinWeight
 }
 
 class GeometryBindings{
@@ -46,8 +46,19 @@ class GeometryBindings{
     _bindTextures(pass,vertex,fragment);
 
     // Bind and draw using the correct calculated indices count
-    pass.bindVertexBuffer( host.emplace(hardwareBuffers.vertexBuffer), hardwareBuffers.vertexCount);
-    if(hardwareBuffers.indexCount != 0) pass.bindIndexBuffer( host.emplace(hardwareBuffers.indexBuffer), hardwareBuffers.indexType, hardwareBuffers.indexCount);
+    pass.bindVertexBuffer( 
+      host.emplace(hardwareBuffers.vertexBuffer), 
+      hardwareBuffers.vertexCount
+    );
+    if(hardwareBuffers.indexCount != 0){
+      pass.bindIndexBuffer( 
+        host.emplace(
+          hardwareBuffers.indexBuffer
+        ), 
+        hardwareBuffers.indexType, 
+        hardwareBuffers.indexCount * (object is InstancedMesh?object.count ?? 1:1)
+      );
+    }
   }
 
   void _bindTextures(
@@ -68,11 +79,26 @@ class GeometryBindings{
     
     if (object is SkinnedMesh && object.skeleton != null && activeBindings.contains(TextureType.boneTexture)) {
       final skeleton = object.skeleton!;
-      if (skeleton.boneTexture == null ) skeleton.computeBoneTexture();
+      if (skeleton.boneTexture == null ){
+        skeleton.computeBoneTexture();
+      }
 
-      final texture = _createTexture(skeleton.boneTexture!.image);
+      final text = skeleton.boneTexture!;
+      final texture = _createTexture(text.image);
       final texSlot = vertex.getUniformSlot('boneTexture');
-      pass.bindTexture(texSlot, texture, sampler: GpuSamplerConverter.getSampler(skeleton.boneTexture!));
+      pass.bindTexture(texSlot, texture, sampler: GpuSamplerConverter.getSampler(text));
+    }
+
+    if(object is InstancedMesh && (object as InstancedMesh).instanceMatrix != null && activeBindings.contains(TextureType.instanceTexture)){
+      final data = (object as InstancedMesh).instanceMatrix!.array as Float32List;
+      final image = ImageElement(
+        width: 16,
+        height: data.length ~/16,
+        data: data,
+      );
+      final texture = _createTexture(image);
+      final texSlot = vertex.getUniformSlot('instanceTexture');
+      pass.bindTexture(texSlot, texture, sampler: GpuSamplerConverter.getSampler());
     }
     
     // ========================================================
@@ -593,8 +619,8 @@ class GpuSamplerConverter {
   static const int GL_MIRRORED_REPEAT = 33648;
   static const int GL_TEXTURE_MIN_FILTER = 10241;
 
-  static gpux.SamplerOptions getSampler(Texture text){
-    final GpuFilterPair minf = fromGlMinFilter(text.minFilter);
+  static gpux.SamplerOptions getSampler([Texture? text]){
+    //final GpuFilterPair minf = fromGlMinFilter(text.minFilter);
 
     return gpux.SamplerOptions(
       // minFilter: minf.minFilter,

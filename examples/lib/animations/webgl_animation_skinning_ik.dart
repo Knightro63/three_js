@@ -138,7 +138,7 @@ class _State extends State<WebglAnimationSkinningIK> {
         ],
       }
     ];
-    ikSolver = three.CCDIKSolver( ooi.kira!, iks );
+    ikSolver = three.CCDIKSolver( ooi.kira!, ooi.kira!.skeleton!,iks );
     //final ccdikhelper = ikSolver.createHelper(0.01);
     final ccdikhelper = three.CCDIKHelper( ooi.kira!, iks, 0.01 );
     threeJs.scene.add( ccdikhelper );

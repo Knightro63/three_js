@@ -30,7 +30,7 @@ dependencies:
   three_js_exporters: ^0.3.0
   three_js_line: ^0.3.0
   three_js_bvh_csg: ^0.3.0
-  #three_js_video_texture: ^0.1.0
+  three_js_video_texture: ^0.1.0
   three_js_audio: ^0.3.0
   three_js_audio_latency: ^0.1.0
   three_js_advanced_exporters: ^0.1.0

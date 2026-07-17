@@ -14,9 +14,6 @@ in vec3 v_normal;
 in vec2 v_uv;
 in vec3 v_worldPosition;
 
-in vec4 v_skinIndex;
-in vec4 v_skinWeight;
-
 out vec4 frag_color;
 
 void main() {
