@@ -1,0 +1,41 @@
+name: three_js_impeller
+description: "Flutter package converted from threejs and three_dart to allow users to view, edit, and control 3D models."
+version: 0.0.1
+homepage: https://github.com/Knightro63/three_js/tree/main/packages/three_js_impeller
+
+topics:
+  - threejs
+  - games
+  - animations
+  - flutter3d
+  - model3d
+
+environment:
+  sdk: '>=3.5.0 <4.0.0'
+  flutter: ">=1.17.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  three_js_impeller_renderer:
+    path: ../three_js_impeller_renderer
+  three_js_math: ^0.3.0
+  three_js_advanced_loaders: ^0.3.0
+  three_js_animations: ^0.3.0
+  three_js_controls: ^0.3.0
+  three_js_core: ^0.3.0
+  three_js_core_loaders: ^0.3.0
+  three_js_curves: ^0.3.0
+  three_js_simple_loaders: ^0.3.0
+  three_js_text: ^0.3.0
+  three_js_geometry: ^0.3.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+platforms:
+  android:
+  ios:
+  macos:
