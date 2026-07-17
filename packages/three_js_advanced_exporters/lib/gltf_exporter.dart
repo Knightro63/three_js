@@ -567,7 +567,9 @@ class GLTFWriter {
 	BufferAttribute createNormalizedNormalAttribute(BufferAttribute normal ) {
 		final cache = this.cache;
 
-		if ( cache['attributesNormalized']?.containsValue( normal ) ?? false)	return cache['attributesNormalized']?[normal];//CHECK
+		if ( cache['attributesNormalized']?.containsValue( normal ) == true && cache['attributesNormalized']?[normal] != null){
+      return cache['attributesNormalized']?[normal];//CHECK
+    }
 
 		final BufferAttribute attribute = normal.clone();
 		final v = Vector3();
@@ -1588,11 +1590,9 @@ class GLTFWriter {
 	 * In this case the extension is automatically added to the list of used extensions.
 	 */
 	void detectMeshQuantization(String attributeName, BufferAttribute attribute ) {
-    print('detectMeshQuantization: ${this.extensionsUsed[ KHR_MESH_QUANTIZATION ] == true}, ${attribute.array.runtimeType}');
 		if ( this.extensionsUsed[ KHR_MESH_QUANTIZATION ] == true) return;
 
 		String? attrType;
-    print('continued');
     if(attribute.array is Int8List){
       attrType = 'byte';
     }
@@ -1745,10 +1745,12 @@ class GLTFWriter {
       else {
 				interpolation = 'LINEAR';
 			}
+      List<int> cleanTimes = track.times.map((e) => e.toInt()).toList();
+      List<double> cleanValues = track.values.map((e) => e.toDouble()).toList();
 
 			samplers.add( {
-				'input': this.processAccessor( Uint16BufferAttribute.fromList( List<int>.from(track.times), inputItemSize ) ),
-				'output': this.processAccessor( Float32BufferAttribute.fromList( List<double>.from(track.values), outputItemSize.toInt() ) ),
+				'input': this.processAccessor( Uint16BufferAttribute.fromList( cleanTimes, inputItemSize ) ),
+				'output': this.processAccessor( Float32BufferAttribute.fromList( cleanValues, outputItemSize.toInt() ) ),
 				'interpolation': interpolation
 			} );
 
@@ -1807,7 +1809,7 @@ class GLTFWriter {
 			skeleton: nodeMap[rootJoint]
 		} );
 
-		final skinIndex = node.skin = json['skins'].length - 1;
+		final skinIndex = node['skin'] = json['skins'].length - 1;
 
 		return skinIndex;
 	}

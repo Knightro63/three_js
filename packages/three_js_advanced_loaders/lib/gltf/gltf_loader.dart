@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert' as convert;
 import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
+import 'package:three_js_animations/three_js_animations.dart';
 import 'package:three_js_core/three_js_core.dart';
 import 'gltf_extensions.dart';
 import 'gltf_parser.dart';
@@ -20,11 +21,11 @@ class GLTFData{
   });
 
   Object3D scene;
-  List scenes;
-  List? animations;
-  List? cameras;
+  List<Object3D> scenes;
+  List<AnimationClip>? animations;
+  List<Camera>? cameras;
   dynamic asset;
-  Map? userData;
+  Map<String,dynamic>? userData;
   GLTFParser parser;
 }
 

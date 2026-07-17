@@ -85,14 +85,14 @@ class GLTFParser {
     });
 
     final scenes = await getDependencies('scene');
-    final animations = await getDependencies('animation');
-    final cameras = await getDependencies('camera');
+    final animations = await getAnimationDependencies();
+    final cameras = await getCameraDependencies();
 
     final result = GLTFData(
       scene: scenes[json["scene"] ?? 0],
       scenes: scenes,
-      animations: animations as List?,
-      cameras: cameras as List?,
+      animations: animations,
+      cameras: cameras,
       asset: json["asset"],
       parser: parser,
       userData: {}
@@ -311,12 +311,8 @@ class GLTFParser {
     return dependency;
   }
 
-  ///
-  /// Requests all dependencies of the specified type asynchronously, with caching.
-  /// @param {string} type
-  /// @return {Promise<Array<Object>>}
-  ///
-  Future<List> getDependencies(String type) async {
+  Future<List<Camera>> getCameraDependencies() async {
+    String type = 'camera';
     final dependencies = cache.get(type);
 
     if (dependencies != null) {
@@ -324,7 +320,57 @@ class GLTFParser {
     }
     
     final defs = json[type + (type == 'mesh' ? 'es' : 's')] ?? [];
-    List otherDependencies = [];
+    List<Camera> otherDependencies = [];
+
+    int l = defs.length;
+
+    for (int i = 0; i < l; i++) {
+      final dep1 = await getDependency(type, i);
+      otherDependencies.add(dep1);
+    }
+
+    cache.add(type, otherDependencies);
+
+    return otherDependencies;
+  }
+
+  Future<List<AnimationClip>> getAnimationDependencies() async {
+    String type = 'animation';
+    final dependencies = cache.get(type);
+
+    if (dependencies != null) {
+      return dependencies;
+    }
+    
+    final defs = json[type + (type == 'mesh' ? 'es' : 's')] ?? [];
+    List<AnimationClip> otherDependencies = [];
+
+    int l = defs.length;
+
+    for (int i = 0; i < l; i++) {
+      final dep1 = await getDependency(type, i);
+      otherDependencies.add(dep1);
+    }
+
+    cache.add(type, otherDependencies);
+
+    return otherDependencies;
+  }
+
+  ///
+  /// Requests all dependencies of the specified type asynchronously, with caching.
+  /// @param {string} type
+  /// @return {Promise<Array<Object>>}
+  ///
+  Future<List<Object3D>> getDependencies(String type) async {
+    final dependencies = cache.get(type);
+
+    if (dependencies != null) {
+      return dependencies;
+    }
+    
+    final defs = json[type + (type == 'mesh' ? 'es' : 's')] ?? [];
+    List<Object3D> otherDependencies = [];
 
     int l = defs.length;
 

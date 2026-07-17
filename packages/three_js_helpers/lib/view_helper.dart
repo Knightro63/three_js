@@ -64,7 +64,7 @@ class ViewHelper extends Object3D {
 
   bool _didChange = true;
   final Vector4 _viewport = Vector4();
-  late Size size;
+  Size size = Size(0,0);
   double ratioX = 0;
   double ratioY = 0;
 
