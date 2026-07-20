@@ -11,6 +11,7 @@ import 'package:three_js_impeller_renderer/renderer/render_pass_manager.dart';
 import 'package:three_js_impeller_renderer/renderer/render_target.dart';
 import 'package:three_js_impeller_renderer/renderer/shaders.dart';
 import 'package:three_js_impeller_renderer/renderer/three_js_rendering/gpu_animation.dart';
+import 'package:three_js_impeller_renderer/renderer/three_js_rendering/gpu_background.dart';
 import 'package:three_js_impeller_renderer/renderer/three_js_rendering/gpu_clipping.dart';
 import 'package:three_js_impeller_renderer/renderer/three_js_rendering/gpu_properties.dart';
 import 'package:three_js_impeller_renderer/renderer/three_js_rendering/gpu_render_list.dart';
@@ -131,6 +132,9 @@ class ImpellerRenderer extends Renderer{
   int _currentActiveMipmapLevel = 0;
   ImpellerRenderTarget? _currentRenderTarget;
 
+  bool renderBackground = false;
+  late GpuBackground background;  
+
   late gpu.Texture depthTexture = gpu.gpuContext.createTexture(
     gpu.StorageMode.deviceTransient, width.toInt(), height.toInt(),
     sampleCount: _sampleCount,
@@ -177,6 +181,19 @@ class ImpellerRenderer extends Renderer{
   int _drawCallCount = 0;
   int _drawIndexInFrame = 0;
 
+  Set compile(Object3D scene, Camera camera, [Object3D? targetScene]){
+    return {};
+  }
+  int getActiveCubeFace(){
+    return 0;
+  }
+  int getActiveMipmapLevel(){
+    return 0;
+  }
+  Vector2 getDrawingBufferSize(Vector2 target){
+    return Vector2();
+  }
+  void setPixelRatio(double value){}
   //late final GeometryBufferCache _geometryCache = GeometryBufferCache(deviceProvider: () => _device, statsTracker: _statsTracker);
   //late final UniformBufferManager _uniformManager = UniformBufferManager(deviceProvider: () => _device, statsTracker: _statsTracker);
 
@@ -186,6 +203,11 @@ class ImpellerRenderer extends Renderer{
     _sampleCount = this.parameters.sampleCount;
 
     renderLists = GpuRenderLists();
+    background = GpuBackground(
+      this, 
+      parameters.alpha, 
+    );
+
 
     _setXR = null;
 
@@ -342,6 +364,11 @@ class ImpellerRenderer extends Renderer{
 
     if (sortObjects) {
       currentRenderList!.sort(_opaqueSort, _transparentSort);
+    }
+
+		renderBackground = !xr.enabled || !xr.isPresenting || !xr.hasDepthSensing();
+		if ( renderBackground ) {
+      background.addToRenderList( currentRenderList!, scene );
     }
 
     final Color clearColorFeature020 = Color(

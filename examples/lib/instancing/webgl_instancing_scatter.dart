@@ -119,7 +119,7 @@ class _State extends State<WebglInstancingScatter> {
 
       for (int i = 0; i < count; i ++ ) {
         color.setFromHex32( blossomPalette[ ( math.Random().nextDouble() * blossomPalette.length ).floor() ] );
-        blossomMesh.setColorAt( i, color );
+        blossomMesh.setColorAt( i, color);
       }
 
       // Instance matrices will be updated every frame.

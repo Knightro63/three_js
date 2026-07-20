@@ -1,7 +1,4 @@
 import 'package:three_js_core/three_js_core.dart';
-import './gpu_cube_maps.dart';
-import './gpu_cube_uv_maps.dart';
-import './gpu_objects.dart';
 import './gpu_render_list.dart';
 import '../renderer.dart';
 import 'package:three_js_math/three_js_math.dart';
@@ -11,13 +8,9 @@ final _m1 = Matrix4();
 
 class GpuBackground {
   bool _didDispose = false;
-  GpuCubeMaps cubemaps;
-  GpuCubeUVMaps cubeuvmaps;
 
   ImpellerRenderer renderer;
-  GpuObjects objects;
   bool alpha;
-  bool premultipliedAlpha;
 
   Color clearColor = Color(0x000000);
   double clearAlpha = 0;
@@ -29,18 +22,12 @@ class GpuBackground {
   int currentBackgroundVersion = 0;
   late int currentTonemapping;
 
-  GpuBackground(this.renderer, this.cubemaps, this.cubeuvmaps, this.objects, this.alpha, this.premultipliedAlpha) {
+  GpuBackground(this.renderer, this.alpha) {
     clearAlpha = alpha == true ? 0.0 : 1.0;
   }
 	
   dynamic getBackground(Object3D? scene ) {
 		dynamic background = scene is Scene? scene.background : null;
-
-		if ( background != null && background is Texture ) {
-			final usePMREM = (scene as Scene).backgroundBlurriness > 0; // use PMREM if the user wants to blur the background
-			background = usePMREM ? cubeuvmaps.get(background) : cubemaps.get(background);
-		}
-
 		return background;
 	}
 
@@ -97,7 +84,6 @@ class GpuBackground {
         };
 
         planeMesh?.material?.envMap = planeMesh?.material?.uniforms['envMap']['value'];
-				objects.update(boxMesh!);
 			}
 
       (scene as Scene);
@@ -154,8 +140,6 @@ class GpuBackground {
 
 				planeMesh!.geometry?.deleteAttributeFromString( 'normal' );
         planeMesh!.material?.map = planeMesh!.material!.uniforms['t2D']['value'];
-
-				objects.update(planeMesh!);
 			}
 
 			planeMesh!.material?.uniforms['t2D']['value'] = background;
@@ -210,11 +194,9 @@ class GpuBackground {
   void dispose(){
     if(_didDispose) return;
     _didDispose = true;
-    cubemaps.dispose();
     renderer.dispose();
     planeMesh?.dispose();
     boxMesh?.dispose();
-    objects.dispose();
 
     if(currentBackground is Texture){
       currentBackground.dispose();

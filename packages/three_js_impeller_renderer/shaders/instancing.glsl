@@ -1,30 +1,47 @@
 layout(binding = 3) uniform sampler2D instanceTexture;
 
-mat4 getInstanceMatrix() {
-    // Total indices inside a single instance mesh template (passed via uniforms)
-    float templateIndexCount = material.materialParams.x; 
-    if (templateIndexCount <= 0.0) templateIndexCount = 36.0; // e.g., Fallback default for a cube
+mat4 getInstanceMatrix(float instanceID) {
+    float computedInstanceId = floor(instanceID + 0.01);
+    float texWidth = 4.0;
+    
+    float baseCount = material.boneTextureParm.w; 
+    float texHeight = material.boneTextureParm.z;
+    float maxValue = 1.0; 
 
-    // 1. Calculate which instance batch copy this specific hardware thread belongs to
-    float computedInstanceId = floor(float(gl_VertexIndex) / templateIndexCount);
+    if (baseCount != texHeight) {
+        maxValue = baseCount / texHeight;
+    }
+    
+    if (texHeight <= 0.0) texHeight = 1.0;
 
-    // 2. Perform your standard square texture coordinate layout lookups
-    float size = material.boneTextureParm.y;
-    if (size <= 0.0) size = 4.0;
+    float v = clamp((computedInstanceId + 0.5) / texHeight, 0.0, maxValue);
+
+    vec4 row1 = texture(instanceTexture, vec2(0.5 / texWidth, v));
+    vec4 row2 = texture(instanceTexture, vec2(1.5 / texWidth, v));
+    vec4 row3 = texture(instanceTexture, vec2(2.5 / texWidth, v));
+    vec4 row4 = texture(instanceTexture, vec2(3.5 / texWidth, v));
     
-    int j = int(computedInstanceId) * 4;
-    float yPixel = floor(float(j) / size);
-    float xPixel = mod(float(j), size);
+    return mat4(row1, row2, row3, row4);
+}
+
+vec3 getInstanceColor(float instanceID) {
+    float id = floor(instanceID + 0.01);
+    float texWidth = 4.0;
     
-    vec2 uv1 = vec2(xPixel + 0.5, yPixel + 0.5) / size;
-    vec2 uv2 = vec2(xPixel + 1.5, yPixel + 0.5) / size;
-    vec2 uv3 = vec2(xPixel + 2.5, yPixel + 0.5) / size;
-    vec2 uv4 = vec2(xPixel + 3.5, yPixel + 0.5) / size;
+    float baseCount = material.boneTextureParm.w; // uniformData (e.g., 1000.0)
+    float texHeight = material.boneTextureParm.z; // uniformData (e.g., 1250.0)
+
+    if (texHeight <= 0.0) texHeight = 1.0;
+
+    // Use your 4-instances-per-row color math layout
+    float colorRowOffset = floor(id / 4.0);
+    float colorPixelOffset = mod(id, 4.0);
+
+    // Shift targetRow downward past the complete matrix block height
+    float targetRow = baseCount + colorRowOffset;
     
-    return mat4(
-        texture(instanceTexture, uv1),
-        texture(instanceTexture, uv2),
-        texture(instanceTexture, uv3),
-        texture(instanceTexture, uv4)
-    );
+    float v = clamp((targetRow + 0.5) / texHeight, 0.0, 1.0);
+    float u = (colorPixelOffset + 0.5) / texWidth;
+
+    return texture(instanceTexture, vec2(u, v)).rgb;
 }

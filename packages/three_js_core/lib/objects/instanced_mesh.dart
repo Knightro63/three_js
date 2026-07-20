@@ -1,5 +1,6 @@
 import 'dart:typed_data';
-
+import 'dart:ui' as ui;
+import 'package:flutter/foundation.dart';
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 
@@ -19,6 +20,11 @@ final _mesh = Mesh(BufferGeometry(), Material());
 class InstancedMesh extends Mesh {
   DataTexture? morphTexture;
   BoundingSphere? boundingSphere;
+
+  int get byteSize{
+    // This property evaluates to true ONLY when the modern Impeller pipeline is handling execution
+    return kIsWeb?3:ui.ImageFilter.isShaderFilterSupported?4:3;
+  }
 
   /// [geometry] - an instance of [BufferGeometry].
   ///
@@ -55,7 +61,7 @@ class InstancedMesh extends Mesh {
   }
 
   Color getColorAt(int index, Color color) {
-    return color.fromUnknown(instanceColor!.array, index * 3);
+    return color.fromUnknown(instanceColor!.array, index * byteSize);
   }
 
   /// [index] - The index of an instance. Values have to be in the
@@ -114,8 +120,8 @@ class InstancedMesh extends Mesh {
   /// [instanceColor][needsUpdate] to
   /// true after updating all the colors.
   void setColorAt(int index, Color color) {
-    instanceColor ??= InstancedBufferAttribute(Float32List((instanceMatrix!.count * 3).toInt()), 3, false);
-    color.copyIntoArray(instanceColor!.array, index * 3);
+    instanceColor ??= InstancedBufferAttribute(Float32List((instanceMatrix!.count * byteSize).toInt()), byteSize, false);
+    color.copyIntoArray(instanceColor!.array, index * byteSize);
   }
 
 

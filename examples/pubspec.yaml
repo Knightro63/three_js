@@ -72,7 +72,9 @@ dependency_overrides:
     path: ../packages/three_js_helpers
   three_js_angle_renderer: 
     path: ../packages/three_js_angle_renderer
-
+  three_js_core: 
+    path: ../packages/three_js_core
+    
 flutter:
   config:
     enable-swift-package-manager: true

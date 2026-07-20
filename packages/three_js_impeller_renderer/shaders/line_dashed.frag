@@ -35,8 +35,7 @@ void main() {
 
   // If the pixel lands in a gap, or fails your alpha test contract, execute early return
   if (moduloDistance > dashSize || alpha < material.pbrParams.w) {
-    frag_color = vec4(0.0);
-    return;
+    discard;
   }
 
   // Compile environment layers and output

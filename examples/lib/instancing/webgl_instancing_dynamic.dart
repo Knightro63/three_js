@@ -75,9 +75,7 @@ class _State extends State<WebglInstancingDynamic> {
       geometry?.computeVertexNormals();
       geometry?.scale( 0.5, 0.5, 0.5 );
 
-      //final material = three.MeshNormalMaterial();
-      // check overdraw
-      final material = three.MeshBasicMaterial.fromMap( { 'color': 0xff0000, 'opacity': 0.1, 'transparent': true } );
+      final material = three.MeshNormalMaterial();
 
       mesh = three.InstancedMesh( geometry, material, count );
       mesh.instanceMatrix?.setUsage(three.DynamicDrawUsage ); // will be updated every frame

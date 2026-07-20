@@ -31,7 +31,8 @@ enum TextureType {
   gradientMap,
   uniforms,
   boneTexture,
-  instanceTexture
+  instanceTexture,
+  morphTexture
 }
 
 /// Core blending modes supported by the material system.
@@ -450,7 +451,8 @@ abstract class MaterialDescriptorRegistry {
         GeometryAttribute.uv0,
         GeometryAttribute.color,
         GeometryAttribute.skinIndex,
-        GeometryAttribute.skinWeight
+        GeometryAttribute.skinWeight,
+        GeometryAttribute.instanceId
       ],
     );
 
@@ -463,9 +465,13 @@ abstract class MaterialDescriptorRegistry {
     final normalDescriptor = MaterialDescriptor(
       key: 'Normal',
       renderState: MaterialRenderState(),
+      bindings: [TextureType.boneTexture,TextureType.instanceTexture],
       requiredAttributes: [
         GeometryAttribute.position,
         GeometryAttribute.normal,
+        GeometryAttribute.skinIndex,
+        GeometryAttribute.skinWeight,
+        GeometryAttribute.instanceId
       ],
     );
     _registerInternal(normalDescriptor,[MeshNormalMaterial],true);
@@ -485,13 +491,16 @@ abstract class MaterialDescriptorRegistry {
 
     final phongDescriptor = MaterialDescriptor(
       key: 'Phong',
-      bindings: [TextureType.map,TextureType.alphaMap,TextureType.displacementMap,TextureType.normalMap,TextureType.bumpMap,TextureType.specularMap,TextureType.aoMap,TextureType.lightMap],
+      bindings: [TextureType.map,TextureType.alphaMap,TextureType.displacementMap,TextureType.normalMap,TextureType.bumpMap,TextureType.specularMap,TextureType.aoMap,TextureType.lightMap,TextureType.boneTexture,TextureType.instanceTexture,TextureType.morphTexture],
       renderState: MaterialRenderState(),
       requiredAttributes: [
         GeometryAttribute.position,
         GeometryAttribute.normal,
         GeometryAttribute.uv0,
         GeometryAttribute.color,
+        GeometryAttribute.skinIndex,
+        GeometryAttribute.skinWeight,
+        GeometryAttribute.instanceId
       ],
     );
 
@@ -512,7 +521,7 @@ abstract class MaterialDescriptorRegistry {
 
     final pointsDescriptor = MaterialDescriptor(
       key: 'Points',
-      bindings: [TextureType.map],
+      bindings: [TextureType.map,TextureType.instanceTexture],
       // CRITICAL OVERRIDE: Tells the pipeline compiler to draw points instead of triangles
       renderState: MaterialRenderState(
         topology: gpux.PrimitiveType.point, 
@@ -520,6 +529,7 @@ abstract class MaterialDescriptorRegistry {
       requiredAttributes: [
         GeometryAttribute.position,
         GeometryAttribute.color, 
+        GeometryAttribute.instanceId,
       ],
     );
     _registerInternal(pointsDescriptor, [PointsMaterial], true);
@@ -548,18 +558,21 @@ abstract class MaterialDescriptorRegistry {
 
     final lineBasicDescriptor = MaterialDescriptor(
       key: 'LineBasic',
+      bindings: [TextureType.instanceTexture],
       renderState: MaterialRenderState(
         //topology: gpux.PrimitiveType.line, 
       ),
       requiredAttributes: [
         GeometryAttribute.position,
         GeometryAttribute.color, // REQUIRED to protect your sequential offset registers
+        GeometryAttribute.instanceId,
       ],
     );
     _registerInternal(lineBasicDescriptor, [LineBasicMaterial], true);
 
     final lineDashedDescriptor = MaterialDescriptor(
       key: 'LineDashed',
+      bindings: [TextureType.instanceTexture],
       renderState: MaterialRenderState(
         topology: gpux.PrimitiveType.line, 
       ),
@@ -567,7 +580,7 @@ abstract class MaterialDescriptorRegistry {
         GeometryAttribute.position,
         GeometryAttribute.uv0,
         GeometryAttribute.color, // REQUIRED to secure layout stability
-        //GeometryAttribute.lineDistance,
+        GeometryAttribute.instanceId,
       ],
     );
     _registerInternal(lineDashedDescriptor, [LineDashedMaterial], true);
@@ -617,7 +630,7 @@ abstract class MaterialDescriptorRegistry {
 
     final standardDescriptor = MaterialDescriptor(
       key: 'Standard',
-      bindings: [TextureType.boneTexture,TextureType.map,TextureType.alphaMap,TextureType.displacementMap,TextureType.normalMap,TextureType.bumpMap,TextureType.specularMap,TextureType.aoMap,TextureType.lightMap,TextureType.roughnessMap,TextureType.metalnessMap,TextureType.emissiveMap],
+      bindings: [TextureType.instanceTexture,TextureType.boneTexture,TextureType.map,TextureType.alphaMap,TextureType.displacementMap,TextureType.normalMap,TextureType.bumpMap,TextureType.specularMap,TextureType.aoMap,TextureType.lightMap,TextureType.roughnessMap,TextureType.metalnessMap,TextureType.emissiveMap],
       renderState: MaterialRenderState(),
       requiredAttributes: [
         GeometryAttribute.position,
@@ -625,7 +638,8 @@ abstract class MaterialDescriptorRegistry {
         GeometryAttribute.uv0,
         GeometryAttribute.color,
         GeometryAttribute.skinIndex,
-        GeometryAttribute.skinWeight
+        GeometryAttribute.skinWeight,
+        GeometryAttribute.instanceId
       ],
     );
 
