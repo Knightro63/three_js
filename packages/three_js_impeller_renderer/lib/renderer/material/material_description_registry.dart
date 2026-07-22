@@ -32,7 +32,8 @@ enum TextureType {
   uniforms,
   boneTexture,
   instanceTexture,
-  morphTexture
+  morphTexture,
+  envMap
 }
 
 /// Core blending modes supported by the material system.
@@ -214,6 +215,8 @@ class MaterialDescriptor {
     MaterialRenderState? renderState,
     Map<String,String>? defines,
     List<GeometryAttribute>? requiredAttributes,
+    this.useSceneData = true,
+    this.useMaterialData = true
   }){
     this.renderState = renderState ?? MaterialRenderState();
     this.defines = defines ?? {};
@@ -221,6 +224,8 @@ class MaterialDescriptor {
   }
 
   final String key;
+  bool useSceneData = true;
+  bool useMaterialData = true;
   final List<TextureType> bindings;
   late final MaterialRenderState renderState;
   late final Map<String, String> defines;
@@ -360,9 +365,19 @@ abstract class MaterialDescriptorRegistry {
 
   /// Intercepts material variants and forwards them to specialized resolution systems.
   static ResolvedMaterialDescriptor? resolve(Material material, Object3D mesh) {
-    final descriptor = descriptorFor(material);
+    MaterialDescriptor? descriptor = descriptorFor(material);
+    if (material is ShaderMaterial && descriptor == null){
+      descriptor = MaterialDescriptor(
+        key: material.name,
+        bindings: material.uniforms['bindings'] ?? [],
+        renderState: MaterialRenderState(),
+        requiredAttributes: material.uniforms['requiredAttributes']
+      );
+      //_registerInternal(descriptor,[MeshBasicMaterial],true,);
+    }
     if (descriptor == null) return null;
-  
+    
+
     final blendState = _blendStateFor(
       Blending.values[material.blending],
       material.transparent,
@@ -447,7 +462,6 @@ abstract class MaterialDescriptorRegistry {
       renderState: MaterialRenderState(),
       requiredAttributes: [
         GeometryAttribute.position,
-        GeometryAttribute.normal,
         GeometryAttribute.uv0,
         GeometryAttribute.color,
         GeometryAttribute.skinIndex,
@@ -455,20 +469,17 @@ abstract class MaterialDescriptorRegistry {
         GeometryAttribute.instanceId
       ],
     );
-
-    _registerInternal(
-      basicDescriptor,
-      [MeshBasicMaterial],
-      true,
-    );
+    _registerInternal(basicDescriptor,[MeshBasicMaterial],true,);
 
     final normalDescriptor = MaterialDescriptor(
       key: 'Normal',
+      useSceneData: false,
       renderState: MaterialRenderState(),
-      bindings: [TextureType.boneTexture,TextureType.instanceTexture],
+      bindings: [TextureType.displacementMap,TextureType.boneTexture,TextureType.instanceTexture],
       requiredAttributes: [
         GeometryAttribute.position,
         GeometryAttribute.normal,
+        GeometryAttribute.uv0,
         GeometryAttribute.skinIndex,
         GeometryAttribute.skinWeight,
         GeometryAttribute.instanceId
@@ -478,13 +489,16 @@ abstract class MaterialDescriptorRegistry {
 
     final toonDescriptor = MaterialDescriptor(
       key: 'Toon',
-      bindings: [TextureType.map,TextureType.alphaMap,TextureType.gradientMap,TextureType.normalMap,TextureType.bumpMap],
+      bindings: [TextureType.displacementMap,TextureType.boneTexture,TextureType.instanceTexture,TextureType.map,TextureType.alphaMap,TextureType.gradientMap,TextureType.normalMap,TextureType.bumpMap],
       renderState: MaterialRenderState(),
       requiredAttributes: [
         GeometryAttribute.position,
         GeometryAttribute.normal,
         GeometryAttribute.uv0,
         GeometryAttribute.color,
+        GeometryAttribute.skinIndex,
+        GeometryAttribute.skinWeight,
+        GeometryAttribute.instanceId
       ],
     );
     _registerInternal(toonDescriptor, [MeshToonMaterial], true);
@@ -515,6 +529,9 @@ abstract class MaterialDescriptorRegistry {
         GeometryAttribute.normal,
         GeometryAttribute.uv0,
         GeometryAttribute.color,
+        GeometryAttribute.skinIndex,
+        GeometryAttribute.skinWeight,
+        GeometryAttribute.instanceId
       ],
     );
     _registerInternal(lambertDescriptor,[MeshLambertMaterial,MeshGouraudMaterial],true,);
@@ -536,11 +553,14 @@ abstract class MaterialDescriptorRegistry {
 
     final shadowDescriptor = MaterialDescriptor(
       key: 'Shadow',
+      bindings: [TextureType.boneTexture,TextureType.instanceTexture],
       renderState: MaterialRenderState(),
       requiredAttributes: [
         GeometryAttribute.position,
         GeometryAttribute.normal, 
-        GeometryAttribute.color, // REQUIRED to protect your sequential offset registers
+        GeometryAttribute.skinIndex,
+        GeometryAttribute.skinWeight,
+        GeometryAttribute.instanceId
       ],
     );
     _registerInternal(shadowDescriptor, [ShadowMaterial], true);
@@ -587,13 +607,16 @@ abstract class MaterialDescriptorRegistry {
 
     final metcapDescriptor = MaterialDescriptor(
       key: 'Matcap',
-      bindings: [TextureType.matcap],
+      bindings: [TextureType.matcap,TextureType.boneTexture,TextureType.instanceTexture,TextureType.displacementMap],
       renderState: MaterialRenderState(),
       requiredAttributes: [
         GeometryAttribute.position,
         GeometryAttribute.normal,
         GeometryAttribute.uv0,
         GeometryAttribute.color,
+        GeometryAttribute.skinIndex,
+        GeometryAttribute.skinWeight,
+        GeometryAttribute.instanceId
       ],
     );
 
@@ -601,32 +624,42 @@ abstract class MaterialDescriptorRegistry {
 
     final distanceDescriptor = MaterialDescriptor(
       key: 'Distance',
+      bindings: [TextureType.boneTexture,TextureType.instanceTexture],
       renderState: MaterialRenderState(),
       requiredAttributes: [
         GeometryAttribute.position,
         GeometryAttribute.color,
+        GeometryAttribute.skinIndex,
+        GeometryAttribute.skinWeight,
+        GeometryAttribute.instanceId
       ],
     );
     _registerInternal(distanceDescriptor, [MeshDistanceMaterial], true);
 
     final depthDescriptor = MaterialDescriptor(
       key: 'Depth',
+      bindings: [TextureType.boneTexture,TextureType.instanceTexture],
       renderState: MaterialRenderState(),
-      requiredAttributes: [GeometryAttribute.position],
+      requiredAttributes: [
+        GeometryAttribute.position,
+        GeometryAttribute.skinIndex,
+        GeometryAttribute.skinWeight,
+        GeometryAttribute.instanceId
+      ],
     );
 
     _registerInternal(depthDescriptor,[MeshDepthMaterial],true);
 
-    final shaderDescriptor = MaterialDescriptor(
-      key: 'Shader',
-      bindings: [TextureType.uniforms], 
-      renderState: MaterialRenderState(),
-      requiredAttributes: [
-        GeometryAttribute.position,
-        GeometryAttribute.color,
-      ],
-    );
-    _registerInternal(shaderDescriptor, [ShaderMaterial], true);
+    // final shaderDescriptor = MaterialDescriptor(
+    //   key: 'Shader',
+    //   bindings: [TextureType.uniforms], 
+    //   renderState: MaterialRenderState(),
+    //   requiredAttributes: [
+    //     GeometryAttribute.position,
+    //     GeometryAttribute.color,
+    //   ],
+    // );
+    // _registerInternal(shaderDescriptor, [ShaderMaterial], true);
 
     final standardDescriptor = MaterialDescriptor(
       key: 'Standard',

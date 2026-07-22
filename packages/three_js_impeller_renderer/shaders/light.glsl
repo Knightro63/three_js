@@ -43,7 +43,7 @@ vec3 calculateDynamicLighting(
 ) {
     // Explicit structural initializations using GLSL data type constructors
     ReflectedLight reflected = ReflectedLight(vec3(0.0), vec3(0.0));
-    int totalLights = min(int(scene.cameraPosition.w), 16);
+    int totalLights = min(int(scene.envParms.w), 16);
     vec3 ambientAccum = vec3(0.0);
 
     for (int i = 0; i < totalLights; i++) {
@@ -74,7 +74,7 @@ vec3 calculateDynamicLighting(
             vec3 lightWorldPos = scene.lightPositions[i].xyz;
             
             if (dot(lightWorldPos, lightWorldPos) == 0.0) {
-                lightWorldPos = scene.cameraPosition.xyz;
+                lightWorldPos = material.cameraPosition.xyz;
             }
             
             vec3 lightToVertex = lightWorldPos - worldPos;

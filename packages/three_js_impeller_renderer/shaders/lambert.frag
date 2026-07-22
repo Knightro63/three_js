@@ -1,4 +1,5 @@
-#include <common.glsl>
+#include <material_block.glsl>
+#include <scene_block.glsl>
 #include <light.glsl>
 #include <fog.glsl>
 #include <color.glsl>
@@ -77,7 +78,7 @@ void main() {
 
   // 9. Surface & Vector Math Extractions
   vec3 N = evaluateNormal(v_worldNormal, v_worldPosition);
-  vec3 V = normalize(scene.cameraPosition.xyz - v_worldPosition);
+  vec3 V = normalize(material.cameraPosition.xyz - v_worldPosition);
 
   // 10. Multi-Light Pipeline Compilation
   // Pass diffuse properties, roughness (0.0 for Lambert), and your sampled reflections
@@ -88,7 +89,7 @@ void main() {
   vec4 finalRGBA = vec4(finalColor, alpha);
   
   // Transform from working Linear space back to destination Output Space
-  finalRGBA = applyColor(finalRGBA,material.lineExtendedParams.z);
+  finalRGBA = applyColor(finalRGBA,scene.rendParms.z);
 
   // 12. Output final safe frame register metrics
   frag_color = vec4(clamp(finalRGBA.rgb, vec3(0.0), vec3(1.0)), finalRGBA.a);

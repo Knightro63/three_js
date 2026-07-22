@@ -1,4 +1,5 @@
-#include <common.glsl>
+#include <material_block.glsl>
+#include <scene_block.glsl>
 #include <light.glsl>
 #include <fog.glsl>
 #include <color.glsl>
@@ -105,7 +106,7 @@ void main() {
     N = perturbNormalArb(v_worldPosition, N, dHdxy, faceDirection);
   }
 
-  vec3 V = normalize(scene.cameraPosition.xyz - v_worldPosition);
+  vec3 V = normalize(material.cameraPosition.xyz - v_worldPosition);
 
   float shininess = material.materialParams.x;
 
@@ -114,7 +115,7 @@ void main() {
   finalColor = applyFog(finalColor, v_worldPosition);
   vec4 finalRGBA = vec4(finalColor, alpha);
 
-  finalRGBA = applyColor(finalRGBA,material.lineExtendedParams.z);
+  finalRGBA = applyColor(finalRGBA,scene.rendParms.z);
 
   frag_color = vec4(clamp(finalRGBA.rgb, vec3(0.0), vec3(1.0)), finalRGBA.a);
 }

@@ -1,4 +1,5 @@
-#include <common.glsl> 
+#include <material_block.glsl>
+#include <scene_block.glsl>
 #include <light.glsl> 
 #include <fog.glsl> 
 #include <color.glsl> 
@@ -54,8 +55,7 @@ void main() {
   } 
 
   if (alpha < material.pbrParams.w) {
-    frag_color = vec4(0.0); 
-    return; 
+    discard;
   } 
 
   // 3. Process Material Grayscale Ambient Occlusion 
@@ -99,7 +99,7 @@ void main() {
   } 
 
   // Camera perspective direction vector calculations 
-  vec3 V = normalize(scene.cameraPosition.xyz - v_worldPosition); 
+  vec3 V = normalize(material.cameraPosition.xyz - v_worldPosition); 
 
   // 8. Execute Dynamic Lights calculation loop 
   vec3 specularColorReflection = vec3(metalnessFactor); 
@@ -115,6 +115,6 @@ void main() {
   vec4 finalRGBA = vec4(finalColor, alpha); 
 
   // Isolate color grading space conversions to protect transparency channel lines 
-  finalRGBA= applyColor(finalRGBA,material.lineExtendedParams.z); 
+  finalRGBA= applyColor(finalRGBA,scene.rendParms.z); 
   frag_color = vec4(clamp(finalRGBA.rgb, vec3(0.0), vec3(1.0)), finalRGBA.a); 
 }

@@ -1,4 +1,5 @@
-#include <common.glsl>
+#include <material_block.glsl>
+#include <scene_block.glsl>
 #include <fog.glsl>
 #include <color.glsl>
 #include <clipping.glsl>
@@ -47,7 +48,7 @@ void main() {
 
   vec3 N = evaluateNormal(v_worldNormal, v_worldPosition);
 
-  mat4 modelViewMatrix = scene.viewMatrix * material.modelMatrix;
+  mat4 modelViewMatrix = material.viewMatrix * material.modelMatrix;
   mat3 normalMatrix = mat3(modelViewMatrix);
   vec3 viewNormal = normalize(normalMatrix * N);
 
@@ -65,7 +66,7 @@ void main() {
   vec4 finalRGBA = vec4(finalColor, alpha);
 
   // Run central color space grading rules
-  finalRGBA = applyColor(finalRGBA,material.lineExtendedParams.z);
+  finalRGBA = applyColor(finalRGBA,scene.rendParms.z);
 
   // float antiPrune = texture(normalMap, vec2(0.0)).r * 0.000001 + 
   //                   texture(bumpMap, vec2(0.0)).r * 0.000001;

@@ -1,4 +1,5 @@
-#include <common.glsl>
+#include <material_block.glsl>
+#include <scene_block.glsl>
 #include <fog.glsl>
 #include <color.glsl>
 #include <clipping.glsl>
@@ -11,8 +12,7 @@ out vec4 frag_color;
 
 void main() {
   if(evaluateClippingPlanes(v_worldPosition)){
-    frag_color = vec4(0.0);
-    return;
+    discard;
   }
   vec3 color = v_color;
   float alpha = material.baseColor.a;
@@ -41,7 +41,7 @@ void main() {
   // Compile environment layers and output
   vec3 finalColor = applyFog(color, v_worldPosition);
   vec4 finalRGBA = vec4(finalColor, alpha);
-  finalRGBA = applyColor(finalRGBA,material.lineExtendedParams.z);
+  finalRGBA = applyColor(finalRGBA,scene.rendParms.z);
 
   frag_color = vec4(clamp(finalRGBA.rgb, vec3(0.0), vec3(1.0)), alpha);
 }

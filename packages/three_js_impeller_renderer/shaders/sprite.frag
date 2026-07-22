@@ -1,4 +1,5 @@
-#include <common.glsl>
+#include <material_block.glsl>
+#include <scene_block.glsl>
 #include <fog.glsl>
 #include <color.glsl>
 
@@ -33,7 +34,11 @@ void main() {
   vec3 finalColor = applyFog(blendedAlbedo, v_worldPosition);
   vec4 finalRGBA = vec4(finalColor, alpha);
 
-  finalRGBA = applyColor(finalRGBA,material.lineExtendedParams.z);
+  finalRGBA = applyColor(finalRGBA,scene.rendParms.z);
 
+  if (alpha < 0.01) {
+    discard; 
+  }
+  
   frag_color = vec4(clamp(finalRGBA.rgb, vec3(0.0), vec3(1.0)), alpha);
 }

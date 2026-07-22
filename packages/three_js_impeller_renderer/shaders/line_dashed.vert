@@ -1,4 +1,4 @@
-#include <common.glsl>
+#include <material_block.glsl>
 #include <instancing.glsl>
 
 in vec3 position;
@@ -12,25 +12,13 @@ out float vLineDistance;
 out vec3 v_worldPosition;
 
 void main() {
-  mat4 instanceModelMatrix = mat4(1.0);
-  vec3 vertexColor = color;
-  if (dot(vertexColor, vertexColor) <= 0.0) {
-    vertexColor = vec3(1.0);
-  }
-
-  bool hasInstancingTexture = material.flags5.w > 0.5;
-  bool hasInstancingColor = material.flags5.w > 1.5;
-  if (hasInstancingTexture) {
-    instanceModelMatrix = getInstanceMatrix(instanceID);
-  }
-  if (hasInstancingColor) {
-    vertexColor = getInstanceColor(instanceID);
-  }
-
+  mat4 instanceModelMatrix = getBatchingInstance(instanceID);
+  vec3 vertexColor = getInstanceColor(color,instanceID);
+  
   vec4 worldPosition = material.modelMatrix * instanceModelMatrix * vec4(position, 1.0);
   v_worldPosition = worldPosition.xyz;
   
-  vec4 clipPosition = scene.projectionMatrix * scene.viewMatrix * worldPosition;
+  vec4 clipPosition = material.projectionMatrix * material.viewMatrix * worldPosition;
   gl_Position = clipPosition;
 
   float materialScale = material.lineExtendedParams.y; // line.scale uniform property slider

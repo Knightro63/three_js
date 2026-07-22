@@ -1,5 +1,7 @@
-#include <common.glsl>
+#include <material_block.glsl>
+#include <scene_block.glsl>
 #include <clipping.glsl>
+#include <fog.glsl>
 
 in vec3 v_worldPosition;
 in float v_viewDepth;
@@ -8,8 +10,7 @@ out vec4 frag_color;
 
 void main() {
   if(evaluateClippingPlanes(v_worldPosition)){
-    frag_color = vec4(0.0);
-    return;
+    discard;
   }
 
   float near = scene.fogParams.x;

@@ -118,5 +118,21 @@
   "PhysicalFragment": {
     "type": "fragment",
     "file": "shaders/physical.frag"
+  },
+  "BackgroundCubeVertex": {
+    "type": "vertex",
+    "file": "shaders/background_cube.vert"
+  },
+  "BackgroundCubeFragment": {
+    "type": "fragment",
+    "file": "shaders/background_cube.frag"
+  },
+  "BackgroundVertex": {
+    "type": "vertex",
+    "file": "shaders/background.vert"
+  },
+  "BackgroundFragment": {
+    "type": "fragment",
+    "file": "shaders/background.frag"
   }
 }

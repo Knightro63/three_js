@@ -45,7 +45,10 @@ class GeometryBindings{
     if (hardwareBuffers == null) return;
 
     final gpux.HostBuffer host = context.createHostBuffer();
-    _bindUniforms(host, pass, vertex, fragment, sceneData, materialData);
+    _bindMaterialUniforms(host, pass, vertex, fragment ,materialData);
+    if(descriptor.useSceneData){
+      _bindSceneUniforms(host, pass, vertex, fragment, sceneData);
+    }
     _bindTextures(pass,vertex,fragment);
 
     bool needsUpdate = hardwareBuffers.needsUpdate;
@@ -106,7 +109,7 @@ class GeometryBindings{
       }
 
       final text = skeleton.boneTexture!;
-      final texture = _createTexture(text.image);
+      final texture = _createTexture(text.image, '');
       final texSlot = vertex.getUniformSlot('unifiedTransformationTexture');
       pass.bindTexture(texSlot, texture, sampler: GpuSamplerConverter.getSampler(text));
     }
@@ -149,7 +152,7 @@ class GeometryBindings{
         );
 
         // 5. Upload and bind seamlessly to uniform slot layout index 2 (boneTexture)
-        final texture = _createTexture(image);
+        final texture = _createTexture(image, '');
         final texSlot = vertex.getUniformSlot('unifiedTransformationTexture'); // Reused target name
         pass.bindTexture(texSlot, texture, sampler: GpuSamplerConverter.getSampler());
       }
@@ -180,7 +183,7 @@ class GeometryBindings{
         height: texHeight, // 63
         data: combined,    // Now exactly 4,032 bytes!
       );
-      final texture = _createTexture(image);
+      final texture = _createTexture(image, '');
       final texSlot = vertex.getUniformSlot('instanceTexture');
       pass.bindTexture(texSlot, texture, sampler: GpuSamplerConverter.getSampler());
     }
@@ -223,51 +226,57 @@ class GeometryBindings{
         descriptor.bindings.contains(TextureType.aoMap)
       )
     ){
-      final ImageElement? ieo = material.aoMap?.image;
-      final ImageElement? ier = material.roughnessMap?.image;
-      final ImageElement? iem = material.metalnessMap?.image;
+      String uuid = material.aoMap?.uuid ?? material.roughnessMap?.uuid ?? material.metalnessMap!.uuid;
+      gpux.Texture? texture = material.userData[uuid];
+      if(texture == null){
+        final ImageElement? ieo = material.aoMap?.image;
+        final ImageElement? ier = material.roughnessMap?.image;
+        final ImageElement? iem = material.metalnessMap?.image;
 
-      final o = ieo?.data as Uint8List?;
-      final r = ier?.data as Uint8List?;
-      final m = iem?.data as Uint8List?;
-      //final int l = o?.length ?? r?.length ?? m?.length ?? 0;
+        final o = ieo?.data as Uint8List?;
+        final r = ier?.data as Uint8List?;
+        final m = iem?.data as Uint8List?;
+        //final int l = o?.length ?? r?.length ?? m?.length ?? 0;
 
-      final int w = (ieo?.width ?? ier?.width ?? iem?.width ?? 0).toInt();
-      final int h = (ieo?.height ?? ier?.height ?? iem?.height ?? 0).toInt();
+        final int w = (ieo?.width ?? ier?.width ?? iem?.width ?? 0).toInt();
+        final int h = (ieo?.height ?? ier?.height ?? iem?.height ?? 0).toInt();
 
-      final int totalPixels = w * h;
-      final Uint8List packedData = Uint8List(totalPixels * 4);
+        final int totalPixels = w * h;
+        final Uint8List packedData = Uint8List(totalPixels * 4);
 
-      // 3. FIXED: Robust multi-stride unpacking.
-      // This automatically adjusts if three.js textures use 3 or 4 components natively.
-      final int oStride = (o != null && o.length >= totalPixels * 4) ? 4 : 3;
-      final int rStride = (r != null && r.length >= totalPixels * 4) ? 4 : 3;
-      final int mStride = (m != null && m.length >= totalPixels * 4) ? 4 : 3;
+        // 3. FIXED: Robust multi-stride unpacking.
+        // This automatically adjusts if three.js textures use 3 or 4 components natively.
+        final int oStride = (o != null && o.length >= totalPixels * 4) ? 4 : 3;
+        final int rStride = (r != null && r.length >= totalPixels * 4) ? 4 : 3;
+        final int mStride = (m != null && m.length >= totalPixels * 4) ? 4 : 3;
 
-      for (int i = 0; i < totalPixels; i++) {
-        int outIdx = i * 4;
+        for (int i = 0; i < totalPixels; i++) {
+          int outIdx = i * 4;
 
-        // Red Channel = Ambient Occlusion (Defaults to full white if missing)
-        packedData[outIdx + 0] = o != null ? o[i * oStride + 0] : 255;
+          // Red Channel = Ambient Occlusion (Defaults to full white if missing)
+          packedData[outIdx + 0] = o != null ? o[i * oStride + 0] : 255;
+          
+          // Green Channel = Roughness (Three.js standard reads green)
+          // If your roughness maps are purely grayscale single-channel, reading component +0 is completely safe
+          packedData[outIdx + 1] = r != null ? r[i * rStride + 0] : 255;
+          
+          // Blue Channel = Metalness (Three.js standard reads blue)
+          packedData[outIdx + 2] = m != null ? m[i * mStride + 0] : 0;
+          
+          // Alpha Channel = Padding required by Vulkan/Metal formats
+          packedData[outIdx + 3] = 255; 
+        }
         
-        // Green Channel = Roughness (Three.js standard reads green)
-        // If your roughness maps are purely grayscale single-channel, reading component +0 is completely safe
-        packedData[outIdx + 1] = r != null ? r[i * rStride + 0] : 255;
-        
-        // Blue Channel = Metalness (Three.js standard reads blue)
-        packedData[outIdx + 2] = m != null ? m[i * mStride + 0] : 0;
-        
-        // Alpha Channel = Padding required by Vulkan/Metal formats
-        packedData[outIdx + 3] = 255; 
+        texture = _createTexture(
+          ImageElement(
+            data: packedData,
+            width: w,
+            height: h
+          ),
+          uuid
+        );
       }
-
-      final texture = _createTexture(
-        ImageElement(
-          data: packedData,
-          width: w,
-          height: h
-        )
-      );
+  
       final texSlot = fragment.getUniformSlot('ormMap');
       pass.bindTexture(texSlot, texture, sampler: GpuSamplerConverter.getSampler(material.aoMap ?? material.roughnessMap ?? material.metalnessMap!));
     }
@@ -299,44 +308,46 @@ class GeometryBindings{
 
     if ((material.clearcoatMap != null || material.clearcoatRoughnessMap != null) &&
         (descriptor.bindings.contains(TextureType.clearcoatMap) ||
-        descriptor.bindings.contains(TextureType.clearcoatRoughnessMap))) {
-      
-      final ImageElement? iec = material.clearcoatMap?.image;
-      final ImageElement? ier = material.clearcoatRoughnessMap?.image;
+        descriptor.bindings.contains(TextureType.clearcoatRoughnessMap))
+    ) {
+      String uuid = material.clearcoatMap?.uuid ?? material.clearcoatRoughnessMap!.uuid;
+      gpux.Texture? texture = material.userData[uuid];
+      if(texture == null){
+        final ImageElement? iec = material.clearcoatMap?.image;
+        final ImageElement? ier = material.clearcoatRoughnessMap?.image;
 
-      final c = iec?.data as Uint8List?;
-      final r = ier?.data as Uint8List?;
+        final c = iec?.data as Uint8List?;
+        final r = ier?.data as Uint8List?;
 
-      final int w = (iec?.width ?? ier?.width ?? 0).toInt();
-      final int h = (iec?.height ?? ier?.height ?? 0).toInt();
-      
-      final int totalPixels = w * h;
-      final Uint8List packedData = Uint8List(totalPixels * 4);
-
-      final int cStride = (c != null && c.length >= totalPixels * 4) ? 4 : 3;
-      final int rStride = (r != null && r.length >= totalPixels * 4) ? 4 : 3;
-
-      for (int i = 0; i < totalPixels; i++) {
-        int outIdx = i * 4;
-
-        // Red Channel = Clearcoat Intensity Factor (Default to 0 if missing)
-        packedData[outIdx + 0] = c != null ? c[i * cStride + 0] : 0;
+        final int w = (iec?.width ?? ier?.width ?? 0).toInt();
+        final int h = (iec?.height ?? ier?.height ?? 0).toInt();
         
-        // Green Channel = Clearcoat Roughness Vector (Default to full rough if missing)
-        packedData[outIdx + 1] = r != null ? r[i * rStride + 0] : 255;
-        
-        // Blue & Alpha = Standard padding bytes required by the hardware backend
-        packedData[outIdx + 2] = 255;
-        packedData[outIdx + 3] = 255; 
+        final int totalPixels = w * h;
+        final Uint8List packedData = Uint8List(totalPixels * 4);
+
+        final int cStride = (c != null && c.length >= totalPixels * 4) ? 4 : 3;
+        final int rStride = (r != null && r.length >= totalPixels * 4) ? 4 : 3;
+
+        for (int i = 0; i < totalPixels; i++) {
+          int outIdx = i * 4;
+
+          // Red Channel = Clearcoat Intensity Factor (Default to 0 if missing)
+          packedData[outIdx + 0] = c != null ? c[i * cStride + 0] : 0;
+          
+          // Green Channel = Clearcoat Roughness Vector (Default to full rough if missing)
+          packedData[outIdx + 1] = r != null ? r[i * rStride + 0] : 255;
+          
+          // Blue & Alpha = Standard padding bytes required by the hardware backend
+          packedData[outIdx + 2] = 255;
+          packedData[outIdx + 3] = 255; 
+        }
+
+        texture = _createTexture(ImageElement(data: packedData, width: w, height: h));
       }
 
-      final texture = _createTexture(ImageElement(data: packedData, width: w, height: h));
-      
       final texSlot = fragment.getUniformSlot('clearcoatParamsMap');
-      
       final targetMap = material.clearcoatMap ?? material.clearcoatRoughnessMap!;
       final sampler = GpuSamplerConverter.getSampler(targetMap);
-
       pass.bindTexture(texSlot, texture, sampler: sampler);
     }
 
@@ -422,9 +433,11 @@ class GeometryBindings{
   }
 
   gpux.Texture _createTexture(
-    ImageElement element
+    ImageElement element,
+    [String? cacheName]
   ){
-    if(material.userData.containsKey(element.uuid)){
+    //print(material.userData.keys.length);
+    if(material.userData[element.uuid] != null){
       return material.userData[element.uuid]!;
     }
     
@@ -434,54 +447,67 @@ class GeometryBindings{
       element.height.toInt(),
       sampleCount: 1,
       //textureType: gpux.TextureType.texture2D,
-      format: element.data is Uint8List?gpux.PixelFormat.r8g8b8a8UNormInt:gpux.PixelFormat.r32g32b32a32Float,
-      enableShaderReadUsage: true
+      format: element.data is Uint8List?
+        gpux.PixelFormat.r8g8b8a8UNormInt:
+        element.data is Float32List?
+        gpux.PixelFormat.r32g32b32a32Float:gpux.PixelFormat.r16g16b16a16Float,
     );
-    element.uuid = MathUtils.generateUUID();
-    material.userData[element.uuid!] = sampledTexture;
+    if(cacheName == null && element.uuid == null){
+      element.uuid = MathUtils.generateUUID();
+    }
+    if(cacheName != '' && element.uuid != null){
+      material.userData[element.uuid!] = sampledTexture;
+    }
 
     if(element.data != null) sampledTexture.overwrite(element.data.buffer.asByteData());
 
     return sampledTexture;
   }
 
-  void _bindUniforms(
+  void _bindMaterialUniforms(
     gpux.HostBuffer host,
     gpux.RenderPass pass,
     gpux.Shader vertex,
     gpux.Shader fragment,
-    Float32List sceneData,
     Float32List materialData,
   ){
     // Emplace raw Float32 data segments straight into the host-visible staging memory
-    final gpux.BufferView sceneBufferView = host.emplace(sceneData.buffer.asByteData());
     final gpux.BufferView materialBufferView = host.emplace(materialData.buffer.asByteData());
 
     //Map uniform buffer blocks to specific shader string properties
-    final sceneSlotVertex = vertex.getUniformSlot('SceneBlock');
-    final materialSlotVertex = vertex.getUniformSlot('MaterialBlock');
-
-    final sceneSlotFragment = fragment.getUniformSlot('SceneBlock');
+    final vertexSlot = vertex.getUniformSlot('MaterialBlock');
     final materialSlotFragment = fragment.getUniformSlot('MaterialBlock');
     
-    if (sceneSlotVertex.sizeInBytes != null) {
-      pass.bindUniform(sceneSlotVertex, sceneBufferView);
-    }
-    if (materialSlotVertex.sizeInBytes != null) {
-      pass.bindUniform(materialSlotVertex, materialBufferView);
-    }
-    if (sceneSlotFragment.sizeInBytes != null) {
-      pass.bindUniform(sceneSlotFragment, sceneBufferView);
+    if (vertexSlot.sizeInBytes != null) {
+      pass.bindUniform(vertexSlot, materialBufferView);
     }
     if (materialSlotFragment.sizeInBytes != null) {
       pass.bindUniform(materialSlotFragment, materialBufferView);
     }
   }
+  void _bindSceneUniforms(
+    gpux.HostBuffer host,
+    gpux.RenderPass pass,
+    gpux.Shader vertex,
+    gpux.Shader fragment,
+    Float32List sceneData,
+  ){
+    // Emplace raw Float32 data segments straight into the host-visible staging memory
+    final gpux.BufferView sceneBufferView = host.emplace(sceneData.buffer.asByteData());
 
+    //Map uniform buffer blocks to specific shader string properties
+    final sceneSlotFragment = fragment.getUniformSlot('SceneBlock');
+    
+    if (sceneSlotFragment.sizeInBytes != null) {
+      pass.bindUniform(sceneSlotFragment, sceneBufferView);
+    }
+  }
+  
   GpuGeometryBuffers? _createHardwareBuffers(int instanceCount) {
     String uuid = '${material.uuid}_${geometry.uuid}';
     if (material.userData[uuid]?.version == material.version) {
       material.userData[uuid].needsUpdate = false;
+      _updateBuffer(material.userData[uuid]);
       return material.userData[uuid];
     }
 
@@ -519,13 +545,13 @@ class GeometryBindings{
     }
 
     // Attribute array extracts
-    final Float32List positions = positionAttr.array.buffer.asFloat32List();
-    final Float32List? normals = normalAttr?.array.buffer.asFloat32List();
-    final Float32List? colors = colorAttr?.array.buffer.asFloat32List();
-    final Float32List? uvs0 = uv0Attr?.array.buffer.asFloat32List();
-    final Float32List? uvs1 = uv1Attr?.array.buffer.asFloat32List();
-    final Float32List? skinIndices = skinIndexAttr?.array.buffer.asFloat32List();
-    final Float32List? skinWeights = skinWeightAttr?.array.buffer.asFloat32List();
+    final Float32List positions = positionAttr.array as Float32List;
+    final Float32List? normals = normalAttr?.array as Float32List?;
+    final colors = colorAttr?.array.buffer.asFloat32List();
+    final uvs0 = uv0Attr?.array.buffer.asFloat32List();
+    final uvs1 = uv1Attr?.array.buffer.asFloat32List();
+    final skinIndices = skinIndexAttr?.array;
+    final Float32List? skinWeights = skinWeightAttr?.array as Float32List?;
 
     final attri = descriptor.requiredAttributes;
 
@@ -566,127 +592,241 @@ class GeometryBindings{
 
     final Float32List interleavedData = Float32List(finalVertexCount * stride);
     int vertexStride = 0;
-    int destIndexOffset = 0;
-
-    // Data mapping internal helper methods
-    void _position(int i) {
-      interleavedData[vertexStride + 0] = positions[i * 3 + 0];
-      interleavedData[vertexStride + 1] = positions[i * 3 + 1];
-      interleavedData[vertexStride + 2] = positions[i * 3 + 2];
-    }
-    void _normal(int i, int offset) {
-      interleavedData[vertexStride + offset + 0] = normals?[i * 3 + 0] ?? 0.0;
-      interleavedData[vertexStride + offset + 1] = normals?[i * 3 + 1] ?? 0.0;
-      interleavedData[vertexStride + offset + 2] = normals?[i * 3 + 2] ?? 0.0;
-    }
-    void _uv0(int i, int offset) {
-      interleavedData[vertexStride + offset + 0] = uvs0?[i * 2 + 0] ?? 0.0;
-      interleavedData[vertexStride + offset + 1] = uvs0?[i * 2 + 1] ?? 0.0;
-    }
-    void _uv1(int i, int offset) {
-      interleavedData[vertexStride + offset + 0] = uvs1?[i * 2 + 0] ?? 0.0;
-      interleavedData[vertexStride + offset + 1] = uvs1?[i * 2 + 1] ?? 0.0;
-    }
-    void _colors(int i, int offset) {
-      interleavedData[vertexStride + offset + 0] = ((colors?.length ?? 0) > i * colorItemSize ? (colors?[i * colorItemSize + 0]) : null) ?? material.color.red;
-      interleavedData[vertexStride + offset + 1] = ((colors?.length ?? 0) > i * colorItemSize + 1 ? (colors?[i * colorItemSize + 1]) : null) ?? material.color.green;
-      interleavedData[vertexStride + offset + 2] = ((colors?.length ?? 0) > i * colorItemSize + 2 ? (colors?[i * colorItemSize + 2]) : null) ?? material.color.blue;
-    }
-    void _skinIndex(int i, int offset) {
-      interleavedData[vertexStride + offset + 0] = ((skinIndices?.length ?? 0) > i * 4 + 0 ? (skinIndices?[i * 4 + 0]) : null) ?? 0.0;
-      interleavedData[vertexStride + offset + 1] = ((skinIndices?.length ?? 0) > i * 4 + 1 ? (skinIndices?[i * 4 + 1]) : null) ?? 0.0;
-      interleavedData[vertexStride + offset + 2] = ((skinIndices?.length ?? 0) > i * 4 + 2 ? (skinIndices?[i * 4 + 2]) : null) ?? 0.0;
-      interleavedData[vertexStride + offset + 3] = ((skinIndices?.length ?? 0) > i * 4 + 3 ? (skinIndices?[i * 4 + 3]) : null) ?? 0.0;
-    }
-    void _skinWeight(int i, int offset) {
-      interleavedData[vertexStride + offset + 0] = ((skinWeights?.length ?? 0) > i * 4 + 0 ? (skinWeights?[i * 4 + 0]) : null) ?? 1.0;
-      interleavedData[vertexStride + offset + 1] = ((skinWeights?.length ?? 0) > i * 4 + 1 ? (skinWeights?[i * 4 + 1]) : null) ?? 0.0;
-      interleavedData[vertexStride + offset + 2] = ((skinWeights?.length ?? 0) > i * 4 + 2 ? (skinWeights?[i * 4 + 2]) : null) ?? 0.0;
-      interleavedData[vertexStride + offset + 3] = ((skinWeights?.length ?? 0) > i * 4 + 3 ? (skinWeights?[i * 4 + 3]) : null) ?? 0.0;
-    }
 
     // ========================================================
-    // 3. FLATTENED MASTER INFLATION LOOP (Single Linear Pass)
+    // 3. FLATTENED MASTER INFLATION LOOP (Unnested & Optimized)
     // ========================================================
 
-    // A. Flatten Vertex Buffering Layouts
+    // Cache map lookups and attribute states outside the loop
+    final bool hasNormal = attri.contains(GeometryAttribute.normal);
+    final bool hasUv0 = uvs0 != null && attri.contains(GeometryAttribute.uv0);
+    final bool hasUv1 = attri.contains(GeometryAttribute.uv1);
+    final bool hasColor = attri.contains(GeometryAttribute.color);
+    final bool hasSkinIndex = attri.contains(GeometryAttribute.skinIndex);
+    final bool hasSkinWeight = attri.contains(GeometryAttribute.skinWeight);
+    final bool hasInstanceId = attri.contains(GeometryAttribute.instanceId);
+
+    final int normalOff = attributeOffsets[GeometryAttribute.normal] ?? 0;
+    final int uv0Off = attributeOffsets[GeometryAttribute.uv0] ?? 0;
+    final int uv1Off = attributeOffsets[GeometryAttribute.uv1] ?? 0;
+    final int colorOff = attributeOffsets[GeometryAttribute.color] ?? 0;
+    final int skinIdxOff = attributeOffsets[GeometryAttribute.skinIndex] ?? 0;
+    final int skinWgtOff = attributeOffsets[GeometryAttribute.skinWeight] ?? 0;
+    final int instanceIdOff = attributeOffsets[GeometryAttribute.instanceId] ?? 0;
+
+    final double matRed = material.color.red;
+    final double matGreen = material.color.green;
+    final double matBlue = material.color.blue;
+
+    // Track current instance and template vertex indices manually
+    int currentInst = 0;
+    double currentInstDouble = 0.0;
+    int currentVertexTemplateIdx = 0;
+
+    // A. Unnested Single-Pass Vertex Buffering Layout
     for (int globalV = 0; globalV < finalVertexCount; globalV++) {
-      // Determine which instance step and vertex template index this index maps to
-      final int inst = globalV ~/ totalVertices; // e.g., 25 ~/ 24 = instance 1
-      final int i = globalV % totalVertices;     // e.g., 25 % 24 = vertex 1
+      final int i = currentVertexTemplateIdx;
+      
+      // 1. Position
+      final int i3 = i * 3;
+      interleavedData[vertexStride + 0] = positions[i3 + 0];
+      interleavedData[vertexStride + 1] = positions[i3 + 1];
+      interleavedData[vertexStride + 2] = positions[i3 + 2];
 
-      _position(i);
-      if (attri.contains(GeometryAttribute.normal)) {
-        _normal(i, attributeOffsets[GeometryAttribute.normal]!);
+      // 2. Normal
+      if (hasNormal) {
+        final int dest = vertexStride + normalOff;
+        if (normals != null) {
+          interleavedData[dest + 0] = normals[i3 + 0];
+          interleavedData[dest + 1] = normals[i3 + 1];
+          interleavedData[dest + 2] = normals[i3 + 2];
+        } else {
+          interleavedData[dest + 0] = 0.0;
+          interleavedData[dest + 1] = 0.0;
+          interleavedData[dest + 2] = 0.0;
+        }
       }
-      if (uvs0 != null && attri.contains(GeometryAttribute.uv0)) {
-        _uv0(i, attributeOffsets[GeometryAttribute.uv0]!);
+
+      // 3. UV0
+      if (hasUv0) {
+        final int i2 = i * 2;
+        final int dest = vertexStride + uv0Off;
+        interleavedData[dest + 0] = uvs0[i2 + 0];
+        interleavedData[dest + 1] = uvs0[i2 + 1];
       }
-      if (attri.contains(GeometryAttribute.uv1)) {
-        _uv1(i, attributeOffsets[GeometryAttribute.uv1]!);
+
+      // 4. UV1
+      if (hasUv1) {
+        final int i2 = i * 2;
+        final int dest = vertexStride + uv1Off;
+        if (uvs1 != null) {
+          interleavedData[dest + 0] = uvs1[i2 + 0];
+          interleavedData[dest + 1] = uvs1[i2 + 1];
+        } else {
+          interleavedData[dest + 0] = 0.0;
+          interleavedData[dest + 1] = 0.0;
+        }
       }
-      if (attri.contains(GeometryAttribute.color)) {
-        _colors(i, attributeOffsets[GeometryAttribute.color]!);
+
+      // 5. Colors
+      if (hasColor) {
+        final int dest = vertexStride + colorOff;
+        final int idx = i * colorItemSize;
+        final int colorsLen = colors?.length ?? 0;
+        interleavedData[dest + 0] = (colorsLen > idx) ? colors![idx] : matRed;
+        interleavedData[dest + 1] = (colorsLen > idx + 1) ? colors![idx + 1] : matGreen;
+        interleavedData[dest + 2] = (colorsLen > idx + 2) ? colors![idx + 2] : matBlue;
       }
-      if (attri.contains(GeometryAttribute.skinIndex)) {
-        _skinIndex(i, attributeOffsets[GeometryAttribute.skinIndex]!);
+
+      // 6. Skin Index
+      if (hasSkinIndex) {
+        final int dest = vertexStride + skinIdxOff;
+        final int idx = i * 4;
+        final int len = skinIndices?.length ?? 0;
+        interleavedData[dest + 0] = (len > idx) ? skinIndices![idx].toDouble() : 0.0;
+        interleavedData[dest + 1] = (len > idx + 1) ? skinIndices![idx + 1].toDouble() : 0.0;
+        interleavedData[dest + 2] = (len > idx + 2) ? skinIndices![idx + 2].toDouble() : 0.0;
+        interleavedData[dest + 3] = (len > idx + 3) ? skinIndices![idx + 3].toDouble() : 0.0;
       }
-      if (attri.contains(GeometryAttribute.skinWeight)) {
-        _skinWeight(i, attributeOffsets[GeometryAttribute.skinWeight]!);
+
+      // 7. Skin Weight
+      if (hasSkinWeight) {
+        final int dest = vertexStride + skinWgtOff;
+        final int idx = i * 4;
+        final int len = skinWeights?.length ?? 0;
+        interleavedData[dest + 0] = (len > idx) ? skinWeights![idx] : 1.0;
+        interleavedData[dest + 1] = (len > idx + 1) ? skinWeights![idx + 1] : 0.0;
+        interleavedData[dest + 2] = (len > idx + 2) ? skinWeights![idx + 2] : 0.0;
+        interleavedData[dest + 3] = (len > idx + 3) ? skinWeights![idx + 3] : 0.0;
       }
-      
-      // Inject the dynamically resolved instance identity directly into the stream
-      if (attri.contains(GeometryAttribute.instanceId)) {
-        interleavedData[vertexStride + attributeOffsets[GeometryAttribute.instanceId]!] = inst.toDouble();
+
+      // 8. Instance ID
+      if (hasInstanceId) {
+        interleavedData[vertexStride + instanceIdOff] = currentInstDouble;
       }
-      
+
       vertexStride += stride;
+
+      // Step indices manually instead of using division/modulo
+      currentVertexTemplateIdx++;
+      if (currentVertexTemplateIdx == totalVertices) {
+        currentVertexTemplateIdx = 0;
+        currentInst++;
+        currentInstDouble = currentInst.toDouble();
+      }
     }
 
-    // B. Flatten Index Mapping Layouts
-    for (int globalIdx = 0; globalIdx < finalIndexCount; globalIdx++) {
-      // Determine which instance sequence and base template index this spot maps to
-      final int inst = globalIdx ~/ originalIndexCount;
-      final int j = globalIdx % originalIndexCount;
+    // Track index loops manually
+    int currentIndexTemplateIdx = 0;
+    int vertexOffset = 0;
 
+    // B. Unnested Single-Pass Index Mapping Layout
+    for (int globalIdx = 0; globalIdx < finalIndexCount; globalIdx++) {
+      final int j = currentIndexTemplateIdx;
       final int baseIndex = overwrite ? j : baseIndices[j];
-      final int vertexOffset = inst * totalVertices;
       
       finalIndices[globalIdx] = baseIndex + vertexOffset;
-    }
 
-    final ByteData rawVertices = interleavedData.buffer.asByteData();
+      currentIndexTemplateIdx++;
+      if (currentIndexTemplateIdx == originalIndexCount) {
+        currentIndexTemplateIdx = 0;
+        vertexOffset += totalVertices; // Tick up the base offset for the next instance block
+      }
+    }
     
     material.userData[uuid] = GpuGeometryBuffers(
-      vertexBuffer: rawVertices,
+      vertexFloatArray: interleavedData,
       indexBuffer: finalIndices.buffer.asByteData(),
       indexCount: finalIndexCount, 
       vertexCount: finalVertexCount, 
       version: material.version,
       needsUpdate: true,
-      indexType: finalIndices is Uint32List ? gpux.IndexType.int32 : gpux.IndexType.int16
+      indexType: finalIndices is Uint32List ? gpux.IndexType.int32 : gpux.IndexType.int16,
+      instanceCount: effectiveInstances
     );
 
     return material.userData[uuid];
   }
+
+  void _updateBuffer(GpuGeometryBuffers cachedBuffers) {
+    final positionAttr = geometry.attributes['position'] as BufferAttribute;
+    final normalAttr = geometry.attributes['normal'] as BufferAttribute?;
+
+    final Float32List currentPositions = positionAttr.array as Float32List;
+    final Float32List? currentNormals = normalAttr?.array as Float32List?;
+
+    final Float32List destData = cachedBuffers.vertexFloatArray;
+    
+    // 1. DYNAMICALLY RESOLVE STRIDE AND OFFSETS FROM THE ORIGINAL LAYOUT DESCRIPTOR
+    final attri = descriptor.requiredAttributes;
+    int stride = 3; 
+    int normalOff = 0;
+
+    if (attri.contains(GeometryAttribute.normal)) {
+      normalOff = stride;
+      stride += 3;
+    }
+    if (attri.contains(GeometryAttribute.uv0)) stride += 2;
+    if (attri.contains(GeometryAttribute.uv1)) stride += 2;
+    if (attri.contains(GeometryAttribute.color)) stride += 3;
+    if (attri.contains(GeometryAttribute.skinIndex)) stride += 4;
+    if (attri.contains(GeometryAttribute.skinWeight)) stride += 4;
+    if (attri.contains(GeometryAttribute.instanceId)) stride += 1;
+
+    final int totalVerts = positionAttr.count;
+    final bool hasNormal = currentNormals != null && attri.contains(GeometryAttribute.normal);
+
+    // 2. RUN THE SAFELY POSITIONED UPDATE LOOP
+    int vertexStride = 0;
+
+    int currentVertexTemplateIdx = 0;
+    final int finalVertexCount = totalVerts * cachedBuffers.instanceCount;
+
+    for (int globalV = 0; globalV < finalVertexCount; globalV++) {
+      final int i = currentVertexTemplateIdx;
+      final int i3 = i * 3;
+
+      // 1. Safely insert position into its exact slot
+      destData.setRange(vertexStride + 0, vertexStride + 3, currentPositions, i3);
+
+      // 2. Safely insert normal into its exact slot
+      if (hasNormal) {
+        destData.setRange(vertexStride + normalOff, vertexStride + normalOff + 3, currentNormals, i3);
+      }
+
+      // 3. Step forward by the TRUE full layout stride length
+      vertexStride += stride;
+
+      // 4. Step vertex templates manually instead of using division or modulo
+      currentVertexTemplateIdx++;
+      if (currentVertexTemplateIdx == totalVerts) {
+        currentVertexTemplateIdx = 0;
+      }
+    }
+
+    cachedBuffers.needsUpdate = true;
+  }
+
 }
 
 class GpuGeometryBuffers {
   GpuGeometryBuffers({
-    required this.vertexBuffer,
+    required this.vertexFloatArray,
     required this.indexBuffer,
     required this.indexCount,
     required this.vertexCount,
     required this.version,
     required this.indexType,
-    required this.needsUpdate
+    required this.needsUpdate,
+    required this.instanceCount,
   });
-
-  final ByteData vertexBuffer;
+  ByteData get vertexBuffer => vertexFloatArray.buffer.asByteData();
+  final Float32List vertexFloatArray;
   final ByteData indexBuffer;
   final int indexCount;
   final int vertexCount;
   final int version;
+  final int instanceCount;
   final gpux.IndexType indexType;
   bool needsUpdate;
 }
@@ -711,14 +851,17 @@ class GpuSamplerConverter {
   static const int GL_TEXTURE_MIN_FILTER = 10241;
 
   static gpux.SamplerOptions getSampler([Texture? text]){
-    //final GpuFilterPair minf = fromGlMinFilter(text.minFilter);
+    if(text == null){
+      return gpux.SamplerOptions();
+    }
+    final GpuFilterPair minf = fromGlMinFilter(text.minFilter);
 
     return gpux.SamplerOptions(
-      // minFilter: minf.minFilter,
-      // magFilter: fromGlMagFilter(text.magFilter),
-      // mipFilter: minf.mipFilter, 
-      // widthAddressMode: fromGlWrapMode(text.wrapS),
-      // heightAddressMode: fromGlWrapMode(text.wrapT),
+      minFilter: minf.minFilter,
+      magFilter: fromGlMagFilter(text.magFilter),
+      mipFilter: minf.mipFilter, 
+      widthAddressMode: fromGlWrapMode(text.wrapS),
+      heightAddressMode: fromGlWrapMode(text.wrapT),
     );
   }
 

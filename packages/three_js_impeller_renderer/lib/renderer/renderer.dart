@@ -4,12 +4,10 @@ import 'package:flutter/foundation.dart';
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_impeller_renderer/renderer/frame_attachments.dart';
 import 'package:three_js_impeller_renderer/renderer/geometry/geometry_descriptor.dart';
-import 'package:three_js_impeller_renderer/renderer/material/material_converter.dart';
 import 'package:three_js_impeller_renderer/renderer/material/material_description_registry.dart';
 import 'package:three_js_impeller_renderer/renderer/pipeline.dart';
 import 'package:three_js_impeller_renderer/renderer/render_pass_manager.dart';
 import 'package:three_js_impeller_renderer/renderer/render_target.dart';
-import 'package:three_js_impeller_renderer/renderer/shaders.dart';
 import 'package:three_js_impeller_renderer/renderer/three_js_rendering/gpu_animation.dart';
 import 'package:three_js_impeller_renderer/renderer/three_js_rendering/gpu_background.dart';
 import 'package:three_js_impeller_renderer/renderer/three_js_rendering/gpu_clipping.dart';
@@ -20,6 +18,25 @@ import 'package:three_js_impeller_renderer/renderer/three_js_rendering/gpu_rende
 import 'package:three_js_impeller_renderer/renderer/uniform_buffer_manager.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'package:flutter_gpu/gpu.dart' as gpu;
+
+class ImpellerCapabilities extends Capabilities{
+  num getMaxAnisotropy(){
+    return 0;
+  }
+
+	bool textureFormatReadable(int textureFormat ){
+    return false;
+  }
+
+	bool textureTypeReadable(int textureType ){
+    return false;
+  }
+  String getMaxPrecision([String? precision]){
+    return 'highp';
+  }
+
+  void dispose(){}
+}
 
 class ImpellerRendererParameters{
   double width;
@@ -215,6 +232,8 @@ class ImpellerRenderer extends Renderer{
     xr.init();
 		xr.addEventListener( 'sessionstart', onXRSessionStart );
 		xr.addEventListener( 'sessionend', onXRSessionEnd );
+
+    capabilities = ImpellerCapabilities();
   }
 
   void _setTextures(int width, int height){
@@ -318,6 +337,8 @@ class ImpellerRenderer extends Renderer{
     return target;
   }
 
+  final Map<String,SceneUniformData> _cacheSceneData = {};
+
   @override
   void render(Object3D scene, Camera camera){
     if (scene.matrixWorldAutoUpdate) scene.updateMatrixWorld();
@@ -400,7 +421,6 @@ class ImpellerRenderer extends Renderer{
     //shadowMap.render(shadowsArray, scene, camera);
     if (_clippingEnabled) clipping.endShadows();
 
-
     final lights = currentRenderList?.lights;
     final opaqueObjects = currentRenderList?.opaque ?? [];
     final transmissiveObjects = currentRenderList?.transmissive ?? [];
@@ -409,11 +429,14 @@ class ImpellerRenderer extends Renderer{
     console.info('RENDER: Sorting complete. Lights: ${lights?.length}, Opaque: ${opaqueObjects.length}, Transparent: ${transmissiveObjects.length}');
 
     // 1. COLLECT LIGHTS AND GENERATE UNIFORMS
-    final sceneData = SceneUniformData.updateUniforms(
-      camera: camera,
-      scene: scene as Scene,
-      activeLights: lights
-    );
+    final sceneData = _cacheSceneData[scene.uuid] ?? SceneUniformData(scene as Scene,this,lights);
+    
+    if(_cacheSceneData[scene.uuid] == null){
+      _cacheSceneData[scene.uuid] = SceneUniformData(scene as Scene,this,lights);
+    }
+    else{
+      sceneData.updateUniforms();
+    }
 
     if(camera is ArrayCamera){
       final List<Camera> subCameras = camera.cameras;
@@ -454,25 +477,25 @@ class ImpellerRenderer extends Renderer{
         subCamera.updateMatrixWorld(true);
 
         for (final o in opaqueObjects) {
-          _renderMesh(o, subCamera, sceneData, renderPass, environmentBinding);
+          _renderMesh(o, subCamera, sceneData.sceneData, renderPass, environmentBinding);
         }
         for (final o in transmissiveObjects) {
-          _renderMesh(o, subCamera, sceneData, renderPass, environmentBinding);
+          _renderMesh(o, subCamera, sceneData.sceneData, renderPass, environmentBinding);
         }
         for (final o in transparentObjects) {
-          _renderMesh(o, subCamera, sceneData, renderPass, environmentBinding);
+          _renderMesh(o, subCamera, sceneData.sceneData, renderPass, environmentBinding);
         }
       }
     }
     else{
       for (final o in opaqueObjects) {
-        _renderMesh(o, camera, sceneData, renderPass, environmentBinding);
+        _renderMesh(o, camera, sceneData.sceneData, renderPass, environmentBinding);
       }
       for (final o in transmissiveObjects) {
-        _renderMesh(o, camera, sceneData, renderPass, environmentBinding);
+        _renderMesh(o, camera, sceneData.sceneData, renderPass, environmentBinding);
       }
       for (final o in transparentObjects) {
-        _renderMesh(o, camera, sceneData, renderPass, environmentBinding);
+        _renderMesh(o, camera, sceneData.sceneData, renderPass, environmentBinding);
       }
     }
     commandBuffer.submit();
@@ -592,48 +615,57 @@ class ImpellerRenderer extends Renderer{
   ) {
     if (item == null) return;
 
-    // 1. Frame-bound layout and allocation guards
     final int maxMeshesPerFrame = 200;
     if (_drawIndexInFrame >= maxMeshesPerFrame) return;
 
-    // Force absolute parent-child matrix updates
-    if (camera.matrixWorldInverse.storage[0] == 0.0 && camera.matrixWorldInverse.storage[5] == 0.0) {
-      camera.matrixWorldInverse.setFrom(camera.matrixWorld).invert();
-    }
-    
     final object = item.object!;
     final geometry = item.geometry;
     if (geometry == null) return;
     final material = item.material;
     if (material == null) return;
-    
+
+    if (camera.matrixWorldInverse.storage[0] == 0.0 && camera.matrixWorldInverse.storage[5] == 0.0) {
+      camera.matrixWorldInverse.setFrom(camera.matrixWorld).invert();
+    }
+
     final resolved = MaterialDescriptorRegistry.resolve(material, object)!;
     final renderState = resolved.renderState;
+    final MaterialDescriptor mdescriptor = resolved.descriptor;
+    
     final String pipelineHash = '${resolved.vertex.hashCode}_${resolved.fragment.hashCode}_${renderState.uuid}';
-    if(_cachedPipeline[pipelineHash] == null || resolved.renderState != _cachedPipeline[pipelineHash]?.descriptor.renderState){
+    final bool pipelineNeedsRebuild = _cachedPipeline[pipelineHash] == null || 
+                                      resolved.renderState != _cachedPipeline[pipelineHash]?.descriptor.renderState;
+
+    if (pipelineNeedsRebuild) {
       _cachedPipeline[pipelineHash] = GpuPipeline(
         gpu.gpuContext, 
         RenderPipelineDescriptor(
-          vertexShader: resolved.vertex, 
-          fragmentShader: resolved.fragment, 
-          //vertexLayouts: vertexLayouts, 
+          vertexShader: resolved.vertex,
+          fragmentShader: resolved.fragment,
           renderState: renderState,
         )
       );
     }
 
-    pass.clearBindings(); 
+    pass.clearBindings();
     _cachedPipeline[pipelineHash]!.bind(pass);
 
-    MaterialDescriptor mdescriptor = resolved.descriptor;
-    final Float32List materialData = MaterialConverter.convert(material, camera).updateUniforms(object);
+    if (_cachedUniforms[object.uuid] == null) {
+      _cachedUniforms[object.uuid] = UniformData(object, camera);
+    }
+    
+    _cachedUniforms[object.uuid]?.update();
+
     final String geomHash = '${geometry.uuid}_${material.uuid}';
-    if(_cachedGeometry[geomHash] == null || mdescriptor != _cachedPipeline[geomHash]?.descriptor){
+    final bool geometryNeedsRebuild = _cachedGeometry[geomHash] == null || 
+                                      mdescriptor != _cachedGeometry[geomHash]?.descriptor; // Note: Fixed a likely bug here where you checked _cachedPipeline instead of _cachedGeometry
+
+    if (geometryNeedsRebuild) {
       _cachedGeometry[geomHash] = GeometryBindings(
         gpu.gpuContext, 
-        object,
-        geometry,
-        material,
+        object, 
+        geometry, 
+        material, 
         mdescriptor
       );
     }
@@ -643,17 +675,18 @@ class ImpellerRenderer extends Renderer{
       resolved.vertex,
       resolved.fragment,
       sceneData,
-      materialData,
+      _cachedUniforms[object.uuid]!.data,
     );
 
     pass.draw();
-
+    
     _drawCallCount++;
     _drawIndexInFrame++;
   }
 
   Map<String,GpuPipeline> _cachedPipeline = {};
   Map<String,GeometryBindings> _cachedGeometry = {};
+  Map<String,UniformData> _cachedUniforms = {};
 
   @override
   void setRenderTarget(RenderTarget? renderTarget, [int activeCubeFace = 0, int activeMipmapLevel = 0]){

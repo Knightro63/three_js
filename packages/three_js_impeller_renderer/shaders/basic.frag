@@ -1,18 +1,18 @@
-#include <common.glsl>
+#include <material_block.glsl>
+#include <scene_block.glsl>
 #include <fog.glsl>
 #include <color.glsl>
 #include <clipping.glsl>
-#include <skinning.glsl>
+#include <tonemapping.glsl>
 
 uniform sampler2D map;          
 uniform sampler2D alphaMap;     
 uniform sampler2D ormMap;        
 uniform sampler2D specularMap;  
 
-in vec3 v_color;
-in vec3 v_normal;
-in vec2 v_uv;
-in vec3 v_worldPosition;
+in vec3 v_color; 
+in vec3 v_worldPosition; 
+in vec2 v_uv; 
 
 out vec4 frag_color;
 
@@ -58,12 +58,10 @@ void main() {
   }
 
   // 5. Final Output Compilation
-  vec3 finalColor = applyFog(
-    baseColor, 
-    v_worldPosition
-  );
+  vec3 finalColor = applyFog( baseColor,  v_worldPosition);
   vec4 finalRGBA = vec4(finalColor, alpha);
-  finalRGBA = applyColor(finalRGBA,material.lineExtendedParams.z);
+  finalRGBA = applyColor(finalRGBA,scene.rendParms.z);
+  finalRGBA.rgb = toneMapping(finalRGBA.rgb);
 
   frag_color = vec4(clamp(finalRGBA.rgb,vec3(0.0),vec3(1.0)), finalRGBA.a);
 }

@@ -1,4 +1,5 @@
-#include <common.glsl>
+#include <material_block.glsl>
+#include <scene_block.glsl>
 #include <light.glsl>
 #include <fog.glsl>
 #include <color.glsl>
@@ -13,6 +14,7 @@ uniform sampler2D bumpMap;
 uniform sampler2D ormMap;
 uniform sampler2D lightMap;
 uniform sampler2D emissiveMap;
+
 uniform sampler2D clearcoatParamsMap;
 uniform sampler2D clearcoatNormalMap;
 uniform sampler2D advancedPhysicalMap;
@@ -128,7 +130,7 @@ void main() {
         thicknessFactor *= advSample.g;
     }
 
-    float iridescenceFactor = material.attenuationColorVec.w;
+    float iridescenceFactor = material.attenuationParms.w;
     if (hasIridescenceMap) {
         iridescenceFactor *= advSample.b;
     }
@@ -162,7 +164,7 @@ void main() {
 
     // 6. Fragment Vector Re-Normalization
     vec3 N_clean = normalize(N);
-    vec3 V_clean = normalize(scene.cameraPosition.xyz - v_worldPosition);
+    vec3 V_clean = normalize(material.cameraPosition.xyz - v_worldPosition);
     vec3 clearcoatN_clean = normalize(clearcoatN);
     float dotNV = clamp(dot(N_clean, V_clean), 0.0, 1.0);
     float dotClearcoatNV = clamp(dot(clearcoatN_clean, V_clean), 0.0, 1.0);
@@ -189,8 +191,8 @@ void main() {
     }
 
     if (transmissionFactor > 0.0) {
-        vec3 transmissionColor = material.attenuationColorVec.rgb;
-        float attenuationDistance = material.lineParams.w;
+        vec3 transmissionColor = material.attenuationParms.rgb;
+        float attenuationDistance = material.attenuationParms.w;
         vec3 thicknessAttenuation = vec3(1.0);
         if (attenuationDistance > 0.0) {
             vec3 absorption = -log(max(transmissionColor, vec3(0.0001))) / attenuationDistance;
@@ -218,14 +220,7 @@ void main() {
 
     baseLighting = applyFog(baseLighting, v_worldPosition);
     vec4 finalRGBA = vec4(baseLighting, alpha);
-    finalRGBA = applyColor(finalRGBA, material.lineExtendedParams.z);
+    finalRGBA = applyColor(finalRGBA, scene.rendParms.z);
 
-    // FIX: Extracting float indices [0][0] from matrices prevents the conversion errors
-    float keepAliveAnchor = 0.000001 * (
-        material.modelMatrix[0][0] + material.morphInfluences0.x + material.morphInfluences1.x +
-        material.bindMatrices[0][0][0] + material.boneTextureParm.x + material.flags0.x +
-        material.flags1.x + material.flags2.x + material.flags3.x + material.flags4.x + material.flags5.x
-    );
-
-    frag_color = vec4(clamp(finalRGBA.rgb, vec3(0.0), vec3(1.0)) + vec3(keepAliveAnchor), finalRGBA.a);
+    frag_color = vec4(clamp(finalRGBA.rgb, vec3(0.0), vec3(1.0)), finalRGBA.a);
 }

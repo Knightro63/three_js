@@ -1,4 +1,5 @@
-#include <common.glsl>
+#include <material_block.glsl>
+#include <scene_block.glsl>
 #include <clipping.glsl>
 
 in vec3 v_color;
@@ -13,7 +14,7 @@ void main() {
   }
   vec3 color = v_color;
 
-  mat4 invView = inverse(scene.viewMatrix);
+  mat4 invView = inverse(material.viewMatrix);
   vec3 cameraWorldPos = invView[3].xyz;
 
   float distanceToCamera = length(v_worldPosition - cameraWorldPos);

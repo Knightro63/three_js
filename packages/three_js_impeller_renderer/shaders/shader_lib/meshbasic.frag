@@ -1,78 +1,54 @@
-#version 460 core
+#include <common>
+#include <batching_pars_vertex>
+#include <uv_pars_vertex>
+#include <envmap_pars_vertex>
+#include <color_pars_vertex>
+#include <fog_pars_vertex>
+#include <morphtarget_pars_vertex>
+#include <skinning_pars_vertex>
+#include <logdepthbuf_pars_vertex>
+#include <clipping_planes_pars_vertex>
 
-// 1. INCLUDE DECLARATIONS
-#include "../shader_chunk/common.frag"
-#include "../shader_chunk/dithering_pars_fragment.frag"
-#include "../shader_chunk/color_pars_fragment.frag"
-#include "../shader_chunk/uv_pars_fragment.frag"
-#include "../shader_chunk/map_pars_fragment.frag"
-#include "../shader_chunk/alphamap_pars_fragment.frag"
-#include "../shader_chunk/alphatest_pars_fragment.frag"
-#include "../shader_chunk/alphahash_pars_fragment.frag"
-#include "../shader_chunk/aomap_pars_fragment.frag"
-#include "../shader_chunk/lightmap_pars_fragment.frag"
-#include "../shader_chunk/envmap_common_pars_fragment.frag"
-#include "../shader_chunk/envmap_pars_fragment.frag"
-#include "../shader_chunk/fog_pars_fragment.frag"
-#include "../shader_chunk/specularmap_pars_fragment.frag"
-#include "../shader_chunk/logdepthbuf_pars_fragment.frag"
-#include "../shader_chunk/clipping_planes_pars_fragment.frag"
+in vec3 position;
+in vec3 normal;
+in vec2 uv;
+in vec3 color;
+in vec4 skinIndex;
+in vec4 skinWeight;
+in float instanceID;
 
-// 2. UNIFORMS BLOCKS
-// Keeping this block aligned to follow your 32-slot base vertex projection matrix sequence.
-uniform MaterialUniforms {
-    vec3 diffuse;            // Float Indices 32, 33, 34
-    float opacity;           // Float Index 35
-    float lightMapIntensity; // Float Index 36
-    bool isFlatShaded;       // Float Index 37 (Converted from macro switch)
-    bool useLightMap;        // Float Index 38 (Converted from macro switch)
-};
-
-// 3. PIPELINE INPUTS (Implicit varying matching)
-in vec3 vNormal;
-// Note: Ensure vLightMapUv is declared in your vertex shader if useLightMap is true
-in vec2 vLightMapUv; 
-
-// 4. PIPELINE OUTPUTS
-layout(location = 0) out vec4 fragColor;
+out vec3 v_color;
+out vec3 v_normal;
+out vec2 v_uv;
+out vec3 v_worldPosition;
 
 void main() {
-    vec4 diffuseColor = vec4(diffuse, opacity);
 
-    #include "../shader_chunk/clipping_planes_fragment.frag"
-    #include "../shader_chunk/logdepthbuf_fragment.frag"
-    #include "../shader_chunk/map_fragment.frag"
-    #include "../shader_chunk/color_fragment.frag"
-    #include "../shader_chunk/alphamap_fragment.frag"
-    #include "../shader_chunk/alphatest_fragment.frag"
-    #include "../shader_chunk/alphahash_fragment.frag"
-    #include "../shader_chunk/specularmap_fragment.frag"
+	#include <uv_vertex>
+	#include <color_vertex>
+	#include <morphinstance_vertex>
+	#include <morphcolor_vertex>
+	#include <batching_vertex>
 
-    // Local variable struct matching Three.js compilation requirements
-    ReflectedLight reflectedLight = ReflectedLight(vec3(0.0), vec3(0.0), vec3(0.0), vec3(0.0));
+	#if defined ( USE_ENVMAP ) || defined ( USE_SKINNING )
 
-    // Converted runtime branch: lightmap texture sampling logic
-    if (useLightMap) {
-        // Modern GLSL handles texture overloads implicitly via texture()
-        vec4 lightMapTexel = texture(lightMap, vLightMapUv);
-        reflectedLight.indirectDiffuse += lightMapTexel.rgb * lightMapIntensity * RECIPROCAL_PI;
-    } else {
-        reflectedLight.indirectDiffuse += vec3(1.0);
-    }
+		#include <beginnormal_vertex>
+		#include <morphnormal_vertex>
+		#include <skinbase_vertex>
+		#include <skinnormal_vertex>
+		#include <defaultnormal_vertex>
 
-    #include "../shader_chunk/aomap_fragment.frag"
+	#endif
 
-    reflectedLight.indirectDiffuse *= diffuseColor.rgb;
-    vec3 outgoingLight = reflectedLight.indirectDiffuse;
+	#include <begin_vertex>
+	#include <morphtarget_vertex>
+	#include <skinning_vertex>
+	#include <project_vertex>
+	#include <logdepthbuf_vertex>
+	#include <clipping_planes_vertex>
 
-    #include "../shader_chunk/envmap_fragment.frag"
-    #include "../shader_chunk/opaque_fragment.frag"
-    #include "../shader_chunk/tonemapping_fragment.frag"
-    #include "../shader_chunk/colorspace_fragment.frag"
-    #include "../shader_chunk/fog_fragment.frag"
-    #include "../shader_chunk/premultiplied_alpha_fragment.frag"
-    #include "../shader_chunk/dithering_fragment.frag"
+	#include <worldpos_vertex>
+	#include <envmap_vertex>
+	#include <fog_vertex>
 
-    // Route the final color output directly to the frame buffer target
-    fragColor = vec4(outgoingLight, diffuseColor.a);
 }
