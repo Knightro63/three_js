@@ -14,7 +14,6 @@ uniform sampler2D bumpMap;
 uniform sampler2D ormMap;
 uniform sampler2D lightMap;
 uniform sampler2D emissiveMap;
-
 uniform sampler2D clearcoatParamsMap;
 uniform sampler2D clearcoatNormalMap;
 uniform sampler2D advancedPhysicalMap;
@@ -40,33 +39,46 @@ void main() {
     }
 
     // 2. Resolve Material Configuration Bitmask Flags
-    bool hasMap                = material.flags0.y > 0.5;
-    bool hasAlphaMap           = material.flags0.z > 0.5;
-    bool hasAoMap              = material.flags0.w > 0.5;
-    bool hasLightMap           = material.flags1.y > 0.5;
-    bool hasBumpMap            = material.flags1.z > 0.5;
-    bool hasNormalMap          = material.flags1.w > 0.5;
-    bool hasRoughnessMap       = material.flags2.y > 0.5;
-    bool hasMetalnessMap       = material.flags2.z > 0.5;
-    bool hasEmissiveMap        = material.flags2.w > 0.5;
-    bool hasClearcoatMap       = material.flags3.x > 0.5;
+    bool hasMap = material.flags0.y > 0.5;
+    bool hasAlphaMap = material.flags0.z > 0.5;
+    bool hasAoMap = material.flags0.w > 0.5;
+    bool hasLightMap = material.flags1.y > 0.5;
+    bool hasBumpMap = material.flags1.z > 0.5;
+    bool hasNormalMap = material.flags1.w > 0.5;
+    bool hasRoughnessMap = material.flags2.y > 0.5;
+    bool hasMetalnessMap = material.flags2.z > 0.5;
+    bool hasEmissiveMap = material.flags2.w > 0.5;
+    bool hasClearcoatMap = material.flags3.x > 0.5;
     bool hasClearcoatNormalMap = material.flags3.y > 0.5;
-    bool hasClearcoatRoughMap  = material.flags3.z > 0.5;
-    bool hasSheenColorMap      = material.flags3.w > 0.5;
-    bool hasSheenRoughMap      = material.flags4.x > 0.5;
-    bool hasTransmissionMap    = material.flags4.y > 0.5;
-    bool hasThicknessMap       = material.flags4.z > 0.5;
-    bool hasIridescenceMap     = material.flags4.w > 0.5;
-    bool hasIridescenceThick   = material.flags5.x > 0.5;
+    bool hasClearcoatRoughMap = material.flags3.z > 0.5;
+    bool hasSheenColorMap = material.flags3.w > 0.5;
+    bool hasSheenRoughMap = material.flags4.x > 0.5;
+    bool hasTransmissionMap = material.flags4.y > 0.5;
+    bool hasThicknessMap = material.flags4.z > 0.5;
+    bool hasIridescenceMap = material.flags4.w > 0.5;
+    bool hasIridescenceThick = material.flags5.x > 0.5;
+
+    // 💡 THE HARDWARE LINE PROTECTION GUARD: 
+    // Detect helper geometries that lack active maps and have zero-length normal vectors
+    bool isUnlitLineHelper = (material.flags5.w < 0.5) && (!hasMap) && (length(v_worldNormal) < 0.1);
 
     // 3. Process Base Albedo and Opacity Channels
     vec4 texelColor = vec4(1.0);
     float alphaOverride = material.baseColor.a;
+
     if (hasMap) {
         texelColor = texture(map, v_uv);
         alphaOverride = material.baseColor.a * texelColor.a;
     }
-    vec3 blendedAlbedo = v_color * texelColor.rgb;
+
+    // 💡 SKELETON WIREFRAME COLOR ROUTER
+    vec3 blendedAlbedo;
+    if (isUnlitLineHelper) {
+        blendedAlbedo = material.baseColor.rgb;
+    } else {
+        blendedAlbedo = v_color * texelColor.rgb;
+    }
+
     float alpha = alphaOverride;
     if (hasAlphaMap) {
         alpha *= texture(alphaMap, v_uv).g;
@@ -83,7 +95,17 @@ void main() {
     }
 
     vec3 linearAlbedo = sRGBTransferEETF(vec4(blendedAlbedo, 1.0)).rgb;
-    // 4. Parse Base PBR parameters
+
+    // 💡 UNLIT BYPASS PASS: Skip all heavy vector mathematics if drawing a skeleton helper line
+    if (isUnlitLineHelper) {
+        vec3 finalColor = applyFog(linearAlbedo, v_worldPosition);
+        vec4 finalRGBA = vec4(finalColor, alpha);
+        finalRGBA = applyColor(finalRGBA, scene.rendParms.z);
+        frag_color = vec4(clamp(finalRGBA.rgb, vec3(0.0), vec3(1.0)), finalRGBA.a);
+        return; // Terminate execution early to completely shield the pipeline from division-by-zero errors
+    }
+
+    // 4. Parse Base PBR parameters (Only executes for valid standard geometries)
     float roughnessFactor = material.pbrParams.x;
     if (hasRoughnessMap) {
         roughnessFactor *= texture(ormMap, v_uv).g;
@@ -129,7 +151,6 @@ void main() {
     if (hasThicknessMap) {
         thicknessFactor *= advSample.g;
     }
-
     float iridescenceFactor = material.attenuationParms.w;
     if (hasIridescenceMap) {
         iridescenceFactor *= advSample.b;
@@ -144,7 +165,6 @@ void main() {
     float faceDirection = gl_FrontFacing ? 1.0 : -1.0;
     vec3 baseNormal = evaluateNormal(v_worldNormal, v_worldPosition);
     vec3 N = baseNormal;
-    
     if (hasNormalMap) {
         vec3 normalMapSample = texture(normalMap, v_uv).xyz * 2.0 - 1.0;
         normalMapSample.xy *= material.mapIntensities.x;
@@ -166,6 +186,7 @@ void main() {
     vec3 N_clean = normalize(N);
     vec3 V_clean = normalize(material.cameraPosition.xyz - v_worldPosition);
     vec3 clearcoatN_clean = normalize(clearcoatN);
+
     float dotNV = clamp(dot(N_clean, V_clean), 0.0, 1.0);
     float dotClearcoatNV = clamp(dot(clearcoatN_clean, V_clean), 0.0, 1.0);
 
@@ -221,6 +242,5 @@ void main() {
     baseLighting = applyFog(baseLighting, v_worldPosition);
     vec4 finalRGBA = vec4(baseLighting, alpha);
     finalRGBA = applyColor(finalRGBA, scene.rendParms.z);
-
     frag_color = vec4(clamp(finalRGBA.rgb, vec3(0.0), vec3(1.0)), finalRGBA.a);
 }

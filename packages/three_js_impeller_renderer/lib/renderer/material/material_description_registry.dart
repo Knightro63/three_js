@@ -650,17 +650,6 @@ abstract class MaterialDescriptorRegistry {
 
     _registerInternal(depthDescriptor,[MeshDepthMaterial],true);
 
-    // final shaderDescriptor = MaterialDescriptor(
-    //   key: 'Shader',
-    //   bindings: [TextureType.uniforms], 
-    //   renderState: MaterialRenderState(),
-    //   requiredAttributes: [
-    //     GeometryAttribute.position,
-    //     GeometryAttribute.color,
-    //   ],
-    // );
-    // _registerInternal(shaderDescriptor, [ShaderMaterial], true);
-
     final standardDescriptor = MaterialDescriptor(
       key: 'Standard',
       bindings: [TextureType.instanceTexture,TextureType.boneTexture,TextureType.map,TextureType.alphaMap,TextureType.displacementMap,TextureType.normalMap,TextureType.bumpMap,TextureType.specularMap,TextureType.aoMap,TextureType.lightMap,TextureType.roughnessMap,TextureType.metalnessMap,TextureType.emissiveMap],
@@ -711,7 +700,8 @@ abstract class MaterialDescriptorRegistry {
         GeometryAttribute.uv0,
         GeometryAttribute.color,
         GeometryAttribute.skinIndex,
-        GeometryAttribute.skinWeight
+        GeometryAttribute.skinWeight,
+        GeometryAttribute.instanceId
       ],
     );
 

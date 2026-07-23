@@ -55,21 +55,59 @@ class GeometryBindings{
     String uuidVert = '${material.uuid}_${geometry.uuid}_vert';
     String uuidIndex = '${material.uuid}_${geometry.uuid}_index';
 
-    if(material.userData[uuidVert] == null || needsUpdate){
-      material.userData[uuidVert] = host.emplace(hardwareBuffers.vertexBuffer);
+    if(material.userData[uuidVert] == null || needsUpdate) {
+      // 1. Calculate the real size in bytes from your typed data array
+      // (Assuming hardwareBuffers.vertexBuffer is a TypedData like Float32List or ByteData)
+      final int vertexBytesLength = hardwareBuffers.vertexBuffer.lengthInBytes;
+
+      if(material.userData[uuidVert] == null){ 
+        // Pass the BYTE length here, NOT the vertex count!
+        material.userData[uuidVert] = context.createDeviceBuffer(
+          gpux.StorageMode.hostVisible, 
+          vertexBytesLength
+        ); 
+      }
+      
+      // 2. Safely populate your permanent VRAM buffer 
+      material.userData[uuidVert].overwrite(hardwareBuffers.vertexBuffer); 
+      
+      // 3. Create the view using byte parameters
+      material.userData['${uuidVert}_bufferView'] = gpux.BufferView(
+        material.userData[uuidVert], 
+        offsetInBytes: 0, 
+        lengthInBytes: vertexBytesLength // Must match the byte size!
+      ); 
     }
-    if(material.userData[uuidIndex] == null || needsUpdate){
-      material.userData[uuidIndex] = host.emplace(hardwareBuffers.indexBuffer);
+
+    // 4. Do the exact same thing for your Index Buffer
+    if(hardwareBuffers.indexCount != 0 && (material.userData[uuidIndex] == null || needsUpdate)) {
+      final int indexBytesLength = hardwareBuffers.indexBuffer.lengthInBytes;
+
+      if(material.userData[uuidIndex] == null) {
+        material.userData[uuidIndex] = context.createDeviceBuffer(
+          gpux.StorageMode.hostVisible, 
+          indexBytesLength
+        );
+      }
+      
+      material.userData[uuidIndex].overwrite(hardwareBuffers.indexBuffer);
+      material.userData['${uuidIndex}_bufferView'] = gpux.BufferView(
+        material.userData[uuidIndex], 
+        offsetInBytes: 0, 
+        lengthInBytes: indexBytesLength
+      );
     }
+
+    
 
     void bind(int i,bool isInstance){
       pass.bindVertexBuffer( 
-        material.userData[uuidVert], 
+        material.userData['${uuidVert}_bufferView'], 
         hardwareBuffers.vertexCount
       );
       if(hardwareBuffers.indexCount != 0){
         pass.bindIndexBuffer( 
-          material.userData[uuidIndex],
+          material.userData['${uuidIndex}_bufferView'],
           hardwareBuffers.indexType, 
           hardwareBuffers.indexCount
         );
@@ -471,13 +509,17 @@ class GeometryBindings{
     gpux.Shader fragment,
     Float32List materialData,
   ){
-    // Emplace raw Float32 data segments straight into the host-visible staging memory
-    final gpux.BufferView materialBufferView = host.emplace(materialData.buffer.asByteData());
+    // 1. CRITICAL PROTECTION FIX: Bound the byte space exactly to the Float32 view window!
+    final int offset = materialData.offsetInBytes;
+    final int length = materialData.lengthInBytes;
+    final ByteData materialView = materialData.buffer.asByteData(offset, length);
 
-    //Map uniform buffer blocks to specific shader string properties
+    // 2. Emplace only the clean, isolated uniform range slice
+    final gpux.BufferView materialBufferView = host.emplace(materialView);
+
     final vertexSlot = vertex.getUniformSlot('MaterialBlock');
     final materialSlotFragment = fragment.getUniformSlot('MaterialBlock');
-    
+
     if (vertexSlot.sizeInBytes != null) {
       pass.bindUniform(vertexSlot, materialBufferView);
     }
@@ -485,6 +527,7 @@ class GeometryBindings{
       pass.bindUniform(materialSlotFragment, materialBufferView);
     }
   }
+
   void _bindSceneUniforms(
     gpux.HostBuffer host,
     gpux.RenderPass pass,
@@ -492,12 +535,15 @@ class GeometryBindings{
     gpux.Shader fragment,
     Float32List sceneData,
   ){
-    // Emplace raw Float32 data segments straight into the host-visible staging memory
-    final gpux.BufferView sceneBufferView = host.emplace(sceneData.buffer.asByteData());
+    // 1. CRITICAL PROTECTION FIX: Bound the byte space exactly to the Float32 view window!
+    final int offset = sceneData.offsetInBytes;
+    final int length = sceneData.lengthInBytes;
+    final ByteData sceneView = sceneData.buffer.asByteData(offset, length);
 
-    //Map uniform buffer blocks to specific shader string properties
+    // 2. Emplace only the clean, isolated uniform range slice
+    final gpux.BufferView sceneBufferView = host.emplace(sceneView);
+
     final sceneSlotFragment = fragment.getUniformSlot('SceneBlock');
-    
     if (sceneSlotFragment.sizeInBytes != null) {
       pass.bindUniform(sceneSlotFragment, sceneBufferView);
     }
@@ -507,7 +553,26 @@ class GeometryBindings{
     String uuid = '${material.uuid}_${geometry.uuid}';
     if (material.userData[uuid]?.version == material.version) {
       material.userData[uuid].needsUpdate = false;
-      _updateBuffer(material.userData[uuid]);
+      if(
+        object.autoUpdate || 
+        material.userData[uuid].version != geometry.attributes['position'].version ||
+        geometry.verticesNeedUpdate ||
+        geometry.groupsNeedUpdate ||
+        geometry.uvsNeedUpdate ||
+        geometry.normalsNeedUpdate ||
+        geometry.lineDistancesNeedUpdate ||
+        geometry.elementsNeedUpdate
+      ){
+        _updateBuffer(material.userData[uuid]);
+        geometry.colorsNeedUpdate = false;
+        geometry.verticesNeedUpdate = false;
+        geometry.groupsNeedUpdate = false;
+        geometry.uvsNeedUpdate = false;
+        geometry.normalsNeedUpdate = false;
+        geometry.lineDistancesNeedUpdate = false;
+        geometry.elementsNeedUpdate = false;
+        material.userData[uuid].version = geometry.attributes['position'].version;
+      }
       return material.userData[uuid];
     }
 
@@ -742,7 +807,8 @@ class GeometryBindings{
       version: material.version,
       needsUpdate: true,
       indexType: finalIndices is Uint32List ? gpux.IndexType.int32 : gpux.IndexType.int16,
-      instanceCount: effectiveInstances
+      instanceCount: effectiveInstances,
+      positionVersion: positionAttr.version
     );
 
     return material.userData[uuid];
@@ -819,13 +885,15 @@ class GpuGeometryBuffers {
     required this.indexType,
     required this.needsUpdate,
     required this.instanceCount,
+    required this.positionVersion
   });
   ByteData get vertexBuffer => vertexFloatArray.buffer.asByteData();
   final Float32List vertexFloatArray;
   final ByteData indexBuffer;
   final int indexCount;
   final int vertexCount;
-  final int version;
+  int version;
+  int positionVersion;
   final int instanceCount;
   final gpux.IndexType indexType;
   bool needsUpdate;

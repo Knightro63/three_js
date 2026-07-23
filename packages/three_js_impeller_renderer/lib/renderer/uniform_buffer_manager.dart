@@ -133,32 +133,52 @@ class UniformData {
   Camera camera;
   final data = Float32List(192);
 
-  UniformData(this.object,this.camera){
-    create();
+  int _lastMaterialVersion = -1;
+
+
+  UniformData(this.object, this.camera) {
+    // Force a complete structural build on frame 0
+    _buildUniforms(forceAll: true);
   }
 
-  void update(){
-    create(false);
+  void update() {
+    final material = object.material!;
+    
+    // 1. Skinned mesh animation calculations must fire every frame
+    if (object is SkinnedMesh) {
+      object.skeleton?.update();
+    }
+
+    // 3. Conditional Version Check Block
+    final bool materialChanged = material.version != _lastMaterialVersion;
+
+    if (materialChanged || object.matrixWorldNeedsUpdate) {
+      _buildUniforms(
+        forceAll: false, 
+        updateMaterial: materialChanged
+      );
+    }
   }
 
-  void create([bool forceUpdate = true]) {
-    if(forceUpdate) object.updateMatrixWorld(true);
+  void _buildUniforms({
+    required bool forceAll, 
+    bool updateMaterial = false
+  }) {
+    if(forceAll) object.updateMatrixWorld(true);
     
     final material = object.material!;
     final modelMatrix = material.uniforms['uvTransform']!=null?material.uniforms['uvTransform']:object.matrixWorld.storage;
     final projMatrix = camera.projectionMatrix.storage;
     final viewMatrix = camera.matrixWorldInverse.storage;
     
-		if ( object is SkinnedMesh ) {
-			object.skeleton?.update();
-		}
-
     for (int i = 0; i < 16; i++) {
       data[i] = modelMatrix[i];
       data[i+16] = projMatrix[i];
       data[i+32] = viewMatrix[i];
-      data[i+48] = object.bindMatrix?.storage[i] ?? 0.0;
-      data[i+64] = object is SkinnedMesh?(object as SkinnedMesh).bindMatrixInverse.storage[i]:0.0;
+      if(updateMaterial || forceAll){
+        data[i+48] = object.bindMatrix?.storage[i] ?? 0.0;
+        data[i+64] = object is SkinnedMesh?(object as SkinnedMesh).bindMatrixInverse.storage[i]:0.0;
+      }
     }
 
     int x = 80;
@@ -169,182 +189,184 @@ class UniformData {
     data[x++] = camera.position.z;
     data[x++] = camera is OrthographicCamera?1:0;
 
-    // baseColor (vec4)
-    data[x++] = material.color.red;
-    data[x++] = material.color.green;
-    data[x++] = material.color.blue;
-    data[x++] = material.opacity;
+    if(updateMaterial || forceAll){
+      // baseColor (vec4)
+      data[x++] = material.color.red;
+      data[x++] = material.color.green;
+      data[x++] = material.color.blue;
+      data[x++] = material.opacity;
 
-    // [Offsets 20-23]: emissiveColor & Intensity (vec4)
-    data[x++] = material.emissive?.red ?? 0.0;
-    data[x++] = material.emissive?.green ?? 0.0;
-    data[x++] = material.emissive?.blue ?? 0.0;
-    data[x++] = material.emissiveIntensity;
+      // [Offsets 20-23]: emissiveColor & Intensity (vec4)
+      data[x++] = material.emissive?.red ?? 0.0;
+      data[x++] = material.emissive?.green ?? 0.0;
+      data[x++] = material.emissive?.blue ?? 0.0;
+      data[x++] = material.emissiveIntensity;
 
-    // [Offsets 24-27]: pbrParams (vec4) -> roughness, metalness, flatShading, alphaTest
-    data[x++] = material.roughness;
-    data[x++] = material.metalness;
-    data[x++] = (material.flatShading) ? 1.0 : 0.0;
-    data[x++] = material.alphaTest;
+      // [Offsets 24-27]: pbrParams (vec4) -> roughness, metalness, flatShading, alphaTest
+      data[x++] = material.roughness;
+      data[x++] = material.metalness;
+      data[x++] = (material.flatShading) ? 1.0 : 0.0;
+      data[x++] = material.alphaTest;
 
-    // [Offsets 28-31]: materialParams (vec4) -> shininess, clearcoat, clearcoatRoughness, wireframe
-    data[x++] = material.shininess ?? 30;
-    data[x++] = material.clearcoat;
-    data[x++] = material.clearcoatRoughness ?? 0;
-    data[x++] = (material.wireframe) ? 1.0 : 0.0;
+      // [Offsets 28-31]: materialParams (vec4) -> shininess, clearcoat, clearcoatRoughness, wireframe
+      data[x++] = material.shininess ?? 30;
+      data[x++] = material.clearcoat;
+      data[x++] = material.clearcoatRoughness ?? 0;
+      data[x++] = (material.wireframe) ? 1.0 : 0.0;
 
-    // [Offsets 32-35]: mapIntensities (vec4) -> bumpScale, envIntensity, lightMapIntensity, aoMapIntensity
-    data[x++] = material.bumpScale ?? 1;
-    data[x++] = material.envMapIntensity ?? 1.0;
-    data[x++] = material.lightMapIntensity ?? 1;
-    data[x++] = material.aoMapIntensity ?? 1;
+      // [Offsets 32-35]: mapIntensities (vec4) -> bumpScale, envIntensity, lightMapIntensity, aoMapIntensity
+      data[x++] = material.bumpScale ?? 1;
+      data[x++] = material.envMapIntensity ?? 1.0;
+      data[x++] = material.lightMapIntensity ?? 1;
+      data[x++] = material.aoMapIntensity ?? 1;
 
-    // [Offsets 36-39]: specularAndIOR (vec4)
-    double specularIntensity = material.specularIntensity ?? 1;
-    if (material.specularColor != null) {
-      data[x++] = material.specularColor!.red * specularIntensity;
-      data[x++] = material.specularColor!.green * specularIntensity;
-      data[x++] = material.specularColor!.blue * specularIntensity;
-    } else {
-      data[x++] = specularIntensity;
-      data[x++] = specularIntensity;
-      data[x++] = specularIntensity;
-    }
-    data[x++] = material.ior ?? 1.5;
+      // [Offsets 36-39]: specularAndIOR (vec4)
+      double specularIntensity = material.specularIntensity ?? 1;
+      if (material.specularColor != null) {
+        data[x++] = material.specularColor!.red * specularIntensity;
+        data[x++] = material.specularColor!.green * specularIntensity;
+        data[x++] = material.specularColor!.blue * specularIntensity;
+      } else {
+        data[x++] = specularIntensity;
+        data[x++] = specularIntensity;
+        data[x++] = specularIntensity;
+      }
+      data[x++] = material.ior ?? 1.5;
 
-    // [Offsets 40-43]: sheenColorAndIntensity (vec4)
-    if (material.sheenColor != null) {
-      data[x++] = material.sheenColor!.red;
-      data[x++] = material.sheenColor!.green;
-      data[x++] = material.sheenColor!.blue;
-    } else {
-      data[x++] = 0.0;
-      data[x++] = 0.0;
-      data[x++] = 0.0;
-    }
-    data[x++] = material.sheen;
-
-    // [Offsets 44-47]: physicalAdvancedParams (vec4)
-    data[x++] = material.sheenRoughness;
-    data[x++] = material.reflectivity ?? 0.5;
-    data[x++] = material.attenuationDistance ?? 0;
-    data[x++] = material.transmission;
-
-    // [Offsets 48-51]: attenuationColorVec & prefilterMipCount (vec4)
-    if (material.attenuationColor != null) {
-      data[x++] = material.attenuationColor!.red;
-      data[x++] = material.attenuationColor!.green;
-      data[x++] = material.attenuationColor!.blue;
-    } else {
-      data[x++] = 0.0;
-      data[x++] = 0.0;
-      data[x++] = 0.0;
-    }
-    data[x++] = material.attenuationDistance ?? 0;//(material.prefilterMipCount).toDouble();
-
-    // [Offsets 52-55]: lineParams (vec4)
-    if(material is PointsMaterial){
-      data[x++] = (material.size ?? 1);
-      data[x++] = material.sizeAttenuation==true?1:0;
-      data[x++] = (material.scale ?? 1)*250;
-      data[x++] = 0;
-    }
-    else if(material is LineDashedMaterial){
-      data[x++] = material.linewidth ?? 1.0;
-      data[x++] = material.dashSize ?? 0;
-      data[x++] = mapLineCap(material.linecap).toDouble();
-      data[x++] = mapLineJoin(material.linejoin).toDouble();
-    }
-    else if(material is MeshPhongMaterial){
-      data[x++] = material.ior ?? 0;
-      data[x++] = material.thickness ?? 1;
-      data[x++] = 1.0;
-      data[x++] = 0;
-    }
-    else{
-      data[x++] = 0;
-      data[x++] = 0;
-      data[x++] = 0;
-      data[x++] = 0;
-    }
-
-    // [Offsets 56-59]: lineExtendedParams (vec4)
-    data[x++] = material.gapSize ?? 0;
-    data[x++] = material.scale ?? 1.0;
-    data[x++] = 2; // ColorSpace field template fallback
-    data[x++] = material.rotation;
-
-    data[x++] = material.displacementScale ?? 0;
-    data[x++] = material.displacementBias ?? 0;
-
-    data[x++] = material.blending.toDouble();
-    data[x++] = 0;
-
-    // ========================================================
-    // 3. CLIPPING PLANES (Offsets 68 - 91) -> 6 planes * vec4
-    // ========================================================
-    for (int i = 0; i < 6; i++) {
-      if (i < (material.clippingPlanes?.length ?? 0)) {
-        final plane = material.clippingPlanes![i];
-        data[x++] = plane.normal.x;
-        data[x++] = plane.normal.y;
-        data[x++] = plane.normal.z;
-        data[x++] = plane.constant;
+      // [Offsets 40-43]: sheenColorAndIntensity (vec4)
+      if (material.sheenColor != null) {
+        data[x++] = material.sheenColor!.red;
+        data[x++] = material.sheenColor!.green;
+        data[x++] = material.sheenColor!.blue;
       } else {
         data[x++] = 0.0;
         data[x++] = 0.0;
         data[x++] = 0.0;
+      }
+      data[x++] = material.sheen;
+
+      // [Offsets 44-47]: physicalAdvancedParams (vec4)
+      data[x++] = material.sheenRoughness;
+      data[x++] = material.reflectivity ?? 0.5;
+      data[x++] = material.attenuationDistance ?? 0;
+      data[x++] = material.transmission;
+
+      // [Offsets 48-51]: attenuationColorVec & prefilterMipCount (vec4)
+      if (material.attenuationColor != null) {
+        data[x++] = material.attenuationColor!.red;
+        data[x++] = material.attenuationColor!.green;
+        data[x++] = material.attenuationColor!.blue;
+      } else {
+        data[x++] = 0.0;
+        data[x++] = 0.0;
         data[x++] = 0.0;
       }
+      data[x++] = material.attenuationDistance ?? 0;//(material.prefilterMipCount).toDouble();
+
+      // [Offsets 52-55]: lineParams (vec4)
+      if(material is PointsMaterial){
+        data[x++] = (material.size ?? 1);
+        data[x++] = material.sizeAttenuation==true?1:0;
+        data[x++] = (material.scale ?? 1)*250;
+        data[x++] = 0;
+      }
+      else if(material is LineDashedMaterial){
+        data[x++] = material.linewidth ?? 1.0;
+        data[x++] = material.dashSize ?? 0;
+        data[x++] = mapLineCap(material.linecap).toDouble();
+        data[x++] = mapLineJoin(material.linejoin).toDouble();
+      }
+      else if(material is MeshPhongMaterial){
+        data[x++] = material.ior ?? 0;
+        data[x++] = material.thickness ?? 1;
+        data[x++] = 1.0;
+        data[x++] = 0;
+      }
+      else{
+        data[x++] = 0;
+        data[x++] = 0;
+        data[x++] = 0;
+        data[x++] = 0;
+      }
+
+      // [Offsets 56-59]: lineExtendedParams (vec4)
+      data[x++] = material.gapSize ?? 0;
+      data[x++] = material.scale ?? 1.0;
+      data[x++] = 2; // ColorSpace field template fallback
+      data[x++] = material.rotation;
+
+      data[x++] = material.displacementScale ?? 0;
+      data[x++] = material.displacementBias ?? 0;
+
+      data[x++] = material.blending.toDouble();
+      data[x++] = 0;
+
+      // ========================================================
+      // 3. CLIPPING PLANES (Offsets 68 - 91) -> 6 planes * vec4
+      // ========================================================
+      for (int i = 0; i < 6; i++) {
+        if (i < (material.clippingPlanes?.length ?? 0)) {
+          final plane = material.clippingPlanes![i];
+          data[x++] = plane.normal.x;
+          data[x++] = plane.normal.y;
+          data[x++] = plane.normal.z;
+          data[x++] = plane.constant;
+        } else {
+          data[x++] = 0.0;
+          data[x++] = 0.0;
+          data[x++] = 0.0;
+          data[x++] = 0.0;
+        }
+      }
+
+      // ========================================================
+      // 4. TAILING SCALAR + PADDING (Offsets 92 - 95) -> vec4
+      // ========================================================
+      data[x++] = material.clippingPlanes?.length.toDouble() ?? 0; // material.clippingPlaneParams.x
+      data[x++] = material.clipIntersection?material.clippingPlanes!.length.toDouble():0.0; // material.clippingPlaneParams.x
+      data[x++] = material.alphaToCoverage?1.0:0.0; // material.clippingPlaneParams.x
+      data[x++] = 0.0; //padding
+
+      final double boneSize = object.skeleton?.boneTextureSize.toDouble() ?? 0;
+      final double morphCount = object.geometry?.morphAttributes["position"]?.length.toDouble()??0;
+      final double vertexCount = object.geometry?.attributes["position"]?.length.toDouble()??0;
+      data[x++] = boneSize;
+      data[x++] = morphCount;
+      data[x++] = vertexCount;
+      data[x++] = 0;
+
+      // instanceTextureParm
+      if (object is InstancedMesh) {
+        data[x++] = 0;
+        data[x++] = vertexCount; // This slot remains open for your structural features
+        
+        final int matrixFloats = object.instanceMatrix?.length ?? 0; // 16000
+        final int colorFloats = object.instanceColor?.length ?? 0;   // 3000
+        final int totalFloats = matrixFloats + colorFloats~/4;          // 19000
+        final double calculatedTexHeight = (totalFloats).ceilToDouble();
+
+        data[x++] = calculatedTexHeight; // boneTextureParm.z: Total True Height (1188.0)
+        data[x++] = object.count?.toDouble() ?? 0.0; // boneTextureParm.w: Matrix Rows Cutoff (1000.0)
+      }
+      else if (object is BatchedMesh) {
+        data[x++] = 0;
+        data[x++] = 0;
+        data[x++] = 0;
+        data[x++] = 0;
+      }
+      else{
+        data[x++] = 0;
+        data[x++] = 0;
+        data[x++] = 0;
+        data[x++] = 0;
+      }
+
+      // flag0 x
+      bool hasBone = object.skeleton?.boneTexture != null;
+      bool hasMorph = object.geometry?.morphAttributes["position"] != null;
+      data[x++] = hasBone?1:hasMorph?2:0;
+      flags(material,x);
     }
-
-    // ========================================================
-    // 4. TAILING SCALAR + PADDING (Offsets 92 - 95) -> vec4
-    // ========================================================
-    data[x++] = material.clippingPlanes?.length.toDouble() ?? 0; // material.clippingPlaneParams.x
-    data[x++] = material.clipIntersection?material.clippingPlanes!.length.toDouble():0.0; // material.clippingPlaneParams.x
-    data[x++] = material.alphaToCoverage?1.0:0.0; // material.clippingPlaneParams.x
-    data[x++] = 0.0; //padding
-
-    final double boneSize = object.skeleton?.boneTextureSize.toDouble() ?? 0;
-    final double morphCount = object.geometry?.morphAttributes["position"]?.length.toDouble()??0;
-    final double vertexCount = object.geometry?.attributes["position"]?.length.toDouble()??0;
-    data[x++] = boneSize;
-    data[x++] = morphCount;
-    data[x++] = vertexCount;
-    data[x++] = 0;
-
-    // instanceTextureParm
-    if (object is InstancedMesh) {
-      data[x++] = 0;
-      data[x++] = vertexCount; // This slot remains open for your structural features
-      
-      final int matrixFloats = object.instanceMatrix?.length ?? 0; // 16000
-      final int colorFloats = object.instanceColor?.length ?? 0;   // 3000
-      final int totalFloats = matrixFloats + colorFloats~/4;          // 19000
-      final double calculatedTexHeight = (totalFloats).ceilToDouble();
-
-      data[x++] = calculatedTexHeight; // boneTextureParm.z: Total True Height (1188.0)
-      data[x++] = object.count?.toDouble() ?? 0.0; // boneTextureParm.w: Matrix Rows Cutoff (1000.0)
-    }
-    else if (object is BatchedMesh) {
-      data[x++] = 0;
-      data[x++] = 0;
-      data[x++] = 0;
-      data[x++] = 0;
-    }
-    else{
-      data[x++] = 0;
-      data[x++] = 0;
-      data[x++] = 0;
-      data[x++] = 0;
-    }
-
-    // flag0 x
-    bool hasBone = object.skeleton?.boneTexture != null;
-    bool hasMorph = object.geometry?.morphAttributes["position"] != null;
-    data[x++] = hasBone?1:hasMorph?2:0;
-    flags(material,x);
   }
 
   void flags(Material material, int x){
