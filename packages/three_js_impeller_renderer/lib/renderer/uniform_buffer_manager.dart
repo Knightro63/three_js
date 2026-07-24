@@ -23,7 +23,7 @@ final _m2 = Matrix4();
 
 class SceneUniformData {
   final Float32List sceneData = Float32List(16 + (4 * 16 * 4));
-  final Scene scene;
+  final Object3D scene;
   final List<Light>? activeLights;
   final ImpellerRenderer renderer;
 
@@ -35,8 +35,8 @@ class SceneUniformData {
     final lightsList = activeLights ?? const [];
     final int totalCount = lightsList.length;
 
-    final envMatrix = _m1.makeRotationFromEuler( scene.environmentRotation );
-    final bgMatrix = _m2.makeRotationFromEuler( scene.backgroundRotation );
+    final envMatrix = scene is Scene?_m1.makeRotationFromEuler( (scene as Scene).environmentRotation ):_m1;
+    final bgMatrix = scene is Scene?_m2.makeRotationFromEuler( (scene as Scene).backgroundRotation ):_m2;
 
     for(int i = 0; i < 16; i++){
       sceneData[i] = bgMatrix.storage[i];
@@ -45,12 +45,12 @@ class SceneUniformData {
 
     int x = 32;
 
-    sceneData[x++] = scene.backgroundIntensity;
+    sceneData[x++] = scene is Scene?(scene as Scene).backgroundIntensity:1.0;
     sceneData[x++] = scene.background is Texture && scene.background?.flipY != null?1:0;
     sceneData[x++] = scene.background == null?0:scene.background is CubeTexture?2:1;
-    sceneData[x++] = scene.backgroundBlurriness;
+    sceneData[x++] = scene is Scene?(scene as Scene).backgroundBlurriness:0.0;
 
-    sceneData[x++] = scene.environmentIntensity;
+    sceneData[x++] = scene is Scene?(scene as Scene).environmentIntensity:1.0;
     sceneData[x++] = scene.environment?.flipY != null?1:0;
     sceneData[x++] = scene.environment == null?0:scene.environment is CubeTexture?2:1;
     sceneData[x++] = totalCount.toDouble();
@@ -61,17 +61,32 @@ class SceneUniformData {
     sceneData[x++] = 0;
 
     // [Offsets 40-43]: Fog Color
-    final fogColor = scene.fog?.color ?? Color();
-    sceneData[x++] = fogColor.red;
-    sceneData[x++] = fogColor.green;
-    sceneData[x++] = fogColor.blue;
-    sceneData[x++] = fogColor.alpha;
+    if(scene is Scene){
+      final fog = (scene as Scene).fog;
+      final fogColor = fog?.color ?? Color();
+      sceneData[x++] = fogColor.red;
+      sceneData[x++] = fogColor.green;
+      sceneData[x++] = fogColor.blue;
+      sceneData[x++] = fogColor.alpha;
 
-    // [Offsets 44-47]: Fog Params
-    sceneData[x++] = scene.fog?.isFogExp2 == false ? scene.fog?.near ?? 0.0 : 0.0;
-    sceneData[x++] = scene.fog?.isFogExp2 == false ? scene.fog?.far ?? 0.0 : 0.0;
-    sceneData[x++] = (scene.fog?.isFogExp2 == true ? scene.fog?.density : 0.0) ?? 0.0;
-    sceneData[x++] = scene.fog?.isFogExp2 == true ? 1.0 : 0.0;
+      // [Offsets 44-47]: Fog Params
+      sceneData[x++] = fog?.isFogExp2 == false ? fog?.near ?? 0.0 : 0.0;
+      sceneData[x++] = fog?.isFogExp2 == false ? fog?.far ?? 0.0 : 0.0;
+      sceneData[x++] = (fog?.isFogExp2 == true ? fog?.density : 0.0) ?? 0.0;
+      sceneData[x++] = fog?.isFogExp2 == true ? 1.0 : 0.0;
+    }
+    else{
+      sceneData[x++] = 0;
+      sceneData[x++] = 0;
+      sceneData[x++] = 0;
+      sceneData[x++] = 0;
+      sceneData[x++] = 0;
+      sceneData[x++] = 0;
+      sceneData[x++] = 0;
+      sceneData[x++] = 0;
+    }
+
+
 
     // Base pointer coordinates for sequential parallel blocks
     final int positionsBase     = x;
@@ -167,7 +182,7 @@ class UniformData {
     if(forceAll) object.updateMatrixWorld(true);
     
     final material = object.material!;
-    final modelMatrix = material.uniforms['uvTransform']!=null?material.uniforms['uvTransform']:object.matrixWorld.storage;
+    final modelMatrix = object.matrixWorld.storage;
     final projMatrix = camera.projectionMatrix.storage;
     final viewMatrix = camera.matrixWorldInverse.storage;
     
@@ -292,12 +307,12 @@ class UniformData {
       // [Offsets 56-59]: lineExtendedParams (vec4)
       data[x++] = material.gapSize ?? 0;
       data[x++] = material.scale ?? 1.0;
-      data[x++] = 2; // ColorSpace field template fallback
+      data[x++] = 2;
       data[x++] = material.rotation;
 
+      // displacement (vec4)
       data[x++] = material.displacementScale ?? 0;
       data[x++] = material.displacementBias ?? 0;
-
       data[x++] = material.blending.toDouble();
       data[x++] = 0;
 

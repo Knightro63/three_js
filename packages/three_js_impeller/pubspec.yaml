@@ -19,11 +19,15 @@ dependencies:
     sdk: flutter
   three_js_impeller_renderer:
     path: ../three_js_impeller_renderer
-  three_js_math: ^0.3.0
+  #three_js_math: ^0.3.0
+  three_js_math:
+    path: ../three_js_math
   three_js_advanced_loaders: ^0.3.0
   three_js_animations: ^0.3.0
   three_js_controls: ^0.3.0
-  three_js_core: ^0.3.0
+  #three_js_core: ^0.3.0
+  three_js_core:
+    path: ../three_js_core
   three_js_core_loaders: ^0.3.0
   three_js_curves: ^0.3.0
   three_js_simple_loaders: ^0.3.0

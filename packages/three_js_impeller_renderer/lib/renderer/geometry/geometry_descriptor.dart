@@ -4,18 +4,6 @@ import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_impeller_renderer/renderer/material/material_description_registry.dart';
 import 'package:three_js_math/three_js_math.dart'; // Adjust based on your exact gpux library paths
 
-/// Geometry attributes mapped for vertex buffers.
-enum GeometryAttribute {
-  position,
-  normal,
-  color,
-  uv0,
-  uv1,
-  skinIndex,
-  skinWeight,
-  instanceId,
-}
-
 class GeometryBindings{
   final gpux.GpuContext context;
   final Object3D object;
@@ -45,10 +33,22 @@ class GeometryBindings{
     if (hardwareBuffers == null) return;
 
     final gpux.HostBuffer host = context.createHostBuffer();
-    _bindMaterialUniforms(host, pass, vertex, fragment ,materialData);
-    if(descriptor.useSceneData){
-      _bindSceneUniforms(host, pass, vertex, fragment, sceneData);
+
+    if(material is ShaderMaterial){
+      if(material.uniforms.isNotEmpty && material.uniforms['ShaderParameters'] != null){
+        final data = _createHostBuffers(material.uniforms,vertex,fragment,pass);
+        if(data[0].isNotEmpty && material.uniforms['ShaderParameters']['vertex'] != null) _bindUniforms( host, pass, vertex, material.uniforms['ShaderParameters']['vertex'], data[0]);
+        if(data[1].isNotEmpty && material.uniforms['ShaderParameters']['fragment'] != null) _bindUniforms( host, pass, fragment, material.uniforms['ShaderParameters']['fragment'], data[1]);
+      }
     }
+    else if(material is! ShaderMaterial){
+      _bindMaterialUniforms(host, pass, vertex, fragment ,materialData);
+    }
+
+    if(descriptor.useSceneData){
+      _bindUniforms(host, pass, fragment, 'SceneBlock', sceneData);
+    }
+
     _bindTextures(pass,vertex,fragment);
 
     bool needsUpdate = hardwareBuffers.needsUpdate;
@@ -98,8 +98,6 @@ class GeometryBindings{
       );
     }
 
-    
-
     void bind(int i,bool isInstance){
       pass.bindVertexBuffer( 
         material.userData['${uuidVert}_bufferView'], 
@@ -148,7 +146,7 @@ class GeometryBindings{
 
       final text = skeleton.boneTexture!;
       final texture = _createTexture(text.image, '');
-      final texSlot = vertex.getUniformSlot('unifiedTransformationTexture');
+      final texSlot = vertex.getUniformSlot('boneTexture');
       pass.bindTexture(texSlot, texture, sampler: GpuSamplerConverter.getSampler(text));
     }
 
@@ -191,7 +189,7 @@ class GeometryBindings{
 
         // 5. Upload and bind seamlessly to uniform slot layout index 2 (boneTexture)
         final texture = _createTexture(image, '');
-        final texSlot = vertex.getUniformSlot('unifiedTransformationTexture'); // Reused target name
+        final texSlot = vertex.getUniformSlot('morphTexture'); // Reused target name
         pass.bindTexture(texSlot, texture, sampler: GpuSamplerConverter.getSampler());
       }
     }
@@ -472,7 +470,10 @@ class GeometryBindings{
 
   gpux.Texture _createTexture(
     ImageElement element,
-    [String? cacheName]
+    [
+      String? cacheName,
+      gpux.TextureType type = gpux.TextureType.texture2D
+    ]
   ){
     //print(material.userData.keys.length);
     if(material.userData[element.uuid] != null){
@@ -484,11 +485,12 @@ class GeometryBindings{
       element.width.toInt(), 
       element.height.toInt(),
       sampleCount: 1,
-      //textureType: gpux.TextureType.texture2D,
+      textureType: type,
       format: element.data is Uint8List?
         gpux.PixelFormat.r8g8b8a8UNormInt:
         element.data is Float32List?
         gpux.PixelFormat.r32g32b32a32Float:gpux.PixelFormat.r16g16b16a16Float,
+      enableShaderReadUsage: true
     );
     if(cacheName == null && element.uuid == null){
       element.uuid = MathUtils.generateUUID();
@@ -500,6 +502,81 @@ class GeometryBindings{
     if(element.data != null) sampledTexture.overwrite(element.data.buffer.asByteData());
 
     return sampledTexture;
+  }
+
+  gpux.Texture _createCubeTexture(
+    List<ImageElement> elements, {
+    String? cacheName,
+  }) {
+    // 1. Enforce that a valid cubemap requires exactly 6 structural image faces
+    if (elements.length != 6) {
+      throw ArgumentError('Impeller Error: Cubemaps must provide exactly 6 sequential ImageElements.');
+    }
+
+    // Generate a distinct unique ID fallback pattern to prevent cache collisions
+    final String uniqueId = cacheName ?? MathUtils.generateUUID();
+    if (material.userData[uniqueId] != null) {
+      return material.userData[uniqueId]!;
+    }
+
+    final primaryElement = elements[0];
+    final int width = primaryElement.width.toInt();
+    final int height = primaryElement.height.toInt();
+
+    // 2. Allocate ONE single multi-layered texture container using the textureCube flag
+    final cubeTexture = context.createTexture(
+      gpux.StorageMode.hostVisible, // Required for host data overwrite calls
+      width,
+      height,
+      sampleCount: 1,
+      textureType: gpux.TextureType.textureCube, // Informs Impeller this has 6 face slices
+      coordinateSystem: gpux.TextureCoordinateSystem.uploadFromHost, // Matches WebGL rules natively
+      format: primaryElement.data is Uint8List
+          ? gpux.PixelFormat.r8g8b8a8UNormInt
+          : primaryElement.data is Float32List
+              ? gpux.PixelFormat.r32g32b32a32Float
+              : gpux.PixelFormat.r16g16b16a16Float,
+    );
+
+    // 3. FIXED: Grab the precise total base buffer budget directly from Impeller
+    // This already accounts for all 6 faces combined! (e.g., 524288 bytes)
+    final int totalCubeBytesLength = cubeTexture.getBaseMipLevelSizeInBytes(); 
+    
+    // Calculate the specific size constraint allocated per individual face
+    final int singleFaceStride = totalCubeBytesLength ~/ 6;
+    
+    // Allocate the exact size buffer target matching the base mip level expectation
+    final Uint8List combinedCubeBytes = Uint8List(totalCubeBytesLength);
+    int currentByteOffset = 0;
+
+    // 4. Statically append every individual face data slice into the linear queue buffer
+    // Order follows standard WebGL/ThreeJS layout expectations:
+    // 0:+X, 1:-X, 2:+Y, 3:-Y, 4:+Z, 5:-Z
+    for (int faceIndex = 0; faceIndex < 6; faceIndex++) {
+      final element = elements[faceIndex];
+      if (element.data != null) {
+        final Uint8List faceView = element.data.buffer.asUint8List(
+          element.data.offsetInBytes,
+          element.data.lengthInBytes,
+        );
+        
+        // Copy the entire face pixel array chunk directly into its sequential slot segment
+        combinedCubeBytes.setRange(
+          currentByteOffset, 
+          currentByteOffset + faceView.length, 
+          faceView,
+        );
+      }
+      // Step forward by the single face byte length stride
+      currentByteOffset += singleFaceStride;
+    }
+
+    // 5. Fire a single batch overwrite command that perfectly maps to the 524288 byte limit
+    cubeTexture.overwrite(combinedCubeBytes.buffer.asByteData());
+
+    // Cache the generated multi-surface texture
+    material.userData[uniqueId] = cubeTexture;
+    return cubeTexture;
   }
 
   void _bindMaterialUniforms(
@@ -528,50 +605,114 @@ class GeometryBindings{
     }
   }
 
-  void _bindSceneUniforms(
+  void _bindUniforms(
     gpux.HostBuffer host,
     gpux.RenderPass pass,
-    gpux.Shader vertex,
-    gpux.Shader fragment,
-    Float32List sceneData,
+    gpux.Shader shader,
+    String name,
+    Float32List data,
   ){
-    // 1. CRITICAL PROTECTION FIX: Bound the byte space exactly to the Float32 view window!
-    final int offset = sceneData.offsetInBytes;
-    final int length = sceneData.lengthInBytes;
-    final ByteData sceneView = sceneData.buffer.asByteData(offset, length);
+    final int offset = data.offsetInBytes;
+    final int length = data.lengthInBytes;
+    final ByteData sceneView = data.buffer.asByteData(offset, length);
 
-    // 2. Emplace only the clean, isolated uniform range slice
     final gpux.BufferView sceneBufferView = host.emplace(sceneView);
 
-    final sceneSlotFragment = fragment.getUniformSlot('SceneBlock');
+    final sceneSlotFragment = shader.getUniformSlot(name);
     if (sceneSlotFragment.sizeInBytes != null) {
       pass.bindUniform(sceneSlotFragment, sceneBufferView);
     }
   }
+
+  // int _getStride(type){
+  //   if(type is Matrix4 ||
+  //       type is Matrix3 ||
+  //       type is Matrix2 ||
+  //       type is Vector4 ||
+  //       type is Vector3 ||
+  //       type is Vector2
+  //   ){
+  //     return type.storage.length;
+  //   }
+  //   else if(type is num){
+  //     return 1;
+  //   }
+
+  //   return 0;
+  // }
+
+  List<Float32List> _createHostBuffers(
+    Map<String, dynamic> uniforms, 
+    gpux.Shader vertex, 
+    gpux.Shader fragment, 
+    gpux.RenderPass pass
+  ) {
+    if (material.userData['hostBuffers'] != null) {
+      //return material.userData['hostBuffers'];
+    }
+
+    final List<double> hostvB = [];
+    final List<double> hostfB = [];
+
+    for (final key in uniforms.keys) {
+      final uniformEntry = uniforms[key];
+      final type = uniformEntry['value'];
+      final String shader = uniformEntry['shader'] ?? 'vertex';
+      final List<double> currentBuffer = (shader == 'vertex') ? hostvB : hostfB;
+
+      if (type is Matrix4 || type is Vector4 || type == Color) {
+        // Perfectly aligned types. Safe to add directly.
+        currentBuffer.addAll(type.storage);
+      } 
+      else if (type is Matrix3 || type is Matrix2 || type is Vector3 || type is Vector2 || type is num) {
+        // Throw an explicit alignment error detailing why this type is blocked
+        throw ArgumentError(
+          'Impeller Material Error: Uniform "$key" uses an unaligned type (${type.runtimeType}). '
+          'To prevent std140 layout shifting, only Matrix4 (mat4) and Vector4 (vec4) are allowed. '
+          'Please pack smaller types (like float, vec2, or vec3) inside a Vector4 on both Dart and GLSL sides.'
+        );
+      } 
+      else if (type is Texture) {
+        if(type.image is List){
+          final texture = _createCubeTexture(type.image);
+          final texSlot = (shader == 'fragment') 
+              ? fragment.getUniformSlot(key) 
+              : vertex.getUniformSlot(key);
+          pass.bindTexture(texSlot, texture, sampler: GpuSamplerConverter.getSampler(type));
+        }
+        else{
+          final texture = _createTexture(type.image);
+          final texSlot = (shader == 'fragment') 
+              ? fragment.getUniformSlot(key) 
+              : vertex.getUniformSlot(key);
+          pass.bindTexture(texSlot, texture, sampler: GpuSamplerConverter.getSampler(type));
+        }
+      }
+    }
+
+    material.userData['hostBuffers'] = [
+      Float32List.fromList(hostvB),
+      Float32List.fromList(hostfB)
+    ];
+
+    return material.userData['hostBuffers'];
+  }
   
   GpuGeometryBuffers? _createHardwareBuffers(int instanceCount) {
     String uuid = '${material.uuid}_${geometry.uuid}';
-    if (material.userData[uuid]?.version == material.version) {
+    int version = 
+      (geometry.attributes['position']?.version ?? 0) +
+      material.version + 
+      (geometry.attributes['uv']?.version ?? 0) +
+      (geometry.attributes['normal']?.version ?? 0)+
+      (geometry.attributes['color']?.version ?? 0)+
+      (geometry.attributes['skinIndex']?.version ?? 0)+
+      (geometry.attributes['skinWeight']?.version ?? 0);
+
+    if (material.userData[uuid]?.version == version) {
       material.userData[uuid].needsUpdate = false;
-      if(
-        object.autoUpdate || 
-        material.userData[uuid].version != geometry.attributes['position'].version ||
-        geometry.verticesNeedUpdate ||
-        geometry.groupsNeedUpdate ||
-        geometry.uvsNeedUpdate ||
-        geometry.normalsNeedUpdate ||
-        geometry.lineDistancesNeedUpdate ||
-        geometry.elementsNeedUpdate
-      ){
+      if(object.autoUpdate){
         _updateBuffer(material.userData[uuid]);
-        geometry.colorsNeedUpdate = false;
-        geometry.verticesNeedUpdate = false;
-        geometry.groupsNeedUpdate = false;
-        geometry.uvsNeedUpdate = false;
-        geometry.normalsNeedUpdate = false;
-        geometry.lineDistancesNeedUpdate = false;
-        geometry.elementsNeedUpdate = false;
-        material.userData[uuid].version = geometry.attributes['position'].version;
       }
       return material.userData[uuid];
     }
@@ -583,6 +724,7 @@ class GeometryBindings{
     final colorAttr = geometry.attributes['color'] as BufferAttribute?;
     final skinIndexAttr = geometry.attributes['skinIndex'] as BufferAttribute?;
     final skinWeightAttr = geometry.attributes['skinWeight'] as BufferAttribute?;
+    final lineDistanceAttr = geometry.attributes['lineDistances'] as BufferAttribute?;
     final indexAttr = geometry.index;
 
     if (positionAttr == null) {
@@ -617,41 +759,46 @@ class GeometryBindings{
     final uvs1 = uv1Attr?.array.buffer.asFloat32List();
     final skinIndices = skinIndexAttr?.array;
     final Float32List? skinWeights = skinWeightAttr?.array as Float32List?;
+    final Float32List? lineDistance = lineDistanceAttr?.array as Float32List?;
 
     final attri = descriptor.requiredAttributes;
 
     // 2. Configure float layout step strides and dynamic slot offset positions
     int stride = 3; 
     final int colorItemSize = colorAttr?.itemSize ?? 3;
-    final Map<GeometryAttribute, int> attributeOffsets = {};
+    final Map<Attribute, int> attributeOffsets = {};
 
-    if (attri.contains(GeometryAttribute.normal)) {
-      attributeOffsets[GeometryAttribute.normal] = stride;
+    if (attri.contains(Attribute.normal)) {
+      attributeOffsets[Attribute.normal] = stride;
       stride += 3;
     }
-    if (attri.contains(GeometryAttribute.uv0)) {
-      attributeOffsets[GeometryAttribute.uv0] = stride;
+    if (attri.contains(Attribute.uv)) {
+      attributeOffsets[Attribute.uv] = stride;
       stride += 2;
     }
-    if (attri.contains(GeometryAttribute.uv1)) {
-      attributeOffsets[GeometryAttribute.uv1] = stride;
+    if (attri.contains(Attribute.uv2)) {
+      attributeOffsets[Attribute.uv2] = stride;
       stride += 2;
     }
-    if (attri.contains(GeometryAttribute.color)) {
-      attributeOffsets[GeometryAttribute.color] = stride;
+    if (attri.contains(Attribute.color)) {
+      attributeOffsets[Attribute.color] = stride;
       stride += 3;
     }
-    if (attri.contains(GeometryAttribute.skinIndex)) {
-      attributeOffsets[GeometryAttribute.skinIndex] = stride;
+    if (attri.contains(Attribute.skinIndex)) {
+      attributeOffsets[Attribute.skinIndex] = stride;
       stride += 4;
     }
-    if (attri.contains(GeometryAttribute.skinWeight)) {
-      attributeOffsets[GeometryAttribute.skinWeight] = stride;
+    if (attri.contains(Attribute.skinWeight)) {
+      attributeOffsets[Attribute.skinWeight] = stride;
       stride += 4;
     }
     // LOCK IN SLOT: Instance ID Attribute Location Layout
-    if (attri.contains(GeometryAttribute.instanceId)) {
-      attributeOffsets[GeometryAttribute.instanceId] = stride;
+    if (attri.contains(Attribute.instanceId)) {
+      attributeOffsets[Attribute.instanceId] = stride;
+      stride += 1;
+    }
+    if (attri.contains(Attribute.lineDistances)) {
+      attributeOffsets[Attribute.lineDistances] = stride;
       stride += 1;
     }
 
@@ -663,21 +810,23 @@ class GeometryBindings{
     // ========================================================
 
     // Cache map lookups and attribute states outside the loop
-    final bool hasNormal = attri.contains(GeometryAttribute.normal);
-    final bool hasUv0 = uvs0 != null && attri.contains(GeometryAttribute.uv0);
-    final bool hasUv1 = attri.contains(GeometryAttribute.uv1);
-    final bool hasColor = attri.contains(GeometryAttribute.color);
-    final bool hasSkinIndex = attri.contains(GeometryAttribute.skinIndex);
-    final bool hasSkinWeight = attri.contains(GeometryAttribute.skinWeight);
-    final bool hasInstanceId = attri.contains(GeometryAttribute.instanceId);
+    final bool hasNormal = attri.contains(Attribute.normal);
+    final bool hasUv0 = uvs0 != null && attri.contains(Attribute.uv);
+    final bool hasUv1 = attri.contains(Attribute.uv2);
+    final bool hasColor = attri.contains(Attribute.color);
+    final bool hasSkinIndex = attri.contains(Attribute.skinIndex);
+    final bool hasSkinWeight = attri.contains(Attribute.skinWeight);
+    final bool hasInstanceId = attri.contains(Attribute.instanceId);
+    final bool hasLineDistance = attri.contains(Attribute.lineDistances);
 
-    final int normalOff = attributeOffsets[GeometryAttribute.normal] ?? 0;
-    final int uv0Off = attributeOffsets[GeometryAttribute.uv0] ?? 0;
-    final int uv1Off = attributeOffsets[GeometryAttribute.uv1] ?? 0;
-    final int colorOff = attributeOffsets[GeometryAttribute.color] ?? 0;
-    final int skinIdxOff = attributeOffsets[GeometryAttribute.skinIndex] ?? 0;
-    final int skinWgtOff = attributeOffsets[GeometryAttribute.skinWeight] ?? 0;
-    final int instanceIdOff = attributeOffsets[GeometryAttribute.instanceId] ?? 0;
+    final int normalOff = attributeOffsets[Attribute.normal] ?? 0;
+    final int uv0Off = attributeOffsets[Attribute.uv] ?? 0;
+    final int uv1Off = attributeOffsets[Attribute.uv2] ?? 0;
+    final int colorOff = attributeOffsets[Attribute.color] ?? 0;
+    final int skinIdxOff = attributeOffsets[Attribute.skinIndex] ?? 0;
+    final int skinWgtOff = attributeOffsets[Attribute.skinWeight] ?? 0;
+    final int instanceIdOff = attributeOffsets[Attribute.instanceId] ?? 0;
+    final int lineDistanceOff = attributeOffsets[Attribute.lineDistances] ?? 0;
 
     final double matRed = material.color.red;
     final double matGreen = material.color.green;
@@ -770,6 +919,11 @@ class GeometryBindings{
         interleavedData[vertexStride + instanceIdOff] = currentInstDouble;
       }
 
+      // 9. Line Distance
+      if (hasLineDistance) {
+        interleavedData[vertexStride + lineDistanceOff] = lineDistance?[i] ?? 0;
+      }
+
       vertexStride += stride;
 
       // Step indices manually instead of using division/modulo
@@ -804,11 +958,10 @@ class GeometryBindings{
       indexBuffer: finalIndices.buffer.asByteData(),
       indexCount: finalIndexCount, 
       vertexCount: finalVertexCount, 
-      version: material.version,
+      version: version,
       needsUpdate: true,
       indexType: finalIndices is Uint32List ? gpux.IndexType.int32 : gpux.IndexType.int16,
       instanceCount: effectiveInstances,
-      positionVersion: positionAttr.version
     );
 
     return material.userData[uuid];
@@ -828,19 +981,19 @@ class GeometryBindings{
     int stride = 3; 
     int normalOff = 0;
 
-    if (attri.contains(GeometryAttribute.normal)) {
+    if (attri.contains(Attribute.normal)) {
       normalOff = stride;
       stride += 3;
     }
-    if (attri.contains(GeometryAttribute.uv0)) stride += 2;
-    if (attri.contains(GeometryAttribute.uv1)) stride += 2;
-    if (attri.contains(GeometryAttribute.color)) stride += 3;
-    if (attri.contains(GeometryAttribute.skinIndex)) stride += 4;
-    if (attri.contains(GeometryAttribute.skinWeight)) stride += 4;
-    if (attri.contains(GeometryAttribute.instanceId)) stride += 1;
+    if (attri.contains(Attribute.uv)) stride += 2;
+    if (attri.contains(Attribute.uv2)) stride += 2;
+    if (attri.contains(Attribute.color)) stride += 3;
+    if (attri.contains(Attribute.skinIndex)) stride += 4;
+    if (attri.contains(Attribute.skinWeight)) stride += 4;
+    if (attri.contains(Attribute.instanceId)) stride += 1;
 
     final int totalVerts = positionAttr.count;
-    final bool hasNormal = currentNormals != null && attri.contains(GeometryAttribute.normal);
+    final bool hasNormal = currentNormals != null && attri.contains(Attribute.normal);
 
     // 2. RUN THE SAFELY POSITIONED UPDATE LOOP
     int vertexStride = 0;
@@ -885,7 +1038,6 @@ class GpuGeometryBuffers {
     required this.indexType,
     required this.needsUpdate,
     required this.instanceCount,
-    required this.positionVersion
   });
   ByteData get vertexBuffer => vertexFloatArray.buffer.asByteData();
   final Float32List vertexFloatArray;
@@ -893,7 +1045,6 @@ class GpuGeometryBuffers {
   final int indexCount;
   final int vertexCount;
   int version;
-  int positionVersion;
   final int instanceCount;
   final gpux.IndexType indexType;
   bool needsUpdate;

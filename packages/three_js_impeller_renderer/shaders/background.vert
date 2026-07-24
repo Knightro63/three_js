@@ -1,18 +1,22 @@
-#include <material_block.glsl>
+layout(std140, binding = 0) uniform CatBlock {
+  mat4 transform;
+  vec4 backgroundIntensity;
+} cat;
 
 in vec3 position;
 in vec2 uv;
 
 out vec2 v_uv;
+out float v_bright;
 
 void main() {
   mat3 uvTransform = mat3(
-    material.modelMatrix[0].xyz, // Column 0
-    material.modelMatrix[1].xyz, // Column 1
-    material.modelMatrix[3].xyz  // Column 3 (Holds our clean translation properties)
+    cat.transform[0].xyz,
+    cat.transform[1].xyz,
+    cat.transform[2].xyz
   );
   
-  v_uv = ( uvTransform * vec3( uv, 1.0 ) ).xy;
-  gl_Position = vec4( position.xy, 1.0, 1.0 );
-  gl_Position.z = gl_Position.z * 0.999;
+  v_uv = vec2(uv.x, 1.0 - uv.y); 
+  gl_Position = vec4( position.xy, 0.999, 1.0 );
+  v_bright = cat.backgroundIntensity.x;
 }

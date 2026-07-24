@@ -1,4 +1,5 @@
 import 'package:three_js_core/three_js_core.dart';
+import 'package:three_js_impeller_renderer/renderer/texture/pmrem_generator.dart';
 import '../renderer.dart';
 import 'package:three_js_math/three_js_math.dart';
 

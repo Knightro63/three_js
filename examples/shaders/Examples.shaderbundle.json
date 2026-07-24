@@ -1,0 +1,18 @@
+{
+  "WebglShaderVertex": {
+    "type": "vertex",
+    "file": "shaders/webgl_shader.vert"
+  },
+  "WebglShaderFragment": {
+    "type": "fragment",
+    "file": "shaders/webgl_shader.frag"
+  },
+  "WebglVolumeCloudVertex": {
+    "type": "vertex",
+    "file": "shaders/webgl_volume_cloud.vert"
+  },
+  "WebglVolumeCloudFragment": {
+    "type": "fragment",
+    "file": "shaders/webgl_volume_cloud.frag"
+  }
+}

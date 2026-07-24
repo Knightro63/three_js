@@ -2,7 +2,6 @@ import 'package:flutter_gpu/gpu.dart' as gpux;
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_impeller_renderer/renderer/shaders.dart';
 import 'package:three_js_math/three_js_math.dart';
-import '../geometry/geometry_descriptor.dart';
 
 
 /// Enumeration of non-uniform material resource attachment types.
@@ -170,11 +169,13 @@ class ResolvedMaterialDescriptor {
   final MaterialDescriptor descriptor;
   final MaterialRenderState renderState;
 
-  String get vertexName => descriptor.key+"Vertex";
-  String get fragmentName => descriptor.key+"Fragment";
+  String get vertexName => descriptor.vertexKey;
+  String get fragmentName => descriptor.fragmentKey;
+  String get bundle => descriptor.bundle;
+  String? get package => descriptor.package;
 
-  gpux.Shader get vertex => shaderLibrary[vertexName]!;
-  gpux.Shader get fragment => shaderLibrary[fragmentName]!;
+  gpux.Shader? get vertex => shaderLibrary(bundle, package: package)[vertexName];
+  gpux.Shader? get fragment => shaderLibrary(bundle, package: package)[fragmentName];
 
   /// Shorthand immutable copier mimicking Kotlin's data class copy modifier.
   ResolvedMaterialDescriptor copyWith({
@@ -210,39 +211,57 @@ class ResolvedMaterialDescriptor {
 /// Fully describes how a material should be rendered within the pipeline.
 class MaterialDescriptor {
   MaterialDescriptor({
+    String? vertexKey,
+    String? fragmentKey,
     required this.key,
+    required this.bundle,
+    this.package,
     this.bindings = const [],
     MaterialRenderState? renderState,
     Map<String,String>? defines,
-    List<GeometryAttribute>? requiredAttributes,
+    List<Attribute>? requiredAttributes,
     this.useSceneData = true,
     this.useMaterialData = true
   }){
+    this.vertexKey = vertexKey ?? '${key}Vertex';
+    this.fragmentKey = fragmentKey ?? '${key}Fragment';
     this.renderState = renderState ?? MaterialRenderState();
     this.defines = defines ?? {};
     this.requiredAttributes = requiredAttributes ?? [];
   }
 
+  late final String vertexKey;
+  late final String fragmentKey;
+  final String bundle;
+  final String? package;
   final String key;
   bool useSceneData = true;
   bool useMaterialData = true;
   final List<TextureType> bindings;
   late final MaterialRenderState renderState;
   late final Map<String, String> defines;
-  late final List<GeometryAttribute> requiredAttributes;
+  late final List<Attribute> requiredAttributes;
 
 
   /// Shorthand immutable copier mimicking Kotlin's data class copy modifier.
   MaterialDescriptor copyWith({
     String? key,
+    String? vertexKey,
+    String? fragmentKey,
+    String? bundle,
+    String? package,
     MaterialUniformBlock? uniformBlock,
     List<TextureType>? bindings,
     MaterialRenderState? renderState,
     Map<String, String>? defines,
-    List<GeometryAttribute>? requiredAttributes,
+    List<Attribute>? requiredAttributes,
   }) {
     return MaterialDescriptor(
       key: key ?? this.key,
+      bundle: bundle ?? this.bundle,
+      package: package ?? this.package,
+      vertexKey: vertexKey ?? this.vertexKey,
+      fragmentKey: fragmentKey ?? this.fragmentKey,
       bindings: bindings ?? this.bindings,
       renderState: renderState ?? this.renderState,
       defines: defines ?? this.defines,
@@ -256,6 +275,8 @@ class MaterialDescriptor {
       other is MaterialDescriptor &&
           runtimeType == other.runtimeType &&
           key == other.key &&
+          vertexKey == other.vertexKey &&
+          fragmentKey == other.fragmentKey &&
           // Explicit deep-content array checks
           Object.hashAll(bindings) == Object.hashAll(other.bindings) &&
           renderState == other.renderState &&
@@ -267,6 +288,8 @@ class MaterialDescriptor {
   @override
   int get hashCode => Object.hash(
         key,
+        vertexKey,
+        fragmentKey,
         Object.hashAll(bindings),
         renderState,
         Object.hashAll(defines.entries),
@@ -275,7 +298,7 @@ class MaterialDescriptor {
 
   @override
   String toString() {
-    return 'MaterialDescriptor(key: $key, bindings: $bindings, renderState: $renderState, defines: $defines, requiredAttributes: $requiredAttributes)';
+    return 'MaterialDescriptor(vertexKey: $vertexKey, fragmentKey: $fragmentKey, bindings: $bindings, renderState: $renderState, defines: $defines, requiredAttributes: $requiredAttributes)';
   }
 }
 
@@ -338,23 +361,16 @@ abstract class MaterialDescriptorRegistry {
 
   static _DescriptorState _state = const _DescriptorState(
     byKey: {},
-    byMaterial: {},
   );
 
   /// Registers a descriptor for the provided [materials]. Optionally replaces existing registrations.
   static void register(
     MaterialDescriptor descriptor,
-    List<Type> materials, {
+    Material material,{
     bool replaceExisting = false,
   }) {
     _ensureDefaultsRegistered();
-    _registerInternal(descriptor, materials, replaceExisting);
-  }
-
-  /// Retrieves a descriptor by material instance runtime type.
-  static MaterialDescriptor? descriptorFor(Material material) {
-    _ensureDefaultsRegistered();
-    return _state.byMaterial[material.runtimeType];
+    _registerInternal(descriptor, [material.type], replaceExisting);
   }
 
   /// Retrieves a descriptor by key name identifier.
@@ -365,15 +381,16 @@ abstract class MaterialDescriptorRegistry {
 
   /// Intercepts material variants and forwards them to specialized resolution systems.
   static ResolvedMaterialDescriptor? resolve(Material material, Object3D mesh) {
-    MaterialDescriptor? descriptor = descriptorFor(material);
+    MaterialDescriptor? descriptor = material is ShaderMaterial?descriptorForKey(material.name):descriptorForKey(material.type);
     if (material is ShaderMaterial && descriptor == null){
+      print(material.uniforms['ShaderParameters']['bundle']);
       descriptor = MaterialDescriptor(
         key: material.name,
-        bindings: material.uniforms['bindings'] ?? [],
+        bundle: material.uniforms['ShaderParameters']['bundle'],
         renderState: MaterialRenderState(),
-        requiredAttributes: material.uniforms['requiredAttributes']
+        requiredAttributes: material.uniformsGroups.cast()
       );
-      //_registerInternal(descriptor,[MeshBasicMaterial],true,);
+      _registerInternal(descriptor,[material.name],true,);
     }
     if (descriptor == null) return null;
     
@@ -423,7 +440,7 @@ abstract class MaterialDescriptorRegistry {
 
   static void _registerInternal(
     MaterialDescriptor descriptor,
-    List<Type> materials,
+    List<String> materials,
     bool replaceExisting,
   ) {
     if (!replaceExisting) {
@@ -431,7 +448,7 @@ abstract class MaterialDescriptorRegistry {
         throw StateError("Material descriptor with key '${descriptor.key}' already registered");
       }
       for (final type in materials) {
-        if (_state.byMaterial.containsKey(type)) {
+        if (_state.byKey.containsKey(type)) {
           throw StateError('Descriptor already registered for material target type: $type');
         }
       }
@@ -441,12 +458,11 @@ abstract class MaterialDescriptorRegistry {
     final updatedByKey = Map<String, MaterialDescriptor>.from(_state.byKey);
     updatedByKey[descriptor.key] = descriptor;
 
-    final updatedByMaterial = Map<Type, MaterialDescriptor>.from(_state.byMaterial);
     for (final type in materials) {
-      updatedByMaterial[type] = descriptor;
+      updatedByKey[type] = descriptor;
     }
 
-    _state = _DescriptorState(byKey: updatedByKey, byMaterial: updatedByMaterial);
+    _state = _DescriptorState(byKey: updatedByKey);
   }
 
   static void _ensureDefaultsRegistered() {
@@ -458,217 +474,248 @@ abstract class MaterialDescriptorRegistry {
   static void _registerDefaultsLocked() {
     final basicDescriptor = MaterialDescriptor(
       key: 'Basic',
+      package: 'three_js_impeller_renderer',
+      bundle: 'ThreeJS',
       bindings: [TextureType.map,TextureType.alphaMap,TextureType.aoMap,TextureType.boneTexture,TextureType.instanceTexture],
       renderState: MaterialRenderState(),
       requiredAttributes: [
-        GeometryAttribute.position,
-        GeometryAttribute.uv0,
-        GeometryAttribute.color,
-        GeometryAttribute.skinIndex,
-        GeometryAttribute.skinWeight,
-        GeometryAttribute.instanceId
+        Attribute.position,
+        Attribute.uv,
+        Attribute.color,
+        Attribute.skinIndex,
+        Attribute.skinWeight,
+        Attribute.instanceId
       ],
     );
-    _registerInternal(basicDescriptor,[MeshBasicMaterial],true,);
+    _registerInternal(basicDescriptor,['MeshBasicMaterial'],true,);
 
     final normalDescriptor = MaterialDescriptor(
       key: 'Normal',
+      package: 'three_js_impeller_renderer',
+      bundle: 'ThreeJS',
       useSceneData: false,
       renderState: MaterialRenderState(),
       bindings: [TextureType.displacementMap,TextureType.boneTexture,TextureType.instanceTexture],
       requiredAttributes: [
-        GeometryAttribute.position,
-        GeometryAttribute.normal,
-        GeometryAttribute.uv0,
-        GeometryAttribute.skinIndex,
-        GeometryAttribute.skinWeight,
-        GeometryAttribute.instanceId
+        Attribute.position,
+        Attribute.normal,
+        Attribute.uv,
+        Attribute.skinIndex,
+        Attribute.skinWeight,
+        Attribute.instanceId
       ],
     );
-    _registerInternal(normalDescriptor,[MeshNormalMaterial],true);
+    _registerInternal(normalDescriptor,['MeshNormalMaterial'],true);
 
     final toonDescriptor = MaterialDescriptor(
       key: 'Toon',
+      package: 'three_js_impeller_renderer',
+      bundle: 'ThreeJS',
       bindings: [TextureType.displacementMap,TextureType.boneTexture,TextureType.instanceTexture,TextureType.map,TextureType.alphaMap,TextureType.gradientMap,TextureType.normalMap,TextureType.bumpMap],
       renderState: MaterialRenderState(),
       requiredAttributes: [
-        GeometryAttribute.position,
-        GeometryAttribute.normal,
-        GeometryAttribute.uv0,
-        GeometryAttribute.color,
-        GeometryAttribute.skinIndex,
-        GeometryAttribute.skinWeight,
-        GeometryAttribute.instanceId
+        Attribute.position,
+        Attribute.normal,
+        Attribute.uv,
+        Attribute.color,
+        Attribute.skinIndex,
+        Attribute.skinWeight,
+        Attribute.instanceId
       ],
     );
-    _registerInternal(toonDescriptor, [MeshToonMaterial], true);
+    _registerInternal(toonDescriptor, ['MeshToonMaterial'], true);
 
     final phongDescriptor = MaterialDescriptor(
       key: 'Phong',
+      package: 'three_js_impeller_renderer',
+      bundle: 'ThreeJS',
       bindings: [TextureType.map,TextureType.alphaMap,TextureType.displacementMap,TextureType.normalMap,TextureType.bumpMap,TextureType.specularMap,TextureType.aoMap,TextureType.lightMap,TextureType.boneTexture,TextureType.instanceTexture,TextureType.morphTexture],
       renderState: MaterialRenderState(),
       requiredAttributes: [
-        GeometryAttribute.position,
-        GeometryAttribute.normal,
-        GeometryAttribute.uv0,
-        GeometryAttribute.color,
-        GeometryAttribute.skinIndex,
-        GeometryAttribute.skinWeight,
-        GeometryAttribute.instanceId
+        Attribute.position,
+        Attribute.normal,
+        Attribute.uv,
+        Attribute.color,
+        Attribute.skinIndex,
+        Attribute.skinWeight,
+        Attribute.instanceId
       ],
     );
 
-    _registerInternal(phongDescriptor,[MeshPhongMaterial],true,);
+    _registerInternal(phongDescriptor,['MeshPhongMaterial'],true,);
 
     final lambertDescriptor = MaterialDescriptor(
       key: 'Lambert',
+      package: 'three_js_impeller_renderer',
+      bundle: 'ThreeJS',
       bindings: [TextureType.map,TextureType.alphaMap,TextureType.specularMap,TextureType.aoMap,TextureType.lightMap],
       renderState: MaterialRenderState(),
       requiredAttributes: [
-        GeometryAttribute.position,
-        GeometryAttribute.normal,
-        GeometryAttribute.uv0,
-        GeometryAttribute.color,
-        GeometryAttribute.skinIndex,
-        GeometryAttribute.skinWeight,
-        GeometryAttribute.instanceId
+        Attribute.position,
+        Attribute.normal,
+        Attribute.uv,
+        Attribute.color,
+        Attribute.skinIndex,
+        Attribute.skinWeight,
+        Attribute.instanceId
       ],
     );
-    _registerInternal(lambertDescriptor,[MeshLambertMaterial,MeshGouraudMaterial],true,);
+    _registerInternal(lambertDescriptor,['MeshLambertMaterial','MeshGouraudMaterial'],true,);
 
     final pointsDescriptor = MaterialDescriptor(
       key: 'Points',
+      package: 'three_js_impeller_renderer',
+      bundle: 'ThreeJS',
       bindings: [TextureType.map,TextureType.instanceTexture],
       // CRITICAL OVERRIDE: Tells the pipeline compiler to draw points instead of triangles
       renderState: MaterialRenderState(
         topology: gpux.PrimitiveType.point, 
       ),
       requiredAttributes: [
-        GeometryAttribute.position,
-        GeometryAttribute.color, 
-        GeometryAttribute.instanceId,
+        Attribute.position,
+        Attribute.color, 
+        Attribute.instanceId,
       ],
     );
-    _registerInternal(pointsDescriptor, [PointsMaterial], true);
+    _registerInternal(pointsDescriptor, ['PointsMaterial'], true);
 
     final shadowDescriptor = MaterialDescriptor(
       key: 'Shadow',
+      package: 'three_js_impeller_renderer',
+      bundle: 'ThreeJS',
       bindings: [TextureType.boneTexture,TextureType.instanceTexture],
       renderState: MaterialRenderState(),
       requiredAttributes: [
-        GeometryAttribute.position,
-        GeometryAttribute.normal, 
-        GeometryAttribute.skinIndex,
-        GeometryAttribute.skinWeight,
-        GeometryAttribute.instanceId
+        Attribute.position,
+        Attribute.normal, 
+        Attribute.skinIndex,
+        Attribute.skinWeight,
+        Attribute.instanceId
       ],
     );
-    _registerInternal(shadowDescriptor, [ShadowMaterial], true);
+    _registerInternal(shadowDescriptor, ['ShadowMaterial'], true);
 
     final spriteDescriptor = MaterialDescriptor(
       key: 'Sprite',
+      package: 'three_js_impeller_renderer',
+      bundle: 'ThreeJS',
       bindings: [TextureType.map,TextureType.alphaMap], // Allocates albedo texture binding slots for the sprite asset maps
       renderState: MaterialRenderState(),
       requiredAttributes: [
-        GeometryAttribute.position,
-        GeometryAttribute.color, // Always required to preserve layout index offsets
+        Attribute.position,
+        Attribute.color, // Always required to preserve layout index offsets
       ],
     );
-    _registerInternal(spriteDescriptor, [SpriteMaterial], true);
+    _registerInternal(spriteDescriptor, ['SpriteMaterial'], true);
 
     final lineBasicDescriptor = MaterialDescriptor(
       key: 'LineBasic',
+      package: 'three_js_impeller_renderer',
+      bundle: 'ThreeJS',
       bindings: [TextureType.instanceTexture],
       renderState: MaterialRenderState(
         //topology: gpux.PrimitiveType.line, 
       ),
       requiredAttributes: [
-        GeometryAttribute.position,
-        GeometryAttribute.color, // REQUIRED to protect your sequential offset registers
-        GeometryAttribute.instanceId,
+        Attribute.position,
+        Attribute.color, // REQUIRED to protect your sequential offset registers
+        Attribute.instanceId,
       ],
     );
-    _registerInternal(lineBasicDescriptor, [LineBasicMaterial], true);
+    _registerInternal(lineBasicDescriptor, ['LineBasicMaterial'], true);
 
     final lineDashedDescriptor = MaterialDescriptor(
       key: 'LineDashed',
+      package: 'three_js_impeller_renderer',
+      bundle: 'ThreeJS',
       bindings: [TextureType.instanceTexture],
       renderState: MaterialRenderState(
         topology: gpux.PrimitiveType.line, 
       ),
       requiredAttributes: [
-        GeometryAttribute.position,
-        GeometryAttribute.uv0,
-        GeometryAttribute.color, // REQUIRED to secure layout stability
-        GeometryAttribute.instanceId,
+        Attribute.position,
+        Attribute.uv,
+        Attribute.color, // REQUIRED to secure layout stability
+        Attribute.instanceId,
+        Attribute.lineDistances
       ],
     );
-    _registerInternal(lineDashedDescriptor, [LineDashedMaterial], true);
+    _registerInternal(lineDashedDescriptor, ['LineDashedMaterial'], true);
 
     final metcapDescriptor = MaterialDescriptor(
       key: 'Matcap',
+      package: 'three_js_impeller_renderer',
+      bundle: 'ThreeJS',
       bindings: [TextureType.matcap,TextureType.boneTexture,TextureType.instanceTexture,TextureType.displacementMap],
       renderState: MaterialRenderState(),
       requiredAttributes: [
-        GeometryAttribute.position,
-        GeometryAttribute.normal,
-        GeometryAttribute.uv0,
-        GeometryAttribute.color,
-        GeometryAttribute.skinIndex,
-        GeometryAttribute.skinWeight,
-        GeometryAttribute.instanceId
+        Attribute.position,
+        Attribute.normal,
+        Attribute.uv,
+        Attribute.color,
+        Attribute.skinIndex,
+        Attribute.skinWeight,
+        Attribute.instanceId
       ],
     );
 
-    _registerInternal(metcapDescriptor,[MeshMatcapMaterial],true,);
+    _registerInternal(metcapDescriptor,['MeshMatcapMaterial'],true,);
 
     final distanceDescriptor = MaterialDescriptor(
       key: 'Distance',
+      package: 'three_js_impeller_renderer',
+      bundle: 'ThreeJS',
       bindings: [TextureType.boneTexture,TextureType.instanceTexture],
       renderState: MaterialRenderState(),
       requiredAttributes: [
-        GeometryAttribute.position,
-        GeometryAttribute.color,
-        GeometryAttribute.skinIndex,
-        GeometryAttribute.skinWeight,
-        GeometryAttribute.instanceId
+        Attribute.position,
+        Attribute.color,
+        Attribute.skinIndex,
+        Attribute.skinWeight,
+        Attribute.instanceId
       ],
     );
-    _registerInternal(distanceDescriptor, [MeshDistanceMaterial], true);
+    _registerInternal(distanceDescriptor, ['MeshDistanceMaterial'], true);
 
     final depthDescriptor = MaterialDescriptor(
       key: 'Depth',
+      package: 'three_js_impeller_renderer',
+      bundle: 'ThreeJS',
       bindings: [TextureType.boneTexture,TextureType.instanceTexture],
       renderState: MaterialRenderState(),
       requiredAttributes: [
-        GeometryAttribute.position,
-        GeometryAttribute.skinIndex,
-        GeometryAttribute.skinWeight,
-        GeometryAttribute.instanceId
+        Attribute.position,
+        Attribute.skinIndex,
+        Attribute.skinWeight,
+        Attribute.instanceId
       ],
     );
 
-    _registerInternal(depthDescriptor,[MeshDepthMaterial],true);
+    _registerInternal(depthDescriptor,['MeshDepthMaterial'],true);
 
     final standardDescriptor = MaterialDescriptor(
       key: 'Standard',
+      package: 'three_js_impeller_renderer',
+      bundle: 'ThreeJS',
       bindings: [TextureType.instanceTexture,TextureType.boneTexture,TextureType.map,TextureType.alphaMap,TextureType.displacementMap,TextureType.normalMap,TextureType.bumpMap,TextureType.specularMap,TextureType.aoMap,TextureType.lightMap,TextureType.roughnessMap,TextureType.metalnessMap,TextureType.emissiveMap],
       renderState: MaterialRenderState(),
       requiredAttributes: [
-        GeometryAttribute.position,
-        GeometryAttribute.normal,
-        GeometryAttribute.uv0,
-        GeometryAttribute.color,
-        GeometryAttribute.skinIndex,
-        GeometryAttribute.skinWeight,
-        GeometryAttribute.instanceId
+        Attribute.position,
+        Attribute.normal,
+        Attribute.uv,
+        Attribute.color,
+        Attribute.skinIndex,
+        Attribute.skinWeight,
+        Attribute.instanceId
       ],
     );
 
-    _registerInternal(standardDescriptor,[MeshStandardMaterial],true,);
+    _registerInternal(standardDescriptor,['MeshStandardMaterial'],true,);
 
     final physicalDescriptor = MaterialDescriptor(
       key: 'Physical',
+      package: 'three_js_impeller_renderer',
+      bundle: 'ThreeJS',
       bindings: [
         TextureType.map,
         TextureType.alphaMap,
@@ -695,17 +742,17 @@ abstract class MaterialDescriptorRegistry {
       ],      
       renderState: MaterialRenderState(),
       requiredAttributes: [
-        GeometryAttribute.position,
-        GeometryAttribute.normal,
-        GeometryAttribute.uv0,
-        GeometryAttribute.color,
-        GeometryAttribute.skinIndex,
-        GeometryAttribute.skinWeight,
-        GeometryAttribute.instanceId
+        Attribute.position,
+        Attribute.normal,
+        Attribute.uv,
+        Attribute.color,
+        Attribute.skinIndex,
+        Attribute.skinWeight,
+        Attribute.instanceId
       ],
     );
 
-    _registerInternal(physicalDescriptor,[MeshPhysicalMaterial],true,);
+    _registerInternal(physicalDescriptor,['MeshPhysicalMaterial'],true,);
   }
 
   /// Evaluates material parameters and selects the optimal alpha blending equation.
@@ -776,9 +823,7 @@ abstract class MaterialDescriptorRegistry {
 class _DescriptorState {
   const _DescriptorState({
     required this.byKey,
-    required this.byMaterial,
   });
 
   final Map<String, MaterialDescriptor> byKey;
-  final Map<Type, MaterialDescriptor> byMaterial;
 }

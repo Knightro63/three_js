@@ -122,14 +122,11 @@ class _State extends State<WebglVolumeCloud> {
 
       out vec4 color;
 
-      uniform vec3 base;
+      uniform vec4 base;
       uniform sampler3D map;
 
-      uniform float threshold;
-      uniform float range;
-      uniform float opacity;
-      uniform float steps;
-      uniform float frame;
+      uniform vec4 parms;
+      uniform vec4 parms1;
 
       uint wang_hash(uint seed)
       {
@@ -173,6 +170,12 @@ class _State extends State<WebglVolumeCloud> {
       }
 
       void main(){
+        float threshold = sblock.parms.x;
+        float range = sblock.parms.y;
+        float opacity = sblock.parms.z;
+        float steps = sblock.parms.w;
+        float frame = sblock.parms1.x;
+
         vec3 rayDir = normalize( vDirection );
         vec2 bounds = hitBox( vOrigin, rayDir );
 
@@ -190,7 +193,7 @@ class _State extends State<WebglVolumeCloud> {
         float randNum = randomFloat( seed ) * 2.0 - 1.0;
         p += rayDir * randNum * ( 1.0 / size );
 
-        vec4 ac = vec4( base, 0.0 );
+        vec4 ac = base;
 
         for ( float t = bounds.x; t < bounds.y; t += delta ) {
 
@@ -216,20 +219,51 @@ class _State extends State<WebglVolumeCloud> {
 
       }
     ''';
-
+    bool isImpeller = true;
     final geometry = three.BoxGeometry( 1, 1, 1 );
     final material = three.RawShaderMaterial.fromMap( {
+      'name': 'WebglVolumeCloud',
       'glslVersion':three.GLSL3,
       'uniforms': {
-        'base': { 'value': three.Color.fromHex32( 0x798aa0 ) },
-        'map': { 'value': texture },
-        'cameraPos': { 'value': three.Vector3() },
-        'threshold': { 'value': 0.25 },
-        'opacity': { 'value': 0.25 },
-        'range': { 'value': 0.1 },
-        'steps': { 'value': 100 },
-        'frame': { 'value': 0 }
+        'parms1': {
+          'shader': 'fragment',
+          'value': three.Vector4(),
+        },
+        'parms': {
+          'shader': 'fragment',
+          'value': three.Vector4(0.25,0.25,0.1,100),
+        },
+        'base': {
+          'shader': 'fragment',
+          'value': three.Color.fromHex32( 0x798aa0 ) 
+        },
+        'map': {
+          'shader': 'fragment',
+          'value': texture 
+        },
+        'cameraPos': { 
+          'shader': 'vertex',
+          'value': three.Vector4.identity() 
+        },
+        if(isImpeller)'modelMatrix': { 
+          'shader': 'vertex',
+          'value': three.Matrix4() 
+        },
+        if(isImpeller)'modelViewMatrix': { 
+          'shader': 'vertex',
+          'value': three.Matrix4() 
+        },
+        if(isImpeller)'projectionMatrix': { 
+          'shader': 'vertex',
+          'value': three.Matrix4() 
+        },
+        'ShaderParameters':{
+          'fragment': 'WebglFragBlock',
+          'vertex': 'WebglVertBlock',
+          'bundle': 'Examples',
+        }
       },
+      'uniformsGroups': [three.Attribute.position],
       'vertexShader': vertexShader,
       'fragmentShader': fragmentShader,
       'side': three.BackSide,
@@ -239,13 +273,16 @@ class _State extends State<WebglVolumeCloud> {
     final mesh = three.Mesh( geometry, material );
     threeJs.scene.add( mesh );
 
+    (mesh.material?.uniforms['modelMatrix']['value'] as three.Matrix4).setFrom(mesh.matrixWorld);
+    (mesh.material?.uniforms['modelViewMatrix']['value'] as three.Matrix4).setFrom(threeJs.camera.matrixWorldInverse);
+    (mesh.material?.uniforms['projectionMatrix']['value'] as three.Matrix4).setFrom(threeJs.camera.projectionMatrix);
+
     threeJs.addAnimationEvent((dt){
-				mesh.material?.uniforms['cameraPos']['value'].setFrom( threeJs.camera.position );
-				mesh.rotation.y = - dt / 7500;
+      (mesh.material?.uniforms['cameraPos']['value'] as three.Vector4).setFrom( threeJs.camera.position );
+      mesh.rotation.y = - dt / 7500;
 
-				mesh.material?.uniforms['frame']['value'] ++;
-
-        controls.update();
+      mesh.material?.uniforms['parms1']['value'].x++;
+      controls.update();
     });
   }
 }

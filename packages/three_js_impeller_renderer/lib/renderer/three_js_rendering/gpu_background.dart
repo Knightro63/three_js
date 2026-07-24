@@ -1,6 +1,7 @@
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_impeller_renderer/renderer/geometry/geometry_descriptor.dart';
-import 'package:three_js_impeller_renderer/renderer/material/material_description_registry.dart';
+import 'package:three_js_impeller_renderer/renderer/three_js_rendering/gpu_cube_maps.dart';
+import 'package:three_js_impeller_renderer/renderer/three_js_rendering/gpu_cube_uv_maps.dart';
 import './gpu_render_list.dart';
 import '../renderer.dart';
 import 'package:three_js_math/three_js_math.dart';
@@ -10,7 +11,8 @@ final _m1 = Matrix4();
 
 class GpuBackground {
   bool _didDispose = false;
-
+  GpuCubeMaps cubemaps;
+  GpuCubeUVMaps cubeuvmaps;
   ImpellerRenderer renderer;
   bool alpha;
 
@@ -24,12 +26,16 @@ class GpuBackground {
   int currentBackgroundVersion = 0;
   late int currentTonemapping;
 
-  GpuBackground(this.renderer, this.alpha) {
+  GpuBackground(this.renderer, this.cubemaps, this.cubeuvmaps,this.alpha) {
     clearAlpha = alpha == true ? 0.0 : 1.0;
   }
 	
   dynamic getBackground(Object3D? scene ) {
 		dynamic background = scene is Scene? scene.background : null;
+		if ( background != null && background is Texture ) {
+			final usePMREM = (scene as Scene).backgroundBlurriness > 0; // use PMREM if the user wants to blur the background
+			background = usePMREM ? cubeuvmaps.get(background) : cubemaps.get(background);
+		}
 		return background;
 	}
 
@@ -50,7 +56,7 @@ class GpuBackground {
     }
   }
 
-	void addToRenderList(GpuRenderList renderList, Object3D scene) {
+	void addToRenderList(GpuRenderList renderList, Object3D scene, Camera camera) {
 		final background = getBackground( scene );
 
 		if ( background != null && ( background is CubeTexture || (background is Texture && background.mapping == CubeUVReflectionMapping)) ) {
@@ -60,10 +66,43 @@ class GpuBackground {
 					ShaderMaterial.fromMap( {
 						'name': 'BackgroundCube',
             'uniforms': {
-              'requiredAttributes': [GeometryAttribute.position,GeometryAttribute.uv0],
-              'bindings': [TextureType.map],
+              'modelMatrix': {
+                'shader': 'vertex',
+                'value': Matrix4(),
+              },
+              'viewMatrix': {
+                'shader': 'vertex',
+                'value':camera.matrixWorldInverse,
+              },
+              'projectionMatrix': {
+                'shader': 'vertex',
+                'value':camera.projectionMatrix,
+              },
+              'rotation': {
+                'shader': 'vertex',
+                'value': Matrix4().makeRotationFromEuler((scene as Scene).backgroundRotation),
+              },
+              'iscube': {
+                'shader': 'vertex',
+                'value': Vector4(
+                  background is CubeTexture?2:1,
+                  scene.backgroundIntensity,
+                  scene.backgroundBlurriness
+                ),
+              },
+              if(background is CubeTexture)'envMap': {
+                'shader': 'fragment',
+                'value': background,
+              },
+              if(background is! CubeTexture)'envMap2D': {
+                'shader': 'fragment',
+                'value': background,
+              },
+              'ShaderNames': {
+                'vertex': 'CatBlock'
+              }
             },
-            'map': background,
+            'uniformsGroups': [Attribute.position,Attribute.uv],
 						'side': BackSide,
 						'depthTest': false,
 						'depthWrite': false,
@@ -73,7 +112,7 @@ class GpuBackground {
 
 				boxMesh!.geometry?.deleteAttributeFromString( 'normal' );
 				boxMesh!.geometry?.deleteAttributeFromString( 'uv' );
-
+        boxMesh?.material?.uniforms['modelMatrix']['value'] = boxMesh!.matrixWorld;
         boxMesh!.onBeforeRender = ({
           renderer, 
           scene, 
@@ -87,8 +126,9 @@ class GpuBackground {
           boxMesh!.matrixWorld.copyPosition(camera!.matrixWorld);
         };
 
-        planeMesh?.material?.envMap = planeMesh?.material?.uniforms['envMap']['value'];
-			}
+        //planeMesh?.material?.envMap = planeMesh?.material?.uniforms['envMap']['value'];
+
+      }
 
       (scene as Scene);
 			_e1.copy(scene.backgroundRotation);
@@ -132,18 +172,30 @@ class GpuBackground {
 					PlaneGeometry( 2, 2 ),
 					ShaderMaterial.fromMap( {
 						'name': 'Background',
+            'uniformsGroups': [Attribute.position,Attribute.uv],
             'uniforms': {
-              'requiredAttributes': [GeometryAttribute.position,GeometryAttribute.uv0],
-              'bindings': [TextureType.map],
-              'uvTransform': Matrix4().setFromMatrix3(background.matrix)
+              'uvTransform': {
+                'shader': 'vertex',
+                'value': Matrix4().setFromMatrix3(background.matrix),
+              },
+              'backgroundIntensity':{
+                'shader': 'vertex',
+                "value": Vector4((scene as Scene).backgroundIntensity),
+              },
+              't2D': {
+                'shader': 'fragment',
+                'value':background,
+              },
+              'ShaderNames': {
+                'vertex': 'CatBlock'
+              }
             },
-            'map': background,
 						'side': FrontSide,
 						'depthTest': false,
 						'depthWrite': false,
 						'fog': false
 					} )
-				);
+				)..autoUpdate = true;
 
 				planeMesh!.geometry?.deleteAttributeFromString( 'normal' );
         //planeMesh!.material?.map = planeMesh!.material!.uniforms['t2D']['value'];
@@ -157,7 +209,7 @@ class GpuBackground {
 				background.updateMatrix();
 			}
 
-			//planeMesh!.material?.uniforms['uvTransform']['value'].setFrom( background.matrix );
+			planeMesh!.material?.uniforms['uvTransform']['value'].setFrom( Matrix4().setFromMatrix3( background.matrix ));
 
 			if ( currentBackground != background ||
 				currentBackgroundVersion != background.version ||
@@ -201,6 +253,7 @@ class GpuBackground {
   void dispose(){
     if(_didDispose) return;
     _didDispose = true;
+    cubemaps.dispose();
     renderer.dispose();
     planeMesh?.dispose();
     boxMesh?.dispose();

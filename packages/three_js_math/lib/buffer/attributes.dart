@@ -10,6 +10,7 @@ enum Attribute{
   skinWeight,
   skinIndex,
   faceIndex,
+  instanceId,
   morphs;
 
   static Attribute? getFromName(String name){

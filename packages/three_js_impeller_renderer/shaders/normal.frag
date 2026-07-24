@@ -11,7 +11,8 @@ out vec4 frag_color;
 
 void main() {
   if(evaluateClippingPlanes(v_worldPosition)){
-    discard;
+    frag_color = vec4(0.0);
+    return;
   }
   vec3 N_world = evaluateNormal(v_worldNormal, v_worldPosition); 
 

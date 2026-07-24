@@ -55,10 +55,19 @@ class _State extends State<WebglShader> {
     final geometry = three.PlaneGeometry( 2, 2 );
 
     final uniforms = {
-      'time': { 'value': 1.0 }
+      'time': { 
+        'shader': 'fragment',
+        'value': three.Vector4(1.0) 
+      },
+      'ShaderParameters': {
+        'fragment': 'WebglShaderBlock',
+        'bundle': 'Examples'
+      }
     };
 
     final material = three.ShaderMaterial.fromMap( {
+      'name': 'WebglShader',
+      'uniformsGroups': [three.Attribute.position, three.Attribute.uv],
       'uniforms': uniforms,
       'vertexShader': '''
         varying vec2 vUv;
@@ -74,11 +83,11 @@ class _State extends State<WebglShader> {
       'fragmentShader': '''
         varying vec2 vUv;
 
-        uniform float time;
+        uniform vec4 time;
         void main()	{
 
           vec2 p = - 1.0 + 2.0 * vUv;
-          float a = time * 40.0;
+          float a = time.x * 40.0;
           float d, e, f, g = 1.0 / 40.0 ,h ,i ,r ,q;
 
           e = 400.0 * ( p.x * 0.5 + 0.5 );
@@ -114,7 +123,7 @@ class _State extends State<WebglShader> {
     bool foward = true;
     double max = 1000000;
     threeJs.addAnimationEvent((dt){
-      uniforms[ 'time' ]!['value'] = t;
+      uniforms[ 'time' ]!['value'] = three.Vector4(t);
       t = foward?t+=dt:t-=dt;
 
       if(t > max){

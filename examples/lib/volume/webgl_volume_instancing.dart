@@ -186,9 +186,14 @@ class _State extends State<WebglVolumeInstancing> {
         final geometry = three.BoxGeometry( 1, 1, 1 );
         final material = three.RawShaderMaterial.fromMap( {
           'glslVersion': three.GLSL3,
+          'name': 'WebglVolumeInstancing',
           'uniforms': {
-            'map': { 'value': three.VOXData3DTexture( chunk ) },
-            'cameraPos': { 'value': three.Vector3() }
+            'map': { 
+              'value': three.VOXData3DTexture( chunk ) 
+            },
+            'cameraPos': {
+              'value': three.Vector3() 
+            }
           },
           'vertexShader':vertexShader,
           'fragmentShader':fragmentShader,

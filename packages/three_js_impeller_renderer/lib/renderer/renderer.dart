@@ -11,6 +11,8 @@ import 'package:three_js_impeller_renderer/renderer/render_target.dart';
 import 'package:three_js_impeller_renderer/renderer/three_js_rendering/gpu_animation.dart';
 import 'package:three_js_impeller_renderer/renderer/three_js_rendering/gpu_background.dart';
 import 'package:three_js_impeller_renderer/renderer/three_js_rendering/gpu_clipping.dart';
+import 'package:three_js_impeller_renderer/renderer/three_js_rendering/gpu_cube_maps.dart';
+import 'package:three_js_impeller_renderer/renderer/three_js_rendering/gpu_cube_uv_maps.dart';
 import 'package:three_js_impeller_renderer/renderer/three_js_rendering/gpu_properties.dart';
 import 'package:three_js_impeller_renderer/renderer/three_js_rendering/gpu_render_list.dart';
 import 'package:three_js_impeller_renderer/renderer/three_js_rendering/gpu_render_lists.dart';
@@ -150,7 +152,10 @@ class ImpellerRenderer extends Renderer{
   ImpellerRenderTarget? _currentRenderTarget;
 
   bool renderBackground = false;
+
   late GpuBackground background;  
+  late GpuCubeMaps cubemaps;
+  late GpuCubeUVMaps cubeuvmaps;
 
   late gpu.Texture depthTexture = gpu.gpuContext.createTexture(
     gpu.StorageMode.deviceTransient, width.toInt(), height.toInt(),
@@ -220,8 +225,12 @@ class ImpellerRenderer extends Renderer{
     _sampleCount = this.parameters.sampleCount;
 
     renderLists = GpuRenderLists();
+    cubemaps = GpuCubeMaps(this);
+    cubeuvmaps = GpuCubeUVMaps(this);
     background = GpuBackground(
-      this, 
+      this,
+      cubemaps,
+      cubeuvmaps,
       parameters.alpha, 
     );
 
@@ -321,7 +330,10 @@ class ImpellerRenderer extends Renderer{
   }
   @override
   void dispose(){
-    
+    renderLists.dispose();
+    cubemaps.dispose();
+    cubeuvmaps.dispose();
+    background.dispose();
   }
   @override
   void clear([bool color = true, bool depth = true, bool stencil = true]){
@@ -389,7 +401,7 @@ class ImpellerRenderer extends Renderer{
 
 		renderBackground = !xr.enabled || !xr.isPresenting || !xr.hasDepthSensing();
 		if ( renderBackground ) {
-      background.addToRenderList( currentRenderList!, scene );
+      background.addToRenderList( currentRenderList!, scene, camera );
     }
 
     final Color clearColorFeature020 = Color(
@@ -429,10 +441,10 @@ class ImpellerRenderer extends Renderer{
     console.info('RENDER: Sorting complete. Lights: ${lights?.length}, Opaque: ${opaqueObjects.length}, Transparent: ${transmissiveObjects.length}');
 
     // 1. COLLECT LIGHTS AND GENERATE UNIFORMS
-    final sceneData = _cacheSceneData[scene.uuid] ?? SceneUniformData(scene as Scene,this,lights);
+    final sceneData = _cacheSceneData[scene.uuid] ?? SceneUniformData(scene,this,lights);
     
     if(_cacheSceneData[scene.uuid] == null){
-      _cacheSceneData[scene.uuid] = SceneUniformData(scene as Scene,this,lights);
+      _cacheSceneData[scene.uuid] = SceneUniformData(scene,this,lights);
     }
     else{
       sceneData.updateUniforms();
@@ -636,12 +648,14 @@ class ImpellerRenderer extends Renderer{
     final bool pipelineNeedsRebuild = _cachedPipeline[pipelineHash] == null || 
                                       resolved.renderState != _cachedPipeline[pipelineHash]?.descriptor.renderState;
 
+    if(resolved.vertex == null || resolved.fragment == null) return;
+
     if (pipelineNeedsRebuild) {
       _cachedPipeline[pipelineHash] = GpuPipeline(
         gpu.gpuContext, 
         RenderPipelineDescriptor(
-          vertexShader: resolved.vertex,
-          fragmentShader: resolved.fragment,
+          vertexShader: resolved.vertex!,
+          fragmentShader: resolved.fragment!,
           renderState: renderState,
         )
       );
@@ -672,8 +686,8 @@ class ImpellerRenderer extends Renderer{
 
     _cachedGeometry[geomHash]!.bind(
       pass,
-      resolved.vertex,
-      resolved.fragment,
+      resolved.vertex!,
+      resolved.fragment!,
       sceneData,
       _cachedUniforms[object.uuid]!.data,
     );

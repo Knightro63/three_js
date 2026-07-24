@@ -74,12 +74,13 @@ dependency_overrides:
     path: ../packages/three_js_angle_renderer
   three_js_core: 
     path: ../packages/three_js_core
-    
+
 flutter:
   config:
     enable-swift-package-manager: true
   uses-material-design: true
   assets:
+    - build/shaderbundles/Examples.shaderbundle
     - assets/pingfang.ttf
     - assets/helvetiker_bold.typeface.json
     - assets/screenshots/

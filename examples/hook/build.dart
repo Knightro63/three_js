@@ -6,6 +6,6 @@ void main(List<String> args) async {
     await buildShaderBundleJson(
         buildInput: config,
         buildOutput: output,
-        manifestFileName: 'shaders/ThreeJS.shaderbundle.json');
+        manifestFileName: 'shaders/Examples.shaderbundle.json');
   });
 }
