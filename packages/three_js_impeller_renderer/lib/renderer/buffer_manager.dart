@@ -1,21 +1,20 @@
 import 'dart:typed_data';
-import 'package:flutter_gpu/gpu.dart' as gpux; // Adjust based on your exact gpux library paths
+import 'package:flutter_gpu/gpu.dart' as gpu; // Adjust based on your exact gpu library paths
 
 /// buffer manager implementation.
 ///
 /// Manages GPU buffer lifecycle using GpuBuffer and device.queue.writeBuffer().
-class GpuBufferManager implements BufferManager {
-  late final gpux.HostBuffer host;
+class BufferManager{
+  late final gpu.HostBuffer host;
 
   // Track destroyed buffers to prevent double-destroy
-  final Set<gpux.BufferView> _destroyedBuffers = {};
+  final Set<gpu.BufferView> _destroyedBuffers = {};
 
   GpuBufferManager(){
-    host = gpux.gpuContext.createHostBuffer();
+    host = gpu.gpuContext.createHostBuffer();
   }
 
   /// Create vertex buffer from float list data arrays.
-  @override
   BufferHandle createVertexBuffer(Float32List data) {
     if (data.isEmpty) {
       throw ArgumentError("Vertex data cannot be empty");
@@ -30,7 +29,7 @@ class GpuBufferManager implements BufferManager {
     final sizeBytes = data.length * 4; // 4 bytes per float
     try {
       //   size: sizeBytes,
-      //   usage: gpux.GpuBufferUsage.vertex | gpux.GpuBufferUsage.copyDst,
+      //   usage: gpu.GpuBufferUsage.vertex | gpu.GpuBufferUsage.copyDst,
       //   mappedAtCreation: false,
       //   label: "vertex_buffer_${data.length}",
       // );
@@ -44,7 +43,7 @@ class GpuBufferManager implements BufferManager {
         sizeBytes: sizeBytes,
         length: data.length,
         usage: BufferUsage.vertex,
-        format: gpux.IndexType.int32
+        format: gpu.IndexType.int32
       );
     } on OutOfMemoryException {
       rethrow;
@@ -54,7 +53,6 @@ class GpuBufferManager implements BufferManager {
   }
 
   /// Create index buffer from integer list data arrays.
-  @override
   BufferHandle createIndexBuffer(Uint32List data) {
     if (data.isEmpty) {
       throw ArgumentError("Index data cannot be empty");
@@ -70,7 +68,7 @@ class GpuBufferManager implements BufferManager {
       
       // final bufferWrapper = device.createBuffer(
       //   size: sizeBytes,
-      //   usage: gpux.GpuBufferUsage.index | gpux.GpuBufferUsage.copyDst,
+      //   usage: gpu.GpuBufferUsage.index | gpu.GpuBufferUsage.copyDst,
       //   mappedAtCreation: false,
       //   label: "index_buffer_${data.length}",
       // );
@@ -82,7 +80,7 @@ class GpuBufferManager implements BufferManager {
         sizeBytes: sizeBytes,
         length: data.length,
         usage: BufferUsage.indx,
-        format: gpux.IndexType.int32
+        format: gpu.IndexType.int32
       );
     } on OutOfMemoryException {
       rethrow;
@@ -92,7 +90,6 @@ class GpuBufferManager implements BufferManager {
   }
 
   /// Create uniform buffer with a fixed size constraint.
-  @override
   BufferHandle createUniformBuffer(int sizeBytes) {
     int length = sizeBytes~/4;
     if (sizeBytes < 64) {
@@ -104,7 +101,7 @@ class GpuBufferManager implements BufferManager {
     try {
       // final bufferWrapper = device.createBuffer(
       //   size: sizeBytes,
-      //   usage: gpux.GpuBufferUsage.uniform | gpux.GpuBufferUsage.copyDst,
+      //   usage: gpu.GpuBufferUsage.uniform | gpu.GpuBufferUsage.copyDst,
       //   mappedAtCreation: false,
       //   label: "uniform_buffer_$sizeBytes",
       // );
@@ -116,7 +113,7 @@ class GpuBufferManager implements BufferManager {
         length: length,
         sizeBytes: sizeBytes,
         usage: BufferUsage.uniform,
-        format: gpux.IndexType.int32
+        format: gpu.IndexType.int32
       );
     } on OutOfMemoryException {
       rethrow;
@@ -126,7 +123,6 @@ class GpuBufferManager implements BufferManager {
   }
 
   /// Update uniform buffer data (transformation matrices).
-  @override
   void updateUniformBuffer({
     required BufferHandle handle, 
     required Int8List data, 
@@ -170,10 +166,9 @@ class GpuBufferManager implements BufferManager {
   }
 
   /// Destroy buffer and release GPU memory safely.
-  @override
   void destroyBuffer(BufferHandle handle) {
     final buffer = handle.view;
-    if (buffer is! gpux.HostBuffer) {
+    if (buffer is! gpu.HostBuffer) {
       throw InvalidBufferException("Buffer handle is null or not a GpuBuffer");
     }
 
@@ -194,26 +189,15 @@ class GpuBufferManager implements BufferManager {
   }
 }
 
-// ==========================================
-// ABSTRACT CONTRACT SPECIFICATION DECLARATIONS
-// ==========================================
-
-abstract class BufferManager {
-  BufferHandle createVertexBuffer(Float32List data);
-  BufferHandle createIndexBuffer(Uint32List data);
-  BufferHandle createUniformBuffer(int sizeBytes);
-  void updateUniformBuffer({required BufferHandle handle, required Int8List data, required int offset});
-  void destroyBuffer(BufferHandle handle);
-}
 
 enum BufferUsage { vertex, indx, uniform }
 
 class BufferHandle {
-  final gpux.BufferView view;
+  final gpu.BufferView view;
   final int sizeBytes;
   final int length;
   final BufferUsage usage;
-  final gpux.IndexType format;
+  final gpu.IndexType format;
 
   const BufferHandle({
     required this.view,

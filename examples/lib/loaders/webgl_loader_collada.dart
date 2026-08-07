@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:example/src/statistics.dart';
 import 'package:three_js/three_js.dart' as three;
+import 'package:three_js_helpers/three_js_helpers.dart';
 
 class WebglLoaderCollada extends StatefulWidget {
   

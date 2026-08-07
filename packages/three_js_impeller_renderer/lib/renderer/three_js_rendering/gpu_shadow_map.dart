@@ -1,6 +1,5 @@
 import 'dart:typed_data';
 import 'package:three_js_core/three_js_core.dart';
-import './gpu_objects.dart';
 import '../renderer.dart';
 import 'package:three_js_math/three_js_math.dart';
 
@@ -17,37 +16,39 @@ class GpuShadowMap extends ShadowMap {
   final _materialCache = {};
 
   final ImpellerRenderer _renderer;
-  final GpuObjects _objects;
   int maxTextureSize;
   
   late int _previousType;
 
-  GpuShadowMap(this._renderer, this._objects, this.maxTextureSize) {
+  GpuShadowMap(this._renderer, this.maxTextureSize) {
     _previousType = type;
 
     _depthMaterial = MeshDepthMaterial.fromMap({"depthPacking": RGBADepthPacking});
     _distanceMaterial = MeshDistanceMaterial(null);
 
     shadowMaterialVertical = ShaderMaterial.fromMap({
-      "defines": {"VSM_SAMPLES": 8},
+      'name': 'Vsm',
+      'uniformsGroups': [Attribute.position, Attribute.uv],
       "uniforms": {
-        "shadow_pass": <String,dynamic>{"value": null},
-        "resolution": {"value": Vector2.zero()},
-        "radius": {"value": 4.0}
-      },
-      "vertexShader": vsmVert,
-      "fragmentShader": vsmFrag
+        "shadow_pass": <String,dynamic>{
+          "shader": 'fragment',
+          "value": null
+        },
+        'rr': { 
+          'shader': 'fragment',
+          'value': Vector4(0,0,4.0,1) 
+        },
+        'ShaderParameters': {
+          'fragment': 'VSMBlock',
+          'bundle': 'ThreeJS'
+        }
+      }
     });
 
     final float32List = Float32List.fromList([-1.0, -1.0, 0.5, 3.0, -1.0, 0.5, -1.0, 3.0, 0.5]);
-
     fullScreenTri.setAttributeFromString('position', Float32BufferAttribute.fromList(float32List, 3, false));
-
     fullScreenMesh = Mesh(fullScreenTri, shadowMaterialVertical);
-
     shadowMaterialHorizontal = shadowMaterialVertical.clone();
-    shadowMaterialHorizontal.defines!["HORIZONTAL_PASS"] = 1;
-
     scope = this;
   }
 
@@ -68,7 +69,6 @@ class GpuShadowMap extends ShadowMap {
 
     scope.dispose();
     _renderer.dispose();
-    _objects.dispose();
   }
 
   void render(List<Light> lights, Object3D scene, Camera camera) {
@@ -166,7 +166,7 @@ class GpuShadowMap extends ShadowMap {
   }
 
   void vSMPass(LightShadow shadow, Camera camera) {
-    final geometry = _objects.update(fullScreenMesh);
+    final geometry = fullScreenMesh.geometry!;
 
     if (shadowMaterialVertical.defines!["VSM_SAMPLES"] != shadow.blurSamples) {
       shadowMaterialVertical.defines!["VSM_SAMPLES"] = shadow.blurSamples;
@@ -292,7 +292,7 @@ class GpuShadowMap extends ShadowMap {
           (!object.frustumCulled || _frustum.intersectsObject(object))) {
         object.modelViewMatrix.multiply2(shadowCamera.matrixWorldInverse, object.matrixWorld);
 
-        final geometry = _objects.update(object);
+        final geometry = object.geometry!;
         final material = object.material;
 
         if (material is GroupMaterial) {

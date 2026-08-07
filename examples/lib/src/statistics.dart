@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 bool useOpenGL = true;
+bool impeller = true;
 
 class Statistics extends StatefulWidget {
   const Statistics({super.key, required this.data});

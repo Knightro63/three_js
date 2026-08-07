@@ -1,7 +1,9 @@
 #include <material_block.glsl>
+// #include <scene_block.glsl>
 #include <skinning.glsl>
 #include <instancing.glsl>
 #include <displacement.glsl>
+// #include <shadow_map.glsl>
 
 in vec3 position;
 in vec3 normal;

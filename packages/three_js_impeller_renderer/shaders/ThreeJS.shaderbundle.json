@@ -134,5 +134,13 @@
   "BackgroundFragment": {
     "type": "fragment",
     "file": "shaders/background.frag"
+  },
+  "VsmVertex": {
+    "type": "vertex",
+    "file": "shaders/vsm.vert"
+  },
+  "VsmFragment": {
+    "type": "fragment",
+    "file": "shaders/vsm.frag"
   }
 }

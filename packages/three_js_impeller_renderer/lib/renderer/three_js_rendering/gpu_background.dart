@@ -1,5 +1,4 @@
 import 'package:three_js_core/three_js_core.dart';
-import 'package:three_js_impeller_renderer/renderer/geometry/geometry_descriptor.dart';
 import 'package:three_js_impeller_renderer/renderer/three_js_rendering/gpu_cube_maps.dart';
 import 'package:three_js_impeller_renderer/renderer/three_js_rendering/gpu_cube_uv_maps.dart';
 import './gpu_render_list.dart';
@@ -7,7 +6,6 @@ import '../renderer.dart';
 import 'package:three_js_math/three_js_math.dart';
 
 final _e1 = Euler();
-final _m1 = Matrix4();
 
 class GpuBackground {
   bool _didDispose = false;
@@ -59,8 +57,10 @@ class GpuBackground {
 	void addToRenderList(GpuRenderList renderList, Object3D scene, Camera camera) {
 		final background = getBackground( scene );
 
-		if ( background != null && ( background is CubeTexture || (background is Texture && background.mapping == CubeUVReflectionMapping)) ) {
-			if ( boxMesh == null ) {
+		if ( background != null && ( background is CubeTexture || (background is Texture && background.mapping == CubeUVReflectionMapping))) {
+      bool isCube = false;//background is CubeTexture;
+      
+      if ( boxMesh == null ) {
 				boxMesh = Mesh(
 					BoxGeometry( 1, 1, 1 ),
 					ShaderMaterial.fromMap( {
@@ -85,21 +85,22 @@ class GpuBackground {
               'iscube': {
                 'shader': 'vertex',
                 'value': Vector4(
-                  background is CubeTexture?2:1,
+                  isCube?2:1,
                   scene.backgroundIntensity,
                   scene.backgroundBlurriness
                 ),
               },
-              if(background is CubeTexture)'envMap': {
+              if(isCube)'envMap': {
                 'shader': 'fragment',
                 'value': background,
               },
-              if(background is! CubeTexture)'envMap2D': {
+              if(!isCube)'envMap2D': {
                 'shader': 'fragment',
                 'value': background,
               },
-              'ShaderNames': {
-                'vertex': 'CatBlock'
+              'ShaderParameters': {
+                'vertex': 'CatBlock',
+                'bundle': 'ThreeJS'
               }
             },
             'uniformsGroups': [Attribute.position,Attribute.uv],
@@ -186,8 +187,9 @@ class GpuBackground {
                 'shader': 'fragment',
                 'value':background,
               },
-              'ShaderNames': {
-                'vertex': 'CatBlock'
+              'ShaderParameters': {
+                'vertex': 'CatBlock',
+                'bundle': 'ThreeJS'
               }
             },
 						'side': FrontSide,

@@ -1,20 +1,20 @@
-import 'package:flutter_gpu/gpu.dart' as gpux;
+import 'package:flutter_gpu/gpu.dart' as gpu;
 import 'package:three_js_core/others/console/console_platform.dart';
 import 'package:three_js_impeller_renderer/renderer/material/material_description_registry.dart';
 
 /// Gpu render pipeline implementation.
 /// T032: Pipeline state management with shaders, vertex layout, depth/stencil, culling.
-class GpuPipeline {
-  final gpux.GpuContext context;
+class Pipeline {
+  final gpu.GpuContext context;
   final RenderPipelineDescriptor descriptor;
 
-  GpuPipeline(this.context, this.descriptor);
+  Pipeline(this.context, this.descriptor);
 
-  /// Creates the render pipeline (synchronous fallback architecture matching gpux).
+  /// Creates the render pipeline (synchronous fallback architecture matching gpu).
   ///
   /// @param customLayout Optional custom pipeline layout. If provided, uses it instead of layout inferring.
   /// T021: Used for dynamic offset support in uniform buffers.
-  int bind(gpux.RenderPass pass) {
+  int bind(gpu.RenderPass pass) {
     try {
       console.info("🔨 Creating GPU render pipeline...");
       final vertex = descriptor.vertexShader;
@@ -29,11 +29,11 @@ class GpuPipeline {
       pass.setPrimitiveType(renderState.topology);
       pass.setWindingOrder(renderState.winding);
       pass.setStencilConfig(
-        gpux.StencilConfig(
-          stencilFailureOperation: gpux.StencilOperation.keep,
-          depthStencilPassOperation: gpux.StencilOperation.keep,
-          depthFailureOperation: gpux.StencilOperation.keep,
-          compareFunction: gpux.CompareFunction.always,
+        gpu.StencilConfig(
+          stencilFailureOperation: gpu.StencilOperation.keep,
+          depthStencilPassOperation: gpu.StencilOperation.keep,
+          depthFailureOperation: gpu.StencilOperation.keep,
+          compareFunction: gpu.CompareFunction.always,
           writeMask: descriptor.writeMask ?? 0xffffffff
         ),
         targetFace: renderState.frontFace
@@ -60,8 +60,8 @@ class GpuPipeline {
 
 class RenderPipelineDescriptor {
   final String? label;
-  final gpux.Shader vertexShader;
-  final gpux.Shader fragmentShader;
+  final gpu.Shader vertexShader;
+  final gpu.Shader fragmentShader;
   //final MaterialDescriptor vertexLayouts;
   final MaterialRenderState renderState;
   final DepthStencilStateDescriptor? depthStencilState;
@@ -89,7 +89,7 @@ class VertexBufferLayoutDescriptor {
 }
 
 class VertexAttributeDescriptor {
-  final gpux.PolygonMode format;
+  final gpu.PolygonMode format;
   final int offset;
   final int shaderLocation;
   const VertexAttributeDescriptor({required this.format, required this.offset, required this.shaderLocation});
@@ -102,14 +102,14 @@ class BlendStateDescriptor {
 }
 
 class BlendComponent {
-  final gpux.BlendOperation operation;
-  final gpux.BlendFactor srcFactor;
-  final gpux.BlendFactor dstFactor;
+  final gpu.BlendOperation operation;
+  final gpu.BlendFactor srcFactor;
+  final gpu.BlendFactor dstFactor;
   const BlendComponent({required this.operation, required this.srcFactor, required this.dstFactor});
 }
 
 class DepthStencilStateDescriptor {
-  final gpux.PixelFormat format;
+  final gpu.PixelFormat format;
   final bool depthWriteEnabled;
   final depthCompare;
   const DepthStencilStateDescriptor({required this.format, required this.depthWriteEnabled, required this.depthCompare});

@@ -131,7 +131,7 @@ class PMREMGenerator {
     assert(sampleCount > 0, "sampleCount must be > 0 (was \$sampleCount)");
     assert(roughnessLevels > 0, "roughnessLevels must be > 0 (was \$roughnessLevels)");
 
-    final int baseSize = cubeTexture.image?.width ?? _defaultCubeSize;
+    final int baseSize = cubeTexture.image?[0]?.width ?? _defaultCubeSize;
     final int clampedLevels = roughnessLevels.clamp(1, 1 + _log2Floor(baseSize));
     final List<List<Uint8List>> mipData = [];
     int currentSize = baseSize;

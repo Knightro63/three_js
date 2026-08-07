@@ -21,6 +21,5 @@ void main() {
     discard; 
   }
 
-  vec4 finalRGBA = applyColor(texelColor,2);
-  frag_color = finalRGBA;
+  frag_color = applyColor(texelColor,2);
 }

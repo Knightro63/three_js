@@ -48,8 +48,8 @@ vec3 getMorphPositionOffset(int vertexID, int targetIndex) {
   int flatTexelIndex = (vertexID * vertexStride) + (targetIndex * 3 + 0);
   
   // Apply your exact row-major wrapping math
-  int pixelX = flatTexelIndex % sizeInt;
   int pixelY = flatTexelIndex / sizeInt;
+  int pixelX = int(flatTexelIndex - sizeInt * floor(pixelY));//flatTexelIndex % sizeInt;
   
   vec2 uv = vec2(float(pixelX) + 0.5, float(pixelY) + 0.5) / size;
   

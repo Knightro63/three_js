@@ -18,13 +18,13 @@ final Vector3 _vector = Vector3();
 /// This class solves the Inverse Kinematics Problem with a [CCD Algorithm](https://web.archive.org/web/20221206080850/https://sites.google.com/site/auraliusproject/ccd-algorithm).
 class CCDIKSolver {
   Object3D mesh;
-  Skeleton skeleton;
+  //Skeleton skeleton;
   late List<Map<String,dynamic>> iks;
 
   late List<List<Quaternion>> _initialQuaternions;
   final Quaternion _workingQuaternion = Quaternion();
 
-  CCDIKSolver(this.mesh, this.skeleton, [List<Map<String,dynamic>>? iks]) {
+  CCDIKSolver(this.mesh, [List<Map<String,dynamic>>? iks]) {
     this.iks = iks ?? [];
     _initialQuaternions = [];
 
@@ -59,7 +59,7 @@ class CCDIKSolver {
   /// Returns a reference to this instance.
   CCDIKSolver updateOne(Map<String,dynamic> ik, [double overrideBlend = 1.0]) {
     final double chainBlend = ik['blendFactor'] != null ? ik['blendFactor'].toDouble() : overrideBlend;
-    final bones = skeleton.bones;
+    final bones = mesh.skeleton!.bones;
     final int chainIndex = iks.indexOf(ik);
     final List<Quaternion> initialQuaternions = _initialQuaternions[chainIndex];
 
@@ -189,7 +189,7 @@ class CCDIKSolver {
   // Private validation method
   void valid() {
     final iksList = iks;
-    final bones = skeleton.bones;
+    final bones = mesh.skeleton!.bones;
 
     for (int i = 0; i < iksList.length; i++) {
       final ik = iksList[i];

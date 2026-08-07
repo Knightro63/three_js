@@ -382,7 +382,7 @@ abstract class MaterialDescriptorRegistry {
   /// Intercepts material variants and forwards them to specialized resolution systems.
   static ResolvedMaterialDescriptor? resolve(Material material, Object3D mesh) {
     MaterialDescriptor? descriptor = material is ShaderMaterial?descriptorForKey(material.name):descriptorForKey(material.type);
-    if (material is ShaderMaterial && descriptor == null){
+    if (material is ShaderMaterial && descriptor == null && material.uniforms['ShaderParameters']?['bundle'] != null){
       print(material.uniforms['ShaderParameters']['bundle']);
       descriptor = MaterialDescriptor(
         key: material.name,

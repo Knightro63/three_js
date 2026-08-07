@@ -1,5 +1,4 @@
 import 'dart:math' as math;
-import 'package:xml/xpath.dart';
 import 'package:three_js_animations/three_js_animations.dart';
 import 'package:three_js_core_loaders/three_js_core_loaders.dart';
 import 'package:three_js_core/three_js_core.dart';
@@ -1592,7 +1591,16 @@ class ColladaParser{
 
   buildTransformList(XmlElement node ) {
     final transforms = [];
-    final elements = collada.xpath( '//node[@id="${node.getAttribute('id')}"]' ).toString().split('\n');
+    final String targetId = node.getAttribute('id') ?? '';
+
+    // Find all matching <node> elements with the specific id attribute
+    final List<String> elements = collada
+        .findAllElements('node')
+        .where((element) => element.getAttribute('id') == targetId)
+        .map((element) => element.toString())
+        .join('\n')
+        .split('\n');
+
     for (final child in elements) {
       final data = child.split('>')..removeLast();
       final names = data.first.replaceAll('<', '').split(' ');
@@ -1668,10 +1676,18 @@ class ColladaParser{
 
     for (int i = 0, l = bindJointAxis.length; i < l; i ++ ) {
       final axis = bindJointAxis[ i ];
-      List<XmlNode> targetElement = collada.xpath( '//translate[@sid="${axis['target']}"]' ).toList();
-      targetElement += collada.xpath( '//rotate[@sid="${axis['target']}"]' ).toList();
-      targetElement += collada.xpath( '//matrix[@sid="${axis['target']}"]' ).toList();
-      targetElement += collada.xpath( '//scale[@sid="${axis['target']}"]' ).toList();
+      final String targetSid = axis['target'].toString();
+
+      // Define a helper closure to find and filter elements safely by their 'sid' attribute
+      Iterable<XmlElement> findTargetTags(String tagName) {
+        return collada.findAllElements(tagName).where((element) => element.getAttribute('sid') == targetSid);
+      }
+
+      // Gather all matched nodes into a type-safe unified list
+      List<XmlNode> targetElement = findTargetTags('translate').toList();
+      targetElement.addAll(findTargetTags('rotate'));
+      targetElement.addAll(findTargetTags('matrix'));
+      targetElement.addAll(findTargetTags('scale'));
       if ( targetElement.isNotEmpty) {
         final parentVisualElement = targetElement[0].parentElement;
         connect( axis['jointIndex'], parentVisualElement! );

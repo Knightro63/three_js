@@ -5,7 +5,7 @@ List cloneUniformsGroups<T>( src ) {
 	final dst = <T>[];
 
 	for (int u = 0; u < src.length; u ++ ) {
-		dst.add( src[ u ].clone() );
+		dst.add( src[ u ] );
 	}
 	return dst;
 }

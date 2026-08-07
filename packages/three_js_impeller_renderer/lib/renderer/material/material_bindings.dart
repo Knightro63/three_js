@@ -4,17 +4,15 @@ import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_impeller_renderer/renderer/material/material_description_registry.dart';
 import 'package:three_js_math/three_js_math.dart'; // Adjust based on your exact gpux library paths
 
-class GeometryBindings{
+class MaterialBindings{
   final gpux.GpuContext context;
   final Object3D object;
-  final BufferGeometry geometry;
   final MaterialDescriptor descriptor;
   final Material material;
 
-  GeometryBindings(
+  MaterialBindings(
     this.context, 
     this.object,
-    this.geometry,
     this.material,
     this.descriptor,
   );
@@ -26,17 +24,11 @@ class GeometryBindings{
     Float32List sceneData,
     Float32List materialData,
   ){
-    final bool isInstanced = object is InstancedMesh;
-    final int instanceCount = isInstanced ? (object.count ?? 1) : 1;
-
-    final GpuGeometryBuffers? hardwareBuffers = _createHardwareBuffers(instanceCount);
-    if (hardwareBuffers == null) return;
-
     final gpux.HostBuffer host = context.createHostBuffer();
 
     if(material is ShaderMaterial){
       if(material.uniforms.isNotEmpty && material.uniforms['ShaderParameters'] != null){
-        final data = _createHostBuffers(material.uniforms,vertex,fragment,pass);
+        final data = _createUniformBuffers(material.uniforms,vertex,fragment,pass);
         if(data[0].isNotEmpty && material.uniforms['ShaderParameters']['vertex'] != null) _bindUniforms( host, pass, vertex, material.uniforms['ShaderParameters']['vertex'], data[0]);
         if(data[1].isNotEmpty && material.uniforms['ShaderParameters']['fragment'] != null) _bindUniforms( host, pass, fragment, material.uniforms['ShaderParameters']['fragment'], data[1]);
       }
@@ -50,76 +42,6 @@ class GeometryBindings{
     }
 
     _bindTextures(pass,vertex,fragment);
-
-    bool needsUpdate = hardwareBuffers.needsUpdate;
-    String uuidVert = '${material.uuid}_${geometry.uuid}_vert';
-    String uuidIndex = '${material.uuid}_${geometry.uuid}_index';
-
-    if(material.userData[uuidVert] == null || needsUpdate) {
-      // 1. Calculate the real size in bytes from your typed data array
-      // (Assuming hardwareBuffers.vertexBuffer is a TypedData like Float32List or ByteData)
-      final int vertexBytesLength = hardwareBuffers.vertexBuffer.lengthInBytes;
-
-      if(material.userData[uuidVert] == null){ 
-        // Pass the BYTE length here, NOT the vertex count!
-        material.userData[uuidVert] = context.createDeviceBuffer(
-          gpux.StorageMode.hostVisible, 
-          vertexBytesLength
-        ); 
-      }
-      
-      // 2. Safely populate your permanent VRAM buffer 
-      material.userData[uuidVert].overwrite(hardwareBuffers.vertexBuffer); 
-      
-      // 3. Create the view using byte parameters
-      material.userData['${uuidVert}_bufferView'] = gpux.BufferView(
-        material.userData[uuidVert], 
-        offsetInBytes: 0, 
-        lengthInBytes: vertexBytesLength // Must match the byte size!
-      ); 
-    }
-
-    // 4. Do the exact same thing for your Index Buffer
-    if(hardwareBuffers.indexCount != 0 && (material.userData[uuidIndex] == null || needsUpdate)) {
-      final int indexBytesLength = hardwareBuffers.indexBuffer.lengthInBytes;
-
-      if(material.userData[uuidIndex] == null) {
-        material.userData[uuidIndex] = context.createDeviceBuffer(
-          gpux.StorageMode.hostVisible, 
-          indexBytesLength
-        );
-      }
-      
-      material.userData[uuidIndex].overwrite(hardwareBuffers.indexBuffer);
-      material.userData['${uuidIndex}_bufferView'] = gpux.BufferView(
-        material.userData[uuidIndex], 
-        offsetInBytes: 0, 
-        lengthInBytes: indexBytesLength
-      );
-    }
-
-    void bind(int i,bool isInstance){
-      pass.bindVertexBuffer( 
-        material.userData['${uuidVert}_bufferView'], 
-        hardwareBuffers.vertexCount
-      );
-      if(hardwareBuffers.indexCount != 0){
-        pass.bindIndexBuffer( 
-          material.userData['${uuidIndex}_bufferView'],
-          hardwareBuffers.indexType, 
-          hardwareBuffers.indexCount
-        );
-      }
-    }
-
-    if(instanceCount > 0){
-      for(int i = 0; i < instanceCount; i++){
-        bind(i,true);
-      }
-    }
-    else{
-      bind(0,false);
-    }
   }
 
   void _bindTextures(
@@ -148,50 +70,6 @@ class GeometryBindings{
       final texture = _createTexture(text.image, '');
       final texSlot = vertex.getUniformSlot('boneTexture');
       pass.bindTexture(texSlot, texture, sampler: GpuSamplerConverter.getSampler(text));
-    }
-
-    if (geometry.morphAttributes["position"] != null && activeBindings.contains(TextureType.morphTexture)) { // Reusing slot 2
-      final morphPositions = geometry.morphAttributes["position"];
-
-      if (morphPositions != null && morphPositions.isNotEmpty) {
-        final int vertexCount = geometry.attributes["position"].count;
-        final int morphTargetsCount = morphPositions.length;
-
-        // 1. Define clean 2D Matrix dimensions: Columns = targets, Rows = unique vertices
-        final int texWidth = morphTargetsCount;
-        final int texHeight = vertexCount;
-
-        // 2. Allocate flat contiguous Float32 list layout matching the grid exactly
-        final Float32List morphBuffer = Float32List(texWidth * texHeight * 4);
-        final _tempMorphVector = Vector4.zero(); // Reusable allocation guard
-
-        // 3. Fast linear data transfer pass
-        for (int vIdx = 0; vIdx < vertexCount; vIdx++) {
-          final int rowOffset = vIdx * texWidth * 4;
-
-          for (int tIdx = 0; tIdx < morphTargetsCount; tIdx++) {
-            final BufferAttribute targetAttribute = morphPositions[tIdx];
-            _tempMorphVector.fromBuffer(targetAttribute, vIdx);
-
-            final int pixelOffset = rowOffset + (tIdx * 4);
-            morphBuffer[pixelOffset + 0] = _tempMorphVector.x; // Delta X
-            morphBuffer[pixelOffset + 1] = _tempMorphVector.y; // Delta Y
-            morphBuffer[pixelOffset + 2] = _tempMorphVector.z; // Delta Z
-            morphBuffer[pixelOffset + 3] = 0.0;                // Padding Channel
-          }
-        }
-
-        final image = ImageElement(
-          width: texWidth,
-          height: texHeight,
-          data: morphBuffer,
-        );
-
-        // 5. Upload and bind seamlessly to uniform slot layout index 2 (boneTexture)
-        final texture = _createTexture(image, '');
-        final texSlot = vertex.getUniformSlot('morphTexture'); // Reused target name
-        pass.bindTexture(texSlot, texture, sampler: GpuSamplerConverter.getSampler());
-      }
     }
 
     if (object is InstancedMesh && 
@@ -624,24 +502,7 @@ class GeometryBindings{
     }
   }
 
-  // int _getStride(type){
-  //   if(type is Matrix4 ||
-  //       type is Matrix3 ||
-  //       type is Matrix2 ||
-  //       type is Vector4 ||
-  //       type is Vector3 ||
-  //       type is Vector2
-  //   ){
-  //     return type.storage.length;
-  //   }
-  //   else if(type is num){
-  //     return 1;
-  //   }
-
-  //   return 0;
-  // }
-
-  List<Float32List> _createHostBuffers(
+  List<Float32List> _createUniformBuffers(
     Map<String, dynamic> uniforms, 
     gpux.Shader vertex, 
     gpux.Shader fragment, 
@@ -697,357 +558,6 @@ class GeometryBindings{
 
     return material.userData['hostBuffers'];
   }
-  
-  GpuGeometryBuffers? _createHardwareBuffers(int instanceCount) {
-    String uuid = '${material.uuid}_${geometry.uuid}';
-    int version = 
-      (geometry.attributes['position']?.version ?? 0) +
-      material.version + 
-      (geometry.attributes['uv']?.version ?? 0) +
-      (geometry.attributes['normal']?.version ?? 0)+
-      (geometry.attributes['color']?.version ?? 0)+
-      (geometry.attributes['skinIndex']?.version ?? 0)+
-      (geometry.attributes['skinWeight']?.version ?? 0);
-
-    if (material.userData[uuid]?.version == version) {
-      material.userData[uuid].needsUpdate = false;
-      if(object.autoUpdate){
-        _updateBuffer(material.userData[uuid]);
-      }
-      return material.userData[uuid];
-    }
-
-    final positionAttr = geometry.attributes['position'] as BufferAttribute?;
-    final normalAttr = geometry.attributes['normal'] as BufferAttribute?;
-    final uv0Attr = geometry.attributes['uv'] as BufferAttribute?;
-    final uv1Attr = geometry.attributes['uv1'] as BufferAttribute?;
-    final colorAttr = geometry.attributes['color'] as BufferAttribute?;
-    final skinIndexAttr = geometry.attributes['skinIndex'] as BufferAttribute?;
-    final skinWeightAttr = geometry.attributes['skinWeight'] as BufferAttribute?;
-    final lineDistanceAttr = geometry.attributes['lineDistances'] as BufferAttribute?;
-    final indexAttr = geometry.index;
-
-    if (positionAttr == null) {
-      return null;
-    }
-
-    final int totalVertices = positionAttr.count;
-    final int effectiveInstances = instanceCount > 0 ? instanceCount : 1;
-    
-    // 1. Calculate multiplied capacities across the instance block window
-    final int finalVertexCount = totalVertices * effectiveInstances;
-    int originalIndexCount = indexAttr?.count ?? totalVertices;
-    final int finalIndexCount = originalIndexCount * effectiveInstances;
-    bool overwrite = indexAttr == null;
-
-    // Extract base template index reference data
-    final TypedDataList baseIndices = (indexAttr != null) ? indexAttr.array : Uint16List(totalVertices);
-
-    // Determine standard integer sizing requirements for the index pool allocation
-    late TypedDataList finalIndices;
-    if (finalVertexCount > 65535 || baseIndices is Uint32List || baseIndices is Int32List) {
-      finalIndices = Uint32List(finalIndexCount);
-    } else {
-      finalIndices = Uint16List(finalIndexCount);
-    }
-
-    // Attribute array extracts
-    final Float32List positions = positionAttr.array as Float32List;
-    final Float32List? normals = normalAttr?.array as Float32List?;
-    final colors = colorAttr?.array.buffer.asFloat32List();
-    final uvs0 = uv0Attr?.array.buffer.asFloat32List();
-    final uvs1 = uv1Attr?.array.buffer.asFloat32List();
-    final skinIndices = skinIndexAttr?.array;
-    final Float32List? skinWeights = skinWeightAttr?.array as Float32List?;
-    final Float32List? lineDistance = lineDistanceAttr?.array as Float32List?;
-
-    final attri = descriptor.requiredAttributes;
-
-    // 2. Configure float layout step strides and dynamic slot offset positions
-    int stride = 3; 
-    final int colorItemSize = colorAttr?.itemSize ?? 3;
-    final Map<Attribute, int> attributeOffsets = {};
-
-    if (attri.contains(Attribute.normal)) {
-      attributeOffsets[Attribute.normal] = stride;
-      stride += 3;
-    }
-    if (attri.contains(Attribute.uv)) {
-      attributeOffsets[Attribute.uv] = stride;
-      stride += 2;
-    }
-    if (attri.contains(Attribute.uv2)) {
-      attributeOffsets[Attribute.uv2] = stride;
-      stride += 2;
-    }
-    if (attri.contains(Attribute.color)) {
-      attributeOffsets[Attribute.color] = stride;
-      stride += 3;
-    }
-    if (attri.contains(Attribute.skinIndex)) {
-      attributeOffsets[Attribute.skinIndex] = stride;
-      stride += 4;
-    }
-    if (attri.contains(Attribute.skinWeight)) {
-      attributeOffsets[Attribute.skinWeight] = stride;
-      stride += 4;
-    }
-    // LOCK IN SLOT: Instance ID Attribute Location Layout
-    if (attri.contains(Attribute.instanceId)) {
-      attributeOffsets[Attribute.instanceId] = stride;
-      stride += 1;
-    }
-    if (attri.contains(Attribute.lineDistances)) {
-      attributeOffsets[Attribute.lineDistances] = stride;
-      stride += 1;
-    }
-
-    final Float32List interleavedData = Float32List(finalVertexCount * stride);
-    int vertexStride = 0;
-
-    // ========================================================
-    // 3. FLATTENED MASTER INFLATION LOOP (Unnested & Optimized)
-    // ========================================================
-
-    // Cache map lookups and attribute states outside the loop
-    final bool hasNormal = attri.contains(Attribute.normal);
-    final bool hasUv0 = uvs0 != null && attri.contains(Attribute.uv);
-    final bool hasUv1 = attri.contains(Attribute.uv2);
-    final bool hasColor = attri.contains(Attribute.color);
-    final bool hasSkinIndex = attri.contains(Attribute.skinIndex);
-    final bool hasSkinWeight = attri.contains(Attribute.skinWeight);
-    final bool hasInstanceId = attri.contains(Attribute.instanceId);
-    final bool hasLineDistance = attri.contains(Attribute.lineDistances);
-
-    final int normalOff = attributeOffsets[Attribute.normal] ?? 0;
-    final int uv0Off = attributeOffsets[Attribute.uv] ?? 0;
-    final int uv1Off = attributeOffsets[Attribute.uv2] ?? 0;
-    final int colorOff = attributeOffsets[Attribute.color] ?? 0;
-    final int skinIdxOff = attributeOffsets[Attribute.skinIndex] ?? 0;
-    final int skinWgtOff = attributeOffsets[Attribute.skinWeight] ?? 0;
-    final int instanceIdOff = attributeOffsets[Attribute.instanceId] ?? 0;
-    final int lineDistanceOff = attributeOffsets[Attribute.lineDistances] ?? 0;
-
-    final double matRed = material.color.red;
-    final double matGreen = material.color.green;
-    final double matBlue = material.color.blue;
-
-    // Track current instance and template vertex indices manually
-    int currentInst = 0;
-    double currentInstDouble = 0.0;
-    int currentVertexTemplateIdx = 0;
-
-    // A. Unnested Single-Pass Vertex Buffering Layout
-    for (int globalV = 0; globalV < finalVertexCount; globalV++) {
-      final int i = currentVertexTemplateIdx;
-      
-      // 1. Position
-      final int i3 = i * 3;
-      interleavedData[vertexStride + 0] = positions[i3 + 0];
-      interleavedData[vertexStride + 1] = positions[i3 + 1];
-      interleavedData[vertexStride + 2] = positions[i3 + 2];
-
-      // 2. Normal
-      if (hasNormal) {
-        final int dest = vertexStride + normalOff;
-        if (normals != null) {
-          interleavedData[dest + 0] = normals[i3 + 0];
-          interleavedData[dest + 1] = normals[i3 + 1];
-          interleavedData[dest + 2] = normals[i3 + 2];
-        } else {
-          interleavedData[dest + 0] = 0.0;
-          interleavedData[dest + 1] = 0.0;
-          interleavedData[dest + 2] = 0.0;
-        }
-      }
-
-      // 3. UV0
-      if (hasUv0) {
-        final int i2 = i * 2;
-        final int dest = vertexStride + uv0Off;
-        interleavedData[dest + 0] = uvs0[i2 + 0];
-        interleavedData[dest + 1] = uvs0[i2 + 1];
-      }
-
-      // 4. UV1
-      if (hasUv1) {
-        final int i2 = i * 2;
-        final int dest = vertexStride + uv1Off;
-        if (uvs1 != null) {
-          interleavedData[dest + 0] = uvs1[i2 + 0];
-          interleavedData[dest + 1] = uvs1[i2 + 1];
-        } else {
-          interleavedData[dest + 0] = 0.0;
-          interleavedData[dest + 1] = 0.0;
-        }
-      }
-
-      // 5. Colors
-      if (hasColor) {
-        final int dest = vertexStride + colorOff;
-        final int idx = i * colorItemSize;
-        final int colorsLen = colors?.length ?? 0;
-        interleavedData[dest + 0] = (colorsLen > idx) ? colors![idx] : matRed;
-        interleavedData[dest + 1] = (colorsLen > idx + 1) ? colors![idx + 1] : matGreen;
-        interleavedData[dest + 2] = (colorsLen > idx + 2) ? colors![idx + 2] : matBlue;
-      }
-
-      // 6. Skin Index
-      if (hasSkinIndex) {
-        final int dest = vertexStride + skinIdxOff;
-        final int idx = i * 4;
-        final int len = skinIndices?.length ?? 0;
-        interleavedData[dest + 0] = (len > idx) ? skinIndices![idx].toDouble() : 0.0;
-        interleavedData[dest + 1] = (len > idx + 1) ? skinIndices![idx + 1].toDouble() : 0.0;
-        interleavedData[dest + 2] = (len > idx + 2) ? skinIndices![idx + 2].toDouble() : 0.0;
-        interleavedData[dest + 3] = (len > idx + 3) ? skinIndices![idx + 3].toDouble() : 0.0;
-      }
-
-      // 7. Skin Weight
-      if (hasSkinWeight) {
-        final int dest = vertexStride + skinWgtOff;
-        final int idx = i * 4;
-        final int len = skinWeights?.length ?? 0;
-        interleavedData[dest + 0] = (len > idx) ? skinWeights![idx] : 1.0;
-        interleavedData[dest + 1] = (len > idx + 1) ? skinWeights![idx + 1] : 0.0;
-        interleavedData[dest + 2] = (len > idx + 2) ? skinWeights![idx + 2] : 0.0;
-        interleavedData[dest + 3] = (len > idx + 3) ? skinWeights![idx + 3] : 0.0;
-      }
-
-      // 8. Instance ID
-      if (hasInstanceId) {
-        interleavedData[vertexStride + instanceIdOff] = currentInstDouble;
-      }
-
-      // 9. Line Distance
-      if (hasLineDistance) {
-        interleavedData[vertexStride + lineDistanceOff] = lineDistance?[i] ?? 0;
-      }
-
-      vertexStride += stride;
-
-      // Step indices manually instead of using division/modulo
-      currentVertexTemplateIdx++;
-      if (currentVertexTemplateIdx == totalVertices) {
-        currentVertexTemplateIdx = 0;
-        currentInst++;
-        currentInstDouble = currentInst.toDouble();
-      }
-    }
-
-    // Track index loops manually
-    int currentIndexTemplateIdx = 0;
-    int vertexOffset = 0;
-
-    // B. Unnested Single-Pass Index Mapping Layout
-    for (int globalIdx = 0; globalIdx < finalIndexCount; globalIdx++) {
-      final int j = currentIndexTemplateIdx;
-      final int baseIndex = overwrite ? j : baseIndices[j];
-      
-      finalIndices[globalIdx] = baseIndex + vertexOffset;
-
-      currentIndexTemplateIdx++;
-      if (currentIndexTemplateIdx == originalIndexCount) {
-        currentIndexTemplateIdx = 0;
-        vertexOffset += totalVertices; // Tick up the base offset for the next instance block
-      }
-    }
-    
-    material.userData[uuid] = GpuGeometryBuffers(
-      vertexFloatArray: interleavedData,
-      indexBuffer: finalIndices.buffer.asByteData(),
-      indexCount: finalIndexCount, 
-      vertexCount: finalVertexCount, 
-      version: version,
-      needsUpdate: true,
-      indexType: finalIndices is Uint32List ? gpux.IndexType.int32 : gpux.IndexType.int16,
-      instanceCount: effectiveInstances,
-    );
-
-    return material.userData[uuid];
-  }
-
-  void _updateBuffer(GpuGeometryBuffers cachedBuffers) {
-    final positionAttr = geometry.attributes['position'] as BufferAttribute;
-    final normalAttr = geometry.attributes['normal'] as BufferAttribute?;
-
-    final Float32List currentPositions = positionAttr.array as Float32List;
-    final Float32List? currentNormals = normalAttr?.array as Float32List?;
-
-    final Float32List destData = cachedBuffers.vertexFloatArray;
-    
-    // 1. DYNAMICALLY RESOLVE STRIDE AND OFFSETS FROM THE ORIGINAL LAYOUT DESCRIPTOR
-    final attri = descriptor.requiredAttributes;
-    int stride = 3; 
-    int normalOff = 0;
-
-    if (attri.contains(Attribute.normal)) {
-      normalOff = stride;
-      stride += 3;
-    }
-    if (attri.contains(Attribute.uv)) stride += 2;
-    if (attri.contains(Attribute.uv2)) stride += 2;
-    if (attri.contains(Attribute.color)) stride += 3;
-    if (attri.contains(Attribute.skinIndex)) stride += 4;
-    if (attri.contains(Attribute.skinWeight)) stride += 4;
-    if (attri.contains(Attribute.instanceId)) stride += 1;
-
-    final int totalVerts = positionAttr.count;
-    final bool hasNormal = currentNormals != null && attri.contains(Attribute.normal);
-
-    // 2. RUN THE SAFELY POSITIONED UPDATE LOOP
-    int vertexStride = 0;
-
-    int currentVertexTemplateIdx = 0;
-    final int finalVertexCount = totalVerts * cachedBuffers.instanceCount;
-
-    for (int globalV = 0; globalV < finalVertexCount; globalV++) {
-      final int i = currentVertexTemplateIdx;
-      final int i3 = i * 3;
-
-      // 1. Safely insert position into its exact slot
-      destData.setRange(vertexStride + 0, vertexStride + 3, currentPositions, i3);
-
-      // 2. Safely insert normal into its exact slot
-      if (hasNormal) {
-        destData.setRange(vertexStride + normalOff, vertexStride + normalOff + 3, currentNormals, i3);
-      }
-
-      // 3. Step forward by the TRUE full layout stride length
-      vertexStride += stride;
-
-      // 4. Step vertex templates manually instead of using division or modulo
-      currentVertexTemplateIdx++;
-      if (currentVertexTemplateIdx == totalVerts) {
-        currentVertexTemplateIdx = 0;
-      }
-    }
-
-    cachedBuffers.needsUpdate = true;
-  }
-
-}
-
-class GpuGeometryBuffers {
-  GpuGeometryBuffers({
-    required this.vertexFloatArray,
-    required this.indexBuffer,
-    required this.indexCount,
-    required this.vertexCount,
-    required this.version,
-    required this.indexType,
-    required this.needsUpdate,
-    required this.instanceCount,
-  });
-  ByteData get vertexBuffer => vertexFloatArray.buffer.asByteData();
-  final Float32List vertexFloatArray;
-  final ByteData indexBuffer;
-  final int indexCount;
-  final int vertexCount;
-  int version;
-  final int instanceCount;
-  final gpux.IndexType indexType;
-  bool needsUpdate;
 }
 
 class GpuFilterPair {

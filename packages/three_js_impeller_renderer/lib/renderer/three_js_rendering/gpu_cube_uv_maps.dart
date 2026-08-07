@@ -49,7 +49,7 @@ class GpuCubeUVMaps {
 
               texture.addEventListener('dispose', onTextureDispose);
 
-              return renderTarget!.texture;
+              return renderTarget?.texture;
             } 
             else {
               // image not yet ready. try the conversion next frame

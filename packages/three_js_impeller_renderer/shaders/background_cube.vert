@@ -20,6 +20,6 @@ void main() {
   v_uv = uv;
   parms = cat.iscube;
   vec4 viewPosition = cat.viewMatrix * vec4(position,1.0);
-  gl_Position  = cat.projectionMatrix * viewPosition;
-  gl_Position.z = gl_Position.w;
+  gl_Position = cat.projectionMatrix * viewPosition;
+  gl_Position.z = gl_Position.w = 0.999;
 }

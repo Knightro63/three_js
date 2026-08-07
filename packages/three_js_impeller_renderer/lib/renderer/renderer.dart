@@ -3,7 +3,8 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_impeller_renderer/renderer/frame_attachments.dart';
-import 'package:three_js_impeller_renderer/renderer/geometry/geometry_descriptor.dart';
+import 'package:three_js_impeller_renderer/renderer/geometry/geometry_bindings.dart';
+import 'package:three_js_impeller_renderer/renderer/material/material_bindings.dart';
 import 'package:three_js_impeller_renderer/renderer/material/material_description_registry.dart';
 import 'package:three_js_impeller_renderer/renderer/pipeline.dart';
 import 'package:three_js_impeller_renderer/renderer/render_pass_manager.dart';
@@ -13,10 +14,12 @@ import 'package:three_js_impeller_renderer/renderer/three_js_rendering/gpu_backg
 import 'package:three_js_impeller_renderer/renderer/three_js_rendering/gpu_clipping.dart';
 import 'package:three_js_impeller_renderer/renderer/three_js_rendering/gpu_cube_maps.dart';
 import 'package:three_js_impeller_renderer/renderer/three_js_rendering/gpu_cube_uv_maps.dart';
+import 'package:three_js_impeller_renderer/renderer/three_js_rendering/gpu_objects.dart';
 import 'package:three_js_impeller_renderer/renderer/three_js_rendering/gpu_properties.dart';
 import 'package:three_js_impeller_renderer/renderer/three_js_rendering/gpu_render_list.dart';
 import 'package:three_js_impeller_renderer/renderer/three_js_rendering/gpu_render_lists.dart';
 import 'package:three_js_impeller_renderer/renderer/three_js_rendering/gpu_render_states.dart';
+import 'package:three_js_impeller_renderer/renderer/three_js_rendering/gpu_shadow_map.dart';
 import 'package:three_js_impeller_renderer/renderer/uniform_buffer_manager.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'package:flutter_gpu/gpu.dart' as gpu;
@@ -130,13 +133,14 @@ class ImpellerRenderer extends Renderer{
 
   /// T033: Debug flag for verbose frame logging
   bool enableFrameLogging = false;
-  GpuRenderPassManager? _renderPassManager;
+  RenderPassManager? _renderPassManager;
 
   final GpuAnimation animation = GpuAnimation();
   final GpuProperties properties = GpuProperties();
   late final GpuClipping clipping = GpuClipping(properties);
   GpuRenderState? currentRenderState;
   final GpuRenderStates renderStates = GpuRenderStates();
+  late final GpuShadowMap shadowMap = GpuShadowMap(this, 512);
 
   GpuRenderList? currentRenderList;
   late GpuRenderLists renderLists;
@@ -334,6 +338,7 @@ class ImpellerRenderer extends Renderer{
     cubemaps.dispose();
     cubeuvmaps.dispose();
     background.dispose();
+    shadowMap.dispose();
   }
   @override
   void clear([bool color = true, bool depth = true, bool stencil = true]){
@@ -371,7 +376,7 @@ class ImpellerRenderer extends Renderer{
 
     renderStateStack.add(currentRenderState!);
     final commandBuffer = gpu.gpuContext.createCommandBuffer();
-    _renderPassManager ??= GpuRenderPassManager();
+    _renderPassManager ??= RenderPassManager();
 
     projScreenMatrix.multiply2(camera.projectionMatrix, camera.matrixWorldInverse);
     _frustum.setFromMatrix(projScreenMatrix);
@@ -413,7 +418,7 @@ class ImpellerRenderer extends Renderer{
     _renderPassManager!.beginRenderPass(
       commandBuffer,
       clearColorFeature020,
-      GpuFramebufferAttachments(
+      FramebufferAttachments(
         colorView: _sampleCount>1?msaaColorTexture:renderTexture,
         depthView: depthTexture,
         resolveView: _sampleCount>1?renderTexture:null
@@ -636,11 +641,14 @@ class ImpellerRenderer extends Renderer{
     final material = item.material;
     if (material == null) return;
 
+    //material.onBeforeRender?.call();
+
     if (camera.matrixWorldInverse.storage[0] == 0.0 && camera.matrixWorldInverse.storage[5] == 0.0) {
       camera.matrixWorldInverse.setFrom(camera.matrixWorld).invert();
     }
 
-    final resolved = MaterialDescriptorRegistry.resolve(material, object)!;
+    final ResolvedMaterialDescriptor? resolved = MaterialDescriptorRegistry.resolve(material, object);
+    if (resolved == null) return;
     final renderState = resolved.renderState;
     final MaterialDescriptor mdescriptor = resolved.descriptor;
     
@@ -651,7 +659,7 @@ class ImpellerRenderer extends Renderer{
     if(resolved.vertex == null || resolved.fragment == null) return;
 
     if (pipelineNeedsRebuild) {
-      _cachedPipeline[pipelineHash] = GpuPipeline(
+      _cachedPipeline[pipelineHash] = Pipeline(
         gpu.gpuContext, 
         RenderPipelineDescriptor(
           vertexShader: resolved.vertex!,
@@ -670,36 +678,54 @@ class ImpellerRenderer extends Renderer{
     
     _cachedUniforms[object.uuid]?.update();
 
-    final String geomHash = '${geometry.uuid}_${material.uuid}';
-    final bool geometryNeedsRebuild = _cachedGeometry[geomHash] == null || 
-                                      mdescriptor != _cachedGeometry[geomHash]?.descriptor; // Note: Fixed a likely bug here where you checked _cachedPipeline instead of _cachedGeometry
+    final String geomHash = '${geometry.uuid}';
+    final bool geometryNeedsRebuild = _cachedGeometry[geomHash] == null;// || mdescriptor.bindings != _cachedGeometry[geomHash]?.descriptor.bindings; // Note: Fixed a likely bug here where you checked _cachedPipeline instead of _cachedGeometry
 
     if (geometryNeedsRebuild) {
       _cachedGeometry[geomHash] = GeometryBindings(
         gpu.gpuContext, 
         object, 
-        geometry, 
-        material, 
+        geometry,
         mdescriptor
       );
+      print('geometry update');
     }
 
-    _cachedGeometry[geomHash]!.bind(
-      pass,
-      resolved.vertex!,
-      resolved.fragment!,
-      sceneData,
-      _cachedUniforms[object.uuid]!.data,
-    );
+    bool bound = _cachedGeometry[geomHash]!.bind(pass);
 
-    pass.draw();
-    
-    _drawCallCount++;
+    if(bound){
+      final String materialHash = '${material.uuid}';
+      final bool materialNeedsRebuild = _cachedMaterial[materialHash] == null || 
+        mdescriptor != _cachedMaterial[materialHash]?.descriptor; // Note: Fixed a likely bug here where you checked _cachedPipeline instead of _cachedGeometry
+
+      if (materialNeedsRebuild) {
+        _cachedMaterial[materialHash] = MaterialBindings(
+          gpu.gpuContext, 
+          object, 
+          material,
+          mdescriptor
+        );
+        print('material update');
+      }
+
+      _cachedMaterial[materialHash]!.bind(
+        pass,
+        resolved.vertex!,
+        resolved.fragment!,
+        sceneData,
+        _cachedUniforms[object.uuid]!.data,
+      );
+      
+      pass.draw();
+      _drawCallCount++;
+    }
+
     _drawIndexInFrame++;
   }
 
-  Map<String,GpuPipeline> _cachedPipeline = {};
+  Map<String,Pipeline> _cachedPipeline = {};
   Map<String,GeometryBindings> _cachedGeometry = {};
+  Map<String,MaterialBindings> _cachedMaterial = {};
   Map<String,UniformData> _cachedUniforms = {};
 
   @override

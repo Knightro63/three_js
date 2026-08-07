@@ -22,12 +22,22 @@ final _m1 = Matrix4();
 final _m2 = Matrix4();
 
 class SceneUniformData {
-  final Float32List sceneData = Float32List(16 + (4 * 16 * 4));
+  // --- LAYOUT BREAKDOWN ---
+  // 16 floats (bgMatrix) + 16 floats (envMatrix) = 32
+  // 16 floats (bgParms, envParms, rendParms, fogColor, fogParams) = 16
+  // 16 * 4 floats (lightPositions) = 64
+  // 16 * 4 floats (lightColors) = 64
+  // 16 * 4 floats (lightAttenuationParams) = 64
+  // 16 * 4 floats (lightExtendedParams) = 64
+  // NEW: 16 * 16 floats (16 lightSpaceMatrices mat4s) = 256
+  // TOTAL SIZE = 32 + 16 + 64 + 64 + 64 + 64 + 256 = 560 floats
+  final Float32List sceneData = Float32List(576); 
+  
   final Object3D scene;
   final List<Light>? activeLights;
   final ImpellerRenderer renderer;
 
-  SceneUniformData(this.scene, this.renderer, this.activeLights){
+  SceneUniformData(this.scene, this.renderer, this.activeLights) {
     updateUniforms();
   }
 
@@ -35,33 +45,32 @@ class SceneUniformData {
     final lightsList = activeLights ?? const [];
     final int totalCount = lightsList.length;
 
-    final envMatrix = scene is Scene?_m1.makeRotationFromEuler( (scene as Scene).environmentRotation ):_m1;
-    final bgMatrix = scene is Scene?_m2.makeRotationFromEuler( (scene as Scene).backgroundRotation ):_m2;
+    final envMatrix = scene is Scene ? _m1.makeRotationFromEuler((scene as Scene).environmentRotation) : _m1;
+    final bgMatrix = scene is Scene ? _m2.makeRotationFromEuler((scene as Scene).backgroundRotation) : _m2;
 
-    for(int i = 0; i < 16; i++){
+    for (int i = 0; i < 16; i++) {
       sceneData[i] = bgMatrix.storage[i];
-      sceneData[i+16] = envMatrix.storage[i];
+      sceneData[i + 16] = envMatrix.storage[i];
     }
 
     int x = 32;
+    sceneData[x++] = scene is Scene ? (scene as Scene).backgroundIntensity : 1.0;
+    sceneData[x++] = scene.background is Texture && scene.background?.flipY != null ? 1 : 0;
+    sceneData[x++] = scene.background == null ? 0 : scene.background is CubeTexture ? 2 : 1;
+    sceneData[x++] = scene is Scene ? (scene as Scene).backgroundBlurriness : 0.0;
 
-    sceneData[x++] = scene is Scene?(scene as Scene).backgroundIntensity:1.0;
-    sceneData[x++] = scene.background is Texture && scene.background?.flipY != null?1:0;
-    sceneData[x++] = scene.background == null?0:scene.background is CubeTexture?2:1;
-    sceneData[x++] = scene is Scene?(scene as Scene).backgroundBlurriness:0.0;
-
-    sceneData[x++] = scene is Scene?(scene as Scene).environmentIntensity:1.0;
-    sceneData[x++] = scene.environment?.flipY != null?1:0;
-    sceneData[x++] = scene.environment == null?0:scene.environment is CubeTexture?2:1;
+    sceneData[x++] = scene is Scene ? (scene as Scene).environmentIntensity : 1.0;
+    sceneData[x++] = scene.environment?.flipY != null ? 1 : 0;
+    sceneData[x++] = scene.environment == null ? 0 : scene.environment is CubeTexture ? 2 : 1;
     sceneData[x++] = totalCount.toDouble();
 
     sceneData[x++] = renderer.toneMapping.toDouble();
     sceneData[x++] = renderer.toneMappingExposure;
     sceneData[x++] = ColorSpace.fromString(renderer.outputColorSpace).index.toDouble();
-    sceneData[x++] = 0;
+    sceneData[x++] = 0; 
 
     // [Offsets 40-43]: Fog Color
-    if(scene is Scene){
+    if (scene is Scene) {
       final fog = (scene as Scene).fog;
       final fogColor = fog?.color ?? Color();
       sceneData[x++] = fogColor.red;
@@ -74,32 +83,32 @@ class SceneUniformData {
       sceneData[x++] = fog?.isFogExp2 == false ? fog?.far ?? 0.0 : 0.0;
       sceneData[x++] = (fog?.isFogExp2 == true ? fog?.density : 0.0) ?? 0.0;
       sceneData[x++] = fog?.isFogExp2 == true ? 1.0 : 0.0;
-    }
-    else{
-      sceneData[x++] = 0;
-      sceneData[x++] = 0;
-      sceneData[x++] = 0;
-      sceneData[x++] = 0;
-      sceneData[x++] = 0;
-      sceneData[x++] = 0;
-      sceneData[x++] = 0;
-      sceneData[x++] = 0;
+    } else {
+      sceneData[x++] = 0; sceneData[x++] = 0; sceneData[x++] = 0; sceneData[x++] = 0;
+      sceneData[x++] = 0; sceneData[x++] = 0; sceneData[x++] = 0; sceneData[x++] = 0;
     }
 
+    // Base pointer coordinates for structural array blocks
+    final int positionsBase = x;
+    final int colorsBase = x + (16 * 4);          // Offset 112
+    final int attenuationBase = x + (16 * 4 * 2);   // Offset 176
+    final int extendedBase = x + (16 * 4 * 3);      // Offset 240
+    final int matricesBase = x + (16 * 4 * 4);      // Offset 304 (Start of lightSpaceMatrices)
 
-
-    // Base pointer coordinates for sequential parallel blocks
-    final int positionsBase     = x;
-    final int colorsBase        = x + (16 * 4);       // Offset 112
-    final int attenuationBase   = x + (16 * 4 * 2);   // Offset 176
-    final int extendedBase      = x + (16 * 4 * 3);   // Offset 240
+    // Clear matrix space to identity matrices initially
+    for (int i = 0; i < 16; i++) {
+      final int mOffset = matricesBase + (i * 16);
+      sceneData[mOffset + 0] = 1.0;  sceneData[mOffset + 5] = 1.0;
+      sceneData[mOffset + 10] = 1.0; sceneData[mOffset + 15] = 1.0;
+    }
 
     // Serialize each block sequentially to align perfectly with GLSL std140
     for (int i = 0; i < totalCount; i++) {
       final Light light = lightsList[i];
       final int stride = i * 4;
+      final int matrixStride = i * 16;
 
-      double typeToken = 1.0; 
+      double typeToken = 1.0; // 1.0 = Directional
       if (light is AmbientLight) typeToken = 6.0;
       else if (light is PointLight) typeToken = 2.0;
       else if (light is SpotLight) typeToken = 3.0;
@@ -107,41 +116,57 @@ class SceneUniformData {
       else if (light is RectAreaLight) typeToken = 5.0;
 
       // 1. Pack lightPositions[16]
-      sceneData[positionsBase + stride]     = light.position.x;
+      sceneData[positionsBase + stride] = light.position.x;
       sceneData[positionsBase + stride + 1] = light.position.y;
       sceneData[positionsBase + stride + 2] = light.position.z;
       sceneData[positionsBase + stride + 3] = typeToken;
 
       // 2. Pack lightColors[16]
-      sceneData[colorsBase + stride]     = light.color?.red ?? 1.0;
+      sceneData[colorsBase + stride] = light.color?.red ?? 1.0;
       sceneData[colorsBase + stride + 1] = light.color?.green ?? 1.0;
       sceneData[colorsBase + stride + 2] = light.color?.blue ?? 1.0;
       sceneData[colorsBase + stride + 3] = light.intensity;
 
       // 3. Pack lightAttenuationParams[16]
-      sceneData[attenuationBase + stride]     = light.distance ?? 0.0;
+      sceneData[attenuationBase + stride] = light.distance ?? 0.0;
       sceneData[attenuationBase + stride + 1] = light.decay ?? 2.0;
       sceneData[attenuationBase + stride + 2] = light.angle ?? 0.0;
       sceneData[attenuationBase + stride + 3] = light.penumbra ?? 0.0;
 
+      // Check if light tracks shadow maps (assumes custom properties on your Light class)
+      final bool castsShadow = light.castShadow == true && light.shadow != null;
+
       // 4. Pack lightExtendedParams[16]
       if (typeToken == 4.0 && light.groundColor != null) {
-        sceneData[extendedBase + stride]     = light.groundColor!.red;
+        sceneData[extendedBase + stride] = light.groundColor!.red;
         sceneData[extendedBase + stride + 1] = light.groundColor!.green;
         sceneData[extendedBase + stride + 2] = light.groundColor!.blue;
+        sceneData[extendedBase + stride + 3] = castsShadow ? 1.0 : 0.0;
       } else if (typeToken == 5.0) {
-        sceneData[extendedBase + stride]     = light.width ?? 1.0;
+        sceneData[extendedBase + stride] = light.width ?? 1.0;
         sceneData[extendedBase + stride + 1] = light.height ?? 1.0;
         sceneData[extendedBase + stride + 2] = 0.0;
+        sceneData[extendedBase + stride + 3] = castsShadow ? 1.0 : 0.0;
       } else {
-        sceneData[extendedBase + stride]     = 0.0;
-        sceneData[extendedBase + stride + 1] = 0.0;
-        sceneData[extendedBase + stride + 2] = 0.0;
+        // --- SHADOW PARAMETERS FOR STANDARD LIGHT TYPES ---
+        // x: shadowNormalBias, y: shadowBias, z: typeToken, w: castsShadow
+        sceneData[extendedBase + stride] = light.shadow?.normalBias ?? 0.0;
+        sceneData[extendedBase + stride + 1] = light.shadow?.bias ?? 0.0;
+        sceneData[extendedBase + stride + 2] = typeToken;
+        sceneData[extendedBase + stride + 3] = castsShadow ? 1.0 : 0.0;
       }
-      sceneData[extendedBase + stride + 3] = 0.0;
+
+      // 5. Pack lightSpaceMatrices[16]
+      if (castsShadow && light.shadow?.matrix != null) {
+        final Matrix4 lightMatrix = light.shadow!.matrix;
+        for (int m = 0; m < 16; m++) {
+          sceneData[matricesBase + matrixStride + m] = lightMatrix.storage[m];
+        }
+      }
     }
   }
 }
+
 
 class UniformData {
   Object3D object;

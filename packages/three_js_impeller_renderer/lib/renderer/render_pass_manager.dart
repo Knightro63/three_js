@@ -1,17 +1,17 @@
 import 'dart:core';
-import 'package:flutter_gpu/gpu.dart' as gpux;
+import 'package:flutter_gpu/gpu.dart' as gpu;
 import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 import 'package:vector_math/vector_math.dart' as vmath;
 import 'buffer_manager.dart';
-import 'frame_attachments.dart'; // Adjust based on your exact gpux library paths
+import 'frame_attachments.dart'; // Adjust based on your exact gpu library paths
 
 /// Gpu render pass manager implementation.
 ///
 /// Records drawing commands using GpuRenderPassEncoder.
-class GpuRenderPassManager implements RenderPassManager {
+class RenderPassManager {
   // Track render pass state securely without late initialization flags
-  gpux.RenderPass? _renderpass;
+  gpu.RenderPass? _renderpass;
   bool _renderPassActive = false;
   bool _pipelineBound = false;
 
@@ -21,14 +21,13 @@ class GpuRenderPassManager implements RenderPassManager {
   /// Get the internal GpuRenderPassEncoder for legacy rendering code.
   /// This is a temporary method to support the transition from direct Gpu API usage
   /// to the RenderPassManager abstraction.
-  gpux.RenderPass get getPassEncoder => _renderpass!;
+  gpu.RenderPass get getPassEncoder => _renderpass!;
 
-  GpuFramebufferAttachments? _oldframebuffer;
-  gpux.RenderTarget? _renderTarget;
+  FramebufferAttachments? _oldframebuffer;
+  gpu.RenderTarget? _renderTarget;
 
   /// Begin render pass with clear color context states.
-  @override
-  void beginRenderPass(gpux.CommandBuffer commandBuffer, Color clearColor, GpuFramebufferAttachments framebuffer) {
+  void beginRenderPass(gpu.CommandBuffer commandBuffer, Color clearColor, FramebufferAttachments framebuffer) {
     if(framebuffer == _oldframebuffer){
       _renderpass = commandBuffer.createRenderPass(this._renderTarget!);
       return;
@@ -39,20 +38,20 @@ class GpuRenderPassManager implements RenderPassManager {
     }
 
     //try {
-      final gpux.Texture textureView;
-      final gpux.Texture? depthView;
-      final gpux.Texture? resolveView;
+      final gpu.Texture textureView;
+      final gpu.Texture? depthView;
+      final gpu.Texture? resolveView;
 
       textureView = framebuffer.colorView;
       depthView = framebuffer.depthView;
       resolveView = framebuffer.resolveView; 
 
-      // Replaces programmatic js("{}") assemblies with a clean, strongly-typed gpux declarative object
-      final colorAttachment = gpux.ColorAttachment(
+      // Replaces programmatic js("{}") assemblies with a clean, strongly-typed gpu declarative object
+      final colorAttachment = gpu.ColorAttachment(
         texture: textureView,
-        loadAction: gpux.LoadAction.clear,
+        loadAction: gpu.LoadAction.clear,
         resolveTexture: resolveView,
-        storeAction: resolveView != null ? gpux.StoreAction.multisampleResolve : gpux.StoreAction.store, // Discard 4x view memory if resolved
+        storeAction: resolveView != null ? gpu.StoreAction.multisampleResolve : gpu.StoreAction.store, // Discard 4x view memory if resolved
         clearValue: vmath.Vector4(
           clearColor.red,
           clearColor.green,
@@ -61,13 +60,13 @@ class GpuRenderPassManager implements RenderPassManager {
         ),
       );
 
-      gpux.DepthStencilAttachment? depthStencilAttachment;
+      gpu.DepthStencilAttachment? depthStencilAttachment;
       if (depthView != null) {
-        depthStencilAttachment = gpux.DepthStencilAttachment(
+        depthStencilAttachment = gpu.DepthStencilAttachment(
           texture: depthView,
           depthClearValue: 1.0,
-          depthLoadAction: gpux.LoadAction.clear,
-          depthStoreAction: resolveView == null ? gpux.StoreAction.dontCare : gpux.StoreAction.dontCare,
+          depthLoadAction: gpu.LoadAction.clear,
+          depthStoreAction: resolveView == null ? gpu.StoreAction.dontCare : gpu.StoreAction.dontCare,
         );
       }
 
@@ -81,7 +80,7 @@ class GpuRenderPassManager implements RenderPassManager {
         );
       }
 
-      _renderTarget = gpux.RenderTarget.singleColor(
+      _renderTarget = gpu.RenderTarget.singleColor(
         colorAttachment,
         depthStencilAttachment:depthStencilAttachment
       );
@@ -108,7 +107,6 @@ class GpuRenderPassManager implements RenderPassManager {
   }
 
   /// Bind graphics pipeline context state variables.
-  @override
   void bindPipeline(PipelineHandle pipeline) {
     if (!_renderPassActive) {
       throw StateError("No active render pass. Call beginRenderPass() first.");
@@ -125,7 +123,6 @@ class GpuRenderPassManager implements RenderPassManager {
   }
 
   /// Bind vertex buffer into an active tracking layout entry location slot index.
-  @override
   void bindVertexBuffer(BufferHandle buffer, int vertexCount) {
     if (!_renderPassActive) {
       throw StateError("No active render pass. Call beginRenderPass() first.");
@@ -145,7 +142,6 @@ class GpuRenderPassManager implements RenderPassManager {
   }
 
   /// Bind index buffer using specialized 16-bit or 32-bit layout properties configurations.
-  @override
   void bindIndexBuffer(BufferHandle buffer) {
     if (!_renderPassActive) {
       throw StateError("No active render pass. Call beginRenderPass() first.");
@@ -171,7 +167,6 @@ class GpuRenderPassManager implements RenderPassManager {
   }
 
   /// Bind uniform buffer to group and binding layouts.
-  @override
   void bindUniformBuffer(BufferHandle buffer) {
     if (!_renderPassActive) {
       throw StateError("No active render pass. Call beginRenderPass() first.");
@@ -193,7 +188,6 @@ class GpuRenderPassManager implements RenderPassManager {
   }
 
   /// Draw indexed geometric primitives.
-  @override
   void draw() {
     if (!_renderPassActive) {
       throw StateError("No active render pass. Call beginRenderPass() first.");
@@ -210,7 +204,6 @@ class GpuRenderPassManager implements RenderPassManager {
   }
 
   /// End render pass execution lane tracking loops.
-  @override
   void endRenderPass() {
     if (!_renderPassActive) {
       throw StateError("No active render pass. Call beginRenderPass() first.");
@@ -227,23 +220,8 @@ class GpuRenderPassManager implements RenderPassManager {
   }
 }
 
-// ==========================================
-// INTERFACE CONTRACT PATTERN DEPENDENCIES
-// ==========================================
-
-abstract class RenderPassManager {
-  void beginRenderPass(gpux.CommandBuffer commandBuffer ,Color clearColor, GpuFramebufferAttachments framebuffer);
-  void bindPipeline(PipelineHandle pipeline);
-  void bindVertexBuffer(BufferHandle buffer, int slot);
-  void bindIndexBuffer(BufferHandle buffer);
-  void bindUniformBuffer(BufferHandle buffer);
-  //void drawIndexed(int indexCount, int firstIndex, int instanceCount);
-  void draw();
-  void endRenderPass();
-}
-
 class PipelineHandle {
-  final gpux.RenderPipeline handle;
+  final gpu.RenderPipeline handle;
   const PipelineHandle(this.handle);
 }
 

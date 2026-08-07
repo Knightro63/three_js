@@ -219,7 +219,6 @@ class _State extends State<WebglVolumeCloud> {
 
       }
     ''';
-    bool isImpeller = true;
     final geometry = three.BoxGeometry( 1, 1, 1 );
     final material = three.RawShaderMaterial.fromMap( {
       'name': 'WebglVolumeCloud',
@@ -245,15 +244,15 @@ class _State extends State<WebglVolumeCloud> {
           'shader': 'vertex',
           'value': three.Vector4.identity() 
         },
-        if(isImpeller)'modelMatrix': { 
+        if(impeller)'modelMatrix': { 
           'shader': 'vertex',
           'value': three.Matrix4() 
         },
-        if(isImpeller)'modelViewMatrix': { 
+        if(impeller)'modelViewMatrix': { 
           'shader': 'vertex',
           'value': three.Matrix4() 
         },
-        if(isImpeller)'projectionMatrix': { 
+        if(impeller)'projectionMatrix': { 
           'shader': 'vertex',
           'value': three.Matrix4() 
         },

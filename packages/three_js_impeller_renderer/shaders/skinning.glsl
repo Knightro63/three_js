@@ -14,8 +14,9 @@ mat4 getBoneMatFromText(float i) {
   int j = int(floor(i + 0.5)) * 4;
   int sizeInt = int(size);
 
-  int pixelX = j % sizeInt;
   int pixelY = j / sizeInt;
+  int pixelX = int(j - sizeInt * floor(pixelY));//j % sizeInt;
+  
 
   int targetY = pixelY;
 

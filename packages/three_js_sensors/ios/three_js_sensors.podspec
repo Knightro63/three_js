@@ -12,7 +12,7 @@ Pod::Spec.new do |s|
   s.license          = { :file => '../LICENSE' }
   s.authors          = 'Multiple Authors'
   s.source           = { :path => '.' }
-  s.source_files = 'three_js_sensors/Sources/**/*'
+  s.source_files = 'three_js_sensors/Sources/three_js_sensors/**/*'
   s.dependency 'Flutter'
   s.platform = :ios, '8.0'
 

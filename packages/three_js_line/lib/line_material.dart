@@ -33,7 +33,31 @@ class LineMaterial extends ShaderMaterial {
       'dashOffset': { 'value': 0.0 },
       'dashScale': { 'value': 1.0 },
       'dashSize': { 'value': 1.0 },
-      'gapSize': { 'value': 1.0 } // todo FIX - maybe change to totalSize
+      'gapSize': { 'value': 1.0 }, // todo FIX - maybe change to totalSize,
+      'lineParms':{
+        'shader': 'vertex',
+        'value': Vector4()
+      },
+      'instanceStart':{
+        'shader': 'vertex',
+        'value': Vector4()
+      },
+      'instanceEnd':{
+        'shader': 'vertex',
+        'value': Vector4()
+      },
+      'instanceColorStart':{
+        'shader': 'vertex',
+        'value': Vector4()
+      },
+      'instanceColorEnd':{
+        'shader': 'vertex',
+        'value': Vector4()
+      },
+      'ShaderParameters':{
+        'vertex': 'LineBlock',
+        'bundle': 'Line'
+      }
     };
 
     shaderLib[ 'line' ] = {
@@ -420,6 +444,8 @@ class LineMaterial extends ShaderMaterial {
         '''
     };
 		type = 'LineMaterial';
+    name = 'Line';
+    uniformsGroups = [Attribute.position,Attribute.uv];
     uniforms = UniformsUtils.clone( shaderLib[ 'line' ]['uniforms'] );
     vertexShader = shaderLib[ 'line' ]['vertexShader'];
     fragmentShader = shaderLib[ 'line' ]['fragmentShader'];

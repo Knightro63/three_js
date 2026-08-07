@@ -1,13 +1,13 @@
-import 'package:flutter_gpu/gpu.dart' as gpux; // Adjust based on your exact gpux library paths
+import 'package:flutter_gpu/gpu.dart' as gpu; // Adjust based on your exact gpu library paths
 
 /// Internal tracking class for active framebuffer view channels.
 /// Replaces Kotlin's 'internal data class' with a package-private Dart signature.
-class GpuFramebufferAttachments {
-  final gpux.Texture colorView;
-  final gpux.Texture? depthView;
-  final gpux.Texture? resolveView;
+class FramebufferAttachments {
+  final gpu.Texture colorView;
+  final gpu.Texture? depthView;
+  final gpu.Texture? resolveView;
 
-  const GpuFramebufferAttachments({
+  const FramebufferAttachments({
     required this.colorView,
     this.depthView,
     this.resolveView
@@ -17,7 +17,7 @@ class GpuFramebufferAttachments {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is GpuFramebufferAttachments &&
+      other is FramebufferAttachments &&
           runtimeType == other.runtimeType &&
           colorView == other.colorView &&
           depthView == other.depthView &&
@@ -28,6 +28,6 @@ class GpuFramebufferAttachments {
 
   @override
   String toString() {
-    return 'GpuFramebufferAttachments(colorView: $colorView, depthView: $depthView, resolveView: $resolveView)';
+    return 'FramebufferAttachments(colorView: $colorView, depthView: $depthView, resolveView: $resolveView)';
   }
 }

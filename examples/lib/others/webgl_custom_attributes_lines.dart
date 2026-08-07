@@ -60,9 +60,24 @@ class _State extends State<WebglCustomAttributesLines> {
     threeJs.scene.background = three.Color.fromHex32( 0x050505 );
 
     final Map<String,dynamic> uniforms = {
-      'amplitude': { 'value': 5.0 },
-      'opacity': { 'value': 0.3 },
-      'color': { 'value': three.Color( 0xffffff ) }
+      'ShaderParameters':{
+        'fragment': 'WCALBlock',
+        'bundle': 'Example'
+      },
+      if(impeller)'displacement': { 
+        'shader': 'vertex',
+        'value': three.Vector4(0,0,0,0.5) 
+      },
+      if(impeller)'customColor': { 
+        'shader': 'vertex',
+        'value': three.Vector4() 
+      },
+      if(!impeller)'amplitude': { 'value': 5.0 },
+      if(!impeller)'opacity': { 'value': 0.3 },
+      'color': { 
+        'shader': 'fragment',
+        'value': three.Color.fromHex32( 0xffffff )..alpha = 0.3
+      },
     };
 
     const vertexShader = '''
@@ -97,6 +112,8 @@ class _State extends State<WebglCustomAttributesLines> {
     ''';
 
     final shaderMaterial = three.ShaderMaterial.fromMap( {
+      'name': 'WebglCustomAttributesLines',
+      'uniformsGroups': [three.Attribute.position],
       'uniforms': uniforms,
       'vertexShader': vertexShader,
       'fragmentShader': fragmentShader,
@@ -143,7 +160,12 @@ class _State extends State<WebglCustomAttributesLines> {
 
       line.rotation.y = 0.25 * time;
 
-      uniforms['amplitude']!['value'] = math.sin( 0.5 * time );
+      if(!impeller){
+        uniforms['amplitude']!['value'] = math.sin( 0.5 * time );
+      }
+      else{
+        uniforms['displacemnt']!['value'][3] = math.sin( 0.5 * time );
+      }
       (uniforms['color']!['value'] as three.Color).offsetHSL( 0.0005, 0, 0 );
 
       final attributes = line.geometry!.attributes;

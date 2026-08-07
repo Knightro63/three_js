@@ -52,7 +52,7 @@ class _MyAppState extends State<WebglCameraArray> {
 
   void setup() {
     late three.Mesh mesh;
-    int amount = 8;
+    int amount = 4;
     final width = (threeJs.width / amount) * threeJs.dpr;
     final height = (threeJs.height / amount) * threeJs.dpr;
 
