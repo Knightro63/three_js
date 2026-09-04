@@ -139,8 +139,8 @@ class AnglePrograms {
 			precision: precision,
 
 			batching: object is BatchedMesh,
-			instancing: object is InstancedMesh,
-			instancingColor: object is InstancedMesh && object.instanceColor != null,
+			instancing: isInstanced(object),
+			instancingColor: isInstanced(object) && object.instanceColor != null,
 			instancingMorph: object is InstancedMesh && object.morphTexture != null,
 
 			supportsVertexTextures: vertexTextures,

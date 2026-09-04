@@ -8,6 +8,7 @@ abstract class BaseBufferAttribute<TData extends TypedDataList> {
   InterleavedBuffer? data;
   late String type;
   String? name;
+  int gpuType = FloatType;
 
   int count = 0;
   bool normalized = false;

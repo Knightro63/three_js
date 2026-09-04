@@ -7,7 +7,7 @@ class AngleIndexedBufferRenderer extends BaseAngleBufferRenderer {
   late int bytesPerElement;
   RenderingContext gl;
   AngleExtensions extensions;
-  AngleInfo info;
+  Info info;
 
   AngleIndexedBufferRenderer(this.gl, this.extensions, this.info);
 

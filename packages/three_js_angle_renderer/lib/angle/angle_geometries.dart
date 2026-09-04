@@ -4,7 +4,7 @@ class AngleGeometries {
   bool _didDispose = false;
   RenderingContext gl;
   AngleAttributes attributes;
-  AngleInfo info;
+  Info info;
   AngleBindingStates bindingStates;
 
   Map<int, bool> geometries = {};

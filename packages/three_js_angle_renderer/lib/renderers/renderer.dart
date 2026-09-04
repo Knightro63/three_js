@@ -175,8 +175,7 @@ class AngleRenderer extends Renderer{
   final animation = AngleAnimation();
   late AngleExtensions extensions;
   late Capabilities capabilities;
-  late AngleInfo info;
-  late AngleProperties properties;
+  
   late AngleTextures textures;
   late AngleCubeMaps cubemaps;
   late AngleCubeUVMaps cubeuvmaps;
@@ -252,7 +251,7 @@ class AngleRenderer extends Renderer{
     }
 
     info = AngleInfo(_gl);
-    properties = AngleProperties();
+    properties = Properties();
     textures = AngleTextures(_gl, extensions, state as AngleState, properties, capabilities as AngleCapabilities, utils, info);
     cubemaps = AngleCubeMaps(this);
     cubeuvmaps = AngleCubeUVMaps(this);
@@ -703,7 +702,7 @@ class AngleRenderer extends Renderer{
         }      
       }
     }
-    if (object is InstancedMesh) {
+    if (isInstanced(object)) {
       renderer.renderInstances(drawStart, drawCount, object.count!);
     } 
     else if (geometry is InstancedBufferGeometry) {
@@ -1407,7 +1406,7 @@ class AngleRenderer extends Renderer{
 				needsProgramChange = true;
 			} else if ( object is BatchedMesh && materialProperties['batchingColor'] == false && object.colorsTexture != null ) {
 				needsProgramChange = true;
-			}else if ( object is InstancedMesh && materialProperties['instancing'] == false ) {
+			}else if (isInstanced(object) && materialProperties['instancing'] == false ) {
         needsProgramChange = true;
       } else if (object is! InstancedMesh && materialProperties['instancing'] == true ) {
         needsProgramChange = true;
@@ -1415,9 +1414,9 @@ class AngleRenderer extends Renderer{
         needsProgramChange = true;
       } else if (object is! SkinnedMesh && materialProperties['skinning'] == true ) {
         needsProgramChange = true;
-      } else if ( object is InstancedMesh && materialProperties['instancingColor'] == true && object.instanceColor == null ) {
+      } else if (isInstanced(object) && materialProperties['instancingColor'] == true && object.instanceColor == null ) {
         needsProgramChange = true;
-      } else if ( object is InstancedMesh && materialProperties['instancingColor'] == false && object.instanceColor != null ) {
+      } else if (isInstanced(object) && materialProperties['instancingColor'] == false && object.instanceColor != null ) {
         needsProgramChange = true;
       } else if ( object is InstancedMesh && materialProperties['instancingMorph'] == true && object.morphTexture == null ) {
         needsProgramChange = true;
@@ -1535,7 +1534,7 @@ class AngleRenderer extends Renderer{
 
       final skeleton = object.skeleton;
       if ( skeleton != null) {
-        if ( skeleton.boneTexture == null ) skeleton.computeBoneTexture();
+        if ( skeleton.boneTexture == null )skeleton.computeBoneTexture();
         pUniformS?.setValue( _gl, 'boneTexture', skeleton.boneTexture, textures );
       }
     }

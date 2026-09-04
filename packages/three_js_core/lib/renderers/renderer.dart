@@ -32,6 +32,8 @@ abstract class Renderer {
   late ShadowMap shadowMap;
   late Capabilities capabilities;
   late State state;
+  late Properties properties;
+  late Info info;
 
   int toneMapping = NoToneMapping;
   double toneMappingExposure = 1.0;
@@ -88,4 +90,5 @@ abstract class Renderer {
   Set compile(Object3D scene, Camera camera, [Object3D? targetScene]);
 
   Vector2 getDrawingBufferSize(Vector2 target);
+  void initTexture(Texture texture);
 }

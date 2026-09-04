@@ -3,7 +3,7 @@ part of three_webgl;
 class AngleObjects {
   bool _didDispose = false;
   final updateMap = WeakMap();
-  AngleInfo info;
+  Info info;
   RenderingContext gl;
   AngleGeometries geometries;
   AngleAttributes attributes;
@@ -26,7 +26,7 @@ class AngleObjects {
 
     // print(" WebGLObjects update object: ${object} ${object.type} ");
 
-    if (object is InstancedMesh) {
+    if (isInstanced(object)) {
       if (object.hasEventListener('dispose', onInstancedMeshDispose) == false) {
         object.addEventListener('dispose', onInstancedMeshDispose);
       }

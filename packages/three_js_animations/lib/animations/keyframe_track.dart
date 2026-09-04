@@ -59,6 +59,7 @@ class KeyframeTrack {
 
   Function? createInterpolant;
   late int? _interpolation;
+  int level = -1;
 
   /// [name] - the identifier for the `KeyframeTrack`.
   /// 
@@ -398,7 +399,58 @@ class KeyframeTrack {
 
     return this;
   }
-  
+
+  List<double> getValueAtTime(double time) {
+    if (values.isEmpty) return [];
+
+    final int valueSize = values.length ~/ times.length;
+    
+    // Clamp to start/end if time is out of bounds
+    if (time <= times.first) {
+      return List<double>.generate(valueSize, (i) => values[i].toDouble());
+    }
+    if (time >= times.last) {
+      int startIdx = (times.length - 1) * valueSize;
+      return List<double>.generate(valueSize, (i) => values[startIdx + i].toDouble());
+    }
+
+    // Binary search or linear scan to find bounding frame pair (k, k+1)
+    int k = 0;
+    while (k < times.length - 1 && times[k + 1] <= time) {
+      k++;
+    }
+
+    double t0 = times[k].toDouble();
+    double t1 = times[k + 1].toDouble();
+    double alpha = (time - t0) / (t1 - t0);
+
+    int idx0 = k * valueSize;
+    int idx1 = (k + 1) * valueSize;
+
+    List<double> result = List<double>.filled(valueSize, 0.0);
+
+    // Quaternion Slerp or Vector Lerp
+    if (valueSize == 4) {
+      // Quaternion interpolation
+      final q0 = Quaternion(values[idx0].toDouble(), values[idx0 + 1].toDouble(), values[idx0 + 2].toDouble(), values[idx0 + 3].toDouble());
+      final q1 = Quaternion(values[idx1].toDouble(), values[idx1 + 1].toDouble(), values[idx1 + 2].toDouble(), values[idx1 + 3].toDouble());
+      q0.slerp(q1, alpha);
+      result[0] = q0.x;
+      result[1] = q0.y;
+      result[2] = q0.z;
+      result[3] = q0.w;
+    } else {
+      // Standard linear interpolation (Position / Scale)
+      for (int i = 0; i < valueSize; i++) {
+        double v0 = values[idx0 + i].toDouble();
+        double v1 = values[idx1 + i].toDouble();
+        result[i] = v0 + (v1 - v0) * alpha;
+      }
+    }
+
+    return result;
+  }
+
   /// Returns a copy of this track.
   KeyframeTrack clone() {
     return KeyframeTrack(name, times, values)..createInterpolant = createInterpolant;

@@ -3,7 +3,7 @@ part of three_webgl;
 class AngleMaterials {
   bool _didDispose = false;
   AngleRenderer renderer;
-  AngleProperties properties;
+  Properties properties;
 
   AngleMaterials(this.renderer, this.properties);
 

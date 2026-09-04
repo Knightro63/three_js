@@ -30,7 +30,6 @@ part 'angle_objects.dart';
 part 'angle_program.dart';
 part 'angle_program_extra.dart';
 part 'angle_programs.dart';
-part 'angle_properties.dart';
 part 'angle_render_list.dart';
 part 'angle_render_lists.dart';
 
@@ -45,3 +44,7 @@ part 'angle_uniforms_helper.dart';
 part 'angle_utils.dart';
 part 'angle_cube_uv_maps.dart';
 part 'angle_shader_cache.dart';
+
+bool isInstanced(Object3D object){
+  return object is InstancedMesh || object is InstancedSkinnedMesh;
+}

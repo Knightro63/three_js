@@ -1,23 +1,7 @@
 part of three_webgl;
 
-class WebGLInfo {
+class WebGLInfo extends Info{
   RenderingContext gl;
-
-  Map<String, int> memory = {
-    "geometries": 0, 
-    "textures": 0
-  };
-
-  Map<String, double> render = {
-    "frame": 0.0, 
-    "calls": 0.0, 
-    "triangles": 0.0, 
-    "points": 0.0, 
-    "lines": 0.0
-  };
-
-  dynamic programs;
-  bool autoReset = true;
 
   WebGLInfo(this.gl);
 
@@ -38,14 +22,4 @@ class WebGLInfo {
       console.warning('three.WebGLInfo: Unknown draw mode: $mode ');
     }
   }
-
-  void reset() {
-    render["frame"] = render["frame"]! + 1;
-    render["calls"] = 0;
-    render["triangles"] = 0;
-    render["points"] = 0;
-    render["lines"] = 0;
-  }
-
-  void dispose(){}
 }

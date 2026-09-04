@@ -139,7 +139,7 @@ class Skeleton {
 
   /// Updates the [boneMatrices] and [boneTexture] 
   /// after changing the bones. This is called automatically by the
-  /// [WebGLRenderer] if the skeleton is used with a [SkinnedMesh].
+  /// [Renderer] if the skeleton is used with a [SkinnedMesh].
   void update() {
     final bones = this.bones;
     final boneInverses = this.boneInverses;
@@ -158,9 +158,27 @@ class Skeleton {
       boneMatrices.setAll(i * 16, _offsetMatrix.storage); 
     }
 
-    if (boneTexture != null) {
-      boneTexture.needsUpdate = true;
+    boneTexture?.needsUpdate = true;
+  }
+
+  void updateInstanced([Float32List? instanceBones, int? id]) {
+    final bones = this.bones;
+    final boneInverses = this.boneInverses;
+    final boneMatrices = instanceBones ?? this.boneMatrices;
+    final boneTexture = this.boneTexture;
+    final instanceId = id ?? 0;
+    
+    int il = bones.length;
+    for (int i = 0; i < il; i++) {
+      final matrix = bones[i].matrixWorld;
+      
+      _offsetMatrix.multiply2(matrix, boneInverses[i]);
+      
+      // Flatten bone matrix components to the specific row slot assigned to this instance ID
+      _offsetMatrix.copyIntoList(boneMatrices, 16 * (i + instanceId * bones.length));
     }
+
+    boneTexture?.needsUpdate = true;
   }
 
   /// Returns a clone of this Skeleton object.
@@ -171,10 +189,15 @@ class Skeleton {
   /// Computes an instance of [DataTexture] in order to pass the bone data
   /// more efficiently to the shader. The texture is assigned to
   /// [boneTexture].
-  Skeleton computeBoneTexture() {
-
-    boneTexture = DataTexture(boneMatrices, boneTextureSize, boneTextureSize,
-        RGBAFormat, FloatType);
+  late Skeleton Function() computeBoneTexture = _computeBoneTexture;
+  Skeleton _computeBoneTexture() {
+    boneTexture = DataTexture(
+      boneMatrices, 
+      boneTextureSize, 
+      boneTextureSize,
+      RGBAFormat, 
+      FloatType
+    );
 
     boneTexture!.name = "DataTexture from Skeleton.computeBoneTexture";
     boneTexture!.needsUpdate = true;

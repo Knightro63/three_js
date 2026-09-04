@@ -6,10 +6,10 @@ class AngleTextures {
   RenderingContext get _gl => gl;
   AngleExtensions extensions;
   AngleState state;
-  AngleProperties properties;
+  Properties properties;
   AngleCapabilities capabilities;
   AngleUtils utils;
-  AngleInfo info;
+  Info info;
   bool isWebGL2 = true;
 
   late int maxTextures;

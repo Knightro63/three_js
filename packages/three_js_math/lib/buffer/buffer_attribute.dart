@@ -25,8 +25,6 @@ abstract class BufferAttribute<TData extends TypedDataList> extends BaseBufferAt
   final _vector2 = Vector2.zero();
   List<Ranges> updateRanges = [];
 
-  int gpuType = FloatType;
-
   bool isBufferAttribute = true;
 
   /// [array] -- Must be a

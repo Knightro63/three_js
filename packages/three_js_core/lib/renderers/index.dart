@@ -9,4 +9,5 @@ export 'capabilities.dart';
 export 'shaders/shader_lib.dart';
 export 'shaders/uniforms_lib.dart';
 export 'parameters.dart';
-
+export 'properties.dart';
+export 'info.dart';

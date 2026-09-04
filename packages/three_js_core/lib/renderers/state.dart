@@ -12,6 +12,11 @@ abstract class State {
   void setBlending(int blending);
   void setScissorTest(bool scissorTest);
 
+  void activeTexture(int? webglSlot);
+
   void reset();
   void dispose();
+  bool useProgram(dynamic program);
+
+  void bindTexture(int webglType, dynamic webglTexture, [int? webglSlot]);
 }

@@ -5,3 +5,4 @@ export 'interpolants/index.dart';
 export 'tracks/index.dart';
 export 'object/animation_object.dart';
 export './ccdik/index.dart';
+export 'object/instanced_animation/index.dart';

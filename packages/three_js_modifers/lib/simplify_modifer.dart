@@ -312,9 +312,12 @@ class SimplifyModifier {
     }
 
     // delete triangles on edge uv:
-    for (int i = (u?.faces.length ?? 0) - 1; i >= 0; i -- ) {
-      if (u!.faces[ i ].hasVertex( v ) ) {
-        _removeFace( u.faces[ i ], faces );
+    for (int i = (u?.faces.length ?? 0) - 1; i >= 0; i--) {
+      // THE FIX: If the face was already removed in a concurrent cycle, skip it!
+      if (u!.faces.length <= i) continue; 
+      
+      if (u.faces[i].hasVertex(v)) {
+        _removeFace(u.faces[i], faces);
       }
     }
 

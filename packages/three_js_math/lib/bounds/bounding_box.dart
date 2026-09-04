@@ -426,13 +426,27 @@ class BoundingBox{
     return true;
   }
 
-  /// [box] - Box that will be unioned with this box.
+  /// Adds the given offset to both the upper and lower bounds of this bounding box,
+  /// effectively moving it in 3D space.
   /// 
-  /// Computes the union of this box and [box], setting the upper
+  /// [offset] - The offset that should be used to translate the bounding box.
+  /// Returns a reference to this bounding box.
+  BoundingBox translate(Vector3 offset) {
+    min.add(offset);
+    max.add(offset);
+    return this;
+  }
+
+  /// Computes the union of this box and another and the given one, setting the upper
   /// bound of this box to the greater of the two boxes' upper bounds and the
   /// lower bound of this box to the lesser of the two boxes' lower bounds.
   /// 
-  // BoundingBox union(BoundingBox box){
+  /// [box] - The bounding box that will be unioned with this instance.
+  /// Returns a reference to this bounding box.
+  BoundingBox union(BoundingBox box) {
+    min.min(box.min);
+    max.max(box.max);
+    return this;
+  }
 
-  // }
 }

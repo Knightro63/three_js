@@ -32,7 +32,7 @@ class AngleBufferRenderer extends BaseAngleBufferRenderer {
   bool isWebGL2 = true;
   dynamic mode;
   AngleExtensions extensions;
-  AngleInfo info;
+  Info info;
 
   AngleBufferRenderer(this.gl, this.extensions, this.info);
 

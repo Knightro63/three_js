@@ -2,7 +2,7 @@ part of three_webgl;
 
 class AngleClipping {
   bool _didDispose = false;
-  AngleProperties properties;
+  Properties properties;
 
   Matrix3 viewNormalMatrix = Matrix3.identity();
   Plane plane = Plane();

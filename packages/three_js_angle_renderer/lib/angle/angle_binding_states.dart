@@ -147,7 +147,7 @@ class AngleBindingStates {
 
       if (programAttribute.location.id >= 0) {
         final cachedAttribute = cachedAttributes[name];
-        BufferAttribute? geometryAttribute = geometryAttributes[name];
+        BaseBufferAttribute? geometryAttribute = geometryAttributes[name];
 
         if (geometryAttribute == null) {
           if (name == 'instanceMatrix' && object.instanceMatrix != null) geometryAttribute = object.instanceMatrix;
@@ -180,7 +180,7 @@ class AngleBindingStates {
       AttributeLocations programAttribute = programAttributes[name]!;
 
       if (programAttribute.location.id >= 0) {
-        BufferAttribute? attribute = attributes[name];
+        BaseBufferAttribute? attribute = attributes[name];
 
         if (attribute == null) {
           if (name == 'instanceMatrix' && object.instanceMatrix != null) attribute = object.instanceMatrix;
@@ -274,13 +274,13 @@ class AngleBindingStates {
       final programAttribute = programAttributes[name];
 
       if (programAttribute!.location.id >= 0) {
-        BufferAttribute? geometryAttribute = geometryAttributes[name];
+        BaseBufferAttribute? geometryAttribute = geometryAttributes[name];
 
         if (geometryAttribute == null) {
-          if (name == 'instanceMatrix' && object is InstancedMesh) {
+          if (name == 'instanceMatrix' && isInstanced(object)) {
             geometryAttribute = object.instanceMatrix;
           }
-          if (name == 'instanceColor' && object is InstancedMesh && object.instanceColor != null) {
+          if (name == 'instanceColor' && isInstanced(object) && object.instanceColor != null) {
             geometryAttribute = object.instanceColor;
           }
         }

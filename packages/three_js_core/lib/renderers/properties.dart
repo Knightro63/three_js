@@ -1,6 +1,6 @@
-part of three_webgl;
+import 'package:three_js_core/three_js_core.dart';
 
-class AngleProperties {
+class Properties{
   final properties = WeakMap<dynamic, Map<String, dynamic>?>();
 
   bool has( object ) {
@@ -8,17 +8,17 @@ class AngleProperties {
 	}
 
   Map<String, dynamic> get(object) {
-    Map<String, dynamic> map;
+      Map<String, dynamic> map;
 
-    if (!properties.contains(object)) {
-      map = <String, dynamic>{};
-      properties[object] = map;
-    }
-    else {
-      map = properties[object]!;
-    }
+      if (!properties.contains(object)) {
+        map = <String, dynamic>{};
+        properties[object] = map;
+      }
+      else {
+        map = properties[object]!;
+      }
 
-    return map;
+      return map;
   }
 
   void remove(object) {

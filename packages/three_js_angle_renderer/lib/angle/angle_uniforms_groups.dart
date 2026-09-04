@@ -3,7 +3,7 @@ part of three_webgl;
 class AngleUniformsGroups{
   AngleState state;
   AngleCapabilities capabilities;
-  AngleInfo info;
+  Info info;
   
 	Map buffers = {};
 	Map updateList = {};

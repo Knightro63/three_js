@@ -1102,7 +1102,8 @@ class __FBXTreeParser {
     });
 
     if (materials.length > 1) {
-      material = GroupMaterial(materials as List<Material>);
+      List<Material> cleanList = materials.whereType<Material>().toList(); 
+      material = GroupMaterial(cleanList);
     } 
     else if (materials.isNotEmpty) {
       material = materials[0];

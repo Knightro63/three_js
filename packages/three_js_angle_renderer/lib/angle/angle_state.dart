@@ -241,7 +241,8 @@ class AngleState extends State {
     }
   }
 
-  bool useProgram(Program? program) {
+  bool useProgram(dynamic program) {
+    program as Program?;
     if (currentProgram != program) {
       gl.useProgram(program);
       currentProgram = program;
@@ -478,8 +479,9 @@ class AngleState extends State {
     }
   }
 
-  void bindTexture(int webglType, WebGLTexture? webglTexture, [int? webglSlot]) {
-		if ( webglSlot == null ) {
+  void bindTexture(int webglType, dynamic webglTexture, [int? webglSlot]) {
+		webglTexture as WebGLTexture?;
+    if ( webglSlot == null ) {
 			if ( currentTextureSlot == null ) {
 				webglSlot = WebGL.TEXTURE0 + maxTextures - 1;
 			} 
