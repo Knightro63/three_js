@@ -2,6 +2,8 @@ import 'package:three_js_core/three_js_core.dart';
 import 'package:three_js_math/three_js_math.dart';
 
 class InstancedGroup {
+  final List<int> _checkouts = [];
+
   // Keeps track of the individual sub-pools (e.g., body, armor, weapon meshes)
   final List<InstancedMesh> _subPools = [];
   
@@ -16,6 +18,27 @@ class InstancedGroup {
 
   // A reusable matrix cache to avoid garbage collection spikes inside intense update loops
   final Matrix4 _tempMatrix = Matrix4.identity();
+
+  int? getCheckout(){
+    if(_checkouts.isEmpty){
+      return 0;
+    }
+    for(int i = 0; i < count; i++){
+      if(!_checkouts.contains(i)){
+        return i;
+      }
+    }
+
+    return null;
+  }
+
+  void release(int i){
+    _checkouts.remove(i);
+  }
+
+  void checkout(int i){
+    _checkouts.add(i);
+  }
 
   InstancedGroup(Object3D source, this.maxCapacity) {
     // We force a local matrix update on the hierarchy chain first so that 

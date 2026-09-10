@@ -14,3 +14,4 @@ export 'skinned_mesh.dart';
 export './sprite.dart';
 export './batched_mesh.dart';
 export './instanced_skinned_mesh.dart';
+export './instanced_group.dart';

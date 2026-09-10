@@ -166,6 +166,16 @@ class InstancedAnimation extends three.Group{
     }
   }
 
+  InstancedAnimation clear(){
+    for (int i = 0; i < instancesData.length; i++) {
+      setMatrixAt(i,Matrix4());
+    }
+
+    instancesData.clear();
+
+    return this;
+  }
+
   List<three.SkinnedMesh> _getSkinnedMesh( three.Object3D object) {
     final List<three.SkinnedMesh> skinnedMeshes = [];
 
