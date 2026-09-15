@@ -22,7 +22,6 @@ rootProject.allprojects {
 }
 
 apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
 
 android {
     namespace 'finaldev.tjs_sensors'
@@ -33,9 +32,6 @@ android {
         targetCompatibility JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        jvmTarget = 17
-    }
 
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
@@ -45,6 +41,12 @@ android {
     }
     lintOptions {
         disable 'InvalidPackage'
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
     }
 }
 
