@@ -1039,6 +1039,18 @@ class Matrix4 {
     return setFrom(matrix).invert();
   }
 
+  /// Sets the elements of the matrix from the given array.
+  ///
+  /// [array] - The matrix elements in column-major order.
+  /// [offset] - Index of the first element in the array.
+  /// Returns a reference to this matrix.
+  Matrix4 fromArray(List<num> array, [int offset = 0]) {
+    for (int i = 0; i < 16; i++) {
+      this.storage[i] = array[i + offset].toDouble();
+    }
+    return this;
+  }
+
   Matrix4 operator*(Matrix4 m) => multiply(m);
   double operator[](int index) => storage[index];
   void operator[]=(int index,double value) => storage[index] = value;
