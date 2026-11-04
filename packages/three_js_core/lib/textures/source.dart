@@ -90,23 +90,19 @@ class Source {
 	}
 }
 
-Map<String,dynamic> serializeImage( image ) {
-	if (image is ImageElement){
-		return {'image': image.src};//ImageUtils.getDataURL( image );
-	} 
-  else {
-		if ( image.data != null ) {
-			return {
-				"data": image.data.sublist(0),
-				"width": image.width,
-				"height": image.height,
-				"type": image.data.runtimeType.toString()
-			};
-
-		} 
-    else {
-			console.warning('Texture: Unable to serialize Texture.');
-			return {};
-		}
-	}
+Map<String, dynamic> serializeImage(image) {
+  if (image is ImageElement) {
+    if (image.data != null) { //handle ImageElement DataTexture
+      return {
+        "data": image.data,
+        "width": image.width,
+        "height": image.height,
+        "type": TypedArrayHelper.getArrayType(image.data)
+      };
+    } else
+      return {'image': image.src}; //ImageUtils.getDataURL( image );
+  } else {
+    console.warning('Texture: Unable to serialize Texture.');
+    return {};
+  }
 }
