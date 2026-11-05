@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'package:three_js_math/others/typed_array_helper.dart';
 import 'package:three_js_math/three_js_math.dart';
 
 class Ranges{
@@ -401,7 +402,7 @@ abstract class BufferAttribute<TData extends TypedDataList> extends BaseBufferAt
   Map<String, dynamic> toJson() {
     Map<String, dynamic> result = {
       "itemSize": itemSize,
-      "type": array.runtimeType.toString(), //.replaceAll('List', 'Array'),
+      "type": TypedArrayHelper.getArrayType(array), //.replaceAll('List', 'Array'),
       "array": array.sublist(0),
       "normalized": normalized
     };

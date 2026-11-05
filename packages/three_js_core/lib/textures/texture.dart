@@ -9,7 +9,7 @@ import './source.dart';
 int textureId = 0;
 
 /// Create a texture to apply to a surface or as a reflection or refraction map.
-/// 
+///
 /// Note: After the initial use of a texture, its dimensions, format, and type
 /// cannot be changed. Instead, call [dispose] on the texture and
 /// instantiate a new one.
@@ -31,11 +31,12 @@ class Texture with EventDispatcher {
   bool isDepthTexture = false;
   bool isCompressedTexture = false;
   bool isOpenGLTexture = false;
-  bool isRenderTargetTexture = false; // indicates whether a texture belongs to a render target or not
+  bool isRenderTargetTexture =
+      false; // indicates whether a texture belongs to a render target or not
   // bool needsPMREMUpdate = false; // indicates whether this texture should be processed by PMREMGenerator or not (only relevant for render target textures)
   BaseRenderTarget? renderTarget;
 
-	int pmremVersion = 0;
+  int pmremVersion = 0;
 
   late Source source;
 
@@ -65,7 +66,8 @@ class Texture with EventDispatcher {
   bool generateMipmaps = true;
   bool premultiplyAlpha = false;
   bool flipY = true;
-  int unpackAlignment = 4; // valid values: 1, 2, 4, 8 (see http://www.khronos.org/opengles/sdk/docs/man/xhtml/glPixelStorei.xml)
+  int unpackAlignment =
+      4; // valid values: 1, 2, 4, 8 (see http://www.khronos.org/opengles/sdk/docs/man/xhtml/glPixelStorei.xml)
 
   // Values of encoding !== THREE.LinearEncoding only supported on map, envMap and emissiveMap.
   //
@@ -83,17 +85,16 @@ class Texture with EventDispatcher {
 
   Texture.fromJson(Map<String, dynamic> json, image) {
     _init(
-      image,
-      json["mapping"],
-      json["wrap"] != null ? json["wrap"][0] : null,
-      json["wrap"] != null ? json["wrap"][1] : null,
-      json["magFilter"],
-      json["minFilter"],
-      json["format"],
-      json["type"],
-      json["anisotropy"],
-      json["colorSpace"]
-    );
+        image,
+        json["mapping"],
+        json["wrap"] != null ? json["wrap"][0] : null,
+        json["wrap"] != null ? json["wrap"][1] : null,
+        json["magFilter"],
+        json["minFilter"],
+        json["format"],
+        json["type"],
+        json["anisotropy"],
+        json["colorSpace"]);
 
     name = json["name"] ?? "";
 
@@ -118,44 +119,32 @@ class Texture with EventDispatcher {
     userData = json["userData"] ?? {};
   }
 
-  Texture([
-    image, 
-    int? mapping, 
-    int? wrapS, 
-    int? wrapT, 
-    int? magFilter,
-    int? minFilter, 
-    int? format, 
-    int? type, 
-    int? anisotropy, 
-    String? colorSpace
-  ]){
-    _init(
-      image, 
-      mapping, 
-      wrapS, 
-      wrapT, 
-      magFilter,
-      minFilter, 
-      format, 
-      type, 
-      anisotropy, 
-      colorSpace
-    );
+  Texture(
+      [image,
+      int? mapping,
+      int? wrapS,
+      int? wrapT,
+      int? magFilter,
+      int? minFilter,
+      int? format,
+      int? type,
+      int? anisotropy,
+      String? colorSpace]) {
+    _init(image, mapping, wrapS, wrapT, magFilter, minFilter, format, type,
+        anisotropy, colorSpace);
   }
-  
+
   void _init(
-    image, 
-    int? mapping, 
-    int? wrapS, 
-    int? wrapT, 
-    int? magFilter,
-    int? minFilter, 
-    int? format, 
-    int? type, 
-    int? anisotropy, 
-    String? colorSpace
-  ){
+      image,
+      int? mapping,
+      int? wrapS,
+      int? wrapT,
+      int? magFilter,
+      int? minFilter,
+      int? format,
+      int? type,
+      int? anisotropy,
+      String? colorSpace) {
     source = Source(image);
     this.mapping = mapping ?? Texture.defaultMapping;
 
@@ -174,6 +163,7 @@ class Texture with EventDispatcher {
   }
 
   get image => source.data;
+
   set image(value) => source.data = value;
 
   set needsUpdate(bool value) {
@@ -184,7 +174,8 @@ class Texture with EventDispatcher {
   }
 
   void updateMatrix() {
-    matrix.setUvTransform(offset.x, offset.y, repeat.x, repeat.y, rotation, center.x, center.y);
+    matrix.setUvTransform(
+        offset.x, offset.y, repeat.x, repeat.y, rotation, center.x, center.y);
   }
 
   Texture clone() {
@@ -277,21 +268,20 @@ class Texture with EventDispatcher {
       image.forEach((img) {
         img.dispose();
       });
-    }
-    else {
+    } else {
       image?.dispose();
     }
 
     source.dispose();
   }
 
-	void addLayerUpdate( layerIndex ) {
-		this.layerUpdates.add( layerIndex );
-	}
+  void addLayerUpdate(layerIndex) {
+    this.layerUpdates.add(layerIndex);
+  }
 
-	void clearLayerUpdates() {
-		this.layerUpdates.clear();
-	}
+  void clearLayerUpdates() {
+    this.layerUpdates.clear();
+  }
 
   Vector2 transformUv(Vector2 uv) {
     if (mapping != UVMapping) return uv;
@@ -309,7 +299,7 @@ class Texture with EventDispatcher {
           break;
 
         case MirroredRepeatWrapping:
-          if((uv.x.floor().abs() % 2) == 1) {
+          if ((uv.x.floor().abs() % 2) == 1) {
             uv.x = uv.x.ceil() - uv.x;
           } else {
             uv.x = uv.x - uv.x.floor();
@@ -330,7 +320,7 @@ class Texture with EventDispatcher {
           break;
 
         case MirroredRepeatWrapping:
-          if((uv.y.floor().abs() % 2) == 1) {
+          if ((uv.y.floor().abs() % 2) == 1) {
             uv.y = uv.y.ceil() - uv.y;
           } else {
             uv.y = uv.y - uv.y.floor();
@@ -347,32 +337,32 @@ class Texture with EventDispatcher {
     return uv;
   }
 
-	void addUpdateRange( start, count ) {
-		this.updateRanges.add(TextureRangeInfo(start, count ));
-	}
-	void clearUpdateRanges() {
-		this.updateRanges.clear();
-	}
+  void addUpdateRange(start, count) {
+    this.updateRanges.add(TextureRangeInfo(start, count));
+  }
 
+  void clearUpdateRanges() {
+    this.updateRanges.clear();
+  }
 
-	// Setting this property to `true` indicates the engine the PMREM
-	// must be regenerated.
-	
-	// @type {boolean}
-	// @default false
-	// @param {boolean} value
-	set needsPMREMUpdate(bool value ) {
-		if (value) {
-			this.pmremVersion ++;
-		}
-	}
+  // Setting this property to `true` indicates the engine the PMREM
+  // must be regenerated.
+
+  // @type {boolean}
+  // @default false
+  // @param {boolean} value
+  set needsPMREMUpdate(bool value) {
+    if (value) {
+      this.pmremVersion++;
+    }
+  }
 }
 
-class TextureRangeInfo{
+class TextureRangeInfo {
   int start;
   int count;
 
-  TextureRangeInfo(this.start,this.count);
+  TextureRangeInfo(this.start, this.count);
 }
 
 class ImageDataInfo {
@@ -383,4 +373,3 @@ class ImageDataInfo {
 
   ImageDataInfo(this.data, this.width, this.height, this.depth);
 }
-

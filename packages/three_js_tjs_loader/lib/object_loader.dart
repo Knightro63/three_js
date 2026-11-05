@@ -13,7 +13,7 @@ import 'buffer_geometry_loader.dart';
 
 /// A loader for loading a JSON resource in the
 /// [JSON Object/Scene format](https://github.com/mrdoob/three.js/wiki/JSON-Object-Scene-format-4).
-/// 
+///
 /// This uses the [FileLoader] internally for loading files.
 class ObjectLoader extends Loader {
   late final FileLoader _loader;
@@ -268,12 +268,11 @@ class ObjectLoader extends Loader {
 
         return await loadImage(path);
       } else {
-        if (image.data) {
-          return {
-            "data": getTypedArray(image.type, image.data),
-            "width": image.width,
-            "height": image.height
-          };
+        if (image['data'] != null) {
+          return ImageElement(
+              data: getTypedArray(image['type'], image['data']),
+              width: image['width'],
+              height: image['height']);
         } else {
           return null;
         }
@@ -320,9 +319,7 @@ class ObjectLoader extends Loader {
 
           images[image["uuid"]] = Source(imageArray);
         } else {
-          // load single image
-
-          final deserializedImage = await deserializeImage(image["url"]);
+          final deserializedImage = await deserializeImage(url ?? image);
 
           if (deserializedImage != null) {
             images[image["uuid"]] = Source(deserializedImage);
@@ -365,8 +362,8 @@ class ObjectLoader extends Loader {
           if (image.length == 6) texture.needsUpdate = true;
         }
          else {
-          if (image != null && image.data != null && image.url == null) {
-            texture = DataTexture();
+          if (image is ImageElement && image.data != null) {
+            texture = DataTexture(image.data, image.width as int , image.height as int);
           } else {
             texture = Texture();
           }

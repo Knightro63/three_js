@@ -859,7 +859,7 @@ class BufferGeometry with EventDispatcher {
 
     if (index != null) {
       data["data"]["index"] = {
-        "type": index.array.runtimeType.toString(),
+        "type": TypedArrayHelper.getArrayType(index.array),
         "array": index.array.sublist(0)
       };
     }

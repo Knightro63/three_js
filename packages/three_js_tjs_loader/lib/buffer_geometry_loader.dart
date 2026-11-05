@@ -231,6 +231,8 @@ TypedDataList getTypedArray(String type, List buffer) {
     return Uint32List.fromList(List<int>.from(buffer));
   } else if (type == "Uint16Array" || type == "Uint16List") {
     return Uint16List.fromList(List<int>.from(buffer));
+  } else if (type == "Uint8Array" || type == "Uint8List") {
+    return Uint8List.fromList(List<int>.from(buffer));
   } else if (type == "Float32Array" || type == "Float32List") {
     List<double> b = [];
     for(int i = 0; i < buffer.length;i++){
@@ -248,6 +250,8 @@ BufferAttribute getTypedAttribute(TypedData array, int itemSize,
     return Uint32BufferAttribute(array, itemSize, normalized);
   } else if (array is Uint16List) {
     return Uint16BufferAttribute(array, itemSize, normalized);
+  } else if (array is Uint8List) {
+    return Uint8BufferAttribute(array, itemSize, normalized);
   } else if (array is Float32List) {
     return Float32BufferAttribute(array, itemSize, normalized);
   } else {
